@@ -208,6 +208,7 @@ i.btn-small {
   a.btn.#{$name} { @content; }
   i.btn.#{$name} { @content; }
   span.btn.#{$name} { @content; }
+  label.btn.#{$name} { @content; }
 }
 
 @mixin styled-input ($bg, $hover-bg, $active-bg,
@@ -305,6 +306,7 @@ button.function {
 @include button-div-a-i-span ("function.authority") {
   @include function( $turqo-link, $turqo-hover, $gray51 );
 }
+
 
 @include button-div-a-i-span ("function.julkipano") {
   @include function( $blue-link, $blue-hover, $gray51 );

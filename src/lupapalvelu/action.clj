@@ -10,6 +10,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
@@ -51,21 +52,6 @@
         (fail :error.email)))))
 
 
-;; Role helpers
-
-(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
-(def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl))
-
-(def default-authz-writer-roles #{:owner :writer :foreman})
-(def default-authz-reader-roles (conj default-authz-writer-roles :reader))
-(def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
-(def all-authz-roles (conj all-authz-writer-roles :reader))
-
-(def default-org-authz-roles #{:authority :approver})
-(def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
-(def reader-org-authz-roles (conj commenter-org-authz-roles :reader))
-(def all-org-authz-roles (conj reader-org-authz-roles :authorityAdmin :tos-editor :tos-publisher :archivist))
-
 ;; Notificator
 
 (defn notify [notification]
@@ -87,7 +73,7 @@
       extra-error-data)))
 
 (defn non-blank-parameters [params command]
-  (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))) :error.missing-parameters))
+  (filter-params-of-command params command #(or (not (string? %)) (s/blank? %)) :error.missing-parameters))
 
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
@@ -96,7 +82,7 @@
   (or
     (vector-parameters params command)
     (filter-params-of-command params command
-      (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
+      (partial some #(or (not (string? %)) (s/blank? %)))
       :error.vector-parameters-with-blank-items )))
 
 (defn vector-parameters-with-at-least-n-non-blank-items [n params command]
@@ -114,11 +100,25 @@
       :error.vector-parameters-with-items-missing-required-keys
       {:required-keys required-keys})))
 
+(defn vector-parameter-of [param pred command]
+  (or
+    (vector-parameters [param] command)
+    (when-not (every? pred (get-in command [:data param]))
+      (fail :error.unknown-type :parameters param))))
+
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
 
 (defn number-parameters [params command]
   (filter-params-of-command params command (complement number?) :error.illegal-number))
+
+(defn string-parameters [params command]
+  (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
+
+(defn property-id-parameters [params command]
+  (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
+    (trace "invalid property id parameters:" (s/join ", " invalid))
+    (fail :error.invalid-property-id)))
 
 (defn map-parameters [params command]
   (filter-params-of-command params command (complement map?) :error.unknown-type))
@@ -286,17 +286,15 @@
   (and id user (or application (domain/get-application-as id user :include-canceled-apps? true))))
 
 (defn- user-authz? [command-meta-data application user]
-  (let [allowed-roles (get command-meta-data :user-authz-roles #{})
-        roles-in-app  (map (comp keyword :role) (domain/get-auths application (:id user)))]
-    (some allowed-roles roles-in-app)))
+  (let [allowed-roles (get command-meta-data :user-authz-roles #{})]
+    (auth/user-authz? allowed-roles application user)))
 
-(defn- organization-authz? [command-meta-data {organization :organization} user]
-  (let [required-authz (:org-authz-roles command-meta-data)
-        user-org-authz (get-in user [:orgAuthz (keyword organization)])]
-    (and (user/authority? user) required-authz (some required-authz user-org-authz))))
+(defn- organization-authz? [command-meta-data application user]
+  (let [required-authz (get command-meta-data :org-authz-roles #{})]
+    (auth/has-organization-authz-roles? required-authz application user)))
 
 (defn- company-authz? [command-meta-data application user]
-  (domain/has-auth? application (get-in user [:company :id])))
+  (auth/has-auth? application (get-in user [:company :id])))
 
 (defn- user-is-not-allowed-to-access?
   "Current user must have correct role in application.auth, work in the organization or company that has been invited"
@@ -385,11 +383,6 @@
 ;; Register actions
 ;;
 
-(def default-user-authz {:query default-authz-reader-roles
-                         :export default-authz-reader-roles
-                         :command default-authz-writer-roles
-                         :raw default-authz-writer-roles})
-
 (defn- subset-of [reference-set]
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
@@ -397,15 +390,15 @@
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
-   :user-roles (subset-of all-user-roles)
+   :user-roles (subset-of auth/all-user-roles)
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/either sc/Keyword sc/Symbol)]
    (sc/optional-key :optional-parameters)  [(sc/either sc/Keyword sc/Symbol)]
    ; Set of application context role keywords.
-   (sc/optional-key :user-authz-roles)  (subset-of all-authz-roles)
+   (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
    ; Set of application organization context role keywords
-   (sc/optional-key :org-authz-roles) (subset-of all-org-authz-roles)
+   (sc/optional-key :org-authz-roles) (subset-of auth/all-org-authz-roles)
    ; Documentation string.
    (sc/optional-key :description) sc/Str
    ; Documents that the action will be sending (email) notifications.
@@ -452,6 +445,11 @@
       true)
     (str "You must define :states or :pre-checks meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
+  (assert (or (seq (:input-validators meta-data))
+              (empty? (:parameters meta-data))
+              (= [:id] (:parameters meta-data)))
+    (str "Input validators must be defined for " action-name))
+
   (let [action-keyword (keyword action-name)
         {:keys [user-roles user-authz-roles org-authz-roles]} meta-data]
 
@@ -461,10 +459,10 @@
       (merge
         {:user-authz-roles (if (= #{:authority} user-roles)
                              #{} ; By default, authority gets authorization fron organization role
-                             (default-user-authz action-type))
+                             (auth/default-user-authz action-type))
          :org-authz-roles (cond
-                            (some user-roles [:authority :oirAuthority]) default-org-authz-roles
-                            (user-roles :anonymous) all-org-authz-roles)}
+                            (some user-roles [:authority :oirAuthority]) auth/default-org-authz-roles
+                            (user-roles :anonymous) auth/all-org-authz-roles)}
         meta-data
         {:type action-type
          :ns ns-str

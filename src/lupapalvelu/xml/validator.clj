@@ -91,7 +91,8 @@
     "krysp/ymparistoluvat-2.2.1.xsd"
     "krysp/maaAinesluvat-2.2.1.xsd"
     "krysp/vesihuoltolaki-2.2.1.xsd"
-    "krysp/ilmoitukset-2.2.1.xsd"))
+    "krysp/ilmoitukset-2.2.1.xsd"
+    "krysp/osoitteet-2.1.1.xsd"))
 
 (def- rakval-2_1_6
   (conj public-schema-sources
@@ -195,7 +196,8 @@
    :YM {"ah-1.1" asianhallinta-validator-1_1
         "ah-1.2" asianhallinta-validator-1_2}
    :MM  mkmu-validators ; maankayton muutos aka kaavat
-   :KT  kiito-validators})
+   :KT  kiito-validators
+   :osoitteet {"2.1.1" common-validator-2_1_6}})
 
 (def supported-versions-by-permit-type
   (reduce (fn [m [permit-type validators]] (assoc m permit-type (keys validators))) {} schema-validators))
@@ -209,8 +211,9 @@
 (defn validate
   "Throws an exception if the markup is invalid"
   [xml permit-type schema-version]
-  (let [xml-reader (StringReader. xml)
-        xml-source (StreamSource. xml-reader)
+  (let [xml-source (if (string? xml)
+                     (StreamSource. (StringReader. xml))
+                     (StreamSource. xml))
         validator  (get-in schema-validators [(keyword permit-type) (name schema-version)])]
     (when-not validator
       (throw (IllegalArgumentException. (str "Unsupported schema version " schema-version " for permit type " permit-type))))

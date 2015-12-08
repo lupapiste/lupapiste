@@ -124,6 +124,7 @@
           neighborId: self.neighborId(),
           token: self.token(),
           stamp: self.tupasUser().stamp,
+          lang: loc.getCurrentLanguage(),
           response: self.response(),
           message: self.message()
         })
@@ -170,7 +171,7 @@
 
   $(function() {
     model.map = gis
-      .makeMap("neighbor-map", false)
+      .makeMap("neighbor-map", {zoomWheelEnabled: false})
       .updateSize()
       .center(404168, 6693765, 14);
     $("#neighbor-show").applyBindings(model);

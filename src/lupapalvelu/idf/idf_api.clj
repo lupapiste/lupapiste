@@ -8,7 +8,7 @@
             [sade.dns :as dns]
             [sade.core :refer :all]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery]]
+            [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.token :as token]
@@ -111,6 +111,7 @@
 
 (defquery get-link-account-token
   {:parameters [tokenId]
+   :input-validators [(partial action/non-blank-parameters [:tokenId])]
    :user-roles #{:anonymous}}
   [_]
   (ok :data

@@ -13,11 +13,12 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
-            [scss-compiler.core :as scss]
             [me.raynes.fs :as fs]))
 
 (def debugjs {:depends [:jquery]
@@ -52,6 +53,9 @@
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
                  :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
+                 :bulletinStates        bulletins/bulletin-state-seq
+                 :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -61,14 +65,10 @@
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
 
-(defn- main-style-file [css-file-path scss-file-path]
-  (if-let [main-css-file (io/resource (c/path css-file-path))]
-    (slurp main-css-file)
-    (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
 
-(defn- read-component-list-from-fs [component pattern]
-  (let [path (str "resources/private/" (name component))
-        files (fs/find-files path (re-pattern pattern))
+
+(defn- read-component-list-from-fs [path pattern]
+  (let [files (fs/find-files path (re-pattern pattern))
         mapped-files (map #(-<>> % .getPath (s/replace <> env/file-separator "/")  (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
     mapped-files))
 
@@ -76,9 +76,8 @@
   [jar]
   (re-find (re-pattern ".jar$") jar))
 
-(defn- read-component-list-from-jar [jar component pattern]
-  (let [path (str "private/" (name component))
-        files (util/list-jar jar path)
+(defn- read-component-list-from-jar [jar path pattern]
+  (let [files (util/list-jar jar path)
         filtered-files (filter #(re-find (re-pattern pattern) %) files)]
     filtered-files))
 
@@ -88,24 +87,34 @@
                   :models ".*-model.js$"
                   :templates ".*-template.html$")]
     (if (in-jar? jar)
-      (read-component-list-from-jar jar component pattern)
-      (read-component-list-from-fs component pattern))))
+      (read-component-list-from-jar jar (str "private/" (name component)) pattern)
+      (read-component-list-from-fs (str "resources/private/" (name component)) pattern))))
+
+(defn main-css-count []
+  (let [jar (util/this-jar lupapalvelu.main)
+        file-list (if (in-jar? jar)
+                    (read-component-list-from-jar jar "public/lp-static/css" "main.*css$")
+                    (read-component-list-from-fs "resources/public/lp-static/css" "main.*css$"))]
+    (count file-list)))
 
 (def ui-components
   {;; 3rd party libs
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
-   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
+   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
    :knockout       {:js ["knockout-3.3.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
-   :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
+   ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   ;:open-layers    {:js ["OpenLayers.debug.js" ]}
    :ol             {:js ["openlayers-3.8.2.min.js" "ol3-popup.js"]
                     :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
    :proj4          {:js ["proj4-2.3.3.min.js"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
+   :waypoints      {:js ["jquery.waypoints.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
@@ -128,13 +137,13 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers :stickyfill]
+                            :expanded-content :mockjax :open-layers :stickyfill :waypoints]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "authorization.js" "vetuma.js"]}
+                       "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
+                  :css ["jquery-ui.css"]
                   :html ["404.html"]}
 
    ;; Components to be included in a SPA
@@ -147,7 +156,10 @@
                    "organization-filter-service.js"
                    "organization-tags-service.js"
                    "handler-filter-service.js"
-                   "application-filters-service.js"]}
+                   "publish-bulletin-service.js"
+                   "application-filters-service.js"
+                   "document-data-service.js"
+                   "fileupload-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -230,7 +242,7 @@
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "archival-summary.js"
+                       "add-party.js" "attachments-tab-model.js" "archival-summary.js"
                        "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
@@ -271,7 +283,7 @@
                   :js ["docmodel.js" "docgen.js"]}
 
    :create       {:depends [:common-html :map]
-                  :js ["municipalities.js" "create.js"]
+                  :js ["locationmodel.js" "municipalities.js" "create.js"]
                   :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]
@@ -337,7 +349,8 @@
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
-                         :js [schema-versions-by-permit-type "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
+                         :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
+                              "municipality-maps-service.js" "authority-admin.js"]
                          :html ["authority-admin.html"]}
 
    :admin-app {:depends [:ui-components]
@@ -367,10 +380,19 @@
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
-   :bulletins {:depends [:ui-components :map :docgen]
+   :bulletins {:depends [:ui-components :map :docgen :services]
                :html ["header.html" "footer.html"
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
+                      "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-template.html"
+                      "application-bulletin/bulletin-comment/bulletin-comment-template.html"
+                      "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
+                      "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
+                      "application-bulletin/bulletin-comment/bulletin-comment-template.html"
+                      "application-bulletin/tabs/info/bulletin-info-tab-template.html"
+                      "application-bulletin/tabs/verdicts/verdicts-template.html"
+                      "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
+                      "application-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
@@ -379,10 +401,16 @@
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-template.html"
                       "application-bulletins/bulletins-search/autocomplete/autocomplete-states-template.html"]
                :js ["header.js"
-                    "bulletins.js" "component-base-model.js" "bulletins-model.js"
+                    "bulletins.js" "bulletins-model.js"
                     "application-bulletins-service.js"
+                    "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"
+                    "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-model.js"
+                    "application-bulletin/bulletin-comment/bulletin-comment-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
+                    "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
+                    "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
+                    "application-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"

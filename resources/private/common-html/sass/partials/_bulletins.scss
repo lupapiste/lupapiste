@@ -215,6 +215,9 @@
       color: $blue-dark;
       position: absolute;
     }
+    tbody > tr {
+      cursor: pointer;
+    }
   }
 
   .bulletin-comment {
@@ -223,6 +226,9 @@
     }
     .help-toggle {
       vertical-align: top;
+    }
+    .user-info {
+      font-style: italic;
     }
   }
   ul.bulletin-comment__attachment-list {
@@ -237,5 +243,36 @@
         padding-right: $marginL;
       }
     }
+  }
+  table.bulletin-attachments {
+    tr td {
+      word-wrap: break-word;
+      &:first-child {
+        padding-left: 12px;
+      }
+    }
+  }
+  .bulletin-tab-content {
+    h3 {
+      margin-bottom: $marginL;
+    }
+  }
+}
+
+#application-bulletin-tab {
+  .bulletin-state {
+    font-weight: bold;
+  }
+  .bulletin-component {
+    margin-bottom: $marginL;
+  }
+  .back-button {
+    margin-bottom: $marginL;
+  }
+  .accordion_content {
+    padding: $marginM;
+  }
+  table {
+    margin: 0;
   }
 }

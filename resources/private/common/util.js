@@ -284,6 +284,69 @@ var util = (function($) {
              }) };
   }
 
+  function elementInViewport(element) {
+    var top = element.offsetTop;
+    var left = element.offsetLeft;
+    var width = element.offsetWidth;
+    var height = element.offsetHeight;
+
+    while(element.offsetParent) {
+      element = element.offsetParent;
+      top += element.offsetTop;
+      left += element.offsetLeft;
+    }
+
+    return (
+      top >= window.pageYOffset &&
+      left >= window.pageXOffset &&
+      (top + height) <= (window.pageYOffset + window.innerHeight) &&
+      (left + width) <= (window.pageXOffset + window.innerWidth)
+    );
+  }
+
+  function tasksDataBySchemaName(tasks, schemaName, mapper) {
+    return _(tasks).filter(bySchemaName(schemaName)).map(mapper).value();
+  }
+
+  function bySchemaName(schemaName) {
+    return function(task) {
+      return util.getIn(task, ["schema-info", "name"]) === schemaName;
+    };
+  }
+
+  function calculateVerdictTasks(verdict, tasks) {
+    // Manual verdicts have one paatokset item
+    if (verdict.paatokset && verdict.paatokset.length === 1) {
+
+      var myTasks = _.filter(tasks, function(task) {
+        return task.source && task.source.type === "verdict" && task.source.id === verdict.id;
+      });
+
+      var lupamaaraukset = _(verdict.paatokset || []).pluck("lupamaaraykset").filter().value();
+
+      if (lupamaaraukset.length === 0 && myTasks.length > 0) {
+        var katselmukset = tasksDataBySchemaName(myTasks, "task-katselmus", function(task) {
+          return {katselmuksenLaji: util.getIn(task, ["data", "katselmuksenLaji", "value"], "muu katselmus"), tarkastuksenTaiKatselmuksenNimi: task.taskname};
+        });
+        var tyonjohtajat = tasksDataBySchemaName(myTasks, "task-vaadittu-tyonjohtaja", _.property("taskname"));
+        var muut = tasksDataBySchemaName(myTasks, "task-lupamaarays", _.property("taskname"));
+
+        return {vaaditutTyonjohtajat: tyonjohtajat,
+                muutMaaraykset: muut,
+                vaaditutKatselmukset: katselmukset};
+      }
+    }
+  }
+
+  function verdictsWithTasks(application) {
+    return _.map(application ? application.verdicts : [], function(verdict) {
+      var lupamaaraykset = calculateVerdictTasks(verdict, application.tasks);
+      if (lupamaaraykset) {
+        verdict.paatokset[0].lupamaaraykset = lupamaaraykset;
+      }
+      return verdict;
+    });
+  }
 
   return {
     zeropad:             zeropad,
@@ -320,7 +383,9 @@ var util = (function($) {
     filterDataByQuery: filterDataByQuery,
     showSavedIndicator: showSavedIndicator,
     isNonNegative: isNonNegative,
-    createSortableColumn: createSortableColumn
+    createSortableColumn: createSortableColumn,
+    elementInViewport: elementInViewport,
+    verdictsWithTasks: verdictsWithTasks
   };
 
 })(jQuery);

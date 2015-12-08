@@ -32,7 +32,7 @@
       (deny-remove-of-last-document rakennushanke {:documents [rakennushanke]}) => true
       (deny-remove-of-last-document rakennushanke {:documents [rakennushanke rakennushanke]}) => falsey))
 
-  (fact "hakija"
-    (let [hakija {:schema-info {:name "hakija"}}]
-     (deny-remove-of-last-document hakija {:documents [hakija]}) => falsey
-     (deny-remove-of-last-document hakija {:documents [hakija hakija]}) => falsey)))
+  (fact "suunnittelija"
+    (let [suunnittelija {:schema-info {:name "suunnittelija"}}]
+     (deny-remove-of-last-document suunnittelija {:documents [suunnittelija]}) => falsey
+     (deny-remove-of-last-document suunnittelija {:documents [suunnittelija suunnittelija]}) => falsey)))

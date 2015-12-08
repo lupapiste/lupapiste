@@ -1,4 +1,5 @@
 (ns lupapalvelu.xml.krysp.reader
+  "Read the Krysp from municipality Web Feature Service"
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
             [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
@@ -20,24 +21,6 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
 
-;;
-;; Read the Krysp from municipality Web Feature Service
-;;
-
-(defn wfs-is-alive?
-  "checks if the given system is Web Feature Service -enabled. kindof."
-  [url username password]
-  (when-not (s/blank? url)
-    (try
-      (let [credentials (when-not (s/blank? username) {:basic-auth [username password]})
-            options     (merge {:query-params {:request "GetCapabilities"} :throw-exceptions false} credentials)
-            resp        (http/get url options)]
-       (or
-         (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
-         (warn "Response not OK or did not contain XML. Response was: " resp)))
-     (catch Exception e
-       (warn (str "Could not connect to WFS: " url ", exception was " e))))))
-
 ;; Object types (URL encoded)
 (def building-type    "typeName=rakval%3AValmisRakennus")
 (def rakval-case-type "typeName=rakval%3ARakennusvalvontaAsia")
@@ -46,6 +29,7 @@
 (def yl-case-type     "typeName=ymy%3AYmparistolupa")
 (def mal-case-type    "typeName=ymm%3AMaaAineslupaAsia")
 (def vvvl-case-type   "typeName=ymv%3AVapautus")
+(def kt-case-type-prefix  "typeName=kiito%3A")
 
 ;; Object types as enlive selector
 (def case-elem-selector #{[:RakennusvalvontaAsia]
@@ -60,7 +44,18 @@
                           [:MaaAineslupaAsia]
                           [:Vapautus]})
 
-(defn- get-tunnus-path [permit-type search-type]
+(def outlier-elem-selector #{[:Lohkominen]
+                             [:Rasitetoimitus]
+                             [:YleisenAlueenLohkominen]
+                             [:KiinteistolajinMuutos]
+                             [:YhtAlueenOsuuksienSiirto]
+                             [:KiinteistojenYhdistaminen]
+                             [:Halkominen]
+                             [:KiinteistonMaaritys]
+                             [:Tilusvaihto]})
+
+(defn- get-tunnus-path
+  [permit-type search-type]
   (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)
         tunnus-location (case search-type
                           :application-id  "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus"
@@ -137,12 +132,17 @@
     (trace "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
 
+(defn kt-application-xml   [krysp-name server credentials id search-type raw?]
+  (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
+    (application-xml (str kt-case-type-prefix krysp-name) path server credentials id raw?)))
+
 (permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P    :xml-from-krysp poik-application-xml)
 (permit/register-function permit/YA   :xml-from-krysp ya-application-xml)
 (permit/register-function permit/YL   :xml-from-krysp yl-application-xml)
 (permit/register-function permit/MAL  :xml-from-krysp mal-application-xml)
 (permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
+(permit/register-function permit/KT   :xml-from-krysp kt-application-xml)
 
 
 (defn- pysyva-rakennustunnus
@@ -558,10 +558,11 @@
 (def backend-preverdict-state
   #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
 
-(defn- simple-verdicts-validator [xml organization]
-  (let [xml-without-ns (cr/strip-xml-namespaces xml)
+(defn- simple-verdicts-validator [xml organization & verdict-date-path]
+  (let [verdict-date-path (or verdict-date-path [:paatostieto :Paatos :paatosdokumentinPvm])
+        xml-without-ns (cr/strip-xml-namespaces xml)
         app-state      (application-state xml-without-ns)
-        paivamaarat    (filter number? (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm])))
+        paivamaarat    (filter number? (map (comp cr/to-timestamp get-text) (select xml-without-ns verdict-date-path)))
         max-date       (when (seq paivamaarat) (apply max paivamaarat))
         pre-verdict?   (contains? backend-preverdict-state app-state)]
     (cond
@@ -588,12 +589,41 @@
                                               liitetiedot)))})))
         (select xml-without-ns [:paatostieto :Paatos])))))
 
+(defn- outlier-verdicts-validator [xml organization]
+  (simple-verdicts-validator xml organization :paatostieto :Paatos :pvmtieto :Pvm :pvm))
+
+(defn ->outlier-verdicts
+  "For some reason kiinteistotoimitus (at least) defines its own
+  verdict schema, which is similar to but not the same as the common
+  schema"
+  [xml-no-ns]
+  (let [app-state (application-state xml-no-ns)]
+    (when-not (contains? backend-preverdict-state app-state)
+      (map (fn [verdict]
+             (let [timestamp (cr/to-timestamp (get-text verdict [:pvmtieto :Pvm :pvm]))]
+               (when (and timestamp (> (now) timestamp))
+                 (let [poytakirjat (for [elem (select verdict [:poytakirjatieto])
+                                         :let [pk (-> elem cr/as-is :poytakirjatieto :Poytakirja)
+                                               fields (select-keys pk [:paatoksentekija :pykala])
+                                               paatos (:paatos pk)
+                                               liitteet (map #(-> % :Liite ->liite (dissoc :metadata))
+                                                             (flatten [(:liitetieto pk)]))]]
+                                     (assoc fields
+                                            :paatoskoodi paatos
+                                            :status (verdict/verdict-id paatos)
+                                            :liite liitteet))]
+                   {:paivamaarat    {:paatosdokumentinPvm timestamp}
+                    :poytakirjat poytakirjat}))))
+           (select xml-no-ns [:paatostieto :Paatos])))))
+
+
 (permit/register-function permit/R :verdict-krysp-reader ->standard-verdicts)
 (permit/register-function permit/P :verdict-krysp-reader ->standard-verdicts)
 (permit/register-function permit/YA :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/YL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
+(permit/register-function permit/KT :verdict-krysp-reader ->outlier-verdicts)
 
 (permit/register-function permit/R :tj-suunnittelija-verdict-krysp-reader ->tj-suunnittelija-verdicts)
 
@@ -603,6 +633,7 @@
 (permit/register-function permit/YL :verdict-krysp-validator simple-verdicts-validator)
 (permit/register-function permit/MAL :verdict-krysp-validator simple-verdicts-validator)
 (permit/register-function permit/VVVL :verdict-krysp-validator simple-verdicts-validator)
+(permit/register-function permit/KT :verdict-krysp-validator outlier-verdicts-validator)
 
 (defn- ->lp-tunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
@@ -612,7 +643,15 @@
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
 
-(defn ->verdicts [xml ->function]
+
+;; Reads the verdicts
+;; Arguments:
+;; xml: KRYSP with ns.
+;; fun: verdict-krysp-reader for permit.
+(defmulti ->verdicts (fn [_ fun] fun))
+
+(defmethod ->verdicts :default
+  [xml ->function]
   (map
     (fn [asia]
       (let [verdict-model {:kuntalupatunnus (->kuntalupatunnus asia)}
@@ -622,6 +661,15 @@
                            (filter seq))]
         (util/assoc-when verdict-model :paatokset verdicts)))
     (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
+
+;; Outliers (KT) do not have kuntalupatunnus
+(defmethod ->verdicts ->outlier-verdicts
+  [xml fun]
+  (for [elem (enlive/select (cr/strip-xml-namespaces xml)
+                            outlier-elem-selector)]
+    {:kuntalupatunnus "-"
+     :paatokset (->> elem fun cleanup (filter seq))}))
+
 
 (defn- buildings-summary-for-application [xml]
   (let [summary (->buildings-summary xml)]

@@ -6,7 +6,9 @@
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.property :as p]
-            [sade.validators :as validators]
+            [sade.validators :as v]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -648,7 +650,7 @@
          {$set {(str linkpermit-id ".apptype") apptype}}))))
 
 (defn- merge-versions [old-versions {:keys [user version] :as new-version}]
-  (let [next-ver (lupapalvelu.attachment/next-attachment-version (:version (last old-versions)) user)]
+  (let [next-ver (attachment/next-attachment-version (:version (last old-versions)) user)]
     (concat old-versions [(assoc new-version :version next-ver)])))
 
 (defn- fixed-versions [required-flags-migration-time attachments-backup updated-attachments]
@@ -1006,7 +1008,7 @@
 (defn- find-national-id [conversion-table application-id property-id building-number]
   (let [lookup (rakennustunnus property-id building-number)
         new-id (mongo/select-one conversion-table {:RAKENNUSTUNNUS lookup})]
-    (if (validators/rakennustunnus? (:VTJ_PRT new-id))
+    (if (v/rakennustunnus? (:VTJ_PRT new-id))
       new-id
       (println application-id lookup new-id))))
 
@@ -1192,7 +1194,7 @@
   [user] (= "777777777777777777000020" (:id user)))
 
 (defn init-application-history [{:keys [created opened infoRequest convertedToApplication permitSubtype] :as application}]
-  (let [owner-auth (first (domain/get-auths-by-role application :owner))
+  (let [owner-auth (first (auth/get-auths-by-role application :owner))
         owner-user (user/find-user (select-keys owner-auth [:id]))
         creator (cond
                   (= permitSubtype "muutoslupa") (:user (mongo/by-id :muutoslupa created))
@@ -1338,6 +1340,50 @@
                                                                            "Muu valvontak\u00e4ynti"
                                                                            ""]}}]}]}}}))
 
+
+(defmigration ya-katselmukset-fix-remove-tila
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                                 :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                                                                           {"data.katselmus.tila" {$exists true}}]}}}))}
+  (update-applications-array :tasks
+    (fn [task]
+      (if (= "task-katselmus-ya" (-> task :schema-info :name))
+        (dissoc-in task [:data :katselmus :tila])
+        task))
+    {:permitType "YA"
+     :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
+                               {"data.katselmus.tila" {$exists true}}]}}}))
+
+
+;; BSON type 8 == Boolean (https://docs.mongodb.org/manual/reference/operator/query/type/)
+(defmigration convert-attachments-requestedByAuthority-to-boolean
+  {:apply-when (pos? (mongo/count :applications {:attachments {$elemMatch {$and [{"requestedByAuthority" {$exists true}}
+                                                                                 {"requestedByAuthority" {$not {$type 8}}}]}}}))}
+  (update-applications-array :attachments
+    (fn [attachment]
+      (if-not (util/boolean? (:requestedByAuthority attachment))
+        (update attachment :requestedByAuthority boolean)
+        attachment))
+    {:attachments {$elemMatch {$and [{"requestedByAuthority" {$exists true}}
+                                     {"requestedByAuthority" {$not {$type 8}}}]}}}))
+
+
+(def maisematyo-operations ["muu-tontti-tai-kort-muutos" "kortteli-yht-alue-muutos"
+                            "muu-maisema-toimenpide" "paikoutysjarjestus-muutos"
+                            "rak-valm-tyo" "puun-kaataminen" "kaivuu"
+                            "tontin-jarjestelymuutos" "tontin-ajoliittyman-muutos"])
+
+(defmigration maisematyo-ilman-hankeilmoitusta
+  {:apply-when (pos? (mongo/count :applications {$and [{:primaryOperation.name {$in maisematyo-operations}} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "rakennuspaikka" (:name schema-info))
+        (-> doc
+          (assoc-in [:schema-info :name] "rakennuspaikka-ilman-ilmoitusta")
+          (update :data dissoc :hankkeestaIlmoitettu))
+        doc))
+    {$and [{:primaryOperation.name {$in maisematyo-operations}} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
 
 ;;
 ;; ****** NOTE! ******

@@ -9,7 +9,8 @@
             [sade.util :as util]
             [lupapiste-commons.i18n.core :as commons]))
 
-(def default-lang :fi)
+(def supported-langs [:fi :sv])
+(def default-lang (first supported-langs))
 
 (defn- add-term [k t result lang]
   (assoc-in result [(keyword lang) k] (s/trim t)))

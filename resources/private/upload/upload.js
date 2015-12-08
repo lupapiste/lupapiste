@@ -12,7 +12,6 @@ LUPAPISTE.Upload = {
   targetType: ko.observable(),
   targetId: ko.observable(),
   locked: ko.observable(),
-  authority: ko.observable(),
   selectableOperations: ko.observableArray(),
   selectedOperationId: ko.observable(),
   helpVisible: ko.observable(false)
@@ -31,12 +30,10 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.targetType(options.target ? options.target.type : null);
   LUPAPISTE.Upload.targetId(options.target ? options.target.id : null);
   LUPAPISTE.Upload.locked(options.locked || false);
-  LUPAPISTE.Upload.authority(options.authority || false);
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
   "use strict";
-
   if (applicationId) {
     ajax
       .query("attachment-types",{id: applicationId})
@@ -55,7 +52,6 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
 
 LUPAPISTE.Upload.loadOperations = function(applicationId) {
   "use strict";
-
   if (applicationId) {
     ajax
       .query("attachment-operations", {id: applicationId})
@@ -90,8 +86,7 @@ LUPAPISTE.Upload.initFromURLParams = function() {
       errorMessage: pageutil.getURLParameter("errorMessage"),
       target: {type: pageutil.getURLParameter("targetType"),
                id: pageutil.getURLParameter("targetId")},
-      locked: JSON.parse(pageutil.getURLParameter("locked") || false),
-      authority: JSON.parse(pageutil.getURLParameter("authority") || false)
+      locked: JSON.parse(pageutil.getURLParameter("locked") || false)
     };
     LUPAPISTE.Upload.init(options);
   }

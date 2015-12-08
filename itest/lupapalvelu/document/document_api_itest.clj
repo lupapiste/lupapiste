@@ -16,13 +16,15 @@
         resp             (command pena :update-doc :id application-id :doc hakija-doc-id  :collection "documents" :updates [["henkilo.henkilotiedot.etunimi" "foo"]["henkilo.henkilotiedot.sukunimi" "bar"]]) => ok?
         modified1        (:modified (query-application pena application-id))
         rakennus-doc-id  (:id (domain/get-document-by-name application0 "rakennuspaikka")) => truthy
-        resp             (command pena :update-doc :id application-id :doc rakennus-doc-id  :collection "documents" :updates [["kiinteisto.maaraalaTunnus" "maaraalaTunnus"]["kiinteisto.tilanNimi" "tilanNimi"]]) => ok?
+        resp             (command pena :update-doc :id application-id :doc rakennus-doc-id  :collection "documents" :updates [["kiinteisto.maaraalaTunnus" "maaraalaTunnus"]]) => ok?
         application2     (query-application pena application-id)
         modified2        (:modified application2)
         hakija-doc       (domain/get-document-by-id application2 hakija-doc-id)
         rakennus-doc     (domain/get-document-by-id application2 rakennus-doc-id)
         failing-updates  [["rakennuksenOmistajat.henkilo.henkilotiedot.etunimi" "P0wnr"]]
-        failing-result   (command pena :update-doc :id application-id :doc rakennus-doc-id :updates failing-updates)]
+        failing-result   (command pena :update-doc :id application-id :doc rakennus-doc-id :updates failing-updates)
+        readonly-updates [["kiinteisto.tilanNimi" "tilannimi"]]
+        readonly-result  (command pena :update-doc :id application-id :doc rakennus-doc-id :updates readonly-updates)]
 
     (fact "hakija is valid, but missing some fieds"
       (let [resp (query pena :validate-doc :id application-id :doc hakija-doc-id :collection "documents") => ok?
@@ -46,11 +48,11 @@
       (get-in hakija-doc   [:data :henkilo :henkilotiedot :sukunimi :modified]) => modified1)
     (fact "rakennus-doc"
       (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :value]) => "maaraalaTunnus"
-      (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :modified]) => modified2
-      (get-in rakennus-doc [:data :kiinteisto :tilanNimi :value]) => "tilanNimi"
-      (get-in rakennus-doc [:data :kiinteisto :tilanNimi :modified]) => modified2)
+      (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :modified]) => modified2)
     (fact (:ok failing-result) => false)
-    (fact (:text failing-result) => "document-would-be-in-error-after-update")))
+    (fact (:text failing-result) => "document-would-be-in-error-after-update")
+    (fact (:ok readonly-result) => false)
+    (fact (:text readonly-result) => "error-trying-to-update-readonly-field")))
 
 
 (facts "facts about create-doc command"
@@ -65,10 +67,16 @@
     (fact ok-result => ok?)
     (fact (:text ok-result) => nil)
     (fact doc-id => truthy)
-    (fact (:ok no-schema-result) => false)
-    (fact (:ok repeating-schema-result) => true)
-    (fact (:ok non-repeating-result) => false)
-    (fact (count (:documents application1)) => (inc (inc (count (:documents application0)))))))
+    (fact no-schema-result => fail?)
+    (fact repeating-schema-result => ok?)
+    (fact "paasuunnittelija can't be added" non-repeating-result => fail?)
+    (fact (count (:documents application1)) => (inc (inc (count (:documents application0))))))
+
+  (facts "paasuunnittelija can be added exactly once"
+    (let [application-id (create-app-id pena :operation :puun-kaataminen)]
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => ok?
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?)))
 
 (facts "facts about remove-document-data command"
   (let [application-id             (create-app-id pena)
@@ -131,12 +139,19 @@
 
     (fact "application has attachments with secondary operation" (count (attachment/get-attachments-by-operation application (:id (first sec-operations)))) => pos?)
 
-    (fact "hakija doc is removed"
+    (fact "last hakija doc cannot be removed due :deny-removing-last-document flag"
+      (get-in hakija [:schema-info :deny-removing-last-document]) => true
+      (command pena :remove-doc :id application-id :docId (:id hakija)) => fail?)
+
+    (fact "hakija doc is removed if there is more than one hakija-doc"
+      (command pena :create-doc :id application-id :schemaName (get-in hakija [:schema-info :name])) => ok?
+      (-> (query-application pena application-id) :documents domain/get-applicant-documents count) => 2
+
       (command pena :remove-doc :id application-id :docId (:id hakija)) => ok?
       (let [updated-app (query-application pena application-id)]
-        (domain/get-applicant-document (:documents updated-app)) => nil
-        (fact "but not any other docs or operations"
-          (count (:documents updated-app)) => (dec (count (:documents application)))
+        (-> (:documents updated-app) domain/get-applicant-documents count) => 1
+        (fact "every other doc nad operation remains untouched"
+          (count (:documents updated-app)) => (count (:documents application))
           (count (:secondaryOperations updated-app)) => (count (:secondaryOperations application))
           (:primaryOperation updated-app) => (:primaryOperation application))))
 

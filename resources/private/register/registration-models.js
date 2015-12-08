@@ -11,7 +11,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
   self.keys = ks || ["stamp", "email",
                      "street", "city", "zip", "phone", "password",
                      "allowDirectMarketing", "rakentajafi",
-                     "architect", "degree", "graduatingYear", "fise"];
+                     "architect", "degree", "graduatingYear", "fise", "fiseKelpoisuus"];
 
   var PlainModel = function(data, keys) {
     var self = this;
@@ -31,6 +31,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
       degree: "",
       graduatingYear: "",
       fise: "",
+      fiseKelpoisuus: "",
       architect: false,
       allowDirectMarketing: false,
       rakentajafi: false,
@@ -104,6 +105,9 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
 
     self.availableDegrees = _(LUPAPISTE.config.degrees).map(function(degree) {
       return {id: degree, name: loc(["koulutus", degree])};
+    }).sortBy("name").value();
+    self.availableFiseKelpoisuusValues = _(LUPAPISTE.config.fiseKelpoisuusValues).map(function(kelp) {
+      return {id: kelp, name: loc(["fisekelpoisuus", kelp])};
     }).sortBy("name").value();
   };
 

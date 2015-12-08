@@ -3,7 +3,7 @@
 Documentation   Neighbor logs in with Vetuma and comments the application
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ../02_register/keywords.robot
+Resource        ../common_keywords/vetuma_helpers.robot
 
 *** Test Cases ***
 

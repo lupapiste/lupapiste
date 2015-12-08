@@ -4,6 +4,7 @@
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [update-application] :as action]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -17,7 +18,7 @@
 ;;
 
 (defn user-can-be-set? [user-id application]
-  (and (domain/has-auth? application user-id) (domain/no-pending-invites? application user-id)))
+  (and (auth/has-auth? application user-id) (domain/no-pending-invites? application user-id)))
 
 (defn create-doc-validator [command {documents :documents permit-type :permitType}]
   ;; Hide the "Lisaa osapuoli" button when application contains "party" type documents and more can not be added.

@@ -70,6 +70,26 @@
     message: ""
   };
 
+  ko.validation.rules.beforeThan = {
+    validator: function(date, otherDate) {
+      if (_.isDate(date) && _.isDate(otherDate)) {
+        return date.getTime() <= otherDate.getTime();
+      }
+      return true;
+    },
+    message: loc("bulletin.beforeThan")
+  }
+
+  ko.validation.rules.afterThan = {
+    validator: function(date, otherDate) {
+      if (_.isDate(date) && _.isDate(otherDate)) {
+        return date.getTime() >= otherDate.getTime();
+      }
+      return true;
+    },
+    message: loc("bulletin.afterThan")
+  }
+
   /*
    * Determines if a field is required or not based on a function or value
    * Parameter: boolean function, or boolean value
@@ -161,14 +181,8 @@
 
   ko.bindingHandlers.fullName = {
     update: function(element, valueAccessor) {
-      var value = ko.toJS(valueAccessor());
-      var fullName = "";
-      if (value) {
-        if (value.lastName) { fullName += value.lastName; }
-        if (value.firstName && value.lastName) { fullName += "\u00a0"; }
-        if (value.firstName) { fullName +=  value.firstName; }
-      }
-      $(element).text(fullName);
+      var value = ko.toJS(valueAccessor()) || {};
+      $(element).text(_.filter([value.lastName, value.firstName]).join("\u00a0"));
     }
   };
 
@@ -250,6 +264,7 @@
       ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
         $(element).datepicker("destroy");
       });
+      ko.bindingHandlers.validationCore.init(element, valueAccessor, allBindingsAccessor);
     },
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());

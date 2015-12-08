@@ -436,6 +436,7 @@
     :companyName "Yritys Oy"
     :companyId "1234567-1"
     :fise "f"
+    :fiseKelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
     :private {:password "$2a$10$sVFCAX/MB7wDKA2aNp1greq7QlHCU/r3WykMX/JKMWmg7d1cp7HSq"
               :apikey "502cb9e58426c613c8b85abc"}}
    ;; Hakija: pena / pena
@@ -604,7 +605,7 @@
                        :kopiolaitos-orderer-address "Testikatu 2, 12345 Sipoo"
                        :kopiolaitos-orderer-email "tilaaja@example.com"
                        :kopiolaitos-orderer-phone "0501231234"
-                       :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "YM" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
                        :tags [{:id "111" :label "yl\u00E4maa"} {:id "222" :label "ullakko"}]
                        :areas {:type "FeatureCollection"
@@ -771,6 +772,20 @@
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
+                      ;; Turku R with a public WFS server
+                      {:id "853-R"
+                       :name {:fi "Turku rakennusvalvonta"
+                              :sv "\u00c5bo byggnadstillsyn"}
+                       :scope [{:municipality "853"
+                                :permitType "R"
+                                :new-application-enabled false
+                                :inforequest-enabled true
+                                :open-inforequest true
+                                :open-inforequest-email "turku@example.com"}]
+                       :links []
+                       :krysp {:osoitteet {:url "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"}}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled false}
 
                       ;; Kuopio R, has case management (asianhallinta) enabled
                       {:id "297-R"
@@ -902,6 +917,6 @@
 
 (deffixture "minimal" {}
   (mongo/clear!)
-  (dorun (map (partial mongo/insert :users) users))
-  (dorun (map (partial mongo/insert :companies) companies))
-  (dorun (map (partial mongo/insert :organizations) organizations)))
+  (mongo/insert-batch :users users)
+  (mongo/insert-batch :companies companies)
+  (mongo/insert-batch :organizations organizations))

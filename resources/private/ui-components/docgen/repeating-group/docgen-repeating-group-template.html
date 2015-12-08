@@ -14,8 +14,8 @@
                                                    icon: 'lupicon-remove', 
                                                    label: 'remove',
                                                    index: index,
-                                                   clickFn: $parent.removeGroup }},
-                             visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')">
+                                                   clickFn: $component.removeGroup }},
+                             visible: $component.groupsRemovable($data.schema)">
             </span>
           </div>
 
@@ -26,13 +26,17 @@
           <!-- /ko -->
 
           <div data-bind="component: { name: 'docgen-group',
-                                       index: index,
-                                       params: $data }">
+                                       params: { schema: $data.schema,
+                                                 path: $data.path,
+                                                 i18npath: $component.i18npath,
+                                                 applicationId: $component.applicationId,
+                                                 documentId: $component.documentId,
+                                                 authModel: $component.authModel }}">
           </div>
         </div>
       </div>
         
-      <div class="button-group" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('update-doc')">
+      <div class="button-group" data-bind="visible: updatable()">
         <span data-bind="component: { name: 'docgen-button',
                                       params: { id: groupId + '-append-button', 
                                                 className: 'positive', 

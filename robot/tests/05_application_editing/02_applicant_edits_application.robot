@@ -66,16 +66,14 @@ Huoneistot info for Uusirakennus is correct
   Click by id  huoneistot_append
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
   Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
-  List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  lis\u00e4ys
-
-  Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  0
+  List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  - Valitse -
   Huoneisto row items disabled except muutostapa
+  Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  1
   Reload Page
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
   Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  2
-  Huoneisto row items disabled except muutostapa
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//i[@data-test-class="delete-schemas.huoneistot"]
@@ -114,6 +112,14 @@ Mikko subscribes notifications
   Click by test id  subscribeNotifications
   Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
   Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
+
+Mikko inputs bad postal code for hakija-r
+  Input text with jQuery  div#application-parties-tab section[data-doc-type="hakija-r"] input[data-docgen-path="henkilo.osoite.postinumero"]  000
+  Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.warn[data-docgen-path="henkilo.osoite.postinumero"]
+
+Mikko changes hakija-r country and postal code becomes valid
+  Select from list  jquery=div#application-parties-tab section[data-doc-type="hakija-r"] select[data-docgen-path="henkilo.osoite.maa"]  CHN
+  Wait Until  Element should not be visible  jquery=section[data-doc-type="hakija-r"] input.warn[data-docgen-path="henkilo.osoite.postinumero"]
 
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']

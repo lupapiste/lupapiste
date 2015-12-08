@@ -80,9 +80,11 @@
   [group-schema group-doc locstring]
   (let [subgroups (->> (:body group-schema)
                        (filter is-printable-group-type)
+                       (remove :exclude-from-pdf)
                        (remove :hidden))
         group-schema-body (remove #(= schemas/select-one-of-key (:name %)) (:body group-schema)) ; remove _selected radioGroup
-        fields (filter is-field-type group-schema-body)
+        fields (->> (filter is-field-type group-schema-body)
+                    (remove :exclude-from-pdf))
         group-title (:name group-schema)
         i18name (:i18name group-schema)
         locstring (cond
@@ -128,9 +130,11 @@
         schema-body (remove #(= schemas/select-one-of-key (:name %)) (:body schema)) ; don't print _selected radioGroups
         group-schemas (->> schema-body
                            (filter is-printable-group-type)
+                           (remove :exclude-from-pdf)
                            (remove :hidden)
                            (remove #(some #{(:name %)} unselected-groups)))
-        field-schemas (filter is-field-type schema-body)
+        field-schemas (->> (filter is-field-type schema-body)
+                           (remove :exclude-from-pdf))
         doc-title (-> schema :info :name)
         doc-title (if (#{:op} (:schema-info doc))
                     (str "operations." (-> doc :schema-info :op :name))
@@ -200,13 +204,15 @@
 
 (defn- collect-statement-fields [statements]
   (map
-    (fn [{:keys [requested given status text attachments] {giver :name} :person :as stm}]
+    (fn [{:keys [requested given status text dueDate saateText] {giver :name} :person :as stm}]
       (array-map
         (loc "statement.requested") (str "" (or (util/to-local-date requested) "-"))
         (loc "statement.giver") (if (ss/blank? giver) (loc "application.export.empty") (str giver))
         (loc "export.statement.given") (str "" (or (util/to-local-date given) "-"))
         (loc "statement.title") (if (ss/blank? status) (loc "application.export.empty") (str status))
-        (loc "statement.text") (if (ss/blank? text) (loc "application.export.empty") (str text))))
+        (loc "statement.text") (if (ss/blank? text) (loc "application.export.empty") (str text))
+        (loc "add-statement-giver-maaraaika") (str "" (or (util/to-local-date dueDate) "-"))
+        (loc "application.invite-statement-giver-saateText") (if (ss/blank? saateText) (loc "application.export.empty") (str saateText))))
     statements))
 
 (defn collect-neighbour-fields [neighbours]
@@ -442,10 +448,10 @@
 (defn- generate-pdf-data-with-child [{subtype :permitSubtype :as app} child-type id lang]
   (with-lang lang (let [title (cond
                                 (= child-type :statements) (loc "application.statement.status")
-                                (= child-type :neighbors) (loc "application.MM.neighbors")
-                                (= child-type :verdicts) (loc "application.verdict.title")
-                                (ss/blank? (str subtype)) (loc "application.export.title")
-                                :else (loc "permitSubtype" subtype))
+                                (= child-type :neighbors)  (loc "application.MM.neighbors")
+                                (= child-type :verdicts)   (loc "application.verdict.title")
+                                (ss/blank? (str subtype))  (loc "application.export.title")
+                                :else                      (loc "permitSubtype" subtype))
                         app-data (collect-export-data app title false)
                         child (filter #(= id (:id %)) (child-type app))
                         child-data (cond

@@ -6,6 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn-> fn->> dissoc-in] :as util]
             [sade.core :refer [ok fail now]]
+            [sade.validators :as v]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -32,16 +33,14 @@
       (= "email-sent" (->> statuses  (remove #(= "reminder-sent" (:state %))) last :state)))
     false))
 
-(defn- params->neighbor [{:keys [propertyId name street city zip email type nameOfDeceased businessID]}]
-  {:propertyId propertyId
-   :owner      {:type type
-                :name  name
-                :email (user/canonize-email email)
-                :businessID businessID
-                :nameOfDeceased nameOfDeceased
-                :address {:street street
-                          :city   city
-                          :zip    zip}}})
+(defn- params->neighbor [{:keys [propertyId email] :as params}]
+  {:pre [(every? #(or (string? %) (nil? %)) (vals params))]}
+  (util/deep-merge domain/neighbor-skeleton
+    {:propertyId propertyId
+     :owner      (merge
+                   (select-keys params [:type :name :businessID :nameOfDeceased])
+                   {:email (user/canonize-email email)
+                    :address (select-keys params [:street :city :zip])})}))
 
 (defn- params->new-neighbor [params]
   (merge
@@ -50,9 +49,15 @@
      :status [{:state :open
                :created (now)}]}))
 
+(defn- valid-neighbor? [m]
+  (and (map? m) (every? #(or (string? %) (nil? %)) (vals m)) (v/kiinteistotunnus? (:propertyId m))))
+
 (defcommand neighbor-add
   {:parameters [id]
    :user-roles #{:authority}
+   :input-validators [(fn [command]
+                        (when-not (valid-neighbor? (:data command))
+                          (fail :error.invalid-type)))]
    :states states/all-application-states-but-draft-or-terminal}
   [command]
   (let [new-neighbor (params->new-neighbor (:data command))]
@@ -60,16 +65,18 @@
     (ok :neighborId (:id new-neighbor))))
 
 (defcommand neighbor-add-owners
-  {:parameters [id propertyId owners]
+  {:parameters [id owners]
+   :input-validators [(partial action/vector-parameter-of :owners valid-neighbor?)]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
-  (let [new-neighbors (mapv #(params->new-neighbor (assoc % :propertyId propertyId)) owners)]
+  (let [new-neighbors (map params->new-neighbor owners)]
     (update-application command {$push {:neighbors {$each new-neighbors}}})
     (ok)))
 
 (defcommand neighbor-update
   {:parameters [id neighborId]
+   :input-validators [(partial action/non-blank-parameters [:id :neighborId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
@@ -81,6 +88,7 @@
 
 (defcommand neighbor-remove
   {:parameters [id neighborId]
+   :input-validators [(partial action/non-blank-parameters [:id :neighborId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
@@ -123,6 +131,7 @@
 
 (defcommand neighbor-mark-done
   {:parameters [id neighborId]
+   :input-validators [(partial action/non-blank-parameters [:id :neighborId])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [{:keys [application user created lang] :as command}]
@@ -175,18 +184,20 @@
                                     (filter (fn-> :schema-info :type (not= "party")) documents)))))))
 
 (defquery neighbor-application
-          {:parameters [applicationId neighborId token]
-           :user-roles #{:anonymous}}
-          [{user :user created :created :as command}]
-          (let [application (domain/get-application-no-access-checking applicationId)
-                neighbor (util/find-by-id neighborId (:neighbors application))]
-            (if (valid-token? token (:status neighbor) created)
-              (ok :application (->public application))
-              (fail :error.token-not-found))))
+  {:parameters [applicationId neighborId token]
+   :input-validators [(partial action/non-blank-parameters [:applicationId :neighborId :token])]
+   :user-roles #{:anonymous}}
+  [{user :user created :created :as command}]
+  (let [application (domain/get-application-no-access-checking applicationId)
+        neighbor (util/find-by-id neighborId (:neighbors application))]
+    (if (valid-token? token (:status neighbor) created)
+      (ok :application (->public application))
+      (fail :error.token-not-found))))
 
 (defcommand neighbor-response
   {:parameters [applicationId neighborId token response message stamp]
-   :input-validators [(fn [command]
+   :input-validators [(partial action/non-blank-parameters [:applicationId :neighborId :token :stamp])
+                      (fn [command]
                         (when-not (#{"ok" "comments"} (get-in command [:data :response]))
                           (fail :error.invalid-response)))]
    :user-roles #{:anonymous}}
@@ -218,6 +229,7 @@
 ; http://localhost:8000/api/raw/neighbor/download-attachment?neighbor-id=51b1b6bfaa24d5fcab8a3239&token=G7s1enGjJrHcwHYOzpJ60wDw3JoIfqGhCW74ZLQhKUSiD7wZ&file-id=51b1b86daa24d5fcab8a32d7
 (defraw neighbor-download-attachment
         {:parameters [neighborId token fileId]
+   :input-validators [(partial action/non-blank-parameters [:neighborId :token :fileId])]
          :user-roles #{:anonymous}}
         [{created :created}]
         (let [att-info (attachment/get-attachment-file fileId)

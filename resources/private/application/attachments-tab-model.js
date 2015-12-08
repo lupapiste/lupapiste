@@ -137,7 +137,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
     self.attachmentsOperations(updatedAttachmentsOperations(rawAttachments));
   };
 
-  self.toggleNeeded = function( attachment ) {
+  self.toggleNeeded = _.debounce(function(attachment) {
     // reload application also when error occurs so that model and db dont get out of sync
     ajax.command("set-attachment-not-needed", {id: self.appModel.id(),
                                                attachmentId: attachment.id,
@@ -147,7 +147,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
     .processing(self.appModel.processing)
     .call();
     return true;
-  };
+  }, 500);
 
   self.newAttachment = function() {
     attachment.initFileUpload({

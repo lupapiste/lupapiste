@@ -1,5 +1,5 @@
 (ns lupapalvelu.document.document-field-validators
-  (:require [clojure.string :as s]
+  (:require [sade.strings :as ss]
             [lupapalvelu.document.validator :refer :all]))
 
 ;; Huom!
@@ -21,4 +21,5 @@
            :fail [["other" nil]
                   ["other" ""]
                   ["other" "    "]]}}
-  (and (= "other" buildingId) (s/blank? muu)))
+  (and (= "other" buildingId) (ss/blank? muu)))
+

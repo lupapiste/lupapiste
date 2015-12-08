@@ -10,6 +10,27 @@ Roolit
 front+back
 fyysinen pino: front, app, mongodb, geoserver, sftp jne
 
+# Kehitystyö
+
+## Testaus
+
+### Backend
+
+ - `lein nitpicker` tekee kähdekooditiedostoille laittomien merkkien tarkastuksen
+ - `lein midje` ajaa (pelkät) yksikkötestit
+ - `lein integration` ajaa integraatiotestit. Integraatiotestit olettavat,
+    että palvelin on käynnissä oletusportissa 8000 ja siitä on yhteys MML:n rajapintoihin.
+ - `lein stest` ajaa systeemitestit, jotka käyttävät myös muita ulkoisia integaatioita.
+ - `lein verify` ajaa kaikki edellä mainitut.
+
+### Frontend end-to-end testit
+
+ - `local.sh` / `local.bat` ajaa Robot Frameworkilla paikalliset testit.
+   Näissä oletetaan, että  palvelin on käynnissä oletusportissa.
+ - `local-integration.sh` / `local-integration.bat`
+   ajaa Robot Frameworkilla testit, jotka käyttävät ulkoisia palveluita kuten
+   VETUMA-kirjautumispalvelun testijärjestelmää.
+
 # Frontend arkkitehtuuri
 ## Yleiskuvaus
   SPA intial startup
@@ -36,7 +57,14 @@ fyysinen pino: front, app, mongodb, geoserver, sftp jne
   Tommi
 
 ## Compass + SASS
-  tyyliarkkitehtuuri / konventiot
+
+CSS-tyylit kirjoitetaan Sass-tiedostoihin `resources/private/common-html/sass` kansiossa. Sass-tiedostot käännetään compass gemillä (kirjoitushetkellä versio 1.0.3). Compassin voi asettaa kuuntelemaan muutoksia `compass.sh` scriptillä projektin juuresta. Vaihtoehtoisesti Sass-tiedostot voi kääntää käsin `compass compile resources/private/common-html`.
+
+Compassin konfigurointi on tiedostossa `resources/private/common-html/config.rb`, sisältää mm. CSS splitterin, joka jakaa **main.css** tiedoston pienempiin osiin (IE9 css rule limit). CSS tiedostot generoidaan `resources/public/lp-static/css/` kansioon.
+
+Oletuksena CSS-tiedostot minimoidaan, tätä voidaan säätää compassin _environment_ tai _output-style_ konfiguroinnilla (config.rb). Esimerkiksi käsin generoitu ei-minifioitu CSS: saa aikaiseksi seuraavalla komennolla (development-mode): `compass compile -e development resources/private/common-html`
+
+
 
   Vespe
 
@@ -176,13 +204,26 @@ Readme-tasolle:
 
 Jari
 
-## uuden permit typen lisääminen
+## Uuden hakemustyypin lisääminen
 
-## uudet operaation lisääminen
+## Uudet toimenpidetyypin lisääminen
 ### metatiedot, puu, näiden lokalisaatiot
 
-## uuden skeeman lisääminen
+## Uuden skeeman lisääminen
 
-## uuden liitetyypin lisääminen
+## Uuden liitetyypin lisääminen
+
+## Uuden tilan lisääminen
+
+Lisää tila lupapalvelu/states.clj:ssä tai lupapiste-commons/states.cljc:ssä
+sopivaan tilagraafiin.
+
+Tarkastuslista:
+ - Uusi tila vaikuttaa vain haluttuihin hakemus- ja toimenpidetyyppeihin
+ - Tilan nimeaä vastaava lokalisaatioavain ja vastaava title-avain
+   ("tila", "tila.title") on lokalisoitu
+ - Tilan nimi ja lokalisaatio on viety DW:n lataustiedostoon
+ - Tyylit lisätty resources/private/common-html/sass/views/_application.scss
+   tiedostoon ja tiedosto käännetty compassilla
 
 ## UI komponentit (ui_components.clj, auto-skannatut tiedostot ui-components hakemistossa)

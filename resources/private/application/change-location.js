@@ -2,71 +2,32 @@ LUPAPISTE.ChangeLocationModel = function() {
   "use strict";
 
   var self = this;
+
+  LUPAPISTE.LocationModelBase.call(self,
+      {mapId:"change-location-map", initialZoom: 13, zoomWheelEnabled: false});
+
   self.dialogSelector = "#dialog-change-location";
-
-  var _map = null;
-
-  self.map = function() {
-    if (!_map) {
-      _map = gis
-        .makeMap("change-location-map", false)
-        .center(404168, 6693765, 13)
-        .addClickHandler(function(x, y) {
-          self
-            .address("")
-            .propertyId("")
-            .beginUpdateRequest()
-            .setXY(x, y)
-            .searchPropertyId(x, y)
-            .searchAddress(x, y);
-          return false;
-        });
-    }
-    return _map;
-  };
 
   // Model
 
   self.id = 0;
-  self.x = 0;
-  self.y = 0;
-  self.address = ko.observable("");
-  self.propertyId = ko.observable("");
-  self.propertyIdValidated = ko.observable(true);
+
   self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
-  self.processing = ko.observable();
-  self.pending = ko.observable();
-
 
   self.ok = ko.computed(function() {
-    return util.prop.isPropertyId(self.propertyId()) && self.address() && self.propertyIdValidated();
+    return self.propertyIdOk && self.address() && self.propertyIdValidated();
   });
 
-  self.drawLocation = function() {
-    return self.map().clear().add({x: self.x, y: self.y});
-  };
-
-  self.setXY = function(x, y) {
-    self.x = x;
-    self.y = y;
-    self.drawLocation();
-    return self;
-  };
-
-  self.center = function(zoom) {
-    self.map().center(self.x, self.y, zoom);
-  };
-
-  self.reset = function(app) {
+  self._setApplication = function(app) {
     self.id = app.id();
     self.x = app.location().x();
     self.y = app.location().y();
     self.address(app.address());
     self.propertyId(app.propertyId());
+    self.municipalityCode(app.municipality());
     self.errorMessage(null);
-    self.map().clear().updateSize();
-    self.center(14);
+    self.clearMap().center(14);
     self.processing(false);
     self.pending(false);
     self.propertyIdValidated(true);
@@ -76,7 +37,6 @@ LUPAPISTE.ChangeLocationModel = function() {
   // Concurrency control
   //
 
-  self.requestContext = new RequestContext();
   self.beginUpdateRequest = function() {
     self.errorMessage(null);
     self.requestContext.begin();
@@ -120,7 +80,8 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   self.saveNewLocation = function() {
     if (self.ok()) {
-      var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: util.prop.toDbFormat(self.propertyId())};
+      var data = self.toJS();
+      data.id = self.id;
       ajax.command("change-location", data)
         .processing(self.processing)
         .pending(self.pending)
@@ -135,7 +96,7 @@ LUPAPISTE.ChangeLocationModel = function() {
   // Open the dialog
 
   self.changeLocation = function(app) {
-    self.reset(app);
+    self._setApplication(app);
     self.drawLocation();
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
     hub.send("track-click", {category:"Application", label:"", event:"changeLocation"});
@@ -156,28 +117,6 @@ LUPAPISTE.ChangeLocationModel = function() {
     return self;
   };
 
-  self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
-      self.propertyId(id);
-      self.propertyIdValidated(true);
-    });
-    return self;
-  };
-
-  self.searchAddress = function(x, y) {
-    locationSearch.addressByPoint(self.requestContext, x, y, function(a) {
-      var newAddress = "";
-      if (a) {
-        newAddress = a.street;
-        if (a.number && a.number !== "0") {
-          newAddress = newAddress + " " + a.number;
-        }
-      }
-      self.address(newAddress);
-      self.center();
-      hub.send("track-click", {category:"Application", label:"map", event:"changeLocationOnMap"});
-    });
-    return self;
-  };
-
 };
+
+LUPAPISTE.ChangeLocationModel.prototype = _.create(LUPAPISTE.LocationModelBase.prototype, {"constructor":LUPAPISTE.ChangeLocationModel});
