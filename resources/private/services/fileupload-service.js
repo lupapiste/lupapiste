@@ -48,7 +48,7 @@ LUPAPISTE.FileuploadService = function() {
     ajax
       .command("remove-uploaded-file", {attachmentId: event.attachmentId})
       .success(function(res) {
-        hub.send("fileuploadService::fileRemoved", res.attachmentId);
+        hub.send("fileuploadService::fileRemoved", {attachmentId: res.attachmentId});
       })
       .call();
   });

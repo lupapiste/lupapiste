@@ -87,6 +87,12 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     self.attachments(self.attachments().concat(event.files));
   });
 
+  self.addEventListener("fileuploadService", "fileRemoved", function(event) {
+    self.attachments.remove(function(attachment) {
+      return attachment.id === event.attachmentId;
+    });
+  });
+
   self.addEventListener("bulletinService", "commentProcessed", function(event) {
     if (event.status === "success") {
       self.basicCommentFields.comment("");
