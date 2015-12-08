@@ -18,6 +18,18 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
 
   self.bulletins = ko.pureComputed(function () {
     return _.map(params.bulletins(), function (bulletin) {
+      var commentingType;
+      var commentingEndsAt;
+      if (bulletin.proclamationEndsAt) {
+        commentingType = loc('bulletin.comment.period');
+        var commentingEndsAt = bulletin.proclamationEndsAt > new Date().getTime() ?
+          moment(bulletin.proclamationEndsAt).format("D.M.YYYY") : loc("bulletin.period.ended");
+      } else if (bulletin.appealPeriodEndsAt) {
+        commentingType = loc('bulletin.appeal.period');
+        var commentingEndsAt = bulletin.appealPeriodEndsAt > new Date().getTime() ?
+          moment(bulletin.appealPeriodEndsAt).format("D.M.YYYY") : loc("bulletin.period.ended");
+      }
+
       return {
         id: bulletin.id,
         bulletinState: bulletin.bulletinState,
@@ -27,7 +39,8 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
         type: "operations." + bulletin.primaryOperation.name,
         applicant: bulletin.applicant,
         date: bulletin.modified,
-        proclamationEndsAt: bulletin.proclamationEndsAt
+        commentingType: commentingType,
+        commentingEndsAt: commentingEndsAt
       };
     });
   });
