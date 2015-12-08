@@ -34,15 +34,25 @@
 
 (sc/defschema BlankStr
   "A schema for empty or nil valued string"
-  (sc/if string? (sc/pred empty?) (sc/pred nil?)))
+  (sc/if string? (sc/pred empty? "Not empty") (sc/pred nil? "Not nil")))
 
 (sc/defschema Email
   "A simple schema for email"
-  (sc/constrained sc/Str (every-pred validators/valid-email? (max-length-constraint 255))))
+  (sc/constrained sc/Str (every-pred validators/valid-email? (max-length-constraint 255)) "Not valid email"))
 
 (sc/defschema Timestamp
   "A schema for timestamp"
-  sc/Int)
+  (sc/pred (every-pred integer?) "Not valid timestamp"))
+
+(sc/defschema Zipcode
+  "A schema for finnish zipcode"
+  (sc/pred validators/finnish-zip? "Not valid finnish zipcode"))
+
+(sc/defschema FinnishY
+  (sc/pred validators/finnish-y? "Not valid Y code"))
+
+(sc/defschema FinnishOVTid
+  (sc/pred validators/finnish-ovt? "Not valid finnish OVT id"))
 
 ;; Dynamic schema constructors
 
@@ -54,4 +64,7 @@
 
 (defdynamicschema max-length-string [max-len]
   (sc/constrained sc/Str (max-length-constraint max-len)))
+
+(defdynamicschema min-max-length-string [min-len max-len]
+  (sc/constrained sc/Str (sc/pred (every-pred (min-length-constraint min-len) (max-length-constraint max-len)))))
 
