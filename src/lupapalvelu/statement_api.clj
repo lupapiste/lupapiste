@@ -140,7 +140,7 @@
                                           persons     (concat stm-givers (remove :id selectedPersons))
                                           users       (map (comp #(user/get-or-create-user-by-email % user) :email) persons)
                                           persons+uid (map #(assoc %1 :userId (:id %2)) persons users)
-                                          metadata    (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
+                                          metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
                                           statements  (map (partial create-statement now metadata saateText dueDate) persons+uid)
                                           auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
                                       (update-application command {$push {:statements {$each statements}
@@ -160,6 +160,7 @@
 
 (defcommand save-statement-as-draft
   {:parameters       [:id statementId :lang]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
    :pre-checks       [statement-exists statement-owner statement-not-given]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority :applicant}
