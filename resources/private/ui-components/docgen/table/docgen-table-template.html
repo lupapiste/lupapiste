@@ -11,7 +11,7 @@
         <span class="group-help-text" data-bind="ltext: groupHelp"></span>
         <!-- /ko -->
 
-        <table>
+        <table data-bind="attr: {'class': _.last(path) + '-table'}">
           <thead>
             <tr data-bind="foreach: columnHeaders">
               <th>
@@ -24,7 +24,7 @@
             <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
               <!-- ko foreach: $component.subSchemas -->
               <td>
-                <span class="form-entry"
+                <span class="form-entry form-input"
                   data-bind="component: { name: uicomponent,
                                           params: { schema: $data,
                                                     path: $parent.path.concat(name),
@@ -49,17 +49,17 @@
       <div class="button-group" data-bind="visible: updatable()">
         <span data-bind="saveIndicator: indicator"></span>
         <span data-bind="component: { name: 'docgen-button',
-                                     params: { id: groupId + '-append-button', 
-                                               className: 'positive', 
-                                               icon: 'lupicon-circle-plus', 
-                                               label: appendLabel, 
+                                     params: { id: groupId + '-append-button',
+                                               className: 'positive',
+                                               icon: 'lupicon-circle-plus',
+                                               label: appendLabel,
                                                clickFn: addGroup }}">
         </span>
         <span data-bind="component: { name: 'docgen-button',
-                                     params: { id: groupId + '-copy-button', 
-                                               className: 'secondary', 
-                                               icon: 'lupicon-circle-plus', 
-                                               label: copyLabel, 
+                                     params: { id: groupId + '-copy-button',
+                                               className: 'secondary',
+                                               icon: 'lupicon-circle-plus',
+                                               label: copyLabel,
                                                clickFn: duplicateLastGroup }}">
         </span>
       </div>

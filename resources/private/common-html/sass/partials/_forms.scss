@@ -501,7 +501,7 @@ input.form-input.inline {
     padding: $marginS $marginM;
   }
 
-  #table-huoneistot, #table-muutHankkeet {
+  .huoneistot-table {
     td, th {
       padding: $marginS;
     }
