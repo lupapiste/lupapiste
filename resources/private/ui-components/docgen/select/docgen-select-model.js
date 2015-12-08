@@ -6,9 +6,10 @@ LUPAPISTE.DocgenSelectModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.DocgenInputModel(params));
 
   self.valueAllowUnset = _.isUndefined(params.schema.valueAllowUnset) || params.schema.valueAllowUnset;
-  self.optionsCaption = self.valueAllowUnset ? loc(self.i18npath.concat("select")) : null;
-  
-  self.optionsTextFn = function(item) { 
+  var locStr = loc.hasTerm(self.i18npath.concat("select")) ? self.i18npath.concat("select") : "selectone";
+  self.optionsCaption = self.valueAllowUnset ? loc(locStr) : null;
+
+  self.optionsTextFn = function(item) {
     return loc(item.i18nkey || self.i18npath.concat(item.name));
   };
 };

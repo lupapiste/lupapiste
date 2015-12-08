@@ -451,7 +451,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/lp-static/html/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.111.html"
+      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.112.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)

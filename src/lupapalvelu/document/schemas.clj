@@ -660,6 +660,7 @@
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
                       :type :table
+                      :uicomponent :docgenTable
                       :validator :huoneistot
                       :group-help "huoneistot.groupHelpText"
                       :repeating true
