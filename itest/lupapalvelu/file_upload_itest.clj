@@ -21,7 +21,7 @@
       (fact "Must define attachment id"
         (command pena :remove-uploaded-file :cookie-store cookie-store) => (partial expected-failure? :error.missing-parameters))
       (fact "Attachment id must match with uploaded file"
-        (command pena :remove-uploaded-file :attachmentId "asdasd" :cookie-store cookie-store) => (partial expected-failure? :error.attachment.not-found))
+        (command pena :remove-uploaded-file :attachmentId "asdasd" :cookie-store cookie-store) => (partial expected-failure? :error.file-upload.not-found))
       (fact "Attachment can be deleted"
         (command pena :remove-uploaded-file :attachmentId (:id uploaded-file) :cookie-store cookie-store) => ok?)
       )))

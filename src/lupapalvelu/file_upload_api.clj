@@ -23,15 +23,21 @@
       (resp/content-type "text/plain")
       (resp/status 200))))
 
-(defn- validate-attachment-id
+(defn- file-upload-in-database
   [{{attachment-id :attachmentId} :data}]
   (let [file-found? (mongo/any? :fs.files {:_id attachment-id "metadata.sessionId" (vetuma/session-id)})]
     (when-not file-found?
-      (fail :error.attachment.not-found))))
+      (fail :error.file-upload.not-found))))
+
+(defn- attachment-not-linked
+  [{{attachment-id :attachmentId} :data}]
+  (when-let [{{bulletin-id :bulletinId} :metadata} (mongo/select-one :fs.files {:_id attachment-id "metadata.sessionId" (vetuma/session-id)})]
+    (when-not (empty? bulletin-id)
+      (fail :error.file-upload.already-linked))))
 
 (defcommand remove-uploaded-file
   {:parameters [attachmentId]
-   :input-validators [validate-attachment-id]
+   :input-validators [file-upload-in-database attachment-not-linked]
    :user-roles #{:anonymous}}
   [_]
   (println "REMOVING FILE" attachmentId)
