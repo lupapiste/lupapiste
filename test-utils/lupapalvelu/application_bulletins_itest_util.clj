@@ -16,29 +16,29 @@
     (set-anti-csrf! true)
     resp))
 
-(defn create-application-and-bulletin
-  [& args]
-  (let [args (if (map? args)
-               args
-               (apply hash-map args))
+(defn create-application-and-bulletin [& args]
+  (let [args         (if (map? args)
+                       args
+                       (apply hash-map args))
         cookie-store (if (contains? args :cookie-store)
                        (:cookie-store args)
                        (doto (->cookie-store (atom {}))
                          (.addCookie test-db-cookie)))
-
-        starts  (util/get-timestamp-ago :day 1)
-        ends    (util/get-timestamp-from-now :day 1)
-        app (create-and-send-application sonja :operation "lannan-varastointi"
-                                         :propertyId sipoo-property-id
-                                         :x 406898.625 :y 6684125.375
-                                         :address "Hitantine 108"
-                                         :state "sent")
-        m2p1 (command sonja :move-to-proclaimed
-                      :id (:id app)
-                      :proclamationStartsAt starts
-                      :proclamationEndsAt ends
-                      :proclamationText "testi"
-                      :cookie-store cookie-store)
-        bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))]
-    m2p1 => ok?
+        starts       (util/get-timestamp-ago :day 1)
+        ends         (util/get-timestamp-from-now :day 1)
+        app          (if (contains? args :app)
+                       (:app args)
+                       (create-and-send-application sonja :operation "lannan-varastointi"
+                                                    :propertyId sipoo-property-id
+                                                    :x 406898.625 :y 6684125.375
+                                                    :address "Hitantine 108"
+                                                    :state "sent"))
+        m2p-resp     (command sonja :move-to-proclaimed
+                              :id (:id app)
+                              :proclamationStartsAt starts
+                              :proclamationEndsAt ends
+                              :proclamationText "testi"
+                              :cookie-store cookie-store)
+        bulletin     (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))]
+    m2p-resp => ok?
     bulletin))
