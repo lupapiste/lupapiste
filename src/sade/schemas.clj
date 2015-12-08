@@ -54,6 +54,9 @@
 (sc/defschema FinnishOVTid
   (sc/pred validators/finnish-ovt? "Not valid finnish OVT id"))
 
+(sc/defschema Hetu
+  (sc/pred validators/valid-hetu? "Not valid hetu"))
+
 ;; Dynamic schema constructors
 
 (defdynamicschema fixed-length-string [len]
@@ -66,5 +69,5 @@
   (sc/constrained sc/Str (max-length-constraint max-len)))
 
 (defdynamicschema min-max-length-string [min-len max-len]
-  (sc/constrained sc/Str (sc/pred (every-pred (min-length-constraint min-len) (max-length-constraint max-len)))))
+  (sc/constrained sc/Str (every-pred (min-length-constraint min-len) (max-length-constraint max-len))))
 

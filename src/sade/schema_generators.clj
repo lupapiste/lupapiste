@@ -74,6 +74,10 @@
 
 (register-generator ssc/FinnishOVTid finnish-ovt)
 
+(def hetu (gen/elements ["060666-9435" "251280-9857" "290272-950J" "010800A9602"])) ;; TODO: A real hetu generator
+
+(register-generator ssc/Hetu hetu)
+
 ;; Dynamic schema generator constructors
 
 (defn fixed-length-string [len]
