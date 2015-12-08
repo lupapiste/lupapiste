@@ -1,1 +1,0 @@
-application.find-owners: Hae kiinteistön omistajat
