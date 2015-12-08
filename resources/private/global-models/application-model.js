@@ -332,7 +332,13 @@ LUPAPISTE.ApplicationModel = function() {
       })
       .processing(self.processing)
       .call();
-      hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
+    hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
+    return false;
+  };
+
+  self.findOwners = function() {
+    alert("Will do!");
+    hub.send("track-click", {category:"Application", label:"", event:"findOwners"});
     return false;
   };
 
