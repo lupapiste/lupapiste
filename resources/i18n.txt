@@ -1,3 +1,0 @@
-bulletin.comment.period:  kommentointiaika
-bulletin.appeal.period:  valitusaika
-bulletin.period.ended:  päättynyt
