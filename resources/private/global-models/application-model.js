@@ -337,7 +337,10 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.findOwners = function() {
-    alert("Will do!");
+    hub.send("show-dialog", { ltitle: "neighbor.owners.title",
+      size: "large",
+      component: "neighbors-owners-dialog",
+      componentParams: {applicationId: self.id()} });
     hub.send("track-click", {category:"Application", label:"", event:"findOwners"});
     return false;
   };

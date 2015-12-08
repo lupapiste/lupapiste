@@ -9,6 +9,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   self.statusSelectOwners           = 3;
   self.statusOwnersSearchFailed     = 4;
   self.statusPropertyIdSearchFailed = 5;
+  self.readonly = false;
 
   self.status = ko.observable(self.statusInit);
   self.ownersGroups = ko.observable([]);
@@ -52,7 +53,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners;
   });
 
-  self.search = function(wkt, radius) {
+  self.searchLocation = function(wkt, radius) {
     self.status(self.statusSearchPropertyId).beginUpdateRequest();
     self.searchRequests.push(locationSearch.propertyIdsByWKT(self.requestContext, wkt, radius, self.propertyIdFound, self.propertyIfNotFound));
     return self;
@@ -63,14 +64,20 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     var propertyIds = _.isArray(resp) && resp.length > 0 ? _.pluck(resp, "kiinttunnus") : null;
     if (propertyIds) {
       var filteredPropertyIds = _.filter(propertyIds, function(p) {return p !== applicationPropertyId;});
-      return self.propertyIds(filteredPropertyIds).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(filteredPropertyIds);
+      return self.propertyIds(filteredPropertyIds).status(self.statusSearchOwners).beginUpdateRequest().searchOwnersByPropertyIds(filteredPropertyIds);
     } else {
       return self.propertyIfNotFound();
     }
   };
 
-  self.searchOwners = function(propertyIds) {
+  self.searchOwnersByPropertyIds = function(propertyIds) {
     self.searchRequests.push(locationSearch.ownersByPropertyIds(self.requestContext, propertyIds, self.ownersFound, self.ownersNotFound));
+    return self;
+  };
+
+  self.searchOwnersByApplicationId = function(applicationId) {
+    self.searchRequests.push(ajax.query("application-property-owners", {id:applicationId})
+                                .success(self.ownersFound).error(self.ownersNotFound).call());
     return self;
   };
 
@@ -132,5 +139,12 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   // Init
-  self.search(params.wkt, params.radius);
+  if (params.wkt) {
+    self.searchLocation(params.wkt, params.radius);
+  } else if (params.applicationId) {
+    self.readonly = true;
+    self.status(self.statusSearchOwners).searchOwnersByApplicationId(params.applicationId);
+  } else {
+    error("Not enough params for NeighborsOwnersDialogModel");
+  }
 };
