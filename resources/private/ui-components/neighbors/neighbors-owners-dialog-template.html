@@ -24,7 +24,7 @@
                 <th data-bind="ltext: 'neighbors.owner.type'"></th>
               </tr>
             </thead>
-            <tbody data-bind="foreach: {data: $data.owners, afterRender: function() {$(window).trigger('resize');}}">
+            <tbody data-bind="foreach: {data: $data.owners, afterRender: function() {$(window).trigger('resize');}}"  data-test-id="owner-query-results">
               <tr>
                 <!-- ko ifnot: $component.readonly -->
                 <td>
