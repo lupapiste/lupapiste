@@ -1,0 +1,10 @@
+bulletin.actions.comment:  Haluan antaa mielipiteen tai muistutuksen
+bulletin.comment.title:  Anna mielipide tai muistutus
+bulletin.comment.endDate:  Mielipiteen/muistutuksen antamisen määräaika
+bulletin.comment:  Mielipide/Muistutus
+bulletin.comment.placeholder:  Kirjoita tähän...
+bulletin.comment.selectedAttachments:  Lisätyt liitetiedostot
+bulletin.comment.addAttachment:  Lisää liitetiedosto
+bulletin.comment.send:  Lähetä
+help.bulletin.comment:  Voit jättää kuulutetusta hakemuksesta mielipiteen tai muistutuksen määräaikaan mennessä. Lisäämällä sähköpostiosoitteesi ja valitsemalla "Haluan tiedoksiannon sähköisesti" saat sähköpostiisi tiedon, kun asiasta on annettu päätös. Päätöksen voi valita toimitettavaksi myös toiseen osoitteeseen. Mielipiteen tai muistutuksen yhteyteen voit lisätä tarvittaessa liitetiedostoja. Viranomainen ottaa jätetyt mielipiteet ja muistutukset huomioon päätöstä annettaessa.
+bulletin.comment.save.success:  Kiitos! Mielipide/muistutus on vastaanotettu.
