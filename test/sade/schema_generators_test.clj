@@ -32,3 +32,10 @@
          (every-pred string? #(<= (count %) len)))))
 
 (defspec max-length-string-generator-test 100 max-length-generator-prop)
+
+(def min-max-length-generator-prop
+  (prop/for-all [min-len gen/pos-int range gen/pos-int]
+    (->> (gen/generate (min-max-length-string min-len (+ min-len range)))
+         (every-pred string? #(>= (count %) min-len)  #(<= (count %) (+ min-len range))))))
+
+(defspec min-max-length-string-generator-test 100 min-max-length-generator-prop)
