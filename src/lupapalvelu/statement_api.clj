@@ -102,9 +102,14 @@
    :user-authz-roles #{:statementGiver}}
   [_])
 
+(defn- request-statement-model [{{:keys [saateText dueDate]} :data} _ __]
+  {:saateText saateText
+   :dueDate (util/to-local-date dueDate)})
+
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request"
+   :model-fn       request-statement-model
    :show-municipality-in-subject true})
 
 (defn- make-details [inviter now persons metadata saateText dueDate]
