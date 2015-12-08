@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-bulletins-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.application-bulletins-itest-util :refer :all]
             [lupapalvelu.vetuma-itest-util :as vetuma-util]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.mongo :as mongo]

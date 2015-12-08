@@ -1,6 +1,7 @@
 (ns lupapalvelu.file-upload-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.application-bulletins-itest-util :as bulletin-util]
             [cheshire.core :as json]
             [sade.util :as util]
             [lupapalvelu.vetuma-itest-util :as vetuma-util]))
@@ -11,7 +12,7 @@
   (let [store         (atom {})
         cookie-store  (doto (->cookie-store store)
                         (.addCookie test-db-cookie))
-        upload-resp   (-> (send-file cookie-store)
+        upload-resp   (-> (bulletin-util/send-file cookie-store)
                           :body
                           (json/decode keyword))
         uploaded-file (first (:files upload-resp))]
@@ -42,7 +43,7 @@
                             :cookie-store cookie-store)
               bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
 
-              upload-resp   (-> (send-file cookie-store)
+              upload-resp   (-> (bulletin-util/send-file cookie-store)
                                 :body
                                 (json/decode keyword))
               uploaded-file (first (:files upload-resp))]
