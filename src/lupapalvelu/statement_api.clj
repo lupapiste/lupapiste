@@ -92,7 +92,7 @@
 
 (defquery get-statement-givers
   {:parameters [:id]
-   :user-roles #{:authority :applicant}
+   :user-roles #{:authority}
    :user-authz-roles auth/default-authz-writer-roles
    :states states/all-application-states}
   [{application :application}]
