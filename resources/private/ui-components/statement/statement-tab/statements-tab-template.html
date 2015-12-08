@@ -20,7 +20,9 @@
           <span data-bind="ltext: 'application.statement.add'"></span>
         </button>
 
-        <div data-bind="if: showInviteSection" id="invite-statement-givers-section">
+
+        <!-- ko if: showInviteSection -->
+        <div id="invite-statement-givers-section">
 
             <p id="choose-statement-givers-title" data-bind="ltext: 'application-choose-statement-givers'"></p>
 
@@ -88,6 +90,8 @@
           <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
 
         </div>
+        <!-- /ko -->
+
       </div>
 
       <div class="application-neighbors">
