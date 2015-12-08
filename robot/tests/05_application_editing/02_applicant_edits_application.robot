@@ -66,16 +66,14 @@ Huoneistot info for Uusirakennus is correct
   Click by id  huoneistot_append
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
   Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
-  List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  lis\u00e4ys
-
-  Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  0
+  List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  - Valitse -
   Huoneisto row items disabled except muutostapa
+  Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  1
   Reload Page
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
   Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  2
-  Huoneisto row items disabled except muutostapa
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//i[@data-test-class="delete-schemas.huoneistot"]
