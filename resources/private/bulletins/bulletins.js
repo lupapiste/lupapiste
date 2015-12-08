@@ -28,7 +28,8 @@
         {name: "bulletin-attachments-tab"},
         {name: "bulletin-verdicts-tab"},
         {name: "begin-vetuma-auth-button"},
-        {name: "bulletin-info-tab"}];
+        {name: "bulletin-info-tab"},
+        {name: "bulletin-instructions-tab"}];
 
     _.forEach(components, function(component) {
       ko.components.register(component.name, {

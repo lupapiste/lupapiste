@@ -107,7 +107,9 @@
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
-   :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
+   ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   ;:open-layers    {:js ["OpenLayers.debug.js" ]}
    :ol             {:js ["openlayers-3.8.2.min.js" "ol3-popup.js"]
                     :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
    :proj4          {:js ["proj4-2.3.3.min.js"]}
@@ -390,6 +392,7 @@
                       "application-bulletin/tabs/info/bulletin-info-tab-template.html"
                       "application-bulletin/tabs/verdicts/verdicts-template.html"
                       "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
+                      "application-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
@@ -407,6 +410,7 @@
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
                     "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
                     "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
+                    "application-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"

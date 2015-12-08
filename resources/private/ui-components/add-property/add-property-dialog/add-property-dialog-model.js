@@ -7,7 +7,7 @@ LUPAPISTE.AddPropertyDialogModel = function() {
   self.x = app.location().x();
   self.y = app.location().y();
   self.propertyId = ko.observable(app.propertyId());
-  
+
   self.selectedNotAppProperty = ko.pureComputed(function() {
     return self.propertyId() !== app.propertyId();
   });
@@ -33,7 +33,7 @@ LUPAPISTE.AddPropertyDialogModel = function() {
   self.map = function() {
     if (!_map) {
       _map = gis
-        .makeMap("add-location-map", false)
+        .makeMap("add-location-map", {zoomWheelEnabled: false})
         .addClickHandler(function(x, y) {
           self.x = x;
           self.y = y;

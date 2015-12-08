@@ -16,9 +16,8 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.statement :refer :all]
             [lupapalvelu.states :as states]
-            [lupapalvelu.tiedonohjaus :as t]
-            [lupapalvelu.user :refer [with-user-by-email] :as user]
-            [lupapalvelu.user-api :as user-api]
+            [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.user :as user]
             [lupapalvelu.child-to-attachment :as child-to-attachment]))
 
 ;;
@@ -70,6 +69,7 @@
 
 (defcommand delete-statement-giver
   {:parameters [personId]
+   :input-validators [(partial action/non-blank-parameters [:personId])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (organization/update-organization
@@ -127,7 +127,8 @@
   {:parameters [functionCode id selectedPersons saateText dueDate]
    :user-roles #{:authority}
    :states #{:open :submitted :complementNeeded}
-   :input-validators [(partial action/non-blank-parameters [:saateText :dueDate])
+   :input-validators [(partial action/non-blank-parameters [:saateText])
+                      (partial action/number-parameters [:dueDate])
                       (partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
                       validate-selected-persons]
    :notified true
@@ -148,6 +149,7 @@
 
 (defcommand delete-statement
   {:parameters [id statementId]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId])]
    :states     #{:open :submitted :complementNeeded}
    :user-roles #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
@@ -174,9 +176,10 @@
 
 (defcommand give-statement
   {:parameters  [:id statementId status text :lang]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
    :pre-checks  [statement-exists statement-owner statement-not-given]
    :states      #{:open :submitted :complementNeeded}
-   :user-roles #{:authority :applicant}
+   :user-roles  #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]

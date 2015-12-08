@@ -39,7 +39,8 @@
           :versions.id 1
           :versions.attachments 1
           :versions.verdicts 1
-          :versions.tasks 1}))
+          :versions.tasks 1
+          :bulletinState 1}))
 
 ;; Snapshot
 

@@ -35,15 +35,11 @@
 (defn has-schema? [schema] (fn [docs] (find-by-schema? docs schema)))
 
 (facts filter-repeating-party-docs
-  (filter-repeating-party-docs 1 ["a" "b" "c"]) => (just "a")
-  (provided (schemas/get-schemas 1) => {"a" {:info {:type :party
-                                                    :repeating true}}
-                                        "b" {:info {:type :party
-                                                    :repeating false}}
-                                        "c" {:info {:type :foo
-                                                    :repeating true}}
-                                        "d" {:info {:type :party
-                                                    :repeating true}}}))
+  (filter-party-docs 1 ["a" "b" "c"] true) => (just "a")
+  (provided
+    (schemas/get-schema 1 "a") => {:info {:type :party :repeating true}}
+    (schemas/get-schema 1 "b") => {:info {:type :party :repeating false}}
+    (schemas/get-schema 1 "c") => {:info {:type :foo :repeating true}}))
 
 (facts "is-link-permit-required works correctly"
   (fact "Muutoslupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)

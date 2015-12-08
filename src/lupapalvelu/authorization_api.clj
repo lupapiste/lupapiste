@@ -172,6 +172,7 @@
 
 (defcommand unsubscribe-notifications
   {:parameters [:id :username]
+   :input-validators [(partial action/non-blank-parameters [:id :username])]
    :user-roles #{:applicant :authority}
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
@@ -180,6 +181,7 @@
 
 (defcommand subscribe-notifications
   {:parameters [:id :username]
+   :input-validators [(partial action/non-blank-parameters [:id :username])]
    :user-roles #{:applicant :authority}
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}

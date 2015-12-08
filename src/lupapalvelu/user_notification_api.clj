@@ -1,5 +1,5 @@
 (ns lupapalvelu.user-notification-api
-  (:require [lupapalvelu.action :refer [defcommand defquery]]
+  (:require [lupapalvelu.action :refer [defcommand defquery] :as action]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [sade.core :refer [ok]]
@@ -7,6 +7,8 @@
 
 (defcommand notifications-update
   {:parameters [applicants authorities title-fi message-fi]
+   :input-validators [(partial action/string-parameters [:title-fi :message-fi])
+                      (partial action/boolean-parameters [:applicants :authorities])]
    :user-roles #{:admin}}
   [command]
   (let [params (select-keys (:data command) [:applicants :authorities])

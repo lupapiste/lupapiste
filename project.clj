@@ -38,7 +38,7 @@
                  [org.apache.poi/poi-ooxml "3.11"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.53"]
+                 [fi.sito/oskari "0.9.54"]
                  [slingshot "0.12.2"]
                  [com.google.zxing/javase "2.2"]
                  [prismatic/schema "1.0.3"]
@@ -60,7 +60,7 @@
                  [org.geotools/gt-referencing "12.4"]
                  [org.geotools/gt-epsg-wkt "12.4"]
                  [org.clojure/data.json "0.2.6"]
-                 [lupapiste/commons "0.5.32"]]
+                 [lupapiste/commons "0.5.33"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -73,7 +73,7 @@
                              [lupapiste/lein-hgnotes "0.3.0"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8" "-Dline.separator=\"\n\""]
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}}
