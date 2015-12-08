@@ -16,7 +16,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   self.propertyIds = ko.observable(null);
 
   self.isSubmitEnabled = ko.pureComputed(function() {
-    return self.status() === self.statusSelectOwners
+    return !self.readonly && self.status() === self.statusSelectOwners
            && _.some(self.ownersGroups(), function(o) {return o.ownersGroup();} );
   });
 

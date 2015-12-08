@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="neighbors-owners-dialog-template">
       <div class="content">
-        <div data-bind="if: !readonly || status() !== 3">
+        <div data-bind="ifnot: readonly && status() === statusSelectOwners">
           <h2 data-bind="text: loc(['neighbors.owners.status', status()])"></h2>
           <img data-bind="visible: isSearching" src="/img/ajax-loader-16.gif" alt="" width="16" height="16"/>
         </div>
