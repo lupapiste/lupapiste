@@ -24,11 +24,6 @@
 ;; Authority Admin operations
 ;;
 
-(defn- fetch-organization-statement-givers [org-id]
-  (let [organization (organization/get-organization org-id)
-        permitPersons (or (:statementGivers organization) [])]
-    (ok :data permitPersons)))
-
 (defquery get-organizations-statement-givers
   {:user-roles #{:authorityAdmin}}
   [{user :user}]

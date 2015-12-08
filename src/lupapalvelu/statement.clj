@@ -37,6 +37,15 @@
     (fail :error.statement-already-given)))
 
 ;;
+;; Statement givers
+;;
+
+(defn- fetch-organization-statement-givers [org-id]
+  (let [organization (organization/get-organization org-id)
+        permitPersons (or (:statementGivers organization) [])]
+    (ok :data permitPersons)))
+
+;;
 ;; Statuses
 ;;
 
