@@ -6,14 +6,16 @@
             [sade.strings :as str]
             [sade.util :as util]))
 
-(defn- operation-name
+(defn operation-name
   "Operation name to schema element name.
   Special cases are handled explcitly, others are converted:
   'this-is-operation' -> :ThisIsOperation"
   [name]
   (when name
     (let [specials {"lohkominen-tonttijako" :Lohkominen
-                    "lohkominen-ohjeellinen" :Lohkominen}
+                    "lohkominen-ohjeellinen" :Lohkominen
+                    "kiinteistolajin-muutos" :KiinteistolajinMuutos
+                    "kiinteiston-tunnusmuutos" :KiinteistolajinMuutos}
           name->xml (fn [n]
                       (let [parts (str/split n #"-")]
                         (->> parts (map str/capitalize) str/join keyword)))]

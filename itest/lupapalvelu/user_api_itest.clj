@@ -1,5 +1,6 @@
 (ns lupapalvelu.user-api-itest
   (:require [clojure.java.io :as io]
+            [cheshire.core :as json]
             [monger.operators :refer :all]
             [midje.sweet :refer :all]
             [ring.util.codec :as codec]
@@ -191,6 +192,7 @@
                 :degree "kirvesmies"
                 :graduatingYear "2000"
                 :fise "f"
+                :fiseKelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
                 :companyName "cn"
                 :companyId "1060155-5"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?
@@ -334,7 +336,10 @@
        (map #(:type (% @lupapalvelu.action/actions)) action-names) => (partial every? #{:query :raw})))
 
    (fact "still can not query property owners"
-     (-> (http-get (str (server-address) "/api/query/owners?propertyId=0") params) decode-response :body) => unauthorized?)))
+     (let [req (-> params
+                   (assoc-in [:headers "content-type"] "application/json;charset=utf-8")
+                   (assoc :body (json/encode {:propertyIds ["12312312341234"]})))]
+       (-> (http-post (str (server-address) "/api/datatables/owners") req) decode-response :body)) => unauthorized?)))
 
 (facts* "reset password email"
   (last-email) ; Inbox zero

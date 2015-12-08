@@ -538,15 +538,24 @@ Prepare first request
   Click by test id  applications-create-new-inforequest
   Do prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
 
+Selected Municipality Is
+  [Arguments]  ${municipality}
+  ${selectedMuni} =  Get Element Attribute  xpath=//div[@id="popup-id"]//span[@data-test-id='create-municipality-select']@data-test-value
+  Should Be Equal  ${selectedMuni}  ${municipality}
+
+Address is not blank
+  ${address} =  Get Element Attribute  xpath=//div[@id="popup-id"]//input[@data-test-id='create-address']@value
+  Should Not Be Equal As Strings  ${address}  ${EMPTY}
+
 Do prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Input Text  create-search  ${propertyId}
   Click enabled by test id  create-search-button
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
   Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
-  Wait Until  List Selection Should Be  xpath=//div[@id='popup-id']//select[@data-test-id='create-municipality-select']  ${municipality}
+  Wait Until  Selected Municipality Is  ${municipality}
+  Wait Until  Address is not blank
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
-
   Set animations off
 
   ${path} =   Set Variable  xpath=//div[@id="popup-id"]//button[@data-test-id="create-continue"]
@@ -888,23 +897,23 @@ Neighbor application address should be
 #
 
 Enable maps
-  Execute Javascript  ajax.query("set-feature",{feature:"maps-disabled",value:false}).call();
+  Execute Javascript  ajax.command("set-feature",{feature:"maps-disabled",value:false}).call();
   Wait for jQuery
 
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
   Wait for jQuery
-  Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
+  Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:false}).call();
   Wait for jQuery
 
 Disable maps
-  Execute Javascript  ajax.query("set-feature", {feature: "maps-disabled", value:true}).call();
+  Execute Javascript  ajax.command("set-feature", {feature: "maps-disabled", value:true}).call();
   Wait for jQuery
 
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
   Wait for jQuery
-  Execute Javascript  ajax.query("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
+  Execute Javascript  ajax.command("set-feature", {feature: "disable-ktj-on-create", value:true}).call();
   Wait for jQuery
 
 #
@@ -1027,6 +1036,22 @@ Mock query
 Mock query error
   [Arguments]  ${name}
   Execute Javascript  $.mockjax({url:'/api/query/${name}', dataType:'json', responseText: {"ok":false, "text":"error.unknown"}});
+
+Mock command
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/api/command/${name}', type: 'POST', dataType:'json', responseText: ${jsonResponse}});
+
+Mock datatcommandables error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/api/command/${name}', type: 'POST', dataType:'json', responseText: {"ok":false, "text":"error.unknown"}});
+
+Mock datatables
+  [Arguments]  ${name}  ${jsonResponse}
+  Execute Javascript  $.mockjax({url:'/api/datatables/${name}', type: 'POST', dataType:'json', responseText: ${jsonResponse}});
+
+Mock datatables error
+  [Arguments]  ${name}
+  Execute Javascript  $.mockjax({url:'/api/datatables/${name}', type: 'POST', dataType:'json', responseText: {"ok":false, "text":"error.unknown"}});
 
 Mock proxy
   [Arguments]  ${name}  ${jsonResponse}

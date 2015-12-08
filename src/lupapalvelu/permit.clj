@@ -1,10 +1,22 @@
 (ns lupapalvelu.permit
   (:require [taoensso.timbre :as timbre :refer [errorf warn]]
+            [schema.core :as sc]
             [sade.core :refer [fail]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.states :as states]))
 
 (defonce ^:private permit-type-defs (atom {}))
 (defn permit-types [] @permit-type-defs)
+
+(def PermitMetaData
+  {:subtypes         [sc/Keyword]
+   :sftp-directory   sc/Str
+   :allowed-task-schemas #{sc/Str}
+   :multiple-parties-allowed sc/Bool
+   :extra-statement-selection-values sc/Bool
+   :state-graph     {sc/Keyword [sc/Keyword]}
+   (sc/optional-key :wfs-krysp-ns-name) sc/Str
+   (sc/optional-key :wfs-krysp-url-asia-prefix) sc/Str})
 
 (def poikkeamislupa :poikkeamislupa)
 (def suunnittelutarveratkaisu :suunnittelutarveratkaisu)
@@ -23,12 +35,20 @@
 ;;
 
 (defmacro defpermit [permit-name description m]
-  `(do
+  `(if-let [res# (sc/check PermitMetaData ~m)]
+     (let [invalid-meta# (merge-with (fn [val-in-result# val-in-latter#]
+                                       (if-not (nil? val-in-latter#) val-in-latter# val-in-result#))
+                                     res#
+                                     (select-keys ~m (keys res#)))]
+
+       (throw (AssertionError. (str "Permit '" ~description "' has invalid meta data: " invalid-meta#))))
+     (do
      (def ~permit-name ~(str description) ~(str permit-name))
-     (swap! permit-type-defs util/deep-merge {~permit-name ~m})))
+       (swap! permit-type-defs util/deep-merge {~permit-name ~m}))))
 
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
+   :state-graph      states/full-application-state-graph
    :sftp-directory   "/rakennus"
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -38,6 +58,7 @@
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes             []
+   :state-graph          states/default-application-state-graph
    :sftp-directory       "/yleiset_alueet"
    :allowed-task-schemas #{"task-katselmus-ya" "task-lupamaarays"}
    :multiple-parties-allowed false
@@ -47,6 +68,7 @@
 
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
+   :state-graph    states/default-application-state-graph
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -55,6 +77,7 @@
 
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
+   :state-graph    states/default-application-state-graph
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -64,6 +87,7 @@
 
 (defpermit YM  "Muut ymparistoluvat"
   {:subtypes       []
+   :state-graph    states/default-application-state-graph
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -71,6 +95,7 @@
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
+   :state-graph    states/default-application-state-graph
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -80,6 +105,7 @@
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
+   :state-graph      states/full-application-state-graph
    :sftp-directory   "/poikkeusasiat"
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -89,6 +115,7 @@
 
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
+   :state-graph    states/default-application-state-graph
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -98,6 +125,7 @@
 
 (defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
+   :state-graph    states/default-application-state-graph
    :sftp-directory "/kiinteistotoimitus"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -106,6 +134,7 @@
 
 (defpermit MM "Maankayton muutos"
   {:subtypes       []
+   :state-graph    states/default-application-state-graph
    :sftp-directory "/maankaytonmuutos"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -122,6 +151,9 @@
 
 (defn permit-subtypes [permit-type]
   (get-metadata permit-type :subtypes []))
+
+(defn get-state-graph [permit-type]
+  (get-metadata permit-type :state-graph states/default-application-state-graph))
 
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))

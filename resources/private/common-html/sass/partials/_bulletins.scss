@@ -258,3 +258,21 @@
     }
   }
 }
+
+#application-bulletin-tab {
+  .bulletin-state {
+    font-weight: bold;
+  }
+  .bulletin-component {
+    margin-bottom: $marginL;
+  }
+  .back-button {
+    margin-bottom: $marginL;
+  }
+  .accordion_content {
+    padding: $marginM;
+  }
+  table {
+    margin: 0;
+  }
+}

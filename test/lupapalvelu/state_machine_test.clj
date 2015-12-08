@@ -6,7 +6,8 @@
 
 (facts "state-graph"
   (fact "defaults"
-    (state-graph {}) => states/default-application-state-graph
+    (state-graph {:permitType "R"}) => states/full-application-state-graph
+    (state-graph {:permitType "YA"}) => states/default-application-state-graph
     (state-graph {:infoRequest true}) => states/default-inforequest-state-graph
 
 
@@ -20,16 +21,16 @@
 (facts "can-proceed?"
   (can-proceed? {:infoRequest true :state "info"} :answered) => true
   (can-proceed? {:infoRequest true :state "answered"} :info) => true
-  (can-proceed? {:infoRequest false :state "draft"} :open) => true
-  (can-proceed? {:infoRequest false :state "open"} :draft) => false)
+  (can-proceed? {:infoRequest false :state "draft" :permitType "R"} :open) => true
+  (can-proceed? {:infoRequest false :state "open"  :permitType "R"} :draft) => false)
 
 (facts "next-state"
-  (next-state {:infoRequest false :state "draft"}) => :open
+  (next-state {:infoRequest false :state "draft" :permitType "R"}) => :open
   (next-state {:infoRequest true :state "info"}) => :answered)
 
 (facts "can proceed to next state"
-  (doseq [state (map name (keys states/default-application-state-graph))
-          :let [app {:state state}
+  (doseq [state (map name (keys states/full-application-state-graph))
+          :let [app {:state state :permitType "R"}
                 next (next-state app)]
           :when next]
     (fact {:midje/description state}
@@ -51,7 +52,7 @@
   (validate-state-transition :canceled ..anything.. {:infoRequest true :state "info"}) => nil)
 
 (facts "state-seq"
-  (application-state-seq {}) => [:draft :open :submitted :sent :verdictGiven :constructionStarted :closed]
+  (application-state-seq {:permitType "R"}) => [:draft :open :submitted :sent :verdictGiven :constructionStarted :inUse :closed]
   (application-state-seq {:infoRequest true}) => [:info :answered]
 
   (application-state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => [:draft :open :submitted :sent :foremanVerdictGiven]

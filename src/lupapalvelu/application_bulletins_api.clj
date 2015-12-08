@@ -1,12 +1,13 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [noir.response :as resp]
             [sade.core :refer :all]
+            [sade.util :as util]
             [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
-            [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
@@ -58,11 +59,16 @@
       #(assoc (first (:versions %)) :id (:_id %))
       apps)))
 
+(defn- page-size-validator [{{page :page} :data}]
+  (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
+    (fail :error.page-is-too-big)))
+
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :feature :publish-bulletin
    :parameters [page searchText municipality state sort]
-   :input-validators [(partial action/number-parameters [:page])]
+   :input-validators [(partial action/number-parameters [:page])
+                      page-size-validator]
    :user-roles #{:anonymous}}
   [_]
   (let [parameters [page searchText municipality state sort]]
@@ -79,16 +85,13 @@
     (ok :municipalities municipalities)))
 
 (defquery application-bulletin-states
-  {:description "List of distinct municipalities of application bulletins"
+  {:description "List of distinct states of application bulletins"
    :feature :publish-bulletin
    :parameters []
    :user-roles #{:anonymous}}
   [_]
   (let [states (mongo/distinct :application-bulletins :versions.bulletinState)]
     (ok :states states)))
-
-(defn- get-bulletin [bulletin-id]
-  (mongo/by-id :application-bulletins bulletin-id))
 
 (defn- bulletin-version-is-latest [bulletin bulletin-version-id]
   (let [latest-version-id (:id (last (:versions bulletin)))]
@@ -99,7 +102,8 @@
   [{{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId comment :comment} :data}]
   (if (ss/blank? comment)
     (fail :error.empty-comment)
-    (let [bulletin (get-bulletin bulletin-id)]
+    (let [projection {:bulletinState 1 :versions {$slice -1} "versions.id" 1}
+          bulletin (bulletins/get-bulletin bulletin-id projection)]
       (if-not bulletin
         (fail :error.invalid-bulletin-id)
         (if-not (= (:bulletinState bulletin) "proclaimed")
@@ -112,22 +116,33 @@
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
+(defn- in-proclaimed-period
+  [version]
+  (let [[starts ends] (->> (util/select-values version [:proclamationStartsAt :proclamationEndsAt])
+                           (map c/from-long))
+        ends     (t/plus ends (t/days 1))]
+    (t/within? (t/interval starts ends) (c/from-long (now)))))
+
 (defn- bulletin-can-be-commented
-  [{{bulletin-id :bulletinId} :data} _]
-  (let [{bulletin-state :bulletinState} (mongo/select-one :application-bulletins {:_id bulletin-id} {:bulletinState 1})] ; TODO: use get-bulletin, add projection
-    ; 1. in proclaimed state
-    (when-not (= bulletin-state "proclaimed")
-      (fail :error.bulletin-not-in-commentable-state))
-    ; 2. commenting time period has not passed
-    ; TODO
-    ))
+  ([{{bulletin-id :bulletinId} :data}]
+   (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
+         bulletin   (bulletins/get-bulletin bulletin-id projection)]
+     (if-not (and (= (:bulletinState bulletin) "proclaimed")
+                  (in-proclaimed-period (-> bulletin :versions last)))
+       (fail :error.bulletin-not-in-commentable-state))))
+  ([command _]
+    (bulletin-can-be-commented command)))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
+
+(defn- user-is-vetuma-authenticated [_ _]
+  (when (empty? (vetuma/vetuma-session))
+    (fail :error.user-not-vetuma-authenticated)))
 
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
    :feature          :publish-bulletin
-   :pre-checks       [bulletin-can-be-commented]
+   :pre-checks       [bulletin-can-be-commented user-is-vetuma-authenticated]
    :input-validators [comment-can-be-added referenced-file-can-be-attached]
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
@@ -135,9 +150,10 @@
   (let [address-source (if otherReceiver data (get-in (vetuma/vetuma-session) [:user]))
         delivery-address (select-keys address-source delivery-address-fields)
         contact-info (merge delivery-address {:email          email
-                                              :emailPreferred (= emailPreferred "on")})
-        comment (bulletins/create-comment comment contact-info created)]
-    (mongo/update-by-id :application-bulletins bulletin-id {$push {(str "comments." bulletin-version-id) (assoc comment :attachments files)}})
+                                              :emailPreferred emailPreferred})
+        comment (bulletins/create-comment bulletin-id bulletin-version-id comment contact-info files created)]
+    (mongo/insert :application-bulletin-comments comment)
+    (bulletins/update-file-metadata bulletin-id (:id comment) files)
     (ok)))
 
 (defn- get-search-fields [fields app]
@@ -152,17 +168,10 @@
         search-updates (get-search-fields search-fields app-snapshot)]
     (bulletins/snapshot-updates app-snapshot search-updates created)))
 
-(defcommand publish-bulletin
-  {:parameters [id]
-   :feature :publish-bulletin
-   :user-roles #{:authority}
-   :states     (states/all-application-states-but :draft :open :submitted)}
-  [{:keys [application created] :as command}]
-  (mongo/update-by-id :application-bulletins id (create-bulletin application created) :upsert true)
-  (ok))
-
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
+   :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
+                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}}
@@ -175,6 +184,8 @@
 
 (defcommand move-to-verdict-given
   {:parameters [id verdictGivenAt appealPeriodStartsAt appealPeriodEndsAt verdictGivenText]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictGivenText])
+                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}}
@@ -188,6 +199,8 @@
 
 (defcommand move-to-final
   {:parameters [id officialAt]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/number-parameters [:officialAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}}
@@ -195,30 +208,37 @@
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
   (let [updates (->> (create-bulletin application created {:officialAt officialAt
                                                            :bulletinState :final}))]
-    (clojure.pprint/pprint updates)
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
 (defquery bulletin
-  {:parameters [bulletinId]
-   :feature :publish-bulletin
-   :user-roles #{:anonymous}}
   "return only latest version for application bulletin"
+  {:parameters [bulletinId]
+   :input-validators [(partial action/non-blank-parameters [:bulletinId])]
+   :feature    :publish-bulletin
+   :user-roles #{:anonymous}}
+  [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
-    (let [latest-version (-> bulletin :versions first)
-          bulletin-version (assoc latest-version :versionId (:id latest-version)
-                                                 :id (:id bulletin))
-          append-schema-fn (fn [{schema-info :schema-info :as doc}]
-                             (assoc doc :schema (schemas/get-schema schema-info)))
-          bulletin (-> bulletin-version
-                       (update-in [:documents] (partial map append-schema-fn))
-                       (assoc :stateSeq bulletins/bulletin-state-seq))]
-      (ok :bulletin bulletin))
+    (let [latest-version       (-> bulletin :versions first)
+          bulletin-version     (assoc latest-version :versionId (:id latest-version)
+                                                     :id (:id bulletin))
+          append-schema-fn     (fn [{schema-info :schema-info :as doc}]
+                                 (assoc doc :schema (schemas/get-schema schema-info)))
+          bulletin             (-> bulletin-version
+                                   (update-in [:documents] (partial map append-schema-fn))
+                                   (assoc :stateSeq bulletins/bulletin-state-seq))
+          bulletin-commentable (= (bulletin-can-be-commented command) nil)]
+      (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
     (fail :error.bulletin.not-found)))
+
+(defn- count-comments [version]
+  (let [comment-count (mongo/count :application-bulletin-comments {:versionId (:id version)})]
+    (assoc version :comments comment-count)))
 
 (defquery bulletin-versions
   "returns all bulletin versions for application bulletin with comments"
   {:parameters [bulletinId]
+   :input-validators [(partial action/non-blank-parameters [:bulletinId])]
    :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
   (let [bulletin-fields (-> bulletins/bulletins-fields
@@ -226,5 +246,80 @@
                             (merge {:comments 1
                                     :versions.id 1
                                     :bulletinState 1}))
-        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))]
+        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))
+        versions (map count-comments (:versions bulletin))
+        bulletin (assoc bulletin :versions versions)]
     (ok :bulletin bulletin)))
+
+(defquery bulletin-comments
+  "returns paginated comments related to given version id"
+  {:parameters [bulletinId versionId]
+   :input-validators [(partial action/non-blank-parameters [:bulletinId :versionId])]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}}
+  [{{skip :skip limit :limit asc :asc} :data}]
+  (let [skip           (util/->int skip)
+        limit          (util/->int limit)
+        sort           (if (= "false" asc) {:created -1} {:created 1})
+        comments       (mongo/with-collection "application-bulletin-comments"
+                         (query/find  {:versionId versionId})
+                         (query/sort  sort)
+                         (query/skip  skip)
+                         (query/limit limit))
+        total-comments (mongo/count :application-bulletin-comments {:versionId versionId})
+        comments-left  (max 0 (- total-comments (+ skip (count comments))))]
+    (ok :comments comments :totalComments total-comments :commentsLeft comments-left)))
+
+(defn- bulletin-can-be-saved
+  ([state {{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId} :data}]
+   (let [bulletin (bulletins/get-bulletin bulletin-id)]
+     (prn "state" state)
+     (if-not bulletin
+       (fail :error.invalid-bulletin-id)
+       (if-not (= (:bulletinState bulletin) state)
+         (fail :error.invalid-bulletin-state)
+         (bulletin-version-is-latest bulletin bulletin-version-id)))))
+  ([state command _]
+   (bulletin-can-be-saved state command)))
+
+(defcommand save-proclaimed-bulletin
+  "updates proclaimed version timestamps and text"
+  {:parameters [bulletinId bulletinVersionId proclamationEndsAt proclamationStartsAt proclamationText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:sent :complementNeeded}
+   :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId])
+                      (partial bulletin-can-be-saved "proclaimed")
+                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]}
+  [{:keys [application created] :as command}]
+  (let [updates {$set {"versions.$.proclamationEndsAt"   proclamationEndsAt
+                       "versions.$.proclamationStartsAt" proclamationStartsAt
+                       "versions.$.proclamationText"     proclamationText}}]
+    (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
+    (ok)))
+
+(defcommand save-verdict-given-bulletin
+  "updates verdict given version timestamps and text"
+  {:parameters [bulletinId bulletinVersionId verdictGivenAt appealPeriodEndsAt appealPeriodStartsAt verdictGivenText]
+   :feature :publish-bulletin
+   :user-roles #{:authority}
+   :states     #{:verdictGiven}
+   :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId :verdictGivenText])
+                      (partial bulletin-can-be-saved "verdictGiven")
+                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]}
+  [{:keys [application created] :as command}]
+  (let [updates {$set {"versions.$.verdictGivenAt"       verdictGivenAt
+                       "versions.$.appealPeriodEndsAt"   appealPeriodEndsAt
+                       "versions.$.appealPeriodStartsAt" appealPeriodStartsAt
+                       "versions.$.verdictGivenText"     verdictGivenText}}]
+    (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
+    (ok)))
+
+(defraw "download-bulletin-comment-attachment"
+  {:parameters [attachmentId]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
+  [{:keys [application user] :as command}]
+  (lupapalvelu.attachment/output-attachment attachmentId true
+                                            (partial bulletins/get-bulletin-comment-attachment-file-as user)))

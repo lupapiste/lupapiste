@@ -427,8 +427,8 @@
 ;;
 
 (defpage [:post "/api/upload/attachment"]
-  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked authority] :as data}
-  (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType operationId typeSelector locked authority)
+  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked] :as data}
+  (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s" data upload attachmentType operationId typeSelector locked)
   (let [request (request/ring-request)
         target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
@@ -442,7 +442,6 @@
                       :attachmentId attachmentId
                       :target target
                       :locked (java.lang.Boolean/parseBoolean locked)
-                      :authority (java.lang.Boolean/parseBoolean authority)
                       :text text
                       :op operation)
         attachment-type (attachment/parse-attachment-type attachmentType)
@@ -451,8 +450,8 @@
                       upload-data)
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
-      (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.111.html"
+      (resp/redirect "/lp-static/html/upload-ok.html")
+      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.112.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
@@ -585,12 +584,21 @@
   (defpage "/dev/krysp" {typeName :typeName r :request filter :filter overrides :overrides}
     (if-not (s/blank? typeName)
       (let [filter-type-name (-> filter sade.xml/parse (sade.common-reader/all-of [:PropertyIsEqualTo :PropertyName]))
-            xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
-                  "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"
-                  "ymy:Ymparistolupa"           "krysp/sample/verdict-yl.xml"
-                  "ymm:MaaAineslupaAsia"        "krysp/sample/verdict-mal.xml"
-                  "ymv:Vapautus"                "krysp/sample/verdict-vvvl.xml"
-                  "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"}
+            xmls {"rakval:ValmisRakennus"                         "krysp/sample/building.xml"
+                  "rakval:RakennusvalvontaAsia"                   "krysp/sample/verdict.xml"
+                  "ymy:Ymparistolupa"                             "krysp/sample/verdict-yl.xml"
+                  "ymm:MaaAineslupaAsia"                          "krysp/sample/verdict-mal.xml"
+                  "ymv:Vapautus"                                  "krysp/sample/verdict-vvvl.xml"
+                  "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"
+                  "kiito:KiinteistolajinMuutos"                   "krysp/sample/verdict-kt-kiinteistolajin-muutos.xml"
+                  "kiito:Lohkominen"                              "krysp/sample/verdict-kt-lohkominen.xml"
+                  "kiito:Rasitetoimitus"                          "krysp/sample/verdict-kt-rasitetoimitus.xml"
+                  "kiito:YleisenAlueenLohkominen"                 "krysp/sample/verdict-kt-yleisen-alueen-lohkominen.xml"
+                  "kiito:YhtAlueenOsuuksienSiirto"                "krysp/sample/verdict-kt-yht-alueen-osuuksien-siirto.xml"
+                  "kiito:KiinteistojenYhdistaminen"               "krysp/sample/verdict-kt-kiinteistojen-yhdistaminen.xml"
+                  "kiito:Halkominen"                              "krysp/sample/verdict-kt-halkominen.xml"
+                  "kiito:KiinteistonMaaritys"                     "krysp/sample/verdict-kt-kiinteiston-maaritys.xml"
+                  "kiito:Tilusvaihto"                             "krysp/sample/verdict-kt-tilusvaihto.xml"}
             overrides (-> (json/decode overrides)
                           (clojure.walk/keywordize-keys))]
         ;; Use different sample xml for rakval query with kuntalupatunnus type of filter.
@@ -635,12 +643,6 @@
                                                 "#!/" (if infoRequest "inforequest" "application") "/" (:id response))))
             (resp/status 200 (:id response))))
         (resp/status 400 (str response)))))
-
-  (defpage "/dev/publish-bulletin" {:keys [id]}
-    (let [request (request/ring-request)
-          params (assoc (from-query request) :id id)
-          response (execute-command "publish-bulletin" params request)]
-      (core/ok? response)))
 
   (defn- create-app-and-publish-bulletin []
     (let [request (request/ring-request)

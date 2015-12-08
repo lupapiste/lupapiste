@@ -9,6 +9,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.crypt :as crypt]
+            [sade.http :as http]
             [sade.xml :as sxml]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
@@ -28,16 +29,15 @@
 (def authority-roles (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
-  (when (seq org)
-    (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))))
+  (if (:scope org)
+    (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))
+    org))
 
 (defn- remove-sensitive-data
   [org]
-  (when (seq org)
-    (->> (:krysp org)
-         (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]))
-         (into {})
-         (assoc org :krysp))))
+  (if (:krysp org)
+    (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
+    org))
 
 (defn get-organizations
   ([]
@@ -49,7 +49,7 @@
   ([query projection]
    (->> (mongo/select :organizations query projection)
         (map remove-sensitive-data)
-        (map with-scope-defaults ))))
+        (map with-scope-defaults))))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
@@ -67,9 +67,9 @@
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([{:keys [organization permitType] :as application}]
-    (get-krysp-wfs organization permitType))
-  ([organization-id permit-type]
-   (let [organization (mongo/by-id :organizations organization-id)
+    (get-krysp-wfs {:_id organization} permitType))
+  ([query permit-type]
+   (let [organization (mongo/select-one :organizations query [:krysp])
          krysp-config (get-in organization [:krysp (keyword permit-type)])
          crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
          crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
@@ -77,13 +77,17 @@
          password     (when-let [password (and crypto-iv (:password krysp-config))]
                         (->> password
                              (crypt/str->bytes)
-                            (crypt/base64-decode)
+                             (crypt/base64-decode)
                              (crypt/decrypt crypto-key crypto-iv :aes)
                              (crypt/bytes->str)))
          username     (:username krysp-config)]
      (when-not (s/blank? (:url krysp-config))
        (->> (when username {:credentials [username password]})
             (merge (select-keys krysp-config [:url :version])))))))
+
+(defn municipality-address-endpoint [municipality]
+  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
+    (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
 
 (defn- encode-credentials
   [username password]
@@ -176,3 +180,18 @@
 
 (defn some-organization-has-archive-enabled? [organization-ids]
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))
+
+
+;;
+;; Organization/municipality provided map support.
+
+(defn query-organization-map-server
+  [org-id params headers]
+  (when-let [m (-> org-id get-organization :map-layers :server)]
+    (let [{:keys [url username password]} m]
+      (http/get url
+                (merge {:query-params params}
+                       (when-not (ss/blank? username)
+                         {:basic-auth [username password]})
+                       {:headers (assoc  {} :accept "image/png")
+                        :as :stream})))))

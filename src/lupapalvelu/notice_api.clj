@@ -20,6 +20,7 @@
 
 (defcommand add-authority-notice
   {:parameters [id authorityNotice]
+   :input-validators [(partial action/string-parameters [:authorityNotice])]
    :states (states/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
    :user-roles #{:authority}}

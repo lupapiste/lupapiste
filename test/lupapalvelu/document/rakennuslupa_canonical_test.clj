@@ -77,7 +77,8 @@
                        :patevyysluokka {:value "ei tiedossa"}
                        :valmistumisvuosi {:value "2010"}
                        :kokemus {:value "5"}
-                       :fise {:value "http://www.ym.fi"}}}
+                       :fise {:value "http://www.ym.fi"}
+                       :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
            {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija1
@@ -89,7 +90,8 @@
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
-                            :fise {:value "http://www.ym.fi"}}}
+                            :fise {:value "http://www.ym.fi"}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija2
@@ -101,7 +103,8 @@
                             :patevyysluokka {:value "AA"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
-                            :fise {:value "http://www.ym.fi"}}}
+                            :fise {:value "http://www.ym.fi"}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- suunnittelija-old-schema-LUPA-771
@@ -113,7 +116,8 @@
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
-                            :fise {:value "http://www.ym.fi"}}})})
+                            :fise {:value "http://www.ym.fi"}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}})})
 
 (def- suunnittelija-blank-role
   {:id "suunnittelija-blank-role" :schema-info {:name "suunnittelija"
@@ -124,7 +128,8 @@
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
-                            :fise {:value "http://www.ym.fi"}}}
+                            :fise {:value "http://www.ym.fi"}
+                            :fiseKelpoisuus {:value "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
 (def- maksaja-henkilo
@@ -360,7 +365,7 @@
                                    :id "aidan-rakentaminen"
                                    :created 5
                                    :schema-info {:removable true
-                                                 :op {:id  "5177ac76da060e8cd8348e07"
+                                                 :op {:id  "kaupunkikuva-id"
                                                       :name "aita"}
                                                  :name "kaupunkikuvatoimenpide"
                                                  :version 1}})
@@ -579,6 +584,8 @@
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
+    (fact "FISEpatevyyskortti" (:FISEpatevyyskortti suunnittelija-model) => "http://www.ym.fi")
+    (fact "FISEkelpoisuus" (:FISEkelpoisuus suunnittelija-model) => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
 
@@ -636,7 +643,8 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi tyonjohtaja-model) => "ty\u00f6njohtaja")
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
     (fact "no suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi tyonjohtaja-model) => nil)
-    (fact "no FISEpatevyyskortti" (::FISEpatevyyskortti tyonjohtaja-model) => nil)
+    (fact "no FISEpatevyyskortti" (:FISEpatevyyskortti tyonjohtaja-model) => nil)
+    (fact "no FISEkelpoisuus" (:FISEkelpoisuus tyonjohtaja-model) => nil)
     (fact "alkamisPvm" (:alkamisPvm tyonjohtaja-model) => "2014-02-13")
     (fact "paattymisPvm" (:paattymisPvm tyonjohtaja-model) => "2014-02-20")
     (fact "koulutus with 'Muu' selected" (:koulutus tyonjohtaja-model) => "muu")
@@ -1001,12 +1009,15 @@
     (facts "Purku: rakennus"
       (let [rakennus (get-in purku-t [:rakennustieto :Rakennus])]
         (fact "omistaja" (-> rakennus :omistajatieto first :Omistaja :henkilo :sahkopostiosoite) => "pena@example.com")
-        (fact "yksilointitieto" (-> rakennus :yksilointitieto) => "purku")
+        (fact "yksilointitieto" (-> rakennus :yksilointitieto) => "purkaminen-id")
         (fact "rakennusnro" (-> rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro) => "001")
         (fact "kayttotarkoitus" (-> rakennus :rakennuksenTiedot :kayttotarkoitus) => "012 kahden asunnon talot")))
 
-    (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
-    (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
+
+    (facts "Kaupunkikuvatoimenpide"
+           (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
+           (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
+           (fact "Rakennelman yksilointitieto" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :yksilointitieto) => "kaupunkikuva-id"))))
 
 
 (fl/facts* "Canonical model has correct puolto"

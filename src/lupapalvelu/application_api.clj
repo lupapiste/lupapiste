@@ -13,6 +13,7 @@
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.document.document :as document]
@@ -39,14 +40,6 @@
 
 ;; Validators
 
-(defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (coord/valid-x? x)))
-    (fail :error.illegal-coordinates)))
-
-(defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (coord/valid-y? y)))
-    (fail :error.illegal-coordinates)))
-
 (defn operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
@@ -61,8 +54,8 @@
   {:parameters       [:id]
    :states           states/all-states
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application user]}]
   (if application
     (let [app (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
@@ -95,12 +88,14 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :states     states/all-application-states}
-  [{application :application}]
-  (let [documents (:documents application)
-        op-meta (operations/get-primary-operation-metadata application)
-        original-schema-names (->> (select-keys op-meta [:required :optional]) vals (apply concat))
-        original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
-    (ok :partyDocumentNames (conj original-party-documents (operations/get-applicant-doc-schema-name application)))))
+  [{{:keys [documents schema-version] :as application} :application}]
+  (let [op-meta (operations/get-primary-operation-metadata application)
+        original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
+        original-party-schemas  (a/filter-party-docs schema-version original-schema-names false)
+        repeating-party-schemas (a/filter-party-docs schema-version original-schema-names true)
+        current-schema-name-set (->> documents (filter a/party-document?) (map (comp name :name :schema-info)) set)
+        missing-schema-names    (remove current-schema-name-set original-party-schemas)]
+    (ok :partyDocumentNames (conj (concat missing-schema-names repeating-party-schemas) (operations/get-applicant-doc-schema-name application)))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
@@ -124,6 +119,9 @@
 
 (defcommand assign-application
   {:parameters [:id assigneeId]
+   :input-validators [(fn [{{assignee :assigneeId} :data}]
+                        (when-not (or (ss/blank? assignee) (mongo/valid-key? assignee))
+                          (fail "error.user.not.found")))]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
   [{:keys [user created application] :as command}]
@@ -270,7 +268,7 @@
      :location  {:x (first location) :y (second location)}
      :operation (->> (:primaryOperation app) :name (i18n/localize lang "operations"))
      :authName  (-> app
-                    (domain/get-auths-by-role :owner)
+                    (auth/get-auths-by-role :owner)
                     first
                     (#(str (:firstName %) " " (:lastName %))))
      :comments  (->> (:comments app)
@@ -327,8 +325,8 @@
    :user-roles       #{:applicant :authority}
    :notified         true                                   ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
-                      (partial a/property-id-parameters [:propertyId])
-                      validate-x validate-y
+                      (partial action/property-id-parameters [:propertyId])
+                      coord/validate-x coord/validate-y
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
   (let [created-application (a/do-create-application command)]
@@ -366,6 +364,7 @@
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
+   :input-validators [(partial action/non-blank-parameters [:id :op-id])]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
    :pre-checks [a/validate-authority-in-drafts]}
@@ -376,6 +375,7 @@
 
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
+   :input-validators [(partial action/non-blank-parameters [:id :secondaryOperationId])]
    :user-roles #{:applicant :authority}
    :states states/pre-sent-application-states
    :pre-checks [a/validate-authority-in-drafts]}
@@ -416,8 +416,8 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
-                      (partial a/property-id-parameters [:propertyId])
-                      validate-x validate-y]
+                      (partial action/property-id-parameters [:propertyId])
+                      coord/validate-x coord/validate-y]
    :pre-checks       [authority-if-post-verdict-state
                       a/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
@@ -505,6 +505,7 @@
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
+   :input-validators [(partial action/non-blank-parameters [:id :linkPermitId])]
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but (conj states/terminal-states :sent))
    :pre-checks [a/validate-authority-in-drafts]} ;; Pitaako olla myos 'sent'-tila?

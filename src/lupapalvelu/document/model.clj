@@ -1,23 +1,22 @@
 (ns lupapalvelu.document.model
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.string :refer [join]]
             [clojure.set :refer [union difference]]
-            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.document-field-validators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.document.subtype :as subtype]))
+            [lupapalvelu.document.subtype :as subtype]
+            [lupapalvelu.mongo :as mongo]))
 
 ;;
 ;; Validation:
@@ -113,7 +112,7 @@
 (defmethod validate-field :personSelector [application elem v]
   (when-not (ss/blank? v)
     (when-not (and
-                (domain/has-auth? application v)
+                (auth/has-auth? application v)
                 (domain/no-pending-invites? application v))
       [:err "application-does-not-have-given-auth"])))
 
@@ -139,6 +138,61 @@
   [:err "unknown-type"])
 
 ;;
+;; Element validation (:validator key in schema)
+;;
+
+(declare find-by-name)
+
+(defn good-postal-code?
+    "Empty postal code is always valid. The idea here is to avoid
+  false negatives and this should be a safe assumption since the
+  required fields are enforced on the schema level."
+  [postal-code country]
+  (if (= country "FIN")
+    (or (ss/blank? postal-code) (v/finnish-zip? postal-code))
+    true))
+
+(defmulti validate-element (fn [_ _ _ element]
+                           (:validator element)))
+
+(defmethod validate-element :address
+  [info data path element]
+  (let [{:keys [postinumero maa]} (tools/unwrapped data)]
+    (when-not (good-postal-code? postinumero maa)
+      {:path     (-> (map keyword path) (concat [:postinumero]))
+       :element  (assoc (find-by-name (:body element) [:postinumero]) :locKey "postinumero")
+       :document (:document info)
+       :result   [:warn "bad-postal-code"]})))
+
+(defn inspect-repeating-for-duplicate-rows [data inspected-fields]
+  (when (every? (comp number? read-string name key) data)
+    (let [dummy-keyset      (zipmap inspected-fields (repeat ""))
+          select-keyset     (fn [row] (->> (select-keys (val row) inspected-fields)
+                                           (remove nil?)
+                                           (merge dummy-keyset)))
+          duplicate-keysets (->> (map select-keyset data)
+                                 (frequencies)
+                                 (filter (comp (partial < 1) val))
+                                 (keys))]
+      (when-not (empty? duplicate-keysets)
+        (->> (filter (comp (set duplicate-keysets) select-keyset) data)
+             (keys))))))
+
+(defmethod validate-element :huoneistot
+  [info data path element]
+  (let [data               (tools/unwrapped data)
+        fields-to-validate [:porras :huoneistonumero :jakokirjain :muutostapa]
+        build-row-result   (fn [ind]
+                             (map #(hash-map
+                                    :path     (-> (map keyword path) (concat [ind %]))
+                                    :element  (assoc (find-by-name (:body element) [%]) :locKey (name %))
+                                    :document (:document info)
+                                    :result   [:warn "duplicate-apartment-data"])
+                                  fields-to-validate))]
+    (some->> (inspect-repeating-for-duplicate-rows data fields-to-validate)
+             (mapcat build-row-result))))
+
+;;
 ;; Neue api:
 ;;
 
@@ -158,10 +212,10 @@
     (:i18nkey element)
     (->
       (str
-        (join "." (concat [(-> info :document :locKey)] (map name path)))
+        (ss/join "." (concat [(-> info :document :locKey)] (map name path)))
         (when (= :select (:type element)) "._group_label"))
-      (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-      (s/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
+      (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+      (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (defn- ->validation-result [info data path element result]
   (when result
@@ -176,15 +230,20 @@
       (dissoc result :data))))
 
 (defn- validate-fields [application info k data path]
-  (let [current-path (if k (conj path (name k)) path)]
+  (let [current-path (if k (conj path (name k)) path)
+        element (if (not-empty current-path)
+                  (keywordize-keys (find-by-name (:schema-body info) current-path))
+                  {})]
     (if (contains? data :value)
-      (let [element (keywordize-keys (find-by-name (:schema-body info) current-path))
-            result  (validate-field application element (:value data))]
+      (let [result  (validate-field application element (:value data))]
         (->validation-result info data current-path element result))
-      (filter
-        (comp not nil?)
-        (map (fn [[k2 v2]]
-               (validate-fields application info k2 v2 current-path)) data)))))
+      (let [result (when (:validator element)
+                     (validate-element info data current-path element))]
+        (filter
+         (comp not nil?)
+         (concat (flatten [result])
+                 (map (fn [[k2 v2]]
+                        (validate-fields application info k2 v2 current-path)) data)))))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -462,7 +521,7 @@
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
                          companyName companyId allowDirectMarketing
-                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
+                         fise fiseKelpoisuus degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
   {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
@@ -482,11 +541,11 @@
        :patevyys {:koulutusvalinta              (wrap degree)
                   :koulutus                     nil
                   :valmistumisvuosi             (wrap graduatingYear)
-                  :fise                         (wrap fise)}
+                  :fise                         (wrap fise)
+                  :fiseKelpoisuus               (wrap fiseKelpoisuus)}
        :patevyys-tyonjohtaja {:koulutusvalinta  (wrap degree)
                               :koulutus         nil
-                              :valmistumisvuosi (wrap graduatingYear)
-                              :fise             (wrap fise)}}
+                              :valmistumisvuosi (wrap graduatingYear)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))

@@ -1,7 +1,7 @@
 (ns lupapalvelu.admin-api
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.action :refer [defraw]]
+            [lupapalvelu.action :refer [defraw] :as action]
             [sade.core :refer [now]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
@@ -11,6 +11,7 @@
 
 (defraw admin-download-application-xml
   {:parameters [applicationId]
+   :input-validators [(partial action/non-blank-parameters [:applicationId])]
    :user-roles #{:admin}}
   [_]
   (if-let [application (domain/get-application-no-access-checking applicationId)]
@@ -25,6 +26,7 @@
 
 (defraw admin-download-application-xml-with-kuntalupatunnus
   {:parameters [kuntalupatunnus municipality permitType]
+   :input-validators [(partial action/non-blank-parameters [:kuntalupatunnus :municipality :permitType])]
    :user-roles #{:admin}}
   [_]
   (if-let [organization (organization/resolve-organization municipality permitType)]  ;; this also validates the permit-type
@@ -48,6 +50,7 @@
 
 (defraw admin-download-building-info
   {:parameters [applicationId]
+   :input-validators [(partial action/non-blank-parameters [:applicationId])]
    :user-roles #{:admin}}
   [_]
     (if-let [application (mongo/by-id :applications applicationId ["organization" "permitType" "propertyId"])]

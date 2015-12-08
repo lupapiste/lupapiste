@@ -1,5 +1,5 @@
 (ns lupapalvelu.tiedonohjaus-api
-  (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters]]
+  (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters] :as action]
             [sade.core :refer [ok fail]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
@@ -9,9 +9,7 @@
             [lupapalvelu.action :as action]
             [lupapiste-commons.tos-metadata-schema :as tms]
             [schema.core :as s]
-            [taoensso.timbre :as timbre]
-            [sade.env :as env])
-  (:import (schema.core EnumSchema)))
+            [taoensso.timbre :as timbre]))
 
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
@@ -31,28 +29,6 @@
           (ok))
       (fail "Invalid organization or operation"))))
 
-(defn- get-in-metadata-map [map ks]
-  (let [k (first ks)
-        value (or (get map k)
-                  (second (first (filter (fn [[key-in-map _]] (= k (:k key-in-map))) map))))]
-    (if (and (map? value) (next ks))
-      (get-in-metadata-map value (next ks))
-      value)))
-
-(defn- convert-value-to-schema-type [ks v]
-  (when-let [schema (get-in-metadata-map tms/AsiakirjaMetaDataMap ks)]
-    (if (= EnumSchema (type schema)) (keyword v) v)))
-
-(defn- keywordize-keys-and-some-values [m ks]
-  (->> m
-       (map (fn [[k v]] (let [new-k (if (string? k) (keyword k) k)
-                              new-ks (conj ks new-k)
-                              new-v (if (map? v)
-                                      (keywordize-keys-and-some-values v new-ks)
-                                      (convert-value-to-schema-type new-ks v))]
-                          [new-k new-v])))
-       (into {})))
-
 (defcommand set-tos-function-for-operation
   {:parameters [operation functionCode]
    :user-roles #{:authorityAdmin}
@@ -63,6 +39,7 @@
 
 (defcommand set-tos-function-for-application
   {:parameters [:id functionCode]
+   :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal
    :feature :tiedonohjaus}
@@ -71,15 +48,11 @@
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
     (if code-valid?
       (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode) (:attachments application))
-            updated-verdicts (map #(t/document-with-updated-metadata % orgId functionCode "p\u00e4\u00e4t\u00f6s") (:verdicts application))
-            updated-statements (map #(t/document-with-updated-metadata % orgId functionCode "lausunto") (:statements application))
-            updated-metadata (t/metadata-for-document orgId functionCode "hakemus")]
+            {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode "hakemus")]
         (action/update-application command
                                    {$set {:modified created
                                           :tosFunction functionCode
                                           :metadata updated-metadata
-                                          :verdicts updated-verdicts
-                                          :statements updated-statements
                                           :attachments updated-attachments}}))
       (fail "Invalid TOS function code"))))
 
@@ -119,8 +92,8 @@
     (merge new-metadata replacement-metadata)))
 
 (defn- update-document-metadata [document metadata user-roles]
-  (let [old-metadata (keywordize-keys-and-some-values (:metadata document) [])
-        metadata (->> (keywordize-keys-and-some-values metadata [])
+  (let [old-metadata (tms/coerce-metadata-to-schema (:metadata document) [])
+        metadata (->> (tms/coerce-metadata-to-schema metadata [])
                       (revert-unauthorized-modifications user-roles old-metadata)
                       (#(assoc % :tila (or (:tila old-metadata) :luonnos)))
                       (tms/sanitize-metadata))]
@@ -134,28 +107,14 @@
             updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
         (action/update-application command {$set {:modified created type updated-children}}))
       (fail "error.child.id"))
-    (catch RuntimeException e
+    (catch RuntimeException e ; FIXME use (fail! :error.invalid.metadata) where the validation takes place
       (timbre/error e)
       (fail "error.invalid.metadata"))))
 
-(defcommand store-tos-metadata-for-verdict
-  {:parameters [:id verdictId metadata]
-   :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
-  [command]
-  (update-application-child-metadata! command :verdicts verdictId metadata))
-
-(defcommand store-tos-metadata-for-statement
-  {:parameters [:id statementId metadata]
-   :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
-  [command]
-  (update-application-child-metadata! command :statements statementId metadata))
-
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
+   :input-validators [(partial non-blank-parameters [:id :attachmentId])
+                      (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal
    :feature :tiedonohjaus}
@@ -164,6 +123,8 @@
 
 (defcommand store-tos-metadata-for-application
   {:parameters [:id metadata]
+   :input-validators [(partial non-blank-parameters [:id])
+                      (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal
    :feature :tiedonohjaus}
@@ -174,7 +135,7 @@
                                   (:metadata))]
       (action/update-application command {$set {:modified created
                                                 :metadata processed-metadata}}))
-    (catch RuntimeException e
+    (catch RuntimeException e ; FIXME use (fail! :error.invalid.metadata) where the validation takes place
       (timbre/error e)
       (fail "error.invalid.metadata"))))
 

@@ -23,12 +23,27 @@
     (when-not (= (user/canonize-email statement-email) (user/canonize-email user-email))
       (fail :error.not-statement-owner))))
 
+(defn authority-or-statement-owner-applicant [{{role :role} :user :as command} application]
+  (when-not (or
+              (= :authority (keyword role))
+              (and (= :applicant (keyword role)) (nil? (statement-owner command application))))
+    (fail :error.not-authority-or-statement-owner-applicant)))
+
 (defn statement-given? [application statementId]
-  (boolean (->> statementId (get-statement application) :given)))
+  (-> application (get-statement statementId) :given boolean))
 
 (defn statement-not-given [{{:keys [statementId]} :data} application]
   (when (statement-given? application statementId)
     (fail :error.statement-already-given)))
+
+;;
+;; Statement givers
+;;
+
+(defn fetch-organization-statement-givers [org-id]
+  (let [organization (organization/get-organization org-id)
+        permitPersons (or (:statementGivers organization) [])]
+    (ok :data permitPersons)))
 
 ;;
 ;; Statuses

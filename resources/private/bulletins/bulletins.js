@@ -6,7 +6,6 @@
                                            showUserMenu: false,
                                            componentPages: ["bulletin"]});
 
-  window.lupapisteApp.models.applicationAuthModel = authorization.create();
   window.lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService({
     readOnly: true
   });
@@ -27,8 +26,10 @@
         {name: "bulletin-comment"},
         {name: "bulletin-comment-box"},
         {name: "bulletin-attachments-tab"},
+        {name: "bulletin-verdicts-tab"},
         {name: "begin-vetuma-auth-button"},
-        {name: "bulletin-info-tab"}];
+        {name: "bulletin-info-tab"},
+        {name: "bulletin-instructions-tab"}];
 
     _.forEach(components, function(component) {
       ko.components.register(component.name, {
@@ -37,10 +38,11 @@
       });
     });
 
+    var dummyAuth = { ok: function() { return false; }};
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),
                                     vetumaService: new LUPAPISTE.VetumaService(),
                                     fileuploadService: new LUPAPISTE.FileuploadService(),
-                                    auth: window.lupapisteApp.models.applicationAuthModel});
+                                    auth: dummyAuth });
 
     var errorType = _.includes(["error", "cancel"], pageutil.lastSubPage()) ?
       pageutil.lastSubPage() :

@@ -36,6 +36,10 @@ jQuery(document).ready(function() {
     {name: "ok-button-group"},
     {name: "company-edit"},
     {name: "tags-editor"},
+    {name: "municipality-maps"},
+    {name: "municipality-maps-server"},
+    {name: "municipality-maps-layers"},
+    {name: "municipality-maps-map"},
     {name: "upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},
@@ -82,7 +86,10 @@ jQuery(document).ready(function() {
     {name: "move-to-verdict-given"},
     {name: "move-to-final"},
     {name: "bulletin-versions"},
-    {name: "bulletin-tab"}
+    {name: "bulletin-tab"},
+    {name: "bulletin-comments"},
+    {name: "infinite-scroll"},
+    {name: "statements-tab"},
   ];
 
   _.forEach(components, function(component) {

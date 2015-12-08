@@ -67,10 +67,16 @@
     (fact ok-result => ok?)
     (fact (:text ok-result) => nil)
     (fact doc-id => truthy)
-    (fact (:ok no-schema-result) => false)
-    (fact (:ok repeating-schema-result) => true)
-    (fact (:ok non-repeating-result) => false)
-    (fact (count (:documents application1)) => (inc (inc (count (:documents application0)))))))
+    (fact no-schema-result => fail?)
+    (fact repeating-schema-result => ok?)
+    (fact "paasuunnittelija can't be added" non-repeating-result => fail?)
+    (fact (count (:documents application1)) => (inc (inc (count (:documents application0))))))
+
+  (facts "paasuunnittelija can be added exactly once"
+    (let [application-id (create-app-id pena :operation :puun-kaataminen)]
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => ok?
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?)))
 
 (facts "facts about remove-document-data command"
   (let [application-id             (create-app-id pena)
@@ -133,12 +139,19 @@
 
     (fact "application has attachments with secondary operation" (count (attachment/get-attachments-by-operation application (:id (first sec-operations)))) => pos?)
 
-    (fact "hakija doc is removed"
+    (fact "last hakija doc cannot be removed due :deny-removing-last-document flag"
+      (get-in hakija [:schema-info :deny-removing-last-document]) => true
+      (command pena :remove-doc :id application-id :docId (:id hakija)) => fail?)
+
+    (fact "hakija doc is removed if there is more than one hakija-doc"
+      (command pena :create-doc :id application-id :schemaName (get-in hakija [:schema-info :name])) => ok?
+      (-> (query-application pena application-id) :documents domain/get-applicant-documents count) => 2
+
       (command pena :remove-doc :id application-id :docId (:id hakija)) => ok?
       (let [updated-app (query-application pena application-id)]
-        (domain/get-applicant-document (:documents updated-app)) => nil
-        (fact "but not any other docs or operations"
-          (count (:documents updated-app)) => (dec (count (:documents application)))
+        (-> (:documents updated-app) domain/get-applicant-documents count) => 1
+        (fact "every other doc nad operation remains untouched"
+          (count (:documents updated-app)) => (count (:documents application))
           (count (:secondaryOperations updated-app)) => (count (:secondaryOperations application))
           (:primaryOperation updated-app) => (:primaryOperation application))))
 

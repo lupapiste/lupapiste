@@ -15,6 +15,7 @@
             [cheshire.core :as json]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
@@ -52,7 +53,9 @@
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
                  :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
                  :bulletinStates        bulletins/bulletin-state-seq
+                 :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -104,11 +107,14 @@
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
-   :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
+   ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   ;:open-layers    {:js ["OpenLayers.debug.js" ]}
    :ol             {:js ["openlayers-3.8.2.min.js" "ol3-popup.js"]
                     :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
    :proj4          {:js ["proj4-2.3.3.min.js"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
+   :waypoints      {:js ["jquery.waypoints.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
@@ -131,10 +137,10 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers :stickyfill]
+                            :expanded-content :mockjax :open-layers :stickyfill :waypoints]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "authorization.js" "vetuma.js"]}
+                       "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
    :common-html  {:depends [:selectm-html]
                   :css ["jquery-ui.css"]
@@ -236,7 +242,7 @@
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "archival-summary.js"
+                       "add-party.js" "attachments-tab-model.js" "archival-summary.js"
                        "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
@@ -277,7 +283,7 @@
                   :js ["docmodel.js" "docgen.js"]}
 
    :create       {:depends [:common-html :map]
-                  :js ["municipalities.js" "create.js"]
+                  :js ["locationmodel.js" "municipalities.js" "create.js"]
                   :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]
@@ -343,7 +349,8 @@
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
-                         :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js" "authority-admin.js"]
+                         :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
+                              "municipality-maps-service.js" "authority-admin.js"]
                          :html ["authority-admin.html"]}
 
    :admin-app {:depends [:ui-components]
@@ -383,6 +390,9 @@
                       "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-template.html"
                       "application-bulletin/tabs/info/bulletin-info-tab-template.html"
+                      "application-bulletin/tabs/verdicts/verdicts-template.html"
+                      "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
+                      "application-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
@@ -399,6 +409,8 @@
                     "application-bulletin/bulletin-comment/bulletin-comment-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
                     "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
+                    "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
+                    "application-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"

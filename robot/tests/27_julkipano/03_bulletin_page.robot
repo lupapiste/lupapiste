@@ -13,6 +13,7 @@ Init Bulletins
 
 Bulletin page should have docgen data
   Open bulletin by index  1
+  Open bulletin tab  info
 
   Element should be visible  bulletinDocgen
   ${sectionCount}=  Get Matching Xpath Count  //div[@id='bulletin-component']//div[@id='bulletinDocgen']/section
@@ -31,6 +32,4 @@ Tabs are visible
   Element should be visible  bulletin-tabs
   Element should be visible  xpath=//ul[@id='bulletin-tabs']/li/a[@data-test-id='bulletin-open-info-tab']
   Element should be visible  xpath=//ul[@id='bulletin-tabs']/li/a[@data-test-id='bulletin-open-attachments-tab']
-
-
 

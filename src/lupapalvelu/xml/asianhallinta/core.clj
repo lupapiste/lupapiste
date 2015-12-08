@@ -6,6 +6,7 @@
             [lupapalvelu.xml.validator :as v]
             [sade.core :refer [fail! def-]]
             [sade.env :as env]
+            [sade.strings :as ss]
             [sade.util :as util]))
 
 (def ah-from-dir "/asianhallinta/from_lupapiste")
@@ -20,7 +21,7 @@
   [version scope]
   (let [versions (util/convert-values
                      v/supported-asianhallinta-versions-by-permit-type
-                     (partial map #(sade.strings/suffix % "ah-")))] ; remove "ah-" prefixes
+                     (partial map #(ss/suffix % "ah-")))] ; remove "ah-" prefixes
     (some #(= version %) (get versions (-> scope :permitType keyword)))))
 
 (defn- resolve-ah-version
@@ -32,15 +33,16 @@
     (error "Case management not enabled for scope: municipality: " (:municipality scope) ", permit-type: " (:permitType scope))
     (fail! :error.integration.asianhallinta-disabled))
 
-  (if-let [ah-version (get-in scope [:caseManagement :version])]
-    (do
-     (when-not (is-asianhallinta-version? ah-version scope)
-       (error (str \' ah-version "' is unsupported Asianhallinta version, municipality: " (:municipality scope)))
-       (fail! :error.integration.asianhallinta-version-wrong-form))
-     ah-version)
-    (do
-      (error (str "Asianhallinta version not found for scope: municipality:" (:municipality scope) ", permit-type: " (:permitType scope)))
-      (fail! :error.integration.asianhallinta-version-missing))))
+  (let [ah-version (get-in scope [:caseManagement :version])]
+    (if-not (ss/blank? ah-version)
+      (do
+       (when-not (is-asianhallinta-version? ah-version scope)
+         (error (str \' ah-version "' is unsupported Asianhallinta version, municipality: " (:municipality scope)))
+         (fail! :error.integration.asianhallinta-version-wrong-form))
+       ah-version)
+      (do
+        (error (str "Asianhallinta version not found for scope: municipality:" (:municipality scope) ", permit-type: " (:permitType scope)))
+        (fail! :error.integration.asianhallinta-version-missing)))))
 
 (defn- resolve-output-directory [scope]
   {:pre  [scope]
