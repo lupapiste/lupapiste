@@ -40,5 +40,6 @@
    :input-validators [file-upload-in-database attachment-not-linked]
    :user-roles #{:anonymous}}
   [_]
-  (println "REMOVING FILE" attachmentId)
-  )
+  (if (mongo/remove-many :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})
+    (ok)
+    (fail :error.file-upload.removing-file-failed)))
