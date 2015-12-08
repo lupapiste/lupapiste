@@ -68,11 +68,13 @@
   (fact "update-draft"
     (-> (ssg/generate Statement)
         (assoc :modify-id "mod1")
+        (dissoc :modified)
         (update-draft "some text" "puoltaa" "mod2" "mod1"))
     => (contains #{[:text "some text"] 
                    [:status "puoltaa"] 
                    [:modify-id "mod2"] 
-                   [:state :draft]}))
+                   [:state :draft]
+                   [:modified anything]}))
 
   (fact "update-draft - wrong modify-id"
     (-> (ssg/generate Statement)
