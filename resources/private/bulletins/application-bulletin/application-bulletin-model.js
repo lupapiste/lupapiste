@@ -3,7 +3,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   var self = this;
   var bulletinService = params.bulletinService;
   var map = gis
-      .makeMap("bulletin-map", false)
+      .makeMap("bulletin-map", {zoomWheelEnabled: false})
       .updateSize()
       .center(404168, 6693765, 14);
 
@@ -72,7 +72,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.showCommenting = ko.pureComputed(function() {
-    return self.canCommentCurrentBulletin() && self.selectedTab() !== "instructions";
+    return self.canCommentCurrentBulletin();
   });
 
   var id = self.bulletin.subscribe(function(bulletin) {

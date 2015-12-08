@@ -609,7 +609,6 @@
 (defcommand set-attachment-visibility
   {:parameters       [id attachmentId value]
    :user-roles       #{:authority :applicant}
-   :feature          :attachment-visibility
    :input-validators [(fn [{{nakyvyys-value :value} :data}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value)))]

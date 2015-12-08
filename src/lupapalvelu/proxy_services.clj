@@ -145,9 +145,9 @@
         coords (ss/replace wkt wdk-type-pattern "")
         features (case type
                    "POINT" (let [[x y] (ss/split (first (re-find #"\d+(\.\d+)* \d+(\.\d+)*" coords)) #" ")]
-                             (if-not (ss/numeric? radius)
-                               (wfs/property-info-by-point x y)
-                               (wfs/property-info-by-radius x y radius)))
+                             (if (and (ss/numeric? radius) (> (Long/parseLong radius) 10))
+                               (wfs/property-info-by-radius x y radius)
+                               (wfs/property-info-by-point x y)))
                    "LINESTRING" (wfs/property-info-by-line (ss/split (ss/replace coords #"[\(\)]" "") #","))
                    "POLYGON" (let [outterring (first (ss/split coords #"\)" 1))] ;;; pudotetaan reiat pois
                                (wfs/property-info-by-polygon (ss/split (ss/replace outterring #"[\(\)]" "") #",")))
@@ -240,6 +240,9 @@
                       :name (names-fn name)
                       :subtitle {:fi "" :sv "" :en ""}
                       :id layer-id
+                      ;; User layers should be visible even when zoomed out.
+                      ;; The default Oskary value (159999) is quite small.
+                      :minScale 400000
                       :baseLayerId layer-id
                       :isBaseLayer base})) layers)))
 
@@ -248,19 +251,24 @@
         muni-layers (municipality-layer-objects municipality)
         muni-bases (->> muni-layers (map :id) (filter number?) set)
         capabilities (wfs/get-our-capabilities)
+        trimble (env/value :trimble-kaavamaaraykset (keyword municipality) :url)
         layers (or (wfs/capabilities-to-layers capabilities) [])
         layers (if (nil? municipality)
-          (map create-layer-object (map wfs/layer-to-name layers))
-          (filter
-            #(= (re-find #"^\d+" (:wmsName %)) municipality)
-            (map create-layer-object (map wfs/layer-to-name layers)))
-          )
+                 (map create-layer-object (map wfs/layer-to-name layers))
+                 (if (nil? trimble)
+                   (filter
+                     #(= (re-find #"^\d+" (:wmsName %)) municipality)
+                     (map create-layer-object (map wfs/layer-to-name layers)))
+                   (conj
+                     (filter
+                       #(= (re-find #"^\d+" (:wmsName %)) municipality)
+                       (map create-layer-object (map wfs/layer-to-name layers)))
+                     {"wmsName" (format "%s_asemakaavaindeksiTrimble" municipality)})))
         layers (filter (fn [{id :id}]
                          (not-any? #(= id %) muni-bases)) layers)
         result (concat layers muni-layers)]
     (if (not-empty result)
-      (resp/json result)
-      (resp/status 503 "Service temporarily unavailable"))))
+      (resp/json result))))
 
 ;; The value of "municipality" is "liiteri" when searching from Liiteri and municipality code when searching from municipalities.
 (defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
@@ -285,6 +293,13 @@
       (resp/json (map wfs/general-plan-feature-to-feature-info (wfs/gfi-to-general-plan-features response)))
       (resp/status 503 "Service temporarily unavailable"))
     (resp/status 400 "Bad Request")))
+
+(defn trimble-kaavamaaraykset-by-point-proxy [request]
+  (let [{x :x y :y municipality :municipality} (:params request)
+        response (wfs/trimble-kaavamaaraykset-by-point x y municipality)]
+    (if response
+      (resp/json response)
+      (resp/status 503 "Service temporarily unavailable"))))
 
 (defn organization-map-server
   [request]
@@ -341,4 +356,6 @@
                "plan-urls-by-point" plan-urls-by-point-proxy
                "general-plan-urls-by-point" general-plan-urls-by-point-proxy
                "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))
-               "organization-map-server" organization-map-server})
+               "organization-map-server" organization-map-server
+               "trimble-kaavamaaraykset-by-point" trimble-kaavamaaraykset-by-point-proxy})
+

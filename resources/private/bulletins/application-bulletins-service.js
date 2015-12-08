@@ -96,31 +96,10 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   hub.subscribe("bulletinService::fetchMunicipalities", fetchMunicipalities);
 
   hub.subscribe("bulletinService::fetchBulletin", function(event) {
-    //if (!self.bulletin() || event.id !== self.bulletin().id) {
-      fetchBulletin(event.id);
-    //}
+    fetchBulletin(event.id);
   });
 
   var commentForm;
-
-  hub.subscribe("bulletinService::registerUploadForm", function(event) {
-    $(event.form).fileupload({
-      url: "/api/raw/add-bulletin-comment",
-      type: "POST",
-      dataType: "json",
-      replaceFileInput: true,
-      autoUpload: false,
-      add: function(e, data) {
-        commentForm = data;
-      },
-      done: function() {
-        hub.send("bulletinService::commentProcessed", {status: "success"});
-      },
-      fail: function() {
-        hub.send("bulletinService::commentProcessed", {status: "failed"});
-      }
-    });
-  });
 
   hub.subscribe("bulletinService::newComment", function(comment) {
     hub.send("bulletinService::commentProcessing");

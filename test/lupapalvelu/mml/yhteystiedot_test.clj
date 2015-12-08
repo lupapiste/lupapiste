@@ -9,7 +9,7 @@
 
 (defn- to-date [x] (cr/to-timestamp x))
 
-(fact "Kaksi luonnollista henkil\u00F6\u00E4" (lh/get-owners "1234")
+(fact "Kaksi luonnollista henkil\u00F6\u00E4" (lh/get-owners "12312312341234")
       => [{:henkilolaji :luonnollinen
            :etunimet "Ahma Ky\u00F6sti Jaakkima"
            :sukunimi "Voller"
@@ -29,13 +29,13 @@
            }]
       (provided (cr/get-xml anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-LU.xml")))))
 
-(fact "Juridinen henkil\u00F6" (lh/get-owners "1234")
+(fact "Juridinen henkil\u00F6" (lh/get-owners "12312312341234")
       => [{:henkilolaji :juridinen
            :nimi "Hokki-kiinteist\u00F6t Oy"
            :ytunnus "0704458-3"}]
       (provided (cr/get-xml anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-JU.xml")))))
 
-(fact "Kaksi kuolinpes\u00E4\u00E4" (lh/get-owners "1234")
+(fact "Kaksi kuolinpes\u00E4\u00E4" (lh/get-owners "12312312341234")
       => [{:henkilolaji :kuolinpesa
            :etunimet "Pjotr Seppo Risto"
            :sukunimi "Yl\u00E4m\u00E4rssy"

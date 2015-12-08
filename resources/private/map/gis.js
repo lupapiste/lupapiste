@@ -22,8 +22,17 @@ var gis = (function() {
 
   // Map initialization
 
-  function Map(element, zoomWheelEnabled) {
+  function Map(element, options) {
     var self = this;
+    var allLayers;
+
+    var controls = [new OpenLayers.Control.Zoom({zoomInText:"\ue63d", zoomOutText:"\ue63e"}),
+                    new OpenLayers.Control.Navigation({ zoomWheelEnabled: options && options.zoomWheelEnabled })];
+
+    if (options && options.drawingControls) {
+      self.manualDrawingLayer = new OpenLayers.Layer.Vector("Editable");
+      controls.push(new OpenLayers.Control.LupapisteEditingToolbar(self.manualDrawingLayer));
+    }
 
     self.map = new OpenLayers.Map(element, {
       theme: null,
@@ -31,8 +40,7 @@ var gis = (function() {
       units: "m",
       maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
       resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-      controls: [ new OpenLayers.Control.Zoom(),
-                  new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
+      controls: controls
     });
 
     // Layers
@@ -93,11 +101,14 @@ var gis = (function() {
     self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
 
     if (!features.enabled("maps-disabled")) {
-      self.map.addLayers([base, taustakartta, kiinteistorajat, kiinteistotunnukset, self.vectorLayer]);
+      allLayers = [base, taustakartta, kiinteistorajat, kiinteistotunnukset, self.vectorLayer];
     } else {
-      self.map.addLayers([base, self.vectorLayer]);
+      allLayers = [base, self.vectorLayer];
     }
-
+    if (options && options.drawingControls) {
+      allLayers.push(self.manualDrawingLayer);
+    }
+    self.map.addLayers(allLayers);
 
     //
     // Hack: Did not manage to adjust the configs of the layers and the map (resolutions and maxExtent)
@@ -187,6 +198,13 @@ var gis = (function() {
 
     self.markers = [];
 
+
+    self.clearManualDrawings = function() {
+      if (self.manualDrawingLayer) {
+        self.manualDrawingLayer.removeAllFeatures();
+      }
+    };
+
     self.clear = function() {
       if (self.markerMapCloseCallback) {
         self.markerMapCloseCallback();
@@ -196,6 +214,8 @@ var gis = (function() {
         onPopupClosed(self.selectedFeature);
       }
 
+      self.clearManualDrawings();
+
       self.vectorLayer.removeAllFeatures();
 
       self.markerLayer.removeAllFeatures();
@@ -204,7 +224,6 @@ var gis = (function() {
 
       return self;
     };
-
 
     // Select control
 
@@ -305,7 +324,12 @@ var gis = (function() {
       onUnselect: onPopupClosed
     });
 
-    self.map.addControl(self.selectControl);
+    self.addControl = function(ctrl) {
+      self.map.addControl(ctrl);
+      return self;
+    };
+
+    self.addControl(self.selectControl);
 
 
     // Adding markers
@@ -442,7 +466,7 @@ var gis = (function() {
   }
 
   return {
-    makeMap: function(element, zoomWheelEnabled) { return new Map(element, zoomWheelEnabled); }
+    makeMap: function(element, options) { return new Map(element, options); }
   };
 
 })();

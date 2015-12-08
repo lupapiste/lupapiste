@@ -7,7 +7,9 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]))
+            [lupapalvelu.fixture.core :as fixture]
+            [monger.operators :refer :all]
+            [sade.core :as sade]))
 
 (apply-remote-minimal)
 
@@ -345,8 +347,13 @@
       resp => http200?
       body => ok?)))
 
+(def local-db-name (str "organization_itest_" (sade/now)))
+
+(mongo/connect!)
+(mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
+
 (facts "Municipality (753) maps"
-       (mongo/with-db test-db-name
+       (mongo/with-db local-db-name
          (let [url "http://mapserver"]
            (local-org-api/update-organization
             "753-R"
@@ -397,7 +404,7 @@
                           (->> objects (map :id) set count) => 5)
                     (fact "Ids are correctly formatted"
                           (every? #(let [{:keys [id base]} %]
-                                     (or (and base (= (name {"asemakaava" 101
+                                     (or (and base (= (name {"asemakaava"  101
                                                              "kantakartta" 102})
                                                       id))
                                          (and (not base) (not (number? id))))) objects))
@@ -405,25 +412,26 @@
                           (let [subtitles {:fi "" :sv "" :en ""}
                                 bar-index (->> layers (map-indexed #(assoc %2 :index %1)) (some #(if (= (:id %) "bar-id") (:index %))))]
 
-                            (nth objects bar-index) => {:name {:fi "bar" :sv "bar" :en "bar"}
-                                                        :subtitle subtitles
-                                                        :id (str "Lupapiste-" bar-index)
+                            (nth objects bar-index) => {:name        {:fi "bar" :sv "bar" :en "bar"}
+                                                        :subtitle    subtitles
+                                                        :id          (str "Lupapiste-" bar-index)
                                                         :baseLayerId (str "Lupapiste-" bar-index)
                                                         :isBaseLayer false
-                                                        :wmsName "Lupapiste-753-R:bar-id"
-                                                        :wmsUrl "/proxy/kuntawms"})))
+                                                        :minScale    400000
+                                                        :wmsName     "Lupapiste-753-R:bar-id"
+                                                        :wmsUrl      "/proxy/kuntawms"})))
              (facts "New map data with different server to 753-YA"
                     (local-org-api/update-organization
                      "753-YA"
                      {$set {:map-layers {:server {:url "http://different"}
                                          :layers [{:name "asemakaava"
-                                                   :id "other-asemakaava-id"
+                                                   :id   "other-asemakaava-id"
                                                    :base true}
                                                   {:name "kantakartta"
-                                                   :id "other-kantakartta-id"
+                                                   :id   "other-kantakartta-id"
                                                    :base true}
                                                   {:name "Other foo"
-                                                   :id "foo-id"
+                                                   :id   "foo-id"
                                                    :base false}]}}})
                     (let [layers (proxy/municipality-layers "753")]
                       (fact "Two layers with same ids are allowed if the servers differ"

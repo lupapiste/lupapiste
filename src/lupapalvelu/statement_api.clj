@@ -16,19 +16,13 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.statement :refer :all]
             [lupapalvelu.states :as states]
-            [lupapalvelu.tiedonohjaus :as t]
-            [lupapalvelu.user :refer [with-user-by-email] :as user]
-            [lupapalvelu.user-api :as user-api]
+            [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.user :as user]
             [lupapalvelu.child-to-attachment :as child-to-attachment]))
 
 ;;
 ;; Authority Admin operations
 ;;
-
-(defn- fetch-organization-statement-givers [org-id]
-  (let [organization (organization/get-organization org-id)
-        permitPersons (or (:statementGivers organization) [])]
-    (ok :data permitPersons)))
 
 (defquery get-organizations-statement-givers
   {:user-roles #{:authorityAdmin}}
@@ -93,7 +87,7 @@
 
 (defquery get-statement-givers
   {:parameters [:id]
-   :user-roles #{:authority :applicant}
+   :user-roles #{:authority}
    :user-authz-roles auth/default-authz-writer-roles
    :states states/all-application-states}
   [{application :application}]
@@ -108,9 +102,16 @@
    :user-authz-roles #{:statementGiver}}
   [_])
 
+(defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application} _ recipient]
+  {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
+   :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
+   :saateText saateText
+   :dueDate (util/to-local-date dueDate)})
+
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request"
+   :model-fn       request-statement-model
    :show-municipality-in-subject true})
 
 (defn- make-details [inviter now persons metadata saateText dueDate]
@@ -163,7 +164,7 @@
       (fn [{:keys [statementGivers]}]
         (let [persons (filter #(personIdSet (:id %)) statementGivers)
               persons-combined (concat persons manualPersons)
-              metadata (when (seq functionCode) (t/metadata-for-document organization functionCode "lausunto"))
+              metadata (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
               details (make-details user now persons-combined metadata saateText dueDate)
               statements (map :statement details)
               auth (map :auth details)

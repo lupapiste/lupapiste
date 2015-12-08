@@ -660,6 +660,7 @@
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
                       :type :table
+                      :uicomponent :docgenTable
                       :validator :huoneistot
                       :group-help "huoneistot.groupHelpText"
                       :repeating true
@@ -1173,11 +1174,12 @@
                                       :type :select
                                       :layout :full-width
                                       :required true
-                                      :body [{:name "halkominen"}
+                                      :body [{:name "lohkominen-tonttijako"}
+                                             {:name "lohkominen-ohjeellinen"}
                                              {:name "kiinteistojen-yhdistaminen"}
                                              {:name "kiinteistolajin-muutos"}
-                                             {:name "lohkominen-tonttijako"}
-                                             {:name "lohkominen-ohjeellinen"}
+                                             {:name "kiinteiston-tunnusmuutos"}
+                                             {:name "halkominen"}
                                              {:name "tilusvaihto"}
                                              {:name "yht-alueen-osuuksien-siirto"}
                                              {:name "yleisen-alueen-lohkominen" }]}
@@ -1378,7 +1380,7 @@
 
 
 
-   {:info {:name "hakija"
+      {:info {:name "hakija"
            :i18name "osapuoli"
            :order 3
            :removable true
@@ -1391,7 +1393,8 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body party}
+       :body party}
+
 
    {:info {:name "hakija-r"
            :i18name "osapuoli"
@@ -1404,6 +1407,21 @@
            :subtype "hakija"
            :group-help "hakija.group.help"
            :section-help "party.section.help"
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body party}
+
+   {:info {:name "hakija-kt"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :deny-removing-last-document true
+           :approvable true
+           :type :party
+           :subtype "hakija"
+           :group-help nil
+           :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
     :body party}
@@ -1490,6 +1508,13 @@
            :order 2
            :type :location}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
+
+   {:info {:name "rakennuspaikka-ilman-ilmoitusta"
+           :approvable true
+           :i18name "rakennuspaikka"
+           :order 2
+           :type :location}
+    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hankkeestaIlmoitettu")}
 
    {:info {:name "kiinteisto"
            :approvable true

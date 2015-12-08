@@ -88,12 +88,14 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :states     states/all-application-states}
-  [{application :application}]
-  (let [documents (:documents application)
-        op-meta (operations/get-primary-operation-metadata application)
-        original-schema-names (->> (select-keys op-meta [:required :optional]) vals (apply concat))
-        original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
-    (ok :partyDocumentNames (conj original-party-documents (operations/get-applicant-doc-schema-name application)))))
+  [{{:keys [documents schema-version] :as application} :application}]
+  (let [op-meta (operations/get-primary-operation-metadata application)
+        original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
+        original-party-schemas  (a/filter-party-docs schema-version original-schema-names false)
+        repeating-party-schemas (a/filter-party-docs schema-version original-schema-names true)
+        current-schema-name-set (->> documents (filter a/party-document?) (map (comp name :name :schema-info)) set)
+        missing-schema-names    (remove current-schema-name-set original-party-schemas)]
+    (ok :partyDocumentNames (conj (concat missing-schema-names repeating-party-schemas) (operations/get-applicant-doc-schema-name application)))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
@@ -323,7 +325,7 @@
    :user-roles       #{:applicant :authority}
    :notified         true                                   ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
-                      (partial a/property-id-parameters [:propertyId])
+                      (partial action/property-id-parameters [:propertyId])
                       coord/validate-x coord/validate-y
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
@@ -414,7 +416,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:address])
-                      (partial a/property-id-parameters [:propertyId])
+                      (partial action/property-id-parameters [:propertyId])
                       coord/validate-x coord/validate-y]
    :pre-checks       [authority-if-post-verdict-state
                       a/validate-authority-in-drafts]}

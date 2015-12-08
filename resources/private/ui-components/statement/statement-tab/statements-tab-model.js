@@ -30,19 +30,24 @@ LUPAPISTE.StatementsTabModel = function(params) {
   };
 
   var dataTemplate = function() {
-    var self = this;
-    self.text = ko.observable("").extend({ required: true });
-    self.name = ko.observable("").extend({ required: true });
-    self.email = ko.observable("").extend({ required: true, email: true });
+    var selfie = this;
+    selfie.text = ko.observable("").extend({ required: true });
+    selfie.name = ko.observable("").extend({ required: true });
+    selfie.email = ko.observable("").extend({ required: true, email: true });
     // Make the statement givers entered by authority admin (self.data) read-only. Those have an ID, others (dynamically input ones - self.manualData) do not.
-    self.readonly = ko.pureComputed(function() {
-      return self.id ? true : false;
+    selfie.readonly = ko.pureComputed(function() {
+      return selfie.id ? true : false;
     });
-    self.errors = ko.validation.group(self);
-    self.errors.subscribe(function(errs) {
-      if (errs.length == 0) addManualData();
+    selfie.errors = ko.validation.group(selfie);
+    selfie.errors.subscribe(function(errs) {
+//      if (errs.length == 0) addManualData();  // TODO: This is temporarily commented out, until the specs for multiple addition of statement givers will be defined
+      if (errs.length == 0 && self.showInviteSection && self.showInviteSection()) {
+        self.selectedPerson(selfie);
+      } else {
+        self.selectedPerson(undefined);
+      }
     });
-    return self;
+    return selfie;
   };
 
   self.toggleInviteSection = function() {
