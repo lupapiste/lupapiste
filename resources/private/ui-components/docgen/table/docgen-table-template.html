@@ -21,7 +21,7 @@
             </tr>
           </thead>
           <tbody data-bind="foreach: groups">
-            <tr data-bind="attr: { id: $component.groupId + '-row-' + index }">
+            <tr data-bind="attr: { 'id': $component.groupId + '-row-' + index , 'data-test-id': $component.schemaName + '-row-' + index}">
               <!-- ko foreach: $component.subSchemas -->
               <td>
                 <span class="form-entry form-input"
@@ -38,7 +38,8 @@
 
               <td class="action-column">
                 <i class="lupicon-remove primary" data-bind="click: $component.removeGroup,
-                                                             visible: $component.groupsRemovable($data.schema)"></i>
+                                                             visible: $component.groupsRemovable($data.schema),
+                                                             attr: {'data-test-class': 'delete-schemas.' + $data.schema.name}"></i>
               </td>
 
             </tr>
@@ -53,14 +54,16 @@
                                                className: 'positive',
                                                icon: 'lupicon-circle-plus',
                                                label: appendLabel,
-                                               clickFn: addGroup }}">
+                                               clickFn: addGroup,
+                                               testId: schemaName + '-append-button' }}">
         </span>
         <span data-bind="component: { name: 'docgen-button',
                                      params: { id: groupId + '-copy-button',
                                                className: 'secondary',
                                                icon: 'lupicon-circle-plus',
                                                label: copyLabel,
-                                               clickFn: duplicateLastGroup }}">
+                                               clickFn: duplicateLastGroup,
+                                               testId: schemaName + '-copy-button' }}">
         </span>
       </div>
     </script>
