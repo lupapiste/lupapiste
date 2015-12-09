@@ -64,7 +64,7 @@
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
 
-(defn- encode-credentials
+(defn encode-credentials
   [username password]
   (when-not (s/blank? username)
     (let [crypto-key       (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
@@ -77,7 +77,7 @@
           crypto-iv        (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
       {:username username :password crypted-password :crypto-iv crypto-iv})))
 
-(defn- decode-credentials
+(defn decode-credentials
   "Decode password that was originally generated (together with the init-vector )by encode-credentials.
    Arguments are base64 encoded."
   [password crypto-iv]
