@@ -73,7 +73,14 @@ LUPAPISTE.MunicipalityMapsService = function() {
              function( data ) {
                error( false );
                var parser = new ol.format.WMSCapabilities();
-               capabilities( parser.read( data ));
+               var parsedCaps = null;
+               try {
+                 parsedCaps = parser.read( data );
+               } catch( e ) {
+                 // Received data was not capabilities.
+               } finally {
+                 capabilities( parsedCaps );
+               }
              },
              "text") // Text works both for xml and text responses.
       .fail( function() {
