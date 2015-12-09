@@ -76,7 +76,7 @@
 
       <section id="link-to-vendor-backend-config" data-bind="with: linkToVendorBackend">
         <h2 data-bind="ltext: 'auth-admin.vendor-backend-link.header'"></h2>
-        <table>
+        <table class="admin-settings">
           <thead>
             <tr>
               <th data-bind="ltext: 'auth-admin.vendor-backend-link.param-name'"></th>
@@ -102,45 +102,41 @@
         </table>
       </section>
 
-
-
-        <section data-bind="visible: $root.asianhallinta.configs().length > 0" data-test-id="asianhallinta">
-          <h2 data-bind="ltext: 'auth-admin.asianhallinta-config'"></h2>
-          <table>
-            <thead>
-              <tr>
-                <th data-bind="ltext: 'application.type'"></th>
-                <th data-bind="ltext: 'admin.municipality'"></th>
-                <th data-bind="ltext: 'auth-admin.asianhallinta-enabled'"></th>
-                <th data-bind="ltext: 'auth-admin.version'"></th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: $root.asianhallinta.configs">
-              <tr>
-                <td data-bind="ltext: $data.permitType"></td>
-                <td data-bind="ltext: 'municipality.' + $data.municipality()"></td>
-                <td>
-                  <span class="indicator-wrapper">
-                    <input type="checkbox" data-test-id="enable-asianhallinta"
-                           data-bind="checked: $data.caseManagement.enabled,
-                                      enable: $root.asianhallinta.versions()[$data.permitType()].length > 0" />
-                    <span data-bind="saveIndicator: $root.asianhallinta.indicator, name: 'asianhallinta'" data-test-id="save-indicator">
-                    </span>
+      <section data-bind="visible: $root.asianhallinta.configs().length > 0" data-test-id="asianhallinta">
+        <h2 data-bind="ltext: 'auth-admin.asianhallinta-config'"></h2>
+        <table>
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'application.type'"></th>
+              <th data-bind="ltext: 'admin.municipality'"></th>
+              <th data-bind="ltext: 'auth-admin.asianhallinta-enabled'"></th>
+              <th data-bind="ltext: 'auth-admin.version'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: $root.asianhallinta.configs">
+            <tr>
+              <td data-bind="ltext: $data.permitType"></td>
+              <td data-bind="ltext: 'municipality.' + $data.municipality()"></td>
+              <td>
+                <span class="indicator-wrapper">
+                  <input type="checkbox" data-test-id="enable-asianhallinta"
+                         data-bind="checked: $data.caseManagement.enabled,
+                                    enable: $root.asianhallinta.versions()[$data.permitType()].length > 0" />
+                  <span data-bind="saveIndicator: $root.asianhallinta.indicator, name: 'asianhallinta'" data-test-id="save-indicator">
                   </span>
-                </td>
-                <td><select data-bind="options: $root.asianhallinta.versions()[$data.permitType()],
-                                       value: $data.caseManagement.version,
-                                       enable: $data.caseManagement.enabled,
-                                       valueAllowUnset: true"
-                            data-test-id="select-asianhallinta-version"></select></td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
+                </span>
+              </td>
+              <td><select data-bind="options: $root.asianhallinta.versions()[$data.permitType()],
+                                     value: $data.caseManagement.version,
+                                     enable: $data.caseManagement.enabled,
+                                     valueAllowUnset: true"
+                          data-test-id="select-asianhallinta-version"></select></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-
-
-<section>
+      <section>
         <h2 data-bind="ltext: 'auth-admin.kopiolaitos-section.title'"></h2>
         <div id="kopiolaitos-info" data-bind="with: $root.kopiolaitos">
           <label for="kopiolaitos-email" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-email.title'"></label>

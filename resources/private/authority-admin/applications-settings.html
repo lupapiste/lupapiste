@@ -18,6 +18,29 @@
         <!-- /ko -->
       </section>
 
+
+      <section class="feature">
+        <h2 data-bind="ltext: 'auth-admin.email-notifications'"></h2>
+
+        <table class="admin-settings">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.email-notifications.param-name'"></th>
+              <th data-bind="ltext: 'auth-admin.email-notifications.param-value'"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.email-notifications.neighbor'"></td>
+              <td class="value">
+                <input type="text" data-xbind="textInput: vendorBackendUrlForBackendId, enable: lupapisteApp.models.globalAuthModel.ok('save-vendor-backend-redirect-config')" size="100" />
+                <span class="save-indicator" xdata-bind="saveIndicator: backendIdIndicator, label: false"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
     </div> <!-- container -->
   </section>
 </body>
