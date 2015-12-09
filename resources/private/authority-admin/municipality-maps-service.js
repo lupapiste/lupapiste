@@ -40,6 +40,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
   var waiting = ko.observable( false );
   var capabilities = ko.observable();
   var mapFitted = ko.observable( false );
+  var backgroundMapVisible = ko.observable( true );
 
   var saveLayersFlag = false;
 
@@ -209,6 +210,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
       layers: {
         userLayers: ss.layers,
         serverLayers: serverLayers,
+        backgroundVisible: backgroundMapVisible,
         channel: channel( "layers")
       },
       map: {
@@ -216,7 +218,8 @@ LUPAPISTE.MunicipalityMapsService = function() {
         capabilities: capabilities,
         serverLayers: serverLayers,
         userLayers: ss.layers,
-        mapFitted: mapFitted
+        mapFitted: mapFitted,
+        backgroundVisible: backgroundMapVisible
       }
     };
   };
