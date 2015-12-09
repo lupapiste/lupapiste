@@ -12,6 +12,26 @@
 (when (sade.env/feature? :publish-bulletin)
   (apply-remote-minimal)
 
+  (create-and-send-application sonja :operation "lannan-varastointi"
+                               :propertyId sipoo-property-id
+                               :x 406898.625 :y 6684125.375
+                               :address "Hitantine 108"
+                               :state "sent")
+
+  (facts "Check if application is publishable"
+    (let [r-app (create-and-submit-application sonja :operation "kerrostalo-rivitalo"
+                                             :propertyId sipoo-property-id
+                                             :x 406898.625 :y 6684125.375
+                                             :address "Hitantine 108")
+          ym-app (create-and-submit-application olli :operation "lannan-varastointi"
+                                                :propertyId oulu-property-id
+                                                :x 430109.3125 :y 7210461.375
+                                                :address "Oulu 10")]
+      (fact "R permit can not be published"
+        (query sonja :publish-bulletin-enabled :id (:id r-app)) => (partial expected-failure? :error.invalid-permit-type))
+      (fact "YM permit can be published"
+        (query olli :publish-bulletin-enabled :id (:id ym-app)) => ok?)))
+
   (facts "Publishing bulletins"
     (let [app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
                                                   :propertyId oulu-property-id
