@@ -42,12 +42,12 @@
           <i data-bind="ltext: 'statement.attachments'" data-test-id="inforequest-attachments-no-attachments"></i>
         </div>
 
-        <button
-          class="btn"
-          data-bind="ltext: 'application.attachmentsAdd',
-                     visible: canAddAttachment(),
-                     click: newAttachment"
-          data-test-id="add-statement-attachment">
+        <button class="positive"
+                data-bind="visible: canAddAttachment(),
+                           click: newAttachment"
+                data-test-id="add-statement-attachment">
+            <i data-bind="attr: { 'class': 'lupicon-circle-plus' }"></i>
+            <span data-bind="ltext: 'application.attachmentsAdd'"></span>
         </button>
       </div>
     </script>
