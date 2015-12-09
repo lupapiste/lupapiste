@@ -57,7 +57,7 @@
                  :bulletinStates        bulletins/bulletin-state-seq
                  :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))
-                 :mimeTypePattern       (.toString lupapalvelu.mime/mime-type-pattern)}]
+                 :mimeTypePattern       (.toString mime/mime-type-pattern)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []

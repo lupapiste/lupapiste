@@ -1,8 +1,7 @@
 (ns lupapalvelu.file-upload-api
-  (:require [noir.core :refer [defpage]]
-            [noir.response :as resp]
+  (:require [noir.response :as resp]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defcommand]]
+            [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.vetuma :as vetuma]))
@@ -16,12 +15,25 @@
      :size (:size file)
      :contentType (:content-type file)}))
 
-(defpage [:post "/api/upload/file"] {files :files}
+(def bulletin-file-upload-max-size 15000000)
+
+(defn- file-size-legal [{{files :files} :data}]
+  (when-not (every? #(< % bulletin-file-upload-max-size) (map :size files))
+    (fail :error.bulletins.illegal-upload-size)))
+
+(defn- file-mime-type-accepted [{{files :files} :data}]
+  (when-not (every? (partial re-matches mime/mime-type-pattern) (map :content-type files))
+    (fail :error.illegal-file-type)))
+
+(defraw upload-file
+  {:user-roles #{:anonymous}
+   :parameters [files]
+   :input-validators [file-mime-type-accepted file-size-legal]}
   (let [file-info {:files (pmap save-file files)}]
     (->> (assoc file-info :ok true)
-      (resp/json)
-      (resp/content-type "text/plain")
-      (resp/status 200))))
+         (resp/json)
+         (resp/content-type "text/plain")
+         (resp/status 200))))
 
 (defn- file-upload-in-database
   [{{attachment-id :attachmentId} :data}]
@@ -39,7 +51,6 @@
   {:parameters [attachmentId]
    :input-validators [file-upload-in-database attachment-not-linked]
    :user-roles #{:anonymous}}
-  [_]
   (if (mongo/remove-many :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})
     (ok :attachmentId attachmentId)
     (fail :error.file-upload.removing-file-failed)))
