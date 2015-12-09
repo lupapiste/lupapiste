@@ -676,7 +676,13 @@
       });
     $("#applications").applyBindings({
       organization:        organizationModel,
-      editSelectedOperationsModel: editSelectedOperationsModel,
+    });
+    $("#operations").applyBindings({
+      organization:        organizationModel,
+      editSelectedOperationsModel: editSelectedOperationsModel
+    });
+    $("#attachments").applyBindings({
+      organization:        organizationModel,
       editAttachments:     editAttachmentsModel
     });
     $("#backends").applyBindings({

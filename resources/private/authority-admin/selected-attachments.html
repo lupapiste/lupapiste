@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="attachments" >
+      <div class="container">
+        <section>
+          <h2 data-bind="ltext: 'auth-admin.operations-attachments'"></h2>
+          <table data-test-id="organization-operations-attachments">
+            <!-- ko foreach: organization.operationsAttachments -->
+            <!-- ko if: $data.operations && operations.length -->
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'auth-admin.operations-attachments.operation'"></th>
+                <th data-bind="visible: $root.organization.tosFunctionVisible, ltext: 'tos.function'"></th>
+                <th data-bind="ltext: 'auth-admin.operations-attachments.attachments'"></th>
+                <th data-bind="ltext: 'auth-admin.actions'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: operations">
+              <tr data-bind="attr: {'data-op-id': id}">
+                <td><span data-bind="ltext: permitType"></span> / <span data-bind="text: text"></span></td>
+                <td data-bind="visible: $root.organization.tosFunctionVisible">
+                  <select data-bind="options: $root.organization.tosFunctions,
+                                     optionsText: 'name',
+                                     optionsValue: 'code',
+                                     value: tosFunction,
+                                     valueAllowUnset: true" ></select>
+                </td>
+                <td data-bind="foreach: attachments">
+                  <span data-bind="visible: $index">, </span>
+                  <span data-bind="text: text"></span>
+                </td>
+                <td>
+                  <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('organization-operations-attachments')">
+                    [<a href="#" data-bind="click: $root.editAttachments.open, ltext: 'edit'" data-test-id="add-operations-attachments" class="modal"></a>]
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+            <!-- /ko -->
+            <!-- /ko -->
+          </table>
+        </section>
+      </div>
+      <div id="dialog-edit-attachments" class="window autosized selectm-dialog">
+        <div class="dialog-header">
+          <p data-bind="text: $root.editAttachments.opName"></p>
+          <p class="dialog-close close lupicon-remove"></p>
+        </div>
+        <div class="dialog-content">
+          <div class="attachment-templates"></div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
