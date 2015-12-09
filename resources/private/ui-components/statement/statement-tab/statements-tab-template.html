@@ -11,13 +11,14 @@
                          name: 'help-toggle',
                          params: {lhtml: 'help.' + application.permitType() + '.statementsDesc'}
                          }"></span>
-        <div id="application-statements-table"
-             data-bind="component: {name: 'statements-table',
-                                    params: {applicationId: application.id,
-                                             statements: application.statements,
-                                             authModel: $root.authorization,
-                                             localisationKeys: {missing: 'application.statement.missing'},
-                                             openStatementPageOnStatementDelete: false}}"></div>
+        <div id="application-statements-table">
+          <div data-bind="component: {name: 'statements-table',
+                                      params: {applicationId: application.id,
+                                               statements: application.statements,
+                                               authModel: $root.authorization,
+                                               localisationKeys: {missing: 'application.statement.missing'},
+                                               openStatementPageOnStatementDelete: false}}"></div>
+        </div>
         <button data-bind="click: toggleInviteSection,
                            visible: authorization.ok('request-for-statement') && !showInviteSection()"
                 class="positive modal"
