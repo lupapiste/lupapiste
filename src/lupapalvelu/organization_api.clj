@@ -512,8 +512,7 @@
 
 (defquery get-map-layers-data
   {:description "Organization server and layer details."
-   :user-roles #{:authorityAdmin}
-   :feature :municipality-maps}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (ok (-> (user/authority-admins-organization-id user)
           o/get-organization
@@ -522,8 +521,7 @@
 (defcommand update-map-server-details
   {:parameters [url username password]
    :input-validators [(partial validate-optional-url :url)]
-   :user-roles #{:authorityAdmin}
-   :feature :municipality-maps}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.server {:url url
@@ -534,8 +532,7 @@
 (defcommand update-user-layers
   {:parameters [layers]
    :input-validators [(partial action/vector-parameter-of :layers map?)] ; FIXME deep validation
-   :user-roles #{:authorityAdmin}
-   :feature :municipality-maps}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.layers layers}})

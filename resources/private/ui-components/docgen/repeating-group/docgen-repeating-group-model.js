@@ -12,6 +12,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.appendLabel = self.i18npath.concat("_append_label").join(".");
   self.copyLabel = self.i18npath.concat("_copy_label").join(".");
   self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
+  self.schemaName = params.schema.name;
 
   self.groups = service.getInDocument(params.documentId, self.path).model;
 
