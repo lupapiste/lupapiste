@@ -98,10 +98,6 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
         mapFitted(true);
         map.getView().fit( extent, map.getSize());
       }
-      if( !extent ) {
-        mapFitted( false );
-        //map.getView().setCenter( BACKGROUND.fountain);
-      }
     }
   });
 };
