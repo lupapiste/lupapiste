@@ -1,70 +1,25 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <section class="page container" id="statement" data-bind="with: $root.statementModel">
+  <section class="page container" id="statement">
     <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'statement' -->
     <div class="headerarea">
-      <h1>
-        <span data-bind="with: application">
-          <span data-bind="text: title"></span>:
-        </span>
-        <span data-bind="with: data">
-          <span data-bind="text: person.text"></span>
-        </span>
-      </h1>
-      <button class="attachment-delete inline-block"
-              data-bind="ltext: 'statement.delete',
-                         click: $root.statementModel.openDeleteDialog,
-                         visible: canDeleteStatement(),
-                         enable: canDeleteStatement()"
-              data-test-id="delete-statement">Poista lausunto</button>
-      <div data-bind="with: application">
+      <div>
         <a class="btn secondary inline-block"
            data-test-id="statement-return"
-           data-bind="attr: {href: '#!/application/' + id() + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
+           data-bind="attr: {href: '#!/application/' + $root.applicationId + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
             <i class="lupicon-chevron-start"></i>
           <span data-bind ="ltext: 'application.return'"></span>
         </a>
       </div>
     </div>
 
-    <div class="statement-info">
-      <form data-bind="with: $root.statementModel">
-        <div class="form-entry">
-          <label for="statement-type-select" class="form-label">
-            <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
-            <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
-          </label>
-          <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses,
-                                                                                    optionsValue: 'id',
-                                                                                    optionsText: 'name',
-                                                                                    value: selectedStatus,
-                                                                                    valueAllowUnset: true,
-                                                                                    optionsCaption: loc('choose'),
-                                                                                    disable: !$root.authorization.ok('give-statement')"></select>
-        </div>
-        <div>
-          <label class="form-label" for="statement-text" data-bind="ltext: 'statement.text'"></label>
-          <textarea
-            data-bind="attr: {placeholder: loc('statement.message.placeholder')}, textInput: text, readonly: !$root.authorization.ok('give-statement')"
-            id="statement-text"
-            rows="20">
-          </textarea>
-        </div>
-        <button
-          data-bind="disable: disabled,
-                     click: submit,
-                     visible: $root.authorization.ok('give-statement'),
-                     css: {waiting: submitting}"
-           id="statement-submit"
-           type="submit"
-           class="positive">
-          <span data-bind="ltext: 'statement.submit'"></span>
-          <i class="wait spin lupicon-refresh"></i>
-        </button>
-      </form>
+    <div id="statement-edit-container">
+      <div data-bind="component: { name: 'statement-edit',
+                                   params: { applicationId: $root.applicationId,
+                                             statementId: $root.statementId,
+                                             authModel: $root.authorization } }"></div> 
     </div>
-
     <div id="statement-attachments-container">
       <div data-bind="component: { name: 'statement-attachments',
                                    params: { applicationId: $root.applicationId,

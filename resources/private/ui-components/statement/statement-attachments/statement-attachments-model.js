@@ -11,9 +11,9 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
 
   function deleteAttachmentFromServer(attachmentId) {
     ajax
-      .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
+      .command("delete-attachment", {id: applicationId(), attachmentId: attachmentId})
       .success(function() {
-        repository.load(applicationId);
+        repository.load(applicationId());
         return false;
       })
       .call();
@@ -22,7 +22,7 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
 
   self.attachments = ko.observableArray([]);
 
-  self.refresh = function(application) {
+  function refresh(application) {
     self.attachments(_.filter(application.attachments, function(attachment) {
       return _.isEqual(attachment.target, {type: "statement", id: statementId()});
     }));
@@ -51,7 +51,7 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   self.newAttachment = function() {
     // created file is authority-file if created by authority
     attachment.initFileUpload({
-      applicationId: applicationId,
+      applicationId: applicationId(),
       attachmentId: null,
       attachmentType: "muut.muu",
       typeSelector: false,
