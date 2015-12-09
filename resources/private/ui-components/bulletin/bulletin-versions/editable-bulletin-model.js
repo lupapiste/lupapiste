@@ -5,7 +5,7 @@ LUPAPISTE.EditableBulletinModel = function(data, bulletin, auth, mapping) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   mapping = !_.isEmpty(mapping) ? mapping : {
-    copy: ["bulletinState"],
+    copy: ["bulletinState"]
   };
 
   ko.mapping.fromJS(data, mapping, self);
@@ -21,4 +21,4 @@ LUPAPISTE.EditableBulletinModel = function(data, bulletin, auth, mapping) {
   });
 
   self.save = _.noop;
-}
+};
