@@ -1500,13 +1500,12 @@
                         </div>
                         <div class="dialog-content">
                             <div>
-                                <select
-                data-bind="options: partyDocumentNames(),
-                           optionsText: function(item) { return loc(['schemas', item]); },
-                           optionsValue: function(item) { return item; },
-                           value: documentName,
-                           optionsCaption: loc('choose')"
-                data-test-id="select-party-document">
+                                <select data-bind="options: partyDocumentNames(),
+                                                   optionsText: function(item) { return loc(['schemas', item]); },
+                                                   optionsValue: function(item) { return item; },
+                                                   value: documentName,
+                                                   optionsCaption: loc('choose')"
+                                        data-test-id="select-party-document">
                                 </select>
                                 <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close" data-test-id="add-party-button"></button>
                             </div>
