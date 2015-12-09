@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="statement-attachments-template">
+      <div class="statement-attachments">
+        <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
+        <div data-bind="if: attachments().length">
+          <table class="table" data-test-id="inforequest-attachments-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                <th data-bind="ltext: 'attachment.actions'">Toiminnot</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: attachments">
+              <tr data-bind="with: $data.latestVersion">
+                <td>
+                  <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+                  <i data-bind="ltext: contentType"></i>
+                  <i data-bind="size: size"></i>
+                </td>
+                <td>
+                  <span data-bind="dateString: $parent.modified"></span>
+                  <span data-bind="fullName: user"></span>
+                </td>
+                <td>
+                </td>
+                <td><a data-bind="ltext: 'remove',
+                                  click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id),
+                                  visible: $root.attachmentsModel.canDeleteAttachment($parent),
+                                  enable: $root.attachmentsModel.canDeleteAttachment($parent)"></a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div data-bind="ifnot: attachments().length">
+          <i data-bind="ltext: 'statement.attachments'" data-test-id="inforequest-attachments-no-attachments"></i>
+        </div>
+
+        <button
+          class="btn"
+          data-bind="ltext: 'application.attachmentsAdd',
+                     visible: canAddAttachment(),
+                     enabled: canAddAttachment(),
+                     click: newAttachment"
+          data-test-id="add-statement-attachment">
+        </button>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

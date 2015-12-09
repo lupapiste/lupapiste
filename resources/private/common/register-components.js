@@ -91,6 +91,7 @@ jQuery(document).ready(function() {
     {name: "bulletin-comments"},
     {name: "infinite-scroll"},
     {name: "statements-tab"},
+    {name: "statement-attachments"}
   ];
 
   _.forEach(components, function(component) {
