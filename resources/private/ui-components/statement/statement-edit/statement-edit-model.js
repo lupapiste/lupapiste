@@ -12,7 +12,7 @@ LUPAPISTE.StatementEditModel = function(params) {
   self.statuses = ko.observableArray([]);
   self.selectedStatus = ko.observable();
   self.text = ko.observable();
-  self.submitting = ko.observable(false);
+  self.submit = ko.observable(false);
   self.saving = ko.observable(false);
   self.dirty = ko.observable(false);
   self.modifyId = ko.observable(util.randomElementId());
@@ -85,13 +85,15 @@ LUPAPISTE.StatementEditModel = function(params) {
       );
   };
 
-  self.submit = function() {
-    clearTimeout(draftTimerId);
-    self.submitting(true);
-  };
+  hub.subscribe("statement::give-statement", function(params) {
+    if(applicationId() === params.applicationId && statementId() === params.statementId) {
+      clearTimeout(draftTimerId);
+      self.submit(true); 
+    }
+  });
 
   self.doSubmit = ko.computed(function() {
-    return !self.saving() && self.submitting();
+    return !self.saving() && self.submit();
   });
 
   self.doSubmit.subscribe(function(doSubmit) {
@@ -122,17 +124,20 @@ LUPAPISTE.StatementEditModel = function(params) {
           hub.send("indicator", {style: "negative"});
         })
         .complete(function() {
-          self.submitting(false);
+          self.submit(false);
           self.saving(false);
         })
         .call();
     }
   });
 
-  self.disabled = ko.computed(function() {
-    return !self.selectedStatus() || !self.text() || self.submitting();
-    return !self.selectedStatus() || !self.text();
-  });    
+  var submitAllowed = ko.pureComputed(function() {
+    return !!self.selectedStatus() && !!self.text() && !self.submit();
+  });
+
+  submitAllowed.subscribe(function(value) {
+    hub.send("statement::submitAllowed", {value: value});
+  });
 
   self.dirty.subscribe(function(dirty) {
     clearTimeout(draftTimerId);

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="statement-control-buttons-template">
+      <div class="statement-control-buttons">
+        <button data-bind="disable: disabled,
+                           click: giveStatement,
+                           visible: authModel.ok('give-statement')"
+                id="statement-submit"
+                type="submit"
+                class="positive">
+          <i class="lupicon-check"></i>
+          <span data-bind="ltext: 'statement.submit'"></span>
+        </button>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

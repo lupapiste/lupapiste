@@ -7,7 +7,7 @@
       <div>
         <a class="btn secondary inline-block"
            data-test-id="statement-return"
-           data-bind="attr: {href: '#!/application/' + $root.applicationId + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
+           data-bind="attr: {href: '#!/application/' + $root.applicationId() + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
             <i class="lupicon-chevron-start"></i>
           <span data-bind ="ltext: 'application.return'"></span>
         </a>
@@ -26,7 +26,13 @@
                                              statementId: $root.statementId,
                                              authModel: $root.authorization } }"></div> 
     </div>
-
+    <div id="statement-control-button-container">
+      <div data-bind="component: { name: 'statement-control-buttons',
+                                   params: { applicationId: $root.applicationId,
+                                             statementId: $root.statementId,
+                                             authModel: $root.authorization,
+                                             submitAllowed: $root.submitAllowed } }"></div> 
+    </div>
     <!-- /ko -->
   </section>
 </body>

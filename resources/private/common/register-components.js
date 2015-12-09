@@ -92,6 +92,7 @@ jQuery(document).ready(function() {
     {name: "infinite-scroll"},
     {name: "statements-tab"},
     {name: "statement-edit"},
+    {name: "statement-control-buttons"},
     {name: "statement-attachments"}
   ];
 

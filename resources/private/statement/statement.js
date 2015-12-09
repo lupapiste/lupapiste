@@ -3,8 +3,13 @@
 
   var applicationId = ko.observable();
   var statementId = ko.observable();
+  var submitAllowed = ko.observable(false);
 
   var authorizationModel = authorization.create();
+
+  hub.subscribe("statement::submitAllowed", function(data) {
+    submitAllowed(data.value);
+  });
 
   repository.loaded(["statement"], function(application) {
     if (applicationId() === application.id) {
@@ -22,7 +27,8 @@
     $("#statement").applyBindings({
       authorization: authorizationModel,
       applicationId: applicationId,
-      statementId: statementId
+      statementId: statementId,
+      submitAllowed: submitAllowed
     });
   });
 

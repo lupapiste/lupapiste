@@ -38,20 +38,9 @@
             rows="20">
           </textarea>
         </div>
-        <button
-          data-bind="disable: disabled,
-                     click: submit,
-                     visible: $component.authModel.ok('give-statement'),
-                     css: {waiting: submitting}"
-           id="statement-submit"
-           type="submit"
-           class="positive">
-          <span data-bind="ltext: 'statement.submit'"></span>
-          <i class="wait spin lupicon-refresh"></i>
-        </button>
       </form>
     </div>
-      </script>
+    </script>
   </section>
 </body>
 </html>
