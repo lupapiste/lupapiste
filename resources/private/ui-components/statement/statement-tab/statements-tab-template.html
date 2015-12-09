@@ -16,8 +16,7 @@
                                       params: {applicationId: application.id,
                                                statements: application.statements,
                                                authModel: $root.authorization,
-                                               localisationKeys: {missing: 'application.statement.missing'},
-                                               openStatementPageOnStatementDelete: false}}"></div>
+                                               localisationKeys: {missing: 'application.statement.missing'}}}"></div>
         </div>
         <button data-bind="click: toggleInviteSection,
                            visible: authorization.ok('request-for-statement') && !showInviteSection()"

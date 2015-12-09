@@ -8,7 +8,6 @@ LUPAPISTE.StatementsTableModel = function(params) {
   self.statements = params.statements;
   self.authorization = params.authModel;
   self.localisationKeys = params.localisationKeys;
-  self.openStatementPageOnStatementDelete = params.openStatementPageOnStatementDelete;
 
 
 // TODO: This is a copy from statement.js, will remove this duplication when moving this to a separate knockout component.
@@ -17,9 +16,6 @@ LUPAPISTE.StatementsTableModel = function(params) {
       .command("delete-statement", {id: self.applicationId(), statementId: statementId})
       .success(function() {
         repository.load(self.applicationId());
-        if (self.openStatementPageOnStatementDelete) {
-          pageutil.openApplicationPage({id: applicationId}, "statement");
-        }
         return false;
       })
       .call();
