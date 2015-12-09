@@ -161,6 +161,10 @@ input[readonly], textarea[readonly] {
   }
 }
 
+message-panel {
+  position: relative;
+}
+
 .form-entry {
   display: inline-block;
 
@@ -501,7 +505,7 @@ input.form-input.inline {
     padding: $marginS $marginM;
   }
 
-  .huoneistot-table {
+  .huoneistot-table, .muutHankkeet-table {
     td, th {
       padding: $marginS;
     }
