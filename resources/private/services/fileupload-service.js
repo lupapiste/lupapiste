@@ -18,7 +18,7 @@ LUPAPISTE.FileuploadService = function() {
   var MAXIMUM_UPLOAD_SIZE = 15000000; // 15Mb
 
   $("#" + self.fileInputId).fileupload({
-    url: "/api/upload/file",
+    url: "/api/raw/upload-file",
     type: "POST",
     dataType: "json",
     formData: [
@@ -49,8 +49,11 @@ LUPAPISTE.FileuploadService = function() {
       hub.send("fileuploadService::filesUploaded", {status: "success",
                                                     files: data.result.files});
     },
-    fail: function() {
-      hub.send("fileuploadService::filesUploaded", {status: "failed"});
+    fail: function(e, data) {
+      hub.send("fileuploadService::filesUploaded", {
+        status: "failed",
+        message: data.jqXHR.responseJSON.text
+      });
     },
     progress: function (e, data) {
       var progress = parseInt(data.loaded / data.total * 100, 10);
