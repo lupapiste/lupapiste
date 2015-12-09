@@ -9,10 +9,10 @@
           <table class="table" data-test-id="inforequest-attachments-table">
             <thead>
               <tr>
-                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
-                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-                <th data-bind="ltext: 'attachment.actions'">Toiminnot</th>
-                <th></th>
+                <th data-bind="ltext: 'statement.attachment.file'">Tiedosto</th>
+                <th data-bind="ltext: 'statement.attachment.comment'">Kommentti</th>
+                <th data-bind="ltext: 'statement.attachment.editDate'">Pvm</th>
+                <th data-bind="ltext: 'remove'">Poista</th>
               </tr>
             </thead>
             <tbody data-bind="foreach: attachments">
@@ -23,14 +23,16 @@
                   <i data-bind="size: size"></i>
                 </td>
                 <td>
-                  <span data-bind="dateString: $parent.modified"></span>
-                  <span data-bind="fullName: user"></span>
+                  <span data-bind="text: $parent.comment"></span>
                 </td>
                 <td>
+                  <span data-bind="dateString: $parent.modified"></span>
                 </td>
-                <td><a data-bind="ltext: 'remove',
-                                  click: _.partial($component.deleteAttachment, $parent.id),
-                                  visible: $component.canDeleteAttachment($parent)"></a></td>
+                <td>
+                  <i class="lupicon-remove primary" 
+                     data-bind="click: _.partial($component.deleteAttachment, $parent.id),
+                                visible: $component.canDeleteAttachment($parent)"></i>
+                </td>
               </tr>
             </tbody>
           </table>
