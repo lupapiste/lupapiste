@@ -42,8 +42,7 @@
   [{{schema-name :schemaName} :data :as command}]
   (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka
-      (let [
-            property-id (or
+      (let [property-id (or
                           (tools/get-update-item-value updates "kiinteisto.kiinteistoTunnus")
                           (get-in command [:application :propertyId]))]
         (fetch-and-persist-ktj-tiedot (:application command) document property-id (now))))

@@ -166,14 +166,16 @@
 
 (defn inspect-repeating-for-duplicate-rows [data inspected-fields]
   (when (every? (comp number? read-string name key) data)
-    (let [select-keyset     (fn [row] (select-keys (val row) inspected-fields))
+    (let [dummy-keyset      (zipmap inspected-fields (repeat ""))
+          select-keyset     (fn [row] (->> (select-keys (val row) inspected-fields)
+                                           (remove nil?)
+                                           (merge dummy-keyset)))
           duplicate-keysets (->> (map select-keyset data)
                                  (frequencies)
                                  (filter (comp (partial < 1) val))
-                                 (keys)
-                                 (set))]
+                                 (keys))]
       (when-not (empty? duplicate-keysets)
-        (->> (filter (comp duplicate-keysets select-keyset) data)
+        (->> (filter (comp (set duplicate-keysets) select-keyset) data)
              (keys))))))
 
 (defmethod validate-element :huoneistot

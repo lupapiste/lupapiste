@@ -660,6 +660,7 @@
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
                       :type :table
+                      :uicomponent :docgenTable
                       :validator :huoneistot
                       :group-help "huoneistot.groupHelpText"
                       :repeating true
@@ -1116,6 +1117,7 @@
                                 :type :group
                                 :uicomponent :propertyGroup
                                 :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
+                                       ; Please channge yhteystiedot-api/application-property-owners if kiinteistoTunnus path changes
                                        {:name "kiinteistoTunnus" :type :string :hidden true}
                                        ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                                        {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
@@ -1507,6 +1509,13 @@
            :order 2
            :type :location}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
+
+   {:info {:name "rakennuspaikka-ilman-ilmoitusta"
+           :approvable true
+           :i18name "rakennuspaikka"
+           :order 2
+           :type :location}
+    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hankkeestaIlmoitettu")}
 
    {:info {:name "kiinteisto"
            :approvable true

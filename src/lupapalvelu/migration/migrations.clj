@@ -1368,6 +1368,23 @@
                                      {"requestedByAuthority" {$not {$type 8}}}]}}}))
 
 
+(def maisematyo-operations ["muu-tontti-tai-kort-muutos" "kortteli-yht-alue-muutos"
+                            "muu-maisema-toimenpide" "paikoutysjarjestus-muutos"
+                            "rak-valm-tyo" "puun-kaataminen" "kaivuu"
+                            "tontin-jarjestelymuutos" "tontin-ajoliittyman-muutos"])
+
+(defmigration maisematyo-ilman-hankeilmoitusta
+  {:apply-when (pos? (mongo/count :applications {$and [{:primaryOperation.name {$in maisematyo-operations}} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "rakennuspaikka" (:name schema-info))
+        (-> doc
+          (assoc-in [:schema-info :name] "rakennuspaikka-ilman-ilmoitusta")
+          (update :data dissoc :hankkeestaIlmoitettu))
+        doc))
+    {$and [{:primaryOperation.name {$in maisematyo-operations}} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
