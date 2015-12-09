@@ -646,11 +646,10 @@
 
   (defn- create-app-and-publish-bulletin []
     (let [request (request/ring-request)
-          params (assoc (from-query request) :operation "kerrostalo-rivitalo"
-                                             :address "Latokuja 3"
-                                             :propertyId (p/to-property-id "753-416-25-22")
-                                             :x "360603.153"
-                                             :y "6734222.95")
+          params (assoc (from-query request) :operation "lannan-varastointi"
+                                             :address "Vaalantie 540"
+                                             :propertyId (p/to-property-id "564-404-26-102")
+                                             :x 430109.3125 :y 7210461.375)
           {id :id} (execute-command "create-application" params request)
           _        (mongo/update-by-id :applications id {$set {:state "sent"}})
           now     (sade.core/now)
@@ -662,7 +661,6 @@
       (core/ok? response)))
 
   (defpage "/dev/publish-bulletin-quickly" {:keys [count] :or {count "1"}}
-    (println count)
     (let [results (take (util/to-long count) (repeatedly create-app-and-publish-bulletin))]
       (if (every? true? results)
         (resp/status 200 "OK")

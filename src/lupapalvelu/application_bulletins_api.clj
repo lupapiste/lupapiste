@@ -15,7 +15,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.states :as states]
             [lupapalvelu.application-search :refer [make-text-query dir]]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.permit :as permit]))
 
 (def bulletin-page-size 10)
 
@@ -174,7 +175,8 @@
                       (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     #{:sent :complementNeeded}}
+   :states     #{:sent :complementNeeded}
+   :pre-checks [(permit/validate-permit-type-is permit/YL permit/YM permit/VVVL)]}
   [{:keys [application created] :as command}]
   (let [updates (->> (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
                                                            :proclamationStartsAt proclamationStartsAt
@@ -188,7 +190,8 @@
                       (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     #{:verdictGiven}}
+   :states     #{:verdictGiven}
+   :pre-checks [(permit/validate-permit-type-is permit/YL permit/YM permit/VVVL)]}
   [{:keys [application created] :as command}]
   (let [updates (->> (create-bulletin application created {:verdictGivenAt verdictGivenAt
                                                            :appealPeriodStartsAt appealPeriodStartsAt
@@ -203,7 +206,8 @@
                       (partial action/number-parameters [:officialAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     #{:verdictGiven}}
+   :states     #{:verdictGiven}
+   :pre-checks [(permit/validate-permit-type-is permit/YL permit/YM permit/VVVL)]}
   [{:keys [application created] :as command}]
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
   (let [updates (->> (create-bulletin application created {:officialAt officialAt
@@ -273,7 +277,6 @@
 (defn- bulletin-can-be-saved
   ([state {{bulletin-id :bulletinId bulletin-version-id :bulletinVersionId} :data}]
    (let [bulletin (bulletins/get-bulletin bulletin-id)]
-     (prn "state" state)
      (if-not bulletin
        (fail :error.invalid-bulletin-id)
        (if-not (= (:bulletinState bulletin) state)
@@ -323,3 +326,9 @@
   [{:keys [application user] :as command}]
   (lupapalvelu.attachment/output-attachment attachmentId true
                                             (partial bulletins/get-bulletin-comment-attachment-file-as user)))
+
+(defquery "publish-bulletin-enabled"
+  {:parameters [id]
+   :feature    :publish-bulletin
+   :user-roles #{:authority :applicant}
+   :pre-checks [(permit/validate-permit-type-is permit/YL permit/YM permit/VVVL)]})

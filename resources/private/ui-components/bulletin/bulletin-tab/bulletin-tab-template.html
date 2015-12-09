@@ -9,20 +9,22 @@
                                                                   bulletinStates: LUPAPISTE.config.bulletinStates}}"></div>
   <!-- /ko -->
 
-  <!-- ko if: showVersions -->
-  <div class="bulletin-component" data-bind="component: {name: 'bulletin-versions',
-                                                         params: {appId: appId,
-                                                                  authModel: authModel,
-                                                                  bulletin: bulletin,
-                                                                  showVersionComments: showVersionComments}}"></div>
-  <!-- /ko -->
+  <!-- ko if: bulletin -->
+    <!-- ko if: showVersions -->
+    <div class="bulletin-component" data-bind="component: {name: 'bulletin-versions',
+                                                           params: {appId: appId,
+                                                                    authModel: authModel,
+                                                                    bulletin: bulletin,
+                                                                    showVersionComments: showVersionComments}}"></div>
+    <!-- /ko -->
 
-  <!-- ko if: showVersionComments -->
-  <div class="bulletin-component" data-bind="component: {name: 'bulletin-comments',
-                                                         params: {showVersionComments: showVersionComments,
-                                                                  bulletin: bulletin,
-                                                                  comments: comments,
-                                                                  commentsLeft: commentsLeft,
-                                                                  totalComments: totalComments}}"></div>
+    <!-- ko if: showVersionComments -->
+    <div class="bulletin-component" data-bind="component: {name: 'bulletin-comments',
+                                                           params: {showVersionComments: showVersionComments,
+                                                                    bulletin: bulletin,
+                                                                    comments: comments,
+                                                                    commentsLeft: commentsLeft,
+                                                                    totalComments: totalComments}}"></div>
+    <!-- /ko -->
   <!-- /ko -->
 </script>

@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-bulletins-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.application-bulletins-itest-util :refer :all]
             [lupapalvelu.vetuma-itest-util :as vetuma-util]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -8,20 +9,28 @@
             [clojure.java.io :as io]
             [cheshire.core :as json]))
 
-(defn- send-file [cookie-store & [filename]]
-  (set-anti-csrf! false)
-  (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
-        uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/upload/file")
-        resp        (http-post uri
-                               {:multipart [{:name "files[]" :content uploadfile}]
-                                :throw-exceptions false
-                                :cookie-store cookie-store})]
-    (set-anti-csrf! true)
-    resp))
-
 (when (sade.env/feature? :publish-bulletin)
   (apply-remote-minimal)
+
+  (create-and-send-application sonja :operation "lannan-varastointi"
+                               :propertyId sipoo-property-id
+                               :x 406898.625 :y 6684125.375
+                               :address "Hitantine 108"
+                               :state "sent")
+
+  (facts "Check if application is publishable"
+    (let [r-app (create-and-submit-application sonja :operation "kerrostalo-rivitalo"
+                                             :propertyId sipoo-property-id
+                                             :x 406898.625 :y 6684125.375
+                                             :address "Hitantine 108")
+          ym-app (create-and-submit-application olli :operation "lannan-varastointi"
+                                                :propertyId oulu-property-id
+                                                :x 430109.3125 :y 7210461.375
+                                                :address "Oulu 10")]
+      (fact "R permit can not be published"
+        (query sonja :publish-bulletin-enabled :id (:id r-app)) => (partial expected-failure? :error.invalid-permit-type))
+      (fact "YM permit can be published"
+        (query olli :publish-bulletin-enabled :id (:id ym-app)) => ok?)))
 
   (facts "Publishing bulletins"
     (let [app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
@@ -82,35 +91,19 @@
             (get-in (first bulletin-attachments) [:type :type-id]) => "vastaanottopaikan_tiedot")))))
 
   (facts "Add comment for published bulletin"
-    (let [starts  (util/get-timestamp-ago :day 1)
-          ends    (util/get-timestamp-from-now :day 1)
-          store (atom {})
+    (let [store        (atom {})
           cookie-store (doto (->cookie-store store)
                          (.addCookie test-db-cookie))
-          app (create-and-send-application sonja :operation "lannan-varastointi"
-                                             :propertyId sipoo-property-id
-                                             :x 406898.625 :y 6684125.375
-                                             :address "Hitantine 108"
-                                             :state "sent")
-          m2p1 (command sonja :move-to-proclaimed
-                        :id (:id app)
-                        :proclamationStartsAt starts
-                        :proclamationEndsAt ends
-                        :proclamationText "testi"
-                        :cookie-store cookie-store)
-          old-bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
-          m2p2 (command sonja :move-to-proclaimed
-                    :id (:id app)
-                    :proclamationStartsAt starts
-                    :proclamationEndsAt ends
-                    :proclamationText "testi"
-                    :cookie-store cookie-store)
-          bulletin (:bulletin (query pena :bulletin :bulletinId (:id app) :cookie-store cookie-store))
-          _ (vetuma-util/authenticate-to-vetuma! cookie-store)
-          files (:files (json/decode (:body (send-file cookie-store)) true))]
+          app          (create-and-send-application sonja :operation "lannan-varastointi"
+                                                    :propertyId sipoo-property-id
+                                                    :x 406898.625 :y 6684125.375
+                                                    :address "Hitantine 108"
+                                                    :state "sent")
+          old-bulletin (create-application-and-bulletin :app app :cookie-store cookie-store)
+          bulletin     (create-application-and-bulletin :app app :cookie-store cookie-store)
+          files        (:files (json/decode (:body (send-file cookie-store)) true))]
 
-      m2p1 => ok?
-      m2p2 => ok?
+      (vetuma-util/authenticate-to-vetuma! cookie-store)
 
       (fact "unable to add comment for older version"
         (command sonja :add-bulletin-comment :bulletinId (:id app) :bulletinVersionId (:versionId old-bulletin) :comment "foobar" :cookie-store cookie-store) => {:ok false :text "error.invalid-version-id"})

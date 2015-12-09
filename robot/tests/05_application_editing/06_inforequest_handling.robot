@@ -84,6 +84,12 @@ Authority can convert the inforequest to application
   Wait until  Inforequest state is  Avoin
   Element should be visible  //*[@data-test-id='inforequest-convert-to-application']
 
+Authority checks property owners
+  Click enabled by test id  inforequest-property-owners-btn
+  # Local dummy endpoint returns 2 results
+  Wait Until  Xpath Should Match X Times  //tbody[@data-test-id="owner-query-results"]/tr  2
+  Click enabled by test id  ok-button
+
 Authority adds a comment marking inforequest answered
   Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
   Input inforequest comment  oletko miettinyt tuulivoimaa?
