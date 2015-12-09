@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="foreman-other-applications-template">
       <label class="form-label form-label-table" data-bind="ltext: 'muutHankkeet.label'"></label>
-      <table data-test-id="foreman-other-applications-table">
+      <table data-bind="attr: {'class': _.last(path) + '-table'}" data-test-id="foreman-other-applications-table">
         <thead>
           <tr>
             <th colspan="5"></th>
