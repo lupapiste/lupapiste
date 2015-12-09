@@ -9,14 +9,14 @@
         <div class="breadcrumb">
             <div class="container">
                 <ul id="applicationTabs" class="tabs">
-                    <li><a class="link-btn" href="#!/admin">XML-lataus</a></li>
-                    <li><a class="link-btn" href="#!/users" data-test-id="users">K&auml;ytt&auml;j&auml;t</a></li>
-                    <li><a class="link-btn" href="#!/organizations">Organisaatiot</a></li>
-                    <li><a class="link-btn" href="#!/companies">Yritykset</a></li>
-                    <li><a class="link-btn" href="#!/features">Feature-flagit</a></li>
-                    <li><a class="link-btn" href="#!/actions">Toiminnot</a></li>
-                    <li><a class="link-btn" href="#!/screenmessages">Ennakkoilmoitukset</a></li>
-                    <li><a class="link-btn" href="#!/notifications">Kayttajailmoitukset</a></li>
+                    <li><a class="link-btn" href="#!/admin" data-bind="css: {'selected': lupapisteApp.models.rootVMO.currentPage() === 'admin'}">XML-lataus</a></li>
+                    <li><a class="link-btn" href="#!/users" data-bind="css: {'selected': lupapisteApp.models.rootVMO.currentPage() === 'users'}" data-test-id="users">K&auml;ytt&auml;j&auml;t</a></li>
+                    <li><a class="link-btn" href="#!/organizations" data-bind="css: {'selected': lupapisteApp.models.rootVMO.currentPage() === 'organizations'}">Organisaatiot</a></li>
+                    <li><a class="link-btn" href="#!/companies" data-bind="css: {'selected': lupapisteApp.models.rootVMO.currentPage() === 'companies'}">Yritykset</a></li>
+                    <li><a class="link-btn" href="#!/features" data-bind="css: {'selected': lupapisteApp.models.rootVMO.currentPage() === 'features'}">Feature-flagit</a></li>
+                    <li><a class="link-btn" href="#!/actions" data-bind="css: {'selected': lupapisteApp.models.rootVMO.currentPage() === 'actions'}">Toiminnot</a></li>
+                    <li><a class="link-btn" href="#!/screenmessages" data-bind="css: {'selected': lupapisteApp.models.rootVMO.currentPage() === 'screenmessages'}">Ennakkoilmoitukset</a></li>
+                    <li><a class="link-btn" href="#!/notifications" data-bind="css: {'selected': lupapisteApp.models.rootVMO.currentPage() === 'notifications'}">Kayttajailmoitukset</a></li>
                 </ul>
             </div>
         </div>

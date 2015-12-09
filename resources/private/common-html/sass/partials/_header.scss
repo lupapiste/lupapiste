@@ -239,14 +239,9 @@ $notification-bottom: -60px;
 
   .breadcrumb {
     background-color: #4F4F4F;
+    .container {margin-top: 0;}
+    a.selected {color: #000}
   }
 
-   section {
-    margin-top: 60px;
-  }
-
-  .breadcrumb .container {
-    margin-top: 0;
-  }
-
+  h2 {margin-top: $marginL}
 }

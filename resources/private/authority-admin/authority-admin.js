@@ -654,14 +654,14 @@
     statementGiversModel.load();
   });
 
+  hub.onPageLoad("applications", function() {
+  });
+
   hub.onPageLoad("backends", function() {
     wfsModel.load();
     kopiolaitosModel.load();
     asianhallintaModel.load();
     linkToVendorBackendModel.load();
-  });
-
-  hub.onPageLoad("admin", function() {
   });
 
   $(function() {
@@ -674,8 +674,10 @@
       createStatementGiver: createStatementGiverModel,
       editRoles:           editRolesDialogModel
       });
-    $("#areas").applyBindings({
-      organization:        organizationModel
+    $("#applications").applyBindings({
+      organization:        organizationModel,
+      editSelectedOperationsModel: editSelectedOperationsModel,
+      editAttachments:     editAttachmentsModel
     });
     $("#backends").applyBindings({
       organization:        organizationModel,
@@ -685,10 +687,8 @@
       asianhallinta:       asianhallintaModel,
       linkToVendorBackend: linkToVendorBackendModel
     });
-    $("#admin").applyBindings({
-      organization:        organizationModel,
-      editSelectedOperationsModel: editSelectedOperationsModel,
-      editAttachments:     editAttachmentsModel
+    $("#areas").applyBindings({
+      organization:        organizationModel
     });
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();

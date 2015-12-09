@@ -3,51 +3,53 @@
   <body>
     <section class="page" id="users" >
       <div class="container">
-        <h1 data-bind="ltext: 'auth-admin.admins'"></h1>
+        <section>
+          <h2 data-bind="ltext: 'auth-admin.admins'"></h2>
 
-        <div class="admin-users-table"></div>
+          <div class="admin-users-table"></div>
 
-        <button data-bind="click: organizationUsers.addUserToOrganization, ltext: 'add.authority', enable: lupapisteApp.models.globalAuthModel.ok('update-user-organization')"
-                class="btn-primary" data-test-id="authadmin-add-authority"></button>
+          <button data-bind="click: organizationUsers.addUserToOrganization, ltext: 'add.authority', enable: lupapisteApp.models.globalAuthModel.ok('update-user-organization')"
+                  class="btn-primary" data-test-id="authadmin-add-authority"></button>
 
-        <div id="add-user-to-organization-dialog" class="window autosized">
-          <div class="dialog-header">
-            <p data-bind="ltext: 'auth-admin.add-dialog.title'"></p>
-            <p class="dialog-close close lupicon-remove"></p>
-          </div>
-          <div class="dialog-content" data-bind="with: organizationUsers">
-            <div data-bind="visible: phase() === 1">
-              <form>
-                <label data-bind="ltext: 'auth-admin.add-dialog.email'" class="form-label" for="auth-admin.admins.add.email"></label>
-                <input class="form-input" data-bind="textInput: email" id="auth-admin.admins.add.email" type="email"/>
+          <div id="add-user-to-organization-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'auth-admin.add-dialog.title'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: organizationUsers">
+              <div data-bind="visible: phase() === 1">
+                <form>
+                  <label data-bind="ltext: 'auth-admin.add-dialog.email'" class="form-label" for="auth-admin.admins.add.email"></label>
+                  <input class="form-input" data-bind="textInput: email" id="auth-admin.admins.add.email" type="email"/>
 
-                <label data-bind="ltext: 'userinfo.firstName'" class="form-label" for="auth-admin.admins.add.firstName"></label>
-                <input class="form-input" data-bind="textInput: firstName" id="auth-admin.admins.add.firstName" type="text"/>
+                  <label data-bind="ltext: 'userinfo.firstName'" class="form-label" for="auth-admin.admins.add.firstName"></label>
+                  <input class="form-input" data-bind="textInput: firstName" id="auth-admin.admins.add.firstName" type="text"/>
 
-                <label data-bind="ltext: 'userinfo.lastName'" class="form-label" for="auth-admin.admins.add.lastName"></label>
-                <input class="form-input" data-bind="textInput: lastName" id="auth-admin.admins.add.lastName" type="text"/>
+                  <label data-bind="ltext: 'userinfo.lastName'" class="form-label" for="auth-admin.admins.add.lastName"></label>
+                  <input class="form-input" data-bind="textInput: lastName" id="auth-admin.admins.add.lastName" type="text"/>
 
-                <h4 data-bind="ltext: 'auth-admin.add-dialog.roles'"></h4>
-                <div data-bind="foreach: availableUserRoles">
-                  <div>
-                    <label>
-                      <input type="checkbox" name="userRoles" data-bind="value: $data, checked: $parent.userRoles">
-                      <span data-bind="ltext: ['authorityrole', $data]"></span>
-                    </label>
+                  <h4 data-bind="ltext: 'auth-admin.add-dialog.roles'"></h4>
+                  <div data-bind="foreach: availableUserRoles">
+                    <div>
+                      <label>
+                        <input type="checkbox" name="userRoles" data-bind="value: $data, checked: $parent.userRoles">
+                        <span data-bind="ltext: ['authorityrole', $data]"></span>
+                      </label>
+                    </div>
                   </div>
-                </div>
 
-                <button data-bind="click: next, enable: userDetailsOk, ltext: 'auth-admin.add-dialog.continue'" class="btn btn-primary btn-dialog" data-test-id="authadmin-add-authority-continue"></button>
-              </form>
-            </div>
-            <div data-bind="visible: phase() === 2">
-              <h2 data-bind="visible: searching, ltext: 'auth-admin.add-dialog.searching'"></h2>
-              <h2 data-bind="visible: userAdded, ltext: 'auth-admin.add-dialog.userAdded'"></h2>
-              <h2 data-bind="visible: invitationSent, ltext: 'auth-admin.add-dialog.invitationSent'"></h2>
-              <button data-bind="enable: !searching(), ltext: 'ok'" class="btn btn-primary btn-dialog close" data-test-id="authadmin-add-authority-ok"></button>
+                  <button data-bind="click: next, enable: userDetailsOk, ltext: 'auth-admin.add-dialog.continue'" class="btn btn-primary btn-dialog" data-test-id="authadmin-add-authority-continue"></button>
+                </form>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'auth-admin.add-dialog.searching'"></h2>
+                <h2 data-bind="visible: userAdded, ltext: 'auth-admin.add-dialog.userAdded'"></h2>
+                <h2 data-bind="visible: invitationSent, ltext: 'auth-admin.add-dialog.invitationSent'"></h2>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="btn btn-primary btn-dialog close" data-test-id="authadmin-add-authority-ok"></button>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
         <div id="dialog-edit-roles" class="window autosized">
           <div class="dialog-header">
