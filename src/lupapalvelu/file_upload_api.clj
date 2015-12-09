@@ -1,6 +1,8 @@
 (ns lupapalvelu.file-upload-api
   (:require [noir.core :refer [defpage]]
             [noir.response :as resp]
+            [sade.core :refer :all]
+            [lupapalvelu.action :refer [defcommand]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.vetuma :as vetuma]))
@@ -20,3 +22,24 @@
       (resp/json)
       (resp/content-type "text/plain")
       (resp/status 200))))
+
+(defn- file-upload-in-database
+  [{{attachment-id :attachmentId} :data}]
+  (let [file-found? (mongo/any? :fs.files {:_id attachment-id "metadata.sessionId" (vetuma/session-id)})]
+    (when-not file-found?
+      (fail :error.file-upload.not-found))))
+
+(defn- attachment-not-linked
+  [{{attachment-id :attachmentId} :data}]
+  (when-let [{{bulletin-id :bulletinId} :metadata} (mongo/select-one :fs.files {:_id attachment-id "metadata.sessionId" (vetuma/session-id)})]
+    (when-not (empty? bulletin-id)
+      (fail :error.file-upload.already-linked))))
+
+(defcommand remove-uploaded-file
+  {:parameters [attachmentId]
+   :input-validators [file-upload-in-database attachment-not-linked]
+   :user-roles #{:anonymous}}
+  [_]
+  (if (mongo/remove-many :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})
+    (ok :attachmentId attachmentId)
+    (fail :error.file-upload.removing-file-failed)))

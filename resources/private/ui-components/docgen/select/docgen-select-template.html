@@ -13,7 +13,8 @@
                          valueAllowUnset: valueAllowUnset,
                          optionsCaption: optionsCaption,
                          disable: disabled() || readonly(),
-                         css: classes">
+                         css: classes,
+                         attr: {'data-test-id': path.join('.')}">
       </select>
       <span data-bind="saveIndicator: indicator, label: false"></span>
     </script>
