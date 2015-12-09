@@ -29,9 +29,8 @@
                 <td>
                 </td>
                 <td><a data-bind="ltext: 'remove',
-                                  click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id),
-                                  visible: $root.attachmentsModel.canDeleteAttachment($parent),
-                                  enable: $root.attachmentsModel.canDeleteAttachment($parent)"></a></td>
+                                  click: _.partial($component.deleteAttachment, $parent.id),
+                                  visible: $component.canDeleteAttachment($parent)"></a></td>
               </tr>
             </tbody>
           </table>
@@ -45,7 +44,6 @@
           class="btn"
           data-bind="ltext: 'application.attachmentsAdd',
                      visible: canAddAttachment(),
-                     enabled: canAddAttachment(),
                      click: newAttachment"
           data-test-id="add-statement-attachment">
         </button>

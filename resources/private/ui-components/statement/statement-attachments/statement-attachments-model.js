@@ -62,7 +62,7 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   };
 
   repository.loaded(["statement"], function(application) {
-    if (applicationId === application.id) {
+    if (applicationId() === application.id) {
       authModel.refresh(application, {statementId: statementId()}, function() {
         refresh(application);
       });
