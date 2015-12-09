@@ -175,7 +175,8 @@
                       (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     #{:sent :complementNeeded}}
+   :states     #{:sent :complementNeeded}
+   :pre-checks [(permit/validate-permit-type-is permit/YL permit/YM permit/VVVL)]}
   [{:keys [application created] :as command}]
   (let [updates (->> (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
                                                            :proclamationStartsAt proclamationStartsAt
@@ -189,7 +190,8 @@
                       (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     #{:verdictGiven}}
+   :states     #{:verdictGiven}
+   :pre-checks [(permit/validate-permit-type-is permit/YL permit/YM permit/VVVL)]}
   [{:keys [application created] :as command}]
   (let [updates (->> (create-bulletin application created {:verdictGivenAt verdictGivenAt
                                                            :appealPeriodStartsAt appealPeriodStartsAt
@@ -204,7 +206,8 @@
                       (partial action/number-parameters [:officialAt])]
    :feature :publish-bulletin
    :user-roles #{:authority}
-   :states     #{:verdictGiven}}
+   :states     #{:verdictGiven}
+   :pre-checks [(permit/validate-permit-type-is permit/YL permit/YM permit/VVVL)]}
   [{:keys [application created] :as command}]
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
   (let [updates (->> (create-bulletin application created {:officialAt officialAt
