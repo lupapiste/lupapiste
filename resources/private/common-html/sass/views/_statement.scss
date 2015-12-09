@@ -6,13 +6,31 @@
     border-bottom: 2px solid #bbb;
   }
 
-  h1 {
-    display: inline;
-  }
   .headerarea {
-    width: 100%;
-    margin-bottom: $marginM;
+    h1 {
+      display: inline;
+    }
+    
+    #statement-draft-indicator {
+      margin-left: $marginL;
+      
+      i {
+        color: red;
+      }
+      span {
+        font-weight: bold;
+        position: relative;
+        left: 3px;
+        bottom: 3px;
+      }
+    }
+
+    #statement-covering-note {
+      margin: $marginL 0px;
+    }
+
   }
+
   .statement-info {
     vertical-align: top;
     margin-bottom: $baseline;

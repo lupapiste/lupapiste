@@ -13,6 +13,13 @@
           <span data-bind="text: person.text"></span>
         </span>
       </h1>
+      <span data-bind="visible: isDraft" id="statement-draft-indicator">
+        <i class="lupicon-circle-attention"></i>
+        <span>Luonnos</span>
+      </span>
+      <div data-bind="with: data" id="statement-covering-note">
+        <span data-bind="text: saateText">Saate</span>
+      </div>
     </div>
 
     <div class="statement-info">
@@ -22,13 +29,15 @@
             <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
             <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
           </label>
-          <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses,
-                                                                                    optionsValue: 'id',
-                                                                                    optionsText: 'name',
-                                                                                    value: selectedStatus,
-                                                                                    valueAllowUnset: true,
-                                                                                    optionsCaption: loc('choose'),
-                                                                                    disable: !$component.authModel.ok('give-statement')"></select>
+          <select id="statement-type-select" 
+                  class="form-input combobox" 
+                  data-bind="options: statuses,
+                             optionsValue: 'id',
+                             optionsText: 'name',
+                             value: selectedStatus,
+                             valueAllowUnset: true,
+                             optionsCaption: loc('choose'),
+                             disable: !$component.authModel.ok('give-statement')"></select>
         </div>
         <div>
           <label class="form-label" for="statement-text" data-bind="ltext: 'statement.text'"></label>

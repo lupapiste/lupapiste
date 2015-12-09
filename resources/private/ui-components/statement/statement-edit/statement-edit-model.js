@@ -16,6 +16,10 @@ LUPAPISTE.StatementEditModel = function(params) {
   self.saving = ko.observable(false);
   self.dirty = ko.observable(false);
   self.modifyId = ko.observable(util.randomElementId());
+  
+  self.isDraft = ko.computed(function() {
+    return _.contains(["requested", "draft"], util.getIn(self.data, ["state"]));
+  });
 
   var draftTimerId = undefined;
 
