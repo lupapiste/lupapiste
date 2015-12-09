@@ -1,1 +1,3 @@
 application.statement.maaraaika: Määräaika
+error.bulletins.illegal-upload-size:  Tiedoston koko ylitti sallitun ylärajan (15Mb)
+bulletin.comment.addAttachment:  Lisää kommenttiin liitetiedosto (maks. 15Mb)
