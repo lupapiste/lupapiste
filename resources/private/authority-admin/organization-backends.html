@@ -166,11 +166,11 @@
 
       <div id="dialog-edit-link" class="window autosized">
         <div class="dialog-header">
-          <p data-bind="ltext: $root.editLink.commandName"></p>
+          <p data-bind="ltext: $root.organization.editLinkModel.commandName"></p>
           <p class="dialog-close close lupicon-remove"></p>
         </div>
         <div class="dialog-content">
-          <div data-bind="with: $root.editLink">
+          <div data-bind="with: $root.organization.editLinkModel">
             <label data-bind="ltext: 'auth-admin.link.fi'" for="link-text-fi" class="form-label"></label>
             <input data-bind="textInput: nameFi" class="form-input text long" type="text" id="link-text-fi" autofocus="autofocus"/>
             <label data-bind="ltext: 'auth-admin.link.sv'" for="link-text-sv" class="form-label"></label>
