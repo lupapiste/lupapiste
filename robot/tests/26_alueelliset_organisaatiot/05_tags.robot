@@ -8,6 +8,7 @@ Resource       ../../common_resource.robot
 
 Admin adds new tags
   Sipoo logs in
+  Go to page  applications
   Wait until  Element should be visible  xpath=//*[@class="authority-admin-alueelliset-organisaatiot"]//div[@class="tags-editor-component"]//li[@class='tag'][1]
   ${tagCount} =  Get Matching Xpath Count  xpath=//*[@class="authority-admin-alueelliset-organisaatiot"]//div[@class="tags-editor-component"]//li[@class="tag"]
   Click by test id  add-tag-button
@@ -57,6 +58,7 @@ Sonja uses tags filter by selecting tag from autocomplete
 
 Admin removes the last tag
   Sipoo logs in
+  Go to page  applications
   Wait until  Element should be visible  xpath=//*[@class="authority-admin-alueelliset-organisaatiot"]//div[@class="tags-editor-component"]//li[@class='tag'][1]
   ${tagCount} =  Get Matching Xpath Count  xpath=//*[@class="authority-admin-alueelliset-organisaatiot"]//div[@class="tags-editor-component"]//li[@class="tag"]
   ${lastTagIndex} =  Evaluate  ${tagCount} - 1

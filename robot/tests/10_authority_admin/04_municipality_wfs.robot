@@ -7,6 +7,9 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
+Open backend settings tab
+  Go to page  backends
+
 Set variables
   Set suite variable   ${VALID_LEGACY}    http://127.0.0.1:8000/dev/krysp
   Set suite variable   ${INVALID_LEGACY}  BROKEN
@@ -44,6 +47,7 @@ There should not be error
 
 Submit wfs
   [Arguments]  ${url}  ${permitType}
+
   Click element  edit-wfs-for-${permitType}
   Wait until  element should be visible  edit-wfs
   There should not be error

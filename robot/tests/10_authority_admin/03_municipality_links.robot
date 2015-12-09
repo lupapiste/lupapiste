@@ -11,6 +11,7 @@ Resource       ../../common_resource.robot
 
 Admin adds new municipality link
   Sipoo logs in
+  Go to page  backends
   Add link  fancy-link  http://reddit.com
 
 Mikko asks information and sees the new link
@@ -19,6 +20,7 @@ Mikko asks information and sees the new link
 
 Admin changes link target
   Sipoo logs in
+  Go to page  backends
   Update link  fancy-link  http://slashdot.org
 
 Mikko asks information and sees updated link
@@ -27,6 +29,7 @@ Mikko asks information and sees updated link
 
 Admin removes the link
   Sipoo logs in
+  Go to page  backends
   Remove link  fancy-link
 
 Mikko asks information and does not see link

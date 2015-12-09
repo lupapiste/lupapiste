@@ -7,6 +7,9 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
+Open integrations tab
+  Go to page  backends
+
 Setup
   # Bitte, see http://ows.terrestris.de/dienste.html for details
   Set Suite Variable  ${url}  http://ows.terrestris.de/osm/service
