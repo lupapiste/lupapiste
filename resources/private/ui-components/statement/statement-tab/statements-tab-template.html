@@ -108,10 +108,12 @@
                            }"></span>
           <div data-bind="template: {name: 'neighbors-table-template', data: {neighbors: application.neighbors, localisationKeys: {missing: 'neighbors.missing'}}}"></div>
           <button data-bind="click: openNeighborsPage,
-                             ltext: 'neighbors.manage',
                              visible: $root.authorization.ok('neighbor-add')"
-                             class="btn btn-primary modal"
-                             data-test-id="manage-neighbors"></button>
+                  class="btn btn-primary modal"
+                  data-test-id="manage-neighbors">
+             <i class="lupicon-circle-plus"></i>
+             <span data-bind="ltext: 'neighbors.manage'"></span>
+           </button>
       </div>
 
     </script>
