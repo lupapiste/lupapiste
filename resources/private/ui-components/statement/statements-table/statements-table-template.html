@@ -38,7 +38,8 @@
                       </td>
                       <td data-bind="text: $data.person.name"></td>
                       <td data-bind="dateString: $data.requested"></td>
-                      <td data-bind="dateString: $data.dueDate"></td>
+                      <td data-bind="dateString: $data.dueDate,
+                                     css: {'statement-over-due': $component.isStatementOverDue($data)}"></td>
                       <td data-bind="dateString: $data.given"></td>
                       <td data-bind="text: $data.status() && loc(['statement', $data.status()]), attr: {'data-test-name' : $data.person.name}"></td>
                       <!-- ko if: $component.authorization.ok('delete-statement') -->

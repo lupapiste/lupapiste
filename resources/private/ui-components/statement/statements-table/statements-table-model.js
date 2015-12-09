@@ -9,6 +9,11 @@ LUPAPISTE.StatementsTableModel = function(params) {
   self.authorization = params.authModel;
   self.localisationKeys = params.localisationKeys;
 
+  self.isStatementOverDue = function(statement) {
+    var nowTimeInMs = new Date().getTime();
+    return (statement.dueDate && !statement.given() ) ? (nowTimeInMs > statement.dueDate()) : false;
+  };
+
   var deleteStatementFromServer = function(statementId) {
     ajax
       .command("delete-statement", {id: self.applicationId(), statementId: statementId})
