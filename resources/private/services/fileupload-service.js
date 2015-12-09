@@ -21,6 +21,16 @@ LUPAPISTE.FileuploadService = function() {
     formData: [
       { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") }
     ],
+    add: function(e, data) {
+      if(data.files[0].type.match(LUPAPISTE.config.mimeTypePattern)) {
+        data.submit();
+      } else {
+        hub.send("indicator", {
+          style: "negative",
+          message: "error.illegal-file-type"
+        });
+      }
+    },
     start: function(e, data) {
       hub.send("fileuploadService::filesUploading", {state: "pending"});
     },
