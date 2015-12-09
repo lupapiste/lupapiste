@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <section class="page container" id="statement">
+  <section class="page" id="statement">
     <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'statement' -->
-    <div class="headerarea">
-      <div>
+    <div class="statement-top">
+      <div class="container">
         <a class="btn secondary inline-block"
            data-test-id="statement-return"
            data-bind="attr: {href: '#!/application/' + $root.applicationId() + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
@@ -14,24 +14,26 @@
       </div>
     </div>
 
-    <div id="statement-edit-container">
-      <div data-bind="component: { name: 'statement-edit',
-                                   params: { applicationId: $root.applicationId,
-                                             statementId: $root.statementId,
-                                             authModel: $root.authorization } }"></div> 
-    </div>
-    <div id="statement-attachments-container">
-      <div data-bind="component: { name: 'statement-attachments',
-                                   params: { applicationId: $root.applicationId,
-                                             statementId: $root.statementId,
-                                             authModel: $root.authorization } }"></div> 
-    </div>
-    <div id="statement-control-button-container">
-      <div data-bind="component: { name: 'statement-control-buttons',
-                                   params: { applicationId: $root.applicationId,
-                                             statementId: $root.statementId,
-                                             authModel: $root.authorization,
-                                             submitAllowed: $root.submitAllowed } }"></div> 
+    <div class="container">
+      <div id="statement-edit-container">
+        <div data-bind="component: { name: 'statement-edit',
+                                     params: { applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization } }"></div> 
+      </div>
+      <div id="statement-attachments-container">
+        <div data-bind="component: { name: 'statement-attachments',
+                                     params: { applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization } }"></div> 
+      </div>
+      <div id="statement-control-button-container">
+        <div data-bind="component: { name: 'statement-control-buttons',
+                                     params: { applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization,
+                                               submitAllowed: $root.submitAllowed } }"></div> 
+      </div>
     </div>
     <!-- /ko -->
   </section>

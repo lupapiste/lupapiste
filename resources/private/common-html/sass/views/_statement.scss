@@ -1,24 +1,40 @@
 #statement {
+
+  .statement-top {
+    background-color: #eee;
+    padding: $marginL 0;
+    border-bottom: 2px solid #bbb;
+  }
+
   h1 {
-    width: 70%;
     display: inline;
   }
   .headerarea {
+    width: 100%;
     margin-bottom: $marginM;
   }
   .statement-info {
-    width: 49%;
-    display: inline-block;
     vertical-align: top;
+    margin-bottom: $baseline;
   }
+
   .statement-conversation {
     width: 49%;
     display: inline-block;
   }
   textarea {
-    width: 90%;
+    resize: none;
+    width: 99%;
   }
   .statement-attachments {
+    margin-bottom: $baseline;
+
+    .removeCol {
+      width: $column;
+    } 
+
+  }
+  .statement-control-buttons {
     margin-bottom: $baseline;
   }
 
