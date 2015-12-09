@@ -23,9 +23,19 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   self.attachments = ko.observableArray([]);
 
   function refresh(application) {
-    self.attachments(_.filter(application.attachments, function(attachment) {
-      return _.isEqual(attachment.target, {type: "statement", id: statementId()});
-    }));
+    self.attachments(
+      _(application.attachments)
+        .filter(function(attachment) {
+          return _.isEqual(attachment.target, {type: "statement", id: statementId()});
+        })
+        .map(function(attachment) {
+          var comments = _.filter(application.comments, function(comment) {
+            return comment.target.id === attachment.id;
+          });
+          return _.extend({comment: _.first(comments).text}, attachment);
+        })
+        .value()
+    );
   };
 
   self.canDeleteAttachment = function(attachment) {
