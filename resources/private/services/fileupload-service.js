@@ -15,7 +15,7 @@ LUPAPISTE.FileuploadService = function() {
   }
 
   var mimeTypeRegex = new RegExp(LUPAPISTE.config.mimeTypePattern);
-  var MAXIMUM_UPLOAD_SIZE = 25000000; // 25Mb
+  var MAXIMUM_UPLOAD_SIZE = 15000000; // 15Mb
 
   $("#" + self.fileInputId).fileupload({
     url: "/api/upload/file",
@@ -39,17 +39,17 @@ LUPAPISTE.FileuploadService = function() {
         });
       }
     },
-    start: function(e, data) {
+    start: function() {
       hub.send("fileuploadService::filesUploading", {state: "pending"});
     },
-    always: function(e, data) {
+    always: function() {
       hub.send("fileuploadService::filesUploading", {state: "finished"});
     },
     done: function(e, data) {
       hub.send("fileuploadService::filesUploaded", {status: "success",
                                                     files: data.result.files});
     },
-    fail: function(e, data) {
+    fail: function() {
       hub.send("fileuploadService::filesUploaded", {status: "failed"});
     },
     progress: function (e, data) {

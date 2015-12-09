@@ -1,2 +1,2 @@
-error.bulletins.illegal-upload-size:  Tiedoston koko ylittää sallitun ylärajan (25Mb)
-bulletin.comment.addAttachment:  Lisää kommenttiin liitetiedosto (maks. 25Mb)
+error.bulletins.illegal-upload-size:  Tiedoston koko ylitti sallitun ylärajan (15Mb)
+bulletin.comment.addAttachment:  Lisää kommenttiin liitetiedosto (maks. 15Mb)
