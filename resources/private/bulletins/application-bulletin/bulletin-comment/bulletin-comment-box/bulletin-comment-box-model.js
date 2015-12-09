@@ -64,7 +64,6 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   };
 
   self.removeAttachment = function(attachment) {
-    //self.attachments.remove(attachment);
     hub.send("fileuploadService::removeFile", {attachmentId: attachment.id});
   };
 
@@ -84,7 +83,14 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   });
 
   self.addEventListener("fileuploadService", "filesUploaded", function(event) {
-    self.attachments(self.attachments().concat(event.files));
+    if(event.status === "success") {
+      self.attachments(self.attachments().concat(event.files));
+    } else {
+      hub.send("indicator", {
+        style: "negative",
+        message: event.message
+      });
+    }
   });
 
   self.addEventListener("fileuploadService", "fileRemoved", function(event) {
