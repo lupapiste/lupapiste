@@ -660,6 +660,7 @@
   });
 
   $(function() {
+    $("#applicationTabs").applyBindings({});
     $("#admin").applyBindings({
       organizationUsers:   organizationUsers,
       organization:        organizationModel,
