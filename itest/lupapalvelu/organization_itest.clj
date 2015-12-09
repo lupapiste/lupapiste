@@ -437,4 +437,29 @@
                       (fact "Two layers with same ids are allowed if the servers differ"
                             (->> layers (filter #(= (:id %) "foo-id")) count) => 2)
                       (fact "Still only two base layers"
-                            (->> layers (filter :base) count) => 2)))))))
+                            (->> layers (filter :base) count) => 2)))
+             (facts "Storing passwords"
+                    (local-org-api/update-organization-map-server "753-YA"
+                                                                  "http://doesnotmatter"
+                                                                  "username"
+                                                                  "plaintext")
+                    (let [org (local-org-api/get-organization "753-YA")
+                          {:keys [username password crypto-iv]} (-> org :map-layers :server)]
+                      (fact "Password is encrypted"
+                            (not= password "plaintext") => true)
+                      (fact "Password decryption"
+                            (local-org-api/decode-credentials password crypto-iv) => "plaintext")
+                      (fact "No extra credentials are stored (nil)"
+                            (local-org-api/update-organization-map-server "753-YA"
+                                                                          "http://stilldoesnotmatter"
+                                                                          nil
+                                                                          nil)
+                            (-> "753-YA" local-org-api/get-organization :map-layers :server
+                                (select-keys [:password :crypto-iv])) => {:password nil})
+                      (fact "No extra credentials are stored (\"\")"
+                            (local-org-api/update-organization-map-server "753-YA"
+                                                                          "http://stilldoesnotmatter"
+                                                                          ""
+                                                                          "")
+                            (-> "753-YA" local-org-api/get-organization :map-layers :server
+                                (select-keys [:password :crypto-iv])) => {:password ""})))))))
