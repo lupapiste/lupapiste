@@ -81,6 +81,12 @@ LUPAPISTE.StatementsTabModel = function(params) {
       .call();
   };
 
+  self.openNeighborsPage = function(model) {
+    pageutil.openPage("neighbors", model.application.id());
+    return false;
+  };
+
+
   (function() {
     if (self.authorization.ok("get-statement-givers")) {
       ajax
