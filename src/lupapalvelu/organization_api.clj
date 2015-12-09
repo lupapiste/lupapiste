@@ -22,6 +22,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
+            [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
@@ -307,6 +308,22 @@
   [{user :user}]
   (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
   (ok))
+
+(defn split-emails [emails] (ss/split emails #"[\s,;]+"))
+
+(defcommand set-organization-neighbor-order-email
+  {:parameters [emails]
+   :user-roles #{:authorityAdmin}
+   :input-validators [(partial action/string-parameters [:emails])
+                      (fn [{{emails :emails} :data}]
+                        (let [splitted (split-emails emails)]
+                          (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
+                            (fail :error.email))))]}
+  [{user :user}]
+  (let [addresses (split-emails emails)
+        organization-id (user/authority-admins-organization-id user)]
+    (o/update-organization organization-id {$set {:notifications.neighbor-order-emails addresses}})
+    (ok)))
 
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}

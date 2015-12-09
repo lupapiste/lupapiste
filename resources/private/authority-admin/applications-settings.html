@@ -33,8 +33,8 @@
             <tr>
               <td data-bind="ltext: 'auth-admin.email-notifications.neighbor'"></td>
               <td class="value">
-                <input type="text" data-xbind="textInput: vendorBackendUrlForBackendId, enable: lupapisteApp.models.globalAuthModel.ok('save-vendor-backend-redirect-config')" size="100" />
-                <span class="save-indicator" xdata-bind="saveIndicator: backendIdIndicator, label: false"></span>
+                <input type="text" data-bind="value: organization.neighborOrderEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-neighbor-order-email')" />
+                <span class="save-indicator" data-bind="saveIndicator: organization.neighborOrderEmailsIndicator, label: false"></span>
               </td>
             </tr>
           </tbody>

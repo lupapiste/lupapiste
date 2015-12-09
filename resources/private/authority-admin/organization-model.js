@@ -83,6 +83,18 @@ LUPAPISTE.OrganizationModel = function () {
       .value();
   }
 
+  self.neighborOrderEmails = ko.observable("");
+  self.neighborOrderEmailsIndicator = ko.observable().extend({notify: "always"});;
+  ko.computed(function() {
+    var emails = self.neighborOrderEmails();
+    if (self.initialized) {
+      ajax.command("set-organization-neighbor-order-email", {emails: emails})
+        .success(_.partial(self.neighborOrderEmailsIndicator, {type: "saved"}))
+        .error(_.partial(self.neighborOrderEmailsIndicator, {type: "err"}))
+        .call();
+    }
+  });
+
   self.init = function(data) {
     var organization = data.organization;
     self.organizationId(organization.id);
@@ -115,6 +127,8 @@ LUPAPISTE.OrganizationModel = function () {
         .success(self.load)
         .call();
     };
+
+    self.neighborOrderEmails(util.getIn(organization, ["notifications", "neighbor-order-emails"], ""));
 
     _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
       var operationsAttachments = _(value)
