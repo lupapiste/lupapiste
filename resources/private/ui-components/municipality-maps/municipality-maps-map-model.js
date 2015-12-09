@@ -70,4 +70,17 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
       }
     }
   });
+
+  var hubsub = hub.subscribe("page-load", function() {
+    if (map) {
+      map.updateSize();
+    }
+  });
+
+  self.dispose = function() {
+    hub.unsubscribe(hubsub);
+    if (map) {
+      map.destroy();
+    }
+  }
 };
