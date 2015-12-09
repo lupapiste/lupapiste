@@ -14,6 +14,9 @@ LUPAPISTE.FileuploadService = function() {
     document.body.appendChild(input);
   }
 
+  var mimeTypeRegex = new RegExp(LUPAPISTE.config.mimeTypePattern);
+  var MAXIMUM_UPLOAD_SIZE = 25000000; // 25Mb
+
   $("#" + self.fileInputId).fileupload({
     url: "/api/upload/file",
     type: "POST",
@@ -22,12 +25,17 @@ LUPAPISTE.FileuploadService = function() {
       { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") }
     ],
     add: function(e, data) {
-      if(data.files[0].type.match(LUPAPISTE.config.mimeTypePattern)) {
+      var mimeTypeLegal = mimeTypeRegex.test(data.files[0].type);
+      if(mimeTypeLegal && data.files[0].size <= MAXIMUM_UPLOAD_SIZE) {
         data.submit();
       } else {
+        var message = !mimeTypeLegal ?
+          "error.illegal-file-type" :
+          "error.bulletins.illegal-upload-size";
+
         hub.send("indicator", {
           style: "negative",
-          message: "error.illegal-file-type"
+          message: message
         });
       }
     },

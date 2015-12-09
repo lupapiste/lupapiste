@@ -1,0 +1,1 @@
+error.bulletins.illegal-upload-size:  Tiedoston koko ylittää sallitun ylärajan (25Mb)
