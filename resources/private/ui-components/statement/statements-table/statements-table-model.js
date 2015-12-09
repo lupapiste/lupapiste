@@ -9,8 +9,6 @@ LUPAPISTE.StatementsTableModel = function(params) {
   self.authorization = params.authModel;
   self.localisationKeys = params.localisationKeys;
 
-
-// TODO: This is a copy from statement.js, will remove this duplication when moving this to a separate knockout component.
   var deleteStatementFromServer = function(statementId) {
     ajax
       .command("delete-statement", {id: self.applicationId(), statementId: statementId})
