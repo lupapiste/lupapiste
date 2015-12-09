@@ -647,33 +647,48 @@
     }
   });
 
-  hub.onPageLoad("admin", function() {
+  hub.onPageLoad("users", function() {
     if (!usersList) {
-      usersList = users.create($("#admin .admin-users-table"), usersTableConfig);
+      usersList = users.create($("#users .admin-users-table"), usersTableConfig);
     }
-    organizationModel.load();
-    wfsModel.load();
     statementGiversModel.load();
+  });
+
+  hub.onPageLoad("backends", function() {
+    wfsModel.load();
     kopiolaitosModel.load();
     asianhallintaModel.load();
     linkToVendorBackendModel.load();
   });
 
+  hub.onPageLoad("admin", function() {
+  });
+
   $(function() {
+    organizationModel.load();
+
     $("#applicationTabs").applyBindings({});
-    $("#admin").applyBindings({
+    $("#users").applyBindings({
       organizationUsers:   organizationUsers,
-      organization:        organizationModel,
-      editLink:            editLinkModel,
-      editSelectedOperationsModel: editSelectedOperationsModel,
-      editAttachments:     editAttachmentsModel,
       statementGivers:    statementGiversModel,
       createStatementGiver: createStatementGiverModel,
+      editRoles:           editRolesDialogModel
+      });
+    $("#areas").applyBindings({
+      organization:        organizationModel
+    });
+    $("#backends").applyBindings({
+      organization:        organizationModel,
+      editLink:            editLinkModel,
       wfs:                 wfsModel,
       kopiolaitos:         kopiolaitosModel,
       asianhallinta:       asianhallintaModel,
-      linkToVendorBackend: linkToVendorBackendModel,
-      editRoles:           editRolesDialogModel
+      linkToVendorBackend: linkToVendorBackendModel
+    });
+    $("#admin").applyBindings({
+      organization:        organizationModel,
+      editSelectedOperationsModel: editSelectedOperationsModel,
+      editAttachments:     editAttachmentsModel
     });
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();

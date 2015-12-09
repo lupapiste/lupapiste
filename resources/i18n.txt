@@ -1,0 +1,3 @@
+auth-admin.areas: Alueet / Områden
+auth-admin.backends: Linkit ja taustajärjestelmät / Länkar och bakgrundssystem
+auth-admin.admin: Hakemusten asetukset

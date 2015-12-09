@@ -351,7 +351,7 @@
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
                          :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
-                         :html ["index.html" "authority-admin.html"]}
+                         :html ["index.html" "authority-admin.html" "organization-users.html" "organization-areas.html" "organization-backends.html"]}
 
    :admin-app {:depends [:ui-components]
                :js ["admin.js" "register-admin-models.js"]}
