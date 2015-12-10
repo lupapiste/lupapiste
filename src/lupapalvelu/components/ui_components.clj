@@ -56,7 +56,8 @@
                  :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
                  :bulletinStates        bulletins/bulletin-state-seq
                  :attachmentVisibilities attachment-meta/visibilities
-                 :features              (into {} (filter second (env/features)))}]
+                 :features              (into {} (filter second (env/features)))
+                 :mimeTypePattern       (.toString mime/mime-type-pattern)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
