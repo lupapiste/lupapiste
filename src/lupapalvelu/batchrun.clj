@@ -50,15 +50,31 @@
 
 (notifications/defemail :reminder-neighbor (assoc neighbors/email-conf :subject-key "neighbor-reminder"))
 
-(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application :as command} _ recipient]
-  {:link-fi (notifications/get-application-link application nil "fi" recipient)
-   :link-sv (notifications/get-application-link application nil "sv" recipient)
+;; Email definition for the "Request statement reminder"
+
+(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application} _ recipient]
+  {:link-fi (notifications/get-application-link application "/statement" "fi" recipient)
+   :link-sv (notifications/get-application-link application "/statement" "sv" recipient)
    :created-date created-date})
 
 (notifications/defemail :reminder-request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request-reminder"
    :model-fn       request-statement-reminder-email-model})
+
+;; Email definition for the "Statement due date reminder"
+
+(defn- reminder-statement-due-date-model [{{:keys [due-date]} :data app :application} _ recipient]
+  {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
+   :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
+   :due-date (util/to-local-date due-date)})
+
+(notifications/defemail :reminder-statement-due-date
+  {:recipients-fn  :recipients
+   :subject-key    "reminder-statement-due-date"
+   :model-fn       reminder-statement-due-date-model})
+
+
 
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
