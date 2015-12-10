@@ -314,6 +314,7 @@
 (defcommand set-organization-neighbor-order-email
   {:parameters [emails]
    :user-roles #{:authorityAdmin}
+   :feature :kunta-kuulee-naapurit
    :input-validators [(partial action/string-parameters [:emails])
                       (fn [{{emails :emails} :data}]
                         (let [splitted (split-emails emails)]
