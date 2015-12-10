@@ -69,15 +69,15 @@
                                               {:tag :paatoksentekija :content [""]}
                                               {:tag :paatospvm :content [date]}
                                               {:tag :liite :content attachment}]}]}]
-          paatostieto  {:tag "paatostieto" :content verdict-xml}
-          placeholders #{:paatostieto :muistiotieto :lisatiedot
+          paatostieto  {:tag :paatostieto :content verdict-xml}
+          placeholders #{:paatostieto :muistiotieto :referenssiPiste
                          :liitetieto  :kayttotapaus :asianTiedot}
           [rakval]     (enlive/select xml [:RakennusvalvontaAsia])
           place        (some #(placeholders (:tag %)) (:content rakval))]
       (case place
         :paatostieto (enlive/at xml [:RakennusvalvontaAsia :paatostieto] (enlive/content verdict-xml))
         nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
-        (enlive/at xml [:RakennusvalvontaAsia place] (enlive/prepend paatostieto))))
+        (enlive/at xml [:RakennusvalvontaAsia place] (enlive/before paatostieto))))
     app-xml))
 
 (defn do-check-for-verdict [{:keys [application] :as command}]
