@@ -114,10 +114,6 @@
       return !self.selectedStatus() || !self.text() || self.submitting() || !self.dirty();
     });
 
-    self.canDeleteStatement = function() {
-      return authorizationModel.ok("delete-statement");
-    };
-
   }
 
   function deleteStatementFromServer() {

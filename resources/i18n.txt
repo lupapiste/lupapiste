@@ -1,0 +1,4 @@
+application.statement.maaraaika: Määräaika
+email.title.reminder-statement-due-date: Muistutus lausuntopyynnölle asetetun määräajan umpeutumisesta
+EMAIL-TEMPLATE.reminder-statements-due-date: Lausunnolle asetettu määräaika {{dueDate}} on umpeutunut.
+

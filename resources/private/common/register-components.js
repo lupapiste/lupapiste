@@ -89,7 +89,8 @@ jQuery(document).ready(function() {
     {name: "bulletin-tab"},
     {name: "bulletin-comments"},
     {name: "infinite-scroll"},
-    {name: "statements-tab"}
+    {name: "statements-tab"},
+    {name: "statements-table"}
   ];
 
   _.forEach(components, function(component) {
