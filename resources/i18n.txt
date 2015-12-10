@@ -1,0 +1,1 @@
+application.municipality-hears-neighbors: Kunta kuulee naapurit (maksullinen, katso taksa kunnan ohjeista)

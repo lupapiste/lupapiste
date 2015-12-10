@@ -628,6 +628,12 @@
 
                             <div class="clear spacerM"></div>
 
+                            <div class="form-grid form-grid--no-border">
+                              <div class="row">
+                                <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, id: 'optionMunicipalityHearsNeighbors', lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
+                              </div>
+                            </div>
+
                             <div data-bind="ifnot: submittable">
                                 <p class="error-text" data-test-id="foreman-not-submittable" data-bind="ltext: 'error.not-submittable.foreman-link'"></p>
                             </div>
