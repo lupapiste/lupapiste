@@ -8,16 +8,19 @@ LUPAPISTE.StatementsTableModel = function(params) {
   self.localisationKeys = params.localisationKeys;
 
 
-  var statementIdsWithAttachments = [];
-  _.forEach(self.application.attachments(), function(attachment) {
-    var target = ko.mapping.toJS(attachment.target);
-    if (target && target.type == "statement") {
-      statementIdsWithAttachments.push(target.id);
-    }
+  self.statementIdsWithAttachments = ko.pureComputed(function() {
+    var statementIdsWithAttachments = [];
+    _.forEach(lupapisteApp.models.application.attachments(), function(attachment) {
+      var target = ko.mapping.toJS(attachment.target);
+      if (target && target.type == "statement") {
+        statementIdsWithAttachments.push(target.id);
+      }
+    });
+    return _.unique(statementIdsWithAttachments);
   });
 
   self.hasAttachment = function(statement) {
-    return _.includes(statementIdsWithAttachments, statement.id());
+    return _.includes(self.statementIdsWithAttachments(), statement.id());
   };
 
   self.isStatementOverDue = function(statement) {
