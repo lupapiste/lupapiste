@@ -81,6 +81,12 @@ LUPAPISTE.StatementsTabModel = function(params) {
       .call();
   };
 
+  self.openNeighborsPage = function(model) {
+    pageutil.openPage("neighbors", model.application.id());
+    return false;
+  };
+
+
   (function() {
     if (self.authorization.ok("get-statement-givers")) {
       ajax
@@ -94,31 +100,5 @@ LUPAPISTE.StatementsTabModel = function(params) {
       .call();
     }
   })();
-
-  self.openStatement = function(model) {
-    pageutil.openPage("statement", self.application.id() + "/" + model.id());
-    return false;
-  };
-
-  // TODO: Kopio applications.js:sta. -> Tee neighborsista uusi oma komponentti, ja siirra tama sinne.
-  self.neighborActions = {
-    manage: function(model) {
-      pageutil.openPage("neighbors", model.application.id());
-      return false;
-    },
-    markDone: function(neighbor) {
-      ajax
-        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.id(), lang: loc.getCurrentLanguage()})
-        .complete(_.partial(repository.load, currentId, _.noop))
-        .call();
-    },
-    statusCompleted: function(neighbor) {
-      return _.contains(["mark-done", "response-given-ok", "response-given-comments"], _.last(neighbor.status()).state());
-    },
-    showStatus: function(neighbor) {
-      neighborStatusModel.init(neighbor).open();
-      return false;
-    }
-  };
 
 };
