@@ -115,7 +115,10 @@
                       action/email-validator]
    :notified true
    :user-roles #{:applicant :authority}
-   :states states/all-application-states-but-draft-or-terminal}
+   :states states/all-application-states-but-draft-or-terminal
+   :pre-checks [(fn [{user :user} {options :options}]
+                  (when (and (:municipalityHearsNeighbors options) (not (user/authority? user)))
+                    (fail :error.unauthorized)))]}
   [{:keys [user created] :as command}]
   (let [token (token/make-token-id)
         email (user/canonize-email email)

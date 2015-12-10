@@ -100,7 +100,8 @@
                            name: 'help-toggle',
                            params: {lhtml: 'help.' + application.permitType() + '.neighborsDesc'}
                            }"></span>
-          <div data-bind="template: {name: 'neighbors-table-template', data: {neighbors: application.neighbors, localisationKeys: {missing: 'neighbors.missing'}}}"></div>
+
+          <div data-bind="template: {name: 'neighbors-table-template', data: {neighbors: application.neighbors, optionMunicipalityHearsNeighbors: application.optionMunicipalityHearsNeighbors, optionMunicipalityHearsNeighborsDisabled: application.optionMunicipalityHearsNeighborsDisabled, localisationKeys: {missing: 'neighbors.missing'}}}"></div>
           <button data-bind="click: neighborActions.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
       </div>
 
@@ -146,6 +147,12 @@
       <script type="text/x-jquery-tmpl" id="neighbors-table-template">
             <div data-bind="ifnot: neighbors() && neighbors().length > 0">
                 <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-neigbors"></p>
+            </div>
+
+            <div class="form-grid form-grid--no-border">
+              <div class="row">
+                <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
+              </div>
             </div>
 
             <div data-bind="if: neighbors() && neighbors().length > 0">
