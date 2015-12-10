@@ -320,7 +320,7 @@
                           (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
                             (fail :error.email))))]}
   [{user :user}]
-  (let [addresses (split-emails emails)
+  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
         organization-id (user/authority-admins-organization-id user)]
     (o/update-organization organization-id {$set {:notifications.neighbor-order-emails addresses}})
     (ok)))
