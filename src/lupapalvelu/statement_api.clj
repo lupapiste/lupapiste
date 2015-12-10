@@ -106,11 +106,18 @@
   {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
    :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
    :saateText saateText
+   :recipient-email (:email recipient)
    :dueDate (util/to-local-date dueDate)})
 
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
    :subject-key    "statement-request"
+   :model-fn       request-statement-model
+   :show-municipality-in-subject true})
+
+(notifications/defemail :request-statement-new-user
+  {:recipients-fn  :recipients
+   :subject-key    "statement-request-new-user"
    :model-fn       request-statement-model
    :show-municipality-in-subject true})
 
@@ -136,18 +143,16 @@
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
-  (organization/with-organization organization
-                                  (fn [{:keys [statementGivers]}]
-                                    (let [stm-givers  (filter (comp string? (set (map :id selectedPersons)) :id) statementGivers)
-                                          persons     (concat stm-givers (remove :id selectedPersons))
-                                          users       (map (comp #(user/get-or-create-user-by-email % user) :email) persons)
-                                          persons+uid (map #(assoc %1 :userId (:id %2)) persons users)
-                                          metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
-                                          statements  (map (partial create-statement now metadata saateText dueDate) persons+uid)
-                                          auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
-                                      (update-application command {$push {:statements {$each statements}
-                                                                          :auth       {$each auth}}})
-                                      (notifications/notify! :request-statement (assoc command :recipients users))))))
+  (let [new-emails  (set (map :email (remove (comp user/get-user-by-email :email) selectedPersons)))
+        users       (map (comp #(user/get-or-create-user-by-email % user) :email) selectedPersons)
+        persons+uid (map #(assoc %1 :userId (:id %2)) selectedPersons users)
+        metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
+        statements  (map (partial create-statement now metadata saateText dueDate) persons+uid)
+        auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
+    (update-application command {$push {:statements {$each statements}
+                                        :auth       {$each auth}}})
+    (notifications/notify! :request-statement-new-user (assoc command :recipients (filter (comp new-emails :email) users)))
+    (notifications/notify! :request-statement (assoc command :recipients (remove (comp new-emails :email) users)))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
