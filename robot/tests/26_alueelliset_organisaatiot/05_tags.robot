@@ -9,8 +9,8 @@ Resource       ../../common_resource.robot
 Admin adds new tags
   Sipoo logs in
   Go to page  applications
-  Wait until  Element should be visible  xpath=//*[@class="authority-admin-alueelliset-organisaatiot"]//div[@class="tags-editor-component"]//li[@class='tag'][1]
-  ${tagCount} =  Get Matching Xpath Count  xpath=//*[@class="authority-admin-alueelliset-organisaatiot"]//div[@class="tags-editor-component"]//li[@class="tag"]
+  Wait until  Element should be visible  xpath=//div[@class="tags-editor-component"]//li[@class='tag'][1]
+  ${tagCount} =  Get Matching Xpath Count  xpath=//div[@class="tags-editor-component"]//li[@class="tag"]
   Click by test id  add-tag-button
   Input text by test id  edit-tag-input-${tagCount}  kalamaa
   Wait until  Element should contain  xpath=//span[@data-test-id="tag-label-${tagCount}"]  kalamaa
@@ -59,8 +59,8 @@ Sonja uses tags filter by selecting tag from autocomplete
 Admin removes the last tag
   Sipoo logs in
   Go to page  applications
-  Wait until  Element should be visible  xpath=//*[@class="authority-admin-alueelliset-organisaatiot"]//div[@class="tags-editor-component"]//li[@class='tag'][1]
-  ${tagCount} =  Get Matching Xpath Count  xpath=//*[@class="authority-admin-alueelliset-organisaatiot"]//div[@class="tags-editor-component"]//li[@class="tag"]
+  Wait until  Element should be visible  xpath=//div[@class="tags-editor-component"]//li[@class='tag'][1]
+  ${tagCount} =  Get Matching Xpath Count  xpath=//div[@class="tags-editor-component"]//li[@class="tag"]
   ${lastTagIndex} =  Evaluate  ${tagCount} - 1
   Wait until  Element Should Be Visible  xpath=//span[@data-test-id="tag-label-${lastTagIndex}"]
   Click by test id  remove-tag-button-${lastTagIndex}
