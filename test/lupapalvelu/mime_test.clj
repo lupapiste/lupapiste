@@ -37,6 +37,12 @@
   (fact (allowed-file? "")             => falsey)
   (fact (allowed-file? nil)            => falsey))
 
+(facts "Test with files"
+  (fact (allowed-file? (clojure.java.io/file "dev-resources/sipoon_alueet.zip")) => truthy)
+  (fact (allowed-file? (clojure.java.io/file "dev-resources/test-pdf.pdf")) => truthy)
+
+  (fact (allowed-file? (clojure.java.io/file "dev-resources/krysp/no-verdicts.xml")) => falsey))
+
 (facts "sanitize-filename"
   (sanitize-filename nil)                 => nil
   (sanitize-filename "")                  => ""
@@ -44,5 +50,3 @@
   (sanitize-filename "foo/bar")           => "bar"
   (sanitize-filename "foo\\bar")          => "bar"
   (sanitize-filename "a\\b/c\\d/r//bar")  => "bar")
-
-;; TODO check few binary files
