@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="applications">
+    <div class="container">
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.required-fields-obligatory.title'"></h2>
+        <input type="checkbox" class="form-input" id="required-fields-obligatory-enabled" data-test-id="required-fields-obligatory-enabled"
+               data-bind="checked: organization.appRequiredFieldsFillingObligatory, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
+        <label for="required-fields-obligatory-enabled" class="form-label" data-bind="ltext: 'auth-admin.required-fields-obligatory.enabled'"></label>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.tags'"></h2>
+        <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+        <div data-bind="component: 'tags-editor'"></div>
+        <!-- /ko -->
+      </section>
+
+      <!-- ko if: features.enabled('kunta-kuulee-naapurit') -->
+      <section class="feature">
+        <h2 data-bind="ltext: 'auth-admin.email-notifications'"></h2>
+
+        <table class="admin-settings">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.email-notifications.param-name'"></th>
+              <th data-bind="ltext: 'auth-admin.email-notifications.param-value'"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.email-notifications.neighbor'"></td>
+              <td class="value">
+                <input type="text" data-bind="value: organization.neighborOrderEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-neighbor-order-email')" />
+                <span class="save-indicator" data-bind="saveIndicator: organization.neighborOrderEmailsIndicator, label: false"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <!--  /ko -->
+
+    </div> <!-- container -->
+  </section>
+</body>
+</html>

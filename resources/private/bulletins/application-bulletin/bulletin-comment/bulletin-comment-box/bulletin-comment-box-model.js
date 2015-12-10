@@ -9,7 +9,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   self.attachments = ko.observableArray([]);
   self.pending = ko.observable(false);
   self.filePending = ko.observable(false);
-  
+
   self.basicCommentFields = {
     comment: ko.observable(),
     email: ko.observable().extend({email: true}),
@@ -64,7 +64,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   };
 
   self.removeAttachment = function(attachment) {
-    self.attachments.remove(attachment); // TODO: do this properly
+    hub.send("fileuploadService::removeFile", {attachmentId: attachment.id});
   };
 
   self.sendComment = function() {
@@ -83,14 +83,27 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   });
 
   self.addEventListener("fileuploadService", "filesUploaded", function(event) {
-    self.attachments(self.attachments().concat(event.files));
+    if(event.status === "success") {
+      self.attachments(self.attachments().concat(event.files));
+    } else {
+      hub.send("indicator", {
+        style: "negative",
+        message: event.message
+      });
+    }
+  });
+
+  self.addEventListener("fileuploadService", "fileRemoved", function(event) {
+    self.attachments.remove(function(attachment) {
+      return attachment.id === event.attachmentId;
+    });
   });
 
   self.addEventListener("bulletinService", "commentProcessed", function(event) {
     if (event.status === "success") {
       self.basicCommentFields.comment("");
       self.attachments([]);
-      hub.send("indicator", {style: "positive", message: "bulletin.comment.save.success"});
+      hub.send("indicator", {style: "positive", message: "bulletin.comment.save.success", sticky: true});
     } else {
       hub.send("indicator", {style: "negative", message: "bulletin.comment.save.failed"});
     }

@@ -22,6 +22,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
+            [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.authorization :as auth]
@@ -308,6 +309,23 @@
   (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
   (ok))
 
+(defn split-emails [emails] (ss/split emails #"[\s,;]+"))
+
+(defcommand set-organization-neighbor-order-email
+  {:parameters [emails]
+   :user-roles #{:authorityAdmin}
+   :feature :kunta-kuulee-naapurit
+   :input-validators [(partial action/string-parameters [:emails])
+                      (fn [{{emails :emails} :data}]
+                        (let [splitted (split-emails emails)]
+                          (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
+                            (fail :error.email))))]}
+  [{user :user}]
+  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+        organization-id (user/authority-admins-organization-id user)]
+    (o/update-organization organization-id {$set {:notifications.neighbor-order-emails addresses}})
+    (ok)))
+
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}
   [{user :user}]
@@ -512,8 +530,7 @@
 
 (defquery get-map-layers-data
   {:description "Organization server and layer details."
-   :user-roles #{:authorityAdmin}
-   :feature :municipality-maps}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (ok (-> (user/authority-admins-organization-id user)
           o/get-organization
@@ -522,8 +539,7 @@
 (defcommand update-map-server-details
   {:parameters [url username password]
    :input-validators [(partial validate-optional-url :url)]
-   :user-roles #{:authorityAdmin}
-   :feature :municipality-maps}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.server {:url url
@@ -534,8 +550,7 @@
 (defcommand update-user-layers
   {:parameters [layers]
    :input-validators [(partial action/vector-parameter-of :layers map?)] ; FIXME deep validation
-   :user-roles #{:authorityAdmin}
-   :feature :municipality-maps}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.layers layers}})

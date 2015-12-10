@@ -20,22 +20,24 @@
           <span data-bind="ltext: 'application.statement.add'"></span>
         </button>
 
-        <div data-bind="if: showInviteSection" id="invite-statement-givers-section">
+
+        <!-- ko if: showInviteSection -->
+        <div id="invite-statement-givers-section">
 
             <p id="choose-statement-givers-title" data-bind="ltext: 'application-choose-statement-givers'"></p>
 
             <table class="table table-striped" data-test-id="table-application-statements-givers">
+                <thead>
+                      <tr>
+                          <th></th>
+                          <th data-bind="ltext: 'application.statement.desc'"></th>
+                          <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                          <th data-bind="ltext: 'userinfo.email'"></th>
+                      </tr>
+                  </thead>
                 <tbody data-bind="foreach: combinedData">
                     <tr class="statement-giver-row">
                         <td>
-<!--  TODO: checkbox komponentti ei tue checkedValue:ta... -->
-<!--                            <div data-bind="component: {name: 'checkbox-field', -->
-<!--                                                        params: {id: 'add-statement-giver-checkbox-' + $index(), -->
-<!--                                                                 checked: $component.selectedPerson, -->
-<!--                                                                 checkedValue: $data, -->
-<!--                                                                 'data-test-id': 'check-statement-giver-' + $index(), -->
-<!--                                                                 'disabled': errors().length != 0 -->
-<!--                                                                 }}"></div> -->
                             <input class="form-input" type="radio"
                                    data-bind="checkedValue: $data,
                                               checked: $component.selectedPerson,
@@ -88,6 +90,8 @@
           <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
 
         </div>
+        <!-- /ko -->
+
       </div>
 
       <div class="application-neighbors">

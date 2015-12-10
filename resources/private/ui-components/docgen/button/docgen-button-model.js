@@ -6,6 +6,8 @@ LUPAPISTE.DocgenButtonModel = function(params) {
     clickFn: params.clickFn || _.noop,
     label: params.label,
     icon: params.icon,
-    className: params.className || "primary"
+    className: params.className || "primary",
+    testId: params.testId || ""
   });
+
 };

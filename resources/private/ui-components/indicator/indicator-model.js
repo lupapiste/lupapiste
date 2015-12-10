@@ -4,11 +4,14 @@ LUPAPISTE.IndicatorModel = function() {
 
   self.showIndicator = ko.observable().extend({notify: "always"});
   self.indicatorStyle = ko.observable("neutral");
+  // keep indicator on screen
+  self.sticky = ko.observable(false);
+
   var message = ko.observable("");
   var timerId;
 
   self.showCloseButton = ko.pureComputed(function() {
-    return self.indicatorStyle() === "negative";
+    return self.indicatorStyle() === "negative" || self.sticky();
   });
 
   self.iconStyle = ko.pureComputed(function() {
@@ -37,7 +40,7 @@ LUPAPISTE.IndicatorModel = function() {
       // stop timer if indicator was set negative during positive indicator hide was delayed
       clearTimeout(timerId);
       timerId = undefined;
-    } else if (val && self.indicatorStyle() !== "negative") {
+    } else if (val && self.indicatorStyle() !== "negative" && !self.sticky()) {
       // automatically hide indicator if shown and not negative
       timerId = _.delay(function() {
         self.showIndicator(false);
@@ -53,6 +56,7 @@ LUPAPISTE.IndicatorModel = function() {
   hub.subscribe("indicator", function(e) {
     message(e.message);
     self.indicatorStyle(e.style);
+    self.sticky(!!e.sticky);
     self.showIndicator(true);
   });
 };

@@ -9,9 +9,9 @@
 
           <div class="group-buttons">
             <span data-bind="component: { name: 'docgen-button',
-                                         params: { id: $component.groupId + '-row-' + index + '-remove-button', 
-                                                   className: 'secondary is-right', 
-                                                   icon: 'lupicon-remove', 
+                                         params: { id: $component.groupId + '-row-' + index + '-remove-button',
+                                                   className: 'secondary is-right',
+                                                   icon: 'lupicon-remove',
                                                    label: 'remove',
                                                    index: index,
                                                    clickFn: $component.removeGroup }},
@@ -20,7 +20,7 @@
           </div>
 
           <label class="form-label form-label-group" data-bind="ltext: $component.groupLabel"></label>
-          
+
           <!-- ko if: $component.groupHelp -->
           <span class="group-help-text" data-bind="ltext: $component.groupHelp"></span>
           <!-- /ko -->
@@ -35,21 +35,23 @@
           </div>
         </div>
       </div>
-        
+
       <div class="button-group" data-bind="visible: updatable()">
         <span data-bind="component: { name: 'docgen-button',
-                                      params: { id: groupId + '-append-button', 
-                                                className: 'positive', 
-                                                icon: 'lupicon-circle-plus', 
-                                                label: appendLabel, 
-                                                clickFn: addGroup }}">
+                                      params: { id: groupId + '-append-button',
+                                                className: 'positive',
+                                                icon: 'lupicon-circle-plus',
+                                                label: appendLabel,
+                                                clickFn: addGroup,
+                                                testId: schemaName + '-append-button' }}">
         </span>
         <span data-bind="component: { name: 'docgen-button',
-                                      params: { id: groupId + '-copy-button', 
-                                                className: 'secondary', 
-                                                icon: 'lupicon-circle-plus', 
-                                                label: copyLabel, 
-                                                clickFn: duplicateLastGroup }}">
+                                      params: { id: groupId + '-copy-button',
+                                                className: 'secondary',
+                                                icon: 'lupicon-circle-plus',
+                                                label: copyLabel,
+                                                clickFn: duplicateLastGroup,
+                                                testId: schemaName + '-copy-button' }}">
         </span>
       </div>
 

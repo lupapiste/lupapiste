@@ -15,7 +15,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
 
   self.fetchBulletinsPending = ko.observable(false);
 
-  self.fetchBulletins = _.debounce(function (query) {
+  var fetchBulletins = _.debounce(function (query) {
     ajax.datatables("application-bulletins", query)
       .success(function(res) {
         self.bulletinsLeft(res.left);
@@ -30,7 +30,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   }, 250);
 
   ko.computed(function() {
-    self.fetchBulletins(ko.mapping.toJS(self.query),
+    fetchBulletins(ko.mapping.toJS(self.query),
       self.fetchBulletinsPending);
   });
 
@@ -96,31 +96,14 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   hub.subscribe("bulletinService::fetchMunicipalities", fetchMunicipalities);
 
   hub.subscribe("bulletinService::fetchBulletin", function(event) {
-    //if (!self.bulletin() || event.id !== self.bulletin().id) {
-      fetchBulletin(event.id);
-    //}
+    fetchBulletin(event.id);
+  });
+
+  hub.subscribe("bulletinService::fetchBulletins", function() {
+    fetchBulletins(ko.mapping.toJS(self.query));
   });
 
   var commentForm;
-
-  hub.subscribe("bulletinService::registerUploadForm", function(event) {
-    $(event.form).fileupload({
-      url: "/api/raw/add-bulletin-comment",
-      type: "POST",
-      dataType: "json",
-      replaceFileInput: true,
-      autoUpload: false,
-      add: function(e, data) {
-        commentForm = data;
-      },
-      done: function() {
-        hub.send("bulletinService::commentProcessed", {status: "success"});
-      },
-      fail: function() {
-        hub.send("bulletinService::commentProcessed", {status: "failed"});
-      }
-    });
-  });
 
   hub.subscribe("bulletinService::newComment", function(comment) {
     hub.send("bulletinService::commentProcessing");

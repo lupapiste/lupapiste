@@ -96,6 +96,15 @@
   (update-statement statement modify-id prev-modify-id :state :given :text text :status status :given (now)))
 
 ;;
+;; Statement givers
+;;
+
+(defn fetch-organization-statement-givers [org-id]
+  (let [organization (organization/get-organization org-id)
+        permitPersons (or (:statementGivers organization) [])]
+    (ok :data permitPersons)))
+
+;;
 ;; Statuses
 ;;
 
