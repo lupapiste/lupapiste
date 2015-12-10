@@ -2,8 +2,6 @@ LUPAPISTE.StatementsTableModel = function(params) {
   "use strict";
   var self = this;
 
-//  console.log("params: ", params);
-
   self.applicationId = params.applicationId;
   self.statements = params.statements;
   self.authorization = params.authModel;
