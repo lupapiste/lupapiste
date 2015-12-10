@@ -74,6 +74,25 @@
    :subject-key    "reminder-statement-due-date"
    :model-fn       reminder-statement-due-date-model})
 
+;; Email definition for the "Application state reminder"
+
+(notifications/defemail :reminder-application-state
+  {:subject-key    "active-application-reminder"
+   :recipients-fn  notifications/from-user})
+
+;; Email definition for the "YA work time is expiring"
+
+(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date :as data} :data application :application :as command} _ recipient]
+  {:link-fi (notifications/get-application-link application nil "fi" recipient)
+   :link-sv (notifications/get-application-link application nil "sv" recipient)
+   :address (:address application)
+   :work-time-expires-date work-time-expires-date})
+
+(notifications/defemail :reminder-ya-work-time-is-expiring
+  {:subject-key    "ya-work-time-is-expiring-reminder"
+   :model-fn       ya-work-time-is-expiring-reminder-email-model})
+
+
 
 
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
@@ -151,22 +170,6 @@
                                            :created  (now)}}})))))))
 
 
-(notifications/defemail :reminder-application-state
-  {:subject-key    "active-application-reminder"
-   :recipients-fn  notifications/from-user})
-
-
-;; Email definition for the "YA work time is expiring"
-
-(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date :as data} :data application :application :as command} _ recipient]
-  {:link-fi (notifications/get-application-link application nil "fi" recipient)
-   :link-sv (notifications/get-application-link application nil "sv" recipient)
-   :address (:address application)
-   :work-time-expires-date work-time-expires-date})
-
-(notifications/defemail :reminder-ya-work-time-is-expiring
-  {:subject-key    "ya-work-time-is-expiring-reminder"
-   :model-fn       ya-work-time-is-expiring-reminder-email-model})
 
 ;; "YA hakemus: Hakemukselle merkitty tyoaika umpeutuu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn ya-work-time-is-expiring-reminder []
