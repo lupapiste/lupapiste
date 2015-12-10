@@ -67,7 +67,7 @@
 (defn- reminder-statement-due-date-model [{{:keys [due-date]} :data app :application} _ recipient]
   {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
    :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
-   :due-date (util/to-local-date due-date)})
+   :due-date due-date})
 
 (notifications/defemail :reminder-statement-due-date
   {:recipients-fn  :recipients
