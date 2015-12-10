@@ -820,24 +820,27 @@
                         </div>
 
                         <button data-bind="click: $root.verdictModel.newVerdict, visible: $root.authorization.ok('new-verdict-draft'), disable: $root.verdictModel.newProcessing"
-                                class="btn btn-primary modal"
+                                class="positive"
                                 data-test-id="give-verdict">
                             <em data-bind="visible: $root.verdictModel.newPending" class="button-loader"></em>
                             <span data-bind="ltext: 'application.verdict.add'"></span>
                         </button>
 
-                        <button data-bind="click: $root.verdictModel.checkVerdict, visible: $root.authorization.ok('check-for-verdict'), disable: $root.verdictModel.processing"
-                                class="btn btn-primary modal"
+                        <button data-bind="click: $root.verdictModel.checkVerdict,
+                                           visible: $root.authorization.ok('check-for-verdict'),
+                                           disable: $root.verdictModel.processing,
+                                           css: {waiting: $root.verdictModel.pending}"
+                                class="positive"
                                 data-test-id="fetch-verdict">
-                            <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
-                            <span data-bind="ltext: 'verdict.fetch.button'"></span>
+                          <i class="wait spin lupicon-refresh"></i>
+                          <span data-bind="ltext: 'verdict.fetch.button'"></span>
                         </button>
 
                         <button data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
                                            enable: !$root.verdictModel.processing() && $root.verdictAttachmentPrintsOrderModel.attachments().length,
                                            visible: $root.authorization.ok('order-verdict-attachment-prints'),
                                            attr: {'title': $root.verdictAttachmentPrintsOrderModel.printsOrderButtonTitle}"
-                                class="btn btn-primary modal"
+                                class="positive"
                                 data-test-id="test-order-attachment-prints">
                             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
                             <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
