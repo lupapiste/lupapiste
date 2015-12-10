@@ -119,6 +119,7 @@
         {$set {:statements.$.reminder-sent (now)}}))))
 
 
+
 ;; "Lausuntopyynnon maaraika umpeutunut, mutta lausuntoa ei ole annettu. Muistutus lahetetaan viikoittain uudelleen."
 (defn statement-reminder-due-date []
   (let [timestamp-now (now)
@@ -138,7 +139,7 @@
                     (nil? (:given statement))
                     (number? due-date)
                     (< due-date timestamp-now)
-                    (or (nil? duedate-reminder-sent) (< duedate-reminder-sent timestamp-now)))]
+                    (or (nil? duedate-reminder-sent) (< duedate-reminder-sent timestamp-1-week-ago)))]
       (notifications/notify! :reminder-statement-due-date {:application app
                                                            :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
                                                            :data {:due-date (util/to-local-date due-date)}})
