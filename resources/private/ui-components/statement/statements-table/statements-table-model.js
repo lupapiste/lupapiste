@@ -17,7 +17,6 @@ LUPAPISTE.StatementsTableModel = function(params) {
   });
 
   self.hasAttachment = function(statement) {
-    console.log("self.hasAttachment, statement id: ", statement.id());
     return _.includes(statementIdsWithAttachments, statement.id());
   };
 
