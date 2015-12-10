@@ -1387,9 +1387,9 @@
 
 (defmigration municipality-map-server-password-encrypted
   {:apply-when (pos? (mongo/count :organizations {:map-layers.server.crypto-iv {$exists false}
-                                                  :map-layers.server.password {$exists true}}))}
+                                                  :map-layers.server.password {$nin [nil ""]}}))}
   (doseq [org (mongo/select :organizations {:map-layers.server.crypto-iv {$exists false}
-                                            :map-layers.server.password {$exists true}})
+                                            :map-layers.server.password {$nin [nil ""]}})
           :let [{:keys [server]} (:map-layers org)
                 {:keys [url username password]} server]]
     (organization/update-organization-map-server (:id org) url username password)))
