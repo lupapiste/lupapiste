@@ -43,6 +43,7 @@
                      (sc/optional-key :reminder-sent) schemas/Timestamp
                      (sc/optional-key :modified)      schemas/Timestamp
                      (sc/optional-key :modify-id)     sc/Str
+                     (sc/optional-key :editor-id)     sc/Str
                      :person                          StatementGiver
                      (sc/optional-key :metadata)      {}})
 
@@ -89,11 +90,11 @@
          (sc/validate Statement))
     (fail! :error.statement-updated-after-last-save :statementId (:id statement))))
 
-(defn update-draft [statement text status modify-id prev-modify-id]
-  (update-statement statement modify-id prev-modify-id :state :draft :text text :status status))
+(defn update-draft [statement text status modify-id prev-modify-id editor-id]
+  (update-statement statement modify-id prev-modify-id :state :draft :text text :status status :editor-id editor-id))
 
-(defn give-statement [statement text status modify-id prev-modify-id]
-  (update-statement statement modify-id prev-modify-id :state :given :text text :status status :given (now)))
+(defn give-statement [statement text status modify-id prev-modify-id editor-id]
+  (update-statement statement modify-id prev-modify-id :state :given :text text :status status :given (now) :editor-id editor-id))
 
 ;;
 ;; Statement givers

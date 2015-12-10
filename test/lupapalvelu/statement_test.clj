@@ -69,32 +69,34 @@
     (-> (ssg/generate Statement)
         (assoc :modify-id "mod1")
         (dissoc :modified)
-        (update-draft "some text" "puoltaa" "mod2" "mod1"))
+        (update-draft "some text" "puoltaa" "mod2" "mod1" "editor1"))
     => (contains #{[:text "some text"] 
                    [:status "puoltaa"] 
-                   [:modify-id "mod2"] 
+                   [:modify-id "mod2"]
+                   [:editor-id "editor1"]
                    [:state :draft]
                    [:modified anything]}))
 
   (fact "update-draft - wrong modify-id"
     (-> (ssg/generate Statement)
         (assoc :modify-id "modx")
-        (update-draft "some text" "puoltaa" "mod2" "mod1"))
+        (update-draft "some text" "puoltaa" "mod2" "mod1" "editor1"))
     => (throws Exception))
 
-  (fact "update-draft - missing person"
+  (fact "update-draft - updated statement is missing person should produce validation error"
     (-> (ssg/generate Statement)
         (dissoc :person)
-        (update-draft "some text" "puoltaa" "mod2" "mod1"))
+        (update-draft "some text" "puoltaa" "mod2" "mod1" "editor1"))
     => (throws Exception))
 
   (fact "give-statement"
     (-> (ssg/generate Statement)
         (assoc :modify-id "mod1")
         (dissoc :given)
-        (give-statement "some text" "puoltaa" "mod2" "mod1"))
+        (give-statement "some text" "puoltaa" "mod2" "mod1" "editor1"))
     => (contains #{[:text "some text"] 
                    [:status "puoltaa"] 
                    [:modify-id "mod2"] 
+                   [:editor-id "editor1"]
                    [:state :given] 
                    [:given anything]})))

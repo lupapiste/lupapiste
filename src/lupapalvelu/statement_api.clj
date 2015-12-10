@@ -173,11 +173,11 @@
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :description "authrority-roled statement owners can save statements as draft before giving final statement."}
-  [{application :application {:keys [text status modify-id prev-modify-id]} :data :as command}]
+  [{application :application user :user {:keys [text status modify-id prev-modify-id]} :data :as command}]
   (when (and status (not ((possible-statement-statuses application) status)))
     (fail! :error.unknown-statement-status))
   (let [statement (-> (util/find-by-id statementId (:statements application))
-                      (update-draft text status modify-id prev-modify-id))]
+                      (update-draft text status modify-id prev-modify-id (:id user)))]
     (update-application command
                         {:statements {$elemMatch {:id statementId}}}
                         {$set {:statements.$ statement}})))
@@ -201,7 +201,7 @@
         comment-target {:type :statement :id statementId}
         comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)
         statement   (-> (util/find-by-id statementId (:statements application))
-                        (give-statement text status modify-id prev-modify-id))
+                        (give-statement text status modify-id prev-modify-id (:id user)))
         response (update-application command
                                      {:statements {$elemMatch {:id statementId}}}
                                      (util/deep-merge
