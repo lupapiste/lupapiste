@@ -3,15 +3,17 @@
             [lupapalvelu.mime :refer :all]))
 
 (facts "Facts about mime-type"
-  (fact (mime-type "foo.exe") => "application/x-msdownload")
-  (fact (mime-type "foo.bar") => nil?)
+  (fact (mime-type "foo.exe") => "application/x-dosexec")
+  (fact (mime-type "foo.bar") => "application/octet-stream")
   (fact (mime-type "foo.doc") => "application/msword")
-  (fact (mime-type "foo.pdf") => "application/pdf"))
+  (fact (mime-type "foo.pdf") => "application/pdf")
+  (fact (mime-type "foo.ifc") => "application/x-extension-ifc"))
 
 (facts "Test mime.types parser"
   (fact (mime-types "pdf") => "application/pdf")
   (fact (mime-types "jpeg") => "image/jpeg")
-  (fact (mime-types "jpg") => "image/jpeg"))
+  (fact (mime-types "jpg") => "image/jpeg")
+  (fact (mime-types "ifc") => "application/x-extension-ifc"))
 
 (facts "Facts about allowed-file?"
   (fact (allowed-file? "foo.pdf")      => truthy)
@@ -25,6 +27,7 @@
   (fact (allowed-file? "text.ods")     => truthy)
   (fact (allowed-file? "plan.zip")     => truthy)
   (fact (allowed-file? "plan.7z")      => truthy)
+  (fact (allowed-file? "cad.ifc")      => truthy)
 
   (fact (allowed-file? "virus.exe")    => falsey)
   (fact (allowed-file? "virus.bat")    => falsey)
@@ -41,3 +44,5 @@
   (sanitize-filename "foo/bar")           => "bar"
   (sanitize-filename "foo\\bar")          => "bar"
   (sanitize-filename "a\\b/c\\d/r//bar")  => "bar")
+
+;; TODO check few binary files
