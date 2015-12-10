@@ -21,3 +21,7 @@ statement.attachment.comment: Kommentti
 
 statement.tab.statement: Lausunto
 statement.tab.reply: Vastine
+
+email.title.statement-request-new-user: Lausuntopyyntö
+
+EMAIL-TEMPLATE-STATEMENT-REQUEST-NEW-USER: Sähköpostiosoite halutaan lisätä lausunnonantajaksi lupahakemukselle Lupapisteeseen. Lupapisteessä voidaan hoitaa rakentamiseen liittyvää lupa-asiointia yhdessä hankkeen osapuolten kesken. Vuorokauden ympäri. Jos et ole vielä Lupapisteen käyttäjä, hakemuksen näkeminen edellyttää rekisteröitymistä palveluun mobiilivarmenteen tai verkkopankkitunnuksien avulla. Muistathan rekisteröityä palveluun samalla sähköpostiosoitteella, johon kutsu on lähetetty. Päästäksesi kirjoittamaan lausuntoa rekisteröidy käyttäjäksi tästä: Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville. Tarkista myös, että kutsuttu sähköpostiosoite vastaa sähköpostiosoitetta, jolla olet palveluun rekisteröitynyt. Lausunnon määräaika on .
