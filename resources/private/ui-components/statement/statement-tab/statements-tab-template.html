@@ -13,7 +13,7 @@
                          }"></span>
         <div id="application-statements-table">
           <div data-bind="component: {name: 'statements-table',
-                                      params: {applicationId: application.id,
+                                      params: {application: application,
                                                statements: application.statements,
                                                authModel: $root.authorization,
                                                localisationKeys: {missing: 'application.statement.missing'}}}"></div>

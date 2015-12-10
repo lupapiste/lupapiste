@@ -2,10 +2,32 @@ LUPAPISTE.StatementsTableModel = function(params) {
   "use strict";
   var self = this;
 
-  self.applicationId = params.applicationId;
+  self.application = params.application;
   self.statements = params.statements;
   self.authorization = params.authModel;
   self.localisationKeys = params.localisationKeys;
+
+
+  var statementIdsWithAttachments = [];
+  _.forEach(self.application.attachments(), function(attachment) {
+    var target = ko.mapping.toJS(attachment.target);
+    if (target && target.type == "statement") {
+      statementIdsWithAttachments.push(target.id);
+    }
+  });
+
+  self.hasAttachment = function(statement) {
+    console.log("self.hasAttachment, statement id: ", statement.id());
+    return _.includes(statementIdsWithAttachments, statement.id());
+  };
+
+  // Enrich each statement with an info about a possible attachment associated with the statement.
+//  self.statements = _.forEach(self.statements(), function(statement) {
+//    statement.hasAttachment = _.some(self.application.attachments(), function(attachment) {
+//     return attachment.target && _.isEqual(ko.mapping.toJS(attachment.target), {type: "statement", id: statement.id()});
+//   });
+//   return statement;
+// });
 
   self.isStatementOverDue = function(statement) {
     var nowTimeInMs = new Date().getTime();
@@ -14,9 +36,9 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   var deleteStatementFromServer = function(statementId) {
     ajax
-      .command("delete-statement", {id: self.applicationId(), statementId: statementId})
+      .command("delete-statement", {id: self.application.id(), statementId: statementId})
       .success(function() {
-        repository.load(self.applicationId());
+        repository.load(self.application.id());
         return false;
       })
       .call();
@@ -24,7 +46,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.openStatement = function(model) {
-    pageutil.openPage("statement", self.applicationId() + "/" + model.id());
+    pageutil.openPage("statement", self.application.id() + "/" + model.id());
     return false;
   };
 
