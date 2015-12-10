@@ -128,7 +128,7 @@ LUPAPISTE.OrganizationModel = function () {
         .call();
     };
 
-    self.neighborOrderEmails(util.getIn(organization, ["notifications", "neighbor-order-emails"], ""));
+    self.neighborOrderEmails(util.getIn(organization, ["notifications", "neighbor-order-emails"], []).join("; "));
 
     _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
       var operationsAttachments = _(value)
