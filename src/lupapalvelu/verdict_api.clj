@@ -3,13 +3,11 @@
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [pandect.core :as pandect]
             [monger.operators :refer :all]
-            [net.cgrand.enlive-html :as enlive]
             [sade.common-reader :as cr]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
-            [sade.xml :as xml]
             [lupapalvelu.application :as application]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
@@ -34,20 +32,8 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
-(defn special-foreman-designer-verdict?
-  "Some verdict providers handle foreman and designer verdicts a bit
-  differently. These 'special' verdicts contain reference permit id in
-  MuuTunnus"
-  [application app-xml]
-  (let [app-id (:id application)
-        op-name (-> application :primaryOperation :name)]
-    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
-      (let [link-permit-id (-> (mongo/select-one :app-links {:link.0 app-id}) :link second)
-            xml (cr/strip-xml-namespaces app-xml)]
-        (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))]))))))
-
 (defn normalize-special-verdict
-  "Normalizes special foreman/designer verdicts (see above) by
+  "Normalizes special foreman/designer verdicts by
   creating a traditional paatostieto element from the proper special
   verdict party.
     application: Application that requests verdict.
@@ -55,30 +41,10 @@
   Returns either normalized app-xml (without namespaces) or app-xml if
   the verdict is not special."
   [application app-xml]
-  (if (special-foreman-designer-verdict? application app-xml)
-    (let [xml          (cr/strip-xml-namespaces app-xml)
-          op-name      (-> application :primaryOperation :name)
-          tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
-          [party]      (enlive/select xml [tag])
-          attachment   (-> party (enlive/select [:liitetieto :Liite]) first enlive/unwrap)
-          date         (xml/get-text party [:paatosPvm])
-          decision     (xml/get-text party [:paatostyyppi])
-          verdict-xml  [{:tag :Paatos
-                         :content [{:tag :poytakirja
-                                    :content [{:tag :paatoskoodi :content [decision]}
-                                              {:tag :paatoksentekija :content [""]}
-                                              {:tag :paatospvm :content [date]}
-                                              {:tag :liite :content attachment}]}]}]
-          paatostieto  {:tag :paatostieto :content verdict-xml}
-          placeholders #{:paatostieto :muistiotieto :referenssiPiste
-                         :liitetieto  :kayttotapaus :asianTiedot}
-          [rakval]     (enlive/select xml [:RakennusvalvontaAsia])
-          place        (some #(placeholders (:tag %)) (:content rakval))]
-      (case place
-        :paatostieto (enlive/at xml [:RakennusvalvontaAsia :paatostieto] (enlive/content verdict-xml))
-        nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
-        (enlive/at xml [:RakennusvalvontaAsia place] (enlive/before paatostieto))))
-    app-xml))
+  (let [xml (cr/strip-xml-namespaces app-xml)]
+    (if (verdict/special-foreman-designer-verdict? application xml)
+      (verdict/verdict-xml-with-foreman-designer-verdicts application xml)
+      app-xml)))
 
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
