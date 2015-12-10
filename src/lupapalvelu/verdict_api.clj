@@ -77,7 +77,7 @@
       (case place
         :paatostieto (enlive/at xml [:RakennusvalvontaAsia :paatostieto] (enlive/content verdict-xml))
         nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
-        :default     (enlive/at xml [:RakennusvalvontaAsia place] (enlive/prepend paatostieto))))
+        (enlive/at xml [:RakennusvalvontaAsia place] (enlive/prepend paatostieto))))
     app-xml))
 
 (defn do-check-for-verdict [{:keys [application] :as command}]
