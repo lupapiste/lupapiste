@@ -14,17 +14,42 @@ LUPAPISTE.FileuploadService = function() {
     document.body.appendChild(input);
   }
 
+  var fileExtensionRegex = new RegExp("(?:\\.([^.]+))?$");
+  var MAXIMUM_UPLOAD_SIZE = 15000000; // 15Mb
+
+  function getFileExtension(fname) {
+    var result = fileExtensionRegex.exec(fname)[1];
+    return _.isString(result) ? result.toLowerCase() : "";
+  }
+
   $("#" + self.fileInputId).fileupload({
-    url: "/api/upload/file",
+    url: "/api/raw/upload-file",
     type: "POST",
     dataType: "json",
     formData: [
       { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") }
     ],
-    start: function(e, data) {
+    add: function(e, data) {
+      var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions, getFileExtension(data.files[0].name));
+
+      if(acceptedFile && data.files[0].size <= MAXIMUM_UPLOAD_SIZE) {
+
+        data.submit();
+      } else {
+        var message = !acceptedFile ?
+          "error.illegal-file-type" :
+          "error.bulletins.illegal-upload-size";
+
+        hub.send("indicator", {
+          style: "negative",
+          message: message
+        });
+      }
+    },
+    start: function() {
       hub.send("fileuploadService::filesUploading", {state: "pending"});
     },
-    always: function(e, data) {
+    always: function() {
       hub.send("fileuploadService::filesUploading", {state: "finished"});
     },
     done: function(e, data) {
@@ -32,7 +57,10 @@ LUPAPISTE.FileuploadService = function() {
                                                     files: data.result.files});
     },
     fail: function(e, data) {
-      hub.send("fileuploadService::filesUploaded", {status: "failed"});
+      hub.send("fileuploadService::filesUploaded", {
+        status: "failed",
+        message: data.jqXHR.responseJSON.text
+      });
     },
     progress: function (e, data) {
       var progress = parseInt(data.loaded / data.total * 100, 10);
@@ -42,5 +70,14 @@ LUPAPISTE.FileuploadService = function() {
 
   hub.subscribe("fileuploadService::uploadFile", function() {
     $("#fileupload-input").click();
+  });
+
+  hub.subscribe("fileuploadService::removeFile", function(event) {
+    ajax
+      .command("remove-uploaded-file", {attachmentId: event.attachmentId})
+      .success(function(res) {
+        hub.send("fileuploadService::fileRemoved", {attachmentId: res.attachmentId});
+      })
+      .call();
   });
 };

@@ -15,7 +15,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
 
   self.fetchBulletinsPending = ko.observable(false);
 
-  self.fetchBulletins = _.debounce(function (query) {
+  var fetchBulletins = _.debounce(function (query) {
     ajax.datatables("application-bulletins", query)
       .success(function(res) {
         self.bulletinsLeft(res.left);
@@ -30,7 +30,7 @@ LUPAPISTE.ApplicationBulletinsService = function() {
   }, 250);
 
   ko.computed(function() {
-    self.fetchBulletins(ko.mapping.toJS(self.query),
+    fetchBulletins(ko.mapping.toJS(self.query),
       self.fetchBulletinsPending);
   });
 
@@ -97,6 +97,10 @@ LUPAPISTE.ApplicationBulletinsService = function() {
 
   hub.subscribe("bulletinService::fetchBulletin", function(event) {
     fetchBulletin(event.id);
+  });
+
+  hub.subscribe("bulletinService::fetchBulletins", function() {
+    fetchBulletins(ko.mapping.toJS(self.query));
   });
 
   var commentForm;

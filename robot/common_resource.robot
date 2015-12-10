@@ -79,7 +79,7 @@ Authority applications page should be open
   Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority-admin front page should be open
-  Wait until  Element should be visible  admin
+  Wait until  Element should be visible  users
 
 Admin front page should be open
   Wait until  Element should be visible  admin
