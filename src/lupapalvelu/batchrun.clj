@@ -12,6 +12,7 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as inforequest]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.xml.krysp.reader]
@@ -118,6 +119,35 @@
         {$set {:statements.$.reminder-sent (now)}}))))
 
 
+;; "Lausuntopyynnon maaraika umpeutunut, mutta lausuntoa ei ole annettu. Muistutus lahetetaan viikoittain uudelleen."
+(defn statement-reminder-due-date []
+  (let [timestamp-now (now)
+        timestamp-1-week-ago (util/get-timestamp-ago :week 1)
+        apps (mongo/select :applications {:state {$nin (->> states/terminal-states vec (map name))}
+                                          :statements {$elemMatch {:given nil
+                                                                   $and [{:dueDate {$exists true}}
+                                                                         {:dueDate (older-than timestamp-now)}]
+                                                                   $or [{:duedate-reminder-sent {$exists false}}
+                                                                        {:duedate-reminder-sent nil}
+                                                                        {:duedate-reminder-sent (older-than timestamp-1-week-ago)}]}}})]
+    (doseq [app apps
+            statement (:statements app)
+            :let [due-date (:dueDate statement)
+                  duedate-reminder-sent (:duedate-reminder-sent statement)]
+            :when (and
+                    (nil? (:given statement))
+                    (number? due-date)
+                    (< due-date timestamp-now)
+                    (or (nil? duedate-reminder-sent) (< duedate-reminder-sent timestamp-now)))]
+      (notifications/notify! :reminder-statement-due-date {:application app
+                                                           :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
+                                                           :data {:due-date (util/to-local-date due-date)}})
+      (update-application (application->command app)
+        {:statements {$elemMatch {:id (:id statement)}}}
+        {$set {:statements.$.duedate-reminder-sent (now)}}))))
+
+
+
 ;; "Neuvontapyynto: Neuvontapyyntoon ei ole vastattu viikon kuluessa eli neuvontapyynnon tila on avoin. Lahetetaan viikoittain uudelleen."
 (defn open-inforequest-reminder []
   (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
@@ -217,6 +247,7 @@
   (when (env/feature? :reminders)
     (mongo/connect!)
     (statement-request-reminder)
+    (statement-reminder-due-date)
     (open-inforequest-reminder)
     (neighbor-reminder)
     (application-state-reminder)
