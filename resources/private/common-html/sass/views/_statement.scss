@@ -2,8 +2,11 @@
 
   .statement-top {
     background-color: #eee;
-    padding: $marginL 0;
+    padding-top: $marginL;
     border-bottom: 2px solid #bbb;
+    .container {
+      margin-bottom: 0;
+    }
   }
 
   .headerarea {

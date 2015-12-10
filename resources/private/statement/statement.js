@@ -7,6 +7,9 @@
 
   var authorizationModel = authorization.create();
 
+  var tabs = ["statement"];
+  var selectedTab = ko.observable("statement");
+
   hub.subscribe("statement::submitAllowed", function(data) {
     submitAllowed(data.value);
   });
@@ -28,7 +31,9 @@
       authorization: authorizationModel,
       applicationId: applicationId,
       statementId: statementId,
-      submitAllowed: submitAllowed
+      submitAllowed: submitAllowed,
+      selectedTab: selectedTab,
+      tabs: tabs
     });
   });
 

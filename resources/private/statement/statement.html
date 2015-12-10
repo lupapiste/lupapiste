@@ -11,6 +11,15 @@
             <i class="lupicon-chevron-start"></i>
           <span data-bind ="ltext: 'application.return'"></span>
         </a>
+        <div class="tabs-container">
+          <ul data-bind="foreach: tabs" class="tabs">
+            <li data-bind="attr: {'data-test-id': 'statement-tab-selector-' + $data},
+                           css: {active: $parent.selectedTab() === $data},
+                           click: $parent.selectedTab">
+              <a href="#" class="link-btn" data-bind="ltext: 'statement.tab.' + $data"></a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
