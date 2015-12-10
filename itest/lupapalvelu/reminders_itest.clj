@@ -23,6 +23,7 @@
 
 (def- timestamp-the-beginning-of-time 0)
 (def- timestamp-1-day-ago (util/get-timestamp-ago :day 1))
+(def- timestamp-1-day-in-future (util/get-timestamp-from-now :day 1))
 
 (def- neighbor-non-matching
   {:id "534bf825299508fb3618489v"
@@ -57,7 +58,7 @@
     (assoc :id "534bf825299508fb3618456c")
     (assoc-in [:status 1 :created] timestamp-the-beginning-of-time)))
 
-(def- neighbor-non-matching-with-response-given
+(def- neighbor-non-matching-with-response-given   ; reminders not sent if response has been given
   (-> neighbor-matching
     (assoc :id "534bf825299508fb3615223m")
     (update-in [:status] conj {:state "response-given-ok"
@@ -88,7 +89,13 @@
              :email "pekka.lupapiste@gmail.com"
              :name "Pekka Lupapiste"}
     :requested timestamp-1-day-ago
+    :dueDate timestamp-1-day-in-future
     :status nil})
+
+(def- statement-non-matching-no-dueDate
+  (-> statement-non-matching
+    (assoc :id "525533f7e4b0138a23d99994")
+    (dissoc :dueDate)))
 
 (def- statement-matching
   {:id "525533f7e4b0138a23d8e4b5"
@@ -98,6 +105,7 @@
             :email "sakari.viranomainen@kuopio.fi"
             :name "Esa Lupapiste"}
    :requested timestamp-the-beginning-of-time
+   :dueDate timestamp-1-day-ago
    :status nil})
 
 (def- reminder-application
@@ -137,8 +145,9 @@
   (assoc reminder-application
     :id "LP-753-2014-123456789"
     :modified timestamp-1-day-ago
-    :statements [statement-non-matching]
-    :neighbors [neighbor-non-matching-with-response-given neighbor-non-matching-with-mark-done]))
+    :statements []
+    :neighbors [neighbor-non-matching-with-response-given
+                neighbor-non-matching-with-mark-done]))
 
 (def- reminder-application-matching-to-inforequest
   (assoc reminder-application
@@ -257,7 +266,9 @@
           email => (partial contains-application-link? application-id link-role))))))
 
 
+
 (facts "reminders"
+
   (mongo/with-db db-name
     (mongo/insert :applications reminder-application)
     (mongo/insert :applications reminder-application-non-matching-neighbors)
