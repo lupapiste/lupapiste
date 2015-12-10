@@ -112,7 +112,9 @@
   (merge
     domain/application-skeleton
     {:neighbors [neighbor-non-matching
-                 neighbor-matching]
+                 neighbor-matching
+                 neighbor-non-matching-with-response-given
+                 neighbor-non-matching-with-mark-done]
      :schema-version 1
      :auth [{:lastName "Panaani"
              :firstName "Pena"
@@ -123,6 +125,7 @@
      :state "open"
      :location {:x 444444.0, :y 6666666.0}
      :statements [statement-non-matching
+                  statement-non-matching-no-dueDate
                   statement-matching]
      :organization "753-R"
      :title "Naapurikuja 3"
@@ -140,14 +143,6 @@
      :permitType "R"
      :id "LP-753-2014-12345"
      :municipality "753"}))
-
-(def- reminder-application-non-matching-neighbors
-  (assoc reminder-application
-    :id "LP-753-2014-123456789"
-    :modified timestamp-1-day-ago
-    :statements []
-    :neighbors [neighbor-non-matching-with-response-given
-                neighbor-non-matching-with-mark-done]))
 
 (def- reminder-application-matching-to-inforequest
   (assoc reminder-application
@@ -244,6 +239,23 @@
                    :data {:tyoaika-alkaa-pvm {:value (util/to-local-date (util/get-timestamp-from-now :day 1)), :modified 1443177749608},
                           :tyoaika-paattyy-pvm {:value (util/to-local-date (util/get-timestamp-from-now :day 6)), :modified 1443177751909}}}]}))
 
+;;
+;; Helper functions
+;;
+
+(defn get-neighbors-with-reminder-sent-status [app]
+  (reduce
+    (fn [res neighbor]
+      (reduce
+        (fn [res2 status]
+          (if (= "reminder-sent" (:state status))
+            (conj res2 {:neighbor-id (:id neighbor)
+                        :timestamp-reminder-sent (:created status)})
+            res2))
+        res
+        (:status neighbor)))
+    []
+    (:neighbors app)))
 
 (defn- check-sent-reminder-email [to subject bodyparts & [application-id link-role]]
   {:pre (vector? bodyparts)}
@@ -271,7 +283,6 @@
 
   (mongo/with-db db-name
     (mongo/insert :applications reminder-application)
-    (mongo/insert :applications reminder-application-non-matching-neighbors)
     (mongo/insert :applications reminder-application-matching-to-inforequest)
     (mongo/insert :applications reminder-application-non-matching-to-inforequest)
     (mongo/insert :applications ya-reminder-application)
@@ -280,234 +291,337 @@
     (mongo/insert :open-inforequest-token open-inforequest-entry-with-application-with-non-matching-state)
     (dummy-email-server/messages :reset true))  ;; clears inbox
 
- (facts "statement-request-reminder"
 
-   (fact "the \"reminder-sent\" timestamp does not pre-exist"
-     (mongo/with-db db-name
-       (let [now-timestamp (now)]
+  (facts "statement-request-reminder"
 
-         (batchrun/statement-request-reminder)
+    (fact "the \"reminder-sent\" timestamp does not pre-exist and one matching statement exists -> reminder is sent"
+      (mongo/with-db db-name
+        (let [now-timestamp (now)]
 
-         (let [app (mongo/by-id :applications (:id reminder-application))]
-           (>= (-> app :statements second :reminder-sent) now-timestamp) => true?
-           (-> app :statements first :reminder-sent) => nil?
-           )
+          (batchrun/statement-request-reminder)
 
-         (check-sent-reminder-email
+          (let [app (mongo/by-id :applications (:id reminder-application))
+                reminder-sent-statements (filter :reminder-sent (:statements app))]
+            (count reminder-sent-statements) => 1
+            (-> reminder-sent-statements first :id) => (:id statement-matching)
+            (>= (-> reminder-sent-statements first :reminder-sent) now-timestamp) => true?)
+
+          (check-sent-reminder-email
+            (-> statement-matching :person :email)
+            "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
+            ["Sinulta on pyydetty lausuntoa lupahakemukseen"]
+            (:id reminder-application) "authority"))))
+
+    (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
+      (mongo/with-db db-name
+
+        (update-application
+          (application->command reminder-application)
+          {:statements {$elemMatch {:id (:id statement-matching)}}}
+          {$set {:statements.$.reminder-sent timestamp-the-beginning-of-time}})
+
+        (batchrun/statement-request-reminder)
+
+        (let [app (mongo/by-id :applications (:id reminder-application))
+              reminder-sent-statements (filter :reminder-sent (:statements app))]
+          (count reminder-sent-statements) => 1
+          (> (-> reminder-sent-statements first :reminder-sent) timestamp-the-beginning-of-time) => true?)
+
+        ;; clears inbox
+        (check-sent-reminder-email
           (-> statement-matching :person :email)
           "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
           ["Sinulta on pyydetty lausuntoa lupahakemukseen"]
-          (:id reminder-application) "authority")
-         )))
+          (:id reminder-application) "authority")))
 
-   (fact "the \"reminder-sent\" timestamp already exists"
-     (mongo/with-db db-name
-       (update-application
-        (application->command reminder-application)
-        {:statements {$elemMatch {:id (:id statement-matching)}}}
-        {$set {:statements.$.reminder-sent timestamp-the-beginning-of-time}})
-
-       (batchrun/statement-request-reminder)
-
-       (let [app (mongo/by-id :applications (:id reminder-application))]
-         (> (-> app :statements second :reminder-sent) timestamp-the-beginning-of-time) => true?)
-
-       (check-sent-reminder-email
-        (-> statement-matching :person :email)
-        "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
-        ["Sinulta on pyydetty lausuntoa lupahakemukseen"]
-        (:id reminder-application) "authority"))
-     ))
+    (fact "a fresh \"reminder-sent\" timestamp already exists -> no reminder is sent"
+      (mongo/with-db db-name
+        (dummy-email-server/messages :reset true)  ;; clears inbox
+        (batchrun/statement-request-reminder)
+        (dummy-email-server/messages :reset true) => empty?)))
 
 
- (facts "open-inforequest-reminder"
 
-   (fact "the \"reminder-sent\" timestamp does not pre-exist"
-     (mongo/with-db db-name
-       (let [now-timestamp (now)]
+  (facts "statement-reminder-due-date"
 
-         (batchrun/open-inforequest-reminder)
+    ;; reset test conditions
+    (mongo/with-db db-name
+      (mongo/remove :applications (:id reminder-application))
+      (mongo/insert :applications reminder-application))
 
-         (let [oir-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))
-               oir-non-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-non-matching))]
-           (>= (:reminder-sent oir-matching) now-timestamp) => true?
-           (:reminder-sent oir-non-matching) => nil?
-           )
+    (fact "the \"duedate-reminder-sent\" timestamp does not pre-exist and one matching statement exists -> reminder is sent"
+      (mongo/with-db db-name
+        (let [now-timestamp (now)]
 
-         (check-sent-reminder-email
-          (:email open-inforequest-entry-matching)
-          "Lupapiste.fi: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
-          ["Organisaatiollasi on vastaamaton neuvontapyynt\u00f6"])
-         )))
+          (batchrun/statement-reminder-due-date)
 
-   (fact "the \"reminder-sent\" timestamp already exists"
-     (mongo/with-db db-name
-       (mongo/update-by-id :open-inforequest-token (:_id open-inforequest-entry-matching)
-                           {$set {:reminder-sent timestamp-the-beginning-of-time}})
+          (let [app (mongo/by-id :applications (:id reminder-application))
+                duedate-reminder-sent-statements (filter :duedate-reminder-sent (:statements app))]
+            (count (:statements app)) => 3
+            (count duedate-reminder-sent-statements) => 1
+            (-> duedate-reminder-sent-statements first :id) => (:id statement-matching)
+            (>= (-> duedate-reminder-sent-statements first :duedate-reminder-sent) now-timestamp) => true?)
 
-       (batchrun/open-inforequest-reminder)
+          (check-sent-reminder-email
+            (-> statement-matching :person :email)
+            "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6lle asetetun m\u00e4\u00e4r\u00e4ajan umpeutumisesta"
+            ["Sinulta on pyydetty lausuntoa lupahakemukseen" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
+            (:id reminder-application) "authority"))))
 
-       (let [oir (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))]
+    (fact "the \"duedate-reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
+      (mongo/with-db db-name
 
-         (> (:reminder-sent oir) timestamp-the-beginning-of-time) => true?
+        (update-application
+          (application->command reminder-application)
+          {:statements {$elemMatch {:id (:id statement-matching)}}}
+          {$set {:statements.$.duedate-reminder-sent timestamp-the-beginning-of-time}})
 
-         (check-sent-reminder-email
-          (:email open-inforequest-entry-matching)
-          "Lupapiste.fi: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
-          ["Organisaatiollasi on vastaamaton neuvontapyynt\u00f6"])
-         ))))
+        (batchrun/statement-reminder-due-date)
+
+        (let [app (mongo/by-id :applications (:id reminder-application))
+              duedate-reminder-sent-statements (filter :duedate-reminder-sent (:statements app))]
+          (count duedate-reminder-sent-statements) => 1
+          (> (-> duedate-reminder-sent-statements first :duedate-reminder-sent) timestamp-the-beginning-of-time) => true?)
+
+        ;; clears inbox
+        (check-sent-reminder-email
+          (-> statement-matching :person :email)
+          "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6lle asetetun m\u00e4\u00e4r\u00e4ajan umpeutumisesta"
+          ["Sinulta on pyydetty lausuntoa lupahakemukseen" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
+          (:id reminder-application) "authority")))
+
+    (fact "a fresh \"duedate-reminder-sent\" timestamp already exists -> no reminder is sent"
+      (mongo/with-db db-name
+        (dummy-email-server/messages :reset true)  ;; clears inbox
+        (batchrun/statement-reminder-due-date)
+        (dummy-email-server/messages :reset true) => empty?)))
 
 
- (facts "neighbor-reminder"
 
-   (fact "the \"reminder-sent\" status does not pre-exist"
-     (mongo/with-db db-name
-       (let [now-timestamp (now)]
+  (facts "open-inforequest-reminder"
 
-         (batchrun/neighbor-reminder)
+    (fact "the \"reminder-sent\" timestamp does not pre-exist and one matching inforequest exists -> reminder is sent"
+      (mongo/with-db db-name
+        (let [now-timestamp (now)]
 
-         (let [app (mongo/by-id :applications (:id reminder-application))
-               reminder-sent-statuses (filter
-                                       #(= "reminder-sent" (:state %))
-                                       (-> app :neighbors second :status))]
+          (batchrun/open-inforequest-reminder)
 
-           (count reminder-sent-statuses) => 1
-           (>= (:created (first reminder-sent-statuses)) now-timestamp) => true?
-           (filter
-            #(= "reminder-sent" (:state %))
-            (-> app :neighbors first :status)) => empty?
+          (let [oir-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))
+                oir-non-matching (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-non-matching))]
+            (>= (:reminder-sent oir-matching) now-timestamp) => true?
+            (:reminder-sent oir-non-matching) => nil?)
+
+          (check-sent-reminder-email
+           (:email open-inforequest-entry-matching)
+           "Lupapiste.fi: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+           ["Organisaatiollasi on vastaamaton neuvontapyynt\u00f6"]))))
+
+    (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
+      (mongo/with-db db-name
+
+        (mongo/update-by-id :open-inforequest-token (:_id open-inforequest-entry-matching)
+                            {$set {:reminder-sent timestamp-the-beginning-of-time}})
+
+        (batchrun/open-inforequest-reminder)
+
+        (let [oir (mongo/by-id :open-inforequest-token (:_id open-inforequest-entry-matching))]
+          (> (:reminder-sent oir) timestamp-the-beginning-of-time) => true?
+
+          ;; clears inbox
+          (check-sent-reminder-email
+           (:email open-inforequest-entry-matching)
+           "Lupapiste.fi: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+           ["Organisaatiollasi on vastaamaton neuvontapyynt\u00f6"]))))
+
+    (fact "a fresh \"duedate-reminder-sent\" timestamp already exists -> no reminder is sent"
+      (mongo/with-db db-name
+        (dummy-email-server/messages :reset true)  ;; clears inbox
+        (batchrun/statement-reminder-due-date)
+        (dummy-email-server/messages :reset true) => empty?)))
+
+
+
+  (facts "neighbor-reminder"
+
+    (fact "the \"reminder-sent\" status does not pre-exist and one matching neighbor exists -> reminder is sent"
+      (mongo/with-db db-name
+        (let [now-timestamp (now)]
+
+          (batchrun/neighbor-reminder)
+
+          (let [app (mongo/by-id :applications (:id reminder-application))
+                neighbors-with-reminder-sent-status (get-neighbors-with-reminder-sent-status app)]
+
+            (count neighbors-with-reminder-sent-status) => 1
+            (> (-> neighbors-with-reminder-sent-status first :timestamp-reminder-sent) now-timestamp) => true?
+
+            ;; clears inbox
+            (check-sent-reminder-email
+              (->> neighbor-matching :status (filter #(= "email-sent" (:state %))) first :email)
+              "Lupapiste.fi: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
+              ["T\u00e4m\u00e4 on muistutusviesti. Rakennuspaikan rajanaapurina Teille ilmoitetaan"])))))
+
+    (fact "a recent \"reminder-sent\" status already exists - no reminder is sent"
+      (mongo/with-db db-name
+        (dummy-email-server/messages :reset true)  ;; clears inbox
+        (batchrun/neighbor-reminder)
+        (dummy-email-server/messages :reset true) => empty?))
+
+    (fact "an very old \"reminder-sent\" status already exists -> reminder is not sent"
+      (mongo/with-db db-name
+        ;; in "neighbor-matching", set the :created timestamp of the "email-sent" status to "timestamp-the-beginning-of-time"
+        (let [now-timestamp (now)
+              app (mongo/by-id :applications (:id reminder-application))
+              new-neighbors (map
+                              (fn [neighbor]
+                                (if (= (:id neighbor-matching) (:id neighbor))
+                                  (update-in neighbor [:status] (fn [statuses]
+                                                                  (map
+                                                                    (fn [status]
+                                                                      (if (= "reminder-sent" (:state status))
+                                                                        (assoc status :created timestamp-the-beginning-of-time)
+                                                                        status))
+                                                                    statuses)))
+                                  neighbor))
+                              (:neighbors app))]
+
+          (update-application
+            (application->command reminder-application)
+            {$set {:neighbors new-neighbors}})
+
+          (batchrun/neighbor-reminder)
+
+          (let [app (mongo/by-id :applications (:id reminder-application))
+                neighbors-with-reminder-sent-status (get-neighbors-with-reminder-sent-status app)]
+
+            ;; New reminders have not been sent because neighbor reminders are sent only once.
+            (count neighbors-with-reminder-sent-status) => 1
+            (-> neighbors-with-reminder-sent-status first :timestamp-reminder-sent) => timestamp-the-beginning-of-time
+
+            (mongo/with-db db-name
+              (dummy-email-server/messages :reset true) => empty?))))))
+
+
+
+  (facts "application-state-reminder"
+
+    (fact "the \"reminder-sent\" timestamp does not pre-exist -> reminder is sent"
+      (mongo/with-db db-name
+        (let [now-timestamp (now)]
+
+          (batchrun/application-state-reminder)
+
+          (let [app (mongo/by-id :applications (:id reminder-application))]
+            (>= (:reminder-sent app) now-timestamp) => true?
 
             (check-sent-reminder-email
-             (-> neighbor-matching :status second :email)
-             "Lupapiste.fi: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
-             ["T\u00e4m\u00e4 on muistutusviesti. Rakennuspaikan rajanaapurina Teille ilmoitetaan"])
-            ))))
-
-   (fact "the \"reminder-sent\" status already exists - no emails sent"
-     (mongo/with-db db-name
-       (dummy-email-server/messages :reset true)  ;; clears inbox
-       (batchrun/neighbor-reminder)
-       (dummy-email-server/messages :reset true) => empty?)))
-
-
- (facts "application-state-reminder"
-
-   (fact "the \"reminder-sent\" timestamp does not pre-exist"
-     (mongo/with-db db-name
-       (let [now-timestamp (now)]
-
-         (batchrun/application-state-reminder)
-
-         (let [app (mongo/by-id :applications (:id reminder-application))]
-           (>= (:reminder-sent app) now-timestamp) => true?
-
-           (check-sent-reminder-email
-            "pena@example.com"
-            "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
-            ["Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])
-           ))))
-
-   (fact "the \"reminder-sent\" timestamp already exists"
-     (mongo/with-db db-name
-       (update-application (application->command reminder-application)
-                           {$set {:reminder-sent timestamp-the-beginning-of-time}})
-
-       (batchrun/application-state-reminder)
-
-       (let [app (mongo/by-id :applications (:id reminder-application))]
-         (> (:reminder-sent app) timestamp-the-beginning-of-time) => true?
-
-         (check-sent-reminder-email
-          "pena@example.com"
-          "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
-          ["Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])
-         ))))
-
-
- (facts "ya-work-time-is-expiring-reminder"
-
-   (fact "the \"ya-work-time-is-expiring\" timestamp does not pre-exist"
-     (mongo/with-db db-name
-       (let [app (mongo/by-id :applications (:id ya-reminder-application))]
-
-         (:work-time-expiring-reminder-sent app) => nil?
-
-         (batchrun/ya-work-time-is-expiring-reminder)
-
-         (let [app (mongo/by-id :applications (:id ya-reminder-application))
-               tyoaika-paattyy (->> ya-reminder-application :documents (filter #(= "tyoaika" (-> % :schema-info :name))) first :data :tyoaika-paattyy-pvm :value)]
-
-           (:work-time-expiring-reminder-sent app) => number?
-
-           (check-sent-reminder-email
              "pena@example.com"
-             "Lupapiste.fi: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
-             ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"
-              tyoaika-paattyy
-              (:address app)])))))
+             "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+             ["Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])))))
 
-   (fact "the \"ya-work-time-is-expiring\" timestamp already exists"
-     (mongo/with-db db-name
-       (update-application (application->command ya-reminder-application)
-         {$set {:work-time-expiring-reminder-sent timestamp-the-beginning-of-time}})
+    (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
+      (mongo/with-db db-name
+        (update-application (application->command reminder-application)
+                            {$set {:reminder-sent timestamp-the-beginning-of-time}})
 
-       (batchrun/ya-work-time-is-expiring-reminder)
+        (batchrun/application-state-reminder)
 
-       (let [app (mongo/by-id :applications (:id ya-reminder-application))]
-         (= (:work-time-expiring-reminder-sent app) timestamp-the-beginning-of-time) => true?
-         (dummy-email-server/messages) => empty?
-         )))
+        (let [app (mongo/by-id :applications (:id reminder-application))]
+          (> (:reminder-sent app) timestamp-the-beginning-of-time) => true?
 
-   (fact "the \"ya-work-time-is-expiring\" reminder is sent also to applications in state 'construction-started'"
-     (mongo/with-db db-name
-       (update-application (application->command ya-reminder-application)
-         (merge (application/state-transition-update :constructionStarted 0 {})
-           {$unset {:work-time-expiring-reminder-sent 1}}))
-       (batchrun/ya-work-time-is-expiring-reminder)
-       (check-sent-reminder-email
-         "pena@example.com"
-         "Lupapiste.fi: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
-         ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"])
-       ))
+          (check-sent-reminder-email
+           "pena@example.com"
+           "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+           ["Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"]))))
 
-   (fact "applications without 'tyoaika' document are not reacted to"
-     (mongo/with-db db-name
-       (update-application (application->command ya-reminder-application)
-           {$unset {:work-time-expiring-reminder-sent 1}
-            $set {:documents (remove
-                               #(= "tyoaika" (-> % :schema-info :name))
-                               (:documents ya-reminder-application))}})
+    (fact "the \"reminder-sent\" timestamp already exists - no reminder is sent"
+      (mongo/with-db db-name
+        (dummy-email-server/messages :reset true)  ;; clears inbox
+        (batchrun/application-state-reminder)
+        (dummy-email-server/messages :reset true) => empty?)))
 
-       (batchrun/ya-work-time-is-expiring-reminder)
-       (dummy-email-server/messages) => empty?
-       ))
 
-   (fact "applications with :tyoaika-paattyy-pvm date too far in the future are not reacted to"
-     (mongo/with-db db-name
-       (let [date-str-8-days-in-future (util/to-local-date (util/get-timestamp-from-now :day 8))]
 
-         (update-application
-           (application->command ya-reminder-application)
-           {:documents {$elemMatch {:schema-info (:name "tyoaika")}}}
-           {$set {:documents.$.data.tyoaika-paattyy-pvm.value date-str-8-days-in-future}})  ;; 8 days -> will not trigger reminder
+  (facts "ya-work-time-is-expiring-reminder"
 
-         (batchrun/ya-work-time-is-expiring-reminder)
-         (dummy-email-server/messages) => empty?
-         )))
+    (fact "the \"ya-work-time-is-expiring\" timestamp does not pre-exist -> reminder is sent"
+      (mongo/with-db db-name
+        (let [app (mongo/by-id :applications (:id ya-reminder-application))]
 
-   (fact "applications with :tyoaika-paattyy-pvm date in the past are not reacted to"
-     (mongo/with-db db-name
-       (let [date-str-1-day-ago (util/to-local-date (util/get-timestamp-ago :day 1))]
+          (:work-time-expiring-reminder-sent app) => nil?
 
-         (update-application
-           (application->command ya-reminder-application)
-           {:documents {$elemMatch {:schema-info (:name "tyoaika")}}}
-           {$set {:documents.$.data.tyoaika-paattyy-pvm.value date-str-1-day-ago}})  ;; 1 day in the past -> will not trigger reminder
+          (batchrun/ya-work-time-is-expiring-reminder)
 
-         (batchrun/ya-work-time-is-expiring-reminder)
-         (dummy-email-server/messages) => empty?
-         )))
+          (let [app (mongo/by-id :applications (:id ya-reminder-application))
+                tyoaika-paattyy (->> ya-reminder-application :documents
+                                  (filter #(= "tyoaika" (-> % :schema-info :name)))
+                                  first :data :tyoaika-paattyy-pvm :value)]
 
-   )
- )
+            (:work-time-expiring-reminder-sent app) => number?
+
+            (check-sent-reminder-email
+              "pena@example.com"
+              "Lupapiste.fi: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
+              ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"
+               tyoaika-paattyy
+               (:address app)])))))
+
+    (fact "the \"ya-work-time-is-expiring\" timestamp already exists -> no reminder is sent"
+      (mongo/with-db db-name
+        (update-application (application->command ya-reminder-application)
+          {$set {:work-time-expiring-reminder-sent timestamp-the-beginning-of-time}})
+
+        (batchrun/ya-work-time-is-expiring-reminder)
+
+        (let [app (mongo/by-id :applications (:id ya-reminder-application))]
+          (= (:work-time-expiring-reminder-sent app) timestamp-the-beginning-of-time) => true?
+          (dummy-email-server/messages) => empty?)))
+
+    (fact "the \"ya-work-time-is-expiring\" reminder is sent also to applications in state 'construction-started'"
+      (mongo/with-db db-name
+        (update-application (application->command ya-reminder-application)
+          (merge (application/state-transition-update :constructionStarted 0 {})
+            {$unset {:work-time-expiring-reminder-sent 1}}))
+        (batchrun/ya-work-time-is-expiring-reminder)
+        (check-sent-reminder-email
+          "pena@example.com"
+          "Lupapiste.fi: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
+          ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"])))
+
+    (fact "applications without 'tyoaika' document are not reacted to"
+      (mongo/with-db db-name
+        (update-application (application->command ya-reminder-application)
+            {$unset {:work-time-expiring-reminder-sent 1}
+             $set {:documents (remove
+                                #(= "tyoaika" (-> % :schema-info :name))
+                                (:documents ya-reminder-application))}})
+
+        (batchrun/ya-work-time-is-expiring-reminder)
+        (dummy-email-server/messages) => empty?))
+
+    (fact "applications with :tyoaika-paattyy-pvm date too far in the future are not reacted to"
+      (mongo/with-db db-name
+        (let [date-str-8-days-in-future (util/to-local-date (util/get-timestamp-from-now :day 8))]
+
+          (update-application
+            (application->command ya-reminder-application)
+            {:documents {$elemMatch {:schema-info (:name "tyoaika")}}}
+            {$set {:documents.$.data.tyoaika-paattyy-pvm.value date-str-8-days-in-future}})  ;; 8 days -> will not trigger reminder
+
+          (batchrun/ya-work-time-is-expiring-reminder)
+          (dummy-email-server/messages) => empty?)))
+
+    (fact "applications with :tyoaika-paattyy-pvm date in the past are not reacted to"
+      (mongo/with-db db-name
+        (let [date-str-1-day-ago (util/to-local-date (util/get-timestamp-ago :day 1))]
+
+          (update-application
+            (application->command ya-reminder-application)
+            {:documents {$elemMatch {:schema-info (:name "tyoaika")}}}
+            {$set {:documents.$.data.tyoaika-paattyy-pvm.value date-str-1-day-ago}})  ;; 1 day in the past -> will not trigger reminder
+
+          (batchrun/ya-work-time-is-expiring-reminder)
+          (dummy-email-server/messages) => empty?)))
+
+   ))
 
