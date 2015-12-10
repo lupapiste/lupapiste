@@ -7,11 +7,14 @@
     <div class="headerarea">
       <div>
         <h1>
+          <span>
+            <span data-bind="ltext: 'statement.tab.' + tab()"></span>:
+          </span>
           <span data-bind="with: application">
-            <span data-bind="text: title"></span>:
+            <span data-bind="text: title"></span>
           </span>
           <span data-bind="with: data">
-            <span data-bind="text: person.text"></span>
+            (<span data-bind="text: person.text"></span>)
           </span>
         </h1>
         <span data-bind="visible: isDraft" class="statement-state-indicator">
@@ -19,8 +22,8 @@
           <span data-bind="ltext: 'luonnos'">Luonnos</span>
         </span>
       </div>
-      <p data-bind="with: data" id="statement-covering-note">
-        <span data-bind="text: saateText">Saate</span>
+      <p id="statement-covering-note">
+        <span data-bind="text: coveringNote">Saate</span>
       </p>
     </div>
 

@@ -5,6 +5,8 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   var applicationId = params.applicationId;
   var statementId = params.statementId;
   var authModel = params.authModel;
+  
+  self.tab = params.selectedTab;
 
   // this function is mutated over in the attachement.deleteVersion
   var deleteAttachmentFromServerProxy;

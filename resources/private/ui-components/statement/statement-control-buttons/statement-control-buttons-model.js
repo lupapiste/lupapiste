@@ -5,6 +5,7 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
   var statementId = params.statementId;
   
   self.authModel = params.authModel;
+  self.tab = params.selectedTab;
 
   self.disabled = ko.pureComputed(function() {
     return !params.submitAllowed();

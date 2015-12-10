@@ -28,20 +28,23 @@
         <div data-bind="component: { name: 'statement-edit',
                                      params: { applicationId: $root.applicationId,
                                                statementId: $root.statementId,
-                                               authModel: $root.authorization } }"></div> 
+                                               authModel: $root.authorization,
+                                               selectedTab: $root.selectedTab } }"></div> 
       </div>
       <div id="statement-attachments-container">
         <div data-bind="component: { name: 'statement-attachments',
                                      params: { applicationId: $root.applicationId,
                                                statementId: $root.statementId,
-                                               authModel: $root.authorization } }"></div> 
+                                               authModel: $root.authorization,
+                                               selectedTab: $root.selectedTab } }"></div> 
       </div>
       <div id="statement-control-button-container">
         <div data-bind="component: { name: 'statement-control-buttons',
                                      params: { applicationId: $root.applicationId,
                                                statementId: $root.statementId,
                                                authModel: $root.authorization,
-                                               submitAllowed: $root.submitAllowed } }"></div> 
+                                               submitAllowed: $root.submitAllowed,
+                                               selectedTab: $root.selectedTab } }"></div> 
       </div>
     </div>
     <!-- /ko -->

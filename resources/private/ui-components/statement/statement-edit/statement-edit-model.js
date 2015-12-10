@@ -5,6 +5,7 @@ LUPAPISTE.StatementEditModel = function(params) {
   var statementId = params.statementId;
   
   self.authModel = params.authModel;
+  self.tab = params.selectedTab;
 
   self.data = ko.observable();
   self.application = ko.observable();
@@ -17,8 +18,13 @@ LUPAPISTE.StatementEditModel = function(params) {
   self.dirty = ko.observable(false);
   self.modifyId = ko.observable(util.randomElementId());
   
-  self.isDraft = ko.computed(function() {
+  self.isDraft = ko.pureComputed(function() {
     return _.contains(["requested", "draft"], util.getIn(self.data, ["state"]));
+  });
+
+  self.coveringNote = ko.pureComputed(function() {
+    var isStatementGiver = util.getIn(self.data(), ["person", "userId"]) === lupapisteApp.models.currentUser.id();
+    return self.tab() === "statement" && isStatementGiver ? util.getIn(self.data, ["saateText"]) : "";
   });
 
   var draftTimerId = undefined;
