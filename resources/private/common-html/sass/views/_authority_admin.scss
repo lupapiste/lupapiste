@@ -51,3 +51,8 @@ table.admin-settings {
     margin-top: $marginL;
   }
 }
+
+.authority-admin .mask {
+  /* cover the tabs*/
+  margin-top: -38px;
+}
