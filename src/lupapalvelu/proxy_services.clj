@@ -304,19 +304,14 @@
 (defn organization-map-server
   [request]
   (if-let [org-id (user/authority-admins-organization-id (user/current-user request))]
-    (if-let [m (-> org-id org/get-organization :map-layers :server)]
-      (let [{:keys [url username password]} m
-            response (http/get url
-                               {:query-params (:params request)
-                                :headers (:headers (http/secure-headers request))
-                                :basic-auth [username password]
-                                :as :stream})]
-        ;; The same precautions as in secure
-        (if response
-          (update-in response [:headers] dissoc "set-cookie" "server")
-          (resp/status 503 "Service temporarily unavailable")))
-      (resp/status 400 "Bad Request"))
-    (resp/status 401 "Unauthorized")))
+    (let [response (org/query-organization-map-server org-id
+                                                      (:params request)
+                                                      (:headers request))]
+      ;; The same precautions as in secure
+      (if response
+        (update-in response [:headers] dissoc "set-cookie" "server")
+        (resp/status 503 "Service temporarily unavailable")))
+    (resp/status 400 "Bad Request")))
 ;
 ; Utils:
 ;

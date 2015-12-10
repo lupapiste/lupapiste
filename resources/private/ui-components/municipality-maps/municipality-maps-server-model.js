@@ -22,8 +22,8 @@ LUPAPISTE.MunicipalityMapsServerModel = function( params ) {
 
   self.updateServerDetails = function() {
     params.channel.send( {
-      url: self.url(),
-      username: self.username(),
+      url: _.trim(self.url()),
+      username: _.trim(self.username()),
       password: self.password()
     });
   };
