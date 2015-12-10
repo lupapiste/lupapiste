@@ -5,7 +5,6 @@
       organizationUsers,
       editSelectedOperationsModel,
       editAttachmentsModel,
-      editLinkModel,
       wfsModel,
       statementGiversModel,
       createStatementGiverModel,
@@ -14,207 +13,6 @@
       linkToVendorBackendModel,
       usersList = null,
       editRolesDialogModel;
-
-  var authorizationModel = lupapisteApp.models.globalAuthModel;
-
-  function OrganizationModel() {
-    var self = this;
-    self.initialized = false;
-
-    self.organizationId = ko.observable();
-    self.links = ko.observableArray();
-    self.operationsAttachments = ko.observableArray();
-    self.attachmentTypes = {};
-    self.selectedOperations = ko.observableArray();
-    self.allOperations = [];
-    self.appRequiredFieldsFillingObligatory = ko.observable(false);
-    self.validateVerdictGivenDate = ko.observable(true);
-    self.tosFunctions = ko.observableArray();
-    self.tosFunctionVisible = ko.observable(false);
-    self.permanentArchiveEnabled = ko.observable(true);
-    self.features = ko.observable();
-    self.allowedRoles = ko.observable([]);
-
-    self.permitTypes = ko.observable([]);
-
-    self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
-
-    ko.computed(function() {
-      var isObligatory = self.appRequiredFieldsFillingObligatory();
-      if (self.initialized) {
-        ajax.command("set-organization-app-required-fields-filling-obligatory", {enabled: isObligatory})
-          .success(util.showSavedIndicator)
-          .error(util.showSavedIndicator)
-          .call();
-      }
-    });
-
-    ko.computed(function() {
-      var validateVerdictGivenDate = self.validateVerdictGivenDate();
-      if (self.initialized) {
-        ajax.command("set-organization-validate-verdict-given-date", {enabled: validateVerdictGivenDate})
-          .success(util.showSavedIndicator)
-          .error(util.showSavedIndicator)
-          .call();
-      }
-    });
-
-    self.validateVerdictGivenDateVisible = ko.pureComputed(function() {
-      var types = self.permitTypes();
-      return _.contains(types, "R") || _.contains(types, "P");
-    });
-
-    function toAttachments(attachments) {
-      return _(attachments || [])
-        .map(function(a) { return {id: a, text: loc(["attachmentType", a[0], a[1]])}; })
-        .sortBy("text")
-        .value();
-    }
-
-    self.init = function(data) {
-      var organization = data.organization;
-      self.organizationId(organization.id);
-      ajax
-        .query("all-operations-for-organization", {organizationId: organization.id})
-        .success(function(data) {
-          self.allOperations = data.operations;
-        })
-        .call();
-
-      // Required fields in app obligatory to submit app
-      //
-      self.appRequiredFieldsFillingObligatory(organization["app-required-fields-filling-obligatory"] || false);
-
-      self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
-
-      self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
-
-      // Operation attachments
-      //
-      var operationsAttachmentsPerPermitType = organization.operationsAttachments || {};
-      var localizedOperationsAttachmentsPerPermitType = [];
-      self.links(organization.links || []);
-
-      var operationsTosFunctions = organization["operations-tos-functions"] || {};
-
-      var setTosFunctionForOperation = function(operationId, functionCode) {
-        ajax
-          .command("set-tos-function-for-operation", {operation: operationId, functionCode: functionCode})
-          .success(self.load)
-          .call();
-      };
-
-      _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
-        var operationsAttachments = _(value)
-          .map(function(v, k) {
-            var attrs = {
-              id: k,
-              text: loc(["operations", k]),
-              attachments: toAttachments(v),
-              permitType: permitType,
-              tosFunction: ko.observable(operationsTosFunctions[k])
-            };
-            attrs.tosFunction.subscribe(function(newFunctionCode) {
-              setTosFunctionForOperation(k, newFunctionCode);
-            });
-            return attrs;
-          })
-          .sortBy("text")
-          .value();
-        localizedOperationsAttachmentsPerPermitType.push({permitType: permitType, operations: operationsAttachments});
-      });
-
-      self.operationsAttachments(localizedOperationsAttachmentsPerPermitType);
-      self.attachmentTypes = data.attachmentTypes;
-
-      // Selected operations
-      //
-      var selectedOperations = organization.selectedOperations || {};
-      var localizedSelectedOperationsPerPermitType = [];
-
-      _.forOwn(selectedOperations, function(value, permitType) {
-        var selectedOperations = _(value)
-          .map(function(v) {
-            return {
-              id: v,
-              text: loc(["operations", v]),
-              permitType: permitType
-              };
-            })
-          .sortBy("text")
-          .value();
-        localizedSelectedOperationsPerPermitType.push({permitType: permitType, operations: selectedOperations});
-      });
-
-      self.selectedOperations(_.sortBy(localizedSelectedOperationsPerPermitType, "permitType"));
-
-      // TODO test properly for timing issues
-      if (authorizationModel.ok("available-tos-functions")) {
-        ajax
-          .query("available-tos-functions", {organizationId: organization.id})
-          .success(function(data) {
-            self.tosFunctions(data.functions);
-            if (data.functions.length > 0 && organization["permanent-archive-enabled"]) {
-              self.tosFunctionVisible(true);
-            }
-          })
-          .call();
-      }
-
-      self.features(util.getIn(organization, ["areas"]));
-
-      self.allowedRoles(organization.allowedRoles);
-
-      self.permitTypes(_(organization.scope).pluck("permitType").uniq().value());
-
-      self.initialized = true;
-    };
-
-    self.editLink = function(indexFn) {
-      var index = indexFn();
-      editLinkModel.init({
-        source: this,
-        commandName: "edit",
-        command: function(url, nameFi, nameSv) {
-          ajax
-            .command("update-organization-link", {index: index, url: url, nameFi: nameFi, nameSv: nameSv})
-            .success(function() {
-              self.load();
-              LUPAPISTE.ModalDialog.close();
-            })
-            .call();
-        }
-      });
-      self.openLinkDialog();
-    };
-
-    self.addLink = function() {
-      editLinkModel.init({
-        commandName: "add",
-        command: function(url, nameFi, nameSv) {
-          ajax
-            .command("add-organization-link", {url: url, nameFi: nameFi, nameSv: nameSv})
-            .success(function() {
-              self.load();
-              LUPAPISTE.ModalDialog.close();
-            })
-            .call();
-        }
-      });
-      self.openLinkDialog();
-    };
-
-    self.rmLink = function() {
-      ajax
-        .command("remove-organization-link", {url: this.url, nameFi: this.name.fi, nameSv: this.name.sv})
-        .success(self.load)
-        .call();
-    };
-
-    self.openLinkDialog = function() {
-      LUPAPISTE.ModalDialog.open("#dialog-edit-link");
-    };
-  }
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -347,32 +145,6 @@
       self.selectm
         .ok(self.execute)
         .cancel(LUPAPISTE.ModalDialog.close);
-    });
-  }
-
-  function EditLinkModel() {
-    var self = this;
-
-    self.nameFi = ko.observable();
-    self.nameSv = ko.observable();
-    self.url = ko.observable();
-    self.commandName = ko.observable();
-    self.command = null;
-
-    self.init = function(params) {
-      self.commandName(params.commandName);
-      self.command = params.command;
-      self.nameFi(params.source ? params.source.name.fi : "");
-      self.nameSv(params.source ? params.source.name.sv : "");
-      self.url(params.source ? params.source.url : "");
-    };
-
-    self.execute = function() {
-      self.command(self.url(), self.nameFi(), self.nameSv());
-    };
-
-    self.ok = ko.computed(function() {
-      return self.nameFi() && self.nameFi().length > 0 && self.nameSv() && self.nameSv().length > 0 && self.url() && self.url().length > 0;
     });
   }
 
@@ -610,11 +382,11 @@
     };
   }
 
-  organizationModel = new OrganizationModel();
+  organizationModel = new LUPAPISTE.OrganizationModel();
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
   editAttachmentsModel = new EditAttachmentsModel();
-  editLinkModel = new EditLinkModel();
+
   wfsModel = new LUPAPISTE.WFSModel();
   statementGiversModel = new StatementGiversModel();
   createStatementGiverModel = new CreateStatementGiverModel();
@@ -647,32 +419,53 @@
     }
   });
 
-  hub.onPageLoad("admin", function() {
+  hub.onPageLoad("users", function() {
     if (!usersList) {
-      usersList = users.create($("#admin .admin-users-table"), usersTableConfig);
+      usersList = users.create($("#users .admin-users-table"), usersTableConfig);
     }
-    organizationModel.load();
-    wfsModel.load();
     statementGiversModel.load();
+  });
+
+  hub.onPageLoad("applications", function() {
+  });
+
+  hub.onPageLoad("backends", function() {
+    wfsModel.load();
     kopiolaitosModel.load();
     asianhallintaModel.load();
     linkToVendorBackendModel.load();
   });
 
   $(function() {
-    $("#admin").applyBindings({
+    organizationModel.load();
+
+    $("#applicationTabs").applyBindings({});
+    $("#users").applyBindings({
       organizationUsers:   organizationUsers,
-      organization:        organizationModel,
-      editLink:            editLinkModel,
-      editSelectedOperationsModel: editSelectedOperationsModel,
-      editAttachments:     editAttachmentsModel,
       statementGivers:    statementGiversModel,
       createStatementGiver: createStatementGiverModel,
+      editRoles:           editRolesDialogModel
+      });
+    $("#applications").applyBindings({
+      organization:        organizationModel
+    });
+    $("#operations").applyBindings({
+      organization:        organizationModel,
+      editSelectedOperationsModel: editSelectedOperationsModel
+    });
+    $("#attachments").applyBindings({
+      organization:        organizationModel,
+      editAttachments:     editAttachmentsModel
+    });
+    $("#backends").applyBindings({
+      organization:        organizationModel,
       wfs:                 wfsModel,
       kopiolaitos:         kopiolaitosModel,
       asianhallinta:       asianhallintaModel,
-      linkToVendorBackend: linkToVendorBackendModel,
-      editRoles:           editRolesDialogModel
+      linkToVendorBackend: linkToVendorBackendModel
+    });
+    $("#areas").applyBindings({
+      organization:        organizationModel
     });
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();
