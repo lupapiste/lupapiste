@@ -22,7 +22,7 @@
     (fail :error.bulletins.illegal-upload-size)))
 
 (defn- file-mime-type-accepted [{{files :files} :data}]
-  (when-not (every? (partial re-matches mime/mime-type-pattern) (map :content-type files))
+  (when-not (every? mime/allowed-file? (map :filename files))
     (fail :error.illegal-file-type)))
 
 (defraw upload-file
