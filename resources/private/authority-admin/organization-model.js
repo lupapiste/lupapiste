@@ -18,9 +18,9 @@ LUPAPISTE.OrganizationModel = function () {
     self.init = function(params) {
       self.commandName(params.commandName);
       self.command = params.command;
-      self.nameFi(params.source ? params.source.name.fi : "");
-      self.nameSv(params.source ? params.source.name.sv : "");
-      self.url(params.source ? params.source.url : "");
+      self.nameFi(util.getIn(params, ["source", "name", "fi"], ""));
+      self.nameFi(util.getIn(params, ["source", "name", "sv"], ""));
+      self.url(util.getIn(params, ["source", "url"], ""));
     };
 
     self.execute = function() {
@@ -28,7 +28,7 @@ LUPAPISTE.OrganizationModel = function () {
     };
 
     self.ok = ko.computed(function() {
-      return self.nameFi() && self.nameFi().length > 0 && self.nameSv() && self.nameSv().length > 0 && self.url() && self.url().length > 0;
+      return !_.isBlank(self.nameFi()) && !_.isBlank(self.nameSv()) && !_.isBlank(self.url());
     });
   }
   self.editLinkModel = new EditLinkModel();
