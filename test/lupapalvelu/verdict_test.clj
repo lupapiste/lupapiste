@@ -114,4 +114,4 @@
 (facts "special foreman/designer verdict"
   (let [xml (verdict-xml-with-foreman-designer-verdicts example-application example-meaningful-tj-krysp)]
     (fact "paatostieto is injected before lisatiedot"
-      (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asiantiedot]))))
+      (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))
