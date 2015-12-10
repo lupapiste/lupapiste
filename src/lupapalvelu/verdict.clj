@@ -2,11 +2,13 @@
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
+            [net.cgrand.enlive-html :as enlive]
             [sade.common-reader :as cr]
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.xml :as xml]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -159,4 +161,42 @@
             (let [updates (find-tj-suunnittelija-verdicts-from-xml command doc link-permit-xml osapuoli-type target-kuntaRoolikoodi)]
               (action/update-application command updates)
               (ok :verdicts (get-in updates [$set :verdicts])))))))))
+
+(defn special-foreman-designer-verdict?
+  "Some verdict providers handle foreman and designer verdicts a bit
+  differently. These 'special' verdicts contain reference permit id in
+  MuuTunnus. xml should be wihout namespaces"
+  [application xml]
+  (let [app-id (:id application)
+        op-name (-> application :primaryOperation :name)]
+    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
+      (let [link-permit-id (-> (mongo/select-one :app-links {:link.0 app-id}) :link second)]
+        (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))]))))))
+
+(defn verdict-xml-with-foreman-designer-verdicts
+  "'Injects' paatostieto tag (if not present) to verdict XML.
+   Takes data from foreman/designer's party details.
+   Returns the xml with paatostieto added"
+  [application xml]
+  (let [op-name      (-> application :primaryOperation :name)
+        tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
+        [party]      (enlive/select xml [tag])
+        attachment   (-> party (enlive/select [:liitetieto :Liite]) first enlive/unwrap)
+        date         (xml/get-text party [:paatosPvm])
+        decision     (xml/get-text party [:paatostyyppi])
+        verdict-xml  [{:tag :Paatos
+                       :content [{:tag :poytakirja
+                                  :content [{:tag :paatoskoodi :content [decision]}
+                                            {:tag :paatoksentekija :content [""]}
+                                            {:tag :paatospvm :content [date]}
+                                            {:tag :liite :content attachment}]}]}]
+        paatostieto  {:tag :paatostieto :content verdict-xml}
+        placeholders #{:paatostieto :muistiotieto :referenssiPiste
+                       :liitetieto  :kayttotapaus :asianTiedot}
+        [rakval]     (enlive/select xml [:RakennusvalvontaAsia])
+        place        (some #(placeholders (:tag %)) (:content rakval))]
+    (case place
+      :paatostieto (enlive/at xml [:RakennusvalvontaAsia :paatostieto] (enlive/content verdict-xml))
+      nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
+      (enlive/at xml [:RakennusvalvontaAsia place] (enlive/before paatostieto)))))
 
