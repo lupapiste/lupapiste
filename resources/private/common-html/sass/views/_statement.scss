@@ -9,26 +9,21 @@
   .headerarea {
     h1 {
       display: inline;
+      vertical-align: middle;
     }
     
-    #statement-draft-indicator {
+    .statement-state-indicator {
       margin-left: $marginL;
-      
+      display: inline-block;
       i {
-        color: red;
+        color: $red;
+        vertical-align: middle;
       }
       span {
         font-weight: bold;
-        position: relative;
-        left: 3px;
-        bottom: 3px;
+        vertical-align: middle;
       }
     }
-
-    #statement-covering-note {
-      margin: $marginL 0px;
-    }
-
   }
 
   .statement-info {
@@ -47,7 +42,7 @@
   .statement-attachments {
     margin-bottom: $baseline;
 
-    .removeCol {
+    .remove-col {
       width: $column;
     } 
 

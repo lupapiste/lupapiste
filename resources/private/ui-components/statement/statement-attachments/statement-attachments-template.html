@@ -12,7 +12,7 @@
                 <th data-bind="ltext: 'statement.attachment.file'">Tiedosto</th>
                 <th data-bind="ltext: 'statement.attachment.comment'">Kommentti</th>
                 <th data-bind="ltext: 'statement.attachment.editDate'">Pvm</th>
-                <th data-bind="ltext: 'remove'" class="removeCol">Poista</th>
+                <th data-bind="ltext: 'remove'" class="remove-col">Poista</th>
               </tr>
             </thead>
             <tbody data-bind="foreach: attachments">
@@ -28,7 +28,7 @@
                 <td>
                   <span data-bind="dateString: $parent.modified"></span>
                 </td>
-                <td class="removeCol">
+                <td class="remove-col">
                   <i class="lupicon-remove primary" 
                      data-bind="click: _.partial($component.deleteAttachment, $parent.id),
                                 visible: $component.canDeleteAttachment($parent)"></i>
