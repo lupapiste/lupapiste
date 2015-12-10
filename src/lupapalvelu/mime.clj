@@ -2,7 +2,7 @@
   (:require [clojure.string :refer [split join trim]]
             [clojure.java.io :refer [reader file]]
             [sade.strings :as ss]
-            [pantomime.mime :refer [mime-type-of]]))
+            [pantomime.mime :refer [mime-type-of] :as mime]))
 
 ;; Reads mime.types file provided by Apache project.
 ;; Ring has also some of the most common file extensions mapped, but is missing
@@ -45,3 +45,5 @@
 
 (defn sanitize-filename [filename]
   (-> filename (ss/suffix "\\") (ss/suffix "/")))
+
+(mime/add-pattern "application/x-extension-ifc" ".+\\.ifc$" "foo.ifc")
