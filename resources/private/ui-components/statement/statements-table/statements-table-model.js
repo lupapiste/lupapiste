@@ -21,14 +21,6 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return _.includes(statementIdsWithAttachments, statement.id());
   };
 
-  // Enrich each statement with an info about a possible attachment associated with the statement.
-//  self.statements = _.forEach(self.statements(), function(statement) {
-//    statement.hasAttachment = _.some(self.application.attachments(), function(attachment) {
-//     return attachment.target && _.isEqual(ko.mapping.toJS(attachment.target), {type: "statement", id: statement.id()});
-//   });
-//   return statement;
-// });
-
   self.isStatementOverDue = function(statement) {
     var nowTimeInMs = new Date().getTime();
     return (statement.dueDate && !statement.given() ) ? (nowTimeInMs > statement.dueDate()) : false;
