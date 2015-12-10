@@ -40,6 +40,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
   var waiting = ko.observable( false );
   var capabilities = ko.observable();
   var mapFitted = ko.observable( false );
+  var backgroundMapVisible = ko.observable( true );
 
   var saveLayersFlag = false;
 
@@ -72,7 +73,14 @@ LUPAPISTE.MunicipalityMapsService = function() {
              function( data ) {
                error( false );
                var parser = new ol.format.WMSCapabilities();
-               capabilities( parser.read( data ));
+               var parsedCaps = null;
+               try {
+                 parsedCaps = parser.read( data );
+               } catch( e ) {
+                 // Received data was not capabilities.
+               } finally {
+                 capabilities( parsedCaps );
+               }
              },
              "text") // Text works both for xml and text responses.
       .fail( function() {
@@ -209,6 +217,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
       layers: {
         userLayers: ss.layers,
         serverLayers: serverLayers,
+        backgroundVisible: backgroundMapVisible,
         channel: channel( "layers")
       },
       map: {
@@ -216,7 +225,8 @@ LUPAPISTE.MunicipalityMapsService = function() {
         capabilities: capabilities,
         serverLayers: serverLayers,
         userLayers: ss.layers,
-        mapFitted: mapFitted
+        mapFitted: mapFitted,
+        backgroundVisible: backgroundMapVisible
       }
     };
   };

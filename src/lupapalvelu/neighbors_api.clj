@@ -22,7 +22,8 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.attachment-metadata :as metadata]))
 
 (defn- valid-token? [token statuses ts-now]
   {:pre [(number? ts-now) (pos? ts-now)]}
@@ -175,7 +176,8 @@
       (assoc :attachments (->> application
                                :attachments
                                (filter (fn-> :type :type-group (= "paapiirustus")))
-                               (filter (fn-> :versions empty? not))))
+                               (filter (fn-> :versions empty? not))
+                               (filter metadata/public-attachment?)))
       (assoc :documents (map
                           strip-document
                           (remove (fn-> :schema-info :name #{"paatoksen-toimitus-rakval"})

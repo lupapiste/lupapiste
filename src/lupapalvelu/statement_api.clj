@@ -128,8 +128,8 @@
                               :given nil
                               :reminder-sent nil
                               :metadata metadata
-                             :saateText     saateText
-                             :dueDate       dueDate
+                              :saateText saateText
+                              :dueDate dueDate
                               :status nil}
                   :auth (user/user-in-role user :statementGiver :statementId statement-id)
                   :recipient user}

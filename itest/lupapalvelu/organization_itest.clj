@@ -437,4 +437,51 @@
                       (fact "Two layers with same ids are allowed if the servers differ"
                             (->> layers (filter #(= (:id %) "foo-id")) count) => 2)
                       (fact "Still only two base layers"
-                            (->> layers (filter :base) count) => 2)))))))
+                            (->> layers (filter :base) count) => 2)))
+             (facts "Storing passwords"
+                    (local-org-api/update-organization-map-server "753-YA"
+                                                                  "http://doesnotmatter"
+                                                                  "username"
+                                                                  "plaintext")
+                    (let [org (local-org-api/get-organization "753-YA")
+                          {:keys [username password crypto-iv]} (-> org :map-layers :server)]
+                      (fact "Password is encrypted"
+                            (not= password "plaintext") => true)
+                      (fact "Password decryption"
+                            (local-org-api/decode-credentials password crypto-iv) => "plaintext")
+                      (fact "No extra credentials are stored (nil)"
+                            (local-org-api/update-organization-map-server "753-YA"
+                                                                          "http://stilldoesnotmatter"
+                                                                          nil
+                                                                          nil)
+                            (-> "753-YA" local-org-api/get-organization :map-layers :server
+                                (select-keys [:password :crypto-iv])) => {:password nil})
+                      (fact "No extra credentials are stored (\"\")"
+                            (local-org-api/update-organization-map-server "753-YA"
+                                                                          "http://stilldoesnotmatter"
+                                                                          ""
+                                                                          "")
+                            (-> "753-YA" local-org-api/get-organization :map-layers :server
+                                (select-keys [:password :crypto-iv])) => {:password ""})))))))
+
+(facts "set-organization-neighbor-order-email"
+       (fact "Emails are not set in fixture"
+             (let [resp (query sipoo :organization-by-user)]
+               resp => ok?
+               (:organization resp) => seq
+               (get-in resp [:organization :notifications :neighbor-order-emails]) => empty?))
+
+       (fact "One email is set"
+             (command sipoo :set-organization-neighbor-order-email :emails "kirjaamo@sipoo.example.com") => ok?
+             (-> (query sipoo :organization-by-user)
+                 (get-in [:organization :notifications :neighbor-order-emails])) => ["kirjaamo@sipoo.example.com"])
+
+       (fact "Three emails are set"
+             (command sipoo :set-organization-neighbor-order-email :emails "kirjaamo@sipoo.example.com,  sijainen1@sipoo.example.com;sijainen2@sipoo.example.com") => ok?
+             (-> (query sipoo :organization-by-user)
+                 (get-in [:organization :notifications :neighbor-order-emails])) => ["kirjaamo@sipoo.example.com", "sijainen1@sipoo.example.com", "sijainen2@sipoo.example.com"])
+
+       (fact "Reset email addresses"
+             (command sipoo :set-organization-neighbor-order-email :emails "") => ok?
+             (-> (query sipoo :organization-by-user)
+                 (get-in [:organization :notifications :neighbor-order-emails])) => empty?))

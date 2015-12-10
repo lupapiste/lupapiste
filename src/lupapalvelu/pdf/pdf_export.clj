@@ -204,15 +204,14 @@
 
 (defn- collect-statement-fields [statements]
   (map
-    (fn [{:keys [requested given status text dueDate saateText] {giver :name} :person :as stm}]
+    (fn [{:keys [requested given status text dueDate] {giver :name} :person :as stm}]
       (array-map
         (loc "statement.requested") (str "" (or (util/to-local-date requested) "-"))
         (loc "statement.giver") (if (ss/blank? giver) (loc "application.export.empty") (str giver))
         (loc "export.statement.given") (str "" (or (util/to-local-date given) "-"))
         (loc "statement.title") (if (ss/blank? status) (loc "application.export.empty") (str status))
         (loc "statement.text") (if (ss/blank? text) (loc "application.export.empty") (str text))
-        (loc "add-statement-giver-maaraaika") (str "" (or (util/to-local-date dueDate) "-"))
-        (loc "application.invite-statement-giver-saateText") (if (ss/blank? saateText) (loc "application.export.empty") (str saateText))))
+        (loc "add-statement-giver-maaraaika") (str "" (or (util/to-local-date dueDate) "-"))))
     statements))
 
 (defn collect-neighbour-fields [neighbours]
