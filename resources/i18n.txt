@@ -1,7 +1,0 @@
-auth-admin.areas: Alueet / Områden
-auth-admin.backends: Linkit ja taustajärjestelmät / Länkar och bakgrundssystem
-auth-admin.admin: Hakemusten asetukset
-auth-admin.email-notifications: Sähköposti-ilmoitukset / E-postanmälaningar
-auth-admin.email-notifications.param-name: Tapahtuma
-auth-admin.email-notifications.param-value: Sähköpostiosoitteet
-auth-admin.email-notifications.neighbor: Kunnan halutaan hoitavan naapurien kuuleminen tai tiedotus
