@@ -25,6 +25,7 @@ Operation tree does have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
 
 AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
   Sipoo logs in
+  Go to page  operations
 
   # => (ns lupapalvelu.operations)
   # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/YM permit/MAL permit/VVVL permit/KT permit/MM} (:permit-type v) ))  operations))

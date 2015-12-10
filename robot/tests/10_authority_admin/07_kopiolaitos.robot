@@ -9,6 +9,7 @@ Resource        ../../common_resource.robot
 
 AuthAdmin logs in and sees Kopiolaitos fields are empty
   Naantali logs in
+  Go to page  backends
 
   Wait until  Element should be visible  kopiolaitos-info
   Element text should be  kopiolaitos-email  ${EMPTY}

@@ -1,3 +1,1 @@
 auth-admin.municipality-maps.taustakartta: Taustakartta
-error.bulletins.illegal-upload-size:  Tiedoston koko ylitti sallitun ylärajan (15Mb)
-bulletin.comment.addAttachment:  Lisää kommenttiin liitetiedosto (maks. 15Mb)
