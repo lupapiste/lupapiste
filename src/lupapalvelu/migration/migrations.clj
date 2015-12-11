@@ -1396,6 +1396,15 @@
         doc))
     {$and [{:primaryOperation.name {$in maisematyo-operations}} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
 
+(defmigration municipality-map-server-password-encrypted
+  {:apply-when (pos? (mongo/count :organizations {:map-layers.server.crypto-iv {$exists false}
+                                                  :map-layers.server.password {$nin [nil ""]}}))}
+  (doseq [org (mongo/select :organizations {:map-layers.server.crypto-iv {$exists false}
+                                            :map-layers.server.password {$nin [nil ""]}})
+          :let [{:keys [server]} (:map-layers org)
+                {:keys [url username password]} server]]
+    (organization/update-organization-map-server (:id org) url username password)))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

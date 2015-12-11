@@ -75,6 +75,7 @@ Velho moves application to asianhallinta, error should pop up
 
 Kuopio admin sets asianhallinta disabled
   Kuopio logs in
+  Go to page  backends
   Wait until  Element should be visible  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
   Unselect checkbox  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
   Logout
@@ -87,6 +88,7 @@ Velho logs in to check if he can move application to asianhallinta
 
 Kuopio admin enabled asianhallinta again
   Kuopio logs in
+  Go to page  backends
   Wait until  Element should be visible  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
   Select checkbox  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
   Logout

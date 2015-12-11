@@ -91,6 +91,7 @@ jQuery(document).ready(function() {
     {name: "bulletin-comments"},
     {name: "infinite-scroll"},
     {name: "statements-tab"},
+    {name: "statements-table"},
     {name: "statement-edit"},
     {name: "statement-control-buttons"},
     {name: "statement-attachments"}

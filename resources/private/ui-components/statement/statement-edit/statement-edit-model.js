@@ -156,10 +156,6 @@ LUPAPISTE.StatementEditModel = function(params) {
     }
   });
 
-  self.canDeleteStatement = function() {
-    return self.authModel.ok("delete-statement");
-  };
-
   function updateModifyId(self) {
     self.data()["modify-id"](self.modifyId());
     self.modifyId(util.randomElementId());
