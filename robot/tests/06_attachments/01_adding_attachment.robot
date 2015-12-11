@@ -65,6 +65,8 @@ Attachment is needed
 Mikko checks Not needed for the attachment
   [Tags]  attachments
   Select checkbox  jquery=td.attachment-not-needed input
+  Sleep  0.5s
+  Wait for jQuery
 
 Not needed should be checked after reload
   [Tags]  attachments

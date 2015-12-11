@@ -8,7 +8,7 @@
   (set-anti-csrf! false)
   (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
         uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/upload/file")
+        uri         (str (server-address) "/api/raw/upload-file")
         resp        (http-post uri
                                {:multipart [{:name "files[]" :content uploadfile}]
                                 :throw-exceptions false

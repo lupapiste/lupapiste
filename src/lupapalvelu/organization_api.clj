@@ -533,18 +533,15 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (ok (-> (user/authority-admins-organization-id user)
-          o/get-organization
-          :map-layers)))
+          o/organization-map-layers-data)))
 
 (defcommand update-map-server-details
   {:parameters [url username password]
    :input-validators [(partial validate-optional-url :url)]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (o/update-organization (user/authority-admins-organization-id user)
-                         {$set {:map-layers.server {:url url
-                                                    :username username
-                                                    :password password}}})
+  (o/update-organization-map-server (user/authority-admins-organization-id user)
+                                    url username password)
   (ok))
 
 (defcommand update-user-layers

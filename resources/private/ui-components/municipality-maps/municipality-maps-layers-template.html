@@ -14,7 +14,17 @@
                 <th data-bind="ltext: 'auth-admin.actions'"></th>
               </tr>
             </thead>
-            <tbody data-bind="foreach: userLayers">
+            <tbody>
+              <tr>
+                <td class="munimaps--wide"
+                    data-bind="ltext: 'auth-admin.municipality-maps.taustakartta'"></td>
+                <td></td>
+               <td class="munimaps--check">
+                  <input type="checkbox"
+                         data-bind="checked: backgroundVisible">
+                </td>
+              </tr>
+              <!-- ko foreach: userLayers -->
               <tr>
                 <!-- ko if: fixed -->
                 <td data-bind="text: $parent.shortLoc(name())"></td>
@@ -51,6 +61,7 @@
                   </a>
                 </td>
               </tr>
+              <!-- /ko -->
             </tbody>
           </table>
           <button class="positive"
