@@ -184,12 +184,6 @@ LUPAPISTE.StatementEditModel = function(params) {
           hub.send("indicator-icon", {style: "positive"});
           return false;
         })
-        .error(function() {
-          hub.send("indicator-icon", {style: "negative"});
-        })
-        .fail(function() {
-          hub.send("indicator-icon", {style: "negative"});
-        })
         .complete(function() { self.saving(false); })
         .call();
     }

@@ -1,5 +1,5 @@
 error.user-not-found: Käyttäjää ei löydy
-error.statement-updated-after-last-save: Lausuntoa on muutettu muualla
+error.statement-updated-after-last-save: Lausuntoa on muutettu muualla. Päivitä sivu nähdäksesi muutokset.
 error.statement-already-given: Annettua lausuntoa ei voi muokata
 application-choose-statement-givers: Valitse lausunnonantaja(t)
 application.invite-statement-giver-saateText: Saateteksti
@@ -18,6 +18,8 @@ EMAIL-TEMPLATE-LAUSUNNONANTAJA-KUTSU: Teidät on lisätty lausunnon antajaksi or
 statement.attachment.file: Tiedosto
 statement.attachment.editDate: Pvm
 statement.attachment.comment: Kommentti
+
+statement.refresh: Päivitä
 
 statement.tab.statement: Lausunto
 statement.tab.reply: Vastine

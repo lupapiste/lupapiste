@@ -17,4 +17,8 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
       statementId: statementId()
     });
   }
+
+  self.refresh = function() {
+    hub.send("statement::refresh");
+  }
 };

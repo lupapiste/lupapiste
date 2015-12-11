@@ -14,6 +14,10 @@
     submitAllowed(data.value);
   });
 
+  hub.subscribe("statement::refresh", function() {
+    repository.load(applicationId());
+  });
+
   repository.loaded(["statement"], function(application) {
     if (applicationId() === application.id) {
       authorizationModel.refresh(application, {statementId: statementId()});
