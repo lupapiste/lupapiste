@@ -46,4 +46,6 @@
 (defn sanitize-filename [filename]
   (-> filename (ss/suffix "\\") (ss/suffix "/")))
 
-(add-pattern "application/x-extension-ifc" ".+\\.ifc$" "foo.ifc")
+(try
+  (add-pattern "application/x-extension-ifc" ".+\\.ifc$" "foo.ifc")
+  (catch java.lang.AssertionError e)) ; Pattern had already been added
