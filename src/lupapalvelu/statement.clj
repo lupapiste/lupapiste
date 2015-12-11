@@ -15,9 +15,11 @@
 ;; Common
 ;;
 
-(def statement-states #{:requested :draft :given :responded})
-(def post-given-states #{:given :responded})
+(def statement-states #{:requested :draft :given :announced :replied})
+(def post-given-states #{:given :announced :replied})
 (def pre-given-states (clojure.set/difference statement-states post-given-states))
+(def post-announce-states #{:announced :replied})
+(def post-reply-states #{:replied})
 
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
 ;; Krysp Yhteiset 2.1.5+
@@ -32,6 +34,10 @@
                      :email                           schemas/Email
                      :name                            sc/Str})
 
+(def Reply          {:editor-id                       sc/Str
+                     :nothing-to-add                  sc/Bool
+                     (sc/optional-key :text)          sc/Str})
+
 (def Statement      {:id                              sc/Str
                      :state                           (apply sc/enum statement-states)
                      (sc/optional-key :saateText)     sc/Str
@@ -44,8 +50,9 @@
                      (sc/optional-key :modified)      schemas/Timestamp
                      (sc/optional-key :modify-id)     sc/Str
                      (sc/optional-key :editor-id)     sc/Str
+                     (sc/optional-key :reply)         Reply
                      :person                          StatementGiver
-                     (sc/optional-key :metadata)      {}})
+                     (sc/optional-key :metadata)      {sc/Any sc/Any}})
 
 (defn create-statement [now metadata saate-text due-date person]
   (sc/validate Statement
@@ -58,7 +65,7 @@
                  (seq metadata) (assoc :metadata metadata))))
 
 (defn get-statement [{:keys [statements]} id]
-  (first (filter #(= id (:id %)) statements)))
+  (util/find-by-id id statements))
 
 (defn statement-exists [{{:keys [statementId]} :data} application]
   (when-not (get-statement application statementId)
@@ -75,6 +82,14 @@
               (and (= :applicant (keyword role)) (nil? (statement-owner command application))))
     (fail :error.not-authority-or-statement-owner-applicant)))
 
+(defn statement-announced [{statement-id :statementId :as command} application]
+  (when-not (->> (get-statement application statement-id) :state post-announce-states)
+    (fail :error.statement-is-not-announced)))
+
+(defn statement-not-replied [{statement-id :statementId :as command} application]
+  (when (->> (get-statement application statement-id) :state post-reply-states)
+    (fail :error.statement-already-replied)))
+
 (defn statement-given? [application statementId]
   (->> statementId (get-statement application) :state keyword post-given-states))
 
@@ -85,8 +100,7 @@
 (defn- update-statement [statement modify-id prev-modify-id & updates]
   (if (or (= prev-modify-id (:modify-id statement)) (nil? (:modify-id statement)))
     (->> (apply assoc statement :modified (now) :modify-id modify-id updates)
-         (remove (comp util/empty-or-nil? val))
-         (into {})
+         (util/strip-nils)
          (sc/validate Statement))
     (fail! :error.statement-updated-after-last-save :statementId (:id statement))))
 
@@ -95,6 +109,14 @@
 
 (defn give-statement [statement text status modify-id prev-modify-id editor-id]
   (update-statement statement modify-id prev-modify-id :state :given :text text :status status :given (now) :editor-id editor-id))
+
+(defn update-reply-draft [statement text nothing-to-add modify-id prev-modify-id editor-id]
+  (->> {:text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id}
+       (update-statement statement modify-id prev-modify-id :reply)))
+
+(defn reply-statement [statement text nothing-to-add modify-id prev-modify-id editor-id]
+  (->> {:text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id}
+       (update-statement statement modify-id prev-modify-id :state :replied :reply)))
 
 ;;
 ;; Statement givers

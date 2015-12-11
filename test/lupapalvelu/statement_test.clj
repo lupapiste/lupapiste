@@ -8,7 +8,9 @@
 (testable-privates lupapalvelu.statement 
                    possible-statement-statuses
                    give-statement
-                   update-draft)
+                   update-draft
+                   reply-statement
+                   update-reply-draft)
 
 (let [test-app-R  {:municipality 753 :permitType "R"}
       test-app-P  {:municipality 753 :permitType "P"}
@@ -99,4 +101,34 @@
                    [:modify-id "mod2"] 
                    [:editor-id "editor1"]
                    [:state :given] 
-                   [:given anything]})))
+                   [:given anything]}))
+
+  (fact "update-reply-draft"
+    (-> (ssg/generate Statement)
+        (assoc :modify-id "mod1" :editor-id "editor1" :state :announced :text "statement text")
+        (dissoc :modified)
+        (update-reply-draft "reply text" true "mod2" "mod1" "editor2"))
+    => (contains #{[:text "statement text"] 
+                   [:modify-id "mod2"]
+                   [:editor-id "editor1"]
+                   [:state :announced]
+                   [:modified anything]
+                   [:reply {:editor-id "editor2"
+                            :nothing-to-add true
+                            :text "reply text"}]}))
+
+  (fact "update-reply-draft - nil values"
+    (-> (ssg/generate Statement)
+        (assoc :modify-id "mod1")
+        (update-reply-draft nil nil "mod2" "mod1" "editor2"))
+    => (contains #{[:reply {:editor-id "editor2"
+                            :nothing-to-add false}]})
+
+  (fact "reply-statement"
+    (-> (ssg/generate Statement)
+        (assoc :modify-id "mod1" :state :announced)
+        (reply-statement "reply text" false "mod2" "mod1" "editor2"))
+    => (contains #{[:state :replied]
+                   [:reply {:editor-id "editor2"
+                            :nothing-to-add false
+                            :text "reply text"}]}))))
