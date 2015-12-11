@@ -67,7 +67,7 @@
   (fact "newly created authority receives mail"
     (let [email (last-email)]
       (:to email) => "foo@example.com"
-      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => "Lupapiste: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 
 ;;
@@ -129,7 +129,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
-      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => "Lupapiste: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))
 
   (fact "add existing authority to new organization"
@@ -137,7 +137,7 @@
     (command naantali :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
-      (:subject email) => "Lupapiste.fi: Ilmoitus k\u00e4ytt\u00e4j\u00e4tilin liitt\u00e4misest\u00e4 organisaation viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => "Lupapiste: Ilmoitus k\u00e4ytt\u00e4j\u00e4tilin liitt\u00e4misest\u00e4 organisaation viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "Naantalin rakennusvalvonta"))))
 
 (facts remove-user-organization
@@ -352,5 +352,5 @@
         email  (last-email)]
     (-> resp decode-response :body) => ok?
     (:to email) => (email-for "pena")
-    (:subject email) => "Lupapiste.fi: Salasanan vaihto"
+    (:subject email) => "Lupapiste: Salasanan vaihto"
     (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))

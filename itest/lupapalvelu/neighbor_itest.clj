@@ -89,7 +89,7 @@
         expiration-date           (util/to-local-date (+ ttl/neighbor-token-ttl (now)))]
 
     (fact "correct to" (:to email) => neighbor-email-addr)
-    (fact "correct subject" (:subject email) => "Lupapiste.fi: Naapurikuja 3 - naapurin kuuleminen")
+    (fact "correct subject" (:subject email) => "Lupapiste: Naapurikuja 3 - naapurin kuuleminen")
     (fact "neighbor name field" (get-in email [:body :plain]) => (contains #"Hei( \w+)+,"))
     (fact "correnct link"
       a-id => application-id

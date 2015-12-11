@@ -320,7 +320,7 @@
 
           (check-sent-reminder-email
             (-> statement-matching :person :email)
-            "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
+            "Lupapiste: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
             ["Sinulta on pyydetty lausuntoa lupahakemukseen"]
             (:id reminder-application) "authority"))))
 
@@ -342,7 +342,7 @@
         ;; clears inbox
         (check-sent-reminder-email
           (-> statement-matching :person :email)
-          "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
+          "Lupapiste: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
           ["Sinulta on pyydetty lausuntoa lupahakemukseen"]
           (:id reminder-application) "authority")))
 
@@ -376,7 +376,7 @@
 
           (check-sent-reminder-email
             (-> statement-matching-duedate-passed :person :email)
-            "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6lle asetetun m\u00e4\u00e4r\u00e4ajan umpeutumisesta"
+            "Lupapiste: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6lle asetetun m\u00e4\u00e4r\u00e4ajan umpeutumisesta"
             ["Sinulta on pyydetty lausuntoa lupahakemukseen" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
             (:id reminder-application) "authority"))))
 
@@ -398,7 +398,7 @@
         ;; clears inbox
         (check-sent-reminder-email
           (-> statement-matching-duedate-passed :person :email)
-          "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6lle asetetun m\u00e4\u00e4r\u00e4ajan umpeutumisesta"
+          "Lupapiste: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6lle asetetun m\u00e4\u00e4r\u00e4ajan umpeutumisesta"
           ["Sinulta on pyydetty lausuntoa lupahakemukseen" "Lausunnolle asetettu m\u00e4\u00e4r\u00e4aika"]
           (:id reminder-application) "authority")))
 
@@ -425,7 +425,7 @@
 
           (check-sent-reminder-email
            (:email open-inforequest-entry-matching)
-           "Lupapiste.fi: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+           "Lupapiste: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
            ["Organisaatiollasi on vastaamaton neuvontapyynt\u00f6"]))))
 
     (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
@@ -442,7 +442,7 @@
           ;; clears inbox
           (check-sent-reminder-email
            (:email open-inforequest-entry-matching)
-           "Lupapiste.fi: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
+           "Lupapiste: Naapurikuja 3 - Muistutus avoimesta neuvontapyynn\u00f6st\u00e4"
            ["Organisaatiollasi on vastaamaton neuvontapyynt\u00f6"]))))
 
     (fact "a fresh \"duedate-reminder-sent\" timestamp already exists -> no reminder is sent"
@@ -470,7 +470,7 @@
             ;; clears inbox
             (check-sent-reminder-email
               (->> neighbor-matching :status (filter #(= "email-sent" (:state %))) first :email)
-              "Lupapiste.fi: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
+              "Lupapiste: Naapurikuja 3 - Muistutus naapurin kuulemisesta"
               ["T\u00e4m\u00e4 on muistutusviesti. Rakennuspaikan rajanaapurina Teille ilmoitetaan"])))))
 
     (fact "a recent \"reminder-sent\" status already exists - no reminder is sent"
@@ -528,7 +528,7 @@
 
             (check-sent-reminder-email
              "pena@example.com"
-             "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+             "Lupapiste: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
              ["Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])))))
 
     (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
@@ -543,7 +543,7 @@
 
           (check-sent-reminder-email
            "pena@example.com"
-           "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
+           "Lupapiste: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
            ["Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"]))))
 
     (fact "the \"reminder-sent\" timestamp already exists - no reminder is sent"
@@ -573,7 +573,7 @@
 
             (check-sent-reminder-email
               "pena@example.com"
-              "Lupapiste.fi: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
+              "Lupapiste: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
               ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"
                tyoaika-paattyy
                (:address app)])))))
@@ -597,7 +597,7 @@
         (batchrun/ya-work-time-is-expiring-reminder)
         (check-sent-reminder-email
           "pena@example.com"
-          "Lupapiste.fi: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
+          "Lupapiste: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
           ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"])))
 
     (fact "applications without 'tyoaika' document are not reacted to"
