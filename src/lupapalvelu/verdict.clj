@@ -174,9 +174,11 @@
          (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
 
 (defn verdict-xml-with-foreman-designer-verdicts
-  "'Injects' paatostieto tag (if not present) to verdict XML.
-   Takes data from foreman/designer's party details.
-   Returns the xml with paatostieto added"
+  "Normalizes special foreman/designer verdict by creating a proper
+  paatostieto. Takes data from foreman/designer's party details. The
+  resulting paatostieto element overrides old one. Returns the xml
+  with paatostieto.
+  Note: This must only be called with special verdict xml (see above)"
   [application xml]
   (let [op-name      (-> application :primaryOperation :name)
         tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
@@ -192,7 +194,8 @@
                                             {:tag :liite :content attachment}]}]}]
         paatostieto  {:tag :paatostieto :content verdict-xml}
         placeholders #{:paatostieto :muistiotieto :lisatiedot
-                       :liitetieto  :kayttotapaus :asianTiedot}
+                       :liitetieto  :kayttotapaus :asianTiedot
+                       :hankkeenVaativuus}
         [rakval]     (enlive/select xml [:RakennusvalvontaAsia])
         place        (some #(placeholders (:tag %)) (:content rakval))]
     (case place

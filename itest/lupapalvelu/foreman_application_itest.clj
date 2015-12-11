@@ -6,7 +6,9 @@
            [lupapalvelu.factlet :refer :all]
            [lupapalvelu.domain :as domain]
            [lupapalvelu.verdict :as verdict]
-           [sade.strings :as ss]))
+           [sade.common-reader :as cr]
+           [sade.strings :as ss]
+           [sade.xml :as xml]))
 
 (apply-remote-minimal)
 
@@ -146,18 +148,57 @@
                                  project-id => application1-id)))))
 
           (facts "Special foreman/designer verdicts"
-                 (let [xml-file (fn [filename] (-> filename io/resource slurp
-                                                   (xml/parse-string "utf-8")
-                                                   cr/strip-xml-namespaces))
-                       special (-> "krysp/sample/rakentamisen aikaiset/tekla-tj-verdict.xml"
-                                    xml-file
-                                    (enlive/at [:tunnus enlive/any-node]
-                                               (enlive/replace-vars {:application-id (:id application)})))
-                       typical  (xml-file "krysp/sample/verdict.xml")]
+                 (let [xml-file   (fn [filename] (-> filename io/resource slurp
+                                                     (xml/parse-string "utf-8")
+                                                     cr/strip-xml-namespaces))
+                       special    (-> "krysp/sample/rakentamisen aikaiset/tekla-tj-verdict.xml"
+                                      xml-file
+                                      (enlive/at [:tunnus enlive/any-node]
+                                                 (enlive/replace-vars {:application-id (:id application)})))
+                       typical    (xml-file "krysp/sample/verdict.xml")
+                       normalized (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application special)
+                       poytakirja (-> normalized (enlive/select [:paatostieto :Paatos :poytakirja :> enlive/any-node]))]
                    (fact "Special verdict"
                          (verdict/special-foreman-designer-verdict? foreman-application special) => truthy)
                    (fact "Typical verdict"
-                         (verdict/special-foreman-designer-verdict? foreman-application typical) => falsey)))))
+                         (verdict/special-foreman-designer-verdict? foreman-application typical) => falsey)
+                   (fact "Paatostieto has replaced the old one"
+                          (count (enlive/select normalized [:paatostieto])) => 1)
+                   (fact "Paatostieto is in the right place"
+                         (let [elems (-> normalized (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))
+                               elems (mapv :tag elems)
+                               index (.indexOf elems :paatostieto)]
+                           (subvec elems (dec index) (+ index 2))
+                           => [:katselmustieto
+                               :paatostieto
+                               :lisatiedot]))
+                   (fact "Poytakirja contents are OK"
+                         (reduce (fn [acc m] (assoc acc (:tag m) (-> m :content))) {} poytakirja)
+                         => {:paatoskoodi ["hyv\u00e4ksytty"]
+                             :paatoksentekija [""]
+                             :paatospvm ["2015-11-29"]
+                             :liite [{:tag :kuvaus
+                                      :attrs nil
+                                      :content []}
+                                     {:tag :linkkiliitteeseen
+                                      :attrs nil
+                                      :content ["http://localhost:8000/dev/sample-attachment.txt"]}]})
+                   (facts "Other paatostieto placements"
+                         (let [minispec (enlive/at special
+                                            [:paatostieto] nil
+                                            [:lisatiedot] nil
+                                            [:liitetieto] nil
+                                            [:asianTiedot] nil
+                                            [:hankkeenVaativuus] nil)]
+                           (fact "Paatostieto will be last element"
+                                 (let [norm (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
+                                       elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]
+                                   (-> elems last :tag) => :paatostieto))
+                           (for [e [:muistiotieto :lisatiedot :liitetieto :kayttotapaus :asianTiedot :hankkeenVaativuus]
+                                 :let [norm (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
+                                       elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]]
+                             (do (fact (str e " is last") (-> elems last :tag) => e)
+                                 (fact "Paatostieto is next to last" (->> elems (drop-last 2) first :tag) => :paatostieto)))))))))
 
 (facts "foreman history"
   (apply-remote-minimal) ; clean mikko before history tests
