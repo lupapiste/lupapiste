@@ -64,22 +64,25 @@ Huoneistot info for Uusirakennus is correct
 
   Open accordions  info
   Click by test id  huoneistot-append-button
-  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
-  Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
+  Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
   List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  - Valitse -
   # TODO check this: Huoneisto row items disabled except muutostapa
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  1
+  Sleep  0.5s
   Reload Page
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
-  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
-  Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class="huoneistot-table"]//tbody//tr  2
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
+  Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class='huoneistot-table']//tbody//tr  2
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//i[@data-test-class="delete-schemas.huoneistot"]
   Wait Until  Element Should Be Visible  xpath=//tr[@data-test-id='huoneistot-row-0']
   Execute Javascript  $("tr[data-test-id='huoneistot-row-0']").find("i[data-test-class='delete-schemas.huoneistot']").click();
   Confirm yes no dialog
+  Wait for jQuery
+  Open accordions  info
   Wait Until  Element Should Not Be Visible  xpath=//tr[@data-test-id='huoneistot-row-0']
   Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class="huoneistot-table"]//tbody//tr  1
 
