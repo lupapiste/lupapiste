@@ -80,7 +80,7 @@
                                           :approvable true
                                           :order 2
                                           :type :location}
-                                   :body rakennuspaikka})
+                                   :body (schema-body-without-element-by-name rakennuspaikka "hankkeestaIlmoitettu")})
 
 (defschemas
   1
