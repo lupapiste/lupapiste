@@ -147,7 +147,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains (email-for-key mikko))
-      (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
+      (:subject email) => "Lupapiste: Peruutustie 23 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id "applicant")))
 

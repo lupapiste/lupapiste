@@ -69,7 +69,7 @@
 
     (fact "new statement person receives email which contains the (html escaped) input text"
       (:to email) => (contains ronja-email)
-      (:subject email) => "Lupapiste.fi: Lausunnot"
+      (:subject email) => "Lupapiste: Lausunnot"
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
       (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))
 
@@ -89,7 +89,7 @@
               email (first emails)]
           (fact "Veikko receives email"
             (:to email) => (contains veikko-email)
-            (:subject email) => "Lupapiste.fi: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
+            (:subject email) => "Lupapiste: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
             email => (partial contains-application-link? application-id "authority"))
           (fact "...but no-one else"
             (count emails) => 1)
@@ -110,7 +110,7 @@
                 email (first emails)]
             (fact "Pena receives email"
               (:to email) => (contains pena-email)
-              (:subject email) => "Lupapiste.fi: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
+              (:subject email) => "Lupapiste: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
               email => (partial contains-application-link? application-id "applicant"))
             (fact "...but no-one else"
               (count emails) => 1)
