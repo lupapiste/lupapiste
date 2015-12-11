@@ -19,7 +19,7 @@ LUPAPISTE.OrganizationModel = function () {
       self.commandName(params.commandName);
       self.command = params.command;
       self.nameFi(util.getIn(params, ["source", "name", "fi"], ""));
-      self.nameFi(util.getIn(params, ["source", "name", "sv"], ""));
+      self.nameSv(util.getIn(params, ["source", "name", "sv"], ""));
       self.url(util.getIn(params, ["source", "url"], ""));
     };
 
@@ -84,7 +84,7 @@ LUPAPISTE.OrganizationModel = function () {
   }
 
   self.neighborOrderEmails = ko.observable("");
-  self.neighborOrderEmailsIndicator = ko.observable().extend({notify: "always"});;
+  self.neighborOrderEmailsIndicator = ko.observable().extend({notify: "always"});
   ko.computed(function() {
     var emails = self.neighborOrderEmails();
     if (self.initialized) {

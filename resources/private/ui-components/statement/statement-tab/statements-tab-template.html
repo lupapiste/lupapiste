@@ -106,7 +106,8 @@
                            name: 'help-toggle',
                            params: {lhtml: 'help.' + application.permitType() + '.neighborsDesc'}
                            }"></span>
-          <div data-bind="template: {name: 'neighbors-table-template', data: {neighbors: application.neighbors, localisationKeys: {missing: 'neighbors.missing'}}}"></div>
+
+          <div data-bind="template: {name: 'neighbors-table-template', data: {neighbors: application.neighbors, optionMunicipalityHearsNeighbors: application.optionMunicipalityHearsNeighbors, optionMunicipalityHearsNeighborsDisabled: application.optionMunicipalityHearsNeighborsDisabled, localisationKeys: {missing: 'neighbors.missing'}}}"></div>
           <button data-bind="click: openNeighborsPage,
                              visible: $root.authorization.ok('neighbor-add')"
                   class="btn btn-primary modal"
@@ -122,6 +123,14 @@
             <div data-bind="ifnot: neighbors() && neighbors().length > 0">
                 <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-neigbors"></p>
             </div>
+
+            <!-- ko if: features.enabled("kunta-kuulee-naapurit") -->
+            <div class="form-grid form-grid--no-border feature">
+              <div class="row">
+                <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
+              </div>
+            </div>
+            <!-- /ko -->
 
             <div data-bind="if: neighbors() && neighbors().length > 0">
                 <table>

@@ -224,13 +224,22 @@
       ; This is ok. Only the first submit is saved.
       )))
 
+(notifications/defemail :neighbor-hearing-requested
+  {:pred-fn       (fn [command] (get-in command [:application :options :municipalityHearsNeighbors]))
+   :recipients-fn (fn [{application :application}]
+                    (let [organization (organization/get-organization (:organization application))
+                          emails (get-in organization [:notifications :neighbor-order-emails])]
+                      (map (fn [e] {:email e, :role "authority"}) emails)))
+   :tab "statement"})
+
 (defcommand submit-application
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
    :states           #{:draft :open}
    :notified         true
-   :on-success       (notify :application-state-change)
+   :on-success       [(notify :application-state-change)
+                      (notify :neighbor-hearing-requested)]
    :pre-checks       [domain/validate-owner-or-write-access
                       a/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
