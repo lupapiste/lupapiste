@@ -224,8 +224,9 @@
                                               "yleiset-alueet-maksaja" operations/schema-data-yritys-selected
                                               "tyomaastaVastaava" operations/schema-data-henkilo-selected)
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
-        make (fn [schema-name]
-               (let [schema (schemas/get-schema schema-version schema-name)]
+        make (fn [schema]
+               {:pre [(:info schema)]}
+               (let [schema-name (get-in schema [:info :name])]
                  {:id          (mongo/create-id)
                   :schema-info (:info schema)
                   :created     created
@@ -237,17 +238,24 @@
                                      {})
                                    created))}))
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
-        op-doc (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
-        existing-schemas (->> (:documents application)
-                              (map (comp :name :schema-info))      ;; existing schema names
-                              set)
-        new-docs (->> (:required op-info)
-                      (remove existing-schemas)      ;; required schema names
+        op-doc (update-in (make (schemas/get-schema schema-version op-schema-name)) [:schema-info] #(merge {:op op :removable true} %))
+
+        existing-schemas-infos (map :schema-info (:documents application))
+        existing-schema-names (set (map :name existing-schemas-infos))
+
+        location-schema (util/find-first #(= (keyword (:type %)) :location) existing-schemas-infos)
+
+        schemas (map #(schemas/get-schema schema-version %) (:required op-info))
+        new-docs (->> schemas
+                      (remove (comp existing-schema-names :name :info))
+                      (remove
+                        (fn [{{:keys [type repeating]} :info}]
+                          (and location-schema (= type :location) (not repeating))))
                       (map make)                           ;; required docs
                       (cons op-doc))]                      ;; new docs
     (if-not user
       new-docs
-      (conj new-docs (make (operations/get-applicant-doc-schema-name application))))))
+      (conj new-docs (make (schemas/get-schema schema-version (operations/get-applicant-doc-schema-name application)))))))
 
 
 (defn make-op [op-name created]
