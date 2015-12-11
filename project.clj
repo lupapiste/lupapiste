@@ -60,8 +60,7 @@
                  [org.clojure/data.json "0.2.6"]
                  [lupapiste/oskari "0.9.55"] 
                  [lupapiste/commons "0.5.36"]
-                 [lupapiste/pantomime "2.8.0-SNAPSHOT"]]
-  
+                 [lupapiste/pantomime "2.8.0-SNAPSHOT" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
