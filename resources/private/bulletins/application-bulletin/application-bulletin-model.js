@@ -102,6 +102,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     $("#bulletin-comment")[0].scrollIntoView(true);
   };
 
+  self.exportToPdf = function() {
+    console.log("exportToPdf");
+  };
+
   self.canCommentCurrentBulletin = ko.pureComputed(function() {
     return util.getIn(self, ["bulletin", "canComment"]);
   });
