@@ -127,6 +127,15 @@
                                 ["rakennuksenOmistajat.0.henkilo.osoite.katu"            "Katuosoite"]
                                 ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"   "040-2345678"]]) => ok?
 
+        (fact "Pena adds second paapiirrustus and set's it not public"
+          (upload-attachment pena application-id {:id "" :type {:type-group "paapiirustus" :type-id "pohjapiirros"}} true) => true
+          (let [{attachments :attachments} (query-application pena application-id)
+                new-att (last attachments)]
+            (fact "now two pohjapiirroses exist"
+              (count (filter (fn-> :type :type-id (= "pohjapiirros")) attachments)) => 2)
+            (get-in new-att [:type :type-group]) => "paapiirustus"
+            (command pena :set-attachment-visibility :id application-id :attachmentId (:id new-att) :value "viranomainen") => ok?))
+
     (let [email               (query pena :last-email)
           body                (get-in email [:message :body :plain])
           [_ a-id n-id token] (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
@@ -195,6 +204,11 @@
             (->> application :attachments count) => pos?)
           (fact "everyone is paapiirustus"
             (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
+
+          (fact "only one pohjapiirustus, as non-public is filtered"
+            (->> (:attachments application)
+              (filter (fn-> :type :type-id (= "pohjapiirros")))
+              count) => 1)
 
           (let [file-id (->> application :attachments first :latestVersion :fileId)]
             (fact "downloading should be possible"
