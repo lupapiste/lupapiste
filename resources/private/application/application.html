@@ -628,6 +628,14 @@
 
                             <div class="clear spacerM"></div>
 
+                            <!-- ko if: features.enabled("kunta-kuulee-naapurit") -->
+                            <div class="form-grid form-grid--no-border feature">
+                              <div class="row">
+                                <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, id: 'optionMunicipalityHearsNeighbors', lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
+                              </div>
+                            </div>
+                            <!-- /ko -->
+
                             <div data-bind="ifnot: submittable">
                                 <p class="error-text" data-test-id="foreman-not-submittable" data-bind="ltext: 'error.not-submittable.foreman-link'"></p>
                             </div>

@@ -102,6 +102,24 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     $("#bulletin-comment")[0].scrollIntoView(true);
   };
 
+  self.openOskariMap = function() {
+    if (self.bulletin()) {
+      var featureParams = ["addPoint", "addArea", "addLine", "addCircle", "addEllipse"];
+      var featuresEnabled = 0;
+      var features = _.map(featureParams, function (f) {return f + "=" + featuresEnabled;}).join("&");
+      var params = ["build=" + LUPAPISTE.config.build,
+                    "id=" + self.bulletin().id,
+                    "coord=" + _.first(self.bulletin().location) + "_" + _.last(self.bulletin().location),
+                    "zoomLevel=12",
+                    "lang=" + loc.getCurrentLanguage(),
+                    "municipality=" + self.bulletin().municipality,
+                    features];
+
+      var url = "/oskari/fullmap.html?" + params.join("&");
+      window.open(url);
+    }
+  };
+
   self.canCommentCurrentBulletin = ko.pureComputed(function() {
     return util.getIn(self, ["bulletin", "canComment"]);
   });

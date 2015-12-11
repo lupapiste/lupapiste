@@ -305,6 +305,7 @@
    :openInfoRequest          false
    :primaryOperation         nil
    :secondaryOperations      []
+   :options                  {}
    :organization             ""
    :propertyId               ""
    :permitSubtype            ""

@@ -84,7 +84,7 @@ LUPAPISTE.OrganizationModel = function () {
   }
 
   self.neighborOrderEmails = ko.observable("");
-  self.neighborOrderEmailsIndicator = ko.observable().extend({notify: "always"});;
+  self.neighborOrderEmailsIndicator = ko.observable().extend({notify: "always"});
   ko.computed(function() {
     var emails = self.neighborOrderEmails();
     if (self.initialized) {
