@@ -1,152 +1,204 @@
 (ns lupapalvelu.foreman-application-itest
   (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]
-            [sade.strings :as ss]))
+           [clojure.java.io :as io]
+           [net.cgrand.enlive-html :as enlive]
+           [lupapalvelu.itest-util :refer :all]
+           [lupapalvelu.factlet :refer :all]
+           [lupapalvelu.domain :as domain]
+           [lupapalvelu.verdict :as verdict]
+           [sade.common-reader :as cr]
+           [sade.strings :as ss]
+           [sade.xml :as xml]))
 
 (apply-remote-minimal)
 
 (facts* "Foreman application"
-  (let [apikey                       mikko
-        {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-        application                  (query-application apikey application-id)
-        _                            (generate-documents application apikey)
-        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa" :foremanEmail "") => truthy
+        (let [apikey                       mikko
+              {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+              application                  (query-application apikey application-id)
+              _                            (generate-documents application apikey)
+              {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa" :foremanEmail "") => truthy
 
-        foreman-application          (query-application apikey foreman-application-id)
-        foreman-link-permit-data     (first (foreman-application :linkPermitData))
-        foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
-        application                  (query-application apikey application-id)
-        link-to-application          (first (application :appsLinkingToUs))
-        foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
+              foreman-application          (query-application apikey foreman-application-id)
+              foreman-link-permit-data     (first (foreman-application :linkPermitData))
+              foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
+              application                  (query-application apikey application-id)
+              link-to-application          (first (application :appsLinkingToUs))
+              foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
-    (fact "Initial permit subtype is 'tyonjohtaja-hakemus'"
-      (:permitSubtype foreman-application) => "tyonjohtaja-hakemus")
+          (fact "Initial permit subtype is 'tyonjohtaja-hakemus'"
+                (:permitSubtype foreman-application) => "tyonjohtaja-hakemus")
 
-    (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
-      (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
+          (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
+                (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
 
-    (fact "Foreman application contains link to application"
-      (:id foreman-link-permit-data) => application-id)
+          (fact "Foreman application contains link to application"
+                (:id foreman-link-permit-data) => application-id)
 
-    (fact "Original application contains link to foreman application"
-      (:id link-to-application) => foreman-application-id)
+          (fact "Original application contains link to foreman application"
+                (:id link-to-application) => foreman-application-id)
 
-    (fact "All linked Foreman applications are returned in query"
-      (let [applications (:applications foreman-applications)]
-        (count applications) => 1
-        (:id (first applications)) => foreman-application-id))
+          (fact "All linked Foreman applications are returned in query"
+                (let [applications (:applications foreman-applications)]
+                  (count applications) => 1
+                  (:id (first applications)) => foreman-application-id))
 
-    (fact "Document data is copied to foreman application"
-      (fact "Hankkeen kuvaus"
-        (let [foreman-hankkeen-kuvaus (domain/get-document-by-name foreman-application "hankkeen-kuvaus-minimum")
-              app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus-rakennuslupa")]
+          (fact "Document data is copied to foreman application"
+                (fact "Hankkeen kuvaus"
+                      (let [foreman-hankkeen-kuvaus (domain/get-document-by-name foreman-application "hankkeen-kuvaus-minimum")
+                            app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus-rakennuslupa")]
 
-          (get-in app-hankkeen-kuvaus [:data :kuvaus :value]) => (get-in foreman-hankkeen-kuvaus [:data :kuvaus :value])))
+                        (get-in app-hankkeen-kuvaus [:data :kuvaus :value]) => (get-in foreman-hankkeen-kuvaus [:data :kuvaus :value])))
 
-      (fact "Tyonjohtaja doc has value from the command"
-        (get-in foreman-doc [:data :kuntaRoolikoodi :value]) => "ei tiedossa")
+                (fact "Tyonjohtaja doc has value from the command"
+                      (get-in foreman-doc [:data :kuntaRoolikoodi :value]) => "ei tiedossa")
 
-      (fact "Hakija docs are equal, expect the userId"
-        (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
-              foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-r")))]
+                (fact "Hakija docs are equal, expect the userId"
+                      (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
+                            foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-r")))]
 
-          hakija-doc-data => map?
-          foreman-hakija-doc-data => map?
+                        hakija-doc-data => map?
+                        foreman-hakija-doc-data => map?
 
-          (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
+                        (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
 
-    (fact "Foreman name index is updated"
-      (command apikey :update-doc :id (:id foreman-application) :doc (:id foreman-doc) :collection "documents"
-        :updates [["henkilotiedot.etunimi" "foo"] ["henkilotiedot.sukunimi" "bar"] ["kuntaRoolikoodi" "erityisalojen ty\u00F6njohtaja"]]) => ok?
+          (fact "Foreman name index is updated"
+                (command apikey :update-doc :id (:id foreman-application) :doc (:id foreman-doc) :collection "documents"
+                         :updates [["henkilotiedot.etunimi" "foo"] ["henkilotiedot.sukunimi" "bar"] ["kuntaRoolikoodi" "erityisalojen ty\u00F6njohtaja"]]) => ok?
 
-      (let [application-after-update (query-application apikey (:id foreman-application))]
-        (:foreman foreman-application) => ss/blank?
-        (:foremanRole foreman-application) => ss/blank?
-        (:foreman application-after-update) => "bar foo"
-        (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
+                (let [application-after-update (query-application apikey (:id foreman-application))]
+                  (:foreman foreman-application) => ss/blank?
+                  (:foremanRole foreman-application) => ss/blank?
+                  (:foreman application-after-update) => "bar foo"
+                  (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
 
-    (fact "Can't submit foreman app before original link-permit-app is submitted"
-      (:submittable (query-application apikey foreman-application-id)) => false)
+          (fact "Can't submit foreman app before original link-permit-app is submitted"
+                (:submittable (query-application apikey foreman-application-id)) => false)
 
-    (fact "Submit link-permit app"
-      (command apikey :submit-application :id application-id) => ok?
-      (:submittable (query-application apikey foreman-application-id)) => true)
+          (fact "Submit link-permit app"
+                (command apikey :submit-application :id application-id) => ok?
+                (:submittable (query-application apikey foreman-application-id)) => true)
 
-    (facts "Can't submit foreman notice app if link permit doesn't have verdict"
-      (fact "gives error about foreman notice"
-        (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.notice-not-submittable))
-      (command sonja :check-for-verdict :id application-id) => ok?
-      (fact "ok after link-permit has verdict"
-        (command apikey :submit-application :id foreman-application-id) => ok?))
-
-
-
-    (fact "Link foreman application to task"
-      (let [apikey                       mikko
-            application (create-and-submit-application apikey)
-            _ (command sonja :check-for-verdict :id (:id application))
-            application (query-application apikey (:id application))
-            {foreman-application-id :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "" :foremanEmail "")
-            tasks (:tasks application)
-            foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks))]
-        (command apikey :link-foreman-task :id (:id application) :taskId (:id foreman-task) :foremanAppId foreman-application-id) => ok?
-        (let [app (query-application apikey (:id application))
-              updated-tasks (:tasks app)
-              updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]
-          (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id)))
+          (facts "Can't submit foreman notice app if link permit doesn't have verdict"
+                 (fact "gives error about foreman notice"
+                       (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.notice-not-submittable))
+                 (command sonja :check-for-verdict :id application-id) => ok?
+                 (fact "ok after link-permit has verdict"
+                       (command apikey :submit-application :id foreman-application-id) => ok?)) (fact "Link foreman application to task"
+                                                                                                      (let [apikey                       mikko
+                                                                                                            application (create-and-submit-application apikey)
+                                                                                                            _ (command sonja :check-for-verdict :id (:id application))
+                                                                                                            application (query-application apikey (:id application))
+                                                                                                            {foreman-application-id :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "" :foremanEmail "")
+                                                                                                            tasks (:tasks application)
+                                                                                                            foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks))]
+                                                                                                        (command apikey :link-foreman-task :id (:id application) :taskId (:id foreman-task) :foremanAppId foreman-application-id) => ok?
+                                                                                                        (let [app (query-application apikey (:id application))
+                                                                                                              updated-tasks (:tasks app)
+                                                                                                              updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]
+                                                                                                          (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id)))
 
     ; delete verdict for next steps
-    (let [app (query-application mikko application-id)
-          verdict-id (-> app :verdicts first :id)
-          verdict-id2 (-> app :verdicts second :id)]
-     (command sonja :delete-verdict :id application-id :verdictId verdict-id) => ok?
-     (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
-     (fact "is submitted" (:state (query-application mikko application-id)) => "submitted"))
+          (let [app (query-application mikko application-id)
+                verdict-id (-> app :verdicts first :id)
+                verdict-id2 (-> app :verdicts second :id)]
+            (command sonja :delete-verdict :id application-id :verdictId verdict-id) => ok?
+            (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
+            (fact "is submitted" (:state (query-application mikko application-id)) => "submitted"))
 
-    (facts "approve foreman"
-      (fact "Can't approve foreman application before actual application"
-        (command sonja :approve-application :id foreman-application-id :lang "fi") => (partial expected-failure? "error.link-permit-app-not-in-post-sent-state"))
+          (facts "approve foreman"
+                 (fact "Can't approve foreman application before actual application"
+                       (command sonja :approve-application :id foreman-application-id :lang "fi") => (partial expected-failure? "error.link-permit-app-not-in-post-sent-state"))
 
-      (fact "can still comment"
-        (comment-application apikey foreman-application-id) => ok?)
+                 (fact "can still comment"
+                       (comment-application apikey foreman-application-id) => ok?)
 
-      (fact "After approving actual application, foreman can be approved. No need for verdict"
-        (command sonja :approve-application :id application-id :lang "fi") => ok?
-        (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)
+                 (fact "After approving actual application, foreman can be approved. No need for verdict"
+                       (command sonja :approve-application :id application-id :lang "fi") => ok?
+                       (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)
 
-      (fact "when foreman application is of type 'ilmoitus', after approval its state is acknowledged"
-        (:state (query-application apikey foreman-application-id)) => "acknowledged")
+                 (fact "when foreman application is of type 'ilmoitus', after approval its state is acknowledged"
+                       (:state (query-application apikey foreman-application-id)) => "acknowledged")
 
-      (fact "can no longer comment"
-        (comment-application apikey foreman-application-id) => fail?))
+                 (fact "can no longer comment"
+                       (comment-application apikey foreman-application-id) => fail?))
 
-    (facts "updating other foreman projects to current foreman application"
-      (let [{application1-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-            {foreman-application1-id :id} (command apikey :create-foreman-application :id application1-id :taskId "" :foremanRole "" :foremanEmail "") => truthy
+          (facts "updating other foreman projects to current foreman application"
+                 (let [{application1-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+                       {foreman-application1-id :id} (command apikey :create-foreman-application :id application1-id :taskId "" :foremanRole "" :foremanEmail "") => truthy
 
-            {application2-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-            {foreman-application2-id :id} (command apikey :create-foreman-application :id application2-id :taskId "" :foremanRole "" :foremanEmail "") => truthy
+                       {application2-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+                       {foreman-application2-id :id} (command apikey :create-foreman-application :id application2-id :taskId "" :foremanRole "" :foremanEmail "") => truthy
 
-            foreman-application1          (query-application apikey foreman-application1-id)
-            foreman-application2          (query-application apikey foreman-application2-id)
+                       foreman-application1          (query-application apikey foreman-application1-id)
+                       foreman-application2          (query-application apikey foreman-application2-id)
 
-            foreman-doc1                  (domain/get-document-by-name foreman-application1 "tyonjohtaja-v2")
-            foreman-doc2                  (domain/get-document-by-name foreman-application2 "tyonjohtaja-v2")]
+                       foreman-doc1                  (domain/get-document-by-name foreman-application1 "tyonjohtaja-v2")
+                       foreman-doc2                  (domain/get-document-by-name foreman-application2 "tyonjohtaja-v2")]
 
-        (fact "other project is updated into current foreman application"
-          (command apikey :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
-          (command apikey :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
-          (command apikey :update-foreman-other-applications :id foreman-application2-id :foremanHetu "")
+                   (fact "other project is updated into current foreman application"
+                         (command apikey :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
+                         (command apikey :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
+                         (command apikey :update-foreman-other-applications :id foreman-application2-id :foremanHetu "")
 
-          (let [updated-application (query-application apikey foreman-application2-id)
-                updated-foreman-doc (domain/get-document-by-name updated-application "tyonjohtaja-v2")
-                project-id (get-in updated-foreman-doc [:data :muutHankkeet :0 :luvanNumero :value])]
-            (fact "first project is in other projects document"
-              project-id => application1-id)))))
+                         (let [updated-application (query-application apikey foreman-application2-id)
+                               updated-foreman-doc (domain/get-document-by-name updated-application "tyonjohtaja-v2")
+                               project-id (get-in updated-foreman-doc [:data :muutHankkeet :0 :luvanNumero :value])]
+                           (fact "first project is in other projects document"
+                                 project-id => application1-id)))))
 
-    ))
+          (facts "Special foreman/designer verdicts"
+                 (let [xml-file   (fn [filename] (-> filename io/resource slurp
+                                                     (xml/parse-string "utf-8")
+                                                     cr/strip-xml-namespaces))
+                       special    (-> "krysp/sample/rakentamisen aikaiset/tekla-tj-verdict.xml"
+                                      xml-file
+                                      (enlive/at [:tunnus enlive/any-node]
+                                                 (enlive/replace-vars {:application-id (:id application)})))
+                       typical    (xml-file "krysp/sample/verdict.xml")
+                       normalized (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application special)
+                       poytakirja (-> normalized (enlive/select [:paatostieto :Paatos :poytakirja :> enlive/any-node]))]
+                   (fact "Special verdict"
+                         (verdict/special-foreman-designer-verdict? foreman-application special) => truthy)
+                   (fact "Typical verdict"
+                         (verdict/special-foreman-designer-verdict? foreman-application typical) => falsey)
+                   (fact "Paatostieto has replaced the old one"
+                          (count (enlive/select normalized [:paatostieto])) => 1)
+                   (fact "Paatostieto is in the right place"
+                         (let [elems (-> normalized (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))
+                               elems (mapv :tag elems)
+                               index (.indexOf elems :paatostieto)]
+                           (subvec elems (dec index) (+ index 2))
+                           => [:katselmustieto
+                               :paatostieto
+                               :lisatiedot]))
+                   (fact "Poytakirja contents are OK"
+                         (reduce (fn [acc m] (assoc acc (:tag m) (-> m :content))) {} poytakirja)
+                         => {:paatoskoodi ["hyv\u00e4ksytty"]
+                             :paatoksentekija [""]
+                             :paatospvm ["2015-11-29"]
+                             :liite [{:tag :kuvaus
+                                      :attrs nil
+                                      :content []}
+                                     {:tag :linkkiliitteeseen
+                                      :attrs nil
+                                      :content ["http://localhost:8000/dev/sample-attachment.txt"]}]})
+                   (facts "Other paatostieto placements"
+                         (let [minispec (enlive/at special
+                                            [:paatostieto] nil
+                                            [:lisatiedot] nil
+                                            [:liitetieto] nil
+                                            [:asianTiedot] nil
+                                            [:hankkeenVaativuus] nil)]
+                           (fact "Paatostieto will be last element"
+                                 (let [norm (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
+                                       elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]
+                                   (-> elems last :tag) => :paatostieto))
+                           (for [e [:muistiotieto :lisatiedot :liitetieto :kayttotapaus :asianTiedot :hankkeenVaativuus]
+                                 :let [norm (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application minispec)
+                                       elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]]
+                             (do (fact (str e " is last") (-> elems last :tag) => e)
+                                 (fact "Paatostieto is next to last" (->> elems (drop-last 2) first :tag) => :paatostieto)))))))))
 
 (facts "foreman history"
   (apply-remote-minimal) ; clean mikko before history tests

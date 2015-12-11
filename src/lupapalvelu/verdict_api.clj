@@ -9,6 +9,7 @@
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
             [lupapalvelu.application :as application]
+            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
@@ -42,7 +43,7 @@
   the verdict is not special."
   [application app-xml]
   (let [xml (cr/strip-xml-namespaces app-xml)]
-    (if (verdict/special-foreman-designer-verdict? application xml)
+    (if (verdict/special-foreman-designer-verdict? (meta-fields/enrich-with-link-permit-data application) xml)
       (verdict/verdict-xml-with-foreman-designer-verdicts application xml)
       app-xml)))
 
