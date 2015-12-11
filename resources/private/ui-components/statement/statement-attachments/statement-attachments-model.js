@@ -8,21 +8,8 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   
   self.tab = params.selectedTab;
 
-  // this function is mutated over in the attachement.deleteVersion
-  var deleteAttachmentFromServerProxy;
-
-  function deleteAttachmentFromServer(attachmentId) {
-    ajax
-      .command("delete-attachment", {id: applicationId(), attachmentId: attachmentId})
-      .success(function() {
-        repository.load(applicationId());
-        return false;
-      })
-      .call();
-    return false;
-  }
-
   self.attachments = ko.observableArray([]);
+
 
   function refresh(application) {
     self.attachments(
@@ -47,8 +34,19 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   };
 
   self.canAddAttachment = function() {
-    return authModel.ok("upload-attachment") && authModel.ok('give-statement');
+    return authModel.ok("upload-attachment") && authModel.ok("give-statement");
   };
+
+  function deleteAttachmentFromServer(attachmentId) {
+    ajax
+      .command("delete-attachment", {id: applicationId(), attachmentId: attachmentId})
+      .success(function() {
+        repository.load(applicationId());
+        return false;
+      })
+      .call();
+    return false;
+  }
 
   self.deleteAttachment = function(attachmentId) {
     deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
@@ -72,12 +70,4 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
-
-  repository.loaded(["statement"], function(application) {
-    if (applicationId() === application.id) {
-      authModel.refresh(application, {statementId: statementId()}, function() {
-        refresh(application);
-      });
-    }
-  });
 };

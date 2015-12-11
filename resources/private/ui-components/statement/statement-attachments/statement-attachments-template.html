@@ -4,7 +4,8 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="statement-attachments-template">
       <div class="statement-attachments">
-        <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
+        <h3 data-bind="ltext: 'inforequest.attachments',
+                       visible: attachments().length || tab() === 'statement'"></h3>
         <div data-bind="if: attachments().length">
           <table class="table" data-test-id="inforequest-attachments-table">
             <thead>
@@ -38,12 +39,13 @@
           </table>
         </div>
 
-        <div data-bind="ifnot: attachments().length">
+        <div data-bind="ifnot: attachments().length,
+                        visible: canAddAttachment() && tab() === 'statement'">
           <i data-bind="ltext: 'statement.attachments'" data-test-id="inforequest-attachments-no-attachments"></i>
         </div>
 
         <button class="positive"
-                data-bind="visible: canAddAttachment(),
+                data-bind="visible: canAddAttachment() && tab() === 'statement',
                            click: newAttachment"
                 data-test-id="add-statement-attachment">
             <i data-bind="attr: { 'class': 'lupicon-circle-plus' }"></i>

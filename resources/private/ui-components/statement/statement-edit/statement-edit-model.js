@@ -3,34 +3,49 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   var applicationId = params.applicationId;
   var statementId = params.statementId;
+  var submitCommand = params.submitCommand;
+  var saveDraftCommand = params.saveDraftCommand;
   
   self.authModel = params.authModel;
-  self.tab = params.selectedTab;
+  self.tab = params.tabName;
 
   self.data = ko.observable();
-  self.application = ko.observable();
+  self.application = params.application;
 
   self.statuses = ko.observableArray([]);
   self.selectedStatus = ko.observable();
+  self.nothingToAdd = ko.observable();
   self.text = ko.observable();
   self.submit = ko.observable(false);
   self.saving = ko.observable(false);
   self.dirty = ko.observable(false);
   self.modifyId = ko.observable(util.randomElementId());
+
+  self.isEditable = function(field) {
+    if (self.tab === "statement") {
+      return _.contains(["text", "status"], field) && self.authModel.ok(submitCommand);
+    } else {
+      return _.contains(["text", "nothing-to-add"], field) && self.authModel.ok(submitCommand);
+    }
+  }
   
   self.isDraft = ko.pureComputed(function() {
-    return _.contains(["requested", "draft"], util.getIn(self.data, ["state"]));
+    if (self.tab === "statement") {
+      return _.contains(["requested", "draft"], util.getIn(self.data, ["state"]));
+    } else {
+      return _.contains(["announced"], util.getIn(self.data, ["state"])); 
+    }
   });
 
   self.coveringNote = ko.pureComputed(function() {
     var isStatementGiver = util.getIn(self.data(), ["person", "userId"]) === lupapisteApp.models.currentUser.id();
-    return self.tab() === "statement" && isStatementGiver ? util.getIn(self.data, ["saateText"]) : "";
+    return self.tab === "statement" && isStatementGiver ? util.getIn(self.data, ["saateText"]) : "";
   });
 
   var draftTimerId = undefined;
 
   self.text.subscribe(function(value) {
-    if(util.getIn(self.data(), ["text"])  !== value) { 
+    if(util.getIn(self.data(), ["text"]) !== value) { 
       self.dirty(true);
     }
   });
@@ -41,18 +56,7 @@ LUPAPISTE.StatementEditModel = function(params) {
     }
   });
 
-  self.clear = function() {
-    self.data(null);
-    self.application(null);
-    self.statuses([]);
-    self.selectedStatus(null);
-    self.text(null);
-    self.dirty(false);
-    return self;
-  };
-
-  function refresh(application) {
-    self.application(ko.mapping.fromJS(application));
+  self.application.subscribe(function(application) {
     var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId(); });
     if(statement) {
       if (!statement["modify-id"]) {
@@ -61,12 +65,9 @@ LUPAPISTE.StatementEditModel = function(params) {
       self.data(ko.mapping.fromJS(statement));
 
       if (!self.dirty()) {
-        if (statement.status) {
-          self.selectedStatus(statement.status);  // LUPA-482 part II
-        }
-        if (statement.text) {
-          self.text(statement.text);
-        }
+        self.selectedStatus(statement.status);  // LUPA-482 part II
+        self.text(util.getIn(statement, self.tab === "statement" ? ["text"] : ["reply", "text"]));
+        self.nothingToAdd(util.getIn(statement, ["reply", "nothing-to-add"]));
         self.dirty(false);
       }
 
@@ -84,16 +85,7 @@ LUPAPISTE.StatementEditModel = function(params) {
     } else {
       pageutil.openPage("404");
     }
-  };
-
-  self.openDeleteDialog = function() {
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("statement.delete.header"),
-        loc("statement.delete.message"),
-        {title: loc("yes"), fn: deleteStatementFromServer},
-        {title: loc("no")}
-      );
-  };
+  });
 
   hub.subscribe("statement::give-statement", function(params) {
     if(applicationId() === params.applicationId && statementId() === params.statementId) {
@@ -106,19 +98,24 @@ LUPAPISTE.StatementEditModel = function(params) {
     return !self.saving() && self.submit();
   });
 
+  function getCommandParams() {
+    return _.extend({ 
+      id: applicationId(), 
+      "modify-id": self.modifyId(),
+      "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
+      statementId: statementId(), 
+      lang: loc.getCurrentLanguage(),
+      text: self.text()
+    }, 
+      self.tab === "statement" ? {status: self.selectedStatus()} : {"nothing-to-add": self.nothingToAdd()}
+    );
+  }
+
   self.doSubmit.subscribe(function(doSubmit) {
     if (doSubmit) {
       self.saving(true);
       ajax
-        .command("give-statement", {
-          id: applicationId(), 
-          "modify-id": self.modifyId(),
-          "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
-          statementId: statementId(), 
-          status: self.selectedStatus(), 
-          text: self.text(), 
-          lang: loc.getCurrentLanguage()
-        })
+        .command(submitCommand, getCommandParams())
         .success(function() {
           updateModifyId(self);
           pageutil.openApplicationPage({id: applicationId()}, "statement");
@@ -166,15 +163,7 @@ LUPAPISTE.StatementEditModel = function(params) {
       self.saving(true);
       self.dirty(false);
       ajax
-        .command("save-statement-as-draft", {
-          id: applicationId(), 
-          "modify-id": self.modifyId(),
-          "prev-modify-id": util.getIn(self.data(), ["modify-id"], ""),
-          statementId: statementId(), 
-          status: self.selectedStatus(), 
-          text: self.text(), 
-          lang: loc.getCurrentLanguage()
-        })
+        .command(saveDraftCommand, getCommandParams())
         .success(function() {
           updateModifyId(self);
           hub.send("indicator-icon", {style: "positive"});
@@ -185,25 +174,5 @@ LUPAPISTE.StatementEditModel = function(params) {
     }
     return false;
   };
-
-  function deleteStatementFromServer() {
-    ajax
-      .command("delete-statement", {id: applicationId(), statementId: statementId()})
-      .success(function() {
-        repository.load(applicationId());
-        pageutil.openApplicationPage({id: applicationId()}, "statement");
-        return false;
-      })
-      .call();
-    return false;
-  }
-
-  repository.loaded(["statement"], function(application) {
-    if (applicationId() === application.id) {
-      self.authModel.refresh(application, {statementId: statementId()}, function() {
-        refresh(application);
-      });
-    }
-  });
 
 };

@@ -8,7 +8,7 @@
       <div>
         <h1>
           <span>
-            <span data-bind="ltext: 'statement.tab.' + tab()"></span>:
+            <span data-bind="ltext: 'statement.tab.' + tab"></span>:
           </span>
           <span data-bind="with: application">
             <span data-bind="text: title"></span>
@@ -29,7 +29,8 @@
 
     <div class="statement-info">
       <form>
-        <div class="form-entry">
+        <div class="form-entry"
+             data-bind="visible: tab === 'statement'">
           <label for="statement-type-select" class="form-label">
             <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
             <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
@@ -42,12 +43,25 @@
                              value: selectedStatus,
                              valueAllowUnset: true,
                              optionsCaption: loc('choose'),
-                             disable: !$component.authModel.ok('give-statement')"></select>
+                             disable: !$component.isEditable('status')"></select>
+        </div>
+        <div class="form-entry"
+             data-bind="visible: tab === 'reply'">
+          <input id="statement-nothing-to-add" 
+                 type="checkbox" 
+                 class="form-input checkbox" 
+                 data-bind="value: nothingToAdd,
+                            disable: !$component.isEditable('nothing-to-add')">
+          <label for="statement-nothing-to-add" class="form-label">
+            <span data-bind="ltext: 'statement.nothing-to-add.label'">Ei lisättävää</span>
+          </label>
         </div>
         <div>
-          <label class="form-label" for="statement-text" data-bind="ltext: 'statement.text'"></label>
+          <label class="form-label" for="statement-text" data-bind="ltext: 'statement.' + tab + '.text'"></label>
           <textarea
-            data-bind="attr: {placeholder: loc('statement.message.placeholder')}, textInput: text, readonly: !$component.authModel.ok('give-statement')"
+            data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')}, 
+                       textInput: text, 
+                       readonly: !$component.isEditable('text')"
             id="statement-text"
             rows="20">
           </textarea>

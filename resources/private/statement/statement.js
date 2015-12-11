@@ -2,12 +2,13 @@
   "use strict";
 
   var applicationId = ko.observable();
+  var application = ko.observable();
   var statementId = ko.observable();
   var submitAllowed = ko.observable(false);
 
   var authorizationModel = authorization.create();
 
-  var tabs = ["statement"];
+  var tabs = ["statement", "reply"];
   var selectedTab = ko.observable("statement");
 
   hub.subscribe("statement::submitAllowed", function(data) {
@@ -18,9 +19,10 @@
     repository.load(applicationId());
   });
 
-  repository.loaded(["statement"], function(application) {
-    if (applicationId() === application.id) {
-      authorizationModel.refresh(application, {statementId: statementId()});
+  repository.loaded(["statement"], function(app) {
+    if (applicationId() === app.id) {
+      application(app);
+      authorizationModel.refresh(app, {statementId: statementId()});
     }
   });
 
@@ -33,6 +35,7 @@
   $(function() {
     $("#statement").applyBindings({
       authorization: authorizationModel,
+      application: application,
       applicationId: applicationId,
       statementId: statementId,
       submitAllowed: submitAllowed,

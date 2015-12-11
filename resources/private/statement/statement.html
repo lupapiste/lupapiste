@@ -26,10 +26,23 @@
     <div class="container">
       <div id="statement-edit-container">
         <div data-bind="component: { name: 'statement-edit',
-                                     params: { applicationId: $root.applicationId,
+                                     params: { application: $root.application,
+                                               applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization, 
+                                               saveDraftCommand: 'save-statement-as-draft',
+                                               submitCommand: 'give-statement',
+                                               tabName: 'statement' } },
+                        visible: $root.selectedTab() === 'statement'"></div> 
+        <div data-bind="component: { name: 'statement-edit',
+                                     params: { application: $root.application,
+                                               applicationId: $root.applicationId,
                                                statementId: $root.statementId,
                                                authModel: $root.authorization,
-                                               selectedTab: $root.selectedTab } }"></div> 
+                                               saveDraftCommand: 'save-statement-reply-as-draft',
+                                               submitCommand: 'reply-statement',
+                                               tabName: 'reply' } },
+                        visible: $root.selectedTab() === 'reply'"></div> 
       </div>
       <div id="statement-attachments-container">
         <div data-bind="component: { name: 'statement-attachments',

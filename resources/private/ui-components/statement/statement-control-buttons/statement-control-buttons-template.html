@@ -6,7 +6,7 @@
       <div class="statement-control-buttons">
         <button data-bind="disable: disabled,
                            click: giveStatement,
-                           visible: authModel.ok('give-statement')"
+                           visible: authModel.ok(tab() === 'statement' ? 'give-statement' : 'reply-statement')"
                 id="statement-submit"
                 type="submit"
                 class="positive">
