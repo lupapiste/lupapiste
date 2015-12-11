@@ -523,6 +523,10 @@ $app-gray-darkest: $gray187;
   #choose-statement-givers-title {
     font-weight: bold;
   }
+  #invite-statement-giver-saateText {
+    resize: none;
+    width: 99%;
+  }
   button {
       margin-top: $marginL;
   }
