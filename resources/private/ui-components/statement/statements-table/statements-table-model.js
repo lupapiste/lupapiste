@@ -25,7 +25,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.isStatementOverDue = function(statement) {
     var nowTimeInMs = new Date().getTime();
-    return (statement.dueDate && !statement.given() ) ? (nowTimeInMs > statement.dueDate()) : false;
+    return (statement.dueDate && !(statement.given && statement.given()) ) ? (nowTimeInMs > statement.dueDate()) : false;
   };
 
   var deleteStatementFromServer = function(statementId) {
