@@ -4,6 +4,7 @@
            [lupapalvelu.itest-util :refer [expected-failure?]]
            [lupapalvelu.action :as action]
            [lupapalvelu.application :as application]
+           [lupapalvelu.application-meta-fields :as meta-fields]
            [lupapalvelu.domain :as domain]
            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
            [lupapalvelu.verdict :refer :all]
