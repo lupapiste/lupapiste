@@ -4,7 +4,8 @@
             [lupapalvelu.user :as user]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.strings :as ss]))
 
 
 (defn visibility-check [user {app-auth :auth org :organization} {:keys [metadata auth] :as attachment}]
@@ -46,12 +47,15 @@
     (assoc attachment :auth (distinct (map auth-from-version versions)))))
 
 (defn can-access-attachment-file? [user file-id {attachments :attachments :as application}]
-  (boolean
-    (when-let [attachment (util/find-first
-                            (fn [{versions :versions :as attachment}]
-                              (util/find-first #{file-id} (map :fileId versions)))
-                            attachments)]
-      (can-access-attachment? user application attachment))))
+  (let [file-id (if (ss/ends-with file-id "preview")
+                  (first (ss/split file-id #"-preview$"))
+                  file-id)]
+    (boolean
+      (when-let [attachment (util/find-first
+                              (fn [{versions :versions :as attachment}]
+                                (util/find-first #{file-id} (map :fileId versions)))
+                              attachments)]
+        (can-access-attachment? user application attachment)))))
 
 (defn filter-attachments-for [user application attachments]
   {:pre [(map? user) (sequential? attachments)]}
