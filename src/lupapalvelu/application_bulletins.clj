@@ -6,7 +6,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [sade.util :refer [fn->]]))
+            [sade.util :refer [fn->]]
+            [lupapalvelu.document.model :as model]))
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
 
@@ -53,7 +54,10 @@
   (partial remove (fn-> :schema-info :type keyword (= :party))))
 
 (defn create-bulletin-snapshot [application]
-  (let [app-snapshot (select-keys application app-snapshot-fields)
+  (let [app-snapshot (-> application
+                         (select-keys app-snapshot-fields)
+                         (model/strip-blacklisted-data :bulletin)
+                         (model/strip-turvakielto-data))
         app-snapshot (update-in
                        app-snapshot
                        [:documents]

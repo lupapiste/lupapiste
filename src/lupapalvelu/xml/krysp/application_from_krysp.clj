@@ -11,23 +11,6 @@
   [{:keys [permitType]}]
   (permit/get-application-xml-getter permitType))
 
-(defmethod fetch-fetch-fn "KT"
-  [application]
-  (let [op-name (-> application :primaryOperation :name)
-        krysp-name (case op-name
-                     "rajankaynti"     "KiinteistonMaaritys"
-                     "rasitetoimitus"  "Rasitetoimitus"
-                     ;; KRYSP element is deduced from kiinteistonmuodostusTyyppi.
-                     ;; For example, kiinteistolajin-muutos -> KiinteistolajinMuutos
-                     "kiinteistonmuodostus" (let [doc (some #(and (= (-> % :schema-info :op :id)
-                                                                     (-> application :primaryOperation :id))
-                                                                  %)
-                                                            (:documents application))]
-                                              (-> doc :data :kiinteistonmuodostus
-                                                  :kiinteistonmuodostusTyyppi :value
-                                                  operation-name name)))]
-    (partial (permit/get-application-xml-getter :permit/KT) krysp-name)))
-
 (defn get-application-xml [{:keys [id permitType] :as application} search-type & [raw?]]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
     (if-let [fetch-fn (fetch-fetch-fn application)]

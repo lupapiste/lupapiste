@@ -1476,7 +1476,7 @@
 
    {:info {:name "tyonjohtaja"
            :i18name "osapuoli"
-           :order 5
+           :order 2
            :removable true
            :repeating true
            :approvable true
@@ -1486,7 +1486,7 @@
 
    {:info {:name "tyonjohtaja-v2"
            :i18name "osapuoli"
-           :order 5
+           :order 2
            :removable false
            :repeating false
            :approvable true
