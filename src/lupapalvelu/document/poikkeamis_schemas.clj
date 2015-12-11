@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.poikkeamis-schemas
   (:require [lupapalvelu.document.schemas :refer :all]
+            [lupapalvelu.document.tools :as tools]
             [lupapiste-commons.usage-types :as usages]))
 
 (def rakennushanke {:info {:name "rakennushanke"
@@ -80,7 +81,7 @@
                                           :approvable true
                                           :order 2
                                           :type :location}
-                                   :body (schema-body-without-element-by-name rakennuspaikka "hankkeestaIlmoitettu")})
+                                   :body (tools/schema-body-without-element-by-name rakennuspaikka "hankkeestaIlmoitettu")})
 
 (defschemas
   1
