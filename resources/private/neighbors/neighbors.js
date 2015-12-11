@@ -96,7 +96,7 @@
       } else {
         self.map.updateSize().clear().add({x: x, y:y});
         if (self.x !== x || self.y !== y) {
-          self.center(x, y);
+          self.map.center(x, y);
         }
       }
 

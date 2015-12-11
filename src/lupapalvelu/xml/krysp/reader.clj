@@ -29,7 +29,8 @@
 (def yl-case-type     "typeName=ymy%3AYmparistolupa")
 (def mal-case-type    "typeName=ymm%3AMaaAineslupaAsia")
 (def vvvl-case-type   "typeName=ymv%3AVapautus")
-(def kt-case-type-prefix  "typeName=kiito%3A")
+
+;;(def kt-case-type-prefix  "typeName=kiito%3A")
 
 ;; Object types as enlive selector
 (def case-elem-selector #{[:RakennusvalvontaAsia]
@@ -53,6 +54,10 @@
                              [:Halkominen]
                              [:KiinteistonMaaritys]
                              [:Tilusvaihto]})
+
+(def kt-types (let [elems (map #(->> % first name (str "kiito:")) outlier-elem-selector)]
+                (str "typeName=" (ss/join "," elems))))
+
 
 (defn- get-tunnus-path
   [permit-type search-type]
@@ -132,9 +137,9 @@
     (trace "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
 
-(defn kt-application-xml   [krysp-name server credentials id search-type raw?]
+(defn kt-application-xml   [server credentials id search-type raw?]
   (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
-    (application-xml (str kt-case-type-prefix krysp-name) path server credentials id raw?)))
+    (application-xml kt-types path server credentials id raw?)))
 
 (permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P    :xml-from-krysp poik-application-xml)

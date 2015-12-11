@@ -108,14 +108,13 @@
                     (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
                           rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
                       (fact "PDF data rows "
-                        (count rows) => 36
+                        (count rows) => 34
                         (nth rows 22) => "14.10.2015"
                         (nth rows 24) => "Matti Malli"
                         (nth rows 26) => "15.10.2015"
                         (nth rows 28) => "puollettu"
                         (nth rows 30) => "Lorelei ipsum"
-                        (nth rows 32) => "07.12.2015"
-                        (nth rows 34) => "Saatteen sisalto"))
+                        (nth rows 32) => "07.12.2015"))
                     (.delete file))))))
 
 (facts "Generate PDF from application neigbors - signed"
