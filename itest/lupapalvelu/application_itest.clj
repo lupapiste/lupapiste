@@ -173,12 +173,16 @@
   (create-app sonja :propertyId tampere-property-id) => unauthorized?)
 
 (facts "Add operations"
-  (let [application-id  (create-app-id mikko :propertyId tampere-property-id)]
+  (let [operation "kerrostalo-rivitalo"
+        application-id  (create-app-id mikko :propertyId tampere-property-id :operation operation)]
     (comment-application mikko application-id true) => ok?
     (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"
-      (success (command mikko :add-operation :id application-id :operation "varasto-tms")) => true)
+      (success (command mikko :add-operation :id application-id :operation "puun-kaataminen")) => true
+      (let [{docs :documents} (query-application mikko application-id)]
+        (fact "Only one non-repeating location exists"
+          (count (filter #(= "location" (get-in % [:schema-info :type])) docs)) => 1)))
 
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
@@ -480,3 +484,4 @@
           primary-op (:primaryOperation app)]
       (:name secondary-op) => "kerrostalo-rivitalo"
       (:name primary-op) => "varasto-tms")))
+
