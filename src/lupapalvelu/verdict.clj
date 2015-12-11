@@ -191,7 +191,7 @@
                                             {:tag :paatospvm :content [date]}
                                             {:tag :liite :content attachment}]}]}]
         paatostieto  {:tag :paatostieto :content verdict-xml}
-        placeholders #{:paatostieto :muistiotieto :referenssiPiste
+        placeholders #{:paatostieto :muistiotieto :lisatiedot
                        :liitetieto  :kayttotapaus :asianTiedot}
         [rakval]     (enlive/select xml [:RakennusvalvontaAsia])
         place        (some #(placeholders (:tag %)) (:content rakval))]
