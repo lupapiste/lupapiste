@@ -1,11 +1,9 @@
 (ns lupapalvelu.verdict-test
   (require [midje.sweet :refer :all]
            [midje.util :refer [testable-privates]]
-           [clojure.java.io :as io]
            [lupapalvelu.itest-util :refer [expected-failure?]]
            [lupapalvelu.action :as action]
            [lupapalvelu.application :as application]
-           [lupapalvelu.application-meta-fields :as meta-fields]
            [lupapalvelu.domain :as domain]
            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
            [lupapalvelu.verdict :refer :all]
@@ -114,4 +112,4 @@
 (facts "special foreman/designer verdict"
   (let [xml (verdict-xml-with-foreman-designer-verdicts example-application example-meaningful-tj-krysp)]
     (fact "paatostieto is injected before lisatiedot"
-      (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))
+          (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))

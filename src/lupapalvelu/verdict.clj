@@ -165,13 +165,13 @@
 (defn special-foreman-designer-verdict?
   "Some verdict providers handle foreman and designer verdicts a bit
   differently. These 'special' verdicts contain reference permit id in
-  MuuTunnus. xml should be wihout namespaces"
+  MuuTunnus. xml should be without namespaces"
   [application xml]
   (let [app-id (:id application)
-        op-name (-> application :primaryOperation :name)]
-    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
-      (let [link-permit-id (-> (mongo/select-one :app-links {:link.0 app-id}) :link second)]
-        (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))]))))))
+        op-name (-> application :primaryOperation :name)
+        link-permit-id (-> application :linkPermitData first :id)]
+    (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
+         (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
 
 (defn verdict-xml-with-foreman-designer-verdicts
   "'Injects' paatostieto tag (if not present) to verdict XML.
