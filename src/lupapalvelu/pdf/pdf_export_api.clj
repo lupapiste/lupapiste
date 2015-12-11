@@ -31,7 +31,7 @@
   (if-let [bulletin (mongo/select-one :application-bulletins {:_id bulletinId})]
     {:status 200
      :headers {"Content-Type" "application/pdf"}
-     :body (-> bulletin (a/with-masked-person-ids user) (pdf-export/generate lang))}
+     :body (-> (last (:versions bulletin)) (a/with-masked-person-ids user) (pdf-export/generate lang))}
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))

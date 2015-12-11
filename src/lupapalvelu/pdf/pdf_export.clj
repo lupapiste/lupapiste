@@ -180,7 +180,8 @@
     (map collect-single-document (sort-docs decorated-docs))))
 
 (defn- get-authority [{authority :authority :as application}]
-  (if (domain/assigned? application)
+  (if (and (:authority application)
+           (domain/assigned? application))
     (str (:lastName authority) " " (:firstName authority))
     (loc "application.export.empty")))
 
