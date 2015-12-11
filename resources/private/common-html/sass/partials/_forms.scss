@@ -40,7 +40,8 @@ legend {
   &.source-value-changed {
     border: 2px solid $lp-green;
   }
-  &.error {
+  &.err {
+    color: red;
     border-color: red;
     border-width: 3px;
   }

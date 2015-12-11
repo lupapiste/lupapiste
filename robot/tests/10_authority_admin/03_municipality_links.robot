@@ -43,9 +43,9 @@ Add link
   Element should not be visible  //a[@href='${url}']
   Wait and click  xpath=//a[@data-test-id='add-link']
   Wait until  Element should be visible  dialog-edit-link
-  Input Text  //div[@id='dialog-edit-link']//input[1]  ${name} fi
-  Input Text  //div[@id='dialog-edit-link']//input[2]  ${name} sv
-  Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
+  Input Text  jquery=#dialog-edit-link #link-text-fi  ${name} fi
+  Input Text  jquery=#dialog-edit-link #link-text-sv  ${name} sv
+  Input Text  jquery=#dialog-edit-link #link-url  ${url}
   Click element  //div[@id='dialog-edit-link']//button[1]
   Wait until  Element should be visible  //td[text()='${name} fi']
   Wait until  Element should be visible  //td[text()='${name} sv']
@@ -56,7 +56,7 @@ Update link
   Execute Javascript  window.scrollTo(0, 500);
   Wait and click  xpath=//table[@data-test-id='organization-links-table']//td[text()='${name} fi']/..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
-  Wait Until  Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
+  Input Text  jquery=#dialog-edit-link #link-url  ${url}
   Click element  //div[@id='dialog-edit-link']//button[1]
 
 Remove link
