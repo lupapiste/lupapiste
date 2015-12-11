@@ -3,7 +3,7 @@
 Documentation   Application gets verdict
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Variables       variables.py
+Variables       ../../common_variables.py
 
 *** Test Cases ***
 
