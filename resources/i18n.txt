@@ -1,0 +1,3 @@
+statement.email.template.duedate-is: Lausunnon määräaika on
+LISAA-TAMA-EDELLISEN-RUOTSINNOKSEKSI.statement.email.template.duedate-is: Deadline för utlåtande är
+statement.email.template.duedate-not-set: Lausunnolle ei ole asetettu määräaikaa.

@@ -71,12 +71,12 @@
                 </tbody>
             </table>
 
-            <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="invite-statement-giver-saateText" class="form-label form-label-text tip"></label>
+            <label data-bind="ltext: 'application.invite-statement-giver-saateText'" for="invite-statement-giver-saateText" class="form-label form-label-text"></label>
             <textarea id="invite-statement-giver-saateText" rows=10 class="form-input textarea really-long high"
                       data-bind="textInput: saateText, attr: {placeholder: loc('application.invite-statement-giver-saateText-placeholder')}"></textarea>
 
 
-            <label class="form-label tip" data-bind="ltext: 'add-statement-giver-maaraaika'" for="add-statement-giver-maaraaika"></label>
+            <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="add-statement-giver-maaraaika"></label>
             <input type="text" class="form-input" data-bind="datepicker: maaraaika" id="add-statement-giver-maaraaika"></input>
 
             <button data-bind="click: toggleInviteSection"
