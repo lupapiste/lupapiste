@@ -1,70 +1,105 @@
 LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   "use strict";
   var self = this;
+  self.searchRequests = [];
 
-  self.status = ko.observable();
   self.statusInit                   = 0;
   self.statusSearchPropertyId       = 1;
   self.statusSearchOwners           = 2;
   self.statusSelectOwners           = 3;
   self.statusOwnersSearchFailed     = 4;
   self.statusPropertyIdSearchFailed = 5;
+  self.readonly = false;
 
-  self.owners = ko.observableArray();
-  self.propertyId = ko.observable();
-
-  self.ownersGroup = ko.computed({
-    read: function() {
-      return _.some(self.owners(), function(owner) {
-        return owner.selected();
-      });
-    },
-    write: function(state) {
-      self.owners().forEach(function(owner) {
-        owner.selected(state);
-      });
-    }
-  });
+  self.status = ko.observable(self.statusInit);
+  self.ownersGroups = ko.observable([]);
+  self.propertyIds = ko.observable(null);
 
   self.isSubmitEnabled = ko.pureComputed(function() {
-    return self.status() === self.statusSelectOwners && self.ownersGroup();
+    return !self.readonly && self.status() === self.statusSelectOwners
+           && _.some(self.ownersGroups(), function(o) {return o.ownersGroup();} );
   });
 
-  self.init = function() {
-    return self.status(self.statusInit).propertyId(null).owners([]);
-  };
+  // Helper functions
+  function getPersonName(person) {
+    return person.sukunimi && person.etunimet ?
+        person.sukunimi + ", " + person.etunimet : person.nimi;
+  }
+  function convertOwner(owner) {
+    var person = owner;
+    var type = owner.henkilolaji;
+    var nameOfDeceased = null;
 
-  self.isSearching = function() {
+    if (owner.yhteyshenkilo) {
+      person = owner.yhteyshenkilo;
+      nameOfDeceased = getPersonName(owner);
+      type = "kuolinpesan_yhthl";
+    }
+
+    return {
+      propertyId: owner.propertyId,
+      name: getPersonName(person),
+      type: type,
+      nameOfDeceased: nameOfDeceased,
+      businessID: person.ytunnus || null,
+      street: person.jakeluosoite || null,
+      city: person.paikkakunta || null,
+      zip: person.postinumero || null,
+      selected: ko.observable(true)
+    };
+  }
+
+  self.isSearching = ko.pureComputed(function() {
     return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners;
-  };
+  });
 
-  self.isPropertyIdAvailable = function() {
-    return self.propertyId() !== null;
-  };
-
-  self.search = function(x, y) {
-    return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y);
-  };
-
-  self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound);
+  self.searchLocation = function(wkt, radius) {
+    self.status(self.statusSearchPropertyId).beginUpdateRequest();
+    self.searchRequests.push(locationSearch.propertyIdsByWKT(self.requestContext, wkt, radius, self.propertyIdFound, self.propertyIfNotFound));
     return self;
   };
 
-  self.propertyIdFound = function(propertyId) {
-    if (propertyId) {
-      return self.propertyId(propertyId).status(self.statusSearchOwners).beginUpdateRequest().searchOwners(propertyId);
+  self.propertyIdFound = function(resp) {
+    var applicationPropertyId = lupapisteApp.models.application.propertyId();
+    var propertyIds = _.isArray(resp) && resp.length > 0 ? _.pluck(resp, "kiinttunnus") : null;
+    if (propertyIds) {
+      var filteredPropertyIds = _.filter(propertyIds, function(p) {return p !== applicationPropertyId;});
+      return self.propertyIds(filteredPropertyIds).status(self.statusSearchOwners).beginUpdateRequest().searchOwnersByPropertyIds(filteredPropertyIds);
     } else {
       return self.propertyIfNotFound();
     }
   };
 
-  self.searchOwners = function(propertyId) {
-    locationSearch.ownersByPropertyId(self.requestContext, propertyId, self.ownersFound, self.ownersNotFound);
+  self.searchOwnersByPropertyIds = function(propertyIds) {
+    self.searchRequests.push(locationSearch.ownersByPropertyIds(self.requestContext, propertyIds, self.ownersFound, self.ownersNotFound));
+    return self;
+  };
+
+  self.searchOwnersByApplicationId = function(applicationId) {
+    self.searchRequests.push(ajax.query("application-property-owners", {id:applicationId})
+                                .success(self.ownersFound).error(self.ownersNotFound).call());
+    return self;
   };
 
   self.ownersFound = function(data) {
-    return self.owners(_.map(data.owners, convertOwner)).status(self.statusSelectOwners);
+    var ownersWithObservables = _.map(data.owners, convertOwner);
+    var gropupedOwners = _.groupBy(ownersWithObservables, "propertyId");
+    var groupsWithSelectAll = _.mapValues(gropupedOwners, function(n) {
+      var ownersGroup = ko.computed({
+        read: function() {
+          return _.some(n, function(owner) {
+            return owner.selected();
+          });
+        },
+        write: function(state) {
+          _.forEach(n, function(owner) {
+            owner.selected(state);
+          });
+        }
+      });
+      return {owners: n, ownersGroup: ownersGroup};
+    });
+    return self.ownersGroups(_.values(groupsWithSelectAll)).status(self.statusSelectOwners);
   };
 
   self.propertyIfNotFound = function() {
@@ -75,29 +110,13 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     return self.status(self.statusOwnersSearchFailed);
   };
 
-  self.cancelSearch = function() {
-    self.status(self.statusEdit).requestContext.begin();
-    return self;
-  };
-
-  self.openOwners = function() {
-    LUPAPISTE.ModalDialog.open("#dialog-select-owners");
-    return self;
-  };
-
   self.addSelectedOwners = function() {
-    var selected = _.filter(self.owners(), function(owner) {
-      return  owner.selected();
-    });
-    var applicationId = lupapisteApp.models.application.id();
-    var parameters = {
-      id: applicationId,
-      propertyId: self.propertyId(),
-      owners: selected
-    };
+    var selected = _(self.ownersGroups()).pluck("owners").flatten()
+                       .filter(function(o) {return o.selected();}).value();
 
-    ajax
-      .command("neighbor-add-owners", parameters)
+    var applicationId = lupapisteApp.models.application.id();
+
+    ajax.command("neighbor-add-owners", {id: applicationId, owners: selected})
       .success(function() {
         repository.load(applicationId);
         hub.send("close-dialog");
@@ -112,34 +131,20 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
   self.requestContext = new RequestContext();
 
-  // Helper functions
-  function getPersonName(person) {
-    if (person.sukunimi && person.etunimet) {
-      return person.sukunimi + ", " + person.etunimet;
-    } else {
-      return person.nimi;
-    }
-  }
-  function convertOwner(owner) {
-    var type = owner.henkilolaji,
-    nameOfDeceased = null;
+  // Abort every search request when the dialog is closed
+  self.dispose = function() {
+    _.each(self.searchRequests, function(r) {
+      r.abort();
+    });
+  };
 
-    if (owner.yhteyshenkilo) {
-      nameOfDeceased = getPersonName(owner);
-      owner = owner.yhteyshenkilo;
-      type = "kuolinpesan_yhthl";
-    }
-    return {
-      name: getPersonName(owner),
-      type: type,
-      nameOfDeceased: nameOfDeceased || null,
-      businessID: owner.ytunnus || null,
-      street: owner.jakeluosoite || null,
-      city: owner.paikkakunta || null,
-      zip: owner.postinumero || null,
-      selected: ko.observable(true)
-    };
+  // Init
+  if (params.wkt) {
+    self.searchLocation(params.wkt, params.radius);
+  } else if (params.applicationId) {
+    self.readonly = true;
+    self.status(self.statusSearchOwners).searchOwnersByApplicationId(params.applicationId);
+  } else {
+    error("Not enough params for NeighborsOwnersDialogModel");
   }
-
-  self.init().search(params.x, params.y);
 };

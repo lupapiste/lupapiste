@@ -255,6 +255,19 @@
    :user    (user/summary user)})
 
 ;;
+;; Neighbors
+;;
+(def neighbor-skeleton
+  {:id ""
+   :propertyId ""
+   :owner {:type nil
+           :name nil
+           :businessID nil
+           :nameOfDeceased nil
+           :address {:street nil :zip nil :city nil}}
+   :status []})
+
+;;
 ;; Application skeleton with default values
 ;;
 

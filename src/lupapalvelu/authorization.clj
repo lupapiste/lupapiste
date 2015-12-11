@@ -45,6 +45,7 @@
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
+  {:pre [(seq inviter) (seq invited) application-id role timestamp]}
   (let [invite {:application  application-id
                 :text         text
                 :path         path

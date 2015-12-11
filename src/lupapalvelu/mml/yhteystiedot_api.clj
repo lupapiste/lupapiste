@@ -1,11 +1,30 @@
 (ns lupapalvelu.mml.yhteystiedot-api
-  (:require [lupapalvelu.mml.yhteystiedot :refer :all]
+  (:require [lupapalvelu.mml.yhteystiedot :as yht]
             [sade.core :refer [ok now]]
-            [lupapalvelu.action :refer [defquery defraw disallow-impersonation]]))
+            [sade.validators :as v]
+            [lupapalvelu.action :refer [defquery disallow-impersonation] :as action]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.states :as states]))
+
+(defn- owners-of [property-id]
+  (->> (yht/get-owners property-id)
+       (map (fn [owner] (assoc owner :propertyId property-id)))))
 
 (defquery owners
-  {:parameters [propertyId]
+  {:parameters [propertyIds]
+   :input-validators [(partial action/vector-parameter-of :propertyIds v/kiinteistotunnus?)]
    :pre-checks [disallow-impersonation]
    :user-roles #{:authority}}
   [_]
-  (ok :owners (get-owners propertyId)))
+  (ok :owners (flatten (map owners-of propertyIds)))) ; pmap?
+
+(defquery application-property-owners
+  {:parameters [:id]
+   :states states/all-states
+   :user-roles #{:authority}
+   :org-authz-roles #{:authority :approver}}
+  [{{property-id :propertyId docs :documents} :application}]
+  (let [extra-properties   (domain/get-documents-by-name docs "secondary-kiinteistot")
+        extra-property-ids (map (comp :value :kiinteistoTunnus :kiinteisto :data) extra-properties)
+        all-property-ids   (set (cons property-id extra-property-ids))]
+    (ok :owners (flatten (map owners-of all-property-ids))))) ; pmap?

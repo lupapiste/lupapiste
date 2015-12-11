@@ -20,6 +20,12 @@
       (assert (= 1 (count initial-states)))
       (first initial-states))))
 
+(def ^{:doc "Possible state transitions for applications.
+          Key is the starting state, first in the value vector is the default next state and
+          the rest are other possible next states."}
+  full-application-state-graph
+  common-states/full-application-state-graph)
+
 (def
   ^{:doc "Possible state transitions for inforequests.
           Key is the starting state, first in the value vector is the default next state and
@@ -30,12 +36,7 @@
     :answered [:info]
     :canceled []))
 
-(def
-  ^{:doc "Possible state transitions for applications.
-          Key is the starting state, first in the value vector is the default next state and
-          the rest are other possible next states."}
-  default-application-state-graph
-  common-states/default-application-state-graph)
+(def default-application-state-graph common-states/default-application-state-graph)
 
 (def
   ^{:doc "See default-application-state-graph"}

@@ -1,5 +1,6 @@
 (ns lupapalvelu.state-machine
   (:require [lupapalvelu.operations :as operations]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [sade.core :refer [fail unauthorized]]
             [sade.util :as util]))
@@ -15,7 +16,7 @@
           state-machine-resolver (operations/get-operation-metadata operation :state-graph-resolver)]
       (if (fn? state-machine-resolver)
         (state-machine-resolver application)
-        states/default-application-state-graph))))
+        (-> application permit/permit-type permit/get-state-graph)))))
 
 (defn- state-transitions [{state :state :as application}]
   (let [graph (state-graph application)]

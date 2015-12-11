@@ -357,9 +357,6 @@
   (ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (ensure-index :applications {:address 1})
   (ensure-index :applications {:tags 1})
-  (try
-    (drop-index :activation "created-at_1") ; no such field "created-at"
-    (catch Exception _))
   (ensure-index :activation {:email 1})
   (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (ensure-index :vetuma {:user.stamp 1})
@@ -376,9 +373,8 @@
   (ensure-index :companies {:name 1} {:name "company-name"})
   (ensure-index :companies {:y 1} {:name "company-y"})
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
-  (try
-    (drop-index :organizations "areas.features.geometry_2dsphere")
-    (catch Exception _))
+  (ensure-index :propertyCache {:created 1} {:expireAfterSeconds (* 60 60 24)}) ; 24 h
+  (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
   (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
 
 (defn clear! []

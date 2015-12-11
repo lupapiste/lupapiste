@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [debug info warnf error]]
             [sade.env :refer [in-dev]]
             [sade.core :refer [ok fail]]
-            [lupapalvelu.action :refer [defquery]]
+            [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.fixture.core :refer :all]))
 
 ;; dev tools:
@@ -11,6 +11,7 @@
 
   (defquery apply-fixture
     {:parameters [:name]
+     :input-validators [(partial action/non-blank-parameters [:name])]
      :user-roles #{:anonymous}}
     [{{:keys [name]} :data}]
     (require (symbol (str "lupapalvelu.fixture." name)))

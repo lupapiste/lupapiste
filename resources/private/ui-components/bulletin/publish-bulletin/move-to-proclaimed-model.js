@@ -17,7 +17,9 @@ LUPAPISTE.MoveToProclaimedModel = function (params) {
 
   self.pending = ko.observable();
 
-  self.all = ko.validatedObservable([self.proclamationStartsAt, self.proclamationEndsAt]);
+  self.all = ko.validatedObservable([self.proclamationStartsAt,
+                                     self.proclamationEndsAt,
+                                     self.proclamationText]);
 
   self.isValid = ko.pureComputed(function() {
     return self.all.isValid();

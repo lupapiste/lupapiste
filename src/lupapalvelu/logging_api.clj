@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [errorf]]
             [sade.env :as env]
             [sade.core :refer [ok fail]]
-            [lupapalvelu.action :refer [defcommand defquery]]
+            [lupapalvelu.action :refer [defcommand defquery] :as action]
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]))
 
@@ -24,7 +24,8 @@
 
 (defquery "newest-version"
   {:user-roles #{:anonymous}
-   :parameters [frontendBuild]}
+   :parameters [frontendBuild]
+   :input-validators [(partial action/non-blank-parameters [:frontendBuild])]}
   [_]
   (let [currentBuild (:build-number env/buildinfo)]
     (if (= frontendBuild currentBuild)

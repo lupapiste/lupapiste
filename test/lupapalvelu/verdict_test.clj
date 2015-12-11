@@ -11,6 +11,7 @@
            [lupapalvelu.verdict :refer :all]
            [lupapalvelu.permit :as permit]
            [lupapalvelu.organization :as organization]
+           [sade.common-reader :as cr]
            [sade.core :refer [now]]
            [sade.xml :as xml]
            [sade.util :as util]))
@@ -85,3 +86,32 @@
         (application/get-link-permit-app irrelevant) => link-app
         (action/update-application irrelevant irrelevant) => nil
         (lupapalvelu.attachment/attach-file! irrelevant) => nil))))
+
+(def example-meaningful-tj-krysp
+  {:tag :Rakennusvalvonta,
+   :content [{:tag :rakennusvalvontaAsiatieto,
+              :attrs nil,
+              :content [{:tag :RakennusvalvontaAsia,
+                         :content [{:tag :lisatiedot,
+                                    :attrs nil,
+                                    :content [{:tag :Lisatiedot,
+                                               :attrs nil,
+                                               :content [{:tag :salassapitotietoKytkin, :attrs nil, :content ["false"]}
+                                                         {:tag :asioimiskieli, :attrs nil, :content ["suomi"]}
+                                                         {:tag :suoramarkkinointikieltoKytkin,
+                                                          :attrs nil,
+                                                          :content ["false"]}]}]}
+                                   {:tag :asianTiedot,
+                                    :attrs nil,
+                                    :content [{:tag :Asiantiedot,
+                                               :attrs nil,
+                                               :content [{:tag :vahainenPoikkeaminen, :attrs nil, :content nil}
+                                                         {:tag :rakennusvalvontaasianKuvaus, :attrs nil, :content nil}]}]}]}]}]})
+
+(def example-application
+  {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}})
+
+(facts "special foreman/designer verdict"
+  (let [xml (verdict-xml-with-foreman-designer-verdicts example-application example-meaningful-tj-krysp)]
+    (fact "paatostieto is injected before lisatiedot"
+      (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))

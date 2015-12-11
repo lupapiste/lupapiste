@@ -101,6 +101,26 @@
                   :attrs attrs
                   :content (if (string? e) [e] e)}]})))
 
+(defn trimble-kaavamaaraykset-point-to-bbox [x y]
+(str "" (apply str x) "," (apply str y) " " (apply str (str (+ (util/->double (str x)) 0.01))) "," (apply str (str (+ (util/->double y) 0.01))) ) )
+
+
+; tm35fin to trimble wfs coordinate system using params from properties file
+
+(defn trimble-kaavamaaraykset-muunnax [x y municipality]
+  (let [k (keyword municipality)]
+    (let [[a b c d e] (s/split (env/value :trimble-kaavamaaraykset k :muunnosparams :x) #",")]
+      (format "%s" (+ (util/->double a) (* (util/->double b) (- (util/->double x) (util/->double c))) (* (util/->double d) (- (util/->double y) (util/->double e))))))))
+
+(defn trimble-kaavamaaraykset-muunnay [x y municipality]
+  (let [k (keyword municipality)]
+    (let [[a b c d e] (s/split (env/value :trimble-kaavamaaraykset k :muunnosparams :y) #",")]
+      (format "%s" (+ (util/->double a) (* (util/->double b) (- (util/->double y) (util/->double c))) (* (util/->double d) (- (util/->double x) (util/->double e))))))))
+
+(defn trimble-kaavamaaraykset-request [x y municipality]
+  (let [bbox [(trimble-kaavamaaraykset-point-to-bbox (trimble-kaavamaaraykset-muunnax x y municipality) (trimble-kaavamaaraykset-muunnay x y municipality))]]
+  (str "<?xml version='1.0' encoding='utf-8'?><GetFeature xmlns='http://www.opengis.net/wfs' xmlns:akaava='http://www.paikkatietopalvelu.fi/gml/asemakaava' xmlns:ogc='http://www.opengis.net/ogc' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:gml='http://www.opengis.net/gml' service='WFS' version='1.0.0' outputFormat='GML2' maxFeatures='1' handle='' ><Query typeName='akaava:Kaava' srsName='EPSG:3877' ><ogc:Filter><ogc:BBOX><ogc:PropertyName>voimassaolosijainti</ogc:PropertyName><gml:Box srsName='EPSG:3877'><gml:coordinates>" (apply str bbox) "</gml:coordinates></gml:Box></ogc:BBOX></ogc:Filter></Query></GetFeature>" )))
+
 (defn ogc-sort-by
   ([property-names]
     (ogc-sort-by property-names "desc"))
@@ -208,10 +228,6 @@
             municipality-name (if (ss/starts-with-i fi city) fi sv)]
         (str street " " number ", " municipality-name)))))
 
-(defn feature-to-position [feature]
-  (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
-    {:x x :y y}))
-
 (defn extract-coordinates [ring]
   (s/replace (first (xml-> ring :gml:LinearRing :gml:posList text)) #"(\d+\.*\d*)\s+(\d+\.*\d*)\s+" "$1 $2, "))
 
@@ -223,12 +239,15 @@
           polygonpatch (first (apply xml-> (cons feature path) ))
           exterior (extract-coordinates (first (xml-> polygonpatch :gml:exterior)))
           interiors (map extract-coordinates (xml-> polygonpatch :gml:interior))]
-      (str "POLYGON ((" exterior ")" (ss/join (map #(str ",(" % ")") interiors)) ")"))))
+      (str "POLYGON((" exterior ")" (ss/join (map #(str ",(" % ")") interiors)) ")"))))
 
-(defn feature-to-area [feature]
+(defn feature-to-location [feature]
   (when feature
-    {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
-     :wkt (property-borders-wkt feature)}))
+    (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
+      {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))
+       :x x
+       :y y
+       :wkt (property-borders-wkt feature)})))
 
 (defn feature-to-property-id [feature]
   (when feature
@@ -326,10 +345,15 @@
                     (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
                   nil)
        :failure (do (errorf data "wfs failure: url=%s" url) nil)
-       :ok      (let [features (if (= url nearestfeature)
-                                 (parse-features-as-latin1 data)
-                                 (->features data sxml/startparse-sax-no-doctype))]
-                  (xml-> features :gml:featureMember))))))
+       :ok      (let [xml (if (= url nearestfeature)
+                            (parse-features-as-latin1 data)
+                            (->features data sxml/startparse-sax-no-doctype))
+                      member-list (xml-> xml :gml:featureMember)]
+                  ; Differences in WFS implementations:
+                  ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
+                  (if (seq member-list)
+                    member-list
+                    (xml-> xml :gml:featureMembers)))))))
 
 (defn post
   ([url q] (exec :post url q))
@@ -347,6 +371,49 @@
     (if (or (not= 200 status) error)
       (errorf "Failed to get %s (status %s): %s" url status (logging/sanitize 1000 error))
       body)))
+
+;;
+;;
+;;
+
+(defn- exec-trimble-kaavamaaraykset-post [method url user passwd q picurltemplate]
+  (let [[http-fn param-key] (method http-method)
+        timeout (env/value :http-client :conn-timeout)
+        request {:throw-exceptions false
+                 :basic-auth [user passwd]
+                 param-key q}
+        task (future* (exec-http http-fn url request))
+        [status data] (deref task timeout [:timeout])]
+    (case status
+      :timeout (errorf "wfs timeout: url=%s" url)
+      :error   (errorf "wfs status %s: url=%s" data url)
+      :failure (errorf data "wfs failure: url=%s" url)
+      :ok      (let [features (->features data sxml/startparse-sax-no-doctype "UTF-8")
+                     muukaavatunnus (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:muuKaavatunnus text))
+                     kaavatunnus (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavatunnus text))
+                     arkistotunnus (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:arkistotunnus text))
+                     kaavanimi1 (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavanimi1 text))
+                     hyvaksyja (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:hyvaksyja text))
+                     hyvaksymispvm (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:hyvaksymispvm text))
+                     kaavanvaihe (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavanvaihe text))
+                     kaavatyyppi (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavatyyppi text))]
+                 [{"Kaavatunnus" (str kaavatunnus)
+                   "Arkistotunnus" (str arkistotunnus)
+                   "Nimi" (str kaavanimi1)
+                   "Hyv." (str hyvaksyja)
+                   "Pvm." (str hyvaksymispvm)
+                   "Vaihe" (str kaavanvaihe)
+                   "Tyyppi" (str kaavatyyppi)},
+                  (for [maarays (xml-> features :gml:featureMember :akaava:Kaava :akaava:yhteisetkaavamaaraykset :akaava:Kaavamaarays)]
+                    {:pic (format picurltemplate muukaavatunnus (first(xml-> maarays :akaava:tunnus text)))
+                     :desc (first(xml-> maarays :akaava:maaraysteksti_primaari text))})]))))
+
+
+(defn trimble-kaavamaaraykset-post [municipality q]
+  (let [k (keyword municipality)]
+    (let [url (env/value :trimble-kaavamaaraykset k :url)
+          picurltemplate (env/value :trimble-kaavamaaraykset k :picurltemplate) user (env/value :trimble-kaavamaaraykset k :user) passwd (env/value :trimble-kaavamaaraykset k :passwd)]
+      (exec-trimble-kaavamaaraykset-post :post url user passwd q picurltemplate))))
 
 ;;
 ;; Public queries:
@@ -367,12 +434,7 @@
   (let [x_d (util/->double x)
         y_d (util/->double y)
         radius 50
-        filter-xml (ogc-filter
-                     (ogc-bbox
-                       (property-name "yht:pistesijainti/gml:Point/gml:pos")
-                       (envelope "EPSG:3067" [(- x_d radius) (- y_d 50)] [(+ x_d 50) (+ y_d 50)])))
-        filter-str (sxml/element-to-string (assoc filter-xml :attrs krysp-namespaces))]
-
+        bbox (ss/join "," [(- x_d radius) (- y_d 50) (+ x_d 50) (+ y_d 50) "EPSG:3067"])]
     (exec :get url
       credentials
       {:REQUEST "GetFeature"
@@ -380,7 +442,7 @@
        :VERSION "1.1.0"
        :TYPENAME "mkos:Osoite"
        :SRSNAME "EPSG:3067"
-       :FILTER filter-str
+       :BBOX   bbox
        :MAXFEATURES "20"})))
 
 (defn property-id-by-point [x y]
@@ -499,6 +561,7 @@
   (when gfi
     (xml-> (->features gfi startparse-sax-non-validating "UTF-8") :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
 
+
 (defn feature-to-feature-info-sito  [feature]
   (when feature
     {:id (first (xml-> feature :lupapiste:TUNNUS text))
@@ -608,15 +671,15 @@
           features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
       (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))
 
+(defn trimble-kaavamaaraykset-by-point [x y municipality]
+  (trimble-kaavamaaraykset-post municipality (trimble-kaavamaaraykset-request x y municipality) ))
 
-;;
 ;; Raster images:
 ;;
 (defn raster-images [request service & [query-organization-map-server]]
-  (let [params  (:params request)
-        accept-encoding (:headers request)
+  (let [{:keys [params headers]}  request
         layer   (or (:LAYER params) (:LAYERS params) (:layer params))
-        headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}]
+        headers (select-keys headers ["accept" "accept-encoding"])]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
                       {:query-params params
@@ -626,7 +689,7 @@
       ;; Municipality map layers are prefixed. For example: Lupapiste-753-R:wms-layer-name
       "wms" (if-let [[_ org-id layer] (re-matches #"(?i)Lupapiste-([\d]+-[\w]+):(.+)" layer)]
               (query-organization-map-server (ss/upper-case org-id)
-                                             (merge params {:layer layer :LAYERS layer})
+                                             (merge params {:LAYERS layer})
                                              headers)
               (http/get wms-url
                         {:query-params params

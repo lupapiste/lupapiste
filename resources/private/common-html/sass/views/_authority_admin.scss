@@ -14,6 +14,15 @@
   }
 }
 
+table.admin-settings {
+  td { width: 50%; }
+  td.value {
+    input { width: 80%; }
+    .save-indicator { top: 0px; }
+    position: relative;
+  }
+}
+
 // Municipality maps
 .munimaps {
   h3 {
@@ -41,4 +50,9 @@
     height: 500px;
     margin-top: $marginL;
   }
+}
+
+.authority-admin .mask {
+  /* cover the tabs*/
+  margin-top: -38px;
 }

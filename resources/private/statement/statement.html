@@ -13,7 +13,10 @@
         </span>
       </h1>
       <button class="attachment-delete inline-block"
-              data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')"
+              data-bind="ltext: 'statement.delete',
+                         click: $root.statementModel.openDeleteDialog,
+                         visible: $root.authorization.ok('delete-statement'),
+                         enable: $root.authorization.ok('delete-statement')"
               data-test-id="delete-statement">Poista lausunto</button>
       <div data-bind="with: application">
         <a class="btn secondary inline-block"
@@ -66,13 +69,13 @@
       <div class="statement-attachments">
         <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
         <div data-bind="if: attachments().length">
-          <table class="table" data-test-id="inforequest-attachments-table">
+          <table class="table" data-test-id="statement-attachments-table">
             <thead>
               <tr>
                 <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                 <th data-bind="ltext: 'attachment.actions'">Toiminnot</th>
-                <th></th>
+                <th data-bind="ltext: 'remove'"></th>
               </tr>
             </thead>
             <tbody data-bind="foreach: attachments">
@@ -88,10 +91,11 @@
                 </td>
                 <td>
                 </td>
-                <td><a data-bind="ltext: 'remove',
-                                  click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id),
-                                  visible: $root.attachmentsModel.canDeleteAttachment($parent) && $root.authorization.ok('give-statement'),
-                                  enable: $root.attachmentsModel.canDeleteAttachment($parent) && $root.authorization.ok('give-statement')" ></a></td>
+                <td><a data-bind="click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id),
+                                  visible: $root.attachmentsModel.canDeleteAttachment($parent),
+                                  enable: $root.attachmentsModel.canDeleteAttachment($parent),
+                                  attr: {'data-test-id': 'removeStatementAttachmet'}">
+                      <i class="lupicon-remove primary"></i></a></td>
               </tr>
             </tbody>
           </table>
@@ -103,7 +107,10 @@
 
         <button
           class="btn"
-          data-bind="ltext: 'application.attachmentsAdd', visible: canAddAttachment() && $root.authorization.ok('give-statement'), enabled: canAddAttachment() && $root.authorization.ok('give-statement'), click: newAttachment"
+          data-bind="ltext: 'application.attachmentsAdd',
+                     visible: canAddAttachment(),
+                     enabled: canAddAttachment(),
+                     click: newAttachment"
           data-test-id="add-statement-attachment">
         </button>
       </div>

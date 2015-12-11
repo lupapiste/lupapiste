@@ -50,7 +50,6 @@
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var verdictAttachmentPrintsOrderModel = new LUPAPISTE.VerdictAttachmentPrintsOrderModel();
   var verdictAttachmentPrintsOrderHistoryModel = new LUPAPISTE.VerdictAttachmentPrintsOrderHistoryModel();
-  var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
@@ -156,10 +155,6 @@
       verdictAttachmentPrintsOrderHistoryModel.refresh();
 
       attachmentsTab.refresh();
-
-      // Statements
-      requestForStatementModel.setApplicationId(app.id);
-      requestForStatementModel.setFunctionCode(app.tosFunction);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
@@ -405,6 +400,14 @@
 
   var sendNeighborEmailModel = new SendNeighborEmailModel();
 
+  var statementActions = {
+    openStatement: function(model) {
+      pageutil.openPage("statement", applicationModel.id() + "/" + model.id());
+      return false;
+    }
+  };
+
+
   $(function() {
     var bindings = {
       // function to access accordion
@@ -427,7 +430,7 @@
       map: mapModel,
       neighbor: neighborActions,
       neighborStatusModel: neighborStatusModel,
-      requestForStatementModel: requestForStatementModel,
+      statementActions: statementActions,
       sendNeighborEmailModel: sendNeighborEmailModel,
       signingModel: signingModel,
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,

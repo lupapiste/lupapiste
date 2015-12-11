@@ -213,7 +213,7 @@ $app-gray-darkest: $gray187;
           }
         }
 
-        .constructionStarted-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box, .final-box  {
+        .constructionStarted-box, .inUse-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box, .final-box, .extinct-box, .onHold-box  {
           display: none;
         }
         &.draft {
@@ -263,10 +263,7 @@ $app-gray-darkest: $gray187;
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, .constructionStarted-box, .closed-box  {
-            display: inline-block;
-          }
-          .final-box {
+          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box, .final-box {
             display: inline-block;
           }
         }
@@ -288,25 +285,67 @@ $app-gray-darkest: $gray187;
           .verdictGiven-box {
             @include past-state;
           }
-          .verdictGiven-box, .constructionStarted-box, .closed-box  {
+          .draft-box, .open-box, .submitted-box, .sent-box   {
+            display: none;
+          }
+          .verdictGiven-box, .constructionStarted-box, .inUse-box .closed-box  {
             display: inline-block;
+          }
+        }
+        &.inUse {
+          .inUse-box {
+            @include active-state;
+          }
+          .verdictGiven-box, .constructionStarted-box {
+            @include past-state;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
+          }
+          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box  {
+            display: inline-block;
           }
         }
         &.closed {
           .closed-box {
             @include active-state;
           }
-          .verdictGiven-box, .constructionStarted-box{
+          .verdictGiven-box, .constructionStarted-box, .inUse-box {
             @include past-state;
-          }
-          .verdictGiven-box, .constructionStarted-box, .closed-box  {
-            display: inline-block;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
+          }
+          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box  {
+            display: inline-block;
+          }
+        }
+        &.onHold {
+          .onHold-box {
+            @include active-state;
+          }
+          .verdictGiven-box {
+            @include past-state;
+          }
+          .draft-box, .open-box, .submitted-box, .sent-box   {
+            display: none;
+          }
+          .verdictGiven-box, onHold-box  {
+            display: inline-block;
+          }
+        }
+        &.extinct {
+          .extinct-box {
+            @include active-state;
+          }
+          .verdictGiven-box {
+            @include past-state;
+          }
+          .draft-box, .open-box, .submitted-box, .sent-box   {
+            display: none;
+          }
+          .verdictGiven-box, extinct-box  {
+            display: inline-block;
           }
         }
         &.acknowledged {
@@ -475,10 +514,22 @@ $app-gray-darkest: $gray187;
   }
 }
 
-#dialog-request-for-statement {
-    button {
-        margin-top: $marginL;
-    }
+#invite-statement-givers-section {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  padding: 24px;
+  border: 1px solid lighten($lp-dark-grey, 40%);
+
+  #choose-statement-givers-title {
+    font-weight: bold;
+  }
+  button {
+      margin-top: $marginL;
+  }
+}
+
+.statement-over-due {
+  color: red;
 }
 
 .form-input.textarea.high {

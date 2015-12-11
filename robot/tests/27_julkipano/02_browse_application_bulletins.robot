@@ -28,19 +28,19 @@ Bulletins should be searchable
   Wait Until  Bulletin list should have rows and text  1  Mixintie 15
 
 Velho adds some bulletins
-  As Velho
-  Create application and publish bulletin  Tiaisenpolku 26  297-14-3-16
+  As Olli
+  Create application and publish bulletin  Vaalantie 540  564-404-26-102
   Go to bulletins page
 
 Bulletins should be filterable by municipality
-  Autocomplete option list should contain by test id  municipalities-filter-component  Koko Suomi  Kuopio  Sipoo
+  Autocomplete option list should contain by test id  municipalities-filter-component  Koko Suomi  Oulu  Sipoo
 
-  Select From Autocomplete By Test Id  municipalities-filter-component  Kuopio
-  Wait Until  Bulletin list should have rows and text  1  Tiaisenpolku 26
+  Select From Autocomplete By Test Id  municipalities-filter-component  Oulu
+  Wait Until  Bulletin list should have rows and text  10  Vaalantie 540
+  Bulletin button should have bulletins left to fetch  3
 
   Select From Autocomplete By Test Id  municipalities-filter-component  Sipoo
-  Wait Until  Bulletin list should have rows and text  10  Mixintie 15
-  Bulletin button should have bulletins left to fetch  2
+  Wait Until  Bulletin list should have rows and text  1  Mixintie 15
 
 Bulletins should be filterable by state
   Reload Page

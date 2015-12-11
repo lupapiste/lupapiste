@@ -11,7 +11,9 @@ Resource        ../common_keywords/vetuma_helpers.robot
 
 Init, go to bulletin and authenticate via Vetuma
   Create a bulletin and go to bulletin page
+  Open bulletin tab  info
   Authenticate via Osuuspankki via Vetuma  vetuma-init
+  Open bulletin tab  info
 
 Comment bulletin without any additional form fields
   Write comment for bulletin  Kommentoidaan julkipantua ilmoitusta

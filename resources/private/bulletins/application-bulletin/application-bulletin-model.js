@@ -3,7 +3,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   var self = this;
   var bulletinService = params.bulletinService;
   var map = gis
-      .makeMap("bulletin-map", false)
+      .makeMap("bulletin-map", {zoomWheelEnabled: false})
       .updateSize()
       .center(404168, 6693765, 14);
 
@@ -18,7 +18,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   self.authenticated = params.authenticated;
 
   self.selectedTab = ko.observable().extend({
-    limited: {values: ["verdicts", "info", "attachments"], defaultValue: "info"}
+    limited: {values: ["verdicts", "info", "attachments", "instructions"], defaultValue: "instructions"}
   });
 
   ko.computed(function() {
@@ -32,11 +32,23 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.verdicts = ko.pureComputed(function() {
-    return util.getIn(self, ["bulletin", "verdicts"], []);
+    return util.verdictsWithTasks(ko.mapping.toJS(self.bulletin));
   });
 
   self.bulletinStateLoc = ko.pureComputed(function() {
     return ["bulletin", "state", self.bulletin().bulletinState].join(".");
+  });
+
+  self.inProclaimedState = ko.pureComputed(function() {
+    return _.includes(["proclaimed"], util.getIn(self, ["bulletin", "bulletinState"]));
+  });
+
+  self.inVerdictGivenState = ko.pureComputed(function() {
+    return _.includes(["verdictGiven"], util.getIn(self, ["bulletin", "bulletinState"]));
+  });
+
+  self.inFinalState = ko.pureComputed(function() {
+    return "final" === util.getIn(self, ["bulletin", "bulletinState"]);
   });
 
   self.currentStateInSeq = ko.pureComputed(function() {
@@ -44,7 +56,11 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.showVerdictsTab = ko.pureComputed(function() {
-    return util.getIn(self, ["bulletin", "bulletinState"]) === "verdictGiven";
+    return _.includes(["verdictGiven", "final"], util.getIn(self, ["bulletin", "bulletinState"]));
+  });
+
+  self.showInstructionsTab = ko.pureComputed(function() {
+    return _.includes(["proclaimed", "verdictGiven"], util.getIn(self, ["bulletin", "bulletinState"]));
   });
 
   self.showInfoTab = ko.pureComputed(function() {
@@ -53,6 +69,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
 
   self.showAttachmentsTab = ko.pureComputed(function() {
     return util.getIn(self, ["bulletin", "bulletinState"]) === "proclaimed";
+  });
+
+  self.showCommenting = ko.pureComputed(function() {
+    return self.canCommentCurrentBulletin();
   });
 
   var id = self.bulletin.subscribe(function(bulletin) {

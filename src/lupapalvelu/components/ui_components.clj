@@ -56,7 +56,8 @@
                  :fiseKelpoisuusValues  (map :name schemas/fise-kelpoisuus-lajit)
                  :bulletinStates        bulletins/bulletin-state-seq
                  :attachmentVisibilities attachment-meta/visibilities
-                 :features              (into {} (filter second (env/features)))}]
+                 :features              (into {} (filter second (env/features)))
+                 :mimeTypePattern       (.toString mime/mime-type-pattern)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -107,7 +108,9 @@
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
-   :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
+   ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   ;:open-layers    {:js ["OpenLayers.debug.js" ]}
    :ol             {:js ["openlayers-3.8.2.min.js" "ol3-popup.js"]
                     :css ["openlayers-3.8.2.css" "ol3-popup.css"]}
    :proj4          {:js ["proj4-2.3.3.min.js"]}
@@ -240,7 +243,7 @@
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "archival-summary.js"
+                       "add-party.js" "attachments-tab-model.js" "archival-summary.js"
                        "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
@@ -345,16 +348,15 @@
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
-                         :js ["authority-admin-app.js" "register-authority-admin-models.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
-                         :js [schema-versions-by-permit-type "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
+                         :js ["authority-admin-app.js"]}
+   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
+                         :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
-                         :html ["authority-admin.html"]}
+                         :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"]}
 
    :admin-app {:depends [:ui-components]
-               :js ["admin.js" "register-admin-models.js"]}
-   :admin     {:depends [:admin-app :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer]
-               :css ["admin.css"]
+               :js ["admin.js"]}
+   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"]
                :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
@@ -390,6 +392,7 @@
                       "application-bulletin/tabs/info/bulletin-info-tab-template.html"
                       "application-bulletin/tabs/verdicts/verdicts-template.html"
                       "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-template.html"
+                      "application-bulletin/tabs/instructions/bulletin-instructions-tab-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-template.html"
                       "application-bulletins/application-bulletins-template.html"
                       "application-bulletins/application-bulletins-list/application-bulletins-list-template.html"
@@ -407,6 +410,7 @@
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
                     "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"
                     "application-bulletin/tabs/verdicts/bulletin-verdicts-tab-model.js"
+                    "application-bulletin/tabs/instructions/bulletin-instructions-tab-model.js"
                     "application-bulletins/application-bulletins-model.js"
                     "application-bulletins/application-bulletins-list/application-bulletins-list-model.js"
                     "application-bulletins/load-more-application-bulletins/load-more-application-bulletins-model.js"

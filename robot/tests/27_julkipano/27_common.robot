@@ -5,7 +5,7 @@ Variables  ../21_stamping/variables.py
 *** Keywords ***
 Create bulletins
   [Arguments]  ${count}
-  As Sonja
+  As Olli
   Create bulletins the fast way  ${count}
 
 Create a bulletin and go to bulletin page
@@ -44,16 +44,18 @@ Publish bulletin
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
   Input text with jQuery  input[name="proclamationStartsAt"]  23.11.2015
   Input text with jQuery  input[name="proclamationEndsAt"]  23.12.2015
+  Input text with jQuery  textarea[name="proclamationText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
 
 Create application and publish bulletin
   [Arguments]  ${address}  ${propertyId}
-  Create application with state  ${address}  ${propertyId}  vapaa-ajan-asuinrakennus  sent
+  Create application with state  ${address}  ${propertyId}  lannan-varastointi  sent
   Open tab  bulletin
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
   Input text with jQuery  input[name="proclamationStartsAt"]  23.11.2015
   Input text with jQuery  input[name="proclamationEndsAt"]  23.12.2015
+  Input text with jQuery  textarea[name="proclamationText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
 
@@ -119,6 +121,7 @@ Move bulletin to verdict given
   Input text with jQuery  input[name="verdictGivenAt"]  23.11.2015
   Input text with jQuery  input[name="appealPeriodStartsAt"]  23.12.2015
   Input text with jQuery  input[name="appealPeriodEndsAt"]  23.12.2016
+  Input text with jQuery  textarea[name="verdictGivenText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
 

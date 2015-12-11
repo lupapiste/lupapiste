@@ -4,6 +4,7 @@ LUPAPISTE.MunicipalityMapsLayersModel = function( params ) {
 
   self.serverLayers = params.serverLayers;
   self.userLayers = params.userLayers;
+  self.backgroundVisible = params.backgroundVisible;
 
   self.shortLoc = function( id ) {
     return loc( "auth-admin.municipality-maps." + id );
