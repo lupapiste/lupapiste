@@ -102,6 +102,20 @@
 
   applicationModel.tosFunction.subscribe(updateTosFunction);
 
+  ko.computed(function(){
+    var enabled = applicationModel.optionMunicipalityHearsNeighbors();
+    if (!isInitializing) {
+      ajax.command("set-municipality-hears-neighbors", {id: currentId, enabled: enabled})
+      .success(function() {
+        applicationModel.reload();
+        hub.send("indicator", {style: "positive"});
+      })
+      .error(util.showSavedIndicator)
+      .processing(applicationModel.processing)
+      .call();
+    }
+  });
+
   function initAuthoritiesSelectList(data) {
     var authorityInfos = [];
     _.each(data || [], function(authority) {
@@ -131,7 +145,7 @@
       applicationModel._js = app;
 
       // Update observables
-      var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers"]};
+      var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
       ko.mapping.fromJS(app, mappingOptions, applicationModel);
 
       // Invite
@@ -207,6 +221,9 @@
                               constructionTimeDocs,
                               authorizationModel,
                               {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+
+      // Options
+      applicationModel.optionMunicipalityHearsNeighbors(util.getIn(app, ["options", "municipalityHearsNeighbors"]));
 
       // Indicators
       function sumDocIndicators(sum, doc) {

@@ -1,0 +1,2 @@
+application.municipality-hears-neighbors: Kunta kuulee kaikki naapurit (maksullinen, katso taksa kunnan ohjeista)
+email.title.neighbor-hearing-requested: Kunnan halutaan kuulevan naapurit
