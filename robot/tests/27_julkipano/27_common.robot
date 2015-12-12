@@ -34,7 +34,7 @@ Bulletin list should not have text
 
 Bulletin button should have bulletins left to fetch
   [Arguments]  ${elements}
-  Element text should be  xpath=//span[@data-test-id='bulletins-left']  ${elements}kpl
+  Wait until  Element text should be  xpath=//span[@data-test-id='bulletins-left']  ${elements}kpl
 
 Load more bulletins
   ${initallyBulletinsLeft}=  Get text  //span[@data-test-id='bulletins-left']

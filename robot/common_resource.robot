@@ -401,7 +401,7 @@ Autocomplete option list should contain by test id
   Click Element  xpath=//div[@data-test-id="${data-test-id}"]//span[contains(@class, "autocomplete-selection")]
   Wait until  Element should be visible  xpath=//div[@data-test-id="${data-test-id}"]//div[@class="autocomplete-dropdown"]
   :FOR  ${element}  IN  @{options}
-  \  Element should contain  xpath=//div[@data-test-id="${data-test-id}"]//ul[contains(@class, "autocomplete-result")]  ${element}
+  \  Wait Until  Element should contain  xpath=//div[@data-test-id="${data-test-id}"]//ul[contains(@class, "autocomplete-result")]  ${element}
 
 Click by id
   [Arguments]  ${id}
