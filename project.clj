@@ -32,7 +32,7 @@
                  [endophile "0.1.2" :exclusions [hiccup]]
                  [com.draines/postal "1.11.1" :exclusions [commons-codec/commons-codec]]
                  [swiss-arrows "1.0.0"]
-                 [me.raynes/fs "1.4.6"]
+                 [me.raynes/fs "1.4.6" :exclusions [org.apache.commons/commons-compress]] ; later version required by pantomime -> tika
                  [ontodev/excel "0.2.3" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
                  [org.apache.poi/poi-ooxml "3.11"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
