@@ -84,7 +84,7 @@
   (fact (pysyva-rakennustunnus "1234567892") => "1234567892"))
 
 (facts "KRYSP verdict"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict.xml"))
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -420,7 +420,7 @@
 ;; YA verdict
 
 (facts "KRYSP ya-verdict"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-ya.xml"))
         cases (->verdicts xml ->simple-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -452,13 +452,13 @@
         (let [pk1   (first poytakirjat)
               liite (:liite pk1)]
           (:kuvaus liite) => "liite"
-          (:linkkiliitteeseen liite) => "http://demokuopio.vianova.fi/Lupapiste/GetFile.aspx?GET_FILE=1106"
+          (:linkkiliitteeseen liite) => "http://localhost:8000/dev/sample-attachment.txt"
           (:muokkausHetki liite) => (to-timestamp "2014-01-29T13:58:15")
           (:tyyppi liite) => "Muu liite")))))
 
 (facts "Ymparisto verdicts"
   (doseq [permit-type ["yl" "mal" "vvvl"]]
-    (let [xml (xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
+    (let [xml (xml/parse (slurp (str "resources/krysp/dev/verdict-" permit-type ".xml")))
           cases (->verdicts xml ->simple-verdicts)]
 
       (fact "xml is parsed" cases => truthy)
@@ -525,7 +525,7 @@
 
 
 (facts* "Testing information parsed from a verdict xml message for application creation"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))
         info (get-app-info-from-message xml "14-0241-R 3") => truthy
         {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat]} info]
 

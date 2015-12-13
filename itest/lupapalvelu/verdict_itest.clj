@@ -147,10 +147,10 @@
        (:subject email) => "Lupapiste: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
        email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")))
 
-    (fact "There is one more attachments, see krysp/sample/verdict.xml"
+    (fact "There is one more attachments, see krysp/dev/verdict.xml"
       (-> app-with-verdict :attachments count) => (inc attachment-count))
 
-    (fact "Lupaehdot, see krysp/sample/verdict.xml"
+    (fact "Lupaehdot, see krysp/dev/verdict.xml"
       (-> application :tasks count) => 0
       (-> app-with-verdict :tasks count) => 9)
 
