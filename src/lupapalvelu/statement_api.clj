@@ -105,12 +105,9 @@
 (defn- get-dueDate-loc [lang dueDate]
   (if dueDate
     (str (i18n/with-lang lang (i18n/loc "statement.email.template.duedate-is")) " " (util/to-local-date dueDate) ".")
-    (i18n/with-lang lang (i18n/loc "statement.email.template.duedate-not-set"))))
+    ""))
 
 (defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application} _ recipient]
-
-  (println "\n dueDate: " dueDate "\n")
-
   {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
    :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
    :saateText saateText
@@ -162,7 +159,7 @@
    :states #{:open :submitted :complementNeeded}
    :input-validators [(fn [command] (if (nil? (get-in command [:data :dueDate]))
                                       nil
-                                      (partial action/number-parameters [:dueDate])))
+                                      (action/number-parameters [:dueDate] command)))
                       (partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
                       validate-selected-persons]
    :notified true

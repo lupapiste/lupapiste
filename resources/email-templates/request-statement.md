@@ -6,7 +6,7 @@ Sinulta on pyydetty lausuntoa lupahakemukseen
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-{{:due-date-str-fi}}
+{{due-date-str-fi}}
 
 ---
 
@@ -26,6 +26,6 @@ om tillst&aring;nd.
 
 Ifall l&auml;nken inte fungerar kan du kopiera adressen till webbl&auml;sarens adressf&auml;lt.
 
-{{:due-date-str-sv}}
+{{due-date-str-sv}}
 
 
