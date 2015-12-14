@@ -6,7 +6,7 @@ Sinulta on pyydetty lausuntoa lupahakemukseen
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-Lausunnon m&auml;&auml;r&auml;aika on {{dueDate}}.
+{{due-date-str-fi}}
 
 ---
 
@@ -26,6 +26,6 @@ om tillst&aring;nd.
 
 Ifall l&auml;nken inte fungerar kan du kopiera adressen till webbl&auml;sarens adressf&auml;lt.
 
-Deadline f&ouml;r utl&aring;tande &auml;r {{dueDate}}.
+{{due-date-str-sv}}
 
 
