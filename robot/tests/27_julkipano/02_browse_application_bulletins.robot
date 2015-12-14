@@ -36,6 +36,7 @@ Bulletins should be filterable by municipality
   Autocomplete option list should contain by test id  municipalities-filter-component  Koko Suomi  Oulu  Sipoo
 
   Select From Autocomplete By Test Id  municipalities-filter-component  Oulu
+  Wait for jQuery
   Wait Until  Bulletin list should have rows and text  10  Vaalantie 540
   Bulletin button should have bulletins left to fetch  3
 

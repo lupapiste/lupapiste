@@ -19,7 +19,7 @@ Mikko creates an info request to Loppi
 
 Email is sent to Loppi rakennusvalvonta
   Open last email
-  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='subject']  Lupapiste.fi: ${appname} - Neuvontapyyntö
+  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='subject']  Lupapiste: ${appname} - Neuvontapyyntö
 
 Loppi auth clicks the link in email
   Execute Javascript  document.getElementsByTagName("a")[0].click()
