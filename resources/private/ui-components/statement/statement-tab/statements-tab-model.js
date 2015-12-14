@@ -14,7 +14,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
   self.maaraaika = ko.observable();
 
   self.disabled = ko.pureComputed(function() {
-    return !self.selectedPerson() || self.submitting() || _.isEmpty(self.saateText()) || !self.maaraaika();
+    return !self.selectedPerson() || self.submitting();
   });
 
   self.combinedData = ko.computed(function() {
@@ -68,7 +68,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
         id: self.application.id(),
         selectedPersons: [selPerson],
         saateText: self.saateText(),
-        dueDate: new Date(self.maaraaika()).getTime()
+        dueDate: self.maaraaika() ? new Date(self.maaraaika()).getTime() : null
         };
     ajax.command("request-for-statement", params)
       .success(function() {

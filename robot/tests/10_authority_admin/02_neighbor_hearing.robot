@@ -2,7 +2,6 @@
 
 Documentation   Email is send to municipality about hearing neighbors
 Resource       ../../common_resource.robot
-
 *** Test Cases ***
 
 Sipoo admin sets email address for neighbor hearing notification
@@ -26,3 +25,4 @@ Mikko asks municipality to hear neighbors
 Kirjaamo got email
   Open last email
   Wait Until  Page Should Contain  ${email}
+  [Teardown]  Go to login page

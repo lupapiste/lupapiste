@@ -6,7 +6,7 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   self.showVersionComments = params.showVersionComments;
 
-  self.bulletin = params.bulletin
+  self.bulletin = params.bulletin;
 
   self.comments = params.comments;
 
@@ -27,18 +27,18 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
   }, 50);
 
   self.description = function(comment) {
-    var contactInfo = comment['contact-info'];
+    var contactInfo = comment["contact-info"];
     var name = _.filter([contactInfo.lastName, contactInfo.firstName]).join(" ");
     var city = _.filter([contactInfo.zip, contactInfo.city]).join(" ");
     var email = contactInfo.email;
     var emailPreferred = contactInfo.emailPreferred ? loc("bulletin.emailPreferred") : undefined;
     return _.filter([name, contactInfo.street, city, email, emailPreferred]).join(", ");
-  }
+  };
 
   ko.computed(function() {
     self.asc();
     self.fetchComments();
-  })
+  });
 
   self.selectedComment = ko.observable();
 
@@ -50,7 +50,7 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
         self.selectedComment(comment._id);
       }
     }
-  }
+  };
 
   self.hideComments = function() {
     self.showVersionComments(undefined);
@@ -61,7 +61,7 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
     var end    = util.getIn(self, ["showVersionComments", "proclamationEndsAt"], "");
     if (start && end) {
       return loc("bulletin.proclaimedHeader.duringProclamation") + " " + moment(start).format("D.M.YYYY") + " - " + moment(end).format("D.M.YYYY") +
-        " " + loc("bulletin.proclaimedHeader.givenComments") + " " + self.totalComments() + " kpl."
+        " " + loc("bulletin.proclaimedHeader.givenComments") + " " + self.totalComments() + " kpl.";
     }
   });
 
