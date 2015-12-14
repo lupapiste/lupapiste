@@ -26,5 +26,5 @@
 
 (defn secure-headers [request-or-response]
   (if (contains? request-or-response :headers)
-    (update request-or-response :headers dissoc "cookie" "set-cookie" "server" "host")
+    (update request-or-response :headers dissoc "cookie" "set-cookie" "server" "host" "connection")
     request-or-response))
