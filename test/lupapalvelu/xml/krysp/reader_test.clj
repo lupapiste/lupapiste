@@ -239,7 +239,7 @@
         (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
 (facts "CGI sample verdict"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
@@ -284,12 +284,12 @@
           (:paatospvm pk1) => (to-timestamp "2013-09-03")
           (:pykala pk1) => 12
           (:kuvaus liite) => "P\u00e4\u00e4t\u00f6sote"
-          (:linkkiliitteeseen liite) => "http://212.213.116.162:80/186/arkisto/2013/PAATOSOTE_13-0185-R_20130903152736270.rtf"
+          (:linkkiliitteeseen liite) => "http://localhost:8000/dev/sample-attachment.txt"
           (:muokkausHetki liite) => (to-timestamp "2013-09-03T15:27:46")
           (:tyyppi liite) => "P\u00e4\u00e4t\u00f6sote")))))
 
 (facts "Tekla sample verdict"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/teklap.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-buildings.xml"))
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -323,7 +323,7 @@
       )))
 
 (facts "case not found"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/notfound.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-not-found.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)
@@ -335,7 +335,7 @@
     (count cases) => 0))
 
 (facts "no verdicts"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
