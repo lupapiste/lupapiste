@@ -43,6 +43,7 @@ LUPAPISTE.StatementUpdate = function(params) {
   }
 
   doSubmit.subscribe(function(doSubmit) {
+    var params = getCommandParams();
     if (doSubmit) {
       clearTimeout(draftTimerId);
       saving(true);
@@ -53,7 +54,7 @@ LUPAPISTE.StatementUpdate = function(params) {
           "prev-modify-id": util.getIn(data(), ["modify-id"], ""),
           statementId: statementId(), 
           lang: loc.getCurrentLanguage()
-        }, getCommandParams()))
+        }, params))
         .success(function() {
           updateModifyId();
           pageutil.openApplicationPage({id: applicationId()}, "statement");
@@ -74,35 +75,39 @@ LUPAPISTE.StatementUpdate = function(params) {
         })
         .call();
     }
+    return false;
   });
 
-  function updateDraft() {
-    saving(true);
-    dirty(false);
-    ajax
-      .command(saveDraftCommand, _.extend({
-        id: applicationId(), 
-        "modify-id": modifyId(),
-        "prev-modify-id": util.getIn(data(), ["modify-id"], ""),
-        statementId: statementId(), 
-        lang: loc.getCurrentLanguage()
-      }, getCommandParams()))
-      .success(function() {
-        updateModifyId();
-        hub.send("indicator-icon", {style: "positive"});
-        return false;
-      })
-      .complete(function() {
-        saving(false);
-      })
-      .call();
+  function updateDraft(id) {
+    var params = getCommandParams();
+    if (statementId() === id) {
+      saving(true);
+      dirty(false);
+      ajax
+        .command(saveDraftCommand, _.extend({
+          id: applicationId(), 
+          "modify-id": modifyId(),
+          "prev-modify-id": util.getIn(data(), ["modify-id"], ""),
+          statementId: statementId(), 
+          lang: loc.getCurrentLanguage()
+        }, params))
+        .success(function() {
+          updateModifyId();
+          hub.send("indicator-icon", {style: "positive"});
+          return false;
+        })
+        .complete(function() {
+          saving(false);
+        })
+        .call();
+    }
     return false;
   };
 
   dirty.subscribe(function(dirty) {
     clearTimeout(draftTimerId);
     if (dirty) {
-      draftTimerId = _.delay(updateDraft, 2000);
+      draftTimerId = _.delay(_.partial(updateDraft, statementId()), 2000);
     }
   });
 };
