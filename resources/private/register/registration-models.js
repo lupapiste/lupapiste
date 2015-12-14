@@ -90,15 +90,15 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
     ko.mapping.fromJS(_.defaults(data, defaults), {}, self);
     self.pending = ko.observable(false);
 
-    self.street.extend({required: true, maxLength: 255});
-    self.city.extend({required: true, maxLength: 255});
+    self.street.extend({required: true, maxLength: LUPAPISTE.config.inputMaxLength});
+    self.city.extend({required: true, maxLength: LUPAPISTE.config.inputMaxLength});
     self.zip.extend({required: true, number: true, maxLength: 5, minLength: 5});
-    self.phone.extend({required: true, maxLength: 255});
+    self.phone.extend({required: true, maxLength: LUPAPISTE.config.inputMaxLength});
     self.email.extend({email: true});
     self.password.extend({validPassword: true});
-    self.degree.extend({maxLength: 255});
+    self.degree.extend({maxLength: LUPAPISTE.config.inputMaxLength});
     self.graduatingYear.extend({number: true, minLength: 4, maxLength: 4});
-    self.fise.extend({maxLength: 255});
+    self.fise.extend({maxLength: LUPAPISTE.config.inputMaxLength});
 
     self.confirmPassword = ko.observable().extend({equal: self.password});
     self.confirmEmail = ko.observable().extend({equal: self.email});

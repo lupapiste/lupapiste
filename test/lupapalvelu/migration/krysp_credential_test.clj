@@ -5,19 +5,19 @@
 
 (facts extract-credentials-from-krysp-address
 
-  (fact (second (extract-credentials-from-krysp-address ["" {:url "http://foo:bar.1@foo.bar.com/TeklaOGCWeb/WFS.ashx?"}]))
+  (fact (second (extract-credentials-from-krysp-address ["" {:url "http://foo:bar.1@example.com/geoserver/wfs?"}]))
         => 
-        {:url "http://foo.bar.com/TeklaOGCWeb/WFS.ashx?" :username "foo" :password "bar.1"})
+        {:url "http://example.com/geoserver/wfs?" :username "foo" :password "bar.1"})
   
-  (fact (second (extract-credentials-from-krysp-address ["" {:url "http://foo:bar:1@foo.bar.com/TeklaOGCWeb/WFS.ashx?"}])) 
+  (fact (second (extract-credentials-from-krysp-address ["" {:url "http://foo:bar:1@example.com/geoserver/wfs?"}]))
         => 
-        {:url "http://foo.bar.com/TeklaOGCWeb/WFS.ashx?" :username "foo" :password "bar:1"})
+        {:url "http://example.com/geoserver/wfs?" :username "foo" :password "bar:1"})
 
-  (fact (second (extract-credentials-from-krysp-address ["" {:url "https://foo:bar.1@foo.bar.com/TeklaOGCWeb/WFS.ashx?"}]))
+  (fact (second (extract-credentials-from-krysp-address ["" {:url "https://foo:bar.1@example.com/geoserver/wfs?"}]))
          => 
-         {:url "https://foo.bar.com/TeklaOGCWeb/WFS.ashx?" :username "foo" :password "bar.1"})
+         {:url "https://example.com/geoserver/wfs?" :username "foo" :password "bar.1"})
 
-  (fact (second (extract-credentials-from-krysp-address ["" {:url "http://foo.bar.com/TeklaOGCWeb/WFS.ashx?"}])) => nil)
+  (fact (second (extract-credentials-from-krysp-address ["" {:url "http://example.com/geoserver/wfs?"}])) => nil)
 
   (fact (second (extract-credentials-from-krysp-address ["" {:url nil}])) => nil)
 

@@ -498,7 +498,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function setMaxLen(input, subSchema) {
-    var maxLen = subSchema["max-len"] || 255; // if you change the default, change in model.clj, too
+    var maxLen = subSchema["max-len"] || LUPAPISTE.config.inputMaxLength; // if you change the default, change in model.clj, too
     input.setAttribute("maxlength", maxLen);
   }
 
