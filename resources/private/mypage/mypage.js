@@ -42,26 +42,26 @@
 
     self.error = ko.observable();
     self.saved = ko.observable(false);
-    self.firstName = ko.observable().extend({ maxLength: 255 });
-    self.lastName = ko.observable().extend({ maxLength: 255 });
+    self.firstName = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
+    self.lastName = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.username = ko.observable();
-    self.street = ko.observable().extend({ maxLength: 255 });
-    self.city = ko.observable().extend({ maxLength: 255 });
+    self.street = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
+    self.city = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.zip = ko.observable().extend({number: true, maxLength: 5, minLength: 5});
-    self.phone = ko.observable().extend({ maxLength: 255 });
+    self.phone = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.role = ko.observable();
     self.architect = ko.observable();
-    self.degree = ko.observable().extend({ maxLength: 255 });
+    self.degree = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.availableDegrees = _(LUPAPISTE.config.degrees).map(function(degree) {
       return {id: degree, name: loc(["koulutus", degree])};
     }).sortBy("name").value();
     self.graduatingYear = ko.observable().extend({ number: true, minLength: 4, maxLength: 4 });
-    self.fise = ko.observable().extend({ maxLength: 255 });
+    self.fise = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.fiseKelpoisuus = ko.observable();
     self.availableFiseKelpoisuusValues = _(LUPAPISTE.config.fiseKelpoisuusValues).map(function(kelp) {
       return {id: kelp, name: loc(["fisekelpoisuus", kelp])};
     }).sortBy("name").value();
-    self.companyName = ko.observable().extend({ maxLength: 255 });
+    self.companyName = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.companyId = ko.observable().extend( { y: true });
     self.allowDirectMarketing = ko.observable();
     self.attachments = ko.observable();
