@@ -9,7 +9,6 @@
             [lupapalvelu.attachment-accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.statement :as statement]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
 
@@ -77,37 +76,40 @@
     application
     (dissoc application :urgency :authorityNotice)))
 
-(defn- only-authority-or-owner-sees-statement-drafts [application user]
+(defn- authorized-to-statement? [user statement]
+  (or
+    (true? (:given statement))  ;; including given statements
+    (= :authority (keyword (:role user)))
+    (and
+      (= :applicant (keyword (:role user)))
+      (= (-> statement :person :email user/canonize-email) (-> user :email user/canonize-email)))))
 
-  (println "\n only-authority-or-owner-sees-statement-drafts, user: ")
-  (>pprint user)
-  (println "\n")
+(defn- authorized-to-statement-attachment? [user attachment ids-of-own-statements]
+  {:pre [user attachment (set? ids-of-own-statements)]}
+  (if (= "statement" (-> attachment :target :type))
+    (or (user/authority? user) (true? (ids-of-own-statements (-> attachment :target :id))))
+    true))
 
-  (let [ids-of-own-statements (-> (:statements application) (filter #(or
-                                                                       (:given %)  ;; including given statements
-                                                                       (= (:id user) (-> % :person :userId)))) (map :id) set)]
-    (println "\n ids-of-own-statements: " ids-of-own-statements "\n")
-
+(defn- only-authority-or-owner-sees-statement-drafts-and-statement-attachments [application user]
+  (let [ids-of-own-statements (->> (:statements application)
+                                (filter #(or
+                                           (:given %)  ;; including given statements
+                                           (= (:id user) (-> % :person :userId))))
+                                (map :id)
+                                set)]
     (-> application
-      (update-in [:statements] (fn [statement]
-                                 (let [authorized-to-statement? (or
-                                                                  (:given statement)  ;; including given statements
-                                                                  (nil? (statement/authority-or-statement-owner-applicant {:user user :data {:statementId (:id statement)}} application)))]
-                                   (println "\n authorized-to-statement?: " authorized-to-statement? "\n")
-                                   (if authorized-to-statement?
-                                     statement
-                                     ;; TODO: sailyta :metadata?
-                                     (select-keys statement [:id :person :requested :given :metadata])))))
-      (update-in [:attachments] (fn [attachment]
-                                  (let [authorized-to-statement-attachment? (if (= "statement" (-> attachment :target :type))
-                                                                              (or (user/authority? user) (ids-of-own-statements (-> attachment :target :id)))
-                                                                              true)]
-
-                                    (println "\n authorized-to-statement-attachment?: " authorized-to-statement-attachment? "\n")
-
-                                    (if authorized-to-statement-attachment?
-                                      statement
-                                      (select-keys statement [:id :person :requested :given :metadata]))))))))
+      (assoc :statements (map
+                           (fn [statement]
+                             (let [authorized-to-statement? (authorized-to-statement? user statement)]
+                               (if authorized-to-statement?
+                                 statement
+                                 (select-keys statement [:id :person :requested :given :status]))))
+                           (:statements application)))
+      (assoc :attachments (filter
+                           (fn [attachment]
+                             (let [authorized-to-statement-attachment? (authorized-to-statement-attachment? user attachment ids-of-own-statements)]
+                               authorized-to-statement-attachment?))
+                           (:attachments application))))))
 
 
 (defn filter-application-content-for [application user]
