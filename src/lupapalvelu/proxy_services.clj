@@ -320,10 +320,9 @@
   "Takes a service function as an argument and returns a proxy function that invokes the original
   function. Proxy function returns what ever the service function returns, excluding some unsafe
   stuff. At the moment strips the 'Set-Cookie' headers."
-  [f service]
-
+  [f & args]
   (fn [request]
-    (let [response (f (http/secure-headers request) service)]
+    (let [response (apply f (cons (http/secure-headers request) args))]
       (http/secure-headers response))))
 
 (defn- cache [max-age-in-s f]
