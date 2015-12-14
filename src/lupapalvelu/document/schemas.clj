@@ -713,6 +713,12 @@
                               (assoc rakennusjatemaara :name "painoT")
                               {:name "jatteenToimituspaikka" :type :string :max-len 50}])
 
+(def availableMaterialsRow [{:name "aines" :type :string}
+                            rakennusjatemaara
+                            jateyksikko
+                            {:name "saatavilla" :type :date}
+                            {:name "kuvaus" :type :string}])
+
 (def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
                                :i18nkey "rakennusJaPurkujate"
                                :type :table
@@ -755,7 +761,23 @@
                                    {:name "suunnittelematonJate"
                                     :type :table
                                     :repeating true
-                                    :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}])
+                                    :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}
+                           {:name "contact"
+                            :i18nkey "contact"
+                            :type :group
+                            :group-help "contact.help"
+                            :body [{:name "name" :type :string}
+                                   {:name "phone" :type :string :subtype :tel}
+                                   {:name "email" :type :string :subtype :email}]}
+                           {:name "availableMaterials"
+                            :i18nkey "available-materials"
+                            :type :table
+                            :uicomponent :docgenTable
+                            :approvable false
+                            :repeating true
+                            :body (body availableMaterialsRow)}])
+
+
 
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types

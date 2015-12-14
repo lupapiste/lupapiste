@@ -3,6 +3,7 @@
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
+            [clojure.set :refer [rename-keys]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
@@ -25,6 +26,7 @@
             [sade.property :as p]
             [sade.validators :as v]
             [sade.util :as util]
+            [sade.strings :as ss]
             [swiss.arrows :refer [-<>>]]))
 
 
@@ -417,3 +419,23 @@
           {:state to-state, :modified timestamp}
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
+
+(defn waste-rss-feed []
+  (let [ads (->>
+             ;; 1. Every application that as at least a bit filled available materials.
+             (mongo/select
+              :applications
+              {documents: {$elemMatch: {data.availableMaterials.0.aines: {$exists: true }}}})
+             ;; 2. Unwrap and create materials, contact map.
+             tools/unwrapped
+             (map (fn [{docs :documents}]
+                    (let [ad (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")
+                                      (-> (:data %)
+                                          (select-keys [:availableMaterials :contact])
+                                          (rename-keys {:availableMateriasl :materials}))))])))
+             ;; 3. We only check the contact validity. Name and either phone or email
+             ;;    must have been provided.
+             (filter (fn [{{:keys [name phone email]} :contact}]
+                       (letfn [(good [s] (-> s ss/blank? false?))]
+                         (and (good name) (or (good phone) (good email)))))))]
+    ))

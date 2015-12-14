@@ -715,3 +715,6 @@
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
 
+(defquery waste-rss
+  {:description "Simple RSS feed for construction waste information."}
+  (ok (a/waste-rss-feed)))
