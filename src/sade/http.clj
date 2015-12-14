@@ -4,6 +4,9 @@
             [sade.env :as env])
   (:refer-clojure :exclude [get]))
 
+(def no-cache-headers {"Cache-Control" "no-cache, no-store"
+                       "Pragma" "no-cache"})
+
 (defn- merge-to-defaults [& options]
   (let [fst-opt     (first options)
         options-map (cond (and (= 1 (count options)) (or (map? fst-opt) (nil? fst-opt)))  fst-opt

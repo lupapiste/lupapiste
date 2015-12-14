@@ -336,21 +336,18 @@
           response (apply f (cons (http/secure-headers sanitized-request) args))]
       (http/secure-headers response))))
 
-(def no-cache-headers {"Cache-Control" "no-cache, no-store"
-                       "Pragma" "no-cache"})
-
 (defn- cache [max-age-in-s f]
   (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]
     (fn [request]
       (let [response (f request)]
         (if (= 200 (:status response))
           (update response :headers merge cache-control)
-          (update response :headers merge no-cache-headers))))))
+          (update response :headers merge http/no-cache-headers))))))
 
 (defn no-cache [f]
   (fn [request]
     (let [response (f request)]
-      (update response :headers merge no-cache-headers))))
+      (update response :headers merge http/no-cache-headers))))
 
 ;;
 ;; Proxy services by name:
