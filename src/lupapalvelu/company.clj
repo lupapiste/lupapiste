@@ -2,7 +2,8 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string fn-> fn->>] :as util]
+            [sade.util :refer [fn-> fn->>] :as util]
+            [sade.schemas :as ssc]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -33,29 +34,20 @@
   (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
     (:limit account-type)))
 
-(def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
-
-(defn supported-invoice-operator? [op]
-  (let [supported-ops (map :name schema/e-invoice-operators)]
-    (some #(= op %) supported-ops)))
-
-(def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
-              :y                             (sc/pred v/finnish-y? "Not valid Y code")
-              :accountType                   (apply sc/enum (conj (map (comp name :name) account-types) "custom"))
+(def Company {:name                          (ssc/min-max-length-string 1 64)
+              :y                             ssc/FinnishY                  
+              :accountType                   (apply sc/enum "custom" (map (comp name :name) account-types))
               :customAccountLimit            (sc/maybe sc/Int)
-              (sc/optional-key :reference)   max-64-or-nil
-              :address1                      max-64-or-nil
-              :po                            max-64-or-nil
-              :zip                           (sc/either (sc/pred v/finnish-zip? "Not a valid zip code")
-                                                         (sc/pred ss/blank?))
-              (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/either (sc/pred v/finnish-ovt? "Not a valid OVT code")
-                                                        (sc/pred ss/blank?))
-              (sc/optional-key :pop)         (sc/either (sc/pred supported-invoice-operator? "Not a supported invoice operator")
-                                                        (sc/pred ss/blank?))
+              (sc/optional-key :reference)   (sc/maybe (ssc/max-length-string 64))
+              :address1                      (sc/maybe (ssc/max-length-string 64))
+              :po                            (sc/maybe (ssc/max-length-string 64))
+              :zip                           (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
+              (sc/optional-key :country)     (sc/maybe (ssc/max-length-string 64))
+              (sc/optional-key :ovt)         (sc/if ss/blank? ssc/BlankStr ssc/FinnishOVTid)
+              (sc/optional-key :pop)         (sc/maybe (apply sc/enum "" (map :name schema/e-invoice-operators)))
               (sc/optional-key :document)    sc/Str
               (sc/optional-key :process-id)  sc/Str
-              (sc/optional-key :created)     sc/Int
+              (sc/optional-key :created)     ssc/Timestamp
               })
 
 (def company-skeleton ; required keys
