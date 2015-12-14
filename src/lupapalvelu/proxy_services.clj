@@ -336,11 +336,21 @@
           response (apply f (cons (http/secure-headers sanitized-request) args))]
       (http/secure-headers response))))
 
+(def no-cache-headers {"Cache-Control" "no-cache, no-store"
+                       "Pragma" "no-cache"})
+
 (defn- cache [max-age-in-s f]
   (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]
     (fn [request]
       (let [response (f request)]
-        (update-in response [:headers] merge cache-control)))))
+        (if (= 200 (:status response))
+          (update response :headers merge cache-control)
+          (update response :headers merge no-cache-headers))))))
+
+(defn no-cache [f]
+  (fn [request]
+    (let [response (f request)]
+      (update response :headers merge no-cache-headers))))
 
 ;;
 ;; Proxy services by name:
@@ -351,16 +361,16 @@
                "kuntawms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
-               "point-by-property-id" (secure point-by-property-id-proxy)
-               "property-id-by-point" (secure property-id-by-point-proxy)
-               "address-by-point" (secure address-by-point-proxy)
-               "find-address" (secure find-addresses-proxy)
-               "get-address" (secure get-addresses-proxy)
-               "property-info-by-wkt" (secure property-info-by-wkt-proxy)
-               "wmscap" (secure wms-capabilities-proxy)
-               "plan-urls-by-point" (secure plan-urls-by-point-proxy)
-               "general-plan-urls-by-point" (secure general-plan-urls-by-point-proxy)
+               "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy))
+               "property-id-by-point" (cache (* 60 60 8) (secure property-id-by-point-proxy))
+               "address-by-point" (no-cache (secure address-by-point-proxy))
+               "find-address" (no-cache (secure find-addresses-proxy))
+               "get-address" (no-cache (secure get-addresses-proxy))
+               "property-info-by-wkt" (cache (* 60 60 8) (secure property-info-by-wkt-proxy))
+               "wmscap" (no-cache (secure wms-capabilities-proxy))
+               "plan-urls-by-point" (no-cache (secure plan-urls-by-point-proxy))
+               "general-plan-urls-by-point" (no-cache (secure general-plan-urls-by-point-proxy))
                "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))
-               "organization-map-server" (secure organization-map-server)
-               "trimble-kaavamaaraykset-by-point" (secure trimble-kaavamaaraykset-by-point-proxy)})
+               "organization-map-server" (no-cache (secure organization-map-server))
+               "trimble-kaavamaaraykset-by-point" (no-cache (secure trimble-kaavamaaraykset-by-point-proxy))})
 
