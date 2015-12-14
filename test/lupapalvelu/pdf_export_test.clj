@@ -63,7 +63,10 @@
              :vetuma {:firstName "TESTAA" :lastName "PORTAALIA"}
              :created 1444902294666}]})
 
-
+(defn- dummy-history [state ts user]
+  {:state state
+   :ts ts
+   :user nil})
 
 (facts "Generate PDF file from application with all documents"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
@@ -147,3 +150,35 @@
                       (fact "Pdf data message" (nth rows 28) => "SigloXX")
                       (fact "Pdf data signature" (nth rows 30) => "TESTAA PORTAALIA, 15.10.2015"))
                     (.delete file))))))
+
+(facts "Generate PDF from history - signed"
+       (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
+             dummy-docs (map test-util/dummy-doc schema-names)
+             dummy-attachments [{:type {:foo :bar}
+                                 :versions [{:version 1
+                                             :created 200}
+                                            {:version 2
+                                             :created 500}]}
+                                {:type {:foo :qaz}
+                                 :versions [{:version 1
+                                             :created 300}]}]
+             dummy-history     [{:state "draft" :ts 100}
+                                {:state "open" :ts 250}]
+             application (merge domain/application-skeleton {:id "LP-1"
+                                                             :address "Korpikuusen kannon alla 1 "
+                                                             :attachments dummy-attachments
+                                                             :history dummy-history
+                                                             :created 100
+                                                             :municipality "444"
+                                                             :state "draft"})]
+         (doseq [lang i18n/languages]
+           (facts {:midje/description (name lang)}
+                  (let [file (File/createTempFile (str "export-test-history-" (name lang) "-") ".pdf")
+                        fis (FileOutputStream. file)]
+                    (pdf-export/generate-pdf-with-child application :history nil lang fis)
+                    (fact "File exists " (.exists file))
+                    (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
+                          expected-state (if (= lang :fi) "Vastattu" "Besvarad")
+                          rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
+                      (fact "PDF data rows " (count rows) => 42)
+                    (.delete file)))))) )
