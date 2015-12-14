@@ -6,6 +6,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.http :as http]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment-accessibility :as access]
             [lupapalvelu.attachment-metadata :as metadata]
@@ -432,15 +433,14 @@
 (defn output-attachment
   [file-id download? attachment-fn]
   (if-let [attachment (attachment-fn file-id)]
-    (let [response {:status 200
+    (let [filename (ss/encode-filename (:file-name attachment))
+          response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
                               "Content-Length" (str (:content-length attachment))}}]
       (if download?
-        (assoc-in response
-          [:headers "Content-Disposition"]
-          (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment))))
-        response))
+        (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" filename))
+        (update response :headers merge http/no-cache-headers)))
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
