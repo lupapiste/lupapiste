@@ -28,7 +28,8 @@
               <tbody data-bind="foreach: $data.statements()">
                   <tr class="statement-row">
                       <td>
-                        <i class="lupicon-paperclip" data-bind="visible: $component.hasAttachment($data)"></i>
+                        <i class="lupicon-paperclip" data-bind="visible: $component.hasAttachment($data),
+                                                                attr: {'title': loc('tooltip.statement-or-reply-has-attachments')}"></i>
                       </td>
                       <td>
                           <span data-bind="if: $data.status && $data.status() || $component.authorization.ok('should-see-unsubmitted-statements')">
