@@ -1,4 +1,4 @@
 error.illegal-number:too-small: Liian pieni numero
 error.illegal-number:too-big: Liian suuri numero
-error.illegal-number:too-small: Liian pieni desimaali
-error.illegal-number:too-big: Liian suuri desimaali
+error.illegal-decimal:too-small: Liian pieni desimaali
+error.illegal-decimal:too-big: Liian suuri desimaali
