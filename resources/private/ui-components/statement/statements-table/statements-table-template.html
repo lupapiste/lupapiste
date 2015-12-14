@@ -32,12 +32,12 @@
                                                                 attr: {'title': loc('tooltip.statement-or-reply-has-attachments')}"></i>
                       </td>
                       <td>
-                          <span data-bind="if: $data.status && $data.status() || $component.authorization.ok('should-see-unsubmitted-statements')">
+                          <span data-bind="if: $component.canAccessStatement($data)">
                               <a href="#" data-bind="text: $data.person.text,
                                                      click: $component.openStatement,
                                                      attr: {'data-test-id' : 'open-statement-' + $index()}"></a>
                           </span>
-                          <span data-bind="ifnot: ($data.status && $data.status()) || $component.authorization.ok('should-see-unsubmitted-statements')">
+                          <span data-bind="ifnot: $component.canAccessStatement($data)">
                               <span data-bind="text: $data.person.text, attr: {'data-test-id' : 'open-statement-' + $index()}"></span>
                           </span>
                       </td>

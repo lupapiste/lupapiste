@@ -27,10 +27,18 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return _.contains(["requested", "draft"], util.getIn(statement, ["state"]));
   }
 
+  var isAuthorityOrStatementOwner = function(statement) {
+    var currentUser = lupapisteApp.models.currentUser;
+    return currentUser.isAuthority() || util.getIn(statement, ["person", "userId"]) === currentUser.id();
+  };
+
   self.isRemovable = function(statement) {
-    var userId = lupapisteApp.models.currentUser.id();
-    return util.getIn(statement, ["person", "userId"]) === userId && self.notGiven(statement);
+    return isAuthorityOrStatementOwner(statement) && self.notGiven(statement);
   }
+
+  self.canAccessStatement = function(statement) {
+    return _.contains(["given", "replyable", "replied", "closed"], util.getIn(statement, ["state"])) || isAuthorityOrStatementOwner(statement);
+  };
 
   self.isStatementOverDue = function(statement) {
     var nowTimeInMs = new Date().getTime();
