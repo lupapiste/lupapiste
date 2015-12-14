@@ -212,7 +212,7 @@
 (defcommand save-statement-reply-as-draft
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-exists statement-announced statement-not-replied]
+   :pre-checks       [statement-exists statement-replyable]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority :applicant}
    :user-authz-roles auth/default-authz-writer-roles
@@ -227,7 +227,7 @@
 (defcommand reply-statement
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-exists statement-announced statement-not-replied]
+   :pre-checks       [statement-exists statement-replyable]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority :applicant}
    :user-authz-roles auth/default-authz-writer-roles

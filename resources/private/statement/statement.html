@@ -29,19 +29,13 @@
                                      params: { application: $root.application,
                                                applicationId: $root.applicationId,
                                                statementId: $root.statementId,
-                                               authModel: $root.authorization, 
-                                               saveDraftCommand: 'save-statement-as-draft',
-                                               submitCommand: 'give-statement',
-                                               tabName: 'statement' } },
+                                               authModel: $root.authorization } },
                         visible: $root.selectedTab() === 'statement'"></div> 
-        <div data-bind="component: { name: 'statement-edit',
+        <div data-bind="component: { name: 'statement-edit-reply',
                                      params: { application: $root.application,
                                                applicationId: $root.applicationId,
                                                statementId: $root.statementId,
-                                               authModel: $root.authorization,
-                                               saveDraftCommand: 'save-statement-reply-as-draft',
-                                               submitCommand: 'reply-statement',
-                                               tabName: 'reply' } },
+                                               authModel: $root.authorization} },
                         visible: $root.selectedTab() === 'reply'"></div> 
       </div>
       <div id="statement-attachments-container">

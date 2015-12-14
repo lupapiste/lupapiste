@@ -4,15 +4,15 @@
   var applicationId = ko.observable();
   var application = ko.observable();
   var statementId = ko.observable();
-  var submitAllowed = ko.observable(false);
 
   var authorizationModel = authorization.create();
 
   var tabs = ["statement", "reply"];
   var selectedTab = ko.observable("statement");
+  var submitAllowed = ko.observable({statement: false, reply: false});
 
   hub.subscribe("statement::submitAllowed", function(data) {
-    submitAllowed(data.value);
+    submitAllowed(_.set(submitAllowed(), data.tab, data.value));
   });
 
   hub.subscribe("statement::refresh", function() {

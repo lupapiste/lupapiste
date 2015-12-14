@@ -30,6 +30,9 @@ statement.statement.message.placeholder: Kirjoita lausunto. Jos lausunto on liit
 statement.reply.message.placeholder: Kirjoita vastine.
 statement.statement.text: Lausuntoteksti
 statement.reply.text: Vastineteksti
+statement.submit.statement: Lähetä lausunto
+statement.submit.reply: Lähetä vastine
+statement.submit:
 statement.message.placeholder:
 statement.text:
 

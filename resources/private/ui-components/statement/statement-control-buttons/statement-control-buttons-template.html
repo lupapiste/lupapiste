@@ -5,13 +5,13 @@
     <script type="text/x-jquery-tmpl" id="statement-control-buttons-template">
       <div class="statement-control-buttons">
         <button data-bind="disable: disabled,
-                           click: giveStatement,
-                           visible: authModel.ok(tab() === 'statement' ? 'give-statement' : 'reply-statement')"
+                           click: submit,
+                           visible: visible"
                 id="statement-submit"
                 type="submit"
                 class="positive">
           <i class="lupicon-check"></i>
-          <span data-bind="ltext: 'statement.submit'"></span>
+          <span data-bind="ltext: 'statement.submit.' + tab()"></span>
         </button>
         <button data-bind="click: refresh"
                 id="statement-refresh"

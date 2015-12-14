@@ -93,6 +93,7 @@ jQuery(document).ready(function() {
     {name: "statements-tab"},
     {name: "statements-table"},
     {name: "statement-edit"},
+    {name: "statement-edit-reply"},
     {name: "statement-control-buttons"},
     {name: "statement-attachments"}
   ];

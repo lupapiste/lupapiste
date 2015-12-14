@@ -15,11 +15,10 @@
 ;; Common
 ;;
 
-(def statement-states #{:requested :draft :given :announced :replied})
-(def post-given-states #{:given :announced :replied})
+(def statement-states #{:requested :draft :given :replyable :replied :closed})
+(def post-given-states #{:given :replyable :replied :closed})
 (def pre-given-states (clojure.set/difference statement-states post-given-states))
-(def post-announce-states #{:announced :replied})
-(def post-reply-states #{:replied})
+(def post-reply-states #{:replied :closed})
 
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
 ;; Krysp Yhteiset 2.1.5+
@@ -82,16 +81,12 @@
               (and (= :applicant (keyword role)) (nil? (statement-owner command application))))
     (fail :error.not-authority-or-statement-owner-applicant)))
 
-(defn statement-announced [{statement-id :statementId :as command} application]
-  (when-not (->> (get-statement application statement-id) :state post-announce-states)
-    (fail :error.statement-is-not-announced)))
-
-(defn statement-not-replied [{statement-id :statementId :as command} application]
-  (when (->> (get-statement application statement-id) :state post-reply-states)
-    (fail :error.statement-already-replied)))
+(defn statement-replyable [{{statement-id :statementId} :data :as command} application]
+  (when-not (->> (get-statement application statement-id) :state keyword #{:replyable})
+    (fail :error.statement-is-not-replyable)))
 
 (defn statement-given? [application statementId]
-  (->> statementId (get-statement application) :state keyword post-given-states))
+  (->> statementId (get-statement application) :state keyword pre-given-states not))
 
 (defn statement-not-given [{{:keys [statementId]} :data} application]
   (when (statement-given? application statementId)
@@ -112,7 +107,7 @@
 
 (defn update-reply-draft [statement text nothing-to-add modify-id prev-modify-id editor-id]
   (->> {:text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id}
-       (update-statement statement modify-id prev-modify-id :reply)))
+       (update-statement statement modify-id prev-modify-id :state :replyable :reply)))
 
 (defn reply-statement [statement text nothing-to-add modify-id prev-modify-id editor-id]
   (->> {:text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id}
