@@ -1,122 +1,59 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <section class="page container" id="statement" data-bind="with: $root.statementModel">
+  <section class="page" id="statement">
     <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'statement' -->
-    <div class="headerarea">
-      <h1>
-        <span data-bind="with: application">
-          <span data-bind="text: title"></span>:
-        </span>
-        <span data-bind="with: data">
-          <span data-bind="text: person.text"></span>
-        </span>
-      </h1>
-      <button class="attachment-delete inline-block"
-              data-bind="ltext: 'statement.delete',
-                         click: $root.statementModel.openDeleteDialog,
-                         visible: $root.authorization.ok('delete-statement'),
-                         enable: $root.authorization.ok('delete-statement')"
-              data-test-id="delete-statement">Poista lausunto</button>
-      <div data-bind="with: application">
+    <div class="statement-top">
+      <div class="container">
         <a class="btn secondary inline-block"
            data-test-id="statement-return"
-           data-bind="attr: {href: '#!/application/' + id() + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
+           data-bind="attr: {href: '#!/application/' + $root.applicationId() + (lupapisteApp.models.application.inPostVerdictState() ? '/applicationSummary' : '/statement') }">
             <i class="lupicon-chevron-start"></i>
           <span data-bind ="ltext: 'application.return'"></span>
         </a>
+        <div class="tabs-container">
+          <ul data-bind="foreach: tabs" class="tabs">
+            <li data-bind="attr: {'data-test-id': 'statement-tab-selector-' + $data},
+                           css: {active: $parent.selectedTab() === $data},
+                           click: $parent.selectedTab">
+              <a href="#" class="link-btn" data-bind="ltext: 'statement.tab.' + $data"></a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div class="statement-info">
-      <form data-bind="with: $root.statementModel">
-        <div class="form-entry">
-          <label for="statement-type-select" class="form-label">
-            <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
-            <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
-          </label>
-          <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses,
-                                                                                    optionsValue: 'id',
-                                                                                    optionsText: 'name',
-                                                                                    value: selectedStatus,
-                                                                                    valueAllowUnset: true,
-                                                                                    optionsCaption: loc('choose'),
-                                                                                    disable: !$root.authorization.ok('give-statement')"></select>
-        </div>
-        <div>
-          <label class="form-label" for="statement-text" data-bind="ltext: 'statement.text'"></label>
-          <textarea
-            data-bind="attr: {placeholder: loc('statement.message.placeholder')}, textInput: text, readonly: !$root.authorization.ok('give-statement')"
-            id="statement-text"
-            rows="20">
-          </textarea>
-        </div>
-        <button
-          data-bind="disable: disabled,
-                     click: submit,
-                     visible: $root.authorization.ok('give-statement'),
-                     css: {waiting: submitting}"
-           id="statement-submit"
-           type="submit"
-           class="positive">
-          <span data-bind="ltext: submitLtext"></span>
-          <i class="wait spin lupicon-refresh"></i>
-        </button>
-      </form>
-    </div>
-
-    <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
-      <div class="statement-attachments">
-        <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
-        <div data-bind="if: attachments().length">
-          <table class="table" data-test-id="statement-attachments-table">
-            <thead>
-              <tr>
-                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
-                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-                <th data-bind="ltext: 'attachment.actions'">Toiminnot</th>
-                <th data-bind="ltext: 'remove'"></th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: attachments">
-              <tr data-bind="with: $data.latestVersion">
-                <td>
-                  <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
-                  <i data-bind="ltext: contentType"></i>
-                  <i data-bind="size: size"></i>
-                </td>
-                <td>
-                  <span data-bind="dateString: $parent.modified"></span>
-                  <span data-bind="fullName: user"></span>
-                </td>
-                <td>
-                </td>
-                <td><a data-bind="click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id),
-                                  visible: $root.attachmentsModel.canDeleteAttachment($parent),
-                                  enable: $root.attachmentsModel.canDeleteAttachment($parent),
-                                  attr: {'data-test-id': 'removeStatementAttachmet'}">
-                      <i class="lupicon-remove primary"></i></a></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div data-bind="ifnot: attachments().length">
-          <i data-bind="ltext: 'statement.attachments'" data-test-id="inforequest-attachments-no-attachments"></i>
-        </div>
-
-        <button
-          class="btn"
-          data-bind="ltext: 'application.attachmentsAdd',
-                     visible: canAddAttachment(),
-                     enabled: canAddAttachment(),
-                     click: newAttachment"
-          data-test-id="add-statement-attachment">
-        </button>
+    <div class="container">
+      <div id="statement-edit-container">
+        <div data-bind="component: { name: 'statement-edit',
+                                     params: { application: $root.application,
+                                               applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization } },
+                        visible: $root.selectedTab() === 'statement'"></div> 
+        <div data-bind="component: { name: 'statement-edit-reply',
+                                     params: { application: $root.application,
+                                               applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization} },
+                        visible: $root.selectedTab() === 'reply'"></div> 
       </div>
-
+      <div id="statement-attachments-container">
+        <div data-bind="component: { name: 'statement-attachments',
+                                     params: { applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization,
+                                               selectedTab: $root.selectedTab } }"></div> 
+      </div>
+      <div id="statement-control-button-container">
+        <div data-bind="component: { name: 'statement-control-buttons',
+                                     params: { applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization,
+                                               submitAllowed: $root.submitAllowed,
+                                               selectedTab: $root.selectedTab } }"></div> 
+      </div>
     </div>
-
     <!-- /ko -->
   </section>
 </body>

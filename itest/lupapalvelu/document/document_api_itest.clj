@@ -51,6 +51,12 @@
       (get-in rakennus-doc [:data :kiinteisto :maaraalaTunnus :modified]) => modified2)
     (fact (:ok failing-result) => false)
     (fact (:text failing-result) => "document-would-be-in-error-after-update")
+
+    (fact "illegal key path is not echoed"
+      (let [errors (filter (fn [{r :result}] (= "err" (first r))) (:results failing-result))]
+        (count errors) => 1
+        (:path (first errors)) => empty?))
+
     (fact (:ok readonly-result) => false)
     (fact (:text readonly-result) => "error-trying-to-update-readonly-field")))
 

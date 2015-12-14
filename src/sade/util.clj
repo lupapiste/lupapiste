@@ -342,30 +342,6 @@
       (and (= source-major (:major target)) (> source-minor (:minor target)))
       (and (= source-major (:major target)) (= source-minor (:minor target)) (>= source-micro (:micro target))))))
 
-;;
-;; Schema utils:
-;;
-
-(def min-length (memoize
-                  (fn [min-len]
-                    (sc/pred
-                      (fn [v]
-                        (>= (count v) min-len))
-                      (str "Shorter than " min-len)))))
-
-(def max-length (memoize
-                  (fn [max-len]
-                    (sc/pred
-                      (fn [v]
-                        (<= (count v) max-len))
-                      (str "Longer than " max-len)))))
-
-(defn min-length-string [min-len]
-  (sc/both sc/Str (min-length min-len)))
-
-(defn max-length-string [max-len]
-  (sc/both sc/Str (max-length max-len)))
-
 (def Fn (sc/pred fn? "Function"))
 
 (def IFn (sc/pred ifn? "Function"))

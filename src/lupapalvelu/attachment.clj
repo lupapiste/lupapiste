@@ -6,6 +6,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.http :as http]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment-accessibility :as access]
             [lupapalvelu.attachment-metadata :as metadata]
@@ -432,29 +433,30 @@
 (defn output-attachment
   [file-id download? attachment-fn]
   (if-let [attachment (attachment-fn file-id)]
-    (let [response {:status 200
+    (let [filename (ss/encode-filename (:file-name attachment))
+          response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
                               "Content-Length" (str (:content-length attachment))}}]
       (if download?
-        (assoc-in response
-          [:headers "Content-Disposition"]
-          (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment))))
-        response))
+        (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" filename))
+        (update response :headers merge http/no-cache-headers)))
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
 (defn create-preview
   [file-id filename content-type content application-id & [db-name]]
-  (when (and (env/feature? :preview) (preview/converter content-type))
+  (if (env/feature? :preview)
+  (when (preview/converter content-type)
     (mongo/with-db (or db-name mongo/default-db-name)
       (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
       (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
                                               (with-open [content ((:content (mongo/download file-id)))]
                                                 (preview/create-preview content content-type)))]
         (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))))
+        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id))))
+  (warn "Preview env feature is turned off!")))
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"

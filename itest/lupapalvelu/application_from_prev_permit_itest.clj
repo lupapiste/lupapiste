@@ -37,7 +37,7 @@
     (apply local-command apikey :create-application-from-previous-permit args)))
 
 (mongo/with-db local-db-name
-  (let [example-xml (xml/parse (slurp (io/resource "../resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml")))
+  (let [example-xml (xml/parse (slurp (io/resource "krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml")))
         example-app-info (krysp-reader/get-app-info-from-message example-xml example-kuntalupatunnus)]
 
     (facts "Creating new application based on a prev permit"
@@ -173,7 +173,7 @@
                                   (keyword (:text resp-body)) => :created-new-application
                                   (let [application (query-application local-query raktark-jarvenpaa (:id resp-body))]
                                     (:opened application) => truthy))))
-                            
+
                             (fact "should return the LP application if the kuntalupatunnus matches an existing app"
                               (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
                                     verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)

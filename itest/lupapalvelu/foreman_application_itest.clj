@@ -151,11 +151,11 @@
                  (let [xml-file   (fn [filename] (-> filename io/resource slurp
                                                      (xml/parse-string "utf-8")
                                                      cr/strip-xml-namespaces))
-                       special    (-> "krysp/sample/rakentamisen aikaiset/tekla-tj-verdict.xml"
+                       special    (-> "krysp/verdict-r-foremen.xml"
                                       xml-file
                                       (enlive/at [:tunnus enlive/any-node]
                                                  (enlive/replace-vars {:application-id (:id application)})))
-                       typical    (xml-file "krysp/sample/verdict.xml")
+                       typical    (xml-file "krysp/dev/verdict.xml")
                        normalized (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application special)
                        poytakirja (-> normalized (enlive/select [:paatostieto :Paatos :poytakirja :> enlive/any-node]))]
                    (fact "Special verdict"

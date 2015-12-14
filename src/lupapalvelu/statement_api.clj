@@ -102,11 +102,20 @@
    :user-authz-roles #{:statementGiver}}
   [_])
 
+(defn- get-dueDate-loc [lang dueDate]
+  (if dueDate
+    (str (i18n/with-lang lang (i18n/loc "statement.email.template.duedate-is")) " " (util/to-local-date dueDate) ".")
+    ""))
+
 (defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application} _ recipient]
   {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
    :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
    :saateText saateText
-   :dueDate (util/to-local-date dueDate)})
+   :recipient-email (:email recipient)
+   :dueDate (util/to-local-date dueDate)
+   :due-date-str-fi (get-dueDate-loc "fi" dueDate)
+   :due-date-str-sv (get-dueDate-loc "sv" dueDate)})
+
 
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
@@ -114,27 +123,11 @@
    :model-fn       request-statement-model
    :show-municipality-in-subject true})
 
-(defn- make-details [inviter now persons metadata saateText dueDate]
-  (map
-    (fn [person]
-      (let [user (if-not (ss/blank? (:id person)) ;; "manually invited" statement givers lack the "id"
-                   (or (user/get-user-by-email (:email person)) (fail! :error.user-not-found))
-                   (user/get-or-create-user-by-email (:email person) inviter))
-              statement-id (mongo/create-id)
-            statement-giver (assoc person :userId (:id user))]
-         (cond-> {:statement {:id statement-id
-                              :person statement-giver
-                              :requested now
-                              :given nil
-                              :reminder-sent nil
-                              :metadata metadata
-                              :saateText saateText
-                              :dueDate dueDate
-                              :status nil}
-                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                  :recipient user}
-          (seq metadata) (assoc :metadata metadata))))
-       persons))
+(notifications/defemail :request-statement-new-user
+  {:recipients-fn  :recipients
+   :subject-key    "statement-request-new-user"
+   :model-fn       request-statement-model
+   :show-municipality-in-subject true})
 
 (defn validate-selected-persons [{{selectedPersons :selectedPersons} :data}]
   (let [non-blank-string-keys (when (some
@@ -151,27 +144,23 @@
   {:parameters [functionCode id selectedPersons saateText dueDate]
    :user-roles #{:authority}
    :states #{:open :submitted :complementNeeded}
-   :input-validators [(partial action/non-blank-parameters [:saateText])
-                      (partial action/number-parameters [:dueDate])
+   :input-validators [(fn [command] (when-not (nil? (get-in command [:data :dueDate]))
+                                      (action/number-parameters [:dueDate] command)))
                       (partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
                       validate-selected-persons]
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{user :user {:keys [organization] :as application} :application now :created :as command}]
-  (let [personIdSet (->> selectedPersons (map :id) (filter identity) set)
-        manualPersons (filter #(not (:id %)) selectedPersons)]
-    (organization/with-organization organization
-      (fn [{:keys [statementGivers]}]
-        (let [persons (filter #(personIdSet (:id %)) statementGivers)
-              persons-combined (concat persons manualPersons)
-              metadata (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
-              details (make-details user now persons-combined metadata saateText dueDate)
-              statements (map :statement details)
-              auth (map :auth details)
-              recipients (map :recipient details)]
-          (update-application command {$push {:statements {$each statements}
-                                              :auth {$each auth}}})
-          (notifications/notify! :request-statement (assoc command :recipients recipients)))))))
+  (let [new-emails  (->> (map :email selectedPersons) (remove user/get-user-by-email) (set))
+        users       (map (comp #(user/get-or-create-user-by-email % user) :email) selectedPersons)
+        persons+uid (map #(assoc %1 :userId (:id %2)) selectedPersons users)
+        metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
+        statements  (map (partial create-statement now metadata saateText dueDate) persons+uid)
+        auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
+    (update-application command {$push {:statements {$each statements}
+                                        :auth       {$each auth}}})
+    (notifications/notify! :request-statement-new-user (assoc command :recipients (filter (comp new-emails :email) users)))
+    (notifications/notify! :request-statement (assoc command :recipients (remove (comp new-emails :email) users)))))
 
 (defcommand delete-statement
   {:parameters [id statementId]
@@ -184,32 +173,76 @@
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
+(defcommand save-statement-as-draft
+  {:parameters       [:id statementId :lang]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
+   :pre-checks       [statement-exists statement-owner statement-not-given]
+   :states           #{:open :submitted :complementNeeded}
+   :user-roles       #{:authority :applicant}
+   :user-authz-roles #{:statementGiver}
+   :description "statement owners can save statements as draft before giving final statement."}
+  [{application :application user :user {:keys [text status modify-id prev-modify-id]} :data :as command}]
+  (when (and status (not ((possible-statement-statuses application) status)))
+    (fail! :error.unknown-statement-status))
+  (let [statement (-> (util/find-by-id statementId (:statements application))
+                      (update-draft text status modify-id prev-modify-id (:id user)))]
+    (update-application command
+                        {:statements {$elemMatch {:id statementId}}}
+                        {$set {:statements.$ statement}})))
+
 (defcommand give-statement
-  {:parameters  [:id statementId status text lang]
+  {:parameters  [:id statementId status text :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
-   :pre-checks  [statement-exists statement-owner #_statement-not-given]
+   :pre-checks  [statement-exists statement-owner statement-not-given]
    :states      #{:open :submitted :complementNeeded}
-   :user-roles #{:authority :applicant}
+   :user-roles  #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
-   :description "authrority-roled statement owners can give statements - notifies via comment."}
-  [{:keys [application user created] :as command}]
-  (when-not ((set (possible-statement-statuses application)) status)
+   :description "statement owners can give statements - notifies via comment."}
+  [{:keys [application user created lang] {:keys [modify-id prev-modify-id]} :data :as command}]
+  (when-not ((possible-statement-statuses application) status)
     (fail! :error.unknown-statement-status))
-  (let [comment-text   (if (statement-given? application statementId)
-                         (i18n/loc "statement.updated")
-                         (i18n/loc "statement.given"))
+  (let [comment-text (i18n/loc "statement.given")
         comment-target {:type :statement :id statementId}
-        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)]
+        comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)
+        statement   (-> (util/find-by-id statementId (:statements application))
+                        (give-statement text status modify-id prev-modify-id (:id user)))
+        response (update-application command
+                                     {:statements {$elemMatch {:id statementId}}}
+                                     (util/deep-merge
+                                      comment-model
+                                      {$set {:statements.$ statement}}))
+        updated-app (assoc application :statements (util/update-by-id statement (:statements application)))]
+    (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
+    response))
 
-    (let [response (update-application command
-                                       {:statements {$elemMatch {:id statementId}}}
-                                       (util/deep-merge
-                                         comment-model
-                                         {$set {:statements.$.status status
-                                                :statements.$.given created
-                                                :statements.$.text text}}))
-          updated-app (assoc application :statements (map  #(if (= statementId (:id %)) (assoc % :status status :given created :text text) % ) (:statements application) ) )]
-                       (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
-                       response)))
+(defcommand save-statement-reply-as-draft
+  {:parameters       [:id statementId :lang]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
+   :pre-checks       [statement-exists statement-replyable]
+   :states           #{:open :submitted :complementNeeded}
+   :user-roles       #{:authority :applicant}
+   :user-authz-roles auth/default-authz-writer-roles
+   :description      "save reply for the statement as draft"}
+  [{application :application user :user {:keys [text nothing-to-add modify-id prev-modify-id]} :data :as command}]
+  (let [statement (-> (util/find-by-id statementId (:statements application))
+                      (update-reply-draft text nothing-to-add modify-id prev-modify-id (:id user)))]
+    (update-application command
+                        {:statements {$elemMatch {:id statementId}}}
+                        {$set {:statements.$ statement}})))
+
+(defcommand reply-statement
+  {:parameters       [:id statementId :lang]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
+   :pre-checks       [statement-exists statement-replyable]
+   :states           #{:open :submitted :complementNeeded}
+   :user-roles       #{:authority :applicant}
+   :user-authz-roles auth/default-authz-writer-roles
+   :description      "reply to statement"}
+  [{application :application user :user {:keys [text nothing-to-add modify-id prev-modify-id]} :data :as command}]
+  (let [statement (-> (util/find-by-id statementId (:statements application))
+                      (reply-statement text nothing-to-add modify-id prev-modify-id (:id user)))]
+    (update-application command
+                        {:statements {$elemMatch {:id statementId}}}
+                        {$set {:statements.$ statement}})))

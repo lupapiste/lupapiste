@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FeatureCollection xmlns="http://www.opengis.net/wfs"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+	xmlns:ogc="http://www.opengis.net/ogc"
+	xmlns:wfs="http://www.opengis.net/wfs"
+	xmlns:ows="http://www.opengis.net/ows"
+	xmlns:gml="http://www.opengis.net/gml"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat/2.1.2/maaAinesluvat.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.3/yhteiset.xsd">
+	<featureMember xmlns="http://www.opengis.net/gml">
+		<MaaAinesluvat xmlns="http://www.paikkatietopalvelu.fi/gml/ymparisto/maa_ainesluvat">
+			<toimituksenTiedot>
+				<yht:aineistonnimi>Sample</yht:aineistonnimi>
+				<yht:aineistotoimittaja>Porvoo</yht:aineistotoimittaja>
+				<yht:tila>valmis</yht:tila>
+				<yht:toimitusPvm>2014-04-11</yht:toimitusPvm>
+				<yht:kuntakoodi>638</yht:kuntakoodi>
+				<yht:kielitieto>Suomi</yht:kielitieto>
+			</toimituksenTiedot>
+			<maaAineslupaAsiatieto>
+				<MaaAineslupaAsia>
+				<yht:yksilointitieto/>
+				<yht:alkuHetki>2014-04-11T00:00:00</yht:alkuHetki>
+				<kasittelytietotieto><KasittelyTieto><yht:muutosHetki>2014-04-11T00:00:00</yht:muutosHetki></KasittelyTieto></kasittelytietotieto>
+					<luvanTunnistetiedot>
+						<LupaTunnus xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+							<kuntalupatunnus>638-2014-0006</kuntalupatunnus>
+							<muuTunnustieto>
+								<MuuTunnus>
+									<tunnus>LP-638-2014-00049</tunnus>
+									<sovellus/>
+								</MuuTunnus>
+							</muuTunnustieto>
+						</LupaTunnus>
+					</luvanTunnistetiedot>
+					<paatostieto>
+						<Paatos>
+							<yht:takuuaikaPaivat>5</yht:takuuaikaPaivat>
+							<yht:lupaehdotJaMaaraykset>Lupaehdot vapaana tekstinä</yht:lupaehdotJaMaaraykset>
+							<yht:paatoslinkki>http://www.example.com/paatos.pdf</yht:paatoslinkki>
+							<paatosdokumentinPvm
+								xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">2014-04-11</paatosdokumentinPvm>
+							<liitetieto xmlns="http://www.paikkatietopalvelu.fi/gml/yhteiset">
+								<Liite>
+									<kuvaus>paatoksenTiedot</kuvaus>
+									<linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</linkkiliitteeseen>
+									<yht:muokkausHetki>2014-03-29T13:58:15</yht:muokkausHetki>
+									<yht:tyyppi>Muu liite</yht:tyyppi>
+								</Liite>
+							</liitetieto>
+						</Paatos>
+					</paatostieto>
+				</MaaAineslupaAsia>
+			</maaAineslupaAsiatieto>
+		</MaaAinesluvat>
+	</featureMember>
+</FeatureCollection>

@@ -53,6 +53,9 @@ LUPAPISTE.DocgenInputModel = function(params) {
   });
 
   self.readonly = ko.observable(params.schema.readonly || params.readonly);
+  self.inputOptions = {maxLength: ko.observable(params.schema["max-len"] || LUPAPISTE.config.inputMaxLength),
+                       max: ko.observable(params.schema.max),
+                       min: ko.observable(params.schema.min)};
 
   self.disabled = ko.observable(params.isDisabled || !self.authModel.ok(service.getUpdateCommand(self.documentId)) ||
                                 util.getIn(params, ["model", "disabled"]));
