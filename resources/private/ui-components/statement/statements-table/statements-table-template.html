@@ -20,7 +20,7 @@
                       <th data-bind="ltext: 'application.statement.maaraaika'"></th>
                       <th data-bind="ltext: 'application.statement.given'"></th>
                       <th data-bind="ltext: 'application.statement.status'"></th>
-                      <!-- ko if: $component.authorization.ok('delete-statement') -->
+                      <!-- ko if: _.some($data.statements(), $component.notGiven) -->
                         <th data-bind="ltext: 'remove'"></th>
                       <!-- /ko -->
                   </tr>
@@ -46,12 +46,11 @@
                                      css: {'statement-over-due': $component.isStatementOverDue($data)}"></td>
                       <td data-bind="dateString: $data.given"></td>
                       <td data-bind="text: $data.status && $data.status() && loc(['statement', $data.status()]), attr: {'data-test-name' : $data.person.name}"></td>
-                      <!-- ko if: $component.authorization.ok('delete-statement') -->
+                      <!-- ko if: _.some($component.statements(), $component.notGiven) -->
                         <td>
                           <span data-bind="click: $component.openDeleteDialog,
                                            clickBubble: false,
-                                           visible: $component.authorization.ok('delete-statement'),
-                                           enable: $component.authorization.ok('delete-statement'),
+                                           visible: $component.isRemovable($data),
                                            attr: {'class': 'lupicon-remove primary',
                                                   'title': loc('statement.delete'),
                                                   'data-test-id': 'delete-statement-' + $index()}"></span>

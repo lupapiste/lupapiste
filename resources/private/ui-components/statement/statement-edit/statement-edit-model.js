@@ -52,7 +52,7 @@ LUPAPISTE.StatementEditModel = function(params) {
   });
   
   hub.subscribe("statement::submit", function(params) {
-    if(applicationId() === params.applicationId && statementId() === params.statementId && tab === params.tab) {
+    if(applicationId() === params.applicationId && statementId() === params.statementId && self.tab === params.tab) {
       goingToSubmit(true); 
     }
   });
