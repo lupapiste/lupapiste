@@ -130,8 +130,10 @@
     (re-matches v/maara-alatunnus-pattern v) nil
     :else [:warn "illegal-maaraala-tunnus"]))
 
+(def illegal-key [:err "illegal-key"])
+
 (defmethod validate-field nil [_ _ _]
-  [:err "illegal-key"])
+  illegal-key)
 
 (defmethod validate-field :default [_ elem _]
   (warn "Unknown schema type: elem=[%s]" elem)
@@ -219,15 +221,16 @@
 
 (defn- ->validation-result [info data path element result]
   (when result
-    (let [result {:data        data
-                  :path        (vec (map keyword path))
-                  :element     (merge element {:locKey (resolve-element-loc-key info element path)})
-                  :document    (:document info)
-                  :result      result}]
-      ; Return results without :data.
-      ; Data is handy when hacking in REPL, though.
-      ; See also mongo_scripts/prod/hetu-cleanup.js.
-      (dissoc result :data))))
+    ; Return results without :data (user input).
+    ; Data is handy when hacking in REPL, though.
+    (let [validation-result {:path        (vec (map keyword path))
+                             ;:data        data
+                             :element     (merge element {:locKey (resolve-element-loc-key info element path)})
+                             :document    (:document info)
+                             :result      result}]
+      (if (= illegal-key result)
+        (assoc validation-result :path []) ; Invalid path from user input should not be echoed
+        validation-result))))
 
 (defn- validate-fields [application info k data path]
   (let [current-path (if k (conj path (name k)) path)
