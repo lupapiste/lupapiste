@@ -14,6 +14,9 @@
                           event: events,
                           disable: disabled,
                           attr: { readonly: readonly,
+                                  maxlength: inputOptions.maxLength,
+                                  max: inputOptions.max,
+                                  min: inputOptions.min,
                                   'data-test-id': path.join('.') }"/>
 
         <!-- ko if: schema.unit -->
