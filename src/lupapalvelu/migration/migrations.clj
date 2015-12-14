@@ -1354,6 +1354,17 @@
      :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
                                {"data.katselmus.tila" {$exists true}}]}}}))
 
+(defn update-statement-state-by-status [{status :status state :state :as statement}]
+  (if state
+    statement
+    (assoc statement :state (if status :given :requested))))
+
+(defmigration statement-state
+  {:apply-when (pos? (mongo/count :applications {:statements {$elemMatch {"state" {$exists false}}}}))}
+  (update-applications-array :statements 
+                             update-statement-state-by-status
+                             {:statements {$elemMatch {"state" {$exists false}}}}))
+
 
 ;; BSON type 8 == Boolean (https://docs.mongodb.org/manual/reference/operator/query/type/)
 (defmigration convert-attachments-requestedByAuthority-to-boolean
