@@ -111,7 +111,7 @@
     => (contains #{[:text "statement text"] 
                    [:modify-id "mod2"]
                    [:editor-id "editor1"]
-                   [:state :announced]
+                   [:state :replyable]
                    [:modified anything]
                    [:reply {:editor-id "editor2"
                             :nothing-to-add true
