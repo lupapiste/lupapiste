@@ -23,16 +23,20 @@
     (let [min-int  (->int min (java.lang.Integer/MIN_VALUE))
           max-int  (->int max (java.lang.Integer/MAX_VALUE))
           number   (->int v nil)]
-      (when-not (and number (<= min-int number max-int))
-        [:warn "illegal-number"]))))
+      (cond
+        (not (integer? number)) [:warn "illegal-number"]
+        (< number min-int) [:warn "illegal-number:too-small"]
+        (> number max-int) [:warn "illegal-number:too-big"]))))
 
 (defmethod subtype-validation :decimal [{:keys [min max]} v]
   (when-not (blank? v)
     (let [min-double (->double min (java.lang.Integer/MIN_VALUE))
           max-double (->double max (java.lang.Integer/MAX_VALUE))
           number (->double (clojure.string/replace v "," ".") nil)]
-      (when-not (and number (<= min-double number max-double))
-        [:warn "illegal-decimal"]))))
+      (cond
+        (not (float? number)) [:warn "illegal-decimal"]
+        (< number min-double) [:warn "illegal-decimal:too-small"]
+        (> number max-double) [:warn "illegal-decimal:too-big"]))))
 
 (defmethod subtype-validation :digit [_ v]
   (cond
