@@ -78,7 +78,7 @@
 
 (defn- authorized-to-statement? [user statement]
   (or
-    (true? (:given statement))  ;; including given statements
+    (:given statement)  ;; including given statements
     (= :authority (keyword (:role user)))
     (and
       (= :applicant (keyword (:role user)))
@@ -87,7 +87,7 @@
 (defn- authorized-to-statement-attachment? [user attachment ids-of-own-statements]
   {:pre [user attachment (set? ids-of-own-statements)]}
   (if (= "statement" (-> attachment :target :type))
-    (or (user/authority? user) (true? (ids-of-own-statements (-> attachment :target :id))))
+    (or (user/authority? user) (ids-of-own-statements (-> attachment :target :id)))
     true))
 
 (defn- only-authority-or-owner-sees-statement-drafts-and-statement-attachments [application user]
