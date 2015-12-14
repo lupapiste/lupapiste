@@ -102,12 +102,20 @@
    :user-authz-roles #{:statementGiver}}
   [_])
 
+(defn- get-dueDate-loc [lang dueDate]
+  (if dueDate
+    (str (i18n/with-lang lang (i18n/loc "statement.email.template.duedate-is")) " " (util/to-local-date dueDate) ".")
+    ""))
+
 (defn- request-statement-model [{{:keys [saateText dueDate]} :data app :application} _ recipient]
   {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
    :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
    :saateText saateText
    :recipient-email (:email recipient)
-   :dueDate (util/to-local-date dueDate)})
+   :dueDate (util/to-local-date dueDate)
+   :due-date-str-fi (get-dueDate-loc "fi" dueDate)
+   :due-date-str-sv (get-dueDate-loc "sv" dueDate)})
+
 
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
@@ -136,8 +144,8 @@
   {:parameters [functionCode id selectedPersons saateText dueDate]
    :user-roles #{:authority}
    :states #{:open :submitted :complementNeeded}
-   :input-validators [(partial action/non-blank-parameters [:saateText])
-                      (partial action/number-parameters [:dueDate])
+   :input-validators [(fn [command] (when-not (nil? (get-in command [:data :dueDate]))
+                                      (action/number-parameters [:dueDate] command)))
                       (partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
                       validate-selected-persons]
    :notified true

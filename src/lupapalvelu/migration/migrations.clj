@@ -1405,6 +1405,16 @@
                 {:keys [url username password]} server]]
     (organization/update-organization-map-server (:id org) url username password)))
 
+(defmigration poikkarit-ilman-hankeilmoitusta
+  {:apply-when (pos? (mongo/count :applications {:permitType "P", :documents.data.hankkeestaIlmoitettu {$exists true}}))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "poikkeusasian-rakennuspaikka" (:name schema-info))
+        (update doc :data dissoc :hankkeestaIlmoitettu)
+        doc))
+    {:permitType "P", :documents.data.hankkeestaIlmoitettu {$exists true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

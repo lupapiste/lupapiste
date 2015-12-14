@@ -165,18 +165,20 @@
 (defn special-foreman-designer-verdict?
   "Some verdict providers handle foreman and designer verdicts a bit
   differently. These 'special' verdicts contain reference permit id in
-  MuuTunnus. xml should be wihout namespaces"
+  MuuTunnus. xml should be without namespaces"
   [application xml]
   (let [app-id (:id application)
-        op-name (-> application :primaryOperation :name)]
-    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
-      (let [link-permit-id (-> (mongo/select-one :app-links {:link.0 app-id}) :link second)]
-        (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))]))))))
+        op-name (-> application :primaryOperation :name)
+        link-permit-id (-> application :linkPermitData first :id)]
+    (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
+         (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
 
 (defn verdict-xml-with-foreman-designer-verdicts
-  "'Injects' paatostieto tag (if not present) to verdict XML.
-   Takes data from foreman/designer's party details.
-   Returns the xml with paatostieto added"
+  "Normalizes special foreman/designer verdict by creating a proper
+  paatostieto. Takes data from foreman/designer's party details. The
+  resulting paatostieto element overrides old one. Returns the xml
+  with paatostieto.
+  Note: This must only be called with special verdict xml (see above)"
   [application xml]
   (let [op-name      (-> application :primaryOperation :name)
         tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
@@ -192,7 +194,8 @@
                                             {:tag :liite :content attachment}]}]}]
         paatostieto  {:tag :paatostieto :content verdict-xml}
         placeholders #{:paatostieto :muistiotieto :lisatiedot
-                       :liitetieto  :kayttotapaus :asianTiedot}
+                       :liitetieto  :kayttotapaus :asianTiedot
+                       :hankkeenVaativuus}
         [rakval]     (enlive/select xml [:RakennusvalvontaAsia])
         place        (some #(placeholders (:tag %)) (:content rakval))]
     (case place

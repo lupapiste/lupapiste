@@ -1,7 +1,6 @@
 (ns lupapalvelu.verdict-test
   (require [midje.sweet :refer :all]
            [midje.util :refer [testable-privates]]
-           [clojure.java.io :as io]
            [lupapalvelu.itest-util :refer [expected-failure?]]
            [lupapalvelu.action :as action]
            [lupapalvelu.application :as application]
@@ -19,7 +18,7 @@
 (testable-privates lupapalvelu.verdict get-verdicts-with-attachments)
 
 (facts "Verdicts parsing"
-  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))]
+  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))]
     (fact "No verdicts found in the attachment parsing phase"
       (count (get-verdicts-with-attachments {:permitType "R"} {} (now) xml (permit/get-verdict-reader "R"))) => 0
       )))
@@ -114,4 +113,4 @@
 (facts "special foreman/designer verdict"
   (let [xml (verdict-xml-with-foreman-designer-verdicts example-application example-meaningful-tj-krysp)]
     (fact "paatostieto is injected before lisatiedot"
-      (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))
+          (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))

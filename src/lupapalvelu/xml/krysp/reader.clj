@@ -55,7 +55,13 @@
                              [:KiinteistonMaaritys]
                              [:Tilusvaihto]})
 
-(def kt-types (let [elems (map #(->> % first name (str "kiito:")) outlier-elem-selector)]
+;; Only those types supported by Facta are included.
+(def kt-types (let [elems (map (comp (partial str "kiito:") name)
+                               [:KiinteistolajinMuutos
+                                :KiinteistojenYhdistaminen
+                                :Lohkominen
+                                :YleisenAlueenLohkominen
+                                :Rasitetoimitus])]
                 (str "typeName=" (ss/join "," elems))))
 
 

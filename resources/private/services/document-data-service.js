@@ -3,7 +3,7 @@ LUPAPISTE.DocumentDataService = function(params) {
 
   var self = this;
   params = params || {};
-  
+
   self.model = ko.observableArray();
   self.applicationId = params.readOnly ? ko.observable() : lupapisteApp.models.application.id;
 
@@ -12,7 +12,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   self.findDocumentById = function(id) {
     return _.find(self.model(), function(doc) {
       return doc.id === id;
-    });    
+    });
   };
 
   function resolveCommandNames(doc, options) {
@@ -118,7 +118,8 @@ LUPAPISTE.DocumentDataService = function(params) {
         indicator({type: "saved"});
         cb(e);
       })
-      .error(function () {
+      .error(function (e) {
+        hub.send("document::validation-result", e.results);
         indicator({type: "err"});
       })
       .fail(function () {

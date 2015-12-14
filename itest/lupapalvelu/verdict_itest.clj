@@ -17,7 +17,7 @@
         email           (last-email) => truthy]
     (:state application) => "submitted"
     (:to email) => (contains (email-for-key pena))
-    (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
+    (:subject email) => "Lupapiste: Paatoskuja 9 - hakemuksen tila muuttunut"
     (get-in email [:body :plain]) => (contains "Hakemus j\u00e4tetty")
     email => (partial contains-application-link? application-id "applicant")
 
@@ -83,7 +83,7 @@
 
           (let [email (last-email)]
             (:to email) => (contains (email-for-key pena))
-            (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
+            (:subject email) => "Lupapiste: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
             email => (partial contains-application-link-with-tab? application-id "verdict" "applicant"))
 
           (upload-attachment sonja (:id application) first-attachment true)
@@ -144,13 +144,13 @@
     (fact "Applicant receives email about verdict (not about comment)"
       (let [email (last-email)]
        (:to email) => (contains (email-for-key mikko))
-       (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
+       (:subject email) => "Lupapiste: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
        email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")))
 
-    (fact "There is one more attachments, see krysp/sample/verdict.xml"
+    (fact "There is one more attachments, see krysp/dev/verdict.xml"
       (-> app-with-verdict :attachments count) => (inc attachment-count))
 
-    (fact "Lupaehdot, see krysp/sample/verdict.xml"
+    (fact "Lupaehdot, see krysp/dev/verdict.xml"
       (-> application :tasks count) => 0
       (-> app-with-verdict :tasks count) => 9)
 
@@ -229,11 +229,13 @@
                   (facts "First decision"
                          (let [d (get-in app [:verdicts 0 :paatokset 0])
                                pk (-> d :poytakirjat first)]
-                           (fact "Date is 10.10.2015" (-> d :paivamaarat :paatosdokumentinPvm) => (coerce/to-long "2015-10-10"))
+                           (fact "Date is 10.10.2015" (-> d :paivamaarat :paatosdokumentinPvm)
+                                 => (coerce/to-long "2015-10-10"))
                            (fact "Poytakirja details"
-                                 (select-keys pk [:paatoksentekija :paatoskoodi :status]) => {:paatoksentekija "Tiina Tilusvaihto"
-                                                                                              :paatoskoodi "Kiinteist\u00f6toimitus"
-                                                                                              :status "43"})
+                                 (select-keys pk [:paatoksentekija :paatoskoodi :status])
+                                 => {:paatoksentekija "Tiina Tilusvaihto"
+                                     :paatoskoodi "Kiinteist\u00f6toimitus"
+                                     :status "43"})
                            (fact "Since there are multiple attachments the poytakirja urlHash is the verdict id"
                                  (:urlHash pk) => verdict-id)
                            (facts "Logo and sample attachments have the poytakirja as target"
@@ -248,11 +250,13 @@
                   (facts "Second decision"
                          (let [d (get-in app [:verdicts 0 :paatokset 1])
                                pk (-> d :poytakirjat first)]
-                           (fact "Date is 11.11.2015" (-> d :paivamaarat :paatosdokumentinPvm) => (coerce/to-long "2015-11-11"))
+                           (fact "Date is 11.11.2015" (-> d :paivamaarat :paatosdokumentinPvm)
+                                 => (coerce/to-long "2015-11-11"))
                            (fact "Poytakirja details"
-                                 (select-keys pk [:paatoksentekija :paatoskoodi :status]) => {:paatoksentekija "Timo Tilusvaihto"
-                                                                                              :paatoskoodi "ei tiedossa"
-                                                                                              :status "42"})
+                                 (select-keys pk [:paatoksentekija :paatoskoodi :status])
+                                 => {:paatoksentekija "Timo Tilusvaihto"
+                                     :paatoskoodi "ei tiedossa"
+                                     :status "42"})
                            (fact "Since there is only one attachment the poytakirja urlHash is the attachment logo2 id"
                                  (:urlHash pk) => (-> (:id logo2)))
                            (fact "Attachment logo2 target"
@@ -266,9 +270,10 @@
                       pk (-> d :poytakirjat first)]
                   (fact "Date is 1.11.2015" (-> d :paivamaarat :paatosdokumentinPvm) => (coerce/to-long "2015-11-01"))
                   (fact "Poytakirja details"
-                        (select-keys pk [:paatoksentekija :paatoskoodi :status]) => {:paatoksentekija "Riku Rasitetoimitus"
-                                                                                     :paatoskoodi "Kiinteist\u00f6rekisterin pit\u00e4j\u00e4n p\u00e4\u00e4t\u00f6s"
-                                                                                     :status "44"})
+                        (select-keys pk [:paatoksentekija :paatoskoodi :status])
+                        => {:paatoksentekija "Riku Rasitetoimitus"
+                            :paatoskoodi "Kiinteist\u00f6rekisterin pit\u00e4j\u00e4n p\u00e4\u00e4t\u00f6s"
+                            :status "44"})
                   (fact "Since there are multiple attachments the poytakirja urlHash is the verdict id"
                         (:urlHash pk) => verdict-id)
                   (facts "Lupapiste and calendar attachments have the poytakirja as target"
@@ -279,8 +284,7 @@
                          (fact "Calendar target"
                                (:target calendar) => {:type "verdict"
                                                    :id verdict-id
-                                                   :urlHash verdict-id})))
-                )
+                                                      :urlHash verdict-id}))))
          (facts "Third verdict"
                 (fact "One decision (paatos)" (count (get-in app [:verdicts 2 :paatokset])) => 1)
                 (let [verdict-id (-> app :verdicts (nth 2) :id)
@@ -288,6 +292,7 @@
                       pk (-> d :poytakirjat first)]
                   (fact "Date is 8.12.2015" (-> d :paivamaarat :paatosdokumentinPvm) => (coerce/to-long "2015-12-08"))
                   (fact "Poytakirja details"
-                        (select-keys pk [:paatoksentekija :paatoskoodi :status]) => {:paatoksentekija "Liisa Lohkominen"
-                                                                                     :paatoskoodi "Kiinteist\u00f6toimitus"
-                                                                                     :status "43"})))))
+                        (select-keys pk [:paatoksentekija :paatoskoodi :status])
+                        => {:paatoksentekija "Liisa Lohkominen"
+                            :paatoskoodi "Kiinteist\u00f6toimitus"
+                            :status "43"})))))

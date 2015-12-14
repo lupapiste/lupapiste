@@ -1,6 +1,8 @@
 *** Settings ***
-Resource  ../../common_resource.robot
+Resource   ../../common_resource.robot
+Library    DateTime
 Variables  ../21_stamping/variables.py
+Variables  ../../common_variables.py
 
 *** Keywords ***
 Create bulletins
@@ -32,7 +34,7 @@ Bulletin list should not have text
 
 Bulletin button should have bulletins left to fetch
   [Arguments]  ${elements}
-  Element text should be  xpath=//span[@data-test-id='bulletins-left']  ${elements}kpl
+  Wait until  Element text should be  xpath=//span[@data-test-id='bulletins-left']  ${elements}kpl
 
 Load more bulletins
   ${initallyBulletinsLeft}=  Get text  //span[@data-test-id='bulletins-left']
@@ -41,9 +43,11 @@ Load more bulletins
 
 Publish bulletin
   Open tab  bulletin
+  ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
+  ${MONTH_FROM_NOW} =    Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
-  Input text with jQuery  input[name="proclamationStartsAt"]  23.11.2015
-  Input text with jQuery  input[name="proclamationEndsAt"]  23.12.2015
+  Input text with jQuery  input[name="proclamationStartsAt"]  ${TODAY_DD_MM_YYYY}
+  Input text with jQuery  input[name="proclamationEndsAt"]  ${MONTH_FROM_NOW}
   Input text with jQuery  textarea[name="proclamationText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
@@ -52,12 +56,15 @@ Create application and publish bulletin
   [Arguments]  ${address}  ${propertyId}
   Create application with state  ${address}  ${propertyId}  lannan-varastointi  sent
   Open tab  bulletin
+  ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
+  ${MONTH_FROM_NOW} =    Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
   Wait until  Element should be visible  //button[@data-test-id='publish-bulletin']
-  Input text with jQuery  input[name="proclamationStartsAt"]  23.11.2015
-  Input text with jQuery  input[name="proclamationEndsAt"]  23.12.2015
+  Input text with jQuery  input[name="proclamationStartsAt"]  ${TODAY_DD_MM_YYYY}
+  Input text with jQuery  input[name="proclamationEndsAt"]  ${MONTH_FROM_NOW}
   Input text with jQuery  textarea[name="proclamationText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
+  Wait until  Element text should be  xpath=//p[@data-test-id='bulletin-state-paragraph']//span[@class='bulletin-state']  Kuulutettavana
 
 Search bulletins by text
   [Arguments]  ${text}
@@ -118,9 +125,12 @@ Bulletin shows as proclaimed and can be moved to verdict given
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Kuulutettavana  Hakemus julkaistaan seuraavaksi tilaan: Päätös annettu
 
 Move bulletin to verdict given
-  Input text with jQuery  input[name="verdictGivenAt"]  23.11.2015
-  Input text with jQuery  input[name="appealPeriodStartsAt"]  23.12.2015
-  Input text with jQuery  input[name="appealPeriodEndsAt"]  23.12.2016
+  ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
+  ${WEEK_FROM_NOW} =     Add time to date  ${CURRENT_DATETIME}  7 days  %d.%m.%Y
+  ${MONTH_FROM_NOW} =     Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
+  Input text with jQuery  input[name="verdictGivenAt"]  ${TODAY_DD_MM_YYYY}
+  Input text with jQuery  input[name="appealPeriodStartsAt"]  ${WEEK_FROM_NOW}
+  Input text with jQuery  input[name="appealPeriodEndsAt"]  ${MONTH_FROM_NOW}
   Input text with jQuery  textarea[name="verdictGivenText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
@@ -130,7 +140,9 @@ Bulletin shows as verdict given and ce be moved to final
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Päätös annettu  Hakemus julkaistaan seuraavaksi tilaan: Lainvoimainen
 
 Move bulletin to final
-  Input text with jQuery  input[name="officialAt"]  23.11.2016
+  ${MONTH_FROM_NOW} =  Add time to date  ${CURRENT_DATETIME}  30 days
+  ${OFFICIAL_DATE} =   Add time to date  ${MONTH_FROM_NOW}  1 days  %d.%m.%Y
+  Input text with jQuery  input[name="officialAt"]  ${OFFICIAL_DATE}
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
 
