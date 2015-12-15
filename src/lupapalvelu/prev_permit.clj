@@ -97,7 +97,7 @@
                                             :y (get-in applicant [:yritys :liikeJaYhteisotunnus])
                                             :email applicant-email
                                             :phone (get-in applicant [:yritys :puhelin])
-                                            :adress1 (get-in postiosoite [:osoitenimi :teksti])
+                                            :address1 (get-in postiosoite [:osoitenimi :teksti])
                                             :zip (get-in postiosoite [:postinumero])
                                             :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
