@@ -3,15 +3,7 @@
             [midje.util :refer [testable-privates]]
             [sade.schema-generators :as ssg]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.statement :refer [Statement]]))
-
-(testable-privates lupapalvelu.statement 
-                   possible-statement-statuses
-                   give-statement
-                   update-draft
-                   reply-statement
-                   update-reply-draft
-                   request-for-reply)
+            [lupapalvelu.statement :refer :all]))
 
 (let [test-app-R  {:municipality 753 :permitType "R"}
       test-app-P  {:municipality 753 :permitType "P"}
@@ -107,6 +99,7 @@
   (fact "update-reply-draft"
     (-> (ssg/generate Statement)
         (assoc :modify-id "mod1" :editor-id "editor1" :state :announced :text "statement text")
+        (assoc-in [:reply :saateText] "saate")
         (dissoc :modified)
         (update-reply-draft "reply text" true "mod2" "mod1" "editor2"))
     => (contains #{[:text "statement text"] 
@@ -116,23 +109,28 @@
                    [:modified anything]
                    [:reply {:editor-id "editor2"
                             :nothing-to-add true
-                            :text "reply text"}]}))
+                            :text "reply text"
+                            :saateText "saate"}]}))
 
   (fact "update-reply-draft - nil values"
     (-> (ssg/generate Statement)
         (assoc :modify-id "mod1")
+        (assoc-in [:reply :saateText] "saate")
         (update-reply-draft nil nil "mod2" "mod1" "editor2"))
     => (contains #{[:reply {:editor-id "editor2"
-                            :nothing-to-add false}]}))
+                            :nothing-to-add false
+                            :saateText "saate"}]}))
 
   (fact "reply-statement"
     (-> (ssg/generate Statement)
         (assoc :modify-id "mod1" :state :announced)
+        (assoc-in [:reply :saateText] "saate")
         (reply-statement "reply text" false "mod2" "mod1" "editor2"))
     => (contains #{[:state :replied]
                    [:reply {:editor-id "editor2"
                             :nothing-to-add false
-                            :text "reply text"}]}))
+                            :text "reply text"
+                            :saateText "saate"}]}))
 
   (fact "request for reply"
     (-> (ssg/generate Statement)
