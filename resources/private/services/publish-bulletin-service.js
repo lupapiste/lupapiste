@@ -85,27 +85,40 @@ LUPAPISTE.PublishBulletinService = function() {
   // bulletin comment pagination
   var skip = 0;
   var limit = 5;
-  var versionId = undefined;
-  var asc = false;
+  var previousVersionId = undefined;
+  var previousAsc = false;
+  var ajaxRunning = false;
 
-  hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
-    if (event.initialQuery || event.versionId !== versionId || event.asc !== asc) {
-      skip = 0;
-      versionId = event.versionId;
-      self.comments([]);
+  var fetchBulletinComments = _.debounce(function(bulletinId, versionId, asc) {
+    // ajax is already running
+    if (ajaxRunning) {
+      return;
     }
-    ajax.query("bulletin-comments", {bulletinId: event.bulletinId,
-                                     versionId: event.versionId,
+    ajaxRunning = true;
+    ajax.query("bulletin-comments", {bulletinId: bulletinId,
+                                     versionId: versionId,
                                      skip: skip,
                                      limit: limit,
-                                     asc: event.asc})
+                                     asc: asc})
       .success(function(res) {
         self.comments(self.comments().concat(res.comments));
         self.commentsLeft(res.commentsLeft);
         self.totalComments(res.totalComments);
         skip += limit;
-        asc = event.asc;
+        previousAsc = asc;
+      })
+      .complete(function() {
+        ajaxRunning = false;
       })
       .call();
+  }, 100);
+
+  hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
+    if (event.initialQuery || event.versionId !== previousVersionId || event.asc !== previousAsc) {
+      skip = 0;
+      previousVersionId = event.versionId;
+      self.comments([]);
+    }
+    fetchBulletinComments(event.bulletinId, event.versionId, event.asc);
   });
 };
