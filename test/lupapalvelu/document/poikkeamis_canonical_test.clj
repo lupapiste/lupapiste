@@ -7,6 +7,7 @@
             [lupapalvelu.domain :as domain]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [sade.env :as env]
             [sade.core :refer :all]))
 
 
@@ -212,7 +213,7 @@
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title poikkari-hakemus)
-        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => "lupapiste@solita.fi"
+        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => (env/value :technical-contact)
         tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
         kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality poikkari-hakemus)
 
@@ -387,7 +388,7 @@
         Popast (:Popast canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Popast) => truthy
         aineistonnimi (:aineistonnimi toimituksenTiedot) => (:title suunnitelutarveratkaisu)
-        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => "lupapiste@solita.fi"
+        aineistotoimittaja (:aineistotoimittaja toimituksenTiedot) => (env/value :technical-contact)
         tila (:tila toimituksenTiedot) => "keskener\u00e4inen"
         kuntakoodi (:kuntakoodi toimituksenTiedot) => (:municipality suunnitelutarveratkaisu)
 
