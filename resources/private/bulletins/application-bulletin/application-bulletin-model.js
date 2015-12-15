@@ -120,6 +120,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     }
   };
 
+  self.exportToPdf = function() {
+    window.open("/api/raw/bulletin-pdf-export?bulletinId=" + self.bulletinId() + "&lang=" + loc.currentLanguage, "_blank");
+  };
+
   self.canCommentCurrentBulletin = ko.pureComputed(function() {
     return util.getIn(self, ["bulletin", "canComment"]);
   });
