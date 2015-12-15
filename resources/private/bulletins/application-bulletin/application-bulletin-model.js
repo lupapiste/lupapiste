@@ -103,7 +103,6 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   };
 
   self.exportToPdf = function() {
-    console.log("exportToPdf");
     window.open("/api/raw/bulletin-pdf-export?bulletinId=" + self.bulletinId() + "&lang=" + loc.currentLanguage, "_blank");
   };
 
