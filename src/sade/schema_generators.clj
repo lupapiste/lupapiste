@@ -22,7 +22,7 @@
 
 (defn generators
   ([] (generators {}))
-  ([custom-generators] (merge (create-dynamic-schema-generators) 
+  ([custom-generators] (merge (create-dynamic-schema-generators)
                               @static-schema-generators
                               custom-generators)))
 
@@ -37,6 +37,8 @@
   ([schema leaf-generators wrappers] (sg/generator schema (generators leaf-generators) wrappers)))
 
 ;; Custom static schema generators
+
+(def single-hex (gen/elements (concat (map str (range 10)) (map (comp str char) (range (int \a) (inc (int \f)))))))
 
 (def single-number-int (gen/elements (range 10)))
 
@@ -56,13 +58,13 @@
 
 (register-generator ssc/Timestamp timestamp)
 
-(def finnish-zipcode (gen/fmap clojure.string/join 
+(def finnish-zipcode (gen/fmap clojure.string/join
                                (gen/vector single-number-int 5)))
 
 (register-generator ssc/Zipcode finnish-zipcode)
 
-(def finnish-y-parts (gen/such-that (fn [[_ cn]] (not= 10 cn)) 
-                                     (gen/fmap (fn [v] 
+(def finnish-y-parts (gen/such-that (fn [[_ cn]] (not= 10 cn))
+                                     (gen/fmap (fn [v]
                                                  (let [cn (mod (apply + (map * [7 9 10 5 8 4 2] v)) 11)
                                                        cn (if (zero? cn) 0 (- 11 cn))]
                                                    [(apply str v) cn]))
@@ -83,10 +85,15 @@
 
 (register-generator ssc/Hetu hetu)
 
+(def object-id (gen/fmap clojure.string/join
+                         (gen/vector single-hex 24)))
+
+(register-generator ssc/ObjectIdStr object-id)
+
 ;; Dynamic schema generator constructors
 
 (defn fixed-length-string [len]
-  (gen/fmap clojure.string/join 
+  (gen/fmap clojure.string/join
             (gen/vector gen/char len)))
 
 (register-generator ssc/fixed-length-string fixed-length-string)
