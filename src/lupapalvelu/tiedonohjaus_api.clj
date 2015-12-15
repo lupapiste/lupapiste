@@ -1,6 +1,6 @@
 (ns lupapalvelu.tiedonohjaus-api
   (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters] :as action]
-            [sade.core :refer [ok fail]]
+            [sade.core :refer [ok fail fail!]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
             [lupapalvelu.states :as states]
@@ -91,25 +91,28 @@
         replacement-metadata (select-keys old-metadata disallowed-keys)]
     (merge new-metadata replacement-metadata)))
 
+(defn- sanitize-metadata [m]
+  (try
+    (tms/sanitize-metadata m)
+    (catch Throwable t
+      (fail! "error.invalid.metadata"))))
+
 (defn- update-document-metadata [document metadata user-roles]
   (let [old-metadata (tms/coerce-metadata-to-schema (:metadata document) [])
         metadata (->> (tms/coerce-metadata-to-schema metadata [])
                       (revert-unauthorized-modifications user-roles old-metadata)
                       (#(assoc % :tila (or (:tila old-metadata) :luonnos)))
-                      (tms/sanitize-metadata))]
+                      sanitize-metadata)]
     (assoc document :metadata metadata)))
 
 (defn- update-application-child-metadata! [{:keys [application created user] :as command} type id metadata]
-  (try
-    (if-let [child (first (filter #(= (:id %) id) (type application)))]
-      (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-            updated-child (update-document-metadata child metadata user-roles)
-            updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
-        (action/update-application command {$set {:modified created type updated-children}}))
-      (fail "error.child.id"))
-    (catch RuntimeException e ; FIXME use (fail! :error.invalid.metadata) where the validation takes place
-      (timbre/error e)
-      (fail "error.invalid.metadata"))))
+  (if-let [child (first (filter #(= (:id %) id) (type application)))]
+    (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
+          updated-child (update-document-metadata child metadata user-roles)
+          updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
+      (action/update-application command {$set {:modified created type updated-children}})
+      (ok))
+    (fail "error.child.id")))
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
@@ -129,15 +132,12 @@
    :states states/all-but-draft-or-terminal
    :feature :tiedonohjaus}
   [{:keys [application created user] :as command}]
-  (try
-    (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-          processed-metadata (->> (update-document-metadata application metadata user-roles)
-                                  (:metadata))]
-      (action/update-application command {$set {:modified created
-                                                :metadata processed-metadata}}))
-    (catch RuntimeException e ; FIXME use (fail! :error.invalid.metadata) where the validation takes place
-      (timbre/error e)
-      (fail "error.invalid.metadata"))))
+  (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
+        processed-metadata (->> (update-document-metadata application metadata user-roles)
+                                (:metadata))]
+    (action/update-application command {$set {:modified created
+                                              :metadata processed-metadata}})
+    (ok)))
 
 (defquery case-file-data
   {:parameters [:id]
