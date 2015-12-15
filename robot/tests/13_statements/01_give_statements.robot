@@ -90,9 +90,7 @@ Sonja adds five statement persons to application
   Statement count is  5
 
 Sonja can delete statement
-  Open statement  3
-  Wait Until  Title Should Be  ${appname} - Lupapiste
-  Wait and click  xpath=//*[@data-test-id='delete-statement']
+  Wait and Click  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Statement count is  4
   Wait Until  Title Should Be  ${appname} - Lupapiste
@@ -107,24 +105,25 @@ Sonja can comment on Ronjas statement
   Wait until  Comment count is  1
   [Teardown]  Return from statement
 
-Sonja can give statement to own request
+Sonja types in draft
   Open statement  2
-  Wait until  Select From List By Value  statement-type-select  puoltaa
+  Wait Until  Element should be enabled  statement-text
   Input text  statement-text  salibandy on the rocks.
+  Sleep  2.5
+  Reload Page
+  Wait Until  Text area should contain  statement-text  salibandy on the rocks.
+
+Sonja can give statement to own request
+  Wait until  Select From List By Value  statement-type-select  puoltaa
   Wait and click  statement-submit
 
 Comment is added
   Open statement  2
   Wait until  Comment count is  1
 
-Sonja can regive statement to own statement
-  Select From List By Value  statement-type-select  puoltaa
-  Input text  statement-text  salibandy on the rocks.
-  Wait and click  statement-submit
-
-Another comment is added
-  Open statement  2
-  Wait until  Comment count is  2
+Sonja cannot regive statement to own statement
+  Statement is disabled
+  Wait until  Element should not be visible  statement-submit
   [Teardown]  logout
 
 Veikko can see statements as he is being requested a statement to the application
@@ -132,8 +131,8 @@ Veikko can see statements as he is being requested a statement to the applicatio
   Open application  ${appname}  753-416-25-22
 
 Statement giver sees comments
-  # 1+2 statement comments, 2 auto generated attachments
-  Comment count is  5
+  # 1+1 statement comments, 1 auto generated attachment
+  Comment count is  3
 
 Statement can export application as PDF
   Element Should Be Visible  xpath=//button[@data-test-id="application-pdf-btn"]

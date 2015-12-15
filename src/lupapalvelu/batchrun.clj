@@ -98,7 +98,8 @@
 
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
-  (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
+  (let [timestamp-now (now)
+        timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                                    :given nil
@@ -107,16 +108,20 @@
                                                                         {:reminder-sent (older-than timestamp-1-week-ago)}]}}})]
     (doseq [app apps
             statement (:statements app)
-            :let [requested (:requested statement)]
+            :let [requested (:requested statement)
+                  due-date (:dueDate statement)
+                  reminder-sent (:reminder-sent statement)]
             :when (and
                     (nil? (:given statement))
-                    (< requested timestamp-1-week-ago))]
+                    (< requested timestamp-1-week-ago)
+                    (or (nil? reminder-sent) (< reminder-sent timestamp-1-week-ago))
+                    (or (nil? due-date) (> due-date timestamp-now)))]
       (notifications/notify! :reminder-request-statement {:application app
                                                           :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
                                                           :data {:created-date (util/to-local-date requested)}})
       (update-application (application->command app)
         {:statements {$elemMatch {:id (:id statement)}}}
-        {$set {:statements.$.reminder-sent (now)}}))))
+        {$set {:statements.$.reminder-sent timestamp-now}}))))
 
 
 

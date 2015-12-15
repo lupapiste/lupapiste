@@ -10,7 +10,7 @@
             [slingshot.slingshot :refer [throw+]]
             [noir.response :as resp]
             [sade.env :as env]
-            [sade.util :refer [max-length-string]]
+            [sade.schemas :refer [max-length-string]]
             [sade.core :refer [ok]]
             [sade.crypt :as crypt]
             [sade.validators :refer [valid-email? valid-hetu?]]

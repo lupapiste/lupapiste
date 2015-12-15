@@ -113,7 +113,7 @@
 
      (fact "New user got email"
        (:to email) => new-user-email
-       (:subject email) => "Lupapiste.fi: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
+       (:subject email) => "Lupapiste: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
 
      (fact "Email has body"
        body => map?
@@ -151,7 +151,7 @@
 
          (fact "New user got email"
            (:to email) => new-user-email
-           (:subject email) => "Lupapiste.fi: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
+           (:subject email) => "Lupapiste: K\u00e4ytt\u00e4j\u00e4tunnuksen aktivointi")
 
          (fact "Can NOT log in"
            (login new-user-email new-user-pw) => fail?)

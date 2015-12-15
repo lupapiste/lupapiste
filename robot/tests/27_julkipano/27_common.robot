@@ -34,7 +34,7 @@ Bulletin list should not have text
 
 Bulletin button should have bulletins left to fetch
   [Arguments]  ${elements}
-  Element text should be  xpath=//span[@data-test-id='bulletins-left']  ${elements}kpl
+  Wait until  Element text should be  xpath=//span[@data-test-id='bulletins-left']  ${elements} kpl
 
 Load more bulletins
   ${initallyBulletinsLeft}=  Get text  //span[@data-test-id='bulletins-left']
@@ -64,6 +64,7 @@ Create application and publish bulletin
   Input text with jQuery  textarea[name="proclamationText"]  foobar
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
   Click by test id  publish-bulletin
+  Wait until  Element text should be  xpath=//p[@data-test-id='bulletin-state-paragraph']//span[@class='bulletin-state']  Kuulutettavana
 
 Search bulletins by text
   [Arguments]  ${text}
@@ -139,7 +140,7 @@ Bulletin shows as verdict given and ce be moved to final
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Päätös annettu  Hakemus julkaistaan seuraavaksi tilaan: Lainvoimainen
 
 Move bulletin to final
-  ${MONTH_FROM_NOW} =  Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
+  ${MONTH_FROM_NOW} =  Add time to date  ${CURRENT_DATETIME}  30 days
   ${OFFICIAL_DATE} =   Add time to date  ${MONTH_FROM_NOW}  1 days  %d.%m.%Y
   Input text with jQuery  input[name="officialAt"]  ${OFFICIAL_DATE}
   Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']

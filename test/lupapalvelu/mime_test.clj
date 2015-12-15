@@ -41,7 +41,7 @@
   (fact (allowed-file? (clojure.java.io/file "dev-resources/sipoon_alueet.zip")) => truthy)
   (fact (allowed-file? (clojure.java.io/file "dev-resources/test-pdf.pdf")) => truthy)
 
-  (fact (allowed-file? (clojure.java.io/file "dev-resources/krysp/no-verdicts.xml")) => falsey))
+  (fact (allowed-file? (clojure.java.io/file "dev-resources/krysp/verdict-r-no-verdicts.xml")) => falsey))
 
 (facts "sanitize-filename"
   (sanitize-filename nil)                 => nil

@@ -12,6 +12,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
+            [sade.schemas :as ssc]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
@@ -35,15 +36,15 @@
    :title     sc/Str
    :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
               :asc    sc/Bool}
-   :filter   {(sc/optional-key :handlers) (sc/pred vector? "Handler filter should have ids in a vector")
-              (sc/optional-key :tags) (sc/pred vector? "Tag filter should have ids in a vector")
-              (sc/optional-key :operations) (sc/pred vector? "Op filter should have ids in a vector")
-              (sc/optional-key :organizations) (sc/pred vector? "Org filter should have ids in a vector")
-              (sc/optional-key :areas) (sc/pred vector? "Area filter should have ids in a vector")}})
+   :filter   {(sc/optional-key :handlers)      [sc/Str]
+              (sc/optional-key :tags)          [sc/Str]
+              (sc/optional-key :operations)    [sc/Str]
+              (sc/optional-key :organizations) [sc/Str]
+              (sc/optional-key :areas)         [sc/Str]}})
 
 (def User {:id                                    sc/Str
-           :firstName                             (util/max-length-string 255)
-           :lastName                              (util/max-length-string 255)
+           :firstName                             (ssc/max-length-string 255)
+           :lastName                              (ssc/max-length-string 255)
            :role                                  (sc/enum "applicant"
                                                            "authority"
                                                            "oirAuthority"
@@ -52,48 +53,34 @@
                                                            "dummy"
                                                            "rest-api"
                                                            "trusted-etl")
-           :email                                 (sc/both
-                                                    (sc/pred v/valid-email? "Not valid email")
-                                                    (util/max-length-string 255))
-           :username                              (util/max-length-string 255)
+           :email                                 ssc/Email
+           :username                              (ssc/max-length-string 255)
            :enabled                               sc/Bool
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
-           (sc/optional-key :orgAuthz)            {sc/Keyword (sc/pred vector? "OrgAuthz must be vector")}
-           (sc/optional-key :personId)            (sc/maybe (sc/pred v/valid-hetu? "Not valid hetu"))
-           (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
-           (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
-           (sc/optional-key :zip)                 (sc/either
-                                                    (sc/pred v/finnish-zip? "Not a valid zip code")
-                                                    (sc/pred ss/blank?))
-           (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
+           (sc/optional-key :orgAuthz)            {sc/Keyword [sc/Str]}
+           (sc/optional-key :personId)            (sc/maybe ssc/Hetu)
+           (sc/optional-key :street)              (sc/maybe (ssc/max-length-string 255))
+           (sc/optional-key :city)                (sc/maybe (ssc/max-length-string 255))
+           (sc/optional-key :zip)                 (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
+           (sc/optional-key :phone)               (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
-           (sc/optional-key :degree)              (sc/either
-                                                    (apply sc/enum (conj
-                                                                     (map :name (:body schemas/koulutusvalinta))
-                                                                     "other"))
-                                                    (sc/pred ss/blank?))
-           (sc/optional-key :graduatingYear)      (sc/either
-                                                    (sc/both (util/min-length-string 4) (util/max-length-string 4))
-                                                    (sc/pred ss/blank?))
-           (sc/optional-key :fise)                (util/max-length-string 255)
-           (sc/optional-key :fiseKelpoisuus)      (sc/either
-                                                    (apply sc/enum (map :name schemas/fise-kelpoisuus-lajit))
-                                                    (sc/pred ss/blank?))
-           (sc/optional-key :companyName)         (util/max-length-string 255)
-           (sc/optional-key :companyId)           (sc/either
-                                                    (sc/pred v/finnish-y? "Not valid Y code")
-                                                    (sc/pred ss/blank?))
+           (sc/optional-key :degree)              (sc/maybe (apply sc/enum "" "other" (map :name (:body schemas/koulutusvalinta))))
+           (sc/optional-key :graduatingYear)      (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
+           (sc/optional-key :fise)                (ssc/max-length-string 255)
+           (sc/optional-key :fiseKelpoisuus)      (sc/maybe (apply sc/enum "" (map :name schemas/fise-kelpoisuus-lajit)))
+           (sc/optional-key :companyName)         (ssc/max-length-string 255)
+           (sc/optional-key :companyId)           (sc/if ss/blank? ssc/BlankStr ssc/FinnishY)
            (sc/optional-key :allowDirectMarketing) sc/Bool
            (sc/optional-key :attachments)         [{:attachment-type  {:type-group sc/Str, :type-id sc/Str}
                                                     :attachment-id sc/Str
                                                     :file-name  sc/Str
                                                     :content-type  sc/Str
                                                     :size  sc/Num
-                                                    :created sc/Num}]
+                                                    :created ssc/Timestamp}]
            (sc/optional-key :company)             {:id sc/Str :role sc/Str}
            (sc/optional-key :partnerApplications) {(sc/optional-key :rakentajafi) {:id sc/Str
-                                                                                   :created sc/Int
+                                                                                   :created ssc/Timestamp
                                                                                    :origin sc/Bool}}
            (sc/optional-key :notification)        {(sc/optional-key :messageI18nkey) sc/Str
                                                    (sc/optional-key :titleI18nkey)   sc/Str
@@ -104,32 +91,20 @@
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]})
 
-(def RegisterUser {:email                            (sc/both
-                                                       (sc/pred v/valid-email? "Not valid email")
-                                                       (util/max-length-string 255))
-                   :street                           (sc/maybe (util/max-length-string 255))
-                   :city                             (sc/maybe (util/max-length-string 255))
-                   :zip                              (sc/either
-                                                       (sc/pred v/finnish-zip? "Not a valid zip code")
-                                                       (sc/pred ss/blank?))
-                   :phone                            (sc/maybe (util/max-length-string 255))
+(def RegisterUser {:email                            ssc/Email
+                   :street                           (sc/maybe (ssc/max-length-string 255))
+                   :city                             (sc/maybe (ssc/max-length-string 255))
+                   :zip                              (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
+                   :phone                            (sc/maybe (ssc/max-length-string 255))
                    (sc/optional-key :architect)      sc/Bool
-                   (sc/optional-key :degree)         (sc/either
-                                                       (apply sc/enum (conj
-                                                                        (map :name (:body schemas/koulutusvalinta))
-                                                                        "other"))
-                                                       (sc/pred ss/blank?))
-                   (sc/optional-key :graduatingYear) (sc/either
-                                                       (sc/both (util/min-length-string 4) (util/max-length-string 4))
-                                                       (sc/pred ss/blank?))
-                   (sc/optional-key :fise)           (util/max-length-string 255)
-                   (sc/optional-key :fiseKelpoisuus) (sc/either
-                                                       (apply sc/enum (map :name schemas/fise-kelpoisuus-lajit))
-                                                       (sc/pred ss/blank?))
+                   (sc/optional-key :degree)         (sc/maybe (apply sc/enum "" "other" (map :name (:body schemas/koulutusvalinta))))
+                   (sc/optional-key :graduatingYear) (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
+                   (sc/optional-key :fise)           (ssc/max-length-string 255)
+                   (sc/optional-key :fiseKelpoisuus) (sc/maybe (apply sc/enum "" (map :name schemas/fise-kelpoisuus-lajit)))
                    :allowDirectMarketing             sc/Bool
                    :rakentajafi                      sc/Bool
-                   :stamp                            (sc/maybe (util/max-length-string 255))
-                   :password                         (util/max-length-string 255)})
+                   :stamp                            (sc/maybe (ssc/max-length-string 255))
+                   :password                         (ssc/max-length-string 255)})
 ;;
 ;; ==============================================================================
 ;; Utils:

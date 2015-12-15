@@ -84,7 +84,7 @@
   (fact (pysyva-rakennustunnus "1234567892") => "1234567892"))
 
 (facts "KRYSP verdict"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict.xml"))
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -168,7 +168,7 @@
             poytakirjat2 => sequential?))))))
 
 (facts "KRYSP verdict 2.1.8"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8.xml"))
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -189,15 +189,8 @@
         (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
         (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
-;;
-;; HUOM: Teklalta saadussa QA:n testisanomassa on vaara encoding ("iso-8859-1").
-;;       Kyseinen file on tallessa nimella "verdict - 2.1.8 - Tekla (iso-8859-1).xml", jolla voi testailla.
-;;       (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml (iso-8859-1)") :encoding "iso-8859-1")
-;;       Readerkaan ei osaa tata lukea, vaan hukkaa skandit.
-;;       Tuotannossa naytti 26.6.2015 viela tulevan "utf-8-enkoodauksella", jota me tuemme.
-;;
-(facts "KRYSP verdict 2.1.8 - Tekla.xml"
- (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))
+(facts "KRYSP verdict 2.1.8"
+ (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8-foremen.xml"))
        cases (->verdicts xml ->standard-verdicts)]
 
    (fact "xml is parsed" cases => truthy)
@@ -207,16 +200,16 @@
          lupamaaraykset (:lupamaaraykset verdict)
          vaaditut-erityissuunnitelmat (:vaaditutErityissuunnitelmat lupamaaraykset)]
 
-     ;; In xml message, Tekla provides just one vaadittuErityissuunnitelma element
+     ;; In xml message, just one vaadittuErityissuunnitelma element is provided
      ;; where there are multiple "vaadittuErityissuunnitelma"s combined as one string, separated by line break.
      ;; Testing here that the reader divides those as different elements properly.
-     (fact "vaaditut erityissuunnitelmat Tekla style"
+     (fact "vaaditut erityissuunnitelmat style"
          vaaditut-erityissuunnitelmat => sequential?
          vaaditut-erityissuunnitelmat => (just ["Rakennesuunnitelmat" "Vesi- ja viem\u00e4risuunnitelmat" "Ilmanvaihtosuunnitelmat"] :in-any-order)))))
 
 
 (facts "KRYSP verdict 2.2.0"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.2.0.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.2.0.xml"))
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -239,7 +232,7 @@
         (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
 (facts "CGI sample verdict"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
@@ -284,12 +277,12 @@
           (:paatospvm pk1) => (to-timestamp "2013-09-03")
           (:pykala pk1) => 12
           (:kuvaus liite) => "P\u00e4\u00e4t\u00f6sote"
-          (:linkkiliitteeseen liite) => "http://212.213.116.162:80/186/arkisto/2013/PAATOSOTE_13-0185-R_20130903152736270.rtf"
+          (:linkkiliitteeseen liite) => "http://localhost:8000/dev/sample-attachment.txt"
           (:muokkausHetki liite) => (to-timestamp "2013-09-03T15:27:46")
           (:tyyppi liite) => "P\u00e4\u00e4t\u00f6sote")))))
 
 (facts "Tekla sample verdict"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/teklap.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-buildings.xml"))
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -323,7 +316,7 @@
       )))
 
 (facts "case not found"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/notfound.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-not-found.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)
@@ -335,7 +328,7 @@
     (count cases) => 0))
 
 (facts "no verdicts"
-  (let [xml (xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
@@ -344,7 +337,7 @@
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
 (facts "KRYSP yhteiset 2.1.0"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/building-2.1.2.xml"))
         buildings (->buildings-summary xml)
         building1-id (:buildingId (first buildings))
         building2-id (:buildingId (last buildings))
@@ -368,16 +361,16 @@
             owner2 (:1 omistajat1)]
         (get-in owner1 [:_selected]) => "henkilo"
         (get-in owner1 [:henkilo :henkilotiedot :etunimi]) => "Antero"
-        (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
+        (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
         (get-in owner1 [:henkilo :henkilotiedot :turvakieltoKytkin]) => true
-        (get-in owner1 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 1"
+        (get-in owner1 [:henkilo :osoite :katu]) => "Krysp-testin tie 1"
         (get-in owner1 [:henkilo :osoite :postinumero]) => "06500"
         (get-in owner1 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
 
         (get-in owner1 [:_selected]) => "henkilo"
         (get-in owner2 [:henkilo :henkilotiedot :etunimi]) => "Pauliina"
-        (get-in owner2 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
-        (get-in owner2 [:henkilo :osoite :katu]) => "Uuden-Saksalan tie 1"
+        (get-in owner2 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
+        (get-in owner2 [:henkilo :osoite :katu]) => "Krysp-testin tie 1"
         (get-in owner2 [:henkilo :osoite :postinumero]) => "06500"
         (get-in owner2 [:henkilo :osoite :postitoimipaikannimi]) => "PORVOO"
         (get-in owner2 [:henkilo :henkilotiedot :turvakieltoKytkin]) => nil))
@@ -393,7 +386,7 @@
       (let [owner1 (:0 omistajat2)
             owner2 (:1 omistajat2)]
         (get-in owner1 [:_selected]) => "henkilo"
-        (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Pekkala"
+        (get-in owner1 [:henkilo :henkilotiedot :sukunimi]) => "Testaaja"
         (get-in owner1 [:omistajalaji]) => nil
         (get-in owner1 [:muu-omistajalaji]) => ", wut?"
 
@@ -401,17 +394,17 @@
         (get-in owner2 [:omistajalaji]) => "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"
         (get-in owner2 [:muu-omistajalaji]) => nil
         (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :etunimi]) => "Paavo"
-        (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :sukunimi]) => "Pekkala"
+        (get-in owner2 [:yritys :yhteyshenkilo :henkilotiedot :sukunimi]) => "Testaaja"
         (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :puhelin]) => "01"
         (get-in owner2 [:yritys :yhteyshenkilo :yhteystiedot :email]) => "paavo@example.com"
-        (get-in owner2 [:yritys :yritysnimi]) => "Pekkalan Putki Oy"
+        (get-in owner2 [:yritys :yritysnimi]) => "Testaajan Putki Oyj"
         (get-in owner2 [:yritys :liikeJaYhteisoTunnus]) => "123"
-        (get-in owner2 [:yritys :osoite :katu]) => "Uuden-Saksalan tie 1\u20132 d\u2013e A 1"
+        (get-in owner2 [:yritys :osoite :katu]) => "Krysp-testin tie 1\u20132 d\u2013e A 1"
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
 
 (facts "KRYSP rakval 2.2.0 ->rakennuksen-tiedot"
-  (let [xml      (xml/parse (slurp "resources/krysp/sample/building_220.xml"))
+  (let [xml      (xml/parse (slurp "dev-resources/krysp/building-2.2.0.xml"))
         building (->> xml ->buildings-summary first :buildingId (->rakennuksen-tiedot xml))]
     (fact "mitat - kerrosala" (get-in building [:mitat :kerrosala]) => "1785")
     (fact "mitat - rakennusoikeudellinenKerrosala" (get-in building [:mitat :rakennusoikeudellinenKerrosala]) => "1780")
@@ -420,7 +413,7 @@
 ;; YA verdict
 
 (facts "KRYSP ya-verdict"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-ya.xml"))
         cases (->verdicts xml ->simple-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -452,13 +445,13 @@
         (let [pk1   (first poytakirjat)
               liite (:liite pk1)]
           (:kuvaus liite) => "liite"
-          (:linkkiliitteeseen liite) => "http://demokuopio.vianova.fi/Lupapiste/GetFile.aspx?GET_FILE=1106"
+          (:linkkiliitteeseen liite) => "http://localhost:8000/dev/sample-attachment.txt"
           (:muokkausHetki liite) => (to-timestamp "2014-01-29T13:58:15")
           (:tyyppi liite) => "Muu liite")))))
 
 (facts "Ymparisto verdicts"
   (doseq [permit-type ["yl" "mal" "vvvl"]]
-    (let [xml (xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
+    (let [xml (xml/parse (slurp (str "resources/krysp/dev/verdict-" permit-type ".xml")))
           cases (->verdicts xml ->simple-verdicts)]
 
       (fact "xml is parsed" cases => truthy)
@@ -496,7 +489,7 @@
           (:tyyppi liite) => "Muu liite"))))))
 
 (facts "Buildings from verdict message"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-no-attachments.xml"))
         buildings (->buildings xml)
         building1 (first buildings)]
     (count buildings) => 1
@@ -506,7 +499,7 @@
     (:valtakunnallinenNumero building1) => "1234567892"))
 
 (facts "Maaraykset from verdict message"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/sito-kajaani-LP-205-2015-00069-paatos-tyhja-maarays.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-empty-maarays-element.xml"))
         verdicts (->verdicts xml ->standard-verdicts)
         paatokset (:paatokset (first verdicts))
         lupamaaraykset (:lupamaaraykset (first paatokset))
@@ -525,7 +518,7 @@
 
 
 (facts* "Testing information parsed from a verdict xml message for application creation"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml"))
         info (get-app-info-from-message xml "14-0241-R 3") => truthy
         {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat]} info]
 
@@ -552,7 +545,7 @@
 
 
 (facts* "Tests for TJ/suunnittelijan verdicts parsing"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8-foremen.xml"))
         osapuoli {:alkamisPvm "2015-07-07"
                   :paattymisPvm "2015-07-10"
                   :sijaistettavaHlo "Pena Panaani"

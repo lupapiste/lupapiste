@@ -16,6 +16,7 @@
             [monger.operators :refer [$set]]
             [sade.core :refer [ok fail ok? fail? now def-] :as core]
             [sade.env :as env]
+            [sade.http :as http]
             [sade.util :as util]
             [sade.property :as p]
             [sade.status :as status]
@@ -56,12 +57,14 @@
      (defpage ~path ~params
        (let [response-data# (do ~@content)
              response-session# (:session response-data#)]
-         (if (contains? response-data# :session)
-           (-> response-data#
-             (dissoc :session)
-             resp/json
-             (assoc :session response-session#))
-           (resp/json response-data#))))))
+         (resp/set-headers
+           http/no-cache-headers
+           (if (contains? response-data# :session)
+             (-> response-data#
+               (dissoc :session)
+               resp/json
+               (assoc :session response-session#))
+             (resp/json response-data#)))))))
 
 (defjson "/system/apis" [] @apis)
 
@@ -345,10 +348,11 @@
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
-  (let [request (request/ring-request)]
-    (if username
-     (execute-command "login" params request) ; Handles form POST (Nessus)
-     (execute-command "login" (from-json request) request))))
+  (let [request (request/ring-request)
+        response (if username
+                   (execute-command "login" params request) ; Handles form POST (Nessus)
+                   (execute-command "login" (from-json request) request))]
+    (select-keys response [:ok :text :session :applicationpage])))
 
 ;; Reset password via saparate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
@@ -585,30 +589,30 @@
     (if-not (s/blank? typeName)
       (let [filter-type-name (-> filter sade.xml/parse (sade.common-reader/all-of [:PropertyIsEqualTo :PropertyName]))
             typeName (if (ss/starts-with typeName "kiito:") "kiito:every-type" typeName)
-            xmls {"rakval:ValmisRakennus"                         "krysp/sample/building.xml"
-                  "rakval:RakennusvalvontaAsia"                   "krysp/sample/verdict.xml"
-                  "ymy:Ymparistolupa"                             "krysp/sample/verdict-yl.xml"
-                  "ymm:MaaAineslupaAsia"                          "krysp/sample/verdict-mal.xml"
-                  "ymv:Vapautus"                                  "krysp/sample/verdict-vvvl.xml"
-                  "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"
-                  "kiito:every-type"                              "krysp/sample/verdict-kt.xml"}
+            xmls {"rakval:ValmisRakennus"                         "krysp/dev/building.xml"
+                  "rakval:RakennusvalvontaAsia"                   "krysp/dev/verdict.xml"
+                  "ymy:Ymparistolupa"                             "krysp/dev/verdict-yl.xml"
+                  "ymm:MaaAineslupaAsia"                          "krysp/dev/verdict-mal.xml"
+                  "ymv:Vapautus"                                  "krysp/dev/verdict-vvvl.xml"
+                  "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/dev/verdict-p.xml"
+                  "kiito:every-type"                              "krysp/dev/verdict-kt.xml"}
             overrides (-> (json/decode overrides)
                           (clojure.walk/keywordize-keys))]
-        ;; Use different sample xml for rakval query with kuntalupatunnus type of filter.
+        ;; Use different xml for rakval query with kuntalupatunnus type of filter.
         (cond
           (and (= "rakval:RakennusvalvontaAsia" typeName)
-               (= "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:kuntalupatunnus" filter-type-name)) (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml")))
+               (= "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:kuntalupatunnus" filter-type-name)) (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml")))
           (not-empty overrides) (resp/content-type "application/xml; charset=utf-8" (override-xml (io/resource (xmls typeName)) overrides))
           :else (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName))))))
       (when (= r "GetCapabilities")
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml"))))))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml"))))))
 
   (defpage [:post "/dev/krysp"] {}
     (let [xml (sade.xml/parse (slurp (:body (request/ring-request))))
           xml-no-ns (sade.common-reader/strip-xml-namespaces xml)
           typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
       (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/yleiset alueet/ya-verdict.xml")))))))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-ya.xml")))))))
 
 (env/in-dev
   (defjson [:any "/dev/spy"] []
@@ -703,5 +707,5 @@
     (let [request (request/ring-request)
           user    (basic-authentication request)]
       (if user
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml")))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml")))
         basic-401))))

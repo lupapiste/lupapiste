@@ -28,17 +28,19 @@
 (def yesterday (- (System/currentTimeMillis) (* 1000 60 60 24)))
 (def today (System/currentTimeMillis))
 
-(defn- dummy-statement [id name status text saateText]
-  {:id id
-   :requested 1444802294666
-   :given 1444902294666
-   :status status
-   :text text
-   :dueDate 1449439200000
-   :saateText saateText
-   :person {:name name}
-;   :attachments [{:target {:type "statement"}} {:target {:type "something else"}}]
-   })
+(defn- dummy-statement [id name status text saateText nothing-to-add reply-text]
+  (cond-> {:id id
+           :requested 1444802294666
+           :given 1444902294666
+           :status status
+           :text text
+           :dueDate 1449439200000
+           :saateText saateText
+           :person {:name name}
+       ;   :attachments [{:target {:type "statement"}} {:target {:type "something else"}}]
+           }
+    (not (nil? nothing-to-add)) (assoc-in [:reply :nothing-to-add] nothing-to-add)
+    (not (nil? reply-text)) (assoc-in [:reply :text] reply-text)))
 
 (defn- dummy-neighbour [id name status message]
   {:propertyId id
@@ -61,7 +63,10 @@
              :vetuma {:firstName "TESTAA" :lastName "PORTAALIA"}
              :created 1444902294666}]})
 
-
+(defn- dummy-history [state ts user]
+  {:state state
+   :ts ts
+   :user nil})
 
 (facts "Generate PDF file from application with all documents"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
@@ -91,8 +96,8 @@
 (facts "Generate PDF from application statements"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
              dummy-docs (map test-util/dummy-doc schema-names)
-             dummy-statements [(dummy-statement "2" "Matti Malli" "puollettu" "Lorelei ipsum" "Saatteen sisalto")
-                               (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero." "Saatteen sisalto")]
+             dummy-statements [(dummy-statement "2" "Matti Malli" "puollettu" "Lorelei ipsum" "Saatteen sisalto" false "dolor sit amet")
+                               (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero." "Saatteen sisalto" nil nil)]
              application (merge domain/application-skeleton {:id "LP-1"
                                                              :address "Korpikuusen kannon alla 1 "
                                                              :documents dummy-docs
@@ -108,13 +113,14 @@
                     (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
                           rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
                       (fact "PDF data rows "
-                        (count rows) => 34
+                        (count rows) => 36
                         (nth rows 22) => "14.10.2015"
                         (nth rows 24) => "Matti Malli"
                         (nth rows 26) => "15.10.2015"
                         (nth rows 28) => "puollettu"
                         (nth rows 30) => "Lorelei ipsum"
-                        (nth rows 32) => "07.12.2015"))
+                        (nth rows 32) => "07.12.2015"
+                        (nth rows 34) => "dolor sit amet"))
                     (.delete file))))))
 
 (facts "Generate PDF from application neigbors - signed"
@@ -144,3 +150,35 @@
                       (fact "Pdf data message" (nth rows 28) => "SigloXX")
                       (fact "Pdf data signature" (nth rows 30) => "TESTAA PORTAALIA, 15.10.2015"))
                     (.delete file))))))
+
+(facts "Generate PDF from history - signed"
+       (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
+             dummy-docs (map test-util/dummy-doc schema-names)
+             dummy-attachments [{:type {:foo :bar}
+                                 :versions [{:version 1
+                                             :created 200}
+                                            {:version 2
+                                             :created 500}]}
+                                {:type {:foo :qaz}
+                                 :versions [{:version 1
+                                             :created 300}]}]
+             dummy-history     [{:state "draft" :ts 100}
+                                {:state "open" :ts 250}]
+             application (merge domain/application-skeleton {:id "LP-1"
+                                                             :address "Korpikuusen kannon alla 1 "
+                                                             :attachments dummy-attachments
+                                                             :history dummy-history
+                                                             :created 100
+                                                             :municipality "444"
+                                                             :state "draft"})]
+         (doseq [lang i18n/languages]
+           (facts {:midje/description (name lang)}
+                  (let [file (File/createTempFile (str "export-test-history-" (name lang) "-") ".pdf")
+                        fis (FileOutputStream. file)]
+                    (pdf-export/generate-pdf-with-child application :history nil lang fis)
+                    (fact "File exists " (.exists file))
+                    (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
+                          expected-state (if (= lang :fi) "Vastattu" "Besvarad")
+                          rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
+                      (fact "PDF data rows " (count rows) => 42)
+                    (.delete file)))))) )
