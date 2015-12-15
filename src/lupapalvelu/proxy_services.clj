@@ -304,33 +304,50 @@
 (defn organization-map-server
   [request]
   (if-let [org-id (user/authority-admins-organization-id (user/current-user request))]
-    (let [response (org/query-organization-map-server org-id
-                                                      (:params request)
-                                                      (:headers request))]
-      ;; The same precautions as in secure
-      (if response
-        (update-in response [:headers] dissoc "set-cookie" "server")
-        (resp/status 503 "Service temporarily unavailable")))
+    (if-let [response (org/query-organization-map-server org-id (:params request) (:headers request))]
+      response
+      (resp/status 503 "Service temporarily unavailable"))
     (resp/status 400 "Bad Request")))
 ;
 ; Utils:
 ;
 
+(def parameter-filter #"[^\p{Print}]")
+
+(defn- sanitize-parameter [s] (ss/replace s parameter-filter ""))
+
+(defn- sanitize-parameters [request k]
+  (if (contains? request k)
+    (update request k util/convert-values sanitize-parameter)
+    request))
+
 (defn- secure
   "Takes a service function as an argument and returns a proxy function that invokes the original
   function. Proxy function returns what ever the service function returns, excluding some unsafe
-  stuff. At the moment strips the 'Set-Cookie' headers."
-  [f service]
-
+  headers, such as cookie and host information. Request parameters are sanitized to contain
+  only printable characters before invoking the wrapped function. For example,
+  newlines are stripped."
+  [f & args]
   (fn [request]
-    (let [response (f (http/secure-headers request) service)]
+    (let [sanitized-request (-> request
+                              (sanitize-parameters :query-params)
+                              (sanitize-parameters :form-params)
+                              (sanitize-parameters :params))
+          response (apply f (cons (http/secure-headers sanitized-request) args))]
       (http/secure-headers response))))
 
 (defn- cache [max-age-in-s f]
   (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]
     (fn [request]
       (let [response (f request)]
-        (update-in response [:headers] merge cache-control)))))
+        (if (= 200 (:status response))
+          (update response :headers merge cache-control)
+          (update response :headers merge http/no-cache-headers))))))
+
+(defn no-cache [f]
+  (fn [request]
+    (let [response (f request)]
+      (update response :headers merge http/no-cache-headers))))
 
 ;;
 ;; Proxy services by name:
@@ -341,16 +358,16 @@
                "kuntawms" (cache (* 3 60 60 24) (secure #(wfs/raster-images %1 %2 org/query-organization-map-server) "wms" ))
                "wmts/maasto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "wmts/kiinteisto" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
-               "point-by-property-id" point-by-property-id-proxy
-               "property-id-by-point" property-id-by-point-proxy
-               "address-by-point" address-by-point-proxy
-               "find-address" find-addresses-proxy
-               "get-address" get-addresses-proxy
-               "property-info-by-wkt" property-info-by-wkt-proxy
-               "wmscap" wms-capabilities-proxy
-               "plan-urls-by-point" plan-urls-by-point-proxy
-               "general-plan-urls-by-point" general-plan-urls-by-point-proxy
+               "point-by-property-id" (cache (* 60 60 8) (secure point-by-property-id-proxy))
+               "property-id-by-point" (cache (* 60 60 8) (secure property-id-by-point-proxy))
+               "address-by-point" (no-cache (secure address-by-point-proxy))
+               "find-address" (no-cache (secure find-addresses-proxy))
+               "get-address" (no-cache (secure get-addresses-proxy))
+               "property-info-by-wkt" (cache (* 60 60 8) (secure property-info-by-wkt-proxy))
+               "wmscap" (no-cache (secure wms-capabilities-proxy))
+               "plan-urls-by-point" (no-cache (secure plan-urls-by-point-proxy))
+               "general-plan-urls-by-point" (no-cache (secure general-plan-urls-by-point-proxy))
                "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))
-               "organization-map-server" organization-map-server
-               "trimble-kaavamaaraykset-by-point" trimble-kaavamaaraykset-by-point-proxy})
+               "organization-map-server" (no-cache (secure organization-map-server))
+               "trimble-kaavamaaraykset-by-point" (no-cache (secure trimble-kaavamaaraykset-by-point-proxy))})
 

@@ -55,25 +55,25 @@ Mikko opens attachment details
 Mikko can change related operation
   Element should be visible  xpath=//select[@data-test-id="attachment-operation-select"]
   Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Muun rakennuksen rakentaminen - Talo B
-  Positive indicator should be visible
+  Sleep  1
+  Negative indicator icon should not be visible
 
 Mikko can change size
-  Positive indicator should not be visible
   Element should be visible  xpath=//select[@data-test-id='attachment-size-select']
   Select From List  xpath=//select[@data-test-id='attachment-size-select']  B0
-  Positive indicator should be visible
+  Sleep  1
+  Negative indicator icon should not be visible
 
 Mikko can change scale
-  Positive indicator should not be visible
   Element should be visible  xpath=//select[@data-test-id='attachment-scale-select']
   Select From List  xpath=//select[@data-test-id='attachment-scale-select']  1:200
-  Positive indicator should be visible
+  Sleep  1
+  Negative indicator icon should not be visible
 
 Mikko can change contents
-  Positive indicator should not be visible
   Element should be visible  xpath=//input[@data-test-id='attachment-contents-input']
   Input text by test id  attachment-contents-input  PuuCee
-  Positive indicator should be visible
+  Positive indicator icon should be visible
 
 Mikko goes to fresh attachments tab
   Go Back

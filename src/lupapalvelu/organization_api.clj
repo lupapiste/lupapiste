@@ -251,7 +251,7 @@
           :new-applications-disabled (not (:new-application-enabled scope))
           :links (:links organization)
           :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
-      (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
+      (fail :municipalityNotSupported))))
 
 (defcommand set-organization-selected-operations
   {:parameters [operations]

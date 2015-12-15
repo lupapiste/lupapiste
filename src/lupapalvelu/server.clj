@@ -73,14 +73,17 @@
   (server/add-middleware web/tempfile-cleanup)
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)
-  (server/add-middleware uach/add-ua-compatible-header)
   (server/add-middleware headers/session-id-to-mdc)
-  (server/add-middleware headers/add-security-headers)
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/wrap-authentication)
   (server/add-middleware web/session-timeout)
+
   (env/in-dev
-   (server/add-middleware mongo/db-selection-middleware))
+    ; Security headers are set by Nginx in production
+    (server/add-middleware uach/add-ua-compatible-header)
+    (server/add-middleware headers/add-security-headers)
+    ; Integration test database selection
+    (server/add-middleware mongo/db-selection-middleware))
 
   (info "*** Instrumenting performance monitoring")
   (perf-mon/init)

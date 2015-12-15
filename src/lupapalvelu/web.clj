@@ -16,6 +16,7 @@
             [monger.operators :refer [$set]]
             [sade.core :refer [ok fail ok? fail? now def-] :as core]
             [sade.env :as env]
+            [sade.http :as http]
             [sade.util :as util]
             [sade.property :as p]
             [sade.status :as status]
@@ -56,12 +57,14 @@
      (defpage ~path ~params
        (let [response-data# (do ~@content)
              response-session# (:session response-data#)]
-         (if (contains? response-data# :session)
-           (-> response-data#
-             (dissoc :session)
-             resp/json
-             (assoc :session response-session#))
-           (resp/json response-data#))))))
+         (resp/set-headers
+           http/no-cache-headers
+           (if (contains? response-data# :session)
+             (-> response-data#
+               (dissoc :session)
+               resp/json
+               (assoc :session response-session#))
+             (resp/json response-data#)))))))
 
 (defjson "/system/apis" [] @apis)
 
@@ -345,10 +348,11 @@
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
-  (let [request (request/ring-request)]
-    (if username
-     (execute-command "login" params request) ; Handles form POST (Nessus)
-     (execute-command "login" (from-json request) request))))
+  (let [request (request/ring-request)
+        response (if username
+                   (execute-command "login" params request) ; Handles form POST (Nessus)
+                   (execute-command "login" (from-json request) request))]
+    (select-keys response [:ok :text :session :applicationpage])))
 
 ;; Reset password via saparate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
