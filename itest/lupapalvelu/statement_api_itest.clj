@@ -120,9 +120,7 @@
                        #(and (= "statementGiver" (:role %)) (= "pena" (:username %)))
                        (:auth application-after))) => 1)
             (fact "Pena really has access to application"
-              (query pena :application :id application-id) => ok?)
-            (fact "Applicant can not see unsubmitted statements"
-              (query pena :should-see-unsubmitted-statements :id application-id) => ok?)))))
+              (query pena :application :id application-id) => ok?)))))
 
     (facts "Veikko gives a statement"
 
@@ -138,15 +136,6 @@
             (giver-emails sonja-email) => sonja-email
             (giver-emails ronja-email) => ronja-email
             (giver-emails veikko-email) => veikko-email))
-
-        (fact "Veikko can see unsubmitted statements"
-          (query veikko :should-see-unsubmitted-statements :id application-id) => ok?)
-
-        (fact "Sonja can see unsubmitted statements"
-          (query sonja :should-see-unsubmitted-statements :id application-id) => ok?)
-
-        (fact "Applicant can not see unsubmitted statements"
-          (query mikko :should-see-unsubmitted-statements :id application-id) => unauthorized?)
 
         (fact "Statement cannot be given with invalid status"
           (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
