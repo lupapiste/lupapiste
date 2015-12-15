@@ -50,6 +50,10 @@
   (when s (let [normalized (Normalizer/normalize s Normalizer$Form/NFD)]
     (clojure.string/replace normalized #"\p{InCombiningDiacriticalMarks}+" ""))))
 
+(def non-printables #"[^\p{Print}]")
+
+(defn strip-non-printables [^String s] (when s (s/replace s non-printables "")))
+
 (defn remove-leading-zeros [^String s] (when s (.replaceFirst s "^0+(?!$)", "")))
 
 (defn zero-pad

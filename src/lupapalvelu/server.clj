@@ -87,6 +87,9 @@
 
   (info "*** Instrumenting performance monitoring")
   (perf-mon/init)
+
+  (server/add-middleware headers/sanitize-header-values)
+
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl in port 9090")
     (require 'clojure.tools.nrepl.server)
