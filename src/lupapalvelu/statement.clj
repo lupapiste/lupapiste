@@ -60,9 +60,9 @@
                (cond-> {:id        (mongo/create-id)
                         :person    person
                         :requested now
-                        :state     :requested
-                        :saateText saate-text
-                        :dueDate   due-date}
+                        :state     :requested}
+                 saate-text     (assoc :saateText saate-text)
+                 due-date       (assoc :dueDate due-date)
                  (seq metadata) (assoc :metadata metadata))))
 
 (defn get-statement [{:keys [statements]} id]

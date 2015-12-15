@@ -141,16 +141,14 @@
     (or non-blank-string-keys has-invalid-email)))
 
 (defcommand request-for-statement
-  {:parameters [functionCode id selectedPersons saateText dueDate]
+  {:parameters [functionCode id selectedPersons]
    :user-roles #{:authority}
    :states #{:open :submitted :complementNeeded}
-   :input-validators [(fn [command] (when-not (nil? (get-in command [:data :dueDate]))
-                                      (action/number-parameters [:dueDate] command)))
-                      (partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
+   :input-validators [(partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
                       validate-selected-persons]
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
-  [{user :user {:keys [organization] :as application} :application now :created :as command}]
+  [{{:keys [dueDate saateText]} :data user :user {:keys [organization] :as application} :application now :created :as command}]
   (let [new-emails  (->> (map :email selectedPersons) (remove user/get-user-by-email) (set))
         users       (map (comp #(user/get-or-create-user-by-email % user) :email) selectedPersons)
         persons+uid (map #(assoc %1 :userId (:id %2)) selectedPersons users)
