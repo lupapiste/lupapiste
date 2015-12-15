@@ -18,12 +18,16 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   self.asc = ko.observable(false);
 
+  var initialQuery = true;
+
   self.fetchComments = _.debounce(function() {
     var bulletinId = util.getIn(self, ["bulletin", "id"]);
     var versionId = util.getIn(self, ["showVersionComments", "id"]);
     self.sendEvent("publishBulletinService", "fetchBulletinComments", {bulletinId: bulletinId,
                                                                        versionId: versionId,
-                                                                       asc: self.asc()});
+                                                                       asc: self.asc(),
+                                                                       initialQuery: initialQuery});
+    initialQuery = false
   }, 50);
 
   self.description = function(comment) {
