@@ -49,7 +49,7 @@
     yritysnimi-ja-ytunnus
     {:osoite osoite
      :yhteyshenkilo {:henkilotiedot (dissoc henkilotiedot :hetu)
-                     :yhteystiedot {:email {:value "solita@solita.fi"}
+                     :yhteystiedot {:email {:value "yritys@example.com"}
                                     :puhelin {:value "03-389 1380"}}}}))
 
 (def- hakija-henkilo
@@ -537,7 +537,7 @@
 (defn- validate-company [company]
   (validate-minimal-company company)
   (fact "puhelin" (:puhelin company) => "03-389 1380")
-  (fact "sahkopostiosoite" (:sahkopostiosoite company) => "solita@solita.fi"))
+  (fact "sahkopostiosoite" (:sahkopostiosoite company) => "yritys@example.com"))
 
 (facts "Canonical hakija/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data hakija-henkilo))
