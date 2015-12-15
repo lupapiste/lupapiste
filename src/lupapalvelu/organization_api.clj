@@ -551,9 +551,12 @@
 
 (defcommand update-user-layers
   {:parameters [layers]
-   :input-validators [(partial action/vector-parameter-of :layers map?)] ; FIXME deep validation
+   :input-validators [(partial action/vector-parameter-of :layers map?)]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
+  (when-let [validation-errors (seq (remove nil? (map (partial sc/check o/Layer) layers)))]
+    (fail! :error.missing-parameters))
+
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.layers layers}})
   (ok))
