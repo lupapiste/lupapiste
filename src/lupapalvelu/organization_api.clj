@@ -10,6 +10,7 @@
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
             [cheshire.core :as cheshire]
+            [schema.core :as sc]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
@@ -411,16 +412,20 @@
 
 (defcommand save-organization-tags
   {:parameters [tags]
-   :input-validators [(partial action/vector-parameter-of :tags map?)] ; FIXME deep validation
+   :input-validators [(partial action/vector-parameter-of :tags map?)]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [org-id (user/authority-admins-organization-id user)
         old-tag-ids (set (map :id (:tags (o/get-organization org-id))))
         new-tag-ids (set (map :id tags))
-        removed-ids (set/difference old-tag-ids new-tag-ids)]
+        removed-ids (set/difference old-tag-ids new-tag-ids)
+        tags-with-ids (o/create-tag-ids tags)
+        validation-errors (seq (remove nil? (map (partial sc/check o/Tag) tags-with-ids)))]
+    (when validation-errors (fail! :error.missing-parameters))
+
     (when (seq removed-ids)
       (mongo/update-by-query :applications {:tags {$in removed-ids} :organization org-id} {$pull {:tags {$in removed-ids}}}))
-    (o/update-organization org-id {$set {:tags (o/create-tag-ids tags)}})))
+    (o/update-organization org-id {$set {:tags tags-with-ids}})))
 
 (defquery remove-tag-ok
   {:parameters [tagId]
