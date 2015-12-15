@@ -15,10 +15,11 @@
 ;; Common
 ;;
 
-(def statement-states #{:requested :draft :given :replyable :replied :closed})
-(def post-given-states #{:given :replyable :replied :closed})
+(def statement-states #{:requested :draft :given :replyable :replied})
+(def post-given-states #{:given :replyable :replied})
 (def pre-given-states (clojure.set/difference statement-states post-given-states))
-(def post-reply-states #{:replied :closed})
+(def post-repliable-states #{:repliable :replied})
+(def pre-repliable-states (clojure.set/difference statement-states post-repliable-states))
 
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
 ;; Krysp Yhteiset 2.1.5+
@@ -67,10 +68,6 @@
 (defn get-statement [{:keys [statements]} id]
   (util/find-by-id id statements))
 
-(defn statement-exists [{{:keys [statementId]} :data} application]
-  (when-not (get-statement application statementId)
-    (fail :error.no-statement :statementId statementId)))
-
 (defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} application]
   (let [{{statement-email :email} :person} (get-statement application statementId)]
     (when-not (= (user/canonize-email statement-email) (user/canonize-email user-email))
@@ -86,12 +83,20 @@
   (when-not (->> (get-statement application statement-id) :state keyword #{:replyable})
     (fail :error.statement-is-not-replyable)))
 
+(defn reply-visible [{{statement-id :statementId} :data :as command} application]
+  (when-not (->> (get-statement application statement-id) :state keyword post-repliable-states)
+    (fail :error.statement-reply-is-not-visible)))
+
+(defn reply-not-visible [{{statement-id :statementId} :data :as command} application]
+  (when-not (->> (get-statement application statement-id) :state keyword pre-repliable-states)
+    (fail :error.statement-reply-is-already-visible)))
+
 (defn statement-not-given [{{:keys [statementId]} :data} application]
-  (when (->> statementId (get-statement application) :state keyword pre-given-states not)
+  (when-not (->> statementId (get-statement application) :state keyword pre-given-states)
     (fail :error.statement-already-given)))
 
 (defn statement-given [{{:keys [statementId]} :data} application]
-  (when (->> statementId (get-statement application) :state keyword post-given-states not)
+  (when-not (->> statementId (get-statement application) :state keyword post-given-states)
     (fail :error.statement-not-given)))
 
 (defn replies-enabled [command {permit-type :permitType :as application}]

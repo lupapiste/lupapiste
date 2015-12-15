@@ -176,7 +176,7 @@
 (defcommand save-statement-as-draft
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-exists statement-owner statement-not-given]
+   :pre-checks       [statement-owner statement-not-given]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
@@ -193,7 +193,7 @@
 (defcommand give-statement
   {:parameters  [:id statementId status text :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
-   :pre-checks  [statement-exists statement-owner statement-not-given]
+   :pre-checks  [statement-owner statement-not-given]
    :states      #{:open :submitted :complementNeeded}
    :user-roles  #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
@@ -220,7 +220,7 @@
 (defcommand request-for-statement-reply
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-exists statement-given replies-enabled]
+   :pre-checks       [statement-given replies-enabled]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority}
    :description      "request for reply for statement when statement is given and organization has enabled statement replies"}
@@ -234,7 +234,7 @@
 (defcommand save-statement-reply-as-draft
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-exists statement-replyable]
+   :pre-checks       [statement-replyable]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority :applicant}
    :user-authz-roles auth/default-authz-writer-roles
@@ -249,7 +249,7 @@
 (defcommand reply-statement
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-exists statement-replyable]
+   :pre-checks       [statement-replyable]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority :applicant}
    :user-authz-roles auth/default-authz-writer-roles
@@ -260,3 +260,22 @@
     (update-application command
                         {:statements {$elemMatch {:id statementId}}}
                         {$set {:statements.$ statement}})))
+
+(defquery statement-is-replyable
+  {:description      "Pseudo query for UI authorization logic"
+   :parameters       [:id]
+   :states           (states/all-application-states-but [:draft])
+   :user-roles       #{:authority :applicant}
+   :user-authz-roles auth/default-authz-writer-roles
+   :pre-checks       [reply-visible]}
+  [_])
+
+(defquery authorized-for-requesting-statement-reply
+  {:description      "Pseudo query for UI authorization logic"
+   :parameters       [:id]
+   :states           (states/all-application-states-but [:draft])
+   :user-roles       #{:authority}
+   :user-authz-roles auth/default-authz-writer-roles
+   :pre-checks       [replies-enabled reply-not-visible]}
+  [_])
+
