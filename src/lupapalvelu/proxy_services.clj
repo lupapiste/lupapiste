@@ -312,13 +312,9 @@
 ; Utils:
 ;
 
-(def parameter-filter #"[^\p{Print}]")
-
-(defn- sanitize-parameter [s] (ss/replace s parameter-filter ""))
-
 (defn- sanitize-parameters [request k]
   (if (contains? request k)
-    (update request k util/convert-values sanitize-parameter)
+    (update request k util/convert-values ss/strip-non-printables)
     request))
 
 (defn- secure

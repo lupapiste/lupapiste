@@ -294,6 +294,7 @@
 
 (facts "Organization tags"
   (fact "only auth admin can add new tags"
+    (command sipoo :save-organization-tags :tags []) => ok?
     (command sipoo :save-organization-tags :tags [{:id nil :label "makeja"} {:id nil :label "nigireja"}]) => ok?
     (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
     (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
@@ -305,6 +306,16 @@
   (fact "only authority can fetch available tags"
     (query pena :get-organization-tags) =not=> ok?
     (map :label (:tags (:753-R (:tags (query sonja :get-organization-tags))))) => ["makeja" "nigireja"])
+
+  (fact "invalid data is rejected"
+    (command sipoo :save-organization-tags :tagz []) => fail?
+    (command sipoo :save-organization-tags :tags {}) => fail?
+    (command sipoo :save-organization-tags :tags nil) => fail?
+    (command sipoo :save-organization-tags :tags "tag") => fail?
+    (command sipoo :save-organization-tags :tags [{}]) => fail?
+    (command sipoo :save-organization-tags :tags [{:id "id"}]) => fail?
+    (command sipoo :save-organization-tags :tags [{:label false}]) => fail?
+    (command sipoo :save-organization-tags :tags [{:id nil :label {:injection true}}]) => fail?)
 
   (fact "Check tag deletion query"
     (let [id (create-app-id sonja)

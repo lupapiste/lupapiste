@@ -66,10 +66,10 @@
 
 (facts "VRK compliant name validation"
   (subtype-validation {:subtype :vrk-name} "") => nil?
-  (subtype-validation {:subtype :vrk-name} "Juha Jokim\u00e4ki") => nil?
-  (subtype-validation {:subtype :vrk-name} "Juha-Matti Jokim\u00e4ki") => nil?
-  (subtype-validation {:subtype :vrk-name} "Juha/Matti Jokim\u00e4ki") => nil?
-  (subtype-validation {:subtype :vrk-name} "Juha *Matti* Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Matti M\u00e4kinen") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha-Matti M\u00e4kinen") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha/Matti M\u00e4kinen") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha *Matti* M\u00e4kinen") => nil?
   (subtype-validation {:subtype :vrk-name} "Pertti \"Veltto\" Virtanen") => [:warn "illegal-name"]
   (subtype-validation {:subtype :vrk-name} "Carl the 16th Gustav") => [:warn "illegal-name"]
   (subtype-validation {:subtype :vrk-name} "Carl XVI Gustav") => nil?)

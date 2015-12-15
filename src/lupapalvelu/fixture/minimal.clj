@@ -23,7 +23,7 @@
    ;; ETL export user: solita-etl / solita-etl
    {:id "solita-etl"
     :username "solita-etl"
-    :email "lupapiste@solita.fi"
+    :email "etl@lupapiste.fi"
     :firstName "Solita"
     :lastName "DW ETL-lataus"
     :enabled true
