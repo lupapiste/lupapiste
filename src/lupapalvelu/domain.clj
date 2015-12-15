@@ -103,7 +103,7 @@
                              (let [authorized-to-statement? (authorized-to-statement? user statement)]
                                (if authorized-to-statement?
                                  statement
-                                 (select-keys statement [:id :person :requested :given :status]))))
+                                 (select-keys statement [:id :person :requested :given :state]))))
                            (:statements application)))
       (assoc :attachments (filter
                            (fn [attachment]
