@@ -89,7 +89,7 @@ LUPAPISTE.PublishBulletinService = function() {
   var asc = false;
 
   hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
-    if (event.initialQuery || event.versionId !== versionId || event.asc !== asc) {
+    if (event.initialQuery || event.versionId !== versionId || event.asc !== asc) {
       skip = 0;
       versionId = event.versionId;
       self.comments([]);
