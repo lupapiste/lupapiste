@@ -18,7 +18,7 @@
 (def statement-states #{:requested :draft :given :replyable :replied})
 (def post-given-states #{:given :replyable :replied})
 (def pre-given-states (clojure.set/difference statement-states post-given-states))
-(def post-repliable-states #{:repliable :replied})
+(def post-repliable-states #{:replyable :replied})
 (def pre-repliable-states (clojure.set/difference statement-states post-repliable-states))
 
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])

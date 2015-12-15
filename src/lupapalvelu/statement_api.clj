@@ -218,7 +218,7 @@
 (defcommand request-for-statement-reply
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-given replies-enabled]
+   :pre-checks       [statement-given replies-enabled reply-not-visible]
    :states           #{:open :submitted :complementNeeded}
    :user-roles       #{:authority}
    :description      "request for reply for statement when statement is given and organization has enabled statement replies"}
@@ -234,7 +234,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
    :pre-checks       [statement-replyable]
    :states           #{:open :submitted :complementNeeded}
-   :user-roles       #{:authority :applicant}
+   :user-roles       #{:applicant}
    :user-authz-roles auth/default-authz-writer-roles
    :description      "save reply for the statement as draft"}
   [{application :application user :user {:keys [text nothing-to-add modify-id prev-modify-id]} :data :as command}]
@@ -249,7 +249,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
    :pre-checks       [statement-replyable]
    :states           #{:open :submitted :complementNeeded}
-   :user-roles       #{:authority :applicant}
+   :user-roles       #{:applicant}
    :user-authz-roles auth/default-authz-writer-roles
    :description      "reply to statement"}
   [{application :application user :user {:keys [text nothing-to-add modify-id prev-modify-id]} :data :as command}]
