@@ -2,6 +2,10 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.schema-generators :as ssg]
+            [sade.schemas :as ssc]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.generators :as gen]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.statement :refer :all]))
 
@@ -58,6 +62,63 @@
     (possible-statement-statuses test-app-YM) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
     (provided
       (organization/resolve-organization anything anything) => {})))
+
+(defn dummy-application [statement]
+  {:statements [statement]})
+
+(defspec validate-statement-owner-pass 5
+  (prop/for-all [email (ssg/generator ssc/Email)]
+                (let [statement (-> (ssg/generate Statement)
+                                    (assoc-in [:person :email] email))
+                      command   {:data {:statementId (:id statement)} :user {:email email}}]
+                  (nil? (statement-owner command (dummy-application statement))))))
+
+(defspec validate-statement-owner-fail 5
+  (prop/for-all [[email1 email2] (gen/such-that (partial apply not=) (gen/tuple (ssg/generator ssc/Email) (ssg/generator ssc/Email)))]
+                (let [statement (-> (ssg/generate Statement)
+                                    (assoc-in [:person :email] email1))
+                      command   {:data {:statementId (:id statement)} :user {:email email2}}]
+                  (-> (statement-owner command (dummy-application statement))
+                      :ok false?))))
+
+(defspec validate-statement-exists-pass 5
+  (prop/for-all [id gen/string-alphanumeric]
+                (let [statement (-> (ssg/generate Statement)
+                                    (assoc :id id))]
+                  (nil? (statement-exists {:data {:statementId (:id statement)}} (dummy-application statement))))))
+
+(defspec validate-statement-exists-fail 5
+  (prop/for-all [[id1 id2] (gen/such-that (partial apply not=) (gen/tuple gen/string-alphanumeric gen/string-alphanumeric))]
+                (let [statement (-> (ssg/generate Statement)
+                                    (assoc :id id1))]
+                  (-> (statement-exists {:data {:statementId id2}} (dummy-application statement))
+                      :ok false?))))
+
+(defspec validate-statement-given-pass 5
+  (prop/for-all [state (gen/elements [:given :replyable :replied])]
+                (let [statement (-> (ssg/generate Statement)
+                                    (assoc :state state))]
+                  (nil? (statement-given {:data {:statementId (:id statement)}} (dummy-application statement))))))
+
+(defspec validate-statement-given-fail 5
+  (prop/for-all [state (gen/elements [:requested :draft :unknown-state])]
+                (let [statement (-> (ssg/generate Statement)
+                                    (assoc :state state))]
+                  (-> (statement-given {:data {:statementId (:id statement)}} (dummy-application statement))
+                      :ok false?))))
+
+(defspec validate-statement-replyable-pass 1
+  (prop/for-all [state (gen/elements [:replyable])]
+                (let [statement (-> (ssg/generate Statement)
+                                    (assoc :state state))]
+                  (nil? (statement-replyable {:data {:statementId (:id statement)}} (dummy-application statement))))))
+
+(defspec validate-statement-replyable-fail 10
+  (prop/for-all [state (gen/elements [:requested :draft :given :replied :unknown-state])]
+                (let [statement (-> (ssg/generate Statement)
+                                    (assoc :state state))]
+                  (-> (statement-replyable {:data {:statementId (:id statement)}} (dummy-application statement))
+                      :ok false?))))
 
 (facts "update-statement"
   (fact "update-draft"
