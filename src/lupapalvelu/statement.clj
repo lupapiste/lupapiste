@@ -94,8 +94,8 @@
   (when (->> statementId (get-statement application) :state keyword post-given-states not)
     (fail :error.statement-not-given)))
 
-(defn replies-enabled [{permit-type :permitType municipality :municipality} application]
-  (when (not= permit-type "R")
+(defn replies-enabled [command {permit-type :permitType :as application}]
+  (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type)
     (fail :error.organization-has-not-enabled-statement-replies)))
 
 (defn- update-statement [statement modify-id prev-modify-id & updates]
