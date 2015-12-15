@@ -1,0 +1,5 @@
+statement.tab.reply-request: Pyydä vastine
+statement.reply-request.text: Vastineen saateteksti
+statement.reply-request.message.placeholder: Kirjoita saateteksti vastineen antajalle lähetettävään viestiin...
+statement.submit.reply-request: Pyydä vastine
+statement.reply-request.info-text: Kun lausunto on annettu, voit täältä pyytää hakijalta siihen vastineen.
