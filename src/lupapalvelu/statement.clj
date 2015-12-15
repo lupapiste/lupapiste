@@ -34,6 +34,7 @@
                      :name                            sc/Str})
 
 (def Reply          {:editor-id                       sc/Str
+                     (sc/optional-key :saateText)     sc/Str
                      :nothing-to-add                  sc/Bool
                      (sc/optional-key :text)          sc/Str})
 
@@ -85,12 +86,17 @@
   (when-not (->> (get-statement application statement-id) :state keyword #{:replyable})
     (fail :error.statement-is-not-replyable)))
 
-(defn statement-given? [application statementId]
-  (->> statementId (get-statement application) :state keyword pre-given-states not))
-
 (defn statement-not-given [{{:keys [statementId]} :data} application]
-  (when (statement-given? application statementId)
+  (when (->> statementId (get-statement application) :state keyword pre-given-states not)
     (fail :error.statement-already-given)))
+
+(defn statement-given [{{:keys [statementId]} :data} application]
+  (when (->> statementId (get-statement application) :state keyword post-given-states not)
+    (fail :error.statement-not-given)))
+
+(defn replies-enabled [{permit-type :permitType municipality :municipality} application]
+  (when (not= permit-type "R")
+    (fail :error.organization-has-not-enabled-statement-replies)))
 
 (defn- update-statement [statement modify-id prev-modify-id & updates]
   (if (or (= prev-modify-id (:modify-id statement)) (nil? (:modify-id statement)))
@@ -105,13 +111,17 @@
 (defn give-statement [statement text status modify-id prev-modify-id editor-id]
   (update-statement statement modify-id prev-modify-id :state :given :text text :status status :given (now) :editor-id editor-id))
 
-(defn update-reply-draft [statement text nothing-to-add modify-id prev-modify-id editor-id]
-  (->> {:text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id}
+(defn update-reply-draft [{reply :reply :as statement} text nothing-to-add modify-id prev-modify-id editor-id]
+  (->> (assoc reply :text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id)
        (update-statement statement modify-id prev-modify-id :state :replyable :reply)))
 
-(defn reply-statement [statement text nothing-to-add modify-id prev-modify-id editor-id]
-  (->> {:text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id}
+(defn reply-statement [{reply :reply :as statement} text nothing-to-add modify-id prev-modify-id editor-id]
+  (->> (assoc reply :text (when-not nothing-to-add text) :nothing-to-add (boolean nothing-to-add) :editor-id editor-id)
        (update-statement statement modify-id prev-modify-id :state :replied :reply)))
+
+(defn request-for-reply [{reply :reply modify-id :modify-id :as statement} text user-id]
+  (->> (assoc reply :saateText text :nothing-to-add false :editor-id user-id)
+       (update-statement statement modify-id modify-id :state :replyable :reply)))
 
 ;;
 ;; Statement givers

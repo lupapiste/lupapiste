@@ -10,7 +10,8 @@
                    give-statement
                    update-draft
                    reply-statement
-                   update-reply-draft)
+                   update-reply-draft
+                   request-for-reply)
 
 (let [test-app-R  {:municipality 753 :permitType "R"}
       test-app-P  {:municipality 753 :permitType "P"}
@@ -122,7 +123,7 @@
         (assoc :modify-id "mod1")
         (update-reply-draft nil nil "mod2" "mod1" "editor2"))
     => (contains #{[:reply {:editor-id "editor2"
-                            :nothing-to-add false}]})
+                            :nothing-to-add false}]}))
 
   (fact "reply-statement"
     (-> (ssg/generate Statement)
@@ -131,4 +132,12 @@
     => (contains #{[:state :replied]
                    [:reply {:editor-id "editor2"
                             :nothing-to-add false
-                            :text "reply text"}]}))))
+                            :text "reply text"}]}))
+
+  (fact "request for reply"
+    (-> (ssg/generate Statement)
+        (assoc :modify-id "mod1")
+        (request-for-reply "covering note for reply" "editor1"))
+    => (contains #{[:reply {:editor-id "editor1"
+                            :nothing-to-add false
+                            :saateText "covering note for reply"}]})))

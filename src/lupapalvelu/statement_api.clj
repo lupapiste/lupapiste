@@ -217,6 +217,20 @@
     (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
     response))
 
+(defcommand request-for-statement-reply
+  {:parameters       [:id statementId :lang]
+   :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
+   :pre-checks       [statement-exists statement-given replies-enabled]
+   :states           #{:open :submitted :complementNeeded}
+   :user-roles       #{:authority}
+   :description      "request for reply for statement when statement is given and organization has enabled statement replies"}
+  [{application :application user :user {:keys [text]} :data :as command}]
+  (let [statement (-> (util/find-by-id statementId (:statements application))
+                      (request-for-reply text (:id user)))]
+    (update-application command
+                        {:statements {$elemMatch {:id statementId}}}
+                        {$set {:statements.$ statement}})))
+
 (defcommand save-statement-reply-as-draft
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
