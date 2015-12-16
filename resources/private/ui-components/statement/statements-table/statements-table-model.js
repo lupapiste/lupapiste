@@ -23,8 +23,8 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return _.includes(self.statementIdsWithAttachments(), statement.id());
   };
 
-  self.notGiven = function(statement) {
-    return _.contains(["requested", "draft"], util.getIn(statement, ["state"]));
+  self.isGiven = function(statement) {
+    return _.contains(["given", "replyable", "replied", "closed"], util.getIn(statement, ["state"]));
   }
 
   var isAuthorityOrStatementOwner = function(statement) {
@@ -33,16 +33,16 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.isRemovable = function(statement) {
-    return isAuthorityOrStatementOwner(statement) && self.notGiven(statement);
+    return isAuthorityOrStatementOwner(statement) && !self.isGiven(statement);
   }
 
   self.canAccessStatement = function(statement) {
-    return _.contains(["given", "replyable", "replied", "closed"], util.getIn(statement, ["state"])) || isAuthorityOrStatementOwner(statement);
+    return self.isGiven(statement) || isAuthorityOrStatementOwner(statement);
   };
 
   self.isStatementOverDue = function(statement) {
     var nowTimeInMs = new Date().getTime();
-    return (statement.dueDate && !self.notGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
+    return (statement.dueDate && self.isGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
   };
 
   var deleteStatementFromServer = function(statementId) {

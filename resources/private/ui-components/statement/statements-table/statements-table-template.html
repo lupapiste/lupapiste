@@ -20,7 +20,7 @@
                       <th data-bind="ltext: 'application.statement.maaraaika'"></th>
                       <th data-bind="ltext: 'application.statement.given'"></th>
                       <th data-bind="ltext: 'application.statement.status'"></th>
-                      <!-- ko if: _.some($data.statements(), $component.notGiven) -->
+                      <!-- ko if-not: _.every($data.statements(), $component.isGiven) -->
                         <th data-bind="ltext: 'remove'"></th>
                       <!-- /ko -->
                   </tr>
@@ -46,8 +46,12 @@
                       <td data-bind="dateString: $data.dueDate,
                                      css: {'statement-over-due': $component.isStatementOverDue($data)}"></td>
                       <td data-bind="dateString: $data.given"></td>
-                      <td data-bind="text: $data.status && $data.status() && loc(['statement', $data.status()]), attr: {'data-test-name' : $data.person.name}"></td>
-                      <!-- ko if: _.some($component.statements(), $component.notGiven) -->
+                      <td>
+                        <span data-bind="visible: $component.isGiven($data),
+                                         text: $data.status && $data.status() && loc(['statement', $data.status()]),
+                                         attr: {'data-test-name' : $data.person.name}"></span>
+                      </td>
+                      <!-- ko if-not: _.every($component.statements(), $component.isGiven) -->
                         <td>
                           <span data-bind="click: $component.openDeleteDialog,
                                            clickBubble: false,
