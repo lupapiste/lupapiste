@@ -1,4 +1,4 @@
-contact: Myytävät/lahjoitettavat materiaalit
+available-materials.contact: Myytävät/lahjoitettavat materiaalit
 available-materials._group_label: Materiaalit
 contact.help: Voit tiedottaa Lupapisteen kautta myynnissä olevista tai lahjoitettavista rakennusjätteistä.
 available-materials.aines: Aines

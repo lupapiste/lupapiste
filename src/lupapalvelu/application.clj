@@ -5,7 +5,9 @@
             [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
             [clojure.walk :refer [keywordize-keys]]
-            [monger.operators :refer [$set $push]]
+            [hiccup.core :as hiccup]
+            [clj-rss.core :as rss]
+            [monger.operators :refer [$set $push $elemMatch $exists]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -15,6 +17,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
@@ -420,22 +423,48 @@
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
 
-(defn waste-rss-feed []
-  (let [ads (->>
-             ;; 1. Every application that as at least a bit filled available materials.
-             (mongo/select
-              :applications
-              {documents: {$elemMatch: {data.availableMaterials.0.aines: {$exists: true }}}})
-             ;; 2. Unwrap and create materials, contact map.
-             tools/unwrapped
-             (map (fn [{docs :documents}]
-                    (let [ad (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")
-                                      (-> (:data %)
-                                          (select-keys [:availableMaterials :contact])
-                                          (rename-keys {:availableMateriasl :materials}))))])))
-             ;; 3. We only check the contact validity. Name and either phone or email
-             ;;    must have been provided.
-             (filter (fn [{{:keys [name phone email]} :contact}]
-                       (letfn [(good [s] (-> s ss/blank? false?))]
-                         (and (good name) (or (good phone) (good email)))))))]
-    ))
+(defmulti waste-ads (fn [& [fmt lang]] fmt))
+
+(defmethod waste-ads :default [& _]
+  (->>
+   ;; 1. Every application that as at least a bit filled available materials.
+   (mongo/select
+    :applications
+    {:documents {$elemMatch {:data.availableMaterials {$exists true }}}})
+   ;; 2. Unwrap and create materials, contact map.
+   tools/unwrapped
+   (map (fn [{docs :documents}]
+          (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")
+                   {:contact (-> % :data :contact)
+                    :materials (-> % :data :availableMaterials tools/rows-to-list)})
+                docs)))
+   ;; 3. We only check the contact validity. Name and either phone or email
+   ;;    must have been provided.
+   (filter (fn [{{:keys [name phone email]} :contact}]
+             (letfn [(good [s] (-> s ss/blank? false?))]
+               (and (good name) (or (good phone) (good email))))))))
+
+
+(defmethod waste-ads :rss [_ lang]
+  (let [ads (waste-ads)
+        columns    (map :name schemas/availableMaterialsRow)
+        col-row-map (fn [fun]
+                      (->> columns (map fun) (concat [:tr]) vec))
+        items      (for [{:keys [contact materials]} ads
+                         :let [{:keys [name phone email]}  contact
+                               html (hiccup/html [:div [:span (ss/join " " [name phone email])]
+                                                  [:table
+                                                   (col-row-map #(i18n/with-lang lang
+                                                                   [:th (->> %
+                                                                             (str "available-materials.")
+                                                                             i18n/loc)]))
+                                                   (for [m materials]
+                                                     (col-row-map #(vec [:td (-> % keyword m)])))]])]]
+
+                     {:title "Lupapiste"
+                      :link "http://www.lupapiste.fi"
+                      :author name
+                      :description (str "<![CDATA[ " html " ]]>")})]
+    (rss/channel-xml {:title (str "Lupapiste:" (i18n/with-lang lang (i18n/loc "available-materials.contact")))
+                  :link "" :description ""}
+                 items)))
