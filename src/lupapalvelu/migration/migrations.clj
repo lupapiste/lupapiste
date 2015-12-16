@@ -8,6 +8,7 @@
             [sade.property :as p]
             [sade.validators :as v]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment-accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
@@ -1414,6 +1415,13 @@
         (update doc :data dissoc :hankkeestaIlmoitettu)
         doc))
     {:permitType "P", :documents.data.hankkeestaIlmoitettu {$exists true}}))
+
+(defmigration generate-attachment-auths
+  (update-applications-array
+    :attachments
+    (fn [{versions :versions :as attachment}]
+      (assoc attachment :auth (distinct (map attaccess/auth-from-version versions))))
+    {:attachments.0 {$exists true}}))
 
 ;;
 ;; ****** NOTE! ******

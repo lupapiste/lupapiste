@@ -36,7 +36,7 @@
       (metadata/public-attachment? attachment)
       (and (seq auth) (publicity-check user application attachment) (visibility-check user application attachment)))))
 
-(defn- auth-from-version [{user :user stamped? :stamped}]
+(defn auth-from-version [{user :user stamped? :stamped}]
   (assoc user :role (if stamped? :stamper :uploader)))
 
 (defn- populate-auth
