@@ -534,3 +534,9 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
+(defn- post-process-attachment [attachment]
+  (assoc attachment :isPublic (metadata/public-attachment? attachment)))
+
+(defn post-process-attachments [application]
+  (update-in application [:attachments] (partial map post-process-attachment)))
+

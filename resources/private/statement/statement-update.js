@@ -1,4 +1,5 @@
 LUPAPISTE.StatementUpdate = function(params) {
+  "use strict";
   var self = this;
 
   var applicationId = params.applicationId;
@@ -51,10 +52,10 @@ LUPAPISTE.StatementUpdate = function(params) {
       clearTimeout(draftTimerId);
       ajax
         .command(submitCommand, _.extend({
-          id: applicationId(), 
+          id: applicationId(),
           "modify-id": modifyId(),
           "prev-modify-id": util.getIn(data(), ["modify-id"], ""),
-          statementId: statementId(), 
+          statementId: statementId(),
           lang: loc.getCurrentLanguage()
         }, params))
         .success(function() {
@@ -87,10 +88,10 @@ LUPAPISTE.StatementUpdate = function(params) {
       dirty(false);
       ajax
         .command(saveDraftCommand, _.extend({
-          id: applicationId(), 
+          id: applicationId(),
           "modify-id": modifyId(),
           "prev-modify-id": util.getIn(data(), ["modify-id"], ""),
-          statementId: statementId(), 
+          statementId: statementId(),
           lang: loc.getCurrentLanguage()
         }, params))
         .success(function() {
@@ -104,7 +105,7 @@ LUPAPISTE.StatementUpdate = function(params) {
         .call();
     }
     return false;
-  };
+  }
 
   dirty.subscribe(function(dirty) {
     clearTimeout(draftTimerId);
