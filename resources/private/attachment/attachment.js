@@ -371,6 +371,7 @@ var attachment = (function() {
         value: data
       })
       .success(function() {
+        model.dirty = true;
         hub.send("indicator-icon", {style: "positive"});
       })
       .call();

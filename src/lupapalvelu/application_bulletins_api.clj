@@ -13,7 +13,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
-            [lupapalvelu.states :as states]
             [lupapalvelu.application-search :refer [make-text-query dir]]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.permit :as permit]))

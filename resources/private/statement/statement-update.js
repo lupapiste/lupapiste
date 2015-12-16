@@ -1,4 +1,5 @@
 LUPAPISTE.StatementUpdate = function(params) {
+  "use strict";
   var self = this;
 
   var applicationId = params.applicationId;
@@ -24,7 +25,9 @@ LUPAPISTE.StatementUpdate = function(params) {
   });
 
   application.subscribe(function(application) {
-    var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId(); });
+    var statement = _.find(util.getIn(application, ["statements"]), function(statement) {
+      return statement.id === statementId();
+    });
     if(statement) {
       if (!statement["modify-id"]) {
         statement["modify-id"] = "";
@@ -44,15 +47,15 @@ LUPAPISTE.StatementUpdate = function(params) {
 
   doSubmit.subscribe(function(doSubmit) {
     var params = getCommandParams();
-    if (doSubmit) {
-      clearTimeout(draftTimerId);
+    if (!saving() && goingToSubmit()) {
       saving(true);
+      clearTimeout(draftTimerId);
       ajax
         .command(submitCommand, _.extend({
-          id: applicationId(), 
+          id: applicationId(),
           "modify-id": modifyId(),
           "prev-modify-id": util.getIn(data(), ["modify-id"], ""),
-          statementId: statementId(), 
+          statementId: statementId(),
           lang: loc.getCurrentLanguage()
         }, params))
         .success(function() {
@@ -85,10 +88,10 @@ LUPAPISTE.StatementUpdate = function(params) {
       dirty(false);
       ajax
         .command(saveDraftCommand, _.extend({
-          id: applicationId(), 
+          id: applicationId(),
           "modify-id": modifyId(),
           "prev-modify-id": util.getIn(data(), ["modify-id"], ""),
-          statementId: statementId(), 
+          statementId: statementId(),
           lang: loc.getCurrentLanguage()
         }, params))
         .success(function() {
@@ -102,7 +105,7 @@ LUPAPISTE.StatementUpdate = function(params) {
         .call();
     }
     return false;
-  };
+  }
 
   dirty.subscribe(function(dirty) {
     clearTimeout(draftTimerId);
