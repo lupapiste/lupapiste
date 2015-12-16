@@ -4,7 +4,7 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
-  self.showVersionComments = params.showVersionComments;
+  self.bulletinVersion = params.bulletinVersion;
 
   self.bulletin = params.bulletin;
 
@@ -22,7 +22,7 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   self.fetchComments = function() {
     var bulletinId = util.getIn(self, ["bulletin", "id"]);
-    var versionId = util.getIn(self, ["showVersionComments", "id"]);
+    var versionId = util.getIn(self, ["bulletinVersion", "id"]);
     self.sendEvent("publishBulletinService", "fetchBulletinComments", {bulletinId: bulletinId,
                                                                        versionId: versionId,
                                                                        asc: self.asc(),
@@ -59,12 +59,12 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
   };
 
   self.hideComments = function() {
-    self.showVersionComments(undefined);
+    self.bulletinVersion(undefined);
   };
 
   self.proclaimedHeader = ko.pureComputed(function() {
-    var start  = util.getIn(self, ["showVersionComments", "proclamationStartsAt"], "");
-    var end    = util.getIn(self, ["showVersionComments", "proclamationEndsAt"], "");
+    var start  = util.getIn(self, ["bulletinVersion", "proclamationStartsAt"], "");
+    var end    = util.getIn(self, ["bulletinVersion", "proclamationEndsAt"], "");
     if (start && end) {
       return loc("bulletin.proclaimedHeader.duringProclamation") + " " + moment(start).format("D.M.YYYY") + " - " + moment(end).format("D.M.YYYY") +
         " " + loc("bulletin.proclaimedHeader.givenComments") + " " + self.totalComments() + " kpl.";
