@@ -715,7 +715,9 @@
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
 
-(defraw waste-ads-rss
+(defraw waste-ads-feed
   {:description "Simple RSS feed for construction waste information."
+   :parameters [fmt org lang]
+   :input-validators [a/valid-feed-format]
    :user-roles #{:anonymous}}
   (a/waste-ads :rss :fi))

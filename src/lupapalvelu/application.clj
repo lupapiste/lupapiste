@@ -426,8 +426,16 @@
 
 (defmulti waste-ads (fn [& [fmt lang]] fmt))
 
-(defn max-modified [m]
-  (apply max (->> m vals (map :modified) )))
+(defn max-modified
+  "Returns the max (latest) modified value of the given document part
+  or list of parts."
+  [m]
+  (if-let [modified (:modified m)]
+    modified
+    (apply max (map max-modified
+                    (if (map? m)
+                      (vals m)
+                      m)))))
 
 (defmethod waste-ads :default [& _]
   (->>
@@ -435,18 +443,23 @@
    (mongo/select
     :applications
     {:documents {$elemMatch {:data.availableMaterials {$exists true }}}})
-   ;; 2. Unwrap and create materials, contact map.
-   tools/unwrapped
+   ;; 2. Create materials, contact, modified map.
    (map (fn [{docs :documents}]
           (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")
-                   {:contact (-> % :data :contact)
-                    :materials (-> % :data :availableMaterials tools/rows-to-list)})
+                   (let [data (select-keys (:data %) [:contact :availableMaterials])
+                         {:keys [contact availableMaterials]} (tools/unwrapped data)]
+                     {:contact contact
+                      :materials (tools/rows-to-list availableMaterials)
+                      :modified (max-modified data)}))
                 docs)))
    ;; 3. We only check the contact validity. Name and either phone or email
    ;;    must have been provided.
    (filter (fn [{{:keys [name phone email]} :contact}]
              (letfn [(good [s] (-> s ss/blank? false?))]
-               (and (good name) (or (good phone) (good email))))))))
+               (and (good name) (or (good phone) (good email))))))
+   ;; 4. Sorted in the descending modification time order.
+   (sort-by :modified)
+   (reverse)))
 
 
 (defmethod waste-ads :rss [_ lang]
@@ -472,3 +485,17 @@
     (rss/channel-xml {:title (str "Lupapiste:" (i18n/with-lang lang (i18n/loc "available-materials.contact")))
                   :link "" :description ""}
                  items)))
+
+;; Waste feed enpoind parameter validators
+
+(defn valid-org [cmd]
+  (when-not (-> cmd :data :org ss/upper-case organization/get-organization)
+    (fail :error.organization-not-found)))
+
+(defn valid-feed-format [cmd]
+  (when-not (->> cmd :data :fmt ss/lower-case keyword (contains? #{:rss :json}) )
+    (fail :error.invalid-feed-format)))
+
+(defn valid-language [cmd]
+  (when-not  (->> cmd :data :lang ss/lower-case keyword (contains? (set i18n/supported-langs)) )
+    (fail :error.invalid-language)))
