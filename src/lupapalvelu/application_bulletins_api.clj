@@ -13,7 +13,6 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
-            [lupapalvelu.states :as states]
             [lupapalvelu.application-search :refer [make-text-query dir]]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.permit :as permit]))
@@ -215,10 +214,14 @@
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
+(defn bulletin-exists [{{bulletin-id :bulletinId} :data}]
+  (when-not (mongo/any? :application-bulletins {:_id bulletin-id})
+    (fail :error.bulletin.not-found)))
+
 (defquery bulletin
   "return only latest version for application bulletin"
   {:parameters [bulletinId]
-   :input-validators [(partial action/non-blank-parameters [:bulletinId])]
+   :input-validators [(partial action/non-blank-parameters [:bulletinId]) bulletin-exists]
    :feature    :publish-bulletin
    :user-roles #{:anonymous}}
   [command]

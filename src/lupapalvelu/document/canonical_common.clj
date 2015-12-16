@@ -213,7 +213,7 @@
 
 (defn toimituksen-tiedot [{:keys [title municipality]} lang]
   {:aineistonnimi title
-   :aineistotoimittaja "lupapiste@solita.fi"
+   :aineistotoimittaja (env/value :technical-contact)
    :tila toimituksenTiedot-tila
    :toimitusPvm (util/to-xml-date (now))
    :kuntakoodi municipality

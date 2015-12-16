@@ -8,6 +8,7 @@
             [sade.property :as p]
             [sade.validators :as v]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment-accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
@@ -1282,7 +1283,7 @@
                             (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
       (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))
 
-(defmigration r-application-hankkeen-kuvaus-documents-to-hankkeen-kuvaus-rakennuslupa
+(defmigration r-application-hankkeen-kuvaus-documents-to-hankkeen-kuvaus-rakennuslupa-v2
   {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]}))
                    (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]})))}
   (update-applications-array
@@ -1414,6 +1415,13 @@
         (update doc :data dissoc :hankkeestaIlmoitettu)
         doc))
     {:permitType "P", :documents.data.hankkeestaIlmoitettu {$exists true}}))
+
+(defmigration generate-attachment-auths
+  (update-applications-array
+    :attachments
+    (fn [{versions :versions :as attachment}]
+      (assoc attachment :auth (distinct (map attaccess/auth-from-version versions))))
+    {:attachments.0 {$exists true}}))
 
 ;;
 ;; ****** NOTE! ******

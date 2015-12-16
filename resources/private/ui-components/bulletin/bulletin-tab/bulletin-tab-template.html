@@ -15,12 +15,12 @@
                                                            params: {appId: appId,
                                                                     authModel: authModel,
                                                                     bulletin: bulletin,
-                                                                    showVersionComments: showVersionComments}}"></div>
+                                                                    handleVersionClick: handleVersionClick}}"></div>
     <!-- /ko -->
 
-    <!-- ko if: showVersionComments -->
+    <!-- ko if: bulletinVersion -->
     <div class="bulletin-component" data-bind="component: {name: 'bulletin-comments',
-                                                           params: {showVersionComments: showVersionComments,
+                                                           params: {bulletinVersion: bulletinVersion,
                                                                     bulletin: bulletin,
                                                                     comments: comments,
                                                                     commentsLeft: commentsLeft,

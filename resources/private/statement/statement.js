@@ -7,9 +7,17 @@
 
   var authorizationModel = authorization.create();
 
-  var tabs = ["statement", "reply"];
+  var tabs = ko.pureComputed(function() {
+    if (authorizationModel.ok("statement-is-replyable")) {
+      return ["statement", "reply"];
+    } else if (authorizationModel.ok("authorized-for-requesting-statement-reply")) {
+      return ["statement", "reply-request"];
+    } else {
+      return ["statement"];
+    };
+  });
   var selectedTab = ko.observable("statement");
-  var submitAllowed = ko.observable({statement: false, reply: false});
+  var submitAllowed = ko.observable({statement: false, reply: false, "reply-request": false});
 
   hub.subscribe("statement::submitAllowed", function(data) {
     submitAllowed(_.set(submitAllowed(), data.tab, data.value));

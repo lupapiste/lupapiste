@@ -323,7 +323,7 @@
 
       // Remove all the extra whitespace
       // "   hii  haa hoo hee  " -> "hii haa hoo hee"
-      var kuntalupatunnus = (self.kuntalupatunnusFromPrevPermit() || "" ).trim().split(/\s+/).join( " ");
+      var kuntalupatunnus = _.trim((self.kuntalupatunnusFromPrevPermit() || "" )).split(/\s+/).join( " ");
 
       var params = self.locationModel.toJS();
       params.lang = loc.getCurrentLanguage();

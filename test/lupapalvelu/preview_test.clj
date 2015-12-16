@@ -25,7 +25,6 @@
 (facts "Test buffered-image-to-input-stream NB: changing preview compression fails this test"
        (fact (.available (buffered-image-to-input-stream image-1)) => 667967))
 
-; FIXME find a sample that can be published
-#_(facts "Test JBIG2 encoded pdf-to-buffered-image"
-        (fact (.getWidth (pdf-to-buffered-image jbig-pdf)) => 1190))
+(facts "Test JBIG2 encoded pdf-to-buffered-image"
+  (.getWidth (pdf-to-buffered-image "dev-resources/jbig2.pdf")) => 450)
 

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="statement-reply-request-template">
+
+    <div class="headerarea">
+      <div>
+        <h1>
+          <span>
+            <span data-bind="ltext: 'statement.tab.' + tab"></span>:
+          </span>
+          <span data-bind="with: application">
+            <span data-bind="text: title"></span>
+          </span>
+          <span data-bind="with: data">
+            (<span data-bind="text: person.text"></span>)
+          </span>
+        </h1>
+      </div>
+    </div>
+
+    <div class="statement-info">
+      <div data-bind="visible: !authModel.ok('request-for-statement-reply')">
+        <p data-bind="ltext: 'statement.reply-request.info-text'"></p>
+      </div>
+      <form>
+        <div data-bind="visible: authModel.ok('request-for-statement-reply')">
+          <label class="form-label" for="statement-reply-covering-note" data-bind="ltext: 'statement.' + tab + '.text'"></label>
+          <textarea
+            data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')}, 
+                       textInput: text, 
+                       readonly: !enabled()"
+            id="statement-reply-covering-note"
+            rows="15">
+          </textarea>
+        </div>
+      </form>
+    </div>
+    </script>
+  </section>
+</body>
+</html>

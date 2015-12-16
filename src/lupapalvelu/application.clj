@@ -188,6 +188,7 @@
 
 (defn post-process-app [app user]
   (->> app
+       attachment/post-process-attachments
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys

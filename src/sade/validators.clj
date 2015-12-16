@@ -4,7 +4,7 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
-(defn- matches? [re s] (boolean (when (string? s) (re-matches re s))))
+(defn matches? [re s] (boolean (when (string? s) (re-matches re s))))
 
 (defn valid-email? [email]
   (try

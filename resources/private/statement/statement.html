@@ -30,7 +30,13 @@
                                                applicationId: $root.applicationId,
                                                statementId: $root.statementId,
                                                authModel: $root.authorization } },
-                        visible: $root.selectedTab() === 'statement'"></div> 
+                        visible: $root.selectedTab() === 'statement'"></div>
+        <div data-bind="component: { name: 'statement-reply-request',
+                                     params: { application: $root.application,
+                                               applicationId: $root.applicationId,
+                                               statementId: $root.statementId,
+                                               authModel: $root.authorization} },
+                        visible: $root.selectedTab() === 'reply-request'"></div> 
         <div data-bind="component: { name: 'statement-edit-reply',
                                      params: { application: $root.application,
                                                applicationId: $root.applicationId,
@@ -40,7 +46,8 @@
       </div>
       <div id="statement-attachments-container">
         <div data-bind="component: { name: 'statement-attachments',
-                                     params: { applicationId: $root.applicationId,
+                                     params: { application: $root.application,
+                                               applicationId: $root.applicationId,
                                                statementId: $root.statementId,
                                                authModel: $root.authorization,
                                                selectedTab: $root.selectedTab } }"></div> 

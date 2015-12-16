@@ -1,7 +1,7 @@
 (ns lupapalvelu.pdf.pdf-export
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [clojure.java.io :as io]
-            [pdfa.core :as pdf]
+            [lupapalvelu.pdf.pdfa-core :as pdf]
             [clj-time.local :as tl]
             [clj-time.format :as tf]
             [lupapalvelu.i18n :refer [with-lang loc]]
@@ -180,7 +180,8 @@
     (map collect-single-document (sort-docs decorated-docs))))
 
 (defn- get-authority [{authority :authority :as application}]
-  (if (domain/assigned? application)
+  (if (and (:authority application)
+           (domain/assigned? application))
     (str (:lastName authority) " " (:firstName authority))
     (loc "application.export.empty")))
 
@@ -236,30 +237,6 @@
                                                  ", "
                                                  (or (util/to-local-date (:created final-status)) "-")))))
     neighbours))
-
-(defn collect-history-fields [child]
-  (map
-    (fn [{:keys [requested given status text attachments] {giver :name} :person :as stm}]
-      (array-map
-        (loc "statement.requested") (str "" (or (util/to-local-date requested) "-"))
-        (loc "statement.giver") (if (ss/blank? giver) (loc "application.export.empty") (str giver))
-        (loc "export.statement.given") (str "" (or (util/to-local-date given) "-"))
-        (loc "statement.title") (if (ss/blank? status) (loc "application.export.empty") (str status))
-        (loc "statement.text") (if (ss/blank? text) (loc "application.export.empty") (str text))))
-    child))
-
-(defn collect-tos-fields [child]
-  (let []
-    (map
-      (fn [{:keys [requested given status text attachments] {giver :name} :person :as stm}]
-        (array-map
-          (loc "statement.requested") (str "" (or (util/to-local-date requested) "-"))
-          (loc "statement.giver") (if (ss/blank? giver) (loc "application.export.empty") (str giver))
-          (loc "export.statement.given") (str "" (or (util/to-local-date given) "-"))
-          (loc "statement.title") (if (ss/blank? status) (loc "application.export.empty") (str status))
-          (loc "statement.text") (if (ss/blank? text) (loc "application.export.empty") (str text))))
-      child)))
-
 
 (defn- collect-export-data
   "Create a map containing combined schema and data for pdf export"
@@ -398,7 +375,7 @@
       [:spacer]
       ]))
 
-(defn common-header [app-data]
+(defn- common-header [app-data]
   [
    [:image {:xscale 1 :yscale 1} (ImageIO/read (io/resource "public/img/logo-v2-flat.png"))]
    [:spacer]
@@ -472,18 +449,16 @@
 (defn- generate-pdf-data-with-child [{subtype :permitSubtype :as app} child-type id lang]
   (with-lang lang (let [title (cond
                                 (= child-type :statements) (loc "application.statement.status")
-                                (= child-type :neighbors) (loc "application.MM.neighbors")
-                                (= child-type :verdicts) (loc "application.verdict.title")
-                                (= child-type :history) (loc "application.history.title")
-                                (ss/blank? (str subtype)) (loc "application.export.title")
-                                :else (loc "permitSubtype" subtype))
+                                (= child-type :neighbors)  (loc "application.MM.neighbors")
+                                (= child-type :verdicts)   (loc "application.verdict.title")
+                                (ss/blank? (str subtype))  (loc "application.export.title")
+                                :else                      (loc "permitSubtype" subtype))
                         app-data (collect-export-data app title false)
-                        child (filter #(or (nil? id) (= id (:id %))) (child-type app))
+                        child (filter #(= id (:id %)) (child-type app))
                         child-data (cond
                                      (= child-type :statements) (collect-statement-fields child)
                                      (= child-type :neighbors) (collect-neighbour-fields child)
                                      (= child-type :verdicts) nil
-                                     (= child-type :history) (collect-history-fields child)
                                      :else (collect-documents app))]
                     ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper
                     ; function into the body of the literal vector defined here.
