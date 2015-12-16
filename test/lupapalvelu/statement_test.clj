@@ -81,19 +81,6 @@
                   (-> (statement-owner command (dummy-application statement))
                       :ok false?))))
 
-(defspec validate-statement-exists-pass 5
-  (prop/for-all [id gen/string-alphanumeric]
-                (let [statement (-> (ssg/generate Statement)
-                                    (assoc :id id))]
-                  (nil? (statement-exists {:data {:statementId (:id statement)}} (dummy-application statement))))))
-
-(defspec validate-statement-exists-fail 5
-  (prop/for-all [[id1 id2] (gen/such-that (partial apply not=) (gen/tuple gen/string-alphanumeric gen/string-alphanumeric))]
-                (let [statement (-> (ssg/generate Statement)
-                                    (assoc :id id1))]
-                  (-> (statement-exists {:data {:statementId id2}} (dummy-application statement))
-                      :ok false?))))
-
 (defspec validate-statement-given-pass 5
   (prop/for-all [state (gen/elements [:given :replyable :replied])]
                 (let [statement (-> (ssg/generate Statement)
@@ -175,8 +162,7 @@
 
   (fact "update-reply-draft - nil values"
     (-> (ssg/generate Statement)
-        (assoc :modify-id "mod1")
-        (assoc-in [:reply :saateText] "saate")
+        (assoc :modify-id "mod1" :reply {:saateText "saate"})
         (update-reply-draft nil nil "mod2" "mod1" "editor2"))
     => (contains #{[:reply {:editor-id "editor2"
                             :nothing-to-add false
@@ -185,17 +171,17 @@
   (fact "reply-statement"
     (-> (ssg/generate Statement)
         (assoc :modify-id "mod1" :state :announced)
-        (assoc-in [:reply :saateText] "saate")
+        (dissoc :reply)
         (reply-statement "reply text" false "mod2" "mod1" "editor2"))
     => (contains #{[:state :replied]
                    [:reply {:editor-id "editor2"
                             :nothing-to-add false
-                            :text "reply text"
-                            :saateText "saate"}]}))
+                            :text "reply text"}]}))
 
   (fact "request for reply"
     (-> (ssg/generate Statement)
         (assoc :modify-id "mod1")
+        (dissoc :reply)
         (request-for-reply "covering note for reply" "editor1"))
     => (contains #{[:reply {:editor-id "editor1"
                             :nothing-to-add false
