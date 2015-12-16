@@ -99,16 +99,15 @@
     (-> application
       (assoc :statements (map
                            (fn [statement]
-                             (let [authorized-to-statement? (authorized-to-statement? user statement)]
-                               (if authorized-to-statement?
-                                 statement
-                                 (select-keys statement [:id :person :requested :given :state]))))
+                             (if (or
+                                   (:given statement)  ;; including given statements
+                                   (authorized-to-statement? user statement))
+                               statement
+                               (select-keys statement [:id :person :requested :given :state])))
                            (:statements application)))
       (assoc :attachments (filter
-                           (fn [attachment]
-                             (let [authorized-to-statement-attachment? (authorized-to-statement-attachment? user attachment ids-of-own-statements)]
-                               authorized-to-statement-attachment?))
-                           (:attachments application))))))
+                            #(authorized-to-statement-attachment? user % ids-of-own-statements)
+                            (:attachments application))))))
 
 
 (defn filter-application-content-for [application user]
