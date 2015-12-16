@@ -425,6 +425,9 @@
 
 (defmulti waste-ads (fn [& [fmt lang]] fmt))
 
+(defn max-modified [m]
+  (apply max (->> m vals (map :modified) )))
+
 (defmethod waste-ads :default [& _]
   (->>
    ;; 1. Every application that as at least a bit filled available materials.
