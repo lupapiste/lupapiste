@@ -92,7 +92,7 @@
 (defn- only-authority-or-owner-sees-statement-drafts-and-statement-attachments [application user]
   (let [ids-of-own-statements (->> (:statements application)
                                 (filter #(or
-                                           (:given %)  ;; including given statements
+                                           (:given %)  ;; including given statements as "own" statements
                                            (= (:id user) (-> % :person :userId))))
                                 (map :id)
                                 set)]
