@@ -32,8 +32,9 @@ LUPAPISTE.FileuploadService = function() {
     add: function(e, data) {
       var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions, getFileExtension(data.files[0].name));
 
-      if(acceptedFile && data.files[0].size <= MAXIMUM_UPLOAD_SIZE) {
-
+      // IE9 doesn't have size, submit data and check files in server
+      var size = util.getIn(data, ["files", 0, "size"]);
+      if((acceptedFile && size <= MAXIMUM_UPLOAD_SIZE) || !size) {
         data.submit();
       } else {
         var message = !acceptedFile ?

@@ -115,39 +115,49 @@
 (def- operation-tree-for-Y
   ["Ymp\u00e4rist\u00f6luvat"
    (filterv identity
-     [; permit/YI
-      ["Meluilmoitus" :meluilmoitus]
+    [["ymparistonsuojelulain-mukaiset-ilmoitukset" 
+       [["Meluilmoitus" :meluilmoitus] ; permit/YI
+         ["koeluontoinen-toiminta" :koeluontoinen-toiminta] ; permit/YM
+         ["ilmoitus-poikkeuksellisesta-tilanteesta" :ilmoitus-poikkeuksellisesta-tilanteesta]]] ; permit/YM
+ 
+      ; permit/YM
+      ["maatalouden-ilmoitukset"
+       [["lannan-varastointi" :lannan-varastointi]]]
 
       ; permit/YL
       ["Pima" :pima]
+ 
+      ; permit/YM
+      ["kunnan-ympmaarayksista-poikkeaminen"
+       [["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]]]
 
-      ; permit/MAL
-      ["maa-ainesten_ottaminen" :maa-aineslupa]
-
+      ["maa-ainekset"
+       [["maa-ainesten_ottaminen" :maa-aineslupa] ; permit/MAL
+        ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]]] ; permit/YM
+          
       ; permit/YL
       ["ympariston-pilaantumisen-vaara"
        [["uusi-toiminta" :yl-uusi-toiminta]
         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
         ["toiminnan-muutos" :yl-toiminnan-muutos]]]
 
-      ; permit/YM
-      ["muut-ymparistoluvat"
-       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]
-        ["jatteen-keraystoiminta" :jatteen-keraystoiminta]
-        ["lannan-varastointi" :lannan-varastointi]
-        ["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]
-        ["koeluontoinen-toiminta" :koeluontoinen-toiminta]
-        ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]
-        ["ilmoitus-poikkeuksellisesta-tilanteesta" :ilmoitus-poikkeuksellisesta-tilanteesta]
-        ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]
-        ]]
-
       ; permit/VVVL
       ["vapautus-vesijohdosta-ja-viemariin-liitymisvelvollisuudeseta"
        [["vesijohdosta" :vvvl-vesijohdosta]
         ["viemarista" :vvvl-viemarista]
         ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
-        ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]])])
+        ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]
+     
+     ; permit/YM
+      ["jatelain-mukaiset-ilmoitukset"
+       [["jatteen-keraystoiminta" :jatteen-keraystoiminta]]]
+     
+      ; permit/YM
+      ["luonnonsuojelulain-mukaiset-ilmoitukset"
+       [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]]]
+     
+      ; permit/YM
+      ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]])])
 
 (def operation-tree-for-KT ; aka kiinteistotoimitus aka maanmittaustoimitukset
   ["maanmittaustoimitukset"

@@ -67,7 +67,7 @@
                 (:build-number env/buildinfo)
                 (:hg-branch env/buildinfo)
                 (s/join failures))]
-      (email/send-email-message "lupapalvelu@solita.fi" "Critical: Migration failure!" [msg msg])))
+      (email/send-email-message (env/value :technical-contact) "Critical: Migration failure!" [msg msg])))
 
   (mongo/ensure-indexes)
   (server/add-middleware web/tempfile-cleanup)
@@ -87,6 +87,9 @@
 
   (info "*** Instrumenting performance monitoring")
   (perf-mon/init)
+
+  (server/add-middleware headers/sanitize-header-values)
+
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl in port 9090")
     (require 'clojure.tools.nrepl.server)

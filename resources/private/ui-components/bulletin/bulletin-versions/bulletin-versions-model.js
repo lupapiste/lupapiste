@@ -26,7 +26,7 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
     return self.bulletin() ? _.map(self.bulletin().versions, mapVersions) : [];
   });
 
-  self.showVersionComments = params.showVersionComments;
+  self.selectedBulletinVersion = params.selectedBulletinVersion;
 
   self.editPublishedApplication = function(bulletin) {
     bulletin.edit(!bulletin.edit());

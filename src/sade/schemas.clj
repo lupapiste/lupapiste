@@ -12,8 +12,8 @@
 (defmacro defdynamicschema [name params form]
   {:pre [(vector? params)]}
   (let [schema-key (apply vector name params)]
-    `(defn ~name ~params 
-       (locking dynamically-created-schemas 
+    `(defn ~name ~params
+       (locking dynamically-created-schemas
          (get @dynamically-created-schemas ~schema-key
               ((swap! dynamically-created-schemas assoc ~schema-key ~form) ~schema-key))))))
 
@@ -30,7 +30,7 @@
 
 ;;
 ;; Schemas
-;; 
+;;
 
 (sc/defschema BlankStr
   "A schema for empty or nil valued string"
@@ -56,6 +56,9 @@
 
 (sc/defschema Hetu
   (sc/pred validators/valid-hetu? "Not valid hetu"))
+
+(sc/defschema ObjectIdStr
+  (sc/pred (partial validators/matches? #"^[0-9a-f]{24}$") "ObjectId hex string"))
 
 ;; Dynamic schema constructors
 
