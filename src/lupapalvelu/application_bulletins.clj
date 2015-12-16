@@ -105,5 +105,6 @@
       (when (seq application) attachment-file))))
 
 (defn update-file-metadata [bulletin-id comment-id files]
-  (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.bulletinId bulletin-id
+  (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.linked     true
+                                                                       :metadata.bulletinId bulletin-id
                                                                        :metadata.commentId  comment-id}}))
