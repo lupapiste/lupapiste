@@ -71,8 +71,7 @@
                    :plugins [[lein-midje "3.1.1"]
                              [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.0"]
-                             [lupapiste/lein-nitpicker "0.5.1"]
-                             [lupapiste/lein-hgnotes "0.3.0"]]
+                             [lupapiste/lein-nitpicker "0.5.1"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
@@ -89,7 +88,7 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
+              :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
