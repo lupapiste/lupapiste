@@ -124,6 +124,12 @@
         (fact "Applicant can not see unsubmitted statements"
           (query mikko :should-see-unsubmitted-statements :id application-id) => unauthorized?)
 
+        (fact "Statement cannot be given by applicant which is not statement owner"
+          (command mikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => unauthorized?)
+
+        (fact "Statement cannot be given by authority which is not statement owner"
+          (command sonja :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.not-statement-owner"))
+
         (fact "Statement cannot be given with invalid status"
           (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
 
@@ -136,7 +142,18 @@
             (count emails) => 1
             (:to email) => (contains mikko-email)
             email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
-        ))))
+        
+        (fact "One Attachment is generated"
+          (->> (query-application sonja application-id)
+               :attachments
+               (filter (comp #{"lausunto"} :type-id :type))
+               (count)) => 1)
+
+        (fact "Comment is added"
+          (->> (query-application sonja application-id)
+               :comments
+               (filter (comp #{"statement"} :type :target))
+               (count)) => 1)))))
 
 (facts "Applicant type person can be requested for statement"
 
@@ -169,15 +186,25 @@
 
       (let [application (query-application pena application-id)
             statement   (some #(when (= pena-email (-> % :person :email)) %) (:statements application))]
-        (fact "Statement cannot be given with invalid status"
-          (command pena :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
         (fact* "Statement is given"
                (command pena :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
         (fact "Applicant statement giver cannot delete his already-given statement"
           (command pena :delete-statement :id application-id :statementId (:id statement)) => (partial expected-failure? "error.statement-already-given"))
-        ))))
+
+        (fact "One Attachment is generated"
+          (->> (query-application sonja application-id)
+               :attachments
+               (filter (comp #{"lausunto"} :type-id :type))
+               (count)) => 1)
+
+        (fact "Comment is added"
+          (->> (query-application sonja application-id)
+               :comments
+               (filter (comp #{"statement"} :type :target))
+               (count)) => 1)))))
 
 (fact "Statement giver has access to application"
+  (create-statement-giver sipoo ronja-email)
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-ronja (get-statement-giver-by-email sipoo ronja-email)
         resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja] :saateText "saate" :dueDate 1450994400000) => ok?
@@ -217,3 +244,37 @@
       (get-statement-by-user-id application (:id user)) => truthy
       (auth-contains-statement-giver application (:id user)) => truthy)))
   
+(facts "Statement reply"
+  (create-statement-giver sipoo veikko-email)
+  (let [statement-giver-veikko (get-statement-giver-by-email sipoo veikko-email)
+        application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :operation "ilmoitus-poikkeuksellisesta-tilanteesta"))
+        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko])
+        application (query-application ronja application-id)
+        statement-id (:id (get-statement-by-user-id application veikko-id)) => truthy]
+
+    (fact "authorized-for-requesting-statement-reply"
+      (query sonja :authorized-for-requesting-statement-reply :id application-id :statementId statement-id) => ok?
+      (query ronja :authorized-for-requesting-statement-reply :id application-id :statementId statement-id) => ok?
+      (query veikko :authorized-for-requesting-statement-reply :id application-id :statementId statement-id) => unauthorized?
+      (query pena :authorized-for-requesting-statement-reply :id application-id :statementId statement-id) => unauthorized?)
+
+    ;; (fact "statement-is-replyable - should fail when statement is not given"
+    ;;   (query sonja :statement-is-replyable :id application-id :statementId statement-id) =not=> ok?)
+    
+    (fact "statement is given"
+      (command veikko :give-statement :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+
+    (fact "statement-is-replyable - should fail when user is not requested for reply"
+      (query sonja :statement-is-replyable :id application-id :statementId statement-id) =not=> ok?)
+
+    (fact "applicant is not authorized for requesting reply"
+      (command mikko :request-for-statement-reply :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") =not=> ok?)
+
+    (fact "statement giver is not authorized for requesting reply"
+      (command veikko :request-for-statement-reply :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") =not=> ok?)
+
+    (fact "authority is able to request for reply"
+      (command sonja :request-for-statement-reply :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+
+    (fact "statement-is-replyable - is replyable when user is requested for reply"
+      (query sonja :statement-is-replyable :id application-id :statementId statement-id) => ok?)))
