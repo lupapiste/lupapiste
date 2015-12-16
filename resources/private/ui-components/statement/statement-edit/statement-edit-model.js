@@ -30,7 +30,7 @@ LUPAPISTE.StatementEditModel = function(params) {
     return _.contains(["requested", "draft"], util.getIn(self.data, ["state"]));
   });
 
-  self.coveringNote = ko.pureComputed(function() {
+  self.coverNote = ko.pureComputed(function() {
     var isStatementGiver = util.getIn(self.data(), ["person", "userId"]) === lupapisteApp.models.currentUser.id();
     return self.tab === "statement" && isStatementGiver ? util.getIn(self.data, ["saateText"]) : "";
   });

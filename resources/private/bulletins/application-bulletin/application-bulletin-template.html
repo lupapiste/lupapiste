@@ -113,8 +113,11 @@
       </div>
 
       <div class="container">
-        <div class="bulletin-tab-content" data-bind="component: { name: 'bulletin-' + selectedTab() + '-tab', params: { bulletin: bulletin,
-                                          attr: {'id': 'bulletin-' + selectedTab() + '-tab-component'}"></div>
+        <div class="bulletin-tab-content" data-bind="component: { name: 'bulletin-' + selectedTab() + '-tab',
+                                                                  params: { bulletin: bulletin,
+                                                                            attachments: attachments,
+                                                                            verdicts: verdicts }},
+                                                     attr: {'id': 'bulletin-' + selectedTab() + '-tab-component'}"></div>
 
         <div data-bind="visible: selectedTab() === 'info'" id="bulletinDocgen" class="docgen-content">
             <!-- This is where the generated documents will be placed. -->

@@ -34,7 +34,7 @@ LUPAPISTE.IndicatorIconModel = function() {
       // stop timer if indicator was set negative during positive indicator hide was delayed
       clearTimeout(showTimerId);
       showTimerId = undefined;
-    } 
+    }
     if (val) {
       // automatically hide indicator, negative after 10 sec else 2 sec.
       showTimerId = _.delay(function() {
@@ -60,7 +60,7 @@ LUPAPISTE.IndicatorIconModel = function() {
         self.indicatorStyle(e.style);
         self.showIndicator(true);
         waitTimerId = undefined;
-      }, 7500, e);
+      }, 500, e);
     }
   });
 };

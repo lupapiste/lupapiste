@@ -7,6 +7,8 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
 
   self.authModel = params.authModel;
 
+  self.handleVersionClick = params.handleVersionClick;
+
   function mapVersions(v) {
     var model;
     switch (v.bulletinState) {
@@ -25,8 +27,6 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
   self.versions = ko.pureComputed(function() {
     return self.bulletin() ? _.map(self.bulletin().versions, mapVersions) : [];
   });
-
-  self.selectedBulletinVersion = params.selectedBulletinVersion;
 
   self.editPublishedApplication = function(bulletin) {
     bulletin.edit(!bulletin.edit());

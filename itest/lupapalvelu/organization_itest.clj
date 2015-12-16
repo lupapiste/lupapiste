@@ -358,7 +358,7 @@
       resp => http200?
       body => ok?)))
 
-(def local-db-name (str "organization_itest_" (sade/now)))
+(def local-db-name (str "test_organization_itest_" (sade/now)))
 
 (mongo/connect!)
 (mongo/with-db local-db-name (fixture/apply-fixture "minimal"))

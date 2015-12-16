@@ -447,16 +447,14 @@
 
 (defn create-preview
   [file-id filename content-type content application-id & [db-name]]
-  (if (env/feature? :preview)
-  (when (preview/converter content-type)
+  (when (and (env/feature? :preview) (preview/converter content-type))
     (mongo/with-db (or db-name mongo/default-db-name)
       (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
       (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
                                               (with-open [content ((:content (mongo/download file-id)))]
                                                 (preview/create-preview content content-type)))]
         (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id))))
-  (warn "Preview env feature is turned off!")))
+        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))))
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"
@@ -535,4 +533,10 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
+
+(defn- post-process-attachment [attachment]
+  (assoc attachment :isPublic (metadata/public-attachment? attachment)))
+
+(defn post-process-attachments [application]
+  (update-in application [:attachments] (partial map post-process-attachment)))
 

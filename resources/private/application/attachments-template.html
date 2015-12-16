@@ -24,11 +24,10 @@
                 data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; },
                            attr: {'id': 'attachment-row-' + type['type-group'] + '-' + type['type-id']}">
               <td class="attachmentState">
-         <i data-bind="attr: {'class': LUPAPISTE.statusIcon(statusName),
+                <i data-bind="attr: {'class': LUPAPISTE.statusIcon(statusName),
                                         'data-test-state': state,
                                         'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                        'title': loc (statusName + '.title')}"
-                  </i>
+                                        'title': loc (statusName + '.title')}"></i>
                 <i data-bind="visible: $data.signed,
                                  attr: {'class': 'lupicon-circle-pen',
                                         'title': loc('attachment.signed'),
@@ -54,6 +53,11 @@
                                  attr: {'class': 'lupicon-circle-section-sign',
                                         'title': loc('attachment.verdict-attachment'),
                                         'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
+                </i>
+                <i data-bind="visible: !$data.isPublic,
+                                 attr: {'class': 'lupicon-lock',
+                                        'title': loc('attachment.not-public-attachment'),
+                                        'data-test-icon': 'not-public-attachment-' + type['type-group'] + '.' + type['type-id']}">
                 </i>
               </td>
               <td class="attachment-type-group">
