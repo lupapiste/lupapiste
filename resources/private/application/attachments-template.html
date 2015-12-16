@@ -55,6 +55,11 @@
                                         'title': loc('attachment.verdict-attachment'),
                                         'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
                 </i>
+                <i data-bind="visible: !$data.isPublic,
+                                 attr: {'class': 'lupicon-lock',
+                                        'title': loc('attachment.not-public-attachment'),
+                                        'data-test-icon': 'not-public-attachment-' + type['type-group'] + '.' + type['type-id']}">
+                </i>
               </td>
               <td class="attachment-type-group">
                 <span data-bind="if: type">
