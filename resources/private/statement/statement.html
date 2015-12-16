@@ -46,7 +46,8 @@
       </div>
       <div id="statement-attachments-container">
         <div data-bind="component: { name: 'statement-attachments',
-                                     params: { applicationId: $root.applicationId,
+                                     params: { application: $root.application,
+                                               applicationId: $root.applicationId,
                                                statementId: $root.statementId,
                                                authModel: $root.authorization,
                                                selectedTab: $root.selectedTab } }"></div> 
