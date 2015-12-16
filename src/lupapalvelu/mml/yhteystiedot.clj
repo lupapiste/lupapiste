@@ -4,6 +4,7 @@
             [sade.common-reader :refer :all]
             [sade.util :refer [assoc-when]]
             [sade.env :as env]
+            [sade.validators :as v]
             [net.cgrand.enlive-html :as enlive]
             [clojure.string :as str])
   (:import [java.net URLEncoder]))
@@ -44,17 +45,15 @@
 (defn- get-yhteystiedot-url-template [] (env/value :mml :yhteystiedot :uri-template))
 
 (defn- get-yhteystiedot
-  ([id] (get-yhteystiedot id false))
-  ([id raw?]
-  (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" (URLEncoder/encode id "UTF-8"))
+  ([property-id] (get-yhteystiedot property-id false))
+  ([property-id raw?]
+  (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" property-id)
         username (env/value :mml :yhteystiedot :username)
         password (env/value :mml :yhteystiedot :password)]
     (cr/get-xml uri [username password] raw?))))
 
-(defn get-owners [id]
-  (let [xml (cr/strip-xml-namespaces (get-yhteystiedot id))
+(defn get-owners [property-id]
+  {:pre [(v/kiinteistotunnus? property-id)]}
+  (let [xml (cr/strip-xml-namespaces (get-yhteystiedot property-id))
         henkilot (children (select1 xml :kohteenHenkilot))]
     (map ->henkilo henkilot)))
-
-(defn get-owners-raw [id]
-  (get-yhteystiedot id true))

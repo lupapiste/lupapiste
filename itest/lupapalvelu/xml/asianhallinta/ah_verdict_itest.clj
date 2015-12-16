@@ -179,7 +179,7 @@
 
               (let [email (last (dummy-email/messages :reset true))]
                 (:to email) => (contains (email-for-key pena))
-                (:subject email) => "Lupapiste.fi: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
+                (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
                 email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))
 
               (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
@@ -216,19 +216,21 @@
 
                 (let [email (last (dummy-email/messages :reset true))]
                   (:to email) => (contains (email-for-key pena))
-                  (:subject email) => "Lupapiste.fi: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
+                  (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
                   email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))))))))))
 
 (facts "unit tests"
   (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path]))]
     (fact* "Can unzip passed zipfile"
-           (let [unzip-path (unzip-file zip-file) =not=> (throws Exception)
+           (let [tmp-dir    (fs/temp-dir "ah-unzip-test")
+                 unzip-path (unzip-file zip-file tmp-dir) =not=> (throws Exception)
                  pattern    (->> [example-ah-xml-path example-ah-attachment-path]
                                  (map fs/base-name)
                                  (s/join "|")
                                  re-pattern)]
 
-             (count (fs/find-files unzip-path pattern)) => 2)))
+             (count (fs/find-files unzip-path pattern)) => 2
+             (fs/delete-dir tmp-dir) => truthy)))
 
   (fact "Creates correct verdict model from xml"
     (build-verdict parsed-example-ah-xml 123456) =>

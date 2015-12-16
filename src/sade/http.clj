@@ -4,6 +4,9 @@
             [sade.env :as env])
   (:refer-clojure :exclude [get]))
 
+(def no-cache-headers {"Cache-Control" "no-cache, no-store"
+                       "Pragma" "no-cache"})
+
 (defn- merge-to-defaults [& options]
   (let [fst-opt     (first options)
         options-map (cond (and (= 1 (count options)) (or (map? fst-opt) (nil? fst-opt)))  fst-opt
@@ -23,3 +26,8 @@
 
 (defn post [uri & options]
   (logged-call http/post uri (apply merge-to-defaults options)))
+
+(defn secure-headers [request-or-response]
+  (if (contains? request-or-response :headers)
+    (update request-or-response :headers dissoc "cookie" "set-cookie" "server" "host" "connection")
+    request-or-response))

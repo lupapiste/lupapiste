@@ -640,7 +640,7 @@
                           {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
                    {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "t" :label false :i18nkey "huoneistot.porras" :listen [:muutostapaChanged]}
-                   {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
+                   {:name "huoneistonumero" :type :string :subtype :number :min 0 :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
                    {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged]}
                    {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku" :listen [:muutostapaChanged]}
                    {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size "s" :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
@@ -660,6 +660,8 @@
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
                       :type :table
+                      :uicomponent :docgenTable
+                      :validator :huoneistot
                       :group-help "huoneistot.groupHelpText"
                       :repeating true
                       :approvable true
@@ -731,13 +733,13 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"      
+                            :body [{:name "suunniteltuJate"
                                     :type :table
                                     :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc jatetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate" 
-                                    :type :table 
+                                   {:name "suunnittelematonJate"
+                                    :type :table
                                     :repeating true
                                     :body (body jatetyyppi rakennusjateselvitysUusiRow)}]}
                            {:name "vaarallisetAineet"
@@ -745,14 +747,14 @@
                             :type :group
                             :uicomponent :constructionWasteReport
                             :approvable false
-                            :body [{:name "suunniteltuJate"      
-                                    :type :table 
-                                    :repeating true 
+                            :body [{:name "suunniteltuJate"
+                                    :type :table
+                                    :repeating true
                                     :repeating-init-empty true
                                     :body (body (assoc vaarallinenainetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate" 
-                                    :type :table 
-                                    :repeating true 
+                                   {:name "suunnittelematonJate"
+                                    :type :table
+                                    :repeating true
                                     :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}])
 
 
@@ -1106,12 +1108,16 @@
                              {:name "oikeusvaikutukseton yleiskaava"}
                              {:name "asemakaava"}
                              {:name "ranta-asemakaava"}
-                             {:name "ei kaavaa"}]}])
+                             {:name "ei kaavaa"}]}
+                     {:name "hankkeestaIlmoitettu" :type :group
+                      :group-help "hankkeestaIlmoitettu.groupHelpText"
+                      :body [{:name "hankkeestaIlmoitettuPvm" :type :date :i18nkey "date"}]}])
 
 (def lisakohde-rakennuspaikka [{:name "kiinteisto"
                                 :type :group
                                 :uicomponent :propertyGroup
                                 :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
+                                       ; Please channge yhteystiedot-api/application-property-owners if kiinteistoTunnus path changes
                                        {:name "kiinteistoTunnus" :type :string :hidden true}
                                        ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                                        {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
@@ -1169,11 +1175,12 @@
                                       :type :select
                                       :layout :full-width
                                       :required true
-                                      :body [{:name "halkominen"}
+                                      :body [{:name "lohkominen-tonttijako"}
+                                             {:name "lohkominen-ohjeellinen"}
                                              {:name "kiinteistojen-yhdistaminen"}
                                              {:name "kiinteistolajin-muutos"}
-                                             {:name "lohkominen-tonttijako"}
-                                             {:name "lohkominen-ohjeellinen"}
+                                             {:name "kiinteiston-tunnusmuutos"}
+                                             {:name "halkominen"}
                                              {:name "tilusvaihto"}
                                              {:name "yht-alueen-osuuksien-siirto"}
                                              {:name "yleisen-alueen-lohkominen" }]}
@@ -1374,11 +1381,12 @@
 
 
 
-   {:info {:name "hakija"
+      {:info {:name "hakija"
            :i18name "osapuoli"
            :order 3
            :removable true
            :repeating true
+           :deny-removing-last-document true
            :approvable true
            :type :party
            :subtype "hakija"
@@ -1386,13 +1394,15 @@
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
-    :body party}
+       :body party}
+
 
    {:info {:name "hakija-r"
            :i18name "osapuoli"
            :order 3
            :removable true
            :repeating true
+           :deny-removing-last-document true
            :approvable true
            :type :party
            :subtype "hakija"
@@ -1402,11 +1412,27 @@
            }
     :body party}
 
+   {:info {:name "hakija-kt"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :deny-removing-last-document true
+           :approvable true
+           :type :party
+           :subtype "hakija"
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           }
+    :body party}
+
    {:info {:name "hakija-ya"
            :i18name "osapuoli"
            :order 3
            :removable false
            :repeating false
+           :deny-removing-last-document true
            :approvable true
            :type :party
            :subtype "hakija"
@@ -1421,6 +1447,7 @@
            :order 3
            :removable true
            :repeating true
+           :deny-removing-last-document true
            :approvable true
            :type :party
            :subtype "hakija"
@@ -1449,7 +1476,7 @@
 
    {:info {:name "tyonjohtaja"
            :i18name "osapuoli"
-           :order 5
+           :order 2
            :removable true
            :repeating true
            :approvable true
@@ -1459,7 +1486,7 @@
 
    {:info {:name "tyonjohtaja-v2"
            :i18name "osapuoli"
-           :order 5
+           :order 2
            :removable false
            :repeating false
            :approvable true
@@ -1483,11 +1510,18 @@
            :type :location}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
 
+   {:info {:name "rakennuspaikka-ilman-ilmoitusta"
+           :approvable true
+           :i18name "rakennuspaikka"
+           :order 2
+           :type :location}
+    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hankkeestaIlmoitettu")}
+
    {:info {:name "kiinteisto"
            :approvable true
            :order 2
            :type :location}
-    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+    :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne" "hankkeestaIlmoitettu")}
 
    {:info {:name "secondary-kiinteistot"
            :i18name "kiinteisto"
@@ -1497,7 +1531,7 @@
            :no-repeat-button true
            :removable true
            :type :location}
-    :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
+    :body (schema-body-without-element-by-name lisakohde-rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne" "hankkeestaIlmoitettu")}
 
    {:info {:name "aloitusoikeus" :removable false :approvable true}
     :body (body kuvaus)}

@@ -45,7 +45,7 @@
                           (i18n/localize "fi" subject-key)))
         title-begin (str (when show-municipality-in-subject
                            (str (i18n/localize "fi" "municipality" municipality) ", ")) title)]
-    (str "Lupapiste.fi: " title-begin (when (and title subject-key)" - ") (when subject-key title-postfix))))
+    (str "Lupapiste: " title-begin (when (and title subject-key)" - ") (when subject-key title-postfix))))
 
 (defn- get-email-recipients-for-application
   "Emails are sent to everyone in auth array except statement persons,

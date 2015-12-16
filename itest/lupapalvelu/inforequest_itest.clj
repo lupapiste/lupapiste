@@ -81,7 +81,7 @@
 
     (fact "Auhtority receives email about the new oir"
       (:to email) => "erajorma@example.com"
-      (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
+      (:subject email) => "Lupapiste: OIR - Neuvontapyynt\u00f6"
       (count token) => pos?)
 
     (fact "Clicking the link redirects to oir page"
@@ -95,7 +95,7 @@
       (let [email          (last-email)
            [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))]
        (:to email) => "erajorma@example.com"
-       (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
+       (:subject email) => "Lupapiste: OIR - Neuvontapyynt\u00f6"
        (count token) => pos?))
 
     (fact "Admin can not convert inforequests to normal yet"

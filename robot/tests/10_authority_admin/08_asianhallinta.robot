@@ -13,6 +13,7 @@ Sipoo can't see asianhallinta configs, because no ftp user is set in scope
 
 Kuopio logs in and sees asianhallinta configs
   Kuopio logs in
+  Go to page  backends
   Element should be visible  xpath=//section[@data-test-id="asianhallinta"]
 
 Asianhallinta is enabled in minimal with version 1.1

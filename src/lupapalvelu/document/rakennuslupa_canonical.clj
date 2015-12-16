@@ -105,7 +105,7 @@
                                :lammonlahde lammonlahde-map
                                :julkisivu julkisivu-map))]
 
-    (util/assoc-when {:yksilointitieto id
+    (util/assoc-when {:yksilointitieto (-> info :op :id)
                       :alkuHetki (util/to-xml-datetime  created)
                       :sijaintitieto {:Sijainti {:tyhja empty-tag}}
                       :rakentajatyyppi (:rakentajaTyyppi kaytto)
@@ -173,7 +173,7 @@
 (defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]
   (let [toimenpide (:data kaupunkikuvatoimenpide-doc)]
     {:Toimenpide {:kaupunkikuvaToimenpide (get-toimenpiteen-kuvaus kaupunkikuvatoimenpide-doc)
-                  :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
+                  :rakennelmatieto {:Rakennelma {:yksilointitieto (-> kaupunkikuvatoimenpide-doc :schema-info :op :id)
                                                  :alkuHetki (util/to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
                                                  :kokonaisala (-> toimenpide :kokonaisala)

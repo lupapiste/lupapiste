@@ -5,6 +5,7 @@
     background-color: $gray221;
     height: $grid-min-height;
     padding: $marginS $marginM;
+    cursor: pointer;
   }
   .bulletin-comment__index {
     margin-right: $marginS;
@@ -41,3 +42,22 @@
     }
   }
 }
+
+.bulletin-comment-spinner {
+  color: $gray221;
+  padding: 0 50%;
+}
+
+.bulletin-proclamation-header {
+  overflow: auto;
+  line-height: $grid-min-height;
+  vertical-align: middle;
+  margin-bottom: $grid-margin;
+  .bulletin-proclamation-text {
+    float: left;
+  }
+  .bulletin-proclamation-sort {
+    float: right;
+  }
+}
+

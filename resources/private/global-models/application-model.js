@@ -51,6 +51,12 @@ LUPAPISTE.ApplicationModel = function() {
   self.tosFunction = ko.observable();
   self.metadata = ko.observable();
 
+  // Options
+  self.optionMunicipalityHearsNeighbors = ko.observable(false);
+  self.optionMunicipalityHearsNeighborsDisabled = ko.pureComputed(function() {
+    return !lupapisteApp.models.applicationAuthModel.ok("set-municipality-hears-neighbors");
+  });
+
   // Application indicator metadata fields
   self.unseenStatements = ko.observable();
   self.unseenVerdicts = ko.observable();
@@ -332,7 +338,16 @@ LUPAPISTE.ApplicationModel = function() {
       })
       .processing(self.processing)
       .call();
-      hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
+    hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
+    return false;
+  };
+
+  self.findOwners = function() {
+    hub.send("show-dialog", { ltitle: "neighbor.owners.title",
+      size: "large",
+      component: "neighbors-owners-dialog",
+      componentParams: {applicationId: self.id()} });
+    hub.send("track-click", {category:"Application", label:"", event:"findOwners"});
     return false;
   };
 

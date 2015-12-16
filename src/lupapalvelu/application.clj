@@ -23,6 +23,7 @@
             [lupapalvelu.states :as states]
             [sade.core :refer :all]
             [sade.property :as p]
+            [sade.validators :as v]
             [sade.util :as util]
             [swiss.arrows :refer [-<>>]]))
 
@@ -43,14 +44,6 @@
 ;;
 ;; Validators
 ;;
-
-(defn- property-id? [^String s]
-  (and s (re-matches #"^[0-9]{14}$" s)))
-
-(defn property-id-parameters [params command]
-  (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
-    (info "invalid property id parameters:" (s/join ", " invalid))
-    (fail :error.invalid-property-id :parameters (vec invalid))))
 
 (defn- is-link-permit-required [application]
   (or (= :muutoslupa (keyword (:permitSubtype application)))
@@ -107,13 +100,15 @@
   {:pre [(every? (partial contains? application)  (keys domain/application-skeleton))]}
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
-(defn filter-repeating-party-docs [schema-version schema-names]
-  (let [schemas (schemas/get-schemas schema-version)]
-    (filter
-      (fn [schema-name]
-        (let [schema-info (get-in schemas [schema-name :info])]
-          (and (:repeating schema-info) (= (:type schema-info) :party))))
-      schema-names)))
+(defn filter-party-docs [schema-version schema-names repeating-only?]
+  (filter (fn [schema-name]
+            (let [schema-info (:info (schemas/get-schema schema-version schema-name))]
+              (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
+          schema-names))
+
+(defn party-document? [doc]
+  (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
+    (= (:type schema-info) :party)))
 
 ; Seen updates
 (def collections-to-be-seen #{"comments" "statements" "verdicts"})
@@ -229,8 +224,9 @@
                                               "yleiset-alueet-maksaja" operations/schema-data-yritys-selected
                                               "tyomaastaVastaava" operations/schema-data-henkilo-selected)
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
-        make (fn [schema-name]
-               (let [schema (schemas/get-schema schema-version schema-name)]
+        make (fn [schema]
+               {:pre [(:info schema)]}
+               (let [schema-name (get-in schema [:info :name])]
                  {:id          (mongo/create-id)
                   :schema-info (:info schema)
                   :created     created
@@ -242,17 +238,24 @@
                                      {})
                                    created))}))
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
-        op-doc (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
-        existing-schemas (->> (:documents application)
-                              (map (comp :name :schema-info))      ;; existing schema names
-                              set)
-        new-docs (->> (:required op-info)
-                      (remove existing-schemas)      ;; required schema names
+        op-doc (update-in (make (schemas/get-schema schema-version op-schema-name)) [:schema-info] #(merge {:op op :removable true} %))
+
+        existing-schemas-infos (map :schema-info (:documents application))
+        existing-schema-names (set (map :name existing-schemas-infos))
+
+        location-schema (util/find-first #(= (keyword (:type %)) :location) existing-schemas-infos)
+
+        schemas (map #(schemas/get-schema schema-version %) (:required op-info))
+        new-docs (->> schemas
+                      (remove (comp existing-schema-names :name :info))
+                      (remove
+                        (fn [{{:keys [type repeating]} :info}]
+                          (and location-schema (= type :location) (not repeating))))
                       (map make)                           ;; required docs
                       (cons op-doc))]                      ;; new docs
     (if-not user
       new-docs
-      (conj new-docs (make (operations/get-applicant-doc-schema-name application))))))
+      (conj new-docs (make (schemas/get-schema schema-version (operations/get-applicant-doc-schema-name application)))))))
 
 
 (defn make-op [op-name created]
@@ -400,7 +403,9 @@
        :proposal
        :registered
        :proposalApproved
-       :sessionProposal]
+       :sessionProposal
+       :inUse
+       :onHold]
       (repeat nil))))
 
 (assert (= states/all-application-states (set (keys timestamp-key))))

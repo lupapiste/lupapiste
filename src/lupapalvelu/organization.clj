@@ -4,12 +4,15 @@
             [clojure.walk :as walk]
             [monger.operators :refer :all]
             [cheshire.core :as json]
+            [schema.core :as sc]
             [sade.core :refer [fail fail!]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.crypt :as crypt]
+            [sade.http :as http]
             [sade.xml :as sxml]
+            [sade.schemas :as ssc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
@@ -24,20 +27,28 @@
    :open-inforequest-email ""
    :opening nil})
 
+(sc/defschema Tag
+  {:id ssc/ObjectIdStr
+   :label sc/Str})
+
+(sc/defschema Layer
+  {:id sc/Str
+   :base sc/Bool
+   :name sc/Str})
+
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
-  (when (seq org)
-    (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))))
+  (if (:scope org)
+    (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))
+    org))
 
 (defn- remove-sensitive-data
   [org]
-  (when (seq org)
-    (->> (:krysp org)
-         (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]))
-         (into {})
-         (assoc org :krysp))))
+  (if (:krysp org)
+    (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
+    org))
 
 (defn get-organizations
   ([]
@@ -49,7 +60,7 @@
   ([query projection]
    (->> (mongo/select :organizations query projection)
         (map remove-sensitive-data)
-        (map with-scope-defaults ))))
+        (map with-scope-defaults))))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
@@ -64,28 +75,7 @@
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
 
-(defn get-krysp-wfs
-  "Returns a map containing :url and :version information for municipality's KRYSP WFS"
-  ([{:keys [organization permitType] :as application}]
-    (get-krysp-wfs organization permitType))
-  ([organization-id permit-type]
-   (let [organization (mongo/by-id :organizations organization-id)
-         krysp-config (get-in organization [:krysp (keyword permit-type)])
-         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-         crypto-iv    (when-let [iv (:crypto-iv krysp-config)]
-                        (-> iv (crypt/str->bytes) (crypt/base64-decode)))
-         password     (when-let [password (and crypto-iv (:password krysp-config))]
-                        (->> password
-                             (crypt/str->bytes)
-                            (crypt/base64-decode)
-                             (crypt/decrypt crypto-key crypto-iv :aes)
-                             (crypt/bytes->str)))
-         username     (:username krysp-config)]
-     (when-not (s/blank? (:url krysp-config))
-       (->> (when username {:credentials [username password]})
-            (merge (select-keys krysp-config [:url :version])))))))
-
-(defn- encode-credentials
+(defn encode-credentials
   [username password]
   (when-not (s/blank? username)
     (let [crypto-key       (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
@@ -97,6 +87,39 @@
                                 (crypt/bytes->str))
           crypto-iv        (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
       {:username username :password crypted-password :crypto-iv crypto-iv})))
+
+(defn decode-credentials
+  "Decode password that was originally generated (together with the init-vector )by encode-credentials.
+   Arguments are base64 encoded."
+  [password crypto-iv]
+  (let [crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+        crypto-iv (-> crypto-iv crypt/str->bytes crypt/base64-decode)]
+    (->> password
+                          (crypt/str->bytes)
+                          (crypt/base64-decode)
+                          (crypt/decrypt crypto-key crypto-iv :aes)
+                          (crypt/bytes->str))))
+
+(defn get-krysp-wfs
+  "Returns a map containing :url and :version information for municipality's KRYSP WFS"
+  ([{:keys [organization permitType] :as application}]
+    (get-krysp-wfs {:_id organization} permitType))
+  ([query permit-type]
+   (let [organization (mongo/select-one :organizations query [:krysp])
+         krysp-config (get-in organization [:krysp (keyword permit-type)])
+         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
+         crypto-iv    (:crypto-iv krysp-config)
+         password     (when-let [password (and crypto-iv (:password krysp-config))]
+                        (decode-credentials password crypto-iv))
+         username     (:username krysp-config)]
+     (when-not (s/blank? (:url krysp-config))
+       (->> (when username {:credentials [username password]})
+            (merge (select-keys krysp-config [:url :version])))))))
+
+(defn municipality-address-endpoint [municipality]
+  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
+    (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
+
 
 (defn set-krysp-endpoint
   [id url username password endpoint-type version]
@@ -176,3 +199,36 @@
 
 (defn some-organization-has-archive-enabled? [organization-ids]
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :permanent-archive-enabled true})))
+
+
+;;
+;; Organization/municipality provided map support.
+
+(defn query-organization-map-server
+  [org-id params headers]
+  (when-let [m (-> org-id get-organization :map-layers :server)]
+    (let [{:keys [url username password crypto-iv]} m]
+      (http/get url
+                (merge {:query-params params}
+                       (when-not (ss/blank? crypto-iv)
+                         {:basic-auth [username (decode-credentials password crypto-iv)]})
+                       {:headers (select-keys headers [:accept :accept-encoding])
+                        :as :stream})))))
+
+(defn organization-map-layers-data [org-id]
+  (when-let [{:keys [server layers]} (-> org-id get-organization :map-layers)]
+    (let [{:keys [url username password crypto-iv]} server]
+      {:server {:url url
+                :username username
+                :password (if (ss/blank? crypto-iv)
+                            password
+                            (decode-credentials password crypto-iv))}
+       :layers layers})))
+
+(defn update-organization-map-server [org-id url username password]
+  (let [credentials (if (ss/blank? password)
+                      {:username username
+                       :password password}
+                      (encode-credentials username password))
+        server      (assoc credentials :url url)]
+   (update-organization org-id {$set {:map-layers.server server}})))

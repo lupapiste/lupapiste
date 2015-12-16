@@ -2,20 +2,21 @@
   (:require [taoensso.timbre :refer [debug error errorf]]
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.neighbors-api :as neighbors]
-            [lupapalvelu.open-inforequest :as inforequest]
             [monger.operators :refer :all]
             [clojure.string :as s]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.action :refer :all]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.neighbors-api :as neighbors]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.open-inforequest :as inforequest]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.xml.krysp.reader]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
@@ -25,7 +26,7 @@
 (defn- older-than [timestamp] {$lt timestamp})
 
 (defn- get-app-owner [application]
-  (let [owner (domain/get-auths-by-role application :owner)]
+  (let [owner (auth/get-auths-by-role application :owner)]
     (user/get-user-by-id (-> owner first :id))))
 
 
@@ -50,9 +51,11 @@
 
 (notifications/defemail :reminder-neighbor (assoc neighbors/email-conf :subject-key "neighbor-reminder"))
 
-(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application :as command} _ recipient]
-  {:link-fi (notifications/get-application-link application nil "fi" recipient)
-   :link-sv (notifications/get-application-link application nil "sv" recipient)
+;; Email definition for the "Request statement reminder"
+
+(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application} _ recipient]
+  {:link-fi (notifications/get-application-link application "/statement" "fi" recipient)
+   :link-sv (notifications/get-application-link application "/statement" "sv" recipient)
    :created-date created-date})
 
 (notifications/defemail :reminder-request-statement
@@ -60,9 +63,43 @@
    :subject-key    "statement-request-reminder"
    :model-fn       request-statement-reminder-email-model})
 
+;; Email definition for the "Statement due date reminder"
+
+(defn- reminder-statement-due-date-model [{{:keys [due-date]} :data app :application} _ recipient]
+  {:link-fi (notifications/get-application-link app "/statement" "fi" recipient)
+   :link-sv (notifications/get-application-link app "/statement" "sv" recipient)
+   :due-date due-date})
+
+(notifications/defemail :reminder-statement-due-date
+  {:recipients-fn  :recipients
+   :subject-key    "reminder-statement-due-date"
+   :model-fn       reminder-statement-due-date-model})
+
+;; Email definition for the "Application state reminder"
+
+(notifications/defemail :reminder-application-state
+  {:subject-key    "active-application-reminder"
+   :recipients-fn  notifications/from-user})
+
+;; Email definition for the "YA work time is expiring"
+
+(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date :as data} :data application :application :as command} _ recipient]
+  {:link-fi (notifications/get-application-link application nil "fi" recipient)
+   :link-sv (notifications/get-application-link application nil "sv" recipient)
+   :address (:address application)
+   :work-time-expires-date work-time-expires-date})
+
+(notifications/defemail :reminder-ya-work-time-is-expiring
+  {:subject-key    "ya-work-time-is-expiring-reminder"
+   :model-fn       ya-work-time-is-expiring-reminder-email-model})
+
+
+
+
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
-  (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
+  (let [timestamp-now (now)
+        timestamp-1-week-ago (util/get-timestamp-ago :week 1)
         apps (mongo/select :applications {:state {$in ["open" "submitted"]}
                                           :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
                                                                    :given nil
@@ -71,16 +108,50 @@
                                                                         {:reminder-sent (older-than timestamp-1-week-ago)}]}}})]
     (doseq [app apps
             statement (:statements app)
-            :let [requested (:requested statement)]
+            :let [requested (:requested statement)
+                  due-date (:dueDate statement)
+                  reminder-sent (:reminder-sent statement)]
             :when (and
                     (nil? (:given statement))
-                    (< requested timestamp-1-week-ago))]
+                    (< requested timestamp-1-week-ago)
+                    (or (nil? reminder-sent) (< reminder-sent timestamp-1-week-ago))
+                    (or (nil? due-date) (> due-date timestamp-now)))]
       (notifications/notify! :reminder-request-statement {:application app
                                                           :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
                                                           :data {:created-date (util/to-local-date requested)}})
       (update-application (application->command app)
         {:statements {$elemMatch {:id (:id statement)}}}
-        {$set {:statements.$.reminder-sent (now)}}))))
+        {$set {:statements.$.reminder-sent timestamp-now}}))))
+
+
+
+;; "Lausuntopyynnon maaraika umpeutunut, mutta lausuntoa ei ole annettu. Muistutus lahetetaan viikoittain uudelleen."
+(defn statement-reminder-due-date []
+  (let [timestamp-now (now)
+        timestamp-1-week-ago (util/get-timestamp-ago :week 1)
+        apps (mongo/select :applications {:state {$nin (->> states/terminal-states vec (map name))}
+                                          :statements {$elemMatch {:given nil
+                                                                   $and [{:dueDate {$exists true}}
+                                                                         {:dueDate (older-than timestamp-now)}]
+                                                                   $or [{:duedate-reminder-sent {$exists false}}
+                                                                        {:duedate-reminder-sent nil}
+                                                                        {:duedate-reminder-sent (older-than timestamp-1-week-ago)}]}}})]
+    (doseq [app apps
+            statement (:statements app)
+            :let [due-date (:dueDate statement)
+                  duedate-reminder-sent (:duedate-reminder-sent statement)]
+            :when (and
+                    (nil? (:given statement))
+                    (number? due-date)
+                    (< due-date timestamp-now)
+                    (or (nil? duedate-reminder-sent) (< duedate-reminder-sent timestamp-1-week-ago)))]
+      (notifications/notify! :reminder-statement-due-date {:application app
+                                                           :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
+                                                           :data {:due-date (util/to-local-date due-date)}})
+      (update-application (application->command app)
+        {:statements {$elemMatch {:id (:id statement)}}}
+        {$set {:statements.$.duedate-reminder-sent (now)}}))))
+
 
 
 ;; "Neuvontapyynto: Neuvontapyyntoon ei ole vastattu viikon kuluessa eli neuvontapyynnon tila on avoin. Lahetetaan viikoittain uudelleen."
@@ -135,22 +206,6 @@
                                            :created  (now)}}})))))))
 
 
-(notifications/defemail :reminder-application-state
-  {:subject-key    "active-application-reminder"
-   :recipients-fn  notifications/from-user})
-
-
-;; Email definition for the "YA work time is expiring"
-
-(defn- ya-work-time-is-expiring-reminder-email-model [{{work-time-expires-date :work-time-expires-date :as data} :data application :application :as command} _ recipient]
-  {:link-fi (notifications/get-application-link application nil "fi" recipient)
-   :link-sv (notifications/get-application-link application nil "sv" recipient)
-   :address (:address application)
-   :work-time-expires-date work-time-expires-date})
-
-(notifications/defemail :reminder-ya-work-time-is-expiring
-  {:subject-key    "ya-work-time-is-expiring-reminder"
-   :model-fn       ya-work-time-is-expiring-reminder-email-model})
 
 ;; "YA hakemus: Hakemukselle merkitty tyoaika umpeutuu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn ya-work-time-is-expiring-reminder []
@@ -198,6 +253,7 @@
   (when (env/feature? :reminders)
     (mongo/connect!)
     (statement-request-reminder)
+    (statement-reminder-due-date)
     (open-inforequest-reminder)
     (neighbor-reminder)
     (application-state-reminder)

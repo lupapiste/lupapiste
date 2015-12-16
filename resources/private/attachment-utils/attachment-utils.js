@@ -52,10 +52,10 @@ var attachmentUtils = (function() {
   };
 
   /*
-   * Returns attachments (source) as GroupModel instances, grouped by grouping function f.
-   * Optionally sorts using sort.
+   * Returns attachments (source) as GroupModel instances, grouped by groupFn.
+   * Optionally sorts using sorterFn.
    */
-  function getAttachmentsByGroup(source, f, sort, editable, allowedAttachmentTypes) {
+  function getAttachmentsByGroup(source, groupFn, sorterFn, editable) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
       a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
@@ -65,11 +65,10 @@ var attachmentUtils = (function() {
       a.notNeededFieldDisabled = ko.observable(a.requestedByAuthority ? lupapisteApp.models.currentUser.role() !== "authority" : false);
       return a;
     });
-    if ( _.isFunction(sort) ) {
-      var sorter = _.partial(sort, allowedAttachmentTypes);
-      attachments.sort(sorter);
+    if ( _.isFunction(sorterFn) ) {
+      attachments.sort(sorterFn);
     }
-    var grouped = _.groupBy(attachments, f);
+    var grouped = _.groupBy(attachments, groupFn);
     var mapped = _.map(grouped, function(attachments, group) {
       if ( group === generalAttachmentsStr ) {
         return new GroupModel(group, null, attachments, editable); // group = attachments.general
@@ -101,7 +100,7 @@ var attachmentUtils = (function() {
 
 
   function getGroupByOperation(source, editable, allowedAttachmentTypes) {
-    return getAttachmentsByGroup(source, fGroupByOperation, fSortByAllowedAttachmentType, editable, allowedAttachmentTypes);
+    return getAttachmentsByGroup(source, fGroupByOperation, _.partial(fSortByAllowedAttachmentType, allowedAttachmentTypes), editable);
   }
 
   function sortAttachmentTypes(attachmentTypes) {

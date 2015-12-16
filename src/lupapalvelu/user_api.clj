@@ -14,6 +14,8 @@
             [sade.core :refer :all]
             [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
@@ -27,7 +29,6 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.password-reset :as pw-reset]
             ))
 
@@ -38,7 +39,7 @@
 ;;
 
 (defquery user
-  {:user-roles action/all-authenticated-user-roles}
+  {:user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if (user/virtual-user? user)
     (ok :user user)
@@ -73,6 +74,7 @@
 (env/in-dev
   (defquery user-by-email
     {:parameters [email]
+     :input-validators [(partial action/non-blank-parameters [:email])]
      :user-roles #{:admin}}
     [_]
     (ok :user (user/get-user-by-email email))))
@@ -230,7 +232,9 @@
   {:parameters       [title :filter sort filterType]
    :user-roles       #{:authority}
    :input-validators [validate-filter-type
-                      (partial action/non-blank-parameters [:title :filter :sort])
+                      (partial action/non-blank-parameters [:title])
+                      (partial action/map-parameters [:filter])
+                      (partial action/map-parameters-with-required-keys [:sort] [:field :asc])
                       (fn [{{filter-id :filterId} :data}]
                         (when (and filter-id (not (mongo/valid-key? filter-id)))
                           (fail :error.illegal-key)))]
@@ -352,6 +356,7 @@
 
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
+   :input-validators [(partial action/non-blank-parameters [:oldPassword :newPassword])]
    :user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
@@ -426,6 +431,7 @@
 
 (defcommand login
   {:parameters [username password]
+   :input-validators [(partial action/non-blank-parameters [:username :password])]
    :user-roles #{:anonymous}}
   [command]
   (if (user/throttle-login? username)
@@ -450,7 +456,7 @@
         (fail :error.login)))))
 
 (defquery redirect-after-login
-  {:user-roles action/all-authenticated-user-roles}
+  {:user-roles auth/all-authenticated-user-roles}
   [{session :session}]
   (ok :url (get session :redirect-after-login "")))
 
@@ -592,6 +598,7 @@
 
 (defraw download-user-attachment
   {:parameters [attachment-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant}}
   [{user :user}]
   (when-not user (throw+ {:status 401 :body "forbidden"}))
@@ -606,6 +613,7 @@
 
 (defcommand remove-user-attachment
   {:parameters [attachment-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant}}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
@@ -657,7 +665,7 @@
 
 (defquery enable-foreman-search
   {:user-roles #{:authority}
-   :org-authz-roles (disj action/all-org-authz-roles :tos-editor :tos-publisher)
+   :org-authz-roles (disj auth/all-org-authz-roles :tos-editor :tos-publisher)
    :pre-checks [(fn [command application]
                   (let [org-ids (user/organization-ids (:user command))]
                     (if-not application

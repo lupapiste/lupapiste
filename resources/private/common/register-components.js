@@ -36,6 +36,10 @@ jQuery(document).ready(function() {
     {name: "ok-button-group"},
     {name: "company-edit"},
     {name: "tags-editor"},
+    {name: "municipality-maps"},
+    {name: "municipality-maps-server"},
+    {name: "municipality-maps-layers"},
+    {name: "municipality-maps-map"},
     {name: "upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},
@@ -62,6 +66,7 @@ jQuery(document).ready(function() {
     {name: "add-property-dialog"},
     {name: "autocomplete-saved-filters"},
     {name: "indicator"},
+    {name: "indicator-icon"},
     {name: "accordion"},
     {name: "date-field", model: "input-field-model"},
     {name: "text-field", model: "input-field-model"},
@@ -83,7 +88,14 @@ jQuery(document).ready(function() {
     {name: "move-to-final"},
     {name: "bulletin-versions"},
     {name: "bulletin-tab"},
-    {name: "bulletin-comments"}
+    {name: "bulletin-comments"},
+    {name: "infinite-scroll"},
+    {name: "statements-tab"},
+    {name: "statements-table"},
+    {name: "statement-edit"},
+    {name: "statement-edit-reply"},
+    {name: "statement-control-buttons"},
+    {name: "statement-attachments"}
   ];
 
   _.forEach(components, function(component) {

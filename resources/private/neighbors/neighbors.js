@@ -1,15 +1,37 @@
 (function() {
   "use strict";
 
+  var applicationDrawStyle = {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF", pointRadius: 6};
+  var neighbourDrawStyle = {fillColor: "rgb(243,145,41)", // $lp-orange
+                            fillOpacity: 0.50,
+                            strokeColor: "#000",
+                            pointRadius: 6,
+                            strokeWidth: 3};
   var applicationId;
+
+  var borderCache = {};
 
   function Model() {
     var self = this;
 
-    self.applicationId = ko.observable();
+    self.getApplicationWKT = null;
+    self.applicationAreaLoading = ko.observable(false);
+
+    self.getNeighbourWKT = null;
+    self.neighborAreasLoading = ko.observable(false);
+
+    self.areasLoading = ko.pureComputed(function() {
+      return self.applicationAreaLoading() || self.neighborAreasLoading();
+    });
+
+    self.applicationId = lupapisteApp.models.application.id;
+    self.permitType = lupapisteApp.models.application.permitType;
     self.neighbors = ko.observableArray();
     self.neighborId = ko.observable();
     self.map = null;
+
+    self.x = 0;
+    self.y = 0;
 
     var neighborSkeleton = {propertyId: undefined,
                             owner: {
@@ -31,18 +53,60 @@
       return n;
     }
 
-    self.init = function(application) {
-      if (!self.map) {
-        self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+    self.draw = function(propertyIds, drawingStyle, processing) {
+      var processedIds = [];
+      var found = [];
+      var missing = [];
+
+      _.each(propertyIds, function(p) {
+        if (!_.contains(processedIds, p)) {
+          if (borderCache[p]) {
+            _.each(borderCache[p], function(wkt) {found.push(wkt);});
+          } else {
+            missing.push(p);
+          }
+          processedIds.push(p);
+        }
+      });
+
+      self.map.drawDrawings(found, {}, drawingStyle);
+
+      if (!_.isEmpty(missing)) {
+        ajax.datatables("property-borders", {propertyIds: missing})
+          .success(function(resp) {
+            _.each(_.groupBy(resp.wkts, "kiinttunnus"), function(m,k) {
+              borderCache[k] = _.pluck(m, "wkt");
+            });
+            self.map.drawDrawings(_.pluck(resp.wkts, "wkt"), {}, drawingStyle);
+          })
+          .processing(processing)
+          .call();
       }
+    };
+
+    self.init = function(application) {
       var location = application.location,
           x = location.x,
           y = location.y;
-      self
-        .applicationId(application.id)
-        .neighbors(_.map(application.neighbors, ensureNeighbors))
-        .neighborId(null)
-        .map.clear().updateSize().center(x, y, 13).add({x: x, y: y});
+      var neighbors = _.map(application.neighbors, ensureNeighbors);
+
+      if (!self.map) {
+        self.map = gis.makeMap("neighbors-map", {zoomWheelEnabled: false, drawingControls: true});
+        self.map.updateSize().center(x, y, 13).add({x: x, y:y});
+      } else {
+        self.map.updateSize().clear().add({x: x, y:y});
+        if (self.x !== x || self.y !== y) {
+          self.map.center(x, y);
+        }
+      }
+
+      self.x = x;
+      self.y = y;
+
+      self.neighbors(neighbors).neighborId(null);
+
+      self.getApplicationWKT = self.draw([application.propertyId], applicationDrawStyle, self.applicationAreaLoading);
+      self.getNeighbourWKT = self.draw(_.pluck(neighbors, "propertyId"), neighbourDrawStyle, self.neighborAreasLoading);
     };
 
     function openEditDialog(params) {
@@ -58,14 +122,6 @@
 
     self.add = function() {
       openEditDialog();
-    };
-
-    self.click = function(x, y) {
-      hub.send("show-dialog", { ltitle: "neighbor.owners.title",
-                                size: "large",
-                                component: "neighbors-owners-dialog",
-                                componentParams: {x: x,
-                                                  y: y} });
     };
 
     self.done = function() {
@@ -94,13 +150,39 @@
 
   var model = new Model();
 
+  function openOwnersDialog(params) {
+    hub.send("show-dialog", { ltitle: "neighbor.owners.title",
+                              size: "large",
+                              component: "neighbors-owners-dialog",
+                              componentParams: params });
+  }
+
+  hub.subscribe("LupapisteEditingToolbar::featureAdded", openOwnersDialog);
+  hub.subscribe({type:"dialog-close", id:"neighbors-owners-dialog"}, function() {
+    if (model.map) {
+      model.map.clearManualDrawings();
+    }
+  });
+
   hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
   });
 
   hub.onPageUnload("neighbors", function() {
-    model.map = null;
+    if (model.getApplicationWKT) {
+      model.getApplicationWKT.abort();
+      model.getApplicationWKT = null;
+    }
+    if (model.getNeighbourWKT) {
+      model.getNeighbourWKT.abort();
+      model.getNeighbourWKT = null;
+    }
+    if (model.map) {
+      model.map.clear();
+    }
+
+    // Could reset borderCache here to save memory?
   });
 
   repository.loaded(["neighbors"], function(application) {

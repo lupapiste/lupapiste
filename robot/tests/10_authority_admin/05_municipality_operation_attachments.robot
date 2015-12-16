@@ -19,8 +19,9 @@ New applications have Asemapiirros, Pohjapiiros and no Rasitustodistus
 
 Admin removes Pohjapiirros template and adds Rasitustodistus template
   Sipoo logs in
+  Go to page  attachments
   # Open dialog
-  ${xpath} =  Set Variable  xpath=//section[@id='admin']//table[@data-test-id='organization-operations-attachments']//tr[@data-op-id='kerrostalo-rivitalo']//a[@data-test-id='add-operations-attachments']
+  ${xpath} =  Set Variable  xpath=//table[@data-test-id='organization-operations-attachments']//tr[@data-op-id='kerrostalo-rivitalo']//a[@data-test-id='add-operations-attachments']
   Wait until  Element should be visible  ${xpath}
   Focus  ${xpath}
   Click element  ${xpath}
@@ -46,7 +47,6 @@ Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirros
   Attachment template is visible  paapiirustus.asemapiirros
   Attachment template is not visible  paapiirustus.pohjapiirros
   Attachment template is visible  rakennuspaikan_hallinta.rasitustodistus
-  Logout
 
 
 *** Keywords ***

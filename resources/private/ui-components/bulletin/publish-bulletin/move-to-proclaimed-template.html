@@ -4,34 +4,7 @@
     <span data-bind="ltext: 'bulletin.application.state.label'"></span>
     <span class="bulletin-state" data-bind="ltext: 'bulletin.state.proclaimed'"></span>
   </p>
-  <div class="form-grid form-grid--no-border">
-    <div class="row">
-      <div class="col-1">
-        <div data-bind="component: {name: 'date-field',
-                                    params: {value: proclamationStartsAt,
-                                             lLabel: 'bulletin.proclamation.startsAt',
-                                             lPlaceholder: 'choose',
-                                             required: true,
-                                             id: 'proclamationStartsAt'}}"></div>
-      </div>
-      <div class="col-1">
-        <div data-bind="component: {name: 'date-field',
-                                    params: {value: proclamationEndsAt,
-                                             lLabel: 'bulletin.proclamation.endsAt',
-                                             lPlaceholder: 'choose',
-                                             required: true,
-                                             id: 'proclamationEndsAt'}}"></div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-4">
-        <div data-bind="component: {name: 'textarea-field',
-                                    params: {value: proclamationText,
-                                             lPlaceholder: 'bulletin.proclamation.text.placeholder',
-                                             lLabel: 'bulletin.proclamation.text'}}"></div>
-      </div>
-    </div>
-  </div>
+  <div data-bind="template: 'edit-proclaimed-template'"></div>
   <div data-bind="template: 'publish-button-template'"></div>
   <!-- /ko -->
   <!-- ko if: alreadyProclaimed() && !proclaimAgain() -->

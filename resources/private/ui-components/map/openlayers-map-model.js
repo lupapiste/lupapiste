@@ -11,8 +11,11 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
 
   // fit viewport to feature layer extent
   function updateView() {
-    if (map && map.getSize() && !ol.extent.isEmpty(vectorLayer.getSource().getExtent())) {
-      view.fit(vectorLayer.getSource().getExtent(), map.getSize());
+    if (map) {
+      map.updateSize();
+      if (map.getSize() && !ol.extent.isEmpty(vectorLayer.getSource().getExtent())) {
+        view.fit(vectorLayer.getSource().getExtent(), map.getSize());
+      }
     }
   }
 
@@ -80,6 +83,7 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
   xhr.send();
 
   function initMap() {
+
     // config from http://epsg.io/3067
     proj4.defs("EPSG:3067","+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 
@@ -88,11 +92,9 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
 
     var parser = new ol.format.WMTSCapabilities();
     var capabilities = parser.read(xhr.responseXML);
-
     var options = ol.source.WMTS.optionsFromCapabilities(capabilities, {
                     layer: "taustakartta"
                   });
-
     // use proxy urls
     options.urls = urls;
 
@@ -134,5 +136,14 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
         popup.show(evt.coordinate, props.nimi);
       }
     });
+  }
+
+  var hubsub = hub.subscribe("page-load", updateView);
+
+  self.dispose = function() {
+    hub.unsubscribe(hubsub);
+    if (map) {
+      map.destroy();
+    }
   }
 };

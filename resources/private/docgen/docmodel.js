@@ -424,7 +424,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.value = value || "";
       sourceValueChanged(input, value, sourceValue, source);
 
-      if (subSchema.placeholder && _.includes(["text", "email", "search", "url", "tel", "password"], type)) {
+      if (subSchema.placeholder && _.includes(["text", "email", "search", "url", "tel", "password"], type) && !self.isDisabled) {
         input.setAttribute("placeholder", loc(subSchema.placeholder));
       }
     }
@@ -498,7 +498,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function setMaxLen(input, subSchema) {
-    var maxLen = subSchema["max-len"] || 255; // if you change the default, change in model.clj, too
+    var maxLen = subSchema["max-len"] || LUPAPISTE.config.inputMaxLength; // if you change the default, change in model.clj, too
     input.setAttribute("maxlength", maxLen);
   }
 
@@ -607,7 +607,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var value = getModelValue(model, subSchema.name);
     input.value = value;
 
-    if (subSchema.placeholder) {
+    if (subSchema.placeholder && !self.isDisabled) {
       input.setAttribute("placeholder", loc(subSchema.placeholder));
     }
 
@@ -682,10 +682,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildSelect(subSchema, model, path) {
     var myPath = path.join(".");
     var select = document.createElement("select");
-    // Set default value of "muutostapa" field to "Lisays" when adding a new huoneisto.
-    if (subSchema.name === "muutostapa" && _.isEmpty(_.keys(model))) {
-      model[subSchema.name] = {value: "lis\u00e4ys"};
-    }
 
     $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 

@@ -228,13 +228,20 @@ $notification-bottom: -60px;
   }
 }
 
-// Admin nav is different, so tweaking is needed.
-// See admin.css for details.
-.admin {
+// Admin & authority admin nav is different, so tweaking is needed.
+.admin, .authority-admin {
   .nav-notification {
     margin: {
-    top: $notification-top + 42px + 4px;
-    bottom: $notification-bottom + 12px;
+      top: $notification-top + 42px + 4px;
+      bottom: $notification-bottom + 12px;
+    }
   }
+
+  .breadcrumb {
+    background-color: #4F4F4F;
+    .container {margin-top: 0;}
+    a.selected {color: #000}
   }
+
+  h2 {margin-top: $marginL}
 }

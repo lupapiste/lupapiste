@@ -1,7 +1,7 @@
 (ns sade.property
-  (:require [clojure.string :as s]
-            [sade.strings :as ss]
-            [sade.util :as util]))
+  (:require [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.municipality :as muni]))
 
 (def property-id-pattern
   "Regex for property id human readable format"
@@ -19,21 +19,15 @@
   (->> (re-matches db-property-id-pattern property-id)
     rest
     (map util/->int)
-    (s/join "-")))
-
-(def municipality-mapping
-  {"476" "297" ; Maaninka -> Kuopio (2015)
-   "413" "609" ; Lavia -> Pori (2015)
-   "838" "423" ; Tarvasjoki -> Lieto (2015)
-   })
+    (ss/join "-")))
 
 (defn- take-municipality [[match s _1 _2 _4]]
   (let [municipality (ss/zero-pad 3 s)]
-    (get municipality-mapping municipality municipality)))
+    (get muni/municipality-mapping municipality municipality)))
 
 (defn municipality-id-by-property-id [^String property-id]
   (when (and (string? property-id) (> (count property-id) 3))
-    (condp re-find (s/trim property-id)
+    (condp re-find (ss/trim property-id)
       property-id-pattern    :>> take-municipality
       db-property-id-pattern :>> take-municipality
       nil))

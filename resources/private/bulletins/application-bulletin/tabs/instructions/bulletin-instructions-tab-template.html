@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="bulletin-instructions-tab-template">
+      <h3>
+        <span data-bind="visible: inProclaimedState, ltext: 'application.tabInstructions.proclaimed'"></span>
+        <span data-bind="visible: inVerdictGivenState() || inFinalState() , ltext: 'application.tabInstructions.verdictGiven'"></span>
+      </h3>
+      <!-- ko if: proclaimedText -->
+      <pre data-bind="text: proclaimedText"></pre>
+      <!-- /ko -->
+      <!-- ko if: verdictGivenText -->
+      <pre data-bind="text: verdictGivenText"></pre>
+      <!-- /ko -->
+    </script>
+  </section>
+</body>
+</html>

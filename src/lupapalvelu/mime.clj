@@ -1,7 +1,8 @@
 (ns lupapalvelu.mime
   (:require [clojure.string :refer [split join trim]]
             [clojure.java.io :refer [reader file]]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [pantomime.mime :refer [mime-type-of add-pattern]]))
 
 ;; Reads mime.types file provided by Apache project.
 ;; Ring has also some of the most common file extensions mapped, but is missing
@@ -31,15 +32,20 @@
 (def allowed-extensions
   (keys
     (into (sorted-map)
-          (filter #(re-matches mime-type-pattern (second %)) mime-types))))
+      (filter #(re-matches mime-type-pattern (second %)) mime-types))))
 
 (defn mime-type [filename]
   (when filename
-    (get mime-types (.toLowerCase (ss/suffix filename ".")))))
+    (mime-type-of filename)))
 
-(defn allowed-file? [filename]
-  (when-let [t (mime-type filename)]
-    (re-matches mime-type-pattern t)))
+(defn allowed-file? [fname-or-file]
+  (when fname-or-file
+    (when-let [mime-type (mime-type-of fname-or-file)]
+      (not (empty? (re-matches mime-type-pattern mime-type))))))
 
 (defn sanitize-filename [filename]
   (-> filename (ss/suffix "\\") (ss/suffix "/")))
+
+(try
+  (add-pattern "application/x-extension-ifc" ".+\\.ifc$" "foo.ifc")
+  (catch java.lang.AssertionError e)) ; Pattern had already been added

@@ -3,8 +3,13 @@
             [clojure.java.io :as io]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.proxy-services :as proxy]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [lupapalvelu.itest-util :refer :all]))
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture.core :as fixture]
+            [monger.operators :refer :all]
+            [sade.core :as sade]))
 
 (apply-remote-minimal)
 
@@ -123,14 +128,14 @@
 
 (facts "Selected operations"
 
-  (fact* "For an organization which has no selected operations, all operations are returned"
-    (let [resp (query sipoo "all-operations-for-organization" :organizationId "753-YA") => ok?
+  (fact "For an organization which has no selected operations, all operations are returned"
+    (let [resp (query sipoo "all-operations-for-organization" :organizationId "753-YA")
           operations (:operations resp)]
       ;; All the YA operations (and only those) are received here.
       (count operations) => 1
       (-> operations first first) => "yleisten-alueiden-luvat"))
 
-  (fact* "Set selected operations"
+  (fact "Set selected operations"
     (command pena "set-organization-selected-operations" :operations ["pientalo" "aita"]) => unauthorized?
     (command sipoo "set-organization-selected-operations" :operations ["pientalo" "aita"]) => ok?)
 
@@ -289,6 +294,7 @@
 
 (facts "Organization tags"
   (fact "only auth admin can add new tags"
+    (command sipoo :save-organization-tags :tags []) => ok?
     (command sipoo :save-organization-tags :tags [{:id nil :label "makeja"} {:id nil :label "nigireja"}]) => ok?
     (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
     (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
@@ -300,6 +306,16 @@
   (fact "only authority can fetch available tags"
     (query pena :get-organization-tags) =not=> ok?
     (map :label (:tags (:753-R (:tags (query sonja :get-organization-tags))))) => ["makeja" "nigireja"])
+
+  (fact "invalid data is rejected"
+    (command sipoo :save-organization-tags :tagz []) => fail?
+    (command sipoo :save-organization-tags :tags {}) => fail?
+    (command sipoo :save-organization-tags :tags nil) => fail?
+    (command sipoo :save-organization-tags :tags "tag") => fail?
+    (command sipoo :save-organization-tags :tags [{}]) => fail?
+    (command sipoo :save-organization-tags :tags [{:id "id"}]) => fail?
+    (command sipoo :save-organization-tags :tags [{:label false}]) => fail?
+    (command sipoo :save-organization-tags :tags [{:id nil :label {:injection true}}]) => fail?)
 
   (fact "Check tag deletion query"
     (let [id (create-app-id sonja)
@@ -341,3 +357,142 @@
     (fact "zip file with correct shape file can be uploaded by auth admin"
       resp => http200?
       body => ok?)))
+
+(def local-db-name (str "test_organization_itest_" (sade/now)))
+
+(mongo/connect!)
+(mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
+
+(facts "Municipality (753) maps"
+       (mongo/with-db local-db-name
+         (let [url "http://mapserver"]
+           (local-org-api/update-organization
+            "753-R"
+            {$set {:map-layers {:server {:url url}
+                                :layers [{:name "asemakaava"
+                                          :id "asemakaava-id"
+                                          :base true}
+                                         {:name "kantakartta"
+                                          :id "kantakartta-id"
+                                          :base true}
+                                         {:name "foo"
+                                          :id "foo-id"
+                                          :base false}
+                                         {:name "bar"
+                                          :id "bar-id"
+                                          :base false}]}}})
+           (local-org-api/update-organization
+            "753-YA"
+            {$set {:map-layers {:server {:url url}
+                                :layers [{:name "asemakaava"
+                                          :id "other-asemakaava-id"
+                                          :base true}
+                                         {:name "kantakartta"
+                                          :id "other-kantakartta-id"
+                                          :base true}
+                                         {:name "Other foo"
+                                          :id "foo-id"
+                                          :base false}
+                                         {:name "kantakartta" ;; not base layer
+                                          :id "hii-id"
+                                          :base false}]}}})
+           (let [layers (proxy/municipality-layers "753")
+                 objects (proxy/municipality-layer-objects "753")]
+             (fact "Five layers"
+                   (count layers) => 5)
+             (fact "Only one asemakaava"
+                   (->> layers (filter #(= (:name %) "asemakaava")) count) => 1)
+             (fact "Only one with foo-id"
+                   (->> layers (filter #(= (:id %) "foo-id")) count) => 1)
+             (facts "Two layers named kantakartta"
+                    (let [kantas (filter #(= "kantakartta" (:name %)) layers)
+                          [k1 k2] kantas]
+                      (fact "Two layers" (count kantas) => 2)
+                      (fact "One of which is not a base layer"
+                            (not= (:base k1) (:base k2)) => true)))
+             (facts "Layer objects"
+                    (fact "Every layer object has an unique id"
+                          (->> objects (map :id) set count) => 5)
+                    (fact "Ids are correctly formatted"
+                          (every? #(let [{:keys [id base]} %]
+                                     (or (and base (= (name {"asemakaava"  101
+                                                             "kantakartta" 102})
+                                                      id))
+                                         (and (not base) (not (number? id))))) objects))
+                    (fact "Bar layer is correct "
+                          (let [subtitles {:fi "" :sv "" :en ""}
+                                bar-index (->> layers (map-indexed #(assoc %2 :index %1)) (some #(if (= (:id %) "bar-id") (:index %))))]
+
+                            (nth objects bar-index) => {:name        {:fi "bar" :sv "bar" :en "bar"}
+                                                        :subtitle    subtitles
+                                                        :id          (str "Lupapiste-" bar-index)
+                                                        :baseLayerId (str "Lupapiste-" bar-index)
+                                                        :isBaseLayer false
+                                                        :minScale    400000
+                                                        :wmsName     "Lupapiste-753-R:bar-id"
+                                                        :wmsUrl      "/proxy/kuntawms"})))
+             (facts "New map data with different server to 753-YA"
+                    (local-org-api/update-organization
+                     "753-YA"
+                     {$set {:map-layers {:server {:url "http://different"}
+                                         :layers [{:name "asemakaava"
+                                                   :id   "other-asemakaava-id"
+                                                   :base true}
+                                                  {:name "kantakartta"
+                                                   :id   "other-kantakartta-id"
+                                                   :base true}
+                                                  {:name "Other foo"
+                                                   :id   "foo-id"
+                                                   :base false}]}}})
+                    (let [layers (proxy/municipality-layers "753")]
+                      (fact "Two layers with same ids are allowed if the servers differ"
+                            (->> layers (filter #(= (:id %) "foo-id")) count) => 2)
+                      (fact "Still only two base layers"
+                            (->> layers (filter :base) count) => 2)))
+             (facts "Storing passwords"
+                    (local-org-api/update-organization-map-server "753-YA"
+                                                                  "http://doesnotmatter"
+                                                                  "username"
+                                                                  "plaintext")
+                    (let [org (local-org-api/get-organization "753-YA")
+                          {:keys [username password crypto-iv]} (-> org :map-layers :server)]
+                      (fact "Password is encrypted"
+                            (not= password "plaintext") => true)
+                      (fact "Password decryption"
+                            (local-org-api/decode-credentials password crypto-iv) => "plaintext")
+                      (fact "No extra credentials are stored (nil)"
+                            (local-org-api/update-organization-map-server "753-YA"
+                                                                          "http://stilldoesnotmatter"
+                                                                          nil
+                                                                          nil)
+                            (-> "753-YA" local-org-api/get-organization :map-layers :server
+                                (select-keys [:password :crypto-iv])) => {:password nil})
+                      (fact "No extra credentials are stored (\"\")"
+                            (local-org-api/update-organization-map-server "753-YA"
+                                                                          "http://stilldoesnotmatter"
+                                                                          ""
+                                                                          "")
+                            (-> "753-YA" local-org-api/get-organization :map-layers :server
+                                (select-keys [:password :crypto-iv])) => {:password ""})))))))
+
+(facts "set-organization-neighbor-order-email"
+       (fact "Emails are not set in fixture"
+             (let [resp (query sipoo :organization-by-user)]
+               resp => ok?
+               (:organization resp) => seq
+               (get-in resp [:organization :notifications :neighbor-order-emails]) => empty?))
+
+       (fact "One email is set"
+             (command sipoo :set-organization-neighbor-order-email :emails "kirjaamo@sipoo.example.com") => ok?
+             (-> (query sipoo :organization-by-user)
+                 (get-in [:organization :notifications :neighbor-order-emails])) => ["kirjaamo@sipoo.example.com"])
+
+       (fact "Three emails are set"
+             (command sipoo :set-organization-neighbor-order-email :emails "kirjaamo@sipoo.example.com,  sijainen1@sipoo.example.com;sijainen2@sipoo.example.com") => ok?
+             (-> (query sipoo :organization-by-user)
+                 (get-in [:organization :notifications :neighbor-order-emails])) => ["kirjaamo@sipoo.example.com", "sijainen1@sipoo.example.com", "sijainen2@sipoo.example.com"])
+
+       (fact "Reset email addresses"
+             (command sipoo :set-organization-neighbor-order-email :emails "") => ok?
+             (-> (query sipoo :organization-by-user)
+                 (get-in [:organization :notifications :neighbor-order-emails])) => empty?))

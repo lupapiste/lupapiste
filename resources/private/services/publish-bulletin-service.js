@@ -8,6 +8,10 @@ LUPAPISTE.PublishBulletinService = function() {
 
   self.comments = ko.observable([]);
 
+  self.commentsLeft = ko.observable(true);
+
+  self.totalComments = ko.observable();
+
   ko.computed(function() {
     var state = self.publishPending() ? "pending" : "finished";
     hub.send("publishBulletinService::publishProcessing", {state: state});
@@ -32,12 +36,29 @@ LUPAPISTE.PublishBulletinService = function() {
                                            proclamationText:     event.proclamationText || ""});
   });
 
+  hub.subscribe("publishBulletinService::saveProclaimedBulletin", function(event) {
+    publishBulletin("save-proclaimed-bulletin", {bulletinId:           event.bulletinId,
+                                                 bulletinVersionId:    event.bulletinVersionId,
+                                                 proclamationEndsAt:   event.proclamationEndsAt,
+                                                 proclamationStartsAt: event.proclamationStartsAt,
+                                                 proclamationText:     event.proclamationText || ""});
+  });
+
   hub.subscribe("publishBulletinService::moveToVerdictGiven", function(event) {
     publishBulletin("move-to-verdict-given", {id: event.id,
                                               verdictGivenAt:       event.verdictGivenAt,
                                               appealPeriodStartsAt: event.appealPeriodStartsAt,
                                               appealPeriodEndsAt:   event.appealPeriodEndsAt,
                                               verdictGivenText:     event.verdictGivenText || ""});
+  });
+
+  hub.subscribe("publishBulletinService::saveVerdictGivenBulletin", function(event) {
+    publishBulletin("save-verdict-given-bulletin", {bulletinId:           event.bulletinId,
+                                                    bulletinVersionId:    event.bulletinVersionId,
+                                                    verdictGivenAt:       event.verdictGivenAt,
+                                                    appealPeriodStartsAt: event.appealPeriodStartsAt,
+                                                    appealPeriodEndsAt:   event.appealPeriodEndsAt,
+                                                    verdictGivenText:     event.verdictGivenText || ""});
   });
 
   hub.subscribe("publishBulletinService::moveToFinal", function(event) {
@@ -63,23 +84,41 @@ LUPAPISTE.PublishBulletinService = function() {
 
   // bulletin comment pagination
   var skip = 0;
-  var limit = 1;
-  var versionId = undefined;
+  var limit = 5;
+  var previousVersionId = undefined;
+  var previousAsc = false;
+  var ajaxRunning = false;
 
-  hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
-    if (event.versionId !== versionId) {
-      skip = 0;
-      versionId = event.versionId;
-      self.comments([]);
+  var fetchBulletinComments = _.debounce(function(bulletinId, versionId, asc) {
+    // ajax is already running
+    if (ajaxRunning) {
+      return;
     }
-    ajax.query("bulletin-comments", {bulletinId: event.bulletinId,
-                                     versionId: event.versionId,
+    ajaxRunning = true;
+    ajax.query("bulletin-comments", {bulletinId: bulletinId,
+                                     versionId: versionId,
                                      skip: skip,
-                                     limit: limit})
+                                     limit: limit,
+                                     asc: asc})
       .success(function(res) {
         self.comments(self.comments().concat(res.comments));
+        self.commentsLeft(res.commentsLeft);
+        self.totalComments(res.totalComments);
         skip += limit;
+        previousAsc = asc;
+      })
+      .complete(function() {
+        ajaxRunning = false;
       })
       .call();
+  }, 100);
+
+  hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
+    if (event.initialQuery || event.versionId !== previousVersionId || event.asc !== previousAsc) {
+      skip = 0;
+      previousVersionId = event.versionId;
+      self.comments([]);
+    }
+    fetchBulletinComments(event.bulletinId, event.versionId, event.asc);
   });
 };

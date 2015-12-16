@@ -1,23 +1,22 @@
 (ns lupapalvelu.document.model
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
-            [clojure.string :refer [join]]
             [clojure.set :refer [union difference]]
-            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.vrk :refer :all]
             [lupapalvelu.document.document-field-validators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.document.subtype :as subtype]))
+            [lupapalvelu.document.subtype :as subtype]
+            [lupapalvelu.mongo :as mongo]))
 
 ;;
 ;; Validation:
@@ -113,7 +112,7 @@
 (defmethod validate-field :personSelector [application elem v]
   (when-not (ss/blank? v)
     (when-not (and
-                (domain/has-auth? application v)
+                (auth/has-auth? application v)
                 (domain/no-pending-invites? application v))
       [:err "application-does-not-have-given-auth"])))
 
@@ -131,8 +130,10 @@
     (re-matches v/maara-alatunnus-pattern v) nil
     :else [:warn "illegal-maaraala-tunnus"]))
 
+(def illegal-key [:err "illegal-key"])
+
 (defmethod validate-field nil [_ _ _]
-  [:err "illegal-key"])
+  illegal-key)
 
 (defmethod validate-field :default [_ elem _]
   (warn "Unknown schema type: elem=[%s]" elem)
@@ -165,6 +166,33 @@
        :document (:document info)
        :result   [:warn "bad-postal-code"]})))
 
+(defn inspect-repeating-for-duplicate-rows [data inspected-fields]
+  (when (every? (comp number? read-string name key) data)
+    (let [dummy-keyset      (zipmap inspected-fields (repeat ""))
+          select-keyset     (fn [row] (->> (select-keys (val row) inspected-fields)
+                                           (remove nil?)
+                                           (merge dummy-keyset)))
+          duplicate-keysets (->> (map select-keyset data)
+                                 (frequencies)
+                                 (filter (comp (partial < 1) val))
+                                 (keys))]
+      (when-not (empty? duplicate-keysets)
+        (->> (filter (comp (set duplicate-keysets) select-keyset) data)
+             (keys))))))
+
+(defmethod validate-element :huoneistot
+  [info data path element]
+  (let [data               (tools/unwrapped data)
+        fields-to-validate [:porras :huoneistonumero :jakokirjain :muutostapa]
+        build-row-result   (fn [ind]
+                             (map #(hash-map
+                                    :path     (-> (map keyword path) (concat [ind %]))
+                                    :element  (assoc (find-by-name (:body element) [%]) :locKey (name %))
+                                    :document (:document info)
+                                    :result   [:warn "duplicate-apartment-data"])
+                                  fields-to-validate))]
+    (some->> (inspect-repeating-for-duplicate-rows data fields-to-validate)
+             (mapcat build-row-result))))
 
 ;;
 ;; Neue api:
@@ -186,22 +214,23 @@
     (:i18nkey element)
     (->
       (str
-        (join "." (concat [(-> info :document :locKey)] (map name path)))
+        (ss/join "." (concat [(-> info :document :locKey)] (map name path)))
         (when (= :select (:type element)) "._group_label"))
-      (s/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-      (s/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
+      (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+      (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (defn- ->validation-result [info data path element result]
   (when result
-    (let [result {:data        data
-                  :path        (vec (map keyword path))
-                  :element     (merge element {:locKey (resolve-element-loc-key info element path)})
-                  :document    (:document info)
-                  :result      result}]
-      ; Return results without :data.
-      ; Data is handy when hacking in REPL, though.
-      ; See also mongo_scripts/prod/hetu-cleanup.js.
-      (dissoc result :data))))
+    ; Return results without :data (user input).
+    ; Data is handy when hacking in REPL, though.
+    (let [validation-result {:path        (vec (map keyword path))
+                             ;:data        data
+                             :element     (merge element {:locKey (resolve-element-loc-key info element path)})
+                             :document    (:document info)
+                             :result      result}]
+      (if (= illegal-key result)
+        (assoc validation-result :path []) ; Invalid path from user input should not be echoed
+        validation-result))))
 
 (defn- validate-fields [application info k data path]
   (let [current-path (if k (conj path (name k)) path)

@@ -1,12 +1,15 @@
 (ns lupapalvelu.verdict-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+  (:require [clojure.walk :as walk]
+            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [pandect.core :as pandect]
             [monger.operators :refer :all]
+            [sade.common-reader :as cr]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
             [lupapalvelu.application :as application]
+            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
@@ -30,20 +33,34 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
-(defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
+(defn normalize-special-verdict
+  "Normalizes special foreman/designer verdicts by
+  creating a traditional paatostieto element from the proper special
+  verdict party.
+    application: Application that requests verdict.
+    app-xml:     Verdict xml message
+  Returns either normalized app-xml (without namespaces) or app-xml if
+  the verdict is not special."
+  [application app-xml]
+  (let [xml (cr/strip-xml-namespaces app-xml)]
+    (if (verdict/special-foreman-designer-verdict? (meta-fields/enrich-with-link-permit-data application) xml)
+      (verdict/verdict-xml-with-foreman-designer-verdicts application xml)
+      app-xml)))
+
+(defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
-    (or
-      (let [organization (organization/get-organization (:organization application))
-            validator-fn (permit/get-verdict-validator (permit/permit-type application))]
-        (validator-fn app-xml organization))
-      (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-        (when updates
-          (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
-            (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))))
-        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
-    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
-      (verdict/fetch-tj-suunnittelija-verdict command))))
+    (let [app-xml (normalize-special-verdict application app-xml)]
+      (or
+       (let [organization (organization/get-organization (:organization application))
+             validator-fn (permit/get-verdict-validator (permit/permit-type application))]
+         (validator-fn app-xml organization))
+       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
+         (when updates
+           (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+             (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+             (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
+         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
@@ -134,11 +151,13 @@
                              (:mongo-updates doc-updates)
                              (application/state-transition-update next-state timestamp (:user command))
                              {$set {:verdicts.$.draft false}}))
+        (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 
 (defcommand publish-verdict
   {:parameters [id verdictId]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictId])]
    :states     give-verdict-states
    :pre-checks [application-has-verdict-given-state]
    :notified   true
@@ -151,7 +170,7 @@
 
 (defcommand delete-verdict
   {:parameters [id verdictId]
-   :input-validators [(partial action/non-blank-parameters [:verdictId])]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictId])]
    :states     give-verdict-states
    :user-roles #{:authority}}
   [{:keys [application created] :as command}]
@@ -175,6 +194,7 @@
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
    :parameters [id verdictId password]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictId :password])]
    :states     states/post-verdict-states
    :pre-checks [domain/validate-owner-or-write-access]
    :user-roles #{:applicant :authority}}

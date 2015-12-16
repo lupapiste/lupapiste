@@ -2,10 +2,13 @@
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
+            [net.cgrand.enlive-html :as enlive]
+            [sade.common-reader :as cr]
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.xml :as xml]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -24,42 +27,56 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
   (:import [java.net URL]))
 
-(defn- get-poytakirja [application user timestamp verdict-id pk]
-  (if-let [url (get-in pk [:liite :linkkiliitteeseen])]
-    (do
-      (debug "Download" url)
-      (let [filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
-            resp            (try
-                              (http/get url :as :stream :throw-exceptions false)
-                              (catch Exception e {:status -1 :body (str e)}))
-            header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
-                               (ss/replace content-disposition #"attachment;filename=" ""))
-            content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-            urlhash         (pandect/sha1 url)
-            attachment-id   urlhash
-            attachment-type {:type-group "muut" :type-id "paatosote"}
-            target          {:type "verdict" :id verdict-id :urlHash urlhash}
-            attachment-time (get-in pk [:liite :muokkausHetki] timestamp)
-            ; Reload application from DB, attachments have changed
-            ; if verdict has several attachments.
-            current-application (domain/get-application-as (:id application) user)]
-        ; If the attachment-id, i.e., hash of the URL matches
-        ; any old attachment, a new version will be added
-        (if (= 200 (:status resp))
-          (attachment/attach-file! {:application current-application
-                                    :filename (or header-filename filename)
-                                    :size content-length
-                                    :content (:body resp)
-                                    :attachment-id attachment-id
-                                    :attachment-type attachment-type
-                                    :target target
-                                    :required false
-                                    :locked true
-                                    :user user
-                                    :created attachment-time
-                                    :state :ok})
-          (error (str (:status resp) " - unable to download " url ": " resp)))
-        (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
+(defn- get-poytakirja
+  "At least outlier verdicts (KT) poytakirja can have multiple
+  attachments. On the other hand, traditional (e.g., R) verdict
+  poytakirja can only have one attachment."
+  [application user timestamp verdict-id pk]
+  (if-let [attachments (:liite pk)]
+    (let [;; Attachments without link are ignored
+          attachments (->> [attachments] flatten (filter #(-> % :linkkiliitteeseen ss/blank? false?)))
+          ;; There is only one urlHash property in
+          ;; poytakirja. If there are multiple attachments the
+          ;; hash is verdict-id. This is the same approach as
+          ;; used with manually entered verdicts.
+          pk-urlhash (if (= (count attachments) 1)
+                       (-> attachments first :linkkiliitteeseen pandect/sha1)
+                       verdict-id)]
+      (doall
+       (for [att  attachments
+             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki} att
+                   _ (debug "Download " url)
+                   filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
+                   resp            (try
+                                     (http/get url :as :stream :throw-exceptions false)
+                                     (catch Exception e {:status -1 :body (str e)}))
+                   header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
+                                      (ss/replace content-disposition #"attachment;filename=" ""))
+                   content-length  (util/->int (get-in resp [:headers "content-length"] 0))
+                   urlhash         (pandect/sha1 url)
+                   attachment-id      urlhash
+                   attachment-type    {:type-group "muut" :type-id "paatosote"}
+                   target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
+                   ;; Reload application from DB, attachments have changed
+                   ;; if verdict has several attachments.
+                   current-application (domain/get-application-as (:id application) user)]]
+         ;; If the attachment-id, i.e., hash of the URL matches
+         ;; any old attachment, a new version will be added
+         (if (= 200 (:status resp))
+           (attachment/attach-file! {:application current-application
+                                     :filename (or header-filename filename)
+                                     :size content-length
+                                     :content (:body resp)
+                                     :attachment-id attachment-id
+                                     :attachment-type attachment-type
+                                     :target target
+                                     :required false
+                                     :locked true
+                                     :user user
+                                     :created (or attachment-time timestamp)
+                                     :state :ok})
+           (error (str (:status resp) " - unable to download " url ": " resp)))))
+      (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
 
 (defn- verdict-attachments [application user timestamp verdict]
@@ -144,4 +161,45 @@
             (let [updates (find-tj-suunnittelija-verdicts-from-xml command doc link-permit-xml osapuoli-type target-kuntaRoolikoodi)]
               (action/update-application command updates)
               (ok :verdicts (get-in updates [$set :verdicts])))))))))
+
+(defn special-foreman-designer-verdict?
+  "Some verdict providers handle foreman and designer verdicts a bit
+  differently. These 'special' verdicts contain reference permit id in
+  MuuTunnus. xml should be without namespaces"
+  [application xml]
+  (let [app-id (:id application)
+        op-name (-> application :primaryOperation :name)
+        link-permit-id (-> application :linkPermitData first :id)]
+    (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
+         (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
+
+(defn verdict-xml-with-foreman-designer-verdicts
+  "Normalizes special foreman/designer verdict by creating a proper
+  paatostieto. Takes data from foreman/designer's party details. The
+  resulting paatostieto element overrides old one. Returns the xml
+  with paatostieto.
+  Note: This must only be called with special verdict xml (see above)"
+  [application xml]
+  (let [op-name      (-> application :primaryOperation :name)
+        tag          (if (ss/starts-with op-name "tyonjohtajan-") :Tyonjohtaja :Suunnittelija)
+        [party]      (enlive/select xml [tag])
+        attachment   (-> party (enlive/select [:liitetieto :Liite]) first enlive/unwrap)
+        date         (xml/get-text party [:paatosPvm])
+        decision     (xml/get-text party [:paatostyyppi])
+        verdict-xml  [{:tag :Paatos
+                       :content [{:tag :poytakirja
+                                  :content [{:tag :paatoskoodi :content [decision]}
+                                            {:tag :paatoksentekija :content [""]}
+                                            {:tag :paatospvm :content [date]}
+                                            {:tag :liite :content attachment}]}]}]
+        paatostieto  {:tag :paatostieto :content verdict-xml}
+        placeholders #{:paatostieto :muistiotieto :lisatiedot
+                       :liitetieto  :kayttotapaus :asianTiedot
+                       :hankkeenVaativuus}
+        [rakval]     (enlive/select xml [:RakennusvalvontaAsia])
+        place        (some #(placeholders (:tag %)) (:content rakval))]
+    (case place
+      :paatostieto (enlive/at xml [:RakennusvalvontaAsia :paatostieto] (enlive/content verdict-xml))
+      nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
+      (enlive/at xml [:RakennusvalvontaAsia place] (enlive/before paatostieto)))))
 

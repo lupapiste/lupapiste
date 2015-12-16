@@ -6,23 +6,24 @@
             [sade.util :as util]
             [sade.env :as env]
             [sade.property :as p]
-            [lupapalvelu.application :as application]
             [lupapalvelu.action :as action]
-            [lupapalvelu.verdict :as verdict]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.application :as application]
+            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization-api :as authorization]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schema]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.user :as user]
+            [lupapalvelu.verdict :as verdict]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -96,7 +97,7 @@
                                             :y (get-in applicant [:yritys :liikeJaYhteisotunnus])
                                             :email applicant-email
                                             :phone (get-in applicant [:yritys :puhelin])
-                                            :adress1 (get-in postiosoite [:osoitenimi :teksti])
+                                            :address1 (get-in postiosoite [:osoitenimi :teksti])
                                             :zip (get-in postiosoite [:postinumero])
                                             :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
@@ -120,11 +121,15 @@
 
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
-     ;; Get verdicts for the application
+    ;; Get verdicts for the application
     (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
+
     (invite-applicants command hakijat)
-    created-application))
+
+    (let [fetched-application (mongo/by-id :applications (:id created-application))]
+      (mongo/update-by-id :applications (:id fetched-application) (meta-fields/applicant-index-update fetched-application))
+      fetched-application)))
 
 (defn- enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
   (and

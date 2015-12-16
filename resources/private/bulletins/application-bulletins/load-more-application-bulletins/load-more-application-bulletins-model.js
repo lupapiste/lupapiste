@@ -7,7 +7,7 @@ LUPAPISTE.LoadMoreApplicationBulletinsModel = function(params) {
   self.visible = params.visible;
 
   self.localizedBulletinsLeft = ko.pureComputed(function () {
-    return self.dataRemaining() + loc("unit.kpl");
+    return self.dataRemaining() + " " + loc("unit.kpl");
   });
 
   self.pageChanged = function() {

@@ -120,6 +120,7 @@ var attachment = (function() {
     size:                         ko.observable(),
     sizes:                        ko.observableArray(LUPAPISTE.config.attachmentSizes),
     isVerdictAttachment:          ko.observable(),
+    visibility:                   ko.observable(_.first(LUPAPISTE.config.attachmentVisibilities)),
     subscriptions:                [],
     showAttachmentVersionHistory: ko.observable(),
     showHelp:                     ko.observable(false),
@@ -130,6 +131,7 @@ var attachment = (function() {
     metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
     dirty:                        false,
+    attachmentVisibilities:       ko.observableArray(LUPAPISTE.config.attachmentVisibilities),
 
     // toggleHelp: function() {
     //   model.showHelp(!model.showHelp());
@@ -294,7 +296,7 @@ var attachment = (function() {
     ajax
       .command("set-attachment-meta", data)
       .success(function() {
-        hub.send("indicator", {style: "positive"});
+        hub.send("indicator-icon", {style: "positive"});
         model.dirty = true;
       })
       .call();
@@ -350,7 +352,7 @@ var attachment = (function() {
         unSelectedAttachmentIds: isVerdictAttachment ? [] : [attachmentId]
       })
       .success(function() {
-        hub.send("indicator", {style: "positive"});
+        hub.send("indicator-icon", {style: "positive"});
         repository.load(applicationId);
       })
       .error(function(e) {
@@ -360,6 +362,20 @@ var attachment = (function() {
       })
       .call();
     }));
+
+
+    model.subscriptions.push(model.visibility.subscribe(function(data) {
+      ajax.command("set-attachment-visibility", {
+        id: applicationId,
+        attachmentId: model.id(),
+        value: data
+      })
+      .success(function() {
+        hub.send("indicator-icon", {style: "positive"});
+      })
+      .call();
+    }));
+
 
 
     applySubscription("contents");
@@ -450,6 +466,7 @@ var attachment = (function() {
     model.scale(attachment.scale);
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
+    model.visibility(attachment.metadata ? attachment.metadata.nakyvyys : _.first(LUPAPISTE.config.attachmentVisibilities));
     model.applicationState(attachment.applicationState);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
     model.metadata(attachment.metadata);
@@ -553,7 +570,6 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  // applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority
   function initFileUpload(options) {
     uploadingApplicationId = options.applicationId;
     var iframeId = "uploadFrame";

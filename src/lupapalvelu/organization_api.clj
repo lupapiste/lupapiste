@@ -10,6 +10,7 @@
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
             [cheshire.core :as cheshire]
+            [schema.core :as sc]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
@@ -22,7 +23,10 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.property :as p]
+            [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mime :as mime]
@@ -30,7 +34,6 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.geojson :as geo]))
@@ -91,6 +94,12 @@
     {}
     (map :permitType scope)))
 
+;; Validators
+(defn validate-optional-url [param command]
+  (let [url (get-in command [:data param])]
+    (when-not (ss/blank? url)
+      (util/validate-url url))))
+
 ;;
 ;; Actions
 ;;
@@ -139,7 +148,8 @@
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
+                      (partial validate-optional-url :url)]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -148,7 +158,8 @@
   {:description "Updates organization link."
    :parameters [url nameFi nameSv index]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv :index])
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
+                      (partial validate-optional-url :url)
                       (partial number-parameters [:index])]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
@@ -157,6 +168,7 @@
 (defcommand remove-organization-link
   {:description "Removes organization link."
    :parameters [url nameFi nameSv]
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
@@ -169,6 +181,7 @@
 
 (defquery organization-by-id
   {:parameters [organizationId]
+   :input-validators [(partial non-blank-parameters [:organizationId])]
    :user-roles #{:admin}}
   [_]
   (o/get-organization organizationId))
@@ -184,6 +197,7 @@
 
 (defquery municipality-active
   {:parameters [municipality]
+   :input-validators [(partial non-blank-parameters [:municipality])]
    :user-roles #{:anonymous}}
   [_]
   (let [organizations (o/get-organizations {:scope.municipality municipality})
@@ -195,14 +209,6 @@
         :applications (->> scopes (filter :new-application-enabled) (map :permitType))
         :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
         :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
-
-(defquery municipality-by-property-id
-  {:parameters [propertyId]
-   :user-roles #{:anonymous}}
-  [_]
-  (if-let [municipality (p/municipality-id-by-property-id propertyId)]
-    (ok :municipality municipality)
-    (fail :municipalitysearch.notfound)))
 
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
@@ -235,6 +241,7 @@
 (defquery organization-details
   {:description "Resolves organization based on municipality and selected operation."
    :parameters [municipality operation]
+   :input-validators [(partial non-blank-parameters [:municipality :operation])]
    :user-roles #{:applicant :authority}}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
@@ -245,13 +252,12 @@
           :new-applications-disabled (not (:new-application-enabled scope))
           :links (:links organization)
           :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
-      (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
+      (fail :municipalityNotSupported))))
 
 (defcommand set-organization-selected-operations
   {:parameters [operations]
    :user-roles #{:authorityAdmin}
-   :input-validators  [(partial non-blank-parameters [:operations])
-                       (partial vector-parameters [:operations])
+   :input-validators  [(partial vector-parameters [:operations])
                        (fn [{{:keys [operations]} :data}]
                          (when-not (every? (->> operations/operations keys (map name) set) operations)
                            (fail :error.unknown-operation)))]}
@@ -298,11 +304,28 @@
 (defcommand set-organization-permanent-archive-enabled
   {:parameters [enabled organizationId]
    :user-roles #{:admin}
-   :input-validators  [(partial non-blank-parameters [:enabled :organizationId])
+   :input-validators  [(partial non-blank-parameters [:organizationId])
                        (partial boolean-parameters [:enabled])]}
   [{user :user}]
   (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
   (ok))
+
+(defn split-emails [emails] (ss/split emails #"[\s,;]+"))
+
+(defcommand set-organization-neighbor-order-email
+  {:parameters [emails]
+   :user-roles #{:authorityAdmin}
+   :feature :kunta-kuulee-naapurit
+   :input-validators [(partial action/string-parameters [:emails])
+                      (fn [{{emails :emails} :data}]
+                        (let [splitted (split-emails emails)]
+                          (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
+                            (fail :error.email))))]}
+  [{user :user}]
+  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+        organization-id (user/authority-admins-organization-id user)]
+    (o/update-organization organization-id {$set {:notifications.neighbor-order-emails addresses}})
+    (ok)))
 
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}
@@ -310,8 +333,8 @@
   (let [organization-id (user/authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
       (let [permit-types (mapv (comp keyword :permitType) (:scope organization))
-            krysp-keys (if (env/feature? :kunnan-osoiteaineisto) (conj permit-types :osoitteet) permit-types)
-            empty-confs (zipmap krysp-keys (repeat {}))]
+            krysp-keys   (conj permit-types :osoitteet)
+            empty-confs  (zipmap krysp-keys (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
       (fail :error.unknown-organization))))
 
@@ -320,12 +343,13 @@
    :user-roles #{:authorityAdmin}
    :input-validators [(fn [{{permit-type :permitType} :data}]
                         (when-not (or
-                                    (and (env/feature? :kunnan-osoiteaineisto) (= "osoitteet" permit-type))
+                                    (= "osoitteet" permit-type)
                                     (permit/valid-permit-type? permit-type))
-                          (fail :error.missing-parameters :parameters [:permitType])))]}
+                          (fail :error.missing-parameters :parameters [:permitType])))
+                      (partial validate-optional-url :url)]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)
-        krysp-config    (o/get-krysp-wfs organization-id permitType)
+        krysp-config    (o/get-krysp-wfs {:_id organization-id} permitType)
         password        (if (s/blank? password) (second (:credentials krysp-config)) password)]
     (if (or (s/blank? url) (wfs/wfs-is-alive? url username password))
       (o/set-krysp-endpoint organization-id url username password permitType version)
@@ -363,7 +387,7 @@
   {:description "Returns an organization id -> name map. (Used by TOJ.)"
    :user-roles #{:anonymous}}
   [_]
-  (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
+  (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {} {:name 1})]
                         [id name]))))
 
 (defquery vendor-backend-redirect-config
@@ -380,9 +404,7 @@
    :input-validators [(fn [{{key :key} :data}]
                         (when-not (contains? #{:vendorBackendUrlForBackendId :vendorBackendUrlForLpId} (keyword key))
                           (fail :error.illegal-key)))
-                      (fn [{{url :val} :data}]
-                        (when-not (ss/blank? url)
-                          (util/validate-url url)))]}
+                      (partial validate-optional-url :val)]}
   [{user :user}]
   (let [key    (csk/->kebab-case key)
         org-id (user/authority-admins-organization-id user)]
@@ -390,18 +412,24 @@
 
 (defcommand save-organization-tags
   {:parameters [tags]
+   :input-validators [(partial action/vector-parameter-of :tags map?)]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [org-id (user/authority-admins-organization-id user)
         old-tag-ids (set (map :id (:tags (o/get-organization org-id))))
         new-tag-ids (set (map :id tags))
-        removed-ids (set/difference old-tag-ids new-tag-ids)]
+        removed-ids (set/difference old-tag-ids new-tag-ids)
+        tags-with-ids (o/create-tag-ids tags)
+        validation-errors (seq (remove nil? (map (partial sc/check o/Tag) tags-with-ids)))]
+    (when validation-errors (fail! :error.missing-parameters))
+
     (when (seq removed-ids)
       (mongo/update-by-query :applications {:tags {$in removed-ids} :organization org-id} {$pull {:tags {$in removed-ids}}}))
-    (o/update-organization org-id {$set {:tags (o/create-tag-ids tags)}})))
+    (o/update-organization org-id {$set {:tags tags-with-ids}})))
 
 (defquery remove-tag-ok
   {:parameters [tagId]
+   :input-validators [(partial non-blank-parameters [:tagId])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [org-id (user/authority-admins-organization-id user)]
@@ -413,7 +441,7 @@
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles action/reader-org-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
@@ -427,7 +455,7 @@
 
 (defquery get-organization-areas
   {:user-authz-roles #{:statementGiver}
-   :org-authz-roles  action/reader-org-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
    :user-roles       #{:authorityAdmin :authority}}
   [{{:keys [orgAuthz] :as user} :user}]
   (if (seq orgAuthz)
@@ -472,13 +500,14 @@
                    :content-type content-type
                    :size         size
                    :organization org-id
-                   :created      created}]
+                   :created      created}
+        tmpdir (fs/temp-dir "area")]
 
     (try+
       (when-not (= content-type "application/zip")
         (fail! :error.illegal-shapefile))
 
-      (let [target-dir (util/unzip (.getPath tempfile) (fs/temp-dir "area"))
+      (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
             shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
             new-collection (some-> data-store
@@ -499,5 +528,35 @@
         (resp/status 400 text))
       (catch Throwable t
         (error "Failed to parse shapefile" t)
-        (resp/status 400 :error.shapefile-parsing-failed)))))
+        (resp/status 400 :error.shapefile-parsing-failed))
+      (finally
+        (when tmpdir
+          (fs/delete-dir tmpdir))))))
 
+(defquery get-map-layers-data
+  {:description "Organization server and layer details."
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (ok (-> (user/authority-admins-organization-id user)
+          o/organization-map-layers-data)))
+
+(defcommand update-map-server-details
+  {:parameters [url username password]
+   :input-validators [(partial validate-optional-url :url)]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (o/update-organization-map-server (user/authority-admins-organization-id user)
+                                    url username password)
+  (ok))
+
+(defcommand update-user-layers
+  {:parameters [layers]
+   :input-validators [(partial action/vector-parameter-of :layers map?)]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (when-let [validation-errors (seq (remove nil? (map (partial sc/check o/Layer) layers)))]
+    (fail! :error.missing-parameters))
+
+  (o/update-organization (user/authority-admins-organization-id user)
+                         {$set {:map-layers.layers layers}})
+  (ok))

@@ -13,7 +13,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
   var createMap = function(divName) {
     return gis
-      .makeMap(divName, false)
+      .makeMap(divName, {zoomWheelEnabled: false})
       .center(404168, 6693765, 14);
   };
 

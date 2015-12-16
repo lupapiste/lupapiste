@@ -25,10 +25,11 @@ Operation tree does have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
 
 AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
   Sipoo logs in
+  Go to page  operations
 
   # => (ns lupapalvelu.operations)
-  # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/MAL permit/VVVL permit/KT permit/MM} (:permit-type v) ))  operations))
-  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  67
+  # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/YM permit/MAL permit/VVVL permit/KT permit/MM} (:permit-type v) ))  operations))
+  Wait until  Xpath Should Match X Times  //table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  75
   Xpath Should Match X Times  //span[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]  1
 
   Click by test id  authadmin-edit-selected-operations
@@ -73,7 +74,7 @@ Go to operation tree
   Click enabled by test id  create-search-button
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
   Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
-  Wait Until  List Selection Should Be  xpath=//div[@id='popup-id']//select[@data-test-id='create-municipality-select']  ${municipality}
+  Wait Until  Selected Municipality Is  ${municipality}
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
   Set animations off
   Click by test id  create-continue

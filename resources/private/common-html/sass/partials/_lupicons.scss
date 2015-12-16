@@ -7,11 +7,11 @@ $lupicon-size: 22px;
 
 @font-face {
   font-family: 'lupapiste';
-  src:url('/fonts/lupapiste.eot?-189xv0');
-  src:url('/fonts/lupapiste.eot?#iefix-189xv0') format('embedded-opentype'),
-    url('/fonts/lupapiste.ttf?-189xv0') format('truetype'),
-    url('/fonts/lupapiste.woff?-189xv0') format('woff'),
-    url('/fonts/lupapiste.svg?-189xv0#lupapiste') format('svg');
+  src:url('/fonts/lupapiste.eot?yodggb');
+  src:url('/fonts/lupapiste.eot?yodggb#iefix') format('embedded-opentype'),
+    url('/fonts/lupapiste.ttf?yodggb') format('truetype'),
+    url('/fonts/lupapiste.woff?yodggb') format('woff'),
+    url('/fonts/lupapiste.svg?yodggb#lupapiste') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -63,6 +63,21 @@ $lupicon-size: 22px;
   cursor: default;
 }
 
+.lupicon-add-circle:before {
+  content: "\e903";
+}
+.lupicon-location-plus:before {
+  content: "\e904";
+}
+.lupicon-lock:before {
+  content: "\e900";
+}
+.lupicon-megaphone:before {
+  content: "\e901";
+}
+.lupicon-presentation:before {
+  content: "\e902";
+}
 .lupicon-external-link:before {
   content: "\e651";
 }

@@ -50,7 +50,6 @@
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var verdictAttachmentPrintsOrderModel = new LUPAPISTE.VerdictAttachmentPrintsOrderModel();
   var verdictAttachmentPrintsOrderHistoryModel = new LUPAPISTE.VerdictAttachmentPrintsOrderHistoryModel();
-  var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
@@ -103,6 +102,20 @@
 
   applicationModel.tosFunction.subscribe(updateTosFunction);
 
+  ko.computed(function(){
+    var enabled = applicationModel.optionMunicipalityHearsNeighbors();
+    if (!isInitializing) {
+      ajax.command("set-municipality-hears-neighbors", {id: currentId, enabled: enabled})
+      .success(function() {
+        applicationModel.reload();
+        hub.send("indicator", {style: "positive"});
+      })
+      .error(util.showSavedIndicator)
+      .processing(applicationModel.processing)
+      .call();
+    }
+  });
+
   function initAuthoritiesSelectList(data) {
     var authorityInfos = [];
     _.each(data || [], function(authority) {
@@ -132,7 +145,7 @@
       applicationModel._js = app;
 
       // Update observables
-      var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers"]};
+      var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
       ko.mapping.fromJS(app, mappingOptions, applicationModel);
 
       // Invite
@@ -156,10 +169,6 @@
       verdictAttachmentPrintsOrderHistoryModel.refresh();
 
       attachmentsTab.refresh();
-
-      // Statements
-      requestForStatementModel.setApplicationId(app.id);
-      requestForStatementModel.setFunctionCode(app.tosFunction);
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
@@ -212,6 +221,9 @@
                               constructionTimeDocs,
                               authorizationModel,
                               {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+
+      // Options
+      applicationModel.optionMunicipalityHearsNeighbors(util.getIn(app, ["options", "municipalityHearsNeighbors"]));
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -405,6 +417,14 @@
 
   var sendNeighborEmailModel = new SendNeighborEmailModel();
 
+  var statementActions = {
+    openStatement: function(model) {
+      pageutil.openPage("statement", applicationModel.id() + "/" + model.id());
+      return false;
+    }
+  };
+
+
   $(function() {
     var bindings = {
       // function to access accordion
@@ -427,7 +447,7 @@
       map: mapModel,
       neighbor: neighborActions,
       neighborStatusModel: neighborStatusModel,
-      requestForStatementModel: requestForStatementModel,
+      statementActions: statementActions,
       sendNeighborEmailModel: sendNeighborEmailModel,
       signingModel: signingModel,
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,

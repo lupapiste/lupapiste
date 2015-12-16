@@ -4,9 +4,10 @@
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
+            [lupapalvelu.application :as application]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
-            [lupapalvelu.application :as application]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.document :refer :all]
             [lupapalvelu.document.persistence :as doc-persistence]
@@ -33,6 +34,7 @@
 (defcommand create-doc
   {:parameters [:id :schemaName]
    :optional-parameters [updates fetchRakennuspaikka]
+   :input-validators [(partial action/non-blank-parameters [:id :schemaName])]
    :user-roles #{:applicant :authority}
    :states     #{:draft :answered :open :submitted :complementNeeded}
    :pre-checks [create-doc-validator
@@ -40,8 +42,7 @@
   [{{schema-name :schemaName} :data :as command}]
   (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka
-      (let [
-            property-id (or
+      (let [property-id (or
                           (tools/get-update-item-value updates "kiinteisto.kiinteistoTunnus")
                           (get-in command [:application :propertyId]))]
         (fetch-and-persist-ktj-tiedot (:application command) document property-id (now))))
@@ -49,6 +50,7 @@
 
 (defcommand remove-doc
   {:parameters  [id docId]
+   :input-validators [(partial action/non-blank-parameters [:id :docId])]
     :user-roles #{:applicant :authority}
     :states     #{:draft :answered :open :submitted :complementNeeded}
     :pre-checks [application/validate-authority-in-drafts
@@ -62,6 +64,8 @@
 
 (defcommand update-doc
   {:parameters [id doc updates]
+   :input-validators [(partial action/non-blank-parameters [:id :doc])
+                      (partial action/vector-parameters [:updates])]
    :user-roles #{:applicant :authority}
    :states     update-doc-states
    :pre-checks [application/validate-authority-in-drafts]}
@@ -70,6 +74,8 @@
 
 (defcommand update-construction-time-doc
   {:parameters [id doc updates]
+   :input-validators [(partial action/non-blank-parameters [:id :doc])
+                      (partial action/vector-parameters [:updates])]
    :user-roles #{:applicant :authority}
    :states     states/post-verdict-states
    :pre-checks [application/validate-authority-in-drafts validate-is-construction-time-doc]}
@@ -78,6 +84,8 @@
 
 (defcommand update-task
   {:parameters [id doc updates]
+   :input-validators [(partial action/non-blank-parameters [:id :doc])
+                      (partial action/vector-parameters [:updates])]
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but (conj states/terminal-states :sent))
    :pre-checks [application/validate-authority-in-drafts]}
@@ -111,8 +119,8 @@
    :user-roles       #{:applicant :authority}
    :states           states/all-states
    :input-validators [doc-persistence/validate-collection]
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application]}]
   (debug doc collection)
   (let [document (doc-persistence/by-id application collection doc)]
@@ -122,8 +130,8 @@
 (defquery fetch-validation-errors
   {:parameters       [:id]
    :user-roles       #{:applicant :authority}
-   :user-authz-roles action/all-authz-roles
-   :org-authz-roles  action/reader-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
    :states           states/all-states}
   [{app :application}]
   (let [results (for [doc (:documents app)] (model/validate app doc))]
@@ -135,7 +143,8 @@
 
 (defcommand approve-doc
   {:parameters [:id :doc :path :collection]
-   :input-validators [doc-persistence/validate-collection]
+   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
+                      doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     approve-doc-states}
   [command]
@@ -143,6 +152,8 @@
 
 (defcommand approve-construction-time-doc
   {:parameters [:id :doc :path :collection]
+   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
+                      doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     states/post-verdict-states
    :pre-checks [validate-is-construction-time-doc]}
@@ -151,7 +162,8 @@
 
 (defcommand reject-doc
   {:parameters [:id :doc :path :collection]
-   :input-validators [doc-persistence/validate-collection]
+   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
+                      doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     approve-doc-states}
   [command]
@@ -159,6 +171,8 @@
 
 (defcommand reject-construction-time-doc
   {:parameters [:id :doc :path :collection]
+   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
+                      doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     states/post-verdict-states
    :pre-checks [validate-is-construction-time-doc]}
@@ -171,6 +185,7 @@
 
 (defcommand set-user-to-document
   {:parameters [id documentId userId path]
+   :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :user-roles #{:applicant :authority}
    :pre-checks [user-can-be-set-validator
                 application/validate-authority-in-drafts]
@@ -180,6 +195,7 @@
 
 (defcommand set-current-user-to-document
   {:parameters [id documentId path]
+   :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :user-roles #{:applicant :authority}
    :pre-checks [domain/validate-owner-or-write-access
                 application/validate-authority-in-drafts]
@@ -189,6 +205,7 @@
 
 (defcommand set-company-to-document
   {:parameters [id documentId companyId path]
+   :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :user-roles #{:applicant :authority}
    :states     update-doc-states
    :pre-checks [application/validate-authority-in-drafts]}

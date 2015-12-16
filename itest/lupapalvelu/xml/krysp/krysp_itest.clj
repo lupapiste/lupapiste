@@ -71,39 +71,6 @@
                 :id (:id application)
                 :drawings drawings))
 
-;; NOTE: For this to work properly,
-;;       the :operations-attachments must be set correctly for organization (in minimal.clj)
-;;       and also the :attachments for operation (in operations.clj).
-(defn- generate-attachment [{id :id :as application} apikey password]
-       (when-let [first-attachment (or
-                                     (get-in application [:attachments 0])
-                                     (case (-> application :primaryOperation :name)
-                                           "aloitusoikeus" {:type {:type-group "paapiirustus"
-                                                                   :type-id "asemapiirros"}
-                                                            :id id}
-                                           nil))]
-                 (upload-attachment apikey id first-attachment true)
-                 (sign-attachment apikey id (:id first-attachment) password)))
-
-;; This has a side effect which generates a attachemnt to appliction
-(defn- generate-statement [application-id]
-       (let [sipoo-statement-givers (:statementGivers (organization-from-minimal-by-id "753-R"))
-             sonja-statement-giver-id (:id (some #(when (= (:email %) "sonja.sibbo@sipoo.fi") %) sipoo-statement-givers))
-             create-statement-result (command sonja :request-for-statement
-                                              :functionCode nil
-                                              :id application-id
-                                              :personIds [sonja-statement-giver-id])
-             updated-application (query-application pena application-id)
-             statement-id (:id (first (:statements updated-application)))
-             upload-statement-attachment-result (upload-attachment-for-statement sonja application-id "" true statement-id)
-             give-statement-result (command sonja :give-statement
-                                            :id application-id
-                                            :statementId statement-id
-                                            :status "puoltaa"
-                                            :lang "fi"
-                                            :text "Annanpa luvan urakalle.")]
-            (query-application pena application-id)))
-
 (defn- generate-link-permit [{id :id :as application} apikey]
        (when (is-link-permit-required application)
              (fact "Lisataan hakemukselle viitelupa" (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
@@ -251,7 +218,7 @@
 
                    (command pena :submit-application :id application-id) => ok?
 
-                   (let [updated-application (generate-statement application-id)]
+                   (let [updated-application (generate-statement application-id sonja)]
 
                         (fact "updated-application exists" updated-application => truthy)
 
@@ -272,8 +239,7 @@
                                             :YL ymparistolupa_to_krysp_221
                                             :MAL maa-aines_to_krysp_221
                                             :VVVL vesihuolto-to-krysp_221)
-                              xml (element-to-xml canonical mapping)
-                              xml-s (indent-str xml)]
+                              xml (element-to-xml canonical mapping)]
                              (fact "xml exists" xml => truthy)))
 
                    (fact "Application is not assigned"
@@ -297,7 +263,7 @@
                         (final-xml-validation approved-application expected-attachment-count expected-sent-attachment-count)
 
                         (:to email) => (contains (email-for-key pena))
-                        (:subject email) => "Lupapiste.fi: Ryspitie 289 - hakemuksen tila muuttunut"
+                        (:subject email) => "Lupapiste: Ryspitie 289 - hakemuksen tila muuttunut"
                         (get-in email [:body :plain]) => (contains "K\u00e4sittelyss\u00e4")
                         email => (partial contains-application-link? application-id "applicant"))
 
@@ -308,7 +274,7 @@
                         (:state application) => "complementNeeded"
                         (-> application :history last :state) => "complementNeeded"
                         (:to email) => (contains (email-for-key pena))
-                        (:subject email) => "Lupapiste.fi: Ryspitie 289 - hakemuksen tila muuttunut"
+                        (:subject email) => "Lupapiste: Ryspitie 289 - hakemuksen tila muuttunut"
                         (get-in email [:body :plain]) => (contains "T\u00e4ydennett\u00e4v\u00e4n\u00e4")
                         email => (partial contains-application-link? application-id "applicant")))))
 

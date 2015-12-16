@@ -3,7 +3,7 @@ LUPAPISTE.DocumentDataService = function(params) {
 
   var self = this;
   params = params || {};
-  
+
   self.model = ko.observableArray();
   self.applicationId = params.readOnly ? ko.observable() : lupapisteApp.models.application.id;
 
@@ -12,7 +12,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   self.findDocumentById = function(id) {
     return _.find(self.model(), function(doc) {
       return doc.id === id;
-    });    
+    });
   };
 
   function resolveCommandNames(doc, options) {
@@ -32,7 +32,7 @@ LUPAPISTE.DocumentDataService = function(params) {
         isDisabled: options && options.disabled
       },
       resolveCommandNames(doc, options),
-      createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, [])
+      createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, doc.validationErrors, [])
     ));
   };
 
@@ -60,7 +60,7 @@ LUPAPISTE.DocumentDataService = function(params) {
     var rawModel = getAsRaw(findByIndex(repeatingModel, index));
     var repLength = pushToRepeating(repeatingModel, rawModel);
     var updates = getAsUpdates(repeatingModel.model()[repLength - 1]);
-    self.updateDoc(documentId, 
+    self.updateDoc(documentId,
                    updates,
                    indicator);
   };
@@ -109,16 +109,17 @@ LUPAPISTE.DocumentDataService = function(params) {
           doc: documentId,
           id: self.applicationId(),
           collection: "documents"
-        }, 
+        },
         params)
       )
       .success(function(e) {
         hub.send("document::validation-result", e.results);
-      
+
         indicator({type: "saved"});
         cb(e);
       })
-      .error(function () {
+      .error(function (e) {
+        hub.send("document::validation-result", e.results);
         indicator({type: "err"});
       })
       .fail(function () {
@@ -131,22 +132,20 @@ LUPAPISTE.DocumentDataService = function(params) {
   // Repeating utilities
   //
 
-  function createRepeatingUnitDataModel(schema, rawModel, path, index) {
+  function createRepeatingUnitDataModel(schema, rawModel, docValidationErrors, path, index) {
     index = index.toString();
     return _.extend(
         {index: index},
-        isGroupType(schema) ? 
-          createGroupDataModel(schema, rawModel, path.concat(index)) : 
-          createInputDataModel(schema, rawModel, path.concat(index))
+         createGroupDataModel(schema, rawModel, docValidationErrors, path.concat(index))
     );
   }
 
-  function createRepeatingDataModel(schema, rawModel, path) {
+  function createRepeatingDataModel(schema, rawModel, docValidationErrors, path) {
     return {
       path: path,
       schema: schema,
       model: ko.observableArray(_.map(rawModel, function(subModel, index) {
-        return createRepeatingUnitDataModel(schema, subModel, path, index);
+        return createRepeatingUnitDataModel(schema, subModel, docValidationErrors, path, index);
       }))
     };
   }
@@ -164,19 +163,19 @@ LUPAPISTE.DocumentDataService = function(params) {
   function pushToRepeating(repeatingModel, rawModel) {
     var ind = _.parseInt( _(repeatingModel.model()).map("index").max() ) + 1 || 0;
     var path = repeatingModel.path;
-    return repeatingModel.model.push(createRepeatingUnitDataModel(repeatingModel.schema, rawModel, path, ind));
+    return repeatingModel.model.push(createRepeatingUnitDataModel(repeatingModel.schema, rawModel, {}, path, ind));
   }
 
   //
   // Group utilities
   //
 
-  function createGroupDataModel(schema, rawModel, path) {
+  function createGroupDataModel(schema, rawModel, docValidationErrors, path) {
     return {
       path: path,
       schema: schema,
       model: _(schema.body).map(function(subSchema) {
-        return [subSchema.name, createDataModel(subSchema, rawModel && rawModel[subSchema.name], path.concat(subSchema.name))];
+        return [subSchema.name, createDataModel(subSchema, rawModel && rawModel[subSchema.name], docValidationErrors, path.concat(subSchema.name))];
       }).zipObject().value()
     };
   }
@@ -185,9 +184,13 @@ LUPAPISTE.DocumentDataService = function(params) {
   // Input utilities
   //
 
-  function createInputDataModel(schema, rawModel, path) {
+  function createInputDataModel(schema, rawModel, docValidationResults, path) {
+    var initValidationResult = _.find(docValidationResults, function(errors) {
+      return _.isEqual(errors.path, path);
+    });
     return {path: path,
             schema: schema,
+            validationResult: ko.observable(initValidationResult && initValidationResult.result),
             model: ko.observable(rawModel && rawModel.value)};
   }
 
@@ -196,20 +199,20 @@ LUPAPISTE.DocumentDataService = function(params) {
   //
 
   function isRepeating(schema) {
-    return schema.repeating && !_.contains(["document" ,"party"], schema.type);
+    return schema.repeating && !_.contains(["document" ,"party", "location"], schema.type);
   }
 
   function isGroupType(schema) {
     return _.contains(["group", "table", "location", "document", "party"], schema.type);
   }
 
-  function createDataModel(schema, rawModel, path) {
+  function createDataModel(schema, rawModel, docValidationErrors, path) {
     if (isRepeating(schema)) {
-      return createRepeatingDataModel(schema, rawModel, path);
+      return createRepeatingDataModel(schema, rawModel, docValidationErrors, path);
     } else if (isGroupType(schema)) {
-      return createGroupDataModel(schema, rawModel, path);
+      return createGroupDataModel(schema, rawModel, docValidationErrors, path);
     } else {
-      return createInputDataModel(schema, rawModel, path);
+      return createInputDataModel(schema, rawModel, docValidationErrors, path);
     }
   }
 
@@ -259,7 +262,7 @@ LUPAPISTE.DocumentDataService = function(params) {
           .flatten()
           .filter(1)
           .value();
-          
+
       } else {
         return [[dataModel.path, dataModel.model]];
       }

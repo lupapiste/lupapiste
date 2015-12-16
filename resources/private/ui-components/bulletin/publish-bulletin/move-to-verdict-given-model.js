@@ -21,7 +21,8 @@ LUPAPISTE.MoveToVerdictGivenModel = function (params) {
 
   self.all = ko.validatedObservable([self.verdictGivenAt,
                                      self.appealPeriodStartsAt,
-                                     self.appealPeriodEndsAt]);
+                                     self.appealPeriodEndsAt,
+                                     self.verdictGivenText]);
 
   self.isValid = ko.pureComputed(function() {
     return self.all.isValid();

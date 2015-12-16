@@ -3,6 +3,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf]]
             [clojure.walk :as walk]
             [clojure.string :as s]
+            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
@@ -135,6 +136,10 @@
   ([collection data] (insert collection data default-write-concern))
   ([collection data concern] (mc/insert (get-db) collection (with-_id (remove-null-chars data))) nil))
 
+(defn insert-batch
+  ([collection data] (insert-batch collection data default-write-concern))
+  ([collection data concern] (mc/insert-batch (get-db) collection (map (comp with-_id remove-null-chars) data))))
+
 (defn by-id
   ([collection id]
     (with-id (mc/find-one-as-map (get-db) collection {:_id (remove-null-chars id)})))
@@ -224,16 +229,21 @@
 (defn upload [file-id filename content-type content & metadata]
   {:pre [(string? file-id) (string? filename) (string? content-type)
          (or (instance? java.io.File content) (instance? java.io.InputStream content))
-         (sequential? metadata)
+         (or (nil? metadata) (sequential? metadata))
          (or (even? (clojure.core/count metadata)) (map? (first metadata)))]}
   (let [meta (remove-null-chars (if (map? (first metadata))
                                   (first metadata)
-                                  (apply hash-map metadata)))]
-    (gfs/store-file (gfs/make-input-file (get-gfs) content)
-      (set-file-id file-id)
-      (gfs/filename filename)
-      (gfs/content-type content-type)
-      (gfs/metadata (assoc meta :uploaded (System/currentTimeMillis))))))
+                                  (apply hash-map metadata)))
+        store-content (fn [input-stream]
+                        (gfs/store-file (gfs/make-input-file (get-gfs) input-stream)
+                                        (set-file-id file-id)
+                                        (gfs/filename filename)
+                                        (gfs/content-type content-type)
+                                        (gfs/metadata (assoc meta :uploaded (System/currentTimeMillis)))))]
+    (if (instance? java.io.InputStream content)
+      (store-content content) ; Closing the stream should be handled by the caller
+      (with-open [input-stream (io/input-stream content)]
+        (store-content input-stream)))))
 
 (defn download-find [query]
   (when-let [attachment (gfs/find-one (get-gfs) (with-_id (remove-null-chars query)))]
@@ -318,6 +328,7 @@
   (if @connection
     (do
       (m/disconnect @connection)
+      (reset! dbs {})
       (reset! connection nil))
     (debug "Not connected")))
 
@@ -346,9 +357,6 @@
   (ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (ensure-index :applications {:address 1})
   (ensure-index :applications {:tags 1})
-  (try
-    (drop-index :activation "created-at_1") ; no such field "created-at"
-    (catch Exception _))
   (ensure-index :activation {:email 1})
   (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (ensure-index :vetuma {:user.stamp 1})
@@ -365,9 +373,8 @@
   (ensure-index :companies {:name 1} {:name "company-name"})
   (ensure-index :companies {:y 1} {:name "company-y"})
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
-  (try
-    (drop-index :organizations "areas.features.geometry_2dsphere")
-    (catch Exception _))
+  (ensure-index :propertyCache {:created 1} {:expireAfterSeconds (* 60 60 24)}) ; 24 h
+  (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
   (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
 
 (defn clear! []

@@ -40,7 +40,8 @@ legend {
   &.source-value-changed {
     border: 2px solid $lp-green;
   }
-  &.error {
+  &.err {
+    color: red;
     border-color: red;
     border-width: 3px;
   }
@@ -159,6 +160,10 @@ input[readonly], textarea[readonly] {
       padding-top: 0;
     }
   }
+}
+
+message-panel {
+  position: relative;
 }
 
 .form-entry {
@@ -501,7 +506,7 @@ input.form-input.inline {
     padding: $marginS $marginM;
   }
 
-  #table-huoneistot, #table-muutHankkeet {
+  .huoneistot-table, .muutHankkeet-table {
     td, th {
       padding: $marginS;
     }

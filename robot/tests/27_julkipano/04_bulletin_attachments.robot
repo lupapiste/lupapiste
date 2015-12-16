@@ -20,6 +20,7 @@ Unlogged user sees bulletin
 
 Bulletin has attachments tab, and uploaded attachments are visible
   Open bulletin by index  1
+  Open bulletin tab  info
   Bulletin tab should be visible  info
   Open bulletin tab  attachments
   Bulletin attachments count is  2

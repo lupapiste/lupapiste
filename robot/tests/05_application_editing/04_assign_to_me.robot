@@ -58,6 +58,12 @@ Sonja assign application to herself
 Assignee has changed
   Wait Until  Application is assigned to  Sibbo Sonja
 
+Sonja checks property owners
+  Click enabled by test id  application-property-owners-btn
+  # Local dummy endpoint returns 2 results
+  Wait Until  Xpath Should Match X Times  //tbody[@data-test-id="owner-query-results"]/tr  2
+  Click enabled by test id  ok-button
+
 Sonja sees Mikko's full person ID
   Open tab  parties
   Open accordions  parties

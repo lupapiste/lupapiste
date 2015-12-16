@@ -4,6 +4,7 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
+(defn matches? [re s] (boolean (when (string? s) (re-matches re s))))
 
 (defn valid-email? [email]
   (try
@@ -38,14 +39,9 @@
       (finnish-y? (str y \- c)))
     false))
 
-(defn bic? [bic]
-  (if bic
-    (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
-    false))
+(def bic? (partial matches? #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$"))
 
-(defn rakennusnumero? [^String s]
-  (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
-
+(def rakennusnumero? (partial matches? #"^\d{3}$"))
 
 (def vrk-checksum-chars ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"])
 
@@ -82,11 +78,15 @@
 (defn- rakennustunnus-checksum-matches? [^String prt]
   (= (subs prt 9 10) (rakennustunnus-checksum prt)))
 
-(defn rakennustunnus? [^String prt]
-  ;; KRYSP: ([1][0-9]{8})[0-9ABCDEFHJKLMNPRSTUVWXY]
-  (and (not (nil? prt)) (re-matches #"^1\d{8}[0-9A-FHJ-NPR-Y]$" prt) (rakennustunnus-checksum-matches? prt)))
+(def rakennustunnus-pattern
+  "VRK pysyva rakennustunnus. KRYSP-skeemassa: ([1][0-9]{8})[0-9ABCDEFHJKLMNPRSTUVWXY]"
+  #"^1\d{8}[0-9A-FHJ-NPR-Y]$")
 
-(defn finnish-zip? [^String zip-code]
-  (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
+(defn rakennustunnus? [^String prt]
+  (and  (matches? rakennustunnus-pattern prt) (rakennustunnus-checksum-matches? prt)))
+
+(def finnish-zip? (partial matches? #"^\d{5}$"))
 
 (def maara-alatunnus-pattern #"^M?([0-9]{1,4})$")
+
+(def kiinteistotunnus? (partial matches? #"^[0-9]{14}$"))

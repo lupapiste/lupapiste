@@ -9,15 +9,17 @@ LUPAPISTE.BulletinTabModel = function(params) {
   self.authModel = params.authModel;
   self.bulletin = params.bulletinService.bulletin;
   self.comments = params.bulletinService.comments;
+  self.commentsLeft = params.bulletinService.commentsLeft;
+  self.totalComments = params.bulletinService.totalComments;
 
-  self.showVersionComments = ko.observable(false);
+  self.selectedBulletinVersion = ko.observable(false);
 
   self.showVersions = ko.pureComputed(function() {
-    return self.bulletin() && self.bulletin().versions.length > 0 && !self.showVersionComments();
+    return self.bulletin() && self.bulletin().versions.length > 0 && !self.selectedBulletinVersion();
   });
 
   self.showPublishing = ko.pureComputed(function() {
-    return !self.showVersionComments();
+    return !self.selectedBulletinVersion();
   });
 
   ko.computed(function() {

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="operations" >
+      <div class="container">
+        <section>
+          <h2 data-bind="ltext: 'auth-admin.selected-operations'"></h2>
+          <table data-test-id="organization-selected-operations">
+          <!-- ko foreach: organization.selectedOperations -->
+            <thead>
+              <tr>
+                <th data-bind="ltext: permitType"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: operations">
+              <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">
+                <td data-bind="text: text"></td>
+              </tr>
+            </tbody>
+          <!-- /ko -->
+          </table>
+          <div data-bind="with: organization">
+            <button data-bind="click: $root.editSelectedOperationsModel.open, ltext: 'edit', enable: lupapisteApp.models.globalAuthModel.ok('set-organization-selected-operations')"
+                    class="btn-primary" data-test-id="authadmin-edit-selected-operations"></button>
+          </div>
+        </section>
+      </div>
+
+      <div id="dialog-edit-selected-operations" class="window autosized selectm-dialog">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'auth-admin.selected-operations'"></p>
+          <p class="dialog-close close lupicon-remove"></p>
+        </div>
+        <div class="dialog-content">
+          <div class="selected-operation-templates"></div>
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>
