@@ -3,125 +3,97 @@
             [hiccup.core :as hiccup]
             [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
-            [sade.strings :as ss]
-            [lupapalvelu.i18n :refer [with-lang loc]]
-            [sade.util :as util])
+            [sade.strings :as ss])
   (:import (java.io File)))
 
-; See commanline parameters:
-; https://help.libreoffice.org/Common/Starting_the_Software_With_Parameters
-; http://kgsspot.blogspot.fi/2011/09/convert-doc-to-pdf-in-command-line.html
-
-; wget http://download.documentfoundation.org/libreoffice/stable/5.0.3/rpm/x86_64/LibreOffice_5.0.3_Linux_x86-64_rpm.tar.gz
-; tar -xzf LibreOffice_5.0.3_Linux_x86-64_rpm.tar.gz
-; cd LibreOffice_5.0.2.2_Linux_x86_rpm/RPMS/
-; yum localinstall *.rpm
-
-; **** autostart service
-; libreoffice --headless --accept="socket,host=127.0.0.1,port=8001,tcpNoDelay=1;urp" --nodefault --nofirststartwizard --nolockcheck --nologo --norestore --invisible &
-
-; TODO: make a better solution using JAVA API http://api.libreoffice.org/examples/java/DocumentHandling/DocumentConverter.java which requires installing "libreoffice-sdk"
-
-;;TODO: needs Libre Office SDK libtraries and more coding. See: http://api.libreoffice.org/examples/DevelopersGuide/examples.html
-;;com.sun.star.uno.XComponentContext xContext
-;;com.sun.star.lang.XMultiComponentFactory xMCF = xContext.getServiceManager();
-;;(defn getUNOServiceManager [] (->
-;;                                (com.sun.star.comp.helper.Bootstrap/bootstrap)
-;;                                (.getServiceManager)))
-
-(defn- connection-url [host port]
-  (let [h (if (empty? host) "127.0.0.1" host)
+; See commanline parameters: https://help.libreoffice.org/Common/Starting_the_Software_With_Parameters
+(defn- libre-office-service [action host port]
+  {:pre [(or (= :start action) (= :stop action))]}
+  (let [a (if (= action :stop) "--unaccept" "--accept")
+        h (if (empty? host) "127.0.0.1" host)
         p (if (empty? port) "2220" port)]
-    (str "\"socket,host=" h ",port=" p ",tcpNoDelay=1;urp\"")))
+    (shell/sh "libreoffice" "--headless" (str a "=\"socket,host=" h ",port=" port ",tcpNoDelay=1;urp") "--nodefault" "--nofirststartwizard" "--nolockcheck" "--nologo" "--norestore" "--invisible" "&")))
 
-(defn libre-command-local [src dst-dir]
-  (shell/sh "libreoffice" "--headless" "--convert-to" "pdf" "--outdir" dst-dir src))
+(defn start-libre-office-service [& [port host]]
+  "Command to start LibreOffice as service that accepts RPC. NB: not needed unless we are going to run the Libre as service"
+  (libre-office-service :start host port))
 
-(defn unoconv-command-local [type src dst-file]
+(defn stop-libre-office-service [& [port host]]
+  "Command to stop LibreOffice as service that accepts RPC. NB: not needed unless we are going to run the Libre as service"
+  (libre-office-service :stop host port))
+
+
+(defn libre-command [src dst-dir & connection] (shell/sh "libreoffice" "--headless" "--convert-to" "pdf" "--outdir" dst-dir src))
+
+(defn unoconv-command [type src dst-file & connection]
   {:pre [(or (= :document type) (= :graphics type) (= :presentation type) (= :spreadsheet type))]}
   (shell/sh "/usr/bin/unoconv" "-d" (name type) "-f" "pdf" "-eSelectPdfVersion=1" "-o" dst-file src))
 
-;;unoconv --connection 'socket, host=127.0.0.1, port=2220, tcpNoDelay=1 ;urp;StarOffice.ComponentContext' -f pdf <filename.rtf>
-(defn unoconv-command-remote [type src dst-file host port]
-  {:pre [(or (= :document type) (= :graphics type) (= :presentation type) (= :spreadsheet type))]}
-  (shell/sh "/usr/bin/unoconv" "-c" (connection-url host port) "-d" (name type) "-f" "pdf" "-eSelectPdfVersion=1" "-o" dst-file src))
 
-(defn- parse-app-operations [{:keys [primaryOperation secondaryOperations]}]
+(defn- get-operations [{:keys [primaryOperation secondaryOperations]}]
   (ss/join ", " (map (fn [[op c]] (str (if (> c 1) (str c " \u00D7 ")) op))
                      (frequencies (map :name (remove nil? (conj (seq secondaryOperations) primaryOperation)))))))
 
-(defn- td [label value & attr]
-  [:td (if (seq? attr) (apply assoc {:style "border: 1.2px solid black; padding: 5px;" :align "left"} attr) {:style "border: 1.2px solid black; padding: 5px;" :align "left"})
-   [:h4 {:style "color: #000000;"} (loc label)] [:p {:style "margin-left: 10px;"} (if (ss/blank? value) (loc "application.export.empty") (str value))]])
+(def td-style {:style "border: 1.2px solid black; " :align "left" })
+(def p-style {:style "margin-left: 10px;"})
 
-(defn- th [label & [colspan]]
-  [:th {:colspan (if (nil? colspan) "2" (str colspan)) :style "background-color: lightgrey; padding: 1em; border: 1.2px solid black;"} [:h2 {:style "color: #000000;"} label]])
-
-(defn- render-common-html [title app data lang]
+(defn- render [title app data]
   (hiccup/html
-    [:html {:lang (name lang)}
+    [:html {:lang "fi"}
      [:head [:title "Lupapiste.fi"]]
      [:body
-      [:div {:style "margin: 50px;"}]
+      [:div {:style "margin: 40px;"}]
       [:img {:src (.getAbsolutePath (File. (.toURI (io/resource "public/img/logo-v2-flat.png"))))}]
       [:h1 title]
       [:h2 (:title app)]
       [:hr]
       [:table {:width "100%"}
        [:tbody
-        [:tr (td "application.muncipality" (:municipality app)) (td "application.export.state" (loc (:state app)))]
-        [:tr (td "kiinteisto.kiinteisto.kiinteistotunnus" (:propertyId app)) (td "submitted" (:created app))]
-        [:tr (td "application.id" (:id app)) (td "applications.authority" (str (get-in app [:authority :lastName]) (get-in app [:authority :firstName])))]
-        [:tr (td "application.address" (:address app)) (td "applicant" (clojure.string/join ", " (:_applicantIndex app)))]
-        [:tr (td "selectm.source.label.edit-selected-operations" (parse-app-operations app) :colspan "2")]]]]
+        [:tr [:td td-style [:h4 "Asiointikunta"] [:p p-style (:municipality app)]] [:td td-style [:h4 "Hakemuksen vaihe"] [:p p-style (:state app)]]]
+        [:tr [:td td-style [:h4 "Kiinteist&ouml;tunnus"] [:p p-style (:propertyId app)]] [:td td-style [:h4 "Hakemus j&aumltetty"] [:p p-style (:created app)]]]
+        [:tr [:td td-style [:h4 "Asiointitunnus"] [:p p-style (:id app)]] [:td td-style [:h4 "K&auml;sitteluj&auml;"] [:p p-style (str (get-in app [:authority :lastName]) (get-in app [:authority :firstName]))]]]
+        [:tr [:td td-style [:h4 "Hankkeen osoite"] [:p p-style (:address app)]] [:td td-style [:h4 "Hakija"] [:p p-style (clojure.string/join ", " (:_applicantIndex app))]]]
+        [:tr [:td (assoc td-style :colspan "2") [:h4 "Toimenpiteet"] [:p p-style (get-operations app)]]]]]]
      [:br]
      [:table {:width "100%"}
       data]]))
 
-(defn- render-statement-html [stm]
+(defn- render-statement [stm]
   [:tbody
-   [:tr (th (loc "application.statement.status"))]
-   [:tr (td "statement.requested" (util/to-local-date (:requested stm))) (td "statement.giver" (str (get-in stm [:person :name])))]
-   [:tr (td "export.statement.given" (util/to-local-date (:given stm))) (td "statement.title" (:status stm))]
-   [:tr (td "statement.text" (:text stm) :colspan "2")]])
+   [:tr [:th {:colspan "2" :style "font-size: 2em; background-color: lightgrey; padding: 1em; border: 1.2px solid black;"} [:h4 {:style "color: #000000;"} "Lausunto"]]]
+   [:tr [:td td-style [:h4 "Lausunnon pyyntop&auml;iv&auml;"] [:p p-style (:requested stm)]] [:td td-style [:h4 "Lausunnon antaja"] [:p p-style (get-in stm [:person :name])]]]
+   [:tr [:td td-style [:h4 "Lausunnon antop&auml;iv&auml;"] [:p p-style (:given stm)]] [:td td-style [:h4 "Puoltotieto"] [:p p-style (:status stm)]]]
+   [:tr [:td (assoc td-style :colspan "2") [:h4 "Lausuntoteksti"] [:p p-style (:text stm)]]]])
 
-(defn- render-history-html [raw-data]
-  (loop [data raw-data rows [:tbody
-                              [:tr (th (loc "caseFile.heading") 4)]
-                              [:tr {:style "background-color: whitesmoke;color: #000000; font-weight: bold;"}
-                               [:td [:h3 (loc "caseFile.action")]] [:td  [:h3 (loc "document")]] [:td  [:h3 (loc "attachment")]] [:td  [:h3 (loc "caseFile.documentDate")]]]]]
-    (let [action (first data)]
-      (if (empty? action)
-        rows
-        (recur (rest data)
-               (-> rows
-                   (conj [:tr {:style (if (even? (count rows)) "background-color: lavenderblush;" "")} [:td (:action action)] [:td ""] [:td ""] [:td (:start action)]])
-                   (into
-                     (loop [docs (:documents action) rows2 []]
-                       (let [doc (first docs)]
-                         (if (empty? doc)
-                           rows2
-                           (recur (rest docs) (conj rows2 [:tr [:td ""] [:td (if (= (:category doc) :document) (:category doc) "")] [:td (if-not (= (:category doc) :document) (:category doc) "")] [:td (:ts doc)]]))))))))))))
+(defn unoconv-render-pdf [src-file dst-file]
+  "Converts any statement readable by LibreOffice to PDF/A1A using unoconv command
+   Requires:
+     1) Libre Office core 4.2 which defaults to PDF/A1A
+     2) Libre Office headless
+     3) Libre Office Writer
+     4) unoconv commandline tool"
+  (debug " Redering PDF via " (unoconv-command :document (.getAbsolutePath src-file) (.getAbsolutePath dst-file))))
 
-(defn render-pdf [src-file dst-file]
-  (debug " Redering PDF via local unoconv: " (unoconv-command-local :document (.getAbsolutePath src-file) (.getAbsolutePath dst-file))))
+(defn libre-render-pdf [src-filename dst-dirname]
+  "Converts any statement readable by LibreOffice to PDF/A1A calling libreoffice directly
+   Requires:
+     1) Libre Office core 4.2 which defaults to PDF/A1A
+     2) Libre Office headless
+     3) Libre Office Writer"
+  (debug " Redering PDF via " (libre-command :document src-filename dst-dirname)))
 
-(defn render-statement-pdf [app stm lang]
-  (let [src (File/createTempFile "test-libre-html-statement-" ".html")
-        dst (File/createTempFile "test-libre-html-statement-" ".pdf")
-        ]
+
+(defn render-statement-pdf [app stm]
+  "Converts any statement readable by LibreOffice to PDF/A1A
+   Requires:
+     1) Libre Office core 4.2 which defaults to PDF/A1A
+     2) Libre Office headless
+     3) Libre Office Writer
+     4) unoconv commandline tool"
+  (let [src (File/createTempFile "test-libre-html-" ".html")
+        dst (File/createTempFile "test-libre-html-" ".pdf")]
     (debug " Rendering statement HTML to temp file: " (.getAbsolutePath src))
-    (io/copy (with-lang lang (render-common-html (loc "application.statement.status") app (render-statement-html stm) lang)) src)
-    (render-pdf src dst)
+    (io/copy (render "Lausunto" app (render-statement stm)) src)
+    (unoconv-render-pdf src dst)
     (.delete src)
-    dst))
-
-(defn render-history-pdf [app history lang]
-  (let [src (File/createTempFile "test-libre-html-history-" ".html")
-        dst (File/createTempFile "test-libre-html-history-" ".pdf")]
-    (debug " Rendering history HTML to temp file: " (.getAbsolutePath src))
-
-      (io/copy (with-lang lang (render-common-html (loc "caseFile.heading") app (render-history-html history) lang)) src)
-       (render-pdf src dst)
-    ;(.delete src)
     dst))
