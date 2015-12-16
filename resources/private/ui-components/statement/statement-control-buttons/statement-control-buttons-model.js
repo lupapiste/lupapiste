@@ -12,7 +12,11 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
   });
 
   self.visible = ko.pureComputed(function() {
-    return self.authModel.ok(self.tab() === "statement" ? "give-statement" : "reply-statement");
+    return self.authModel.ok({
+      "statement": "give-statement",
+      "reply": "reply-statement",
+      "reply-request": "request-for-statement-reply",
+    }[self.tab()]);
   });
 
   self.submit = function() {

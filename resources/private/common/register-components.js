@@ -94,6 +94,7 @@ jQuery(document).ready(function() {
     {name: "statements-table"},
     {name: "statement-edit"},
     {name: "statement-edit-reply"},
+    {name: "statement-reply-request"},
     {name: "statement-control-buttons"},
     {name: "statement-attachments"}
   ];

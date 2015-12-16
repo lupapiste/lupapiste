@@ -677,8 +677,6 @@
   (defjson "/dev/fileinfo/:id" {:keys [id]}
     (dissoc (mongo/download id) :content))
 
-  (defjson "/dev/hgnotes" [] (env/hgnotes))
-
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))

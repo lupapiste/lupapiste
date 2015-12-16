@@ -114,3 +114,22 @@ $tree-height: 320px;
   width: $tree-width;
   height: $baseline * 5;
 }
+ 
+ul.attachments-list {
+  list-style-type: circle;
+  li.mandatory-attachments {
+    list-style-type:circle;
+  }
+}
+
+/* No list-style for links in organization-links in .tree-last */
+.organization-links {
+  li {
+    list-style-type: none;
+  }
+}
+
+/* No list-style for links in loctext in .tree-last */
+ul.no-bullets {
+  list-style-type: none;
+}
