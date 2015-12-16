@@ -31,7 +31,7 @@
           </tbody>
         </table>
         <p data-bind="visible: error" class="munimaps--error">
-          <span data-bind="text: loc( 'auth-admin.municipality-maps.error')"></span>
+          <span data-bind="ltext: errorMessageTerm"></span>
         </p>
         <button class="positive"
                 data-bind="click: updateServerDetails,

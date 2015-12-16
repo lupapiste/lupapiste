@@ -1282,7 +1282,7 @@
                             (merge {:metadata (:metadata (update-document-tila-metadata application))}))]
       (mongo/update-n :applications {:_id (:id application)} {$set data-for-$set}))))
 
-(defmigration r-application-hankkeen-kuvaus-documents-to-hankkeen-kuvaus-rakennuslupa
+(defmigration r-application-hankkeen-kuvaus-documents-to-hankkeen-kuvaus-rakennuslupa-v2
   {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]}))
                    (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hankkeen-kuvaus"}}}]})))}
   (update-applications-array
@@ -1353,6 +1353,17 @@
     {:permitType "YA"
      :tasks {$elemMatch {$and [{"schema-info.name" "task-katselmus-ya"}
                                {"data.katselmus.tila" {$exists true}}]}}}))
+
+(defn update-statement-state-by-status [{status :status state :state :as statement}]
+  (if state
+    statement
+    (assoc statement :state (if status :given :requested))))
+
+(defmigration statement-state
+  {:apply-when (pos? (mongo/count :applications {:statements {$elemMatch {"state" {$exists false}}}}))}
+  (update-applications-array :statements 
+                             update-statement-state-by-status
+                             {:statements {$elemMatch {"state" {$exists false}}}}))
 
 
 ;; BSON type 8 == Boolean (https://docs.mongodb.org/manual/reference/operator/query/type/)

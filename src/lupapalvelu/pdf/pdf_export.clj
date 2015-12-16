@@ -180,7 +180,8 @@
     (map collect-single-document (sort-docs decorated-docs))))
 
 (defn- get-authority [{authority :authority :as application}]
-  (if (domain/assigned? application)
+  (if (and (:authority application)
+           (domain/assigned? application))
     (str (:lastName authority) " " (:firstName authority))
     (loc "application.export.empty")))
 
@@ -204,14 +205,15 @@
 
 (defn- collect-statement-fields [statements]
   (map
-    (fn [{:keys [requested given status text dueDate] {giver :name} :person :as stm}]
-      (array-map
-        (loc "statement.requested") (str "" (or (util/to-local-date requested) "-"))
-        (loc "statement.giver") (if (ss/blank? giver) (loc "application.export.empty") (str giver))
-        (loc "export.statement.given") (str "" (or (util/to-local-date given) "-"))
-        (loc "statement.title") (if (ss/blank? status) (loc "application.export.empty") (str status))
-        (loc "statement.text") (if (ss/blank? text) (loc "application.export.empty") (str text))
-        (loc "add-statement-giver-maaraaika") (str "" (or (util/to-local-date dueDate) "-"))))
+    (fn [{:keys [requested given status text dueDate reply] {giver :name} :person :as stm}]
+      (cond->> [(loc "statement.requested") (str "" (or (util/to-local-date requested) "-"))
+                (loc "statement.giver") (if (ss/blank? giver) (loc "application.export.empty") (str giver))
+                (loc "export.statement.given") (str "" (or (util/to-local-date given) "-"))
+                (loc "statement.title") (if (ss/blank? status) (loc "application.export.empty") (str status))
+                (loc "statement.statement.text") (if (ss/blank? text) (loc "application.export.empty") (str text))
+                (loc "add-statement-giver-maaraaika") (str "" (or (util/to-local-date dueDate) "-"))]
+        reply  (#(conj % (loc "statement.reply.text") (if (:nothing-to-add reply) (loc "statement.nothing-to-add.label") (:text reply))))
+        true   (apply array-map)))
     statements))
 
 (defn collect-neighbour-fields [neighbours]

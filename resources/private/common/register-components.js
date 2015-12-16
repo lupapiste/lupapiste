@@ -67,6 +67,7 @@ jQuery(document).ready(function() {
     {name: "add-property-dialog"},
     {name: "autocomplete-saved-filters"},
     {name: "indicator"},
+    {name: "indicator-icon"},
     {name: "accordion"},
     {name: "date-field", model: "input-field-model"},
     {name: "text-field", model: "input-field-model"},
@@ -91,7 +92,12 @@ jQuery(document).ready(function() {
     {name: "bulletin-comments"},
     {name: "infinite-scroll"},
     {name: "statements-tab"},
-    {name: "statements-table"}
+    {name: "statements-table"},
+    {name: "statement-edit"},
+    {name: "statement-edit-reply"},
+    {name: "statement-reply-request"},
+    {name: "statement-control-buttons"},
+    {name: "statement-attachments"}
   ];
 
   _.forEach(components, function(component) {

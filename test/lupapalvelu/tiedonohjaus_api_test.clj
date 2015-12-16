@@ -49,7 +49,7 @@
            "sailytysaika" {"arkistointi" "ikuisesti"
                            "perustelu" "foo"}
            "myyntipalvelu" false
-           "nakyvyys" "julkinen"}) => nil
+           "nakyvyys" "julkinen"}) => {:ok true}
         (provided
           (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
                                                                                                                :henkilotiedot :ei-sisalla
@@ -78,7 +78,7 @@
            "sailytysaika" {"arkistointi" "ei"
                            "perustelu" "foo"}
            "myyntipalvelu" false
-           "nakyvyys" "julkinen"}) => nil
+           "nakyvyys" "julkinen"}) => {:ok true}
         (provided
           (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
                                                                                                                :henkilotiedot :ei-sisalla

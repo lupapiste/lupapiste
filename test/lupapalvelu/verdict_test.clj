@@ -47,7 +47,7 @@
 (def cmd {:application tj-app :user {:username "sonja"} :created (now)})
 
 (facts "Tyonjohtaja and suunnittelijan nimeaminen tests"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))]
+  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8-foremen.xml"))]
     (facts
       (fact "Success when TJ data is ok, compared to XML. Email is same, kuntaRoolikoodi is same"
         (count (:verdicts (fetch-tj-suunnittelija-verdict cmd))) => 1)

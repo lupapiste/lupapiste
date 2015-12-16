@@ -122,16 +122,16 @@
       (count (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications])) => 1
       (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications 0 :id]) => application-id)
 
-    (command sonja :add-application-tags :id application-id :tags ["222"]) => ok?
+    (command sonja :add-application-tags :id application-id :tags ["222222222222222222222222"]) => ok?
     (fact "$and query returns 1"
-      (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222"]) [:data :applications])) => 1)
+      (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"]) [:data :applications])) => 1)
 
     (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
     (fact "$and query returns 0 when handler is returning 0 matches"
-      (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222"]) [:data :applications])) => 0)
+      (count (get-in (datatables sonja :applications-search :handlers [ronja-id] :tags ["222222222222222222222222"]) [:data :applications])) => 0)
 
     (fact "Tags filter"
-      (get-in (datatables sonja :applications-search :tags ["222"]) [:data :applications 0 :id]) => application-id)
+      (get-in (datatables sonja :applications-search :tags ["222222222222222222222222"]) [:data :applications 0 :id]) => application-id)
 
     (fact "Area filter"
       (let [res (datatables sonja :applications-search :areas ["sipoo_keskusta"])]
@@ -142,6 +142,6 @@
       (let [res (datatables sonja :applications-search
                   :areas ["sipoo_keskusta"]
                   :handlers [sonja-id]
-                  :tags ["222" "111"])]
+                  :tags ["222222222222222222222222" "111111111111111111111111"])]
         (count (get-in res [:data :applications])) => 1
         (get-in res [:data :applications 0 :id]) => application-id))))

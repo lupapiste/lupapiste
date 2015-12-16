@@ -44,6 +44,12 @@ LUPAPISTE.MunicipalityMapsService = function() {
 
   var saveLayersFlag = false;
 
+  // L10n term for the current error status.
+  var errorMessageTerm = ko.pureComputed (function() {
+    var err = error();
+    return err ? "auth-admin.municipality-maps." + err : "empty";
+  });
+
   // Combines (only) the named layers into an array.
   function namedLayers( layer, arr ) {
     arr = arr || [];
@@ -61,30 +67,43 @@ LUPAPISTE.MunicipalityMapsService = function() {
     return arr;
   }
 
+  // Parses given WMS capabilities.
+  // Throws on error or bad data.
+  function parseCapabilities( data ) {
+    var parser = new ol.format.WMSCapabilities();
+    var caps = parser.read( data );
+    if( !_.get( caps, "Capability.Layer" )) {
+      throw "bad-data";
+    }
+    return caps;
+  }
+
   // Whenever the server details change,
   // the map server capabilities are reloaded.
   ko.computed( function() {
     var server = serverDetails();
     if( server && server.url ) {
+      error( false );
       waiting( true );
       $.get( PROXY,
              {request: "GetCapabilities",
               service: "wms"},
              function( data ) {
                error( false );
-               var parser = new ol.format.WMSCapabilities();
                var parsedCaps = null;
                try {
-                 parsedCaps = parser.read( data );
+                 parsedCaps = parseCapabilities( data );
                } catch( e ) {
                  // Received data was not capabilities.
+                 error( "bad-data" );
+
                } finally {
                  capabilities( parsedCaps );
                }
              },
              "text") // Text works both for xml and text responses.
       .fail( function() {
-        error( true );
+        error( "error" );
       })
       .always( _.partial( waiting, false ));
     }
@@ -136,7 +155,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
       }
     })
     .error( function() {
-      error( true );
+      error( "error" );
       resetUserLayers();
     })
     .complete( function() {
@@ -183,7 +202,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
     .pending( waiting )
     .complete( function( res ) {
       var body = res.responseJSON;
-      error( !body.ok );
+      error( !body.ok ? false : "error" );
       serverDetails( details );
       util.showSavedIndicator(body);
     })
@@ -212,6 +231,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
         server: ss.server,
         waiting: waiting,
         error: error,
+        errorMessageTerm: errorMessageTerm,
         channel: channel( "server")
       },
       layers: {

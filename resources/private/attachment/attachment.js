@@ -296,7 +296,7 @@ var attachment = (function() {
     ajax
       .command("set-attachment-meta", data)
       .success(function() {
-        hub.send("indicator", {style: "positive"});
+        hub.send("indicator-icon", {style: "positive"});
         model.dirty = true;
       })
       .call();
@@ -352,7 +352,7 @@ var attachment = (function() {
         unSelectedAttachmentIds: isVerdictAttachment ? [] : [attachmentId]
       })
       .success(function() {
-        hub.send("indicator", {style: "positive"});
+        hub.send("indicator-icon", {style: "positive"});
         repository.load(applicationId);
       })
       .error(function(e) {
@@ -371,7 +371,8 @@ var attachment = (function() {
         value: data
       })
       .success(function() {
-        hub.send("indicator", {style: "positive"});
+        model.dirty = true;
+        hub.send("indicator-icon", {style: "positive"});
       })
       .call();
     }));

@@ -4,6 +4,7 @@
             [clojure.walk :as walk]
             [monger.operators :refer :all]
             [cheshire.core :as json]
+            [schema.core :as sc]
             [sade.core :refer [fail fail!]]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -11,6 +12,7 @@
             [sade.crypt :as crypt]
             [sade.http :as http]
             [sade.xml :as sxml]
+            [sade.schemas :as ssc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
@@ -24,6 +26,15 @@
    :open-inforequest false
    :open-inforequest-email ""
    :opening nil})
+
+(sc/defschema Tag
+  {:id ssc/ObjectIdStr
+   :label sc/Str})
+
+(sc/defschema Layer
+  {:id sc/Str
+   :base sc/Bool
+   :name sc/Str})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="statement-control-buttons-template">
+      <div class="statement-control-buttons">
+        <button data-bind="disable: disabled,
+                           click: submit,
+                           visible: visible"
+                id="statement-submit"
+                type="submit"
+                class="positive">
+          <i class="lupicon-check"></i>
+          <span data-bind="ltext: 'statement.submit.' + tab()"></span>
+        </button>
+        <button data-bind="click: refresh"
+                id="statement-refresh"
+                type="refresh"
+                class="secondary">
+          <i class="lupicon-refresh"></i>
+          <span data-bind="ltext: 'statement.refresh'"></span>
+        </button>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

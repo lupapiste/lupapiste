@@ -1,6 +1,8 @@
 (ns sade.security-headers
   (:require [lupapalvelu.logging :refer [with-logging-context]]
-            [sade.session :refer [merge-to-session]])
+            [sade.session :refer [merge-to-session]]
+            [sade.strings :as ss]
+            [sade.util :as util])
   (:import java.util.UUID))
 
 (defn add-security-headers
@@ -36,3 +38,13 @@
   "Ring middleware. Sets 'session-id' mdc-key with ring session id."
   [handler]
   (fn [request] (copy-id handler request)))
+
+(defn sanitize-header-values
+  "Ring middleware. Removes non-printable characters from request and response headers."
+  [handler]
+  (fn [request]
+    (let [sanitized-request (update request :headers util/convert-values ss/strip-non-printables)
+          response (handler sanitized-request)]
+      (if (:headers response)
+        (update response :headers util/convert-values ss/strip-non-printables)
+        response))))

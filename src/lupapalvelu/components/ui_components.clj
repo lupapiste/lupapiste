@@ -3,23 +3,24 @@
             [swiss.arrows :refer [-<>>]]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.action :as action]
-            [lupapalvelu.components.core :as c]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mime :as mime]
-            [lupapalvelu.xml.validator :as validator]
-            [lupapalvelu.document.schemas :as schemas]
+            [me.raynes.fs :as fs]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.company :as company]
+            [lupapalvelu.components.core :as c]
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
-            [me.raynes.fs :as fs]))
+            [lupapalvelu.xml.validator :as validator]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -57,6 +58,7 @@
                  :bulletinStates        bulletins/bulletin-state-seq
                  :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))
+                 :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -254,7 +256,7 @@
                   :js ["applications-list.js"]}
 
    :statement    {:depends [:common-html :repository :side-panel]
-                  :js ["statement.js"]
+                  :js ["statement-update.js" "statement.js"]
                   :html ["statement.html"]}
 
    :verdict      {:depends [:common-html :repository :attachment]

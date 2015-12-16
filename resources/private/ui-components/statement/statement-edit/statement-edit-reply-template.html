@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="statement-edit-reply-template">
+
+    <div class="headerarea">
+      <div>
+        <h1>
+          <span>
+            <span data-bind="ltext: 'statement.tab.' + tab"></span>:
+          </span>
+          <span data-bind="with: application">
+            <span data-bind="text: title"></span>
+          </span>
+          <span data-bind="with: data">
+            (<span data-bind="text: person.text"></span>)
+          </span>
+        </h1>
+        <span data-bind="visible: isDraft" class="statement-state-indicator">
+          <i class="lupicon-circle-attention"></i>
+          <span data-bind="ltext: 'luonnos'">Luonnos</span>
+        </span>
+      </div>
+      <p id="statement-reply-cover-note">
+        <span data-bind="text: coverNote">Saate</span>
+      </p>
+    </div>
+
+    <div class="statement-info">
+      <form>
+        <div class="form-entry">
+          <input id="statement-nothing-to-add" 
+                 type="checkbox" 
+                 class="form-input checkbox" 
+                 data-bind="checked: nothingToAdd,
+                            disable: !enabled()">
+          <label for="statement-nothing-to-add" class="form-label">
+            <span data-bind="ltext: 'statement.nothing-to-add.label'">Ei lisattavaa</span>
+          </label>
+        </div>
+        <div data-bind="visible: !nothingToAdd()">
+          <label class="form-label" for="statement-text" data-bind="ltext: 'statement.' + tab + '.text'"></label>
+          <textarea
+            data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')}, 
+                       textInput: text, 
+                       readonly: !enabled()"
+            id="statement-text"
+            rows="15">
+          </textarea>
+        </div>
+      </form>
+    </div>
+    </script>
+  </section>
+</body>
+</html>
