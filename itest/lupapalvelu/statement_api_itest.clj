@@ -133,7 +133,7 @@
             (count emails) => 1
             (:to email) => (contains mikko-email)
             email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
-        
+
         (fact "One Attachment is generated"
           (->> (query-application sonja application-id)
                :attachments
@@ -168,8 +168,6 @@
               (:auth application-after))) => 1)
     (fact "Pena really has access to application"
       (query pena :application :id application-id) => ok?)
-    (fact "Applicant can not see unsubmitted statements"
-      (query pena :should-see-unsubmitted-statements :id application-id) => ok?)
 
     (facts "Pena gives a statement"
 
@@ -234,7 +232,7 @@
               user (:user resp) => truthy]
           (get-statement-by-user-id application (:id user)) => truthy
           (auth-contains-statement-giver application (:id user)) => truthy)))
-  
+
 (facts "Statement reply"
   (create-statement-giver sipoo veikko-email)
   (let [statement-giver-veikko (get-statement-giver-by-email sipoo veikko-email)
@@ -251,7 +249,7 @@
 
     ;; (fact "statement-is-replyable - should fail when statement is not given"
     ;;   (query sonja :statement-is-replyable :id application-id :statementId statement-id) =not=> ok?)
-    
+
     (fact "statement is given"
       (command veikko :give-statement :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
 
