@@ -31,6 +31,11 @@
   {:id ssc/ObjectIdStr
    :label sc/Str})
 
+(sc/defschema Layer
+  {:id sc/Str
+   :base sc/Bool
+   :name sc/Str})
+
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
 

@@ -607,7 +607,7 @@
                        :kopiolaitos-orderer-phone "0501231234"
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "YM" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
-                       :tags [{:id "111" :label "yl\u00E4maa"} {:id "222" :label "ullakko"}]
+                       :tags [{:id "111111111111111111111111" :label "yl\u00E4maa"} {:id "222222222222222222222222" :label "ullakko"}]
                        :areas {:type "FeatureCollection"
                                :features [{:id "sipoo_keskusta",
                                            :properties {:nimi "Keskusta", :id 3},
@@ -645,7 +645,7 @@
                                              :ya-kayttolupa-terassit]
                        :operations-attachments ya-default-attachments-for-operations
                        :permanent-archive-enabled false
-                       :tags [{:id "735YA001" :label "YA kadut"} {:id "735YA002" :label "YA ojat"}]}
+                       :tags [{:id "735001000000000000000000" :label "YA kadut"} {:id "735002000000000000000000" :label "YA ojat"}]}
 
                       ;; Kuopio YA
                       {:id "297-YA"
