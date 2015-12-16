@@ -25,7 +25,9 @@ LUPAPISTE.StatementUpdate = function(params) {
   });
 
   application.subscribe(function(application) {
-    var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId(); });
+    var statement = _.find(util.getIn(application, ["statements"]), function(statement) {
+      return statement.id === statementId();
+    });
     if(statement) {
       if (!statement["modify-id"]) {
         statement["modify-id"] = "";
@@ -45,9 +47,9 @@ LUPAPISTE.StatementUpdate = function(params) {
 
   doSubmit.subscribe(function(doSubmit) {
     var params = getCommandParams();
-    if (doSubmit) {
-      clearTimeout(draftTimerId);
+    if (!saving() && goingToSubmit()) {
       saving(true);
+      clearTimeout(draftTimerId);
       ajax
         .command(submitCommand, _.extend({
           id: applicationId(),

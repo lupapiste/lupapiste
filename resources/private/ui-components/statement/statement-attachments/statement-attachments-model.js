@@ -2,6 +2,7 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   "use strict";
   var self = this;
 
+  var application = params.application;
   var applicationId = params.applicationId;
   var statementId = params.statementId;
   var authModel = params.authModel;
@@ -10,8 +11,7 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
 
   self.attachments = ko.observableArray([]);
 
-
-  function refresh(application) {
+  application.subscribe(function(application) {
     self.attachments(
       _(application.attachments)
         .filter(function(attachment) {
@@ -25,11 +25,10 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
         })
         .value()
     );
-  };
+  });
 
   self.canDeleteAttachment = function(attachment) {
     return authModel.ok("delete-attachment") &&
-           authModel.ok("give-statement") &&
            (!attachment.requestedByAuthority || lupapisteApp.models.currentUser.isAuthority());
   };
 

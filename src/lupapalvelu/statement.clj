@@ -15,10 +15,11 @@
 ;; Common
 ;;
 
-(def statement-states #{:requested :draft :given :replyable :replied :closed})
-(def post-given-states #{:given :replyable :replied :closed})
+(def statement-states #{:requested :draft :given :replyable :replied})
+(def post-given-states #{:given :replyable :replied})
 (def pre-given-states (clojure.set/difference statement-states post-given-states))
-(def post-reply-states #{:replied :closed})
+(def post-repliable-states #{:replyable :replied})
+(def pre-repliable-states (clojure.set/difference statement-states post-repliable-states))
 
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
 ;; Krysp Yhteiset 2.1.5+
@@ -34,6 +35,7 @@
                      :name                            sc/Str})
 
 (def Reply          {:editor-id                       sc/Str
+                     (sc/optional-key :saateText)     sc/Str
                      :nothing-to-add                  sc/Bool
                      (sc/optional-key :text)          sc/Str})
 
@@ -58,17 +60,13 @@
                (cond-> {:id        (mongo/create-id)
                         :person    person
                         :requested now
-                        :state     :requested
-                        :saateText saate-text
-                        :dueDate   due-date}
+                        :state     :requested}
+                 saate-text     (assoc :saateText saate-text)
+                 due-date       (assoc :dueDate due-date)
                  (seq metadata) (assoc :metadata metadata))))
 
 (defn get-statement [{:keys [statements]} id]
   (util/find-by-id id statements))
-
-(defn statement-exists [{{:keys [statementId]} :data} application]
-  (when-not (get-statement application statementId)
-    (fail :error.no-statement :statementId statementId)))
 
 (defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} application]
   (let [{{statement-email :email} :person} (get-statement application statementId)]
@@ -85,12 +83,25 @@
   (when-not (->> (get-statement application statement-id) :state keyword #{:replyable})
     (fail :error.statement-is-not-replyable)))
 
-(defn statement-given? [application statementId]
-  (->> statementId (get-statement application) :state keyword pre-given-states not))
+(defn reply-visible [{{statement-id :statementId} :data :as command} application]
+  (when-not (->> (get-statement application statement-id) :state keyword post-repliable-states)
+    (fail :error.statement-reply-is-not-visible)))
+
+(defn reply-not-visible [{{statement-id :statementId} :data :as command} application]
+  (when-not (->> (get-statement application statement-id) :state keyword pre-repliable-states)
+    (fail :error.statement-reply-is-already-visible)))
 
 (defn statement-not-given [{{:keys [statementId]} :data} application]
-  (when (statement-given? application statementId)
+  (when-not (->> statementId (get-statement application) :state keyword pre-given-states)
     (fail :error.statement-already-given)))
+
+(defn statement-given [{{:keys [statementId]} :data} application]
+  (when-not (->> statementId (get-statement application) :state keyword post-given-states)
+    (fail :error.statement-not-given)))
+
+(defn replies-enabled [command {permit-type :permitType :as application}]
+  (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type)
+    (fail :error.organization-has-not-enabled-statement-replies)))
 
 (defn- update-statement [statement modify-id prev-modify-id & updates]
   (if (or (= prev-modify-id (:modify-id statement)) (nil? (:modify-id statement)))
@@ -105,13 +116,17 @@
 (defn give-statement [statement text status modify-id prev-modify-id editor-id]
   (update-statement statement modify-id prev-modify-id :state :given :text text :status status :given (now) :editor-id editor-id))
 
-(defn update-reply-draft [statement text nothing-to-add modify-id prev-modify-id editor-id]
-  (->> {:text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id}
+(defn update-reply-draft [{reply :reply :as statement} text nothing-to-add modify-id prev-modify-id editor-id]
+  (->> (assoc reply :text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id)
        (update-statement statement modify-id prev-modify-id :state :replyable :reply)))
 
-(defn reply-statement [statement text nothing-to-add modify-id prev-modify-id editor-id]
-  (->> {:text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id}
+(defn reply-statement [{reply :reply :as statement} text nothing-to-add modify-id prev-modify-id editor-id]
+  (->> (assoc reply :text (when-not nothing-to-add text) :nothing-to-add (boolean nothing-to-add) :editor-id editor-id)
        (update-statement statement modify-id prev-modify-id :state :replied :reply)))
+
+(defn request-for-reply [{reply :reply modify-id :modify-id :as statement} text user-id]
+  (->> (assoc reply :saateText text :nothing-to-add false :editor-id user-id)
+       (update-statement statement modify-id modify-id :state :replyable :reply)))
 
 ;;
 ;; Statement givers
