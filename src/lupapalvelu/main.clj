@@ -12,7 +12,7 @@
                "check-ah-verdicts"          'lupapalvelu.batchrun/check-for-asianhallinta-verdicts
                "fix-prev-permit-addresses"  'lupapalvelu.prev-permit/fix-prev-permit-addresses
                "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants
-               "cleanup-uploaded-files"     'lupapalvelu.file-upload-api/cleanup-uploaded-files})
+               "cleanup-uploaded-files"     'lupapalvelu.file-upload/cleanup-uploaded-files})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))
