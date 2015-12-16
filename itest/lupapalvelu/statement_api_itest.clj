@@ -267,3 +267,30 @@
 
     (fact "statement-is-replyable - is replyable when user is requested for reply"
       (query sonja :statement-is-replyable :id application-id :statementId statement-id) => ok?)))
+
+
+(facts "Statement data filtering"
+
+  (create-statement-giver sipoo veikko-email)
+  (let [statement-giver-veikko (get-statement-giver-by-email sipoo veikko-email)
+        application-id (:id (create-and-submit-application pena :propertyId sipoo-property-id :operation "ilmoitus-poikkeuksellisesta-tilanteesta"))
+        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000)
+        application (query-application sonja application-id)
+        statement-id (:id (get-statement-by-user-id application veikko-id)) => truthy
+        all-statement-keys  #{:id :person :state :requested :dueDate :saateText}
+        filtered-statement-keys (disj all-statement-keys :saateText :dueDate)]
+
+
+    (fact "All data of not-given statement data is available for authority Sonja"
+      (:statements application) => (has every? #(= all-statement-keys (-> % keys set))))
+
+    (fact "All data of not-given statement data is available for statementGiver himself"
+      (let [app-veikko (query-application veikko application-id)]
+        (:statements app-veikko) => (has every? #(= all-statement-keys (-> % keys set)))))
+
+    (fact "Some data of not-given statement data is filtered from Pena"
+      (let [app-pena (query-application pena application-id)]
+        (:statements app-pena) => (has every? #(= filtered-statement-keys (-> % keys set)))))
+    ))
+
+
