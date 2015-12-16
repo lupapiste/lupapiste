@@ -1,0 +1,56 @@
+# Java:
+*.class
+
+# Eclipse:
+.classpath
+.settings
+.project
+.pydevproject
+.externalToolBuilders
+bin
+
+# CCW:
+.nrepl-port
+
+# Idea
+*.iml
+*.ipr
+*.iws
+.idea
+
+# Maven:
+target
+pom.xml
+
+# Lein:
+.lein-*
+checkouts
+
+# For SCSS/SASS generation
+.sass-cache
+
+# Python
+*.pyc
+
+# Backups
+~$*
+
+# Temp
+temp
+.cache
+
+# OSX
+.DS_Store
+
+# Test files
+robot/local-ie8-test.bat
+*-leima.pdf
+
+# Misc
+*.swp
+.metadata
+*.log
+sessionkey
+keystore
+.tern-port
+user.properties
