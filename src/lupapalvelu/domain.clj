@@ -78,10 +78,9 @@
 
 (defn- authorized-to-statement? [user statement]
   (or
-    (:given statement)  ;; including given statements
-    (= :authority (keyword (:role user)))
+    (user/authority? user)
     (and
-      (= :applicant (keyword (:role user)))
+      (user/applicant? user)
       (= (-> statement :person :email user/canonize-email) (-> user :email user/canonize-email)))))
 
 (defn- authorized-to-statement-attachment? [user attachment ids-of-own-statements]
