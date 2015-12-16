@@ -1,26 +1,102 @@
-# Korkean tason domain-kuvaus
-
-Suomeksi
-
-Tietomalli
-Roolit
-
-# Arkkitehtuuri yleiskuvaus
-(copy paste)
-front+back
-fyysinen pino: front, app, mongodb, geoserver, sftp jne
-
 # Kehitystyö
+
+## Ympäristön pystytys
+
+Tarvitset kehitysympäristöön seuraavat työkalut:
+- [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+- [Leiningen](https://github.com/technomancy/leiningen) 2.5+
+- [MongoDB](https://www.mongodb.org/downloads) (testattu 2.6 ja 3.0 versioilla)
+- Ruby ja compass scss-tyylitiedostojen kääntämistä varten
+  - `gem install compass`
+- Python 2.x ja Robot Framework selaintestausta varten
+  - `pip install robotframework`
+  - `pip install robotframework-selenium2library`
+  - IE:llä ajettavia testejä varten ajuri osoitteesta  http://selenium-release.storage.googleapis.com/index.html
+  - Chromella ajettavia testejä varten ajuri osoitteesta http://chromedriver.storage.googleapis.com/index.html
+- [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
+  PDF-tiedostojen kääntämistä ja korjaamista varten
+- Valinnaisesti: [pdf2pdf](https://www.pdf-tools.com/pdf/Products-Shop/Evaluate.aspx?p=CNV&back=%2fpdf%2fpdf-to-pdfa-converter-signature.aspx)
+  PDF/A-konversioita varten
+
+## Kehitysympäristön konfigurointi
+
+### user.properties
+
+Luo projektin juureen (sovelluksen kehitysaikaiseen ajohakemistoon) user.properties
+tiedosto. Tiedostossa voit määritellä mm. tietokantayhteyden:
+
+    mongodb.servers.0.host  localhost
+    mongodb.servers.0.port  27017
+    mongodb.dbname          lupapiste
+    mongodb.credentials.username     lupapiste-kannan-user
+    mongodb.credentials.password     lupapiste-kannan-salasana
+
+Jos haluat pdf2pdf työkalun käyttöön, määrittele lisenssiavain lisäämällä tiedostoon
+
+    pdf2pdf.license-key    AVAIMESI
+
+
+### Master password
+
+Sovellus vaatii käynnistyäkseen master-salasanan asettamisen. Salasanan voi
+asettaa
+- tallentamalla se kotihakemistosi application_master_password.txt tiedostoon
+- `APPLICATION_MASTER_PASSWORD` ympäristömuuttujassa tai
+-  `-Dapplication.masterpassword=xxxx` käynnistysparametrilla
+  (kun sovellus käynnistetään java -jar komennolla).
+
+Salasanaa käytetään asetuksissa olevien salaisuuksien avaamiseen (ja kryptaamiseen).
+Properties-tiedostoissa voi käyttää Jasyptilla kryptattuja arvoja, ks. ohje
+test/lupapalvelu/nested.properties tiedostossa.
+
+### SSL-avain
+Kehitysmoodissa Lupapiste-sovelluksen sisäänrakennettu sovelluspalvelin kuuntelee
+HTTPS-liikennettä portissa 8443. Generoi tätä varten projektin juureen
+SSL/TLS-avain keystore -nimiseen tiedostoon. Salasanaa ei tule käyttää.
+Ks. http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
+
+Vaihtoehtoisesti voit lisätä user.properties tiedostoon rivin
+
+    feature.ssl    false
+
+Tällöin sovelluspalvelin kuuntelee ainoastaan HTTP-liikennettä.
+
+### Kartat ja paikkatietoaineisto
+
+Karttojen ja paikkatietoaineiston käyttö vaatii käyttäjätunnukset Maanmittauslaitokselta.
+
+## Palvelun käynnistys
+
+Kun työkalut on asennettu ja lisätty polkuun sekä MongoDB käynnistetty,
+Lupapiste käynnistyy komennolla:
+
+    lein run
+
+Sovellus on ajossa osoitteessa http://localhost:8000.
+
+Klikkaa oikean reunan Development palkissa "Apply minimal" linkkiä.
+Tämä alustaa tietokantaan muutamia käyttäjiä ja organisaatioita. Voit kirjautua
+sisään esimerkiksi hakijatunnuksella pena/pena tai viranomaistunnuksella sonja/sonja.
+
+
+## Tyylikäytännöt
+
+Lähdekoodissa käytetään aina unix-rivinvaihtoja (`\n`).
+
+Sisennys on kaksi välilyöntiä. Merkkijonojen ympärillä käytetään lainausmerkkejä
+myös JavaScript-koodissa.
+
+JavaScript-koodi tulee tarkastaa JSHint-työkalulla, jonka asetukset ovat projektin juuressa.
 
 ## Testaus
 
 ### Backend
 
- - `lein nitpicker` tekee kähdekooditiedostoille laittomien merkkien tarkastuksen
+ - `lein nitpicker` tekee lähdekooditiedostoille laittomien merkkien tarkastuksen
  - `lein midje` ajaa (pelkät) yksikkötestit
  - `lein integration` ajaa integraatiotestit. Integraatiotestit olettavat,
     että palvelin on käynnissä oletusportissa 8000 ja siitä on yhteys MML:n rajapintoihin.
- - `lein stest` ajaa systeemitestit, jotka käyttävät myös muita ulkoisia integaatioita.
+ - `lein stest` ajaa systeemitestit, jotka käyttävät myös muita ulkoisia integraatioita.
  - `lein verify` ajaa kaikki edellä mainitut.
 
 ### Frontend end-to-end testit
@@ -31,6 +107,21 @@ fyysinen pino: front, app, mongodb, geoserver, sftp jne
    ajaa Robot Frameworkilla testit, jotka käyttävät ulkoisia palveluita kuten
    VETUMA-kirjautumispalvelun testijärjestelmää.
 
+# Korkean tason domain-kuvaus
+
+TODO
+
+## Tietomalli
+## Roolit
+
+# Arkkitehtuuri yleiskuvaus
+
+TODO
+
+front+back
+fyysinen pino: front, app, mongodb, geoserver, sftp jne
+
+
 # Frontend arkkitehtuuri
 ## Yleiskuvaus
   SPA intial startup
@@ -38,23 +129,21 @@ fyysinen pino: front, app, mongodb, geoserver, sftp jne
     Query and Command
 
 ## Globaalit objektit
-        Ajax
-        Hub
-        User feedback on success and error event
-        Localizations
-    Lupapiste Map
-      Vespe
-    lupapisteApp
-      models
-      services
-    LUPAPISTE
-      config
-    Docgen, viittaus skeemojen määrittelyyn
-## KnockoutJS käyttö
-  component, model, template
-  services
+Ajax
+Hub
+User feedback on success and error event
+Localizations
+Lupapiste Map
+lupapisteApp
+- models
+- services
+LUPAPISTE
+- config
+Docgen, viittaus skeemojen määrittelyyn
 
-  Tommi
+## KnockoutJS käyttö
+- component, model, template
+- services
 
 ## Compass + SASS
 
@@ -65,21 +154,17 @@ Compassin konfigurointi on tiedostossa `resources/private/common-html/config.rb`
 Oletuksena CSS-tiedostot minimoidaan, tätä voidaan säätää compassin _environment_ tai _output-style_ konfiguroinnilla (config.rb). Esimerkiksi käsin generoitu ei-minifioitu CSS: saa aikaiseksi seuraavalla komennolla (development-mode): `compass compile -e development resources/private/common-html`
 
 
-
-  Vespe
-
 ## Oskari Map
   The hub between Lupapiste and Oskari Map
-  (copy-paste)
 
 ## Robot Framework
-  (copy-paste)
+
   Muista 2 välilyöntiä.
 
 # Backend arkkitehtuuri
 ## Yleiskuvaus
-Kerrosarkkitehtuurin kuvaus (copy-paste)
-Kuva olis kiva
+
+TODO
 
 ## Action pipeline
 Routes /api/command/:name, /api/query/:name, /api/datatables/:name, /data-api/json/:name and /api/raw/:name are defined in **web.clj**.
@@ -165,44 +250,35 @@ Normally session contains the following keys:
 Session cookien encryption key is read from sessionkey file (in working directory). If the file is missing, a random key will be used.
 
 ## Notifications
-Kuinka lähetän sähköpostia
+TODO Kuinka lähetän sähköpostia
 
 ## Integrations
-    WFS (KTJ, maastotietokanta, naapurit)
-  WMTS/WMS
-    KRYSP (miten keskustellaan taustajärjestelmien kanssa)
-  Asianhallinta
+TODO
+* WFS (KTJ, maastotietokanta, naapurit)
+* WMTS/WMS
+* KRYSP (miten keskustellaan taustajärjestelmien kanssa)
+* Asianhallinta
 
 ## Tilat ja tilakone
 
 ## VETUMA
 
 ## Database
-    Tietomalli (collectionit), ks. informaatioarkkitehtuuri knowledgessa
+
+TODO tietomalli (collectionit)
 
 ## Schemat
-Antti
 
-{
-(with-doc ""
-  :avain) (schema/Str)
-}
+    {
+    (with-doc ""
+      :avain) (schema/Str)
+    }
 
 ## Koodauskäytännöt
 - Käytetään omia apu-namespaceja (ss, mongo jne)
 
-## Testit
-unit, itest, stest
-
-Readme-tasolle:
-- unix-rivinvaihdot
-- 2 spacea sisennys
-- jshint
-- testien ajaminen
 
 # Laajennuspisteet
-
-Jari
 
 ## Uuden hakemustyypin lisääminen
 
@@ -220,7 +296,7 @@ sopivaan tilagraafiin.
 
 Tarkastuslista:
  - Uusi tila vaikuttaa vain haluttuihin hakemus- ja toimenpidetyyppeihin
- - Tilan nimeaä vastaava lokalisaatioavain ja vastaava title-avain
+ - Tilan nimeä vastaava lokalisaatioavain ja vastaava title-avain
    ("tila", "tila.title") on lokalisoitu
  - Tilan nimi ja lokalisaatio on viety DW:n lataustiedostoon
  - Tyylit lisätty resources/private/common-html/sass/views/_application.scss
