@@ -24,11 +24,10 @@
                 data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; },
                            attr: {'id': 'attachment-row-' + type['type-group'] + '-' + type['type-id']}">
               <td class="attachmentState">
-         <i data-bind="attr: {'class': LUPAPISTE.statusIcon(statusName),
+                <i data-bind="attr: {'class': LUPAPISTE.statusIcon(statusName),
                                         'data-test-state': state,
                                         'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                        'title': loc (statusName + '.title')}"
-                  </i>
+                                        'title': loc (statusName + '.title')}"></i>
                 <i data-bind="visible: $data.signed,
                                  attr: {'class': 'lupicon-circle-pen',
                                         'title': loc('attachment.signed'),
