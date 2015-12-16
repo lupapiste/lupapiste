@@ -39,7 +39,7 @@
         trid (xml/select1-attribute-value form [(e/attr= :id "TRID")] :value)]
 
     (fact "Init returned OK" status => 200)
-    (fact "Form contains application ID" body => (contains "***REMOVED***1"))
+    (fact "Form contains application ID" body => (contains "TESTIASIAKAS11"))
     (fact "Form contains transaction ID" trid =not=> ss/blank?)
     (fact "Form contains standard error url" (xml/select1-attribute-value form [(e/attr= :id "ERRURL")] :value) => (contains "/api/vetuma/error"))
     (fact "Form contains standard cancel url" (xml/select1-attribute-value form [(e/attr= :id "CANURL")] :value) => (contains "/api/vetuma/cancel"))
