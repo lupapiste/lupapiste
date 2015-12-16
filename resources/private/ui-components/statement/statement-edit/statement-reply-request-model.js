@@ -20,11 +20,7 @@ LUPAPISTE.StatementReplyRequestModel = function(params) {
   self.enabled = ko.pureComputed(function() {
     return self.authModel.ok(submitCommand);
   });
-
-  self.replyable = ko.pureComputed(function() {
-    return self.authModel.ok("statement-is-replyable");
-  })
-
+  
   hub.send("statement::submitAllowed", {tab: self.tab, value: true});
   
   hub.subscribe("statement::submit", function(params) {

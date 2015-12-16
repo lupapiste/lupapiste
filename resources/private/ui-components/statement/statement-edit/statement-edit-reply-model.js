@@ -35,6 +35,10 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
     }
   });
 
+  self.coverNote = ko.pureComputed(function() {
+    return util.getIn(self.data, ["reply", "saateText"]) || "";
+  });
+
   self.nothingToAdd.subscribe(function(value) {
     if(util.getIn(self.data(), ["reply", "nothing-to-add"]) !== value) {
       dirty(true);

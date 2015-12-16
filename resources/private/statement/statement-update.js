@@ -46,9 +46,9 @@ LUPAPISTE.StatementUpdate = function(params) {
 
   doSubmit.subscribe(function(doSubmit) {
     var params = getCommandParams();
-    if (doSubmit) {
-      clearTimeout(draftTimerId);
+    if (!saving() && goingToSubmit()) {
       saving(true);
+      clearTimeout(draftTimerId);
       ajax
         .command(submitCommand, _.extend({
           id: applicationId(), 

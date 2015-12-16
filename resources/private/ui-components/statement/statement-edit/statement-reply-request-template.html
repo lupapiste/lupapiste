@@ -21,11 +21,11 @@
     </div>
 
     <div class="statement-info">
-      <div data-bind="visible: !replyable()">
+      <div data-bind="visible: !authModel.ok('request-for-statement-reply')">
         <p data-bind="ltext: 'statement.reply-request.info-text'"></p>
       </div>
       <form>
-        <div data-bind="visible: replyable()">
+        <div data-bind="visible: authModel.ok('request-for-statement-reply')">
           <label class="form-label" for="statement-reply-covering-note" data-bind="ltext: 'statement.' + tab + '.text'"></label>
           <textarea
             data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')}, 
