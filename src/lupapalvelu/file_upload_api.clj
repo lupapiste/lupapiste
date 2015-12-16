@@ -51,6 +51,8 @@
   {:parameters [attachmentId]
    :input-validators [file-upload-in-database attachment-not-linked]
    :user-roles #{:anonymous}}
-  (if (mongo/remove-many :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})
-    (ok :attachmentId attachmentId)
+  (if-let [{file-id :id} (mongo/select-one :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})]
+    (do
+      (mongo/delete-file-by-id file-id)
+      (ok :attachmentId attachmentId))
     (fail :error.file-upload.removing-file-failed)))
