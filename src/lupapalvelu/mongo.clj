@@ -259,6 +259,7 @@
   (download-find {:_id file-id}))
 
 (defn delete-file [query]
+  {:pre [(seq query)]}
   (let [query (with-_id (remove-null-chars query))]
     (info "removing file" query)
     (gfs/remove (get-gfs) query)))
