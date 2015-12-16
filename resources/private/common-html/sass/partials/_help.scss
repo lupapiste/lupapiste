@@ -1,39 +1,3 @@
-/* @mixin info-icon { */
-/*   content:""; */
-/*   display: block; */
-/*   @include spite-bg; */
-/*   background-position: 0px -2900px; */
-/*   height:32px; */
-/*   width: 30px; */
-/*   margin-right: -$marginM; */
-/*   margin-top: -$marginS; */
-/*   float: right; */
-/* } */
-
-/* .icon.help { */
-/*   @include disable-select; */
-/*   position: relative; */
-/*   cursor: pointer; */
-/* } */
-
-/* .help { */
-/*   margin-left: $marginM; */
-/*   margin-bottom: $marginM; */
-/* } */
-
-/* .icon.help.expanded { */
-/*   margin-bottom: 15px; */
-/*   &:after { */
-/*     content: " "; */
-/*     border-left: 16px solid transparent; */
-/*     border-bottom: 16px solid $lp-dark-grey; */
-/*     border-right: 16px solid transparent; */
-/*     position: absolute; */
-/*     top: 38px; */
-/*   } */
-/* } */
-
-
 .help-arrow {
   position: relative;
   z-index: 100;
@@ -67,7 +31,6 @@
 .help-toggle {
   margin: {
     left: $marginM;
-    //bottom: $marginM;
   }
   display: inline-block;
   color: $orange-dark;
@@ -99,17 +62,11 @@
 .help-text {
   display: none;
   position: relative;
-//  width: 100%;
-  /* text-align: justify; */
   background: $gray246;
   color: $gray51;
   padding: $marginM;
   margin-bottom: $marginL;
   border: 1px solid $orange;
-  /* a { */
-  /*   color: white; */
-  /*   font-weight: bold; */
-  /* } */
   p {
     &:last-child {
       margin-bottom: 0;
@@ -129,21 +86,10 @@
   max-height: $marginS;
 }
 
-
 .panel-info {
   width: 100%;
   text-align: justify;
 }
-
-/* .instructions { */
-/*   &:before { */
-/*     @include info-icon; */
-/*   } */
-/*   h3 { */
-/*     display: inline-block; */
-/*     margin-right: $marginS; */
-/*   } */
-/* } */
 
 .expanded-content {
   max-height:0;
@@ -159,4 +105,10 @@
   width: 60%;
   margin: $marginM 0;
 
+}
+
+.help-adjacent-title {
+  margin-top: 0 !important;
+  line-height: normal;
+  float: left;
 }

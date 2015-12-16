@@ -10,6 +10,7 @@ LUPAPISTE.MunicipalityMapsServerModel = function( params ) {
   self.password = ko.observable();
 
   self.error = params.error;
+  self.errorMessageTerm = params.errorMessageTerm;
 
   ko.computed( function() {
     var server = params.server();

@@ -1,0 +1,2 @@
+auth-admin.municipality-maps.help: Voit lisätä organisaation omia karttatasoja. Tasot näytetään Oskari-kartalla eli isolla kartalla, joka avautuu hakemusten pikkukartan Avaa kartta -napista. <p><b>Huom:</b> Toistaiseksi ainoastaan Web Map Service (WMS) -karttapalvelimet ovat tuettuja.</p>
+auth-admin.municipality-maps.bad-data: Väärä formaatti. Ainoastaan WMS-muotoinen karttadata on tuettu.
