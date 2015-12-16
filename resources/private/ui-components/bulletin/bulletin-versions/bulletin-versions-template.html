@@ -41,7 +41,7 @@
     <a href="#" class="link-btn" data-bind="click: $parent.editPublishedApplication, ltext: 'edit'"></a>
     <!-- /ko -->
     <!-- ko if: $data.comments -->
-    <a href="#" class="link-btn" data-bind="click: $parent.selectedBulletinVersion.bind($data), ltext: 'bulletin.versions.comments.show'"></a>
+    <a href="#" class="link-btn" data-bind="click: $parent.handleVersionClick, ltext: 'bulletin.versions.comments.show'"></a>
     <!-- /ko -->
     <a href="#" class="link-btn" target="_blank" data-bind="attr: {href: $parent.bulletinUrl}, ltext: 'bulletin.versions.version.show'"></a>
   </td>
