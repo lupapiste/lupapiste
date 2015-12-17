@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="admin">
+    <div class="container">
+      <h1 id="admin-header"></h1>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.admins'"></h2>
+        <div class="admin-users-table"></div>
+
+        <button data-bind="click: organizationUsers.addUserToOrganization, ltext: 'add.authority', enable: lupapisteApp.models.globalAuthModel.ok('update-user-organization')"
+                class="btn-primary" data-test-id="authadmin-add-authority"></button>
+
+        <div id="add-user-to-organization-dialog" class="window autosized">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'auth-admin.add-dialog.title'"></p>
+            <p class="dialog-close close lupicon-remove"></p>
+          </div>
+          <div class="dialog-content" data-bind="with: organizationUsers">
+            <div data-bind="visible: phase() === 1">
+              <form>
+                <label data-bind="ltext: 'auth-admin.add-dialog.email'" class="form-label" for="auth-admin.admins.add.email"></label>
+                <input class="form-input" data-bind="textInput: email" id="auth-admin.admins.add.email" type="email"/>
+
+                <label data-bind="ltext: 'userinfo.firstName'" class="form-label" for="auth-admin.admins.add.firstName"></label>
+                <input class="form-input" data-bind="textInput: firstName" id="auth-admin.admins.add.firstName" type="text"/>
+
+                <label data-bind="ltext: 'userinfo.lastName'" class="form-label" for="auth-admin.admins.add.lastName"></label>
+                <input class="form-input" data-bind="textInput: lastName" id="auth-admin.admins.add.lastName" type="text"/>
+
+                <h4 data-bind="ltext: 'auth-admin.add-dialog.roles'"></h4>
+                <div data-bind="foreach: availableUserRoles">
+                  <div>
+                    <label>
+                      <input type="checkbox" name="userRoles" data-bind="value: $data, checked: $parent.userRoles">
+                      <span data-bind="ltext: ['authorityrole', $data]"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <button data-bind="click: next, enable: userDetailsOk, ltext: 'auth-admin.add-dialog.continue'" class="btn btn-primary btn-dialog" data-test-id="authadmin-add-authority-continue"></button>
+              </form>
+            </div>
+            <div data-bind="visible: phase() === 2">
+              <h2 data-bind="visible: searching, ltext: 'auth-admin.add-dialog.searching'"></h2>
+              <h2 data-bind="visible: userAdded, ltext: 'auth-admin.add-dialog.userAdded'"></h2>
+              <h2 data-bind="visible: invitationSent, ltext: 'auth-admin.add-dialog.invitationSent'"></h2>
+              <button data-bind="enable: !searching(), ltext: 'ok'" class="btn btn-primary btn-dialog close" data-test-id="authadmin-add-authority-ok"></button>
+            </div>
+          </div>
+        </div>
+
+        <div id="dialog-edit-roles" class="window autosized">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'auth-admin.edit-roles.title'"></p>
+            <p class="dialog-close close lupicon-remove"></p>
+          </div>
+          <div class="dialog-content">
+            <span data-bind="text: $root.editRoles.greeting"></span>
+            <div data-bind="foreach: $root.editRoles.availableRoles">
+              <div>
+                <label>
+                  <input type="checkbox" data-bind="value: $data, checked: $root.editRoles.selectedRoles">
+                  <span data-bind="ltext: ['authorityrole', $data]"></span>
+                </label>
+              </div>
+            </div>
+            <div data-bind="with: $root.editRoles">
+              <button data-bind="click: okPressed, enable: isOk, ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.links'"></h2>
+        <table data-test-id="organization-links-table">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.link.fi'"></th>
+              <th data-bind="ltext: 'auth-admin.link.sv'"></th>
+              <th data-bind="ltext: 'auth-admin.link.url'"></th>
+              <th data-bind="ltext: 'auth-admin.actions'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: organization.links">
+            <tr>
+              <td data-bind="text: name.fi"></td>
+              <td data-bind="text: name.sv"></td>
+              <td><a href="#" data-bind="text: url, attr: {href: url}" target="_blank"></a></td>
+              <td>
+                <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
+                  [<a href="#" data-bind="click: $root.organization.editLink.bind($data, $index), ltext: 'edit'"
+                      data-test-id="edit" class="modal"></a>]
+                  [<a href="#" data-bind="click: $root.organization.rmLink.bind($data, $index), ltext: 'remove'"
+                      data-test-id="remove" class="modal"></a>]
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <a href="#" data-bind="click: $root.organization.addLink, ltext: 'auth-admin.link.add', visible: lupapisteApp.models.globalAuthModel.ok('add-organization-link')"
+           data-test-id="add-link" class="modal btn btn-primary"></a>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.statement-persons'"></h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'userinfo.statement-type'"></th>
+              <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+              <th data-bind="ltext: 'userinfo.email'"></th>
+              <th data-bind="ltext: 'auth-admin.actions'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: statementGivers.data()">
+            <tr data-test-type="statement-giver-row">
+              <td data-bind="text: text"></td>
+              <td data-bind="text: name"></td>
+              <td data-bind="text: email"></td>
+              <td>
+                <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('delete-statement-giver')">
+                  [<a href="#" data-bind="click: $root.statementGivers.delete, ltext: 'remove'" data-test-id="remove-statement-giver" class="modal"></a>]
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button data-bind="click: $root.statementGivers.openCreateModal, ltext: 'auth-admin.statement-person.add', enable: lupapisteApp.models.globalAuthModel.ok('create-statement-giver')"
+                data-test-id="create-statement-giver" class="modal btn btn-primary"></button>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.selected-operations'"></h2>
+        <table data-test-id="organization-selected-operations">
+        <!-- ko foreach: organization.selectedOperations -->
+          <thead>
+            <tr>
+              <th data-bind="ltext: permitType"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: operations">
+            <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">
+              <td data-bind="text: text"></td>
+            </tr>
+          </tbody>
+          <!-- /ko -->
+        </table>
+        <div data-bind="with: organization">
+          <button data-bind="click: $root.editSelectedOperationsModel.open, ltext: 'edit', enable: lupapisteApp.models.globalAuthModel.ok('set-organization-selected-operations')"
+                  class="btn-primary" data-test-id="authadmin-edit-selected-operations"></button>
+        </div>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.operations-attachments'"></h2>
+        <table data-test-id="organization-operations-attachments">
+          <!-- ko foreach: organization.operationsAttachments -->
+          <!-- ko if: $data.operations && operations.length -->
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.operations-attachments.operation'"></th>
+              <th data-bind="visible: $root.organization.tosFunctionVisible, ltext: 'tos.function'"></th>
+              <th data-bind="ltext: 'auth-admin.operations-attachments.attachments'"></th>
+              <th data-bind="ltext: 'auth-admin.actions'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: operations">
+            <tr data-bind="attr: {'data-op-id': id}">
+              <td><span data-bind="ltext: permitType"></span> / <span data-bind="text: text"></span></td>
+              <td data-bind="visible: $root.organization.tosFunctionVisible">
+                <select data-bind="options: $root.organization.tosFunctions,
+                                   optionsText: 'name',
+                                   optionsValue: 'code',
+                                   value: tosFunction,
+                                   valueAllowUnset: true" ></select>
+              </td>
+              <td data-bind="foreach: attachments">
+                <span data-bind="visible: $index">, </span>
+                <span data-bind="text: text"></span>
+              </td>
+              <td>
+                <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('organization-operations-attachments')">
+                  [<a href="#" data-bind="click: $root.editAttachments.open, ltext: 'edit'" data-test-id="add-operations-attachments" class="modal"></a>]
+                </span>
+              </td>
+            </tr>
+          </tbody>
+          <!-- /ko -->
+          <!-- /ko -->
+        </table>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.required-fields-obligatory.title'"></h2>
+        <input type="checkbox" class="form-input" id="required-fields-obligatory-enabled" data-test-id="required-fields-obligatory-enabled"
+               data-bind="checked: organization.appRequiredFieldsFillingObligatory, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
+        <label for="required-fields-obligatory-enabled" class="form-label" data-bind="ltext: 'auth-admin.required-fields-obligatory.enabled'"></label>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.kopiolaitos-section.title'"></h2>
+        <div id="kopiolaitos-info" data-bind="with: $root.kopiolaitos">
+          <label for="kopiolaitos-email" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-email.title'"></label>
+          <input id="kopiolaitos-email" class="form-input text really-long" type="text"
+                 data-bind="textInput: kopiolaitosEmail" readonly />
+          <label for="kopiolaitos-orderer-address" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-orderer-address.title'"></label>
+          <input id="kopiolaitos-orderer-address" class="form-input text really-long" type="text"
+                 data-bind="textInput: kopiolaitosOrdererAddress" readonly />
+          <label for="kopiolaitos-orderer-phone" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-orderer-phone.title'"></label>
+          <input id="kopiolaitos-orderer-phone" class="form-input text really-long" type="text"
+                 data-bind="textInput: kopiolaitosOrdererPhone" readonly />
+          <label for="kopiolaitos-orderer-email" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-orderer-email.title'"></label>
+          <input id="kopiolaitos-orderer-email" class="form-input text really-long" type="text"
+                 data-bind="textInput: kopiolaitosOrdererEmail" readonly />
+          <button data-bind="click: $root.kopiolaitos.openDialog, ltext: 'edit', enable: lupapisteApp.models.globalAuthModel.ok('set-kopiolaitos-info')"
+                  class="btn-primary" data-test-id="authadmin-edit-button-kopiolaitos-info"></button>
+        </div>
+      </section>
+
+      <section id="link-to-vendor-backend-config" data-bind="with: linkToVendorBackend">
+        <h2 data-bind="ltext: 'auth-admin.vendor-backend-link.header'"></h2>
+        <table>
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.vendor-backend-link.param-name'"></th>
+              <th data-bind="ltext: 'auth-admin.vendor-backend-link.param-value'"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.vendor-backend-link.backend-id-param'"></td>
+              <td class="value">
+                <input type="text" data-bind="textInput: vendorBackendUrlForBackendId, enable: lupapisteApp.models.globalAuthModel.ok('save-vendor-backend-redirect-config')"/>
+                <span class="save-indicator" data-bind="saveIndicator: backendIdIndicator, label: false"></span>
+              </td>
+            </tr>
+            <tr>
+              <td data-bind="ltext: 'auth-admin.vendor-backend-link.lp-id-param'"></td>
+              <td class="value">
+                <input type="text" data-bind="textInput: vendorBackendUrlForLpId, enable: lupapisteApp.models.globalAuthModel.ok('save-vendor-backend-redirect-config')"/>
+                <span class="save-indicator" data-bind="saveIndicator: LpIdIndicator, label: false"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section data-bind="if: organization.validateVerdictGivenDateVisible">
+        <h2 data-bind="ltext: 'auth-admin.validate-verdict.title'"></h2>
+        <span data-bind="ltext: 'auth-admin.validate-verdict.rp.info'"></span><br/>
+        <input type="checkbox" class="form-input" id="validate-verdict-given-date-enabled"
+               data-bind="checked: organization.validateVerdictGivenDate, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
+        <label for="validate-verdict-given-date-enabled" class="form-label" data-bind="ltext: 'auth-admin.validate-verdict-given-date.enabled'"></label>
+      </section>
+
+      <section>
+        <h2 data-bind="ltext: 'auth-admin.legacyUrl'"></h2>
+        <table>
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'auth-admin.parameter'"></th>
+              <th data-bind="ltext: 'auth-admin.value'"></th>
+              <th data-bind="ltext: 'auth-admin.actions'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: $root.wfs.data">
+            <tr data-bind="attr:{'data-test-type': permitType}">
+              <td data-bind="ltext: permitType"></td>
+              <td>
+                <span data-bind="if: $data.url">
+                  <a data-bind="text: $data.url, attr: {href: $data.url, id: 'wfs-for-' + permitType}" target="_blank"></a>
+                  (KRYSP <span data-bind="text: $data.version"></span>)
+                </span>
+                <span data-bind="ifnot: $data.url, attr: {id: 'wfs-not-set-' + permitType}"><i data-bind="ltext: 'auth-admin.notSet'"></i></span>
+              </td>
+              <td>
+                <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('set-krysp-endpoint')">
+                  [<a href="#" data-bind="click: $root.wfs.openDialog, ltext: 'edit', attr: {id: 'edit-wfs-for-' + permitType}"></a>]
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+
+      <section data-bind="visible: $root.asianhallinta.configs().length > 0" data-test-id="asianhallinta">
+        <h2 data-bind="ltext: 'auth-admin.asianhallinta-config'"></h2>
+        <table>
+          <thead>
+            <tr>
+              <th data-bind="ltext: 'application.type'"></th>
+              <th data-bind="ltext: 'admin.municipality'"></th>
+              <th data-bind="ltext: 'auth-admin.asianhallinta-enabled'"></th>
+              <th data-bind="ltext: 'auth-admin.version'"></th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: $root.asianhallinta.configs">
+            <tr>
+              <td data-bind="ltext: $data.permitType"></td>
+              <td data-bind="ltext: 'municipality.' + $data.municipality()"></td>
+              <td>
+                <span class="indicator-wrapper">
+                  <input type="checkbox" data-test-id="enable-asianhallinta"
+                         data-bind="checked: $data.caseManagement.enabled,
+                                    enable: $root.asianhallinta.versions()[$data.permitType()].length > 0" />
+                  <span data-bind="saveIndicator: $root.asianhallinta.indicator, name: 'asianhallinta'" data-test-id="save-indicator">
+                  </span>
+                </span>
+              </td>
+              <td><select data-bind="options: $root.asianhallinta.versions()[$data.permitType()],
+                                     value: $data.caseManagement.version,
+                                     enable: $data.caseManagement.enabled,
+                                     valueAllowUnset: true"
+                          data-test-id="select-asianhallinta-version"></select></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="content-cell">
+        <section class="authority-admin-alueelliset-organisaatiot">
+          <h2 data-bind="ltext: 'auth-admin.alueelliset-organisaatiot'"></h2>
+          <h3>Alueet</h3>
+          <div class="organization-areas">
+            <!-- ko if: organization.features -->
+            <div class="organization-areas-map" data-bind="component: {name: 'openlayers-map', params: {geoJsonFeatures: organization.features}}"></div>
+            <!-- /ko -->
+            <div data-bind="component: {name: 'upload', params: {onSuccess: function(res) {organization.features(res.areas);}}}"></div>
+          </div>
+          <h3 data-bind="ltext: 'auth-admin.tags'"></h3>
+          <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+          <div data-bind="component: 'tags-editor'"></div>
+          <!-- /ko -->
+        </section>
+      </div>
+
+      <section data-bind="component: {name: 'municipality-maps'}"></section>
+    </div> <!-- container -->
+
+    <div id="dialog-edit-link" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: $root.editLink.commandName"></p>
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+      <div class="dialog-content">
+        <div data-bind="with: $root.editLink">
+          <label data-bind="ltext: 'auth-admin.link.fi'" for="link-text-fi" class="form-label"></label>
+          <input data-bind="textInput: nameFi" class="form-input text long" type="text" id="link-text-fi" autofocus="autofocus"/>
+          <label data-bind="ltext: 'auth-admin.link.sv'" for="link-text-sv" class="form-label"></label>
+          <input data-bind="textInput: nameSv" class="form-input text long" type="text" id="link-text-sv" />
+          <label data-bind="ltext: 'auth-admin.link.url'" for="link-url"class="form-label"></label>
+          <input data-bind="textInput: url" class="form-input text long" type="text" id="link-url"/>
+          <button data-bind="click: execute, enable: ok(), ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dialog-edit-selected-operations" class="window autosized selectm-dialog">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'auth-admin.selected-operations'"></p>
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+      <div class="dialog-content">
+        <div class="selected-operation-templates"></div>
+      </div>
+    </div>
+
+    <div id="dialog-edit-attachments" class="window autosized selectm-dialog">
+      <div class="dialog-header">
+        <p data-bind="text: $root.editAttachments.opName"></p>
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+      <div class="dialog-content">
+        <div class="attachment-templates"></div>
+      </div>
+    </div>
+
+    <div id="dialog-create-statement-giver" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'auth-admin.create-statement-person'"></p>
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+      <div class="dialog-content">
+        <div data-bind="with: $root.createStatementGiver">
+          <label class="form-label" data-bind="ltext: 'register.email'" for="statement-giver-email"></label>
+          <input class="form-input text long" type="text" id="statement-giver-email" data-bind="textInput: email" />
+          <label class="form-label" data-bind="ltext: 'register.email2'" for="statement-giver-email2"></label>
+          <input class="form-input text long" type="text" id="statement-giver-email2" data-bind="textInput: email2" />
+          <label class="form-label" data-bind="ltext: 'userinfo.statement-type'" for="statement-giver-text"></label>
+          <input class="form-input text long" type="text" id="statement-giver-text" data-bind="textInput: text" />
+          <button data-test-id="create-statement-giver-save" class="btn btn-primary btn-dialog" id="statement-giver-save" data-bind="click: save, disable: disabled, ltext: 'save'"></button>
+          <div data-bind="visible: error" >
+            <div data-bind="ltext: error" id="statement-giver-error" class="context-error"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="dialog-edit-wfs" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'auth-admin.setLegacyUrl'"></p>
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+      <div class="dialog-content" data-bind="with: $root.wfs">
+        <form data-bind="submit: save">
+          <input class="form-input text long" id="edit-wfs" type="text" data-bind="textInput: editUrl, attr: {placeholder: loc('auth-admin.legacyUrl')}" />
+          <input class="form-input text long" id="edit-wfs-username" type="text" data-bind="textInput: editUsername, attr: {placeholder: loc('auth-admin.legacyUsername') + ' (' + loc('if-required') + ')'}" />
+          <input class="form-input text long" id="edit-wfs-password" type="password" data-bind="textInput: editPassword, attr: {placeholder: loc('auth-admin.legacyPassword') + ' (' + loc('if-required') + ')'}" />
+          <select style="margin-bottom: 1em" data-bind="options: versions, value: editVersion"></select>
+          <button type="submit" class="positive no-icon-pad btn-dialog" id="wfs-submit"
+                  data-bind="disable: processing, css: {waiting: pending}">
+            <span data-bind="ltext: 'save'"></span>
+            <i class="wait spin lupicon-refresh"></i>
+          </button>
+
+          <div data-bind="visible: error" >
+            <div data-bind="ltext: error" id="wfs-error" class="context-error"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="dialog-edit-kopiolaitos-info" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'auth-admin.setkopiolaitosInfo'"></p>
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+      <div class="dialog-content" data-bind="with: $root.kopiolaitos">
+        <form>
+          <label for="edit-kopiolaitos-email" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-email.title'"></label>
+          <input class="form-input text really-long" id="edit-kopiolaitos-email" type="email"
+                 data-bind="textInput: kopiolaitosEmailTemp, attr: {placeholder: loc('auth-admin.kopiolaitosEmail')}" />
+          <label for="edit-kopiolaitos-orderer-address" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-orderer-address.title'"></label>
+          <input class="form-input text really-long" id="edit-kopiolaitos-orderer-address" type="text"
+                 data-bind="textInput: kopiolaitosOrdererAddressTemp, attr: {placeholder: loc('auth-admin.kopiolaitosOrdererAddress')}" />
+          <label for="edit-kopiolaitos-orderer-phone" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-orderer-phone.title'"></label>
+          <input class="form-input text really-long" id="edit-kopiolaitos-orderer-phone" type="text"
+                 data-bind="textInput: kopiolaitosOrdererPhoneTemp" />
+          <label for="edit-kopiolaitos-orderer-email" class="form-label" data-bind="ltext: 'auth-admin.kopiolaitos-orderer-email.title'"></label>
+          <input class="form-input text really-long" id="edit-kopiolaitos-orderer-email" type="email"
+                 data-bind="textInput: kopiolaitosOrdererEmailTemp, attr: {placeholder: loc('auth-admin.kopiolaitos-orderer-email')}" />
+          <button class="btn btn-primary btn-dialog" data-bind="click: save, ltext: 'save', enable: ok" id="kopiolaitos-info-submit"></button>
+          <a href="#" class="btn-dialog close cancel" data-bind="ltext: 'cancel'">Peruuta</a>
+          <div data-bind="visible: error" >
+            <div data-bind="ltext: error" id="kopiolaitos-info-error" class="context-error"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="dialog-edit-asianhallinta" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'auth-admin.asianhallinta-config'"></p>
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+      <div class="dialog-content" data-bind="with: $root.asianhallinta">
+        <form>
+          <input type="checkbox" data-bind=""/>
+          <select data-bind=""></select>
+          <button class="btn btn-primary btn-dialog" id="asianhallinta-submit"></button>
+        </form>
+      </div>
+    </div>
+
+  </section>
+</body>
+</html>
