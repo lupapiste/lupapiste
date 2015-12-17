@@ -29,8 +29,12 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
     return _.contains(["replyable"], util.getIn(self.data, ["state"]));
   });
 
+  self.replyVisible = ko.computed(function() {
+    return  _.contains(["replied"], util.getIn(self.data, ["state"])) || self.authModel.ok(submitCommand);
+  });
+
   self.text.subscribe(function(value) {
-    if(util.getIn(self.data(), ["reply", "text"]) !== value) { 
+    if(util.getIn(self.data, ["reply", "text"]) !== value) { 
       dirty(true);
     }
   });
@@ -40,7 +44,7 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   });
 
   self.nothingToAdd.subscribe(function(value) {
-    if(util.getIn(self.data(), ["reply", "nothing-to-add"]) !== value) {
+    if(util.getIn(self.data, ["reply", "nothing-to-add"]) !== value) {
       dirty(true);
     }
   });
