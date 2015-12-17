@@ -55,9 +55,10 @@
                (query/fields bulletins/bulletins-fields)
                (query/sort (make-sort sort))
                (query/paginate :page page :per-page bulletin-page-size))]
-    (map
-      #(assoc (first (:versions %)) :id (:_id %))
-      apps)))
+    (->> apps
+         (map
+           #(assoc (first (:versions %)) :id (:_id %)))
+         (filter bulletins/bulletin-date-valid? ))))
 
 (defn- page-size-validator [{{page :page} :data}]
   (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
@@ -177,9 +178,9 @@
    :states     #{:sent :complementNeeded}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
   [{:keys [application created] :as command}]
-  (let [updates (->> (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
-                                                           :proclamationStartsAt proclamationStartsAt
-                                                           :proclamationText proclamationText}))]
+  (let [updates (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
+                                                      :proclamationStartsAt proclamationStartsAt
+                                                      :proclamationText proclamationText})]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
@@ -192,10 +193,10 @@
    :states     #{:verdictGiven}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
   [{:keys [application created] :as command}]
-  (let [updates (->> (create-bulletin application created {:verdictGivenAt verdictGivenAt
-                                                           :appealPeriodStartsAt appealPeriodStartsAt
-                                                           :appealPeriodEndsAt appealPeriodEndsAt
-                                                           :verdictGivenText verdictGivenText}))]
+  (let [updates (create-bulletin application created {:verdictGivenAt verdictGivenAt
+                                                      :appealPeriodStartsAt appealPeriodStartsAt
+                                                      :appealPeriodEndsAt appealPeriodEndsAt
+                                                      :verdictGivenText verdictGivenText})]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
@@ -209,8 +210,8 @@
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
   [{:keys [application created] :as command}]
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
-  (let [updates (->> (create-bulletin application created {:officialAt officialAt
-                                                           :bulletinState :final}))]
+  (let [updates (create-bulletin application created {:officialAt officialAt
+                                                      :bulletinState :final})]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
