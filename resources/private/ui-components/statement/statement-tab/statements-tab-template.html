@@ -124,13 +124,11 @@
         <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-neigbors"></p>
       </div>
 
-      <!-- ko if: features.enabled("kunta-kuulee-naapurit") -->
-      <div class="form-grid form-grid--no-border feature">
+      <div class="form-grid form-grid--no-border">
         <div class="row">
           <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
         </div>
       </div>
-      <!-- /ko -->
 
       <div data-bind="if: neighbors() && neighbors().length > 0">
         <table>
