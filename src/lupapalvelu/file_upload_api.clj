@@ -1,19 +1,11 @@
 (ns lupapalvelu.file-upload-api
   (:require [noir.response :as resp]
             [sade.core :refer :all]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.vetuma :as vetuma]))
-
-(defn- save-file [file]
-  (let [file-id (mongo/create-id)
-        sanitized-filename (mime/sanitize-filename (:filename file))]
-    (mongo/upload file-id sanitized-filename (:content-type file) (:tempfile file) :sessionId (vetuma/session-id))
-    {:id file-id
-     :filename sanitized-filename
-     :size (:size file)
-     :contentType (:content-type file)}))
 
 (def bulletin-file-upload-max-size 15000000)
 
@@ -29,7 +21,7 @@
   {:user-roles #{:anonymous}
    :parameters [files]
    :input-validators [file-mime-type-accepted file-size-legal]}
-  (let [file-info {:files (pmap save-file files)}]
+  (let [file-info {:files (pmap file-upload/save-file files)}]
     (->> (assoc file-info :ok true)
          (resp/json)
          (resp/content-type "text/plain")
@@ -51,6 +43,8 @@
   {:parameters [attachmentId]
    :input-validators [file-upload-in-database attachment-not-linked]
    :user-roles #{:anonymous}}
-  (if (mongo/remove-many :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})
-    (ok :attachmentId attachmentId)
+  (if-let [{file-id :id} (mongo/select-one :fs.files {:_id attachmentId "metadata.sessionId" (vetuma/session-id)})]
+    (do
+      (mongo/delete-file-by-id file-id)
+      (ok :attachmentId attachmentId))
     (fail :error.file-upload.removing-file-failed)))

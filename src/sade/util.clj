@@ -5,7 +5,7 @@
             [sade.core :refer :all]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
-            [clj-time.core :refer [days weeks months years ago from-now]]
+            [clj-time.core :refer [hours days weeks months years ago from-now]]
             [clj-time.coerce :as tc]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf]]
@@ -277,8 +277,9 @@
 
 (defn- get-timestamp-ago-or-from-now
   [ago-from-now-fn time-key amount]
-  {:pre [(#{:day :week :month :year} time-key)]}
+  {:pre [(#{:hour :day :week :month :year} time-key)]}
   (let [time-fn (case time-key
+                  :hour hours
                   :day days
                   :week weeks
                   :month months
