@@ -27,7 +27,7 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
                                                                        versionId: versionId,
                                                                        asc: self.asc(),
                                                                        initialQuery: initialQuery});
-    initialQuery = false
+    initialQuery = false;
   };
 
   self.description = function(comment) {

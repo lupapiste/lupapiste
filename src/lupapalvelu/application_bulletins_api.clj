@@ -148,7 +148,9 @@
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
      email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
-  (let [address-source (if otherReceiver data (get-in (vetuma/vetuma-session) [:user]))
+  (let [address-source (if otherReceiver
+                         otherReceiver
+                         (get-in (vetuma/vetuma-session) [:user]))
         delivery-address (select-keys address-source delivery-address-fields)
         contact-info (merge delivery-address {:email          email
                                               :emailPreferred emailPreferred})
