@@ -64,7 +64,6 @@
 
 (defquery application-bulletins
   {:description "Query for Julkipano"
-   :feature :publish-bulletin
    :parameters [page searchText municipality state sort]
    :input-validators [(partial action/number-parameters [:page])
                       page-size-validator]
@@ -76,7 +75,6 @@
 
 (defquery application-bulletin-municipalities
   {:description "List of distinct municipalities of application bulletins"
-   :feature :publish-bulletin
    :parameters []
    :user-roles #{:anonymous}}
   [_]
@@ -85,7 +83,6 @@
 
 (defquery application-bulletin-states
   {:description "List of distinct states of application bulletins"
-   :feature :publish-bulletin
    :parameters []
    :user-roles #{:anonymous}}
   [_]
@@ -133,7 +130,6 @@
 
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
-   :feature          :publish-bulletin
    :pre-checks       [bulletin-can-be-commented user-is-vetuma-authenticated]
    :input-validators [comment-can-be-added referenced-file-can-be-attached]
    :user-roles       #{:anonymous}}
@@ -167,7 +163,6 @@
    :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
                       (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])
                       (partial bulletins/validate-input-dates :proclamationStartsAt :proclamationEndsAt)]
-   :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
@@ -183,7 +178,6 @@
    :input-validators [(partial action/non-blank-parameters [:id :verdictGivenText])
                       (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])
                       (partial bulletins/validate-input-dates :appealPeriodStartsAt :appealPeriodEndsAt)]
-   :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
@@ -199,7 +193,6 @@
   {:parameters [id officialAt]
    :input-validators [(partial action/non-blank-parameters [:id])
                       (partial action/number-parameters [:officialAt])]
-   :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
@@ -218,7 +211,6 @@
   "return only latest version for application bulletin"
   {:parameters [bulletinId]
    :input-validators [(partial action/non-blank-parameters [:bulletinId]) bulletin-exists]
-   :feature    :publish-bulletin
    :user-roles #{:anonymous}}
   [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
@@ -242,7 +234,6 @@
   "returns all bulletin versions for application bulletin with comments"
   {:parameters [bulletinId]
    :input-validators [(partial action/non-blank-parameters [:bulletinId])]
-   :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
   (let [bulletin-fields (-> bulletins/bulletins-fields
                             (dissoc :versions)
@@ -258,7 +249,6 @@
   "returns paginated comments related to given version id"
   {:parameters [bulletinId versionId]
    :input-validators [(partial action/non-blank-parameters [:bulletinId :versionId])]
-   :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
   [{{skip :skip limit :limit asc :asc} :data}]
   (let [skip           (util/->int skip)
@@ -287,7 +277,6 @@
 (defcommand save-proclaimed-bulletin
   "updates proclaimed version timestamps and text"
   {:parameters [bulletinId bulletinVersionId proclamationEndsAt proclamationStartsAt proclamationText]
-   :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}
    :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId])
@@ -303,7 +292,6 @@
 (defcommand save-verdict-given-bulletin
   "updates verdict given version timestamps and text"
   {:parameters [bulletinId bulletinVersionId verdictGivenAt appealPeriodEndsAt appealPeriodStartsAt verdictGivenText]
-   :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}
    :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId :verdictGivenText])
@@ -319,7 +307,6 @@
 
 (defraw "download-bulletin-comment-attachment"
   {:parameters [attachmentId]
-   :feature    :publish-bulletin
    :user-roles #{:authority :applicant}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
   [{:keys [application user] :as command}]
@@ -328,6 +315,5 @@
 
 (defquery "publish-bulletin-enabled"
   {:parameters [id]
-   :feature    :publish-bulletin
    :user-roles #{:authority :applicant}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})
