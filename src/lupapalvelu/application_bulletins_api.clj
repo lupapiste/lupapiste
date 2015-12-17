@@ -1,7 +1,5 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [clj-time.coerce :as c]
-            [clj-time.core :as t]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
@@ -122,7 +120,7 @@
    (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
          bulletin   (bulletins/get-bulletin bulletin-id projection)]
      (if-not (and (= (:bulletinState bulletin) "proclaimed")
-                  (bulletins/in-proclaimed-period (-> bulletin :versions last)))
+                  (bulletins/bulletin-date-in-period :proclamationStartsAt :proclamationEndsAt (-> bulletin :versions last)))
        (fail :error.bulletin-not-in-commentable-state))))
   ([command _]
     (bulletin-can-be-commented command)))

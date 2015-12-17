@@ -1,7 +1,9 @@
 (ns lupapalvelu.application-bulletins
   (:require [monger.operators :refer :all]
+            [clj-time.coerce :as c]
+            [clj-time.core :as t]
             [clojure.set :refer [difference]]
-            [sade.util :refer [fn->]]
+            [sade.util :refer [fn->] :as util]
             [sade.core :refer :all]
             [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.mime :as mime]
@@ -110,9 +112,9 @@
                                                                        :metadata.bulletinId bulletin-id
                                                                        :metadata.commentId  comment-id}}))
 
-(defn in-proclaimed-period
-  [version]
-  (let [[starts ends] (->> (util/select-values version [:proclamationStartsAt :proclamationEndsAt])
+(defn bulletin-date-in-period
+  [startdate-kw enddate-kw bulletin-version]
+  (let [[starts ends] (->> (util/select-values bulletin-version [startdate-kw enddate-kw])
                            (map c/from-long))
         ends     (t/plus ends (t/days 1))]
     (t/within? (t/interval starts ends) (c/from-long (now)))))
