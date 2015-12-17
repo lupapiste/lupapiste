@@ -8,6 +8,7 @@
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.core :refer :all]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -239,7 +240,7 @@
                                         (set-file-id file-id)
                                         (gfs/filename filename)
                                         (gfs/content-type content-type)
-                                        (gfs/metadata (assoc meta :uploaded (System/currentTimeMillis)))))]
+                                        (gfs/metadata (assoc meta :uploaded (now)))))]
     (if (instance? java.io.InputStream content)
       (store-content content) ; Closing the stream should be handled by the caller
       (with-open [input-stream (io/input-stream content)]
@@ -259,6 +260,7 @@
   (download-find {:_id file-id}))
 
 (defn delete-file [query]
+  {:pre [(seq query)]}
   (let [query (with-_id (remove-null-chars query))]
     (info "removing file" query)
     (gfs/remove (get-gfs) query)))

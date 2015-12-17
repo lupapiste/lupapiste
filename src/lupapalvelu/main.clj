@@ -11,7 +11,8 @@
                "check-verdicts"             'lupapalvelu.batchrun/check-for-verdicts
                "check-ah-verdicts"          'lupapalvelu.batchrun/check-for-asianhallinta-verdicts
                "fix-prev-permit-addresses"  'lupapalvelu.prev-permit/fix-prev-permit-addresses
-               "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants})
+               "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants
+               "cleanup-uploaded-files"     'lupapalvelu.file-upload/cleanup-uploaded-files})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))
@@ -37,7 +38,6 @@
 (defn rtfm []
   (println "What? I don't even...\n")
   (show-help))
-
 
 (defn -main [& [f & args]]
   (cond
