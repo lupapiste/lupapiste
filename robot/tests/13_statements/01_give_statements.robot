@@ -51,28 +51,6 @@ Sonja adds five statement persons to application
   # We now have 4 statement givers and one empty row (for adding a new statement giver), so there is 5 rows visible
   Wait until  Page Should Contain Element  xpath=//*[@data-test-id='radio-statement-giver-4']
 
-  #
-  # Invite a new statement giver that is not on the ready-populated list that authority admin has added in his admin view.
-  #
-
-  # Set Saate text and Maaraaika
-#  Set maaraaika-datepicker field value  add-statement-giver-maaraaika  01.06.2018
-
-
-#  Input text  xpath=//*[@data-test-id='statement-giver-role-text-4']  lausuja
-#  Input text  xpath=//*[@data-test-id='statement-giver-name-4']  Vainamoinen
-#  # Send button comes enabled only when all fields have content and the email field has a valid email address.
-#  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
-#  Input text  xpath=//*[@data-test-id='statement-giver-email-4']  vainamoinen@
-#  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
-#  Input text  xpath=//*[@data-test-id='statement-giver-email-4']  vainamoinen@example.com
-#  Wait until  Element should be enabled  xpath=//*[@data-test-id='radio-statement-giver-4']
-#  Select Radio Button  statementGiverSelectedPerson  radio-statement-giver-4
-#  Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
-#  Wait and click  xpath=//*[@data-test-id='add-statement-giver']
-#  Element should be visible  xpath=//*[@data-test-id='add-statement-giver']
-#  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
-
   Input text  xpath=//*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
   Invite read-only statement giver  0  01.06.2018
 
@@ -85,6 +63,7 @@ Sonja adds five statement persons to application
   Invite read-only statement giver  2  03.06.2018
   Invite read-only statement giver  3  04.06.2018
 
+  # Invite a new statement giver that is not on the ready-populated list that authority admin has added in his admin view.
   Invite 'manual' statement giver  4  Erikoislausuja  Vainamoinen  vainamoinen@example.com  05.06.2018
 
   Statement count is  5
