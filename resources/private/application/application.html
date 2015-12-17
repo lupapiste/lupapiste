@@ -359,7 +359,7 @@
                                     <span data-bind="ltext: 'attachment.tosMetadata'"></span>
                                 </a></li>
 
-                            <li data-bind="if: features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin-enabled'),
+                            <li data-bind="if: $root.authorization.ok('publish-bulletin-enabled'),
                                            css: {'active': $parent.selectedTabName() === 'bulletin'}">
                                 <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
                                   <span data-bind="ltext: 'bulletin'"></span>
@@ -632,13 +632,11 @@
 
                             <div class="clear spacerM"></div>
 
-                            <!-- ko if: features.enabled("kunta-kuulee-naapurit") -->
-                            <div class="form-grid form-grid--no-border feature">
+                            <div class="form-grid form-grid--no-border">
                               <div class="row">
                                 <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, id: 'optionMunicipalityHearsNeighbors', lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
                               </div>
                             </div>
-                            <!-- /ko -->
 
                             <div data-bind="ifnot: submittable">
                                 <p class="error-text" data-test-id="foreman-not-submittable" data-bind="ltext: 'error.not-submittable.foreman-link'"></p>
@@ -899,8 +897,8 @@
                     <!-- /ko -->
 
                     <!-- Bulletin tab -->
-                    <!-- ko if: selectedTabName() === 'bulletin' && features.enabled('publish-bulletin') && $root.authorization.ok('publish-bulletin-enabled') -->
-                    <div id="application-bulletin-tab" data-bind="with: application, css: {'feature': features.enabled('publish-bulletin')}" class="tab-content">
+                    <!-- ko if: selectedTabName() === 'bulletin' && $root.authorization.ok('publish-bulletin-enabled') -->
+                    <div id="application-bulletin-tab" data-bind="with: application" class="tab-content">
                         <div data-bind="component: {name: 'bulletin-tab',
                                                     params: {appId: id,
                                                              appState: state,

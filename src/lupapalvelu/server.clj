@@ -106,13 +106,9 @@
 
 (defn- start-jetty! []
   (if (nil? @jetty)
-    (let [jetty-opts (into
+    (let [jetty-opts (merge
                        {:max-threads 250}
-                       (when (env/feature? :ssl)
-                         {:ssl? true
-                          :ssl-port 8443
-                          :keystore "./keystore"
-                          :key-password "lupapiste"}))
+                       (when (env/value :ssl :enabled) (assoc (env/value :ssl) :ssl? true)))
           noir-opts {:mode env/mode
                      :ns 'lupapalvelu.web
                      :jetty-options jetty-opts

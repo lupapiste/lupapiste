@@ -2,15 +2,15 @@
   (:require [clojure.set :refer [difference]]
             [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
+            [sade.core :refer [unauthorized]]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.env :as env]
             [lupapalvelu.attachment-accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.verdict :as verdict]
-            [sade.core :refer [unauthorized]]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [sade.env :as env]))
+            [lupapalvelu.xml.krysp.verdict :as verdict]))
 
 ;;
 ;; application mongo querys
@@ -40,7 +40,7 @@
       {})))
 
 (defn- only-authority-sees [user checker items]
-  (filter (fn [m] (not (and (not (user/authority? user)) (checker m)))) items))
+  (filter (fn [m] (or (user/authority? user) (not (checker m)))) items))
 
 (defn- only-authority-sees-drafts [user verdicts]
   (only-authority-sees user :draft verdicts))
@@ -76,6 +76,39 @@
     application
     (dissoc application :urgency :authorityNotice)))
 
+(defn- authorized-to-statement? [user statement]
+  (or
+    (user/authority? user)
+    (and
+      (user/applicant? user)
+      (= (-> statement :person :email user/canonize-email) (-> user :email user/canonize-email)))))
+
+(defn- authorized-to-statement-attachment? [user attachment ids-of-own-statements]
+  {:pre [user attachment (set? ids-of-own-statements)]}
+  (if (= "statement" (-> attachment :target :type))
+    (or (user/authority? user) (ids-of-own-statements (-> attachment :target :id)))
+    true))
+
+(defn- only-authority-or-owner-sees-statement-drafts-and-statement-attachments [application user]
+  (let [ids-of-own-statements (->> (:statements application)
+                                (filter #(or
+                                           (:given %)  ;; including given statements as "own" statements
+                                           (= (:id user) (-> % :person :userId))))
+                                (map :id)
+                                set)]
+    (-> application
+      (assoc :statements (map
+                           (fn [statement]
+                             (if (or
+                                   (:given statement)  ;; including given statements
+                                   (authorized-to-statement? user statement))
+                               statement
+                               (select-keys statement [:id :person :requested :given :state])))
+                           (:statements application)))
+      (assoc :attachments (filter
+                            #(authorized-to-statement-attachment? user % ids-of-own-statements)
+                            (:attachments application))))))
+
 
 (defn filter-application-content-for [application user]
   (when (seq application)
@@ -91,7 +124,8 @@
         (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
-        (filter-notice-from-application user)))))
+        (filter-notice-from-application user)
+        (only-authority-or-owner-sees-statement-drafts-and-statement-attachments user)))))
 
 (defn get-application-as [query-or-id user & {:keys [include-canceled-apps?] :or {include-canceled-apps? false}}]
   {:pre [query-or-id (map? user)]}

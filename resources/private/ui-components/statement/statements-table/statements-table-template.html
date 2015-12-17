@@ -20,7 +20,8 @@
                       <th data-bind="ltext: 'application.statement.maaraaika'"></th>
                       <th data-bind="ltext: 'application.statement.given'"></th>
                       <th data-bind="ltext: 'application.statement.status'"></th>
-                      <!-- ko if: _.some($data.statements(), $component.notGiven) -->
+                      <th data-bind="ltext: 'application.statement.reply', visible: $component.repliesEnabled"></th>
+                      <!-- ko if-not: _.every($data.statements(), $component.isGiven) -->
                         <th data-bind="ltext: 'remove'"></th>
                       <!-- /ko -->
                   </tr>
@@ -28,15 +29,16 @@
               <tbody data-bind="foreach: $data.statements()">
                   <tr class="statement-row">
                       <td>
-                        <i class="lupicon-paperclip" data-bind="visible: $component.hasAttachment($data)"></i>
+                        <i class="lupicon-paperclip" data-bind="visible: $component.hasAttachment($data),
+                                                                attr: {'title': loc('tooltip.statement-or-reply-has-attachments')}"></i>
                       </td>
                       <td>
-                          <span data-bind="if: $data.status && $data.status() || $component.authorization.ok('should-see-unsubmitted-statements')">
+                          <span data-bind="if: $component.canAccessStatement($data)">
                               <a href="#" data-bind="text: $data.person.text,
                                                      click: $component.openStatement,
                                                      attr: {'data-test-id' : 'open-statement-' + $index()}"></a>
                           </span>
-                          <span data-bind="ifnot: ($data.status && $data.status()) || $component.authorization.ok('should-see-unsubmitted-statements')">
+                          <span data-bind="ifnot: $component.canAccessStatement($data)">
                               <span data-bind="text: $data.person.text, attr: {'data-test-id' : 'open-statement-' + $index()}"></span>
                           </span>
                       </td>
@@ -45,8 +47,20 @@
                       <td data-bind="dateString: $data.dueDate,
                                      css: {'statement-over-due': $component.isStatementOverDue($data)}"></td>
                       <td data-bind="dateString: $data.given"></td>
-                      <td data-bind="text: $data.status && $data.status() && loc(['statement', $data.status()]), attr: {'data-test-name' : $data.person.name}"></td>
-                      <!-- ko if: _.some($component.statements(), $component.notGiven) -->
+                      <td>
+                        <span data-bind="visible: $component.isGiven($data),
+                                         text: $data.status && $data.status() && loc(['statement', $data.status()]),
+                                         attr: {'data-test-name' : $data.person.name}"></span>
+                      </td>
+                      <td data-bind="visible: $component.repliesEnabled">
+                        <a href="#" data-bind="visible: $component.isReplyable($data) && !$component.showReplyState($data),
+                                               ltext: 'statement.reply.give-reply-link',
+                                               click: $component.openStatement,
+                                               attr: {'data-test-id' : 'open-statement-reply-' + $index()}"></a>
+                        <span data-bind="visible: $component.showReplyState($data),
+                                         text: loc(['statement', 'reply', 'state', $data.state()])"></span>
+                      </td>
+                      <!-- ko if-not: _.every($component.statements(), $component.isGiven) -->
                         <td>
                           <span data-bind="click: $component.openDeleteDialog,
                                            clickBubble: false,
