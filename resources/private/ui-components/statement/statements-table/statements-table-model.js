@@ -23,18 +23,43 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return _.includes(self.statementIdsWithAttachments(), statement.id());
   };
 
-  self.notGiven = function(statement) {
-    return _.contains(["requested", "draft"], util.getIn(statement, ["state"]));
+  self.isGiven = function(statement) {
+    return _.contains(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
   }
 
+  var isAuthorityOrStatementOwner = function(statement) {
+    var currentUser = lupapisteApp.models.currentUser;
+    return currentUser.isAuthority() || util.getIn(statement, ["person", "userId"]) === currentUser.id();
+  };
+
   self.isRemovable = function(statement) {
-    var userId = lupapisteApp.models.currentUser.id();
-    return util.getIn(statement, ["person", "userId"]) === userId && self.notGiven(statement);
+    return isAuthorityOrStatementOwner(statement) && !self.isGiven(statement);
   }
+
+  self.canAccessStatement = function(statement) {
+    return self.isGiven(statement) || isAuthorityOrStatementOwner(statement);
+  };
 
   self.isStatementOverDue = function(statement) {
     var nowTimeInMs = new Date().getTime();
-    return (statement.dueDate && !self.notGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
+    return (statement.dueDate && self.isGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
+  };
+
+  self.repliesEnabled = ko.pureComputed(function() {
+    return self.authorization.ok("statement-replies-enabled");
+  });
+
+  self.isReplyable = function(statement) {
+    return _.contains(["replyable"], util.getIn(statement, ["state"]));
+  };
+
+  self.showReplyState = function(statement) {
+    var user = lupapisteApp.models.currentUser;
+    if (self.application.userHasRole(user, "owner")) {
+      return _.contains(["replied"], util.getIn(statement, ["state"]));
+    } else {
+      return _.contains(["replyable", "replied"], util.getIn(statement, ["state"]));
+    }
   };
 
   var deleteStatementFromServer = function(statementId) {

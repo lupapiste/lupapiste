@@ -94,14 +94,6 @@
   (let [org-id (:organization application)]
     (fetch-organization-statement-givers org-id)))
 
-(defquery should-see-unsubmitted-statements
-  {:description "Pseudo query for UI authorization logic"
-   :parameters [:id]
-   :states (states/all-application-states-but [:draft])
-   :user-roles #{:authority :applicant}
-   :user-authz-roles #{:statementGiver}}
-  [_])
-
 (defn- get-dueDate-loc [lang dueDate]
   (if dueDate
     (str (i18n/with-lang lang (i18n/loc "statement.email.template.duedate-is")) " " (util/to-local-date dueDate) ".")
@@ -258,6 +250,15 @@
     (update-application command
                         {:statements {$elemMatch {:id statementId}}}
                         {$set {:statements.$ statement}})))
+
+(defquery statement-replies-enabled
+  {:description      "Pseudo query for UI authorization logic"
+   :parameters       [:id]
+   :states           (states/all-application-states-but [:draft])
+   :user-roles       #{:authority :applicant}
+   :user-authz-roles auth/default-authz-writer-roles
+   :pre-checks       [replies-enabled]}
+  [_])
 
 (defquery statement-is-replyable
   {:description      "Pseudo query for UI authorization logic"

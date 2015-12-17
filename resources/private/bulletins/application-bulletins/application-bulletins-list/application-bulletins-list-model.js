@@ -22,12 +22,14 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
       var commentingEndsAt;
       if (bulletin.proclamationEndsAt) {
         commentingType = loc('bulletin.comment.period');
-        var commentingEndsAt = bulletin.proclamationEndsAt > new Date().getTime() ?
-          moment(bulletin.proclamationEndsAt).format("D.M.YYYY") : loc("bulletin.period.ended");
+        var enddate = moment(bulletin.proclamationEndsAt).endOf('day');
+        var commentingEndsAt = enddate.isAfter(moment()) ?
+          enddate.format("D.M.YYYY") : loc("bulletin.period.ended");
       } else if (bulletin.appealPeriodEndsAt) {
         commentingType = loc('bulletin.appeal.period');
-        var commentingEndsAt = bulletin.appealPeriodEndsAt > new Date().getTime() ?
-          moment(bulletin.appealPeriodEndsAt).format("D.M.YYYY") : loc("bulletin.period.ended");
+        var enddate = moment(bulletin.appealPeriodEndsAt).endOf('day');
+        var commentingEndsAt = enddate.isAfter(moment()) ?
+          enddate.format("D.M.YYYY") : loc("bulletin.period.ended");
       }
 
       return {

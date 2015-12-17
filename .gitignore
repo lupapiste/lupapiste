@@ -39,6 +39,9 @@ checkouts
 temp
 .cache
 
+# VCS
+*.orig
+
 # OSX
 .DS_Store
 

@@ -1,12 +1,15 @@
 (ns lupapalvelu.application-bulletins
   (:require [monger.operators :refer :all]
+            [clj-time.coerce :as c]
+            [clj-time.core :as t]
             [clojure.set :refer [difference]]
+            [sade.util :refer [fn->] :as util]
+            [sade.core :refer :all]
             [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [sade.util :refer [fn->]]
             [lupapalvelu.document.model :as model]))
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
@@ -105,5 +108,37 @@
       (when (seq application) attachment-file))))
 
 (defn update-file-metadata [bulletin-id comment-id files]
-  (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.bulletinId bulletin-id
+  (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.linked     true
+                                                                       :metadata.bulletinId bulletin-id
                                                                        :metadata.commentId  comment-id}}))
+
+;;;
+;;; Date checkers
+;;;
+
+(defn bulletin-date-in-period?
+  [startdate-kw enddate-kw bulletin-version]
+  {:pre [(contains? bulletin-version startdate-kw)
+         (contains? bulletin-version enddate-kw)]}
+  (let [[starts ends] (->> (util/select-values bulletin-version [startdate-kw enddate-kw])
+                           (map c/from-long))
+        ends     (t/plus ends (t/days 1))]
+    (t/within? (t/interval starts ends) (c/from-long (now)))))
+
+(defn validate-input-dates [startdate-kw enddate-kw command]
+  (let [start (get-in command [:data startdate-kw])
+        end   (get-in command [:data enddate-kw])]
+    (when-not (< start end)
+      (fail :error.startdate-before-enddate))))
+
+(defn bulletin-date-valid?
+  "Verify that bulletin visibility date is less than current timestamp"
+  [{state :bulletinState :as bulletin-version}]
+  (let [now          (now)
+        proc-start   (:proclamationStartsAt bulletin-version)
+        appeal-start (:appealPeriodStartsAt bulletin-version)
+        final-start  (:officialAt bulletin-version)]
+    (case (keyword state)
+      :proclaimed   (< proc-start now)
+      :verdictGiven (< appeal-start now)
+      :final        (< final-start now))))
