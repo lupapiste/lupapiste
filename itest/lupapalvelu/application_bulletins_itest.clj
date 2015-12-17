@@ -1,13 +1,14 @@
 (ns lupapalvelu.application-bulletins-itest
-  (:require [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.application-bulletins-itest-util :refer :all]
-            [lupapalvelu.vetuma-itest-util :as vetuma-util]
-            [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.mongo :as mongo]
-            [sade.util :as util]
-            [clojure.java.io :as io]
-            [cheshire.core :as json]))
+    (:require [midje.sweet :refer :all]
+              [lupapalvelu.itest-util :refer :all]
+              [lupapalvelu.application-bulletins-itest-util :refer :all]
+              [lupapalvelu.vetuma-itest-util :as vetuma-util]
+              [lupapalvelu.factlet :refer :all]
+              [lupapalvelu.mongo :as mongo]
+              [sade.util :as util]
+              [sade.core :refer [now]]
+              [clojure.java.io :as io]
+              [cheshire.core :as json] [sade.util :as util]))
 
 (when (sade.env/feature? :publish-bulletin)
   (apply-remote-minimal)
@@ -33,7 +34,8 @@
         (query olli :publish-bulletin-enabled :id (:id ym-app)) => ok?)))
 
   (facts "Publishing bulletins"
-    (let [app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
+    (let [ts-now  (now)
+          app (create-and-submit-application pena :operation "jatteen-keraystoiminta"
                                                   :propertyId oulu-property-id
                                                   :x 430109.3125 :y 7210461.375
                                                   :address "Oulu 10")
@@ -62,26 +64,45 @@
       (fact "Authority can't publish to wrong states"
         (command olli :move-to-verdict-given
                  :id app-id
-                 :verdictGivenAt 1449153132436
-                 :appealPeriodStartsAt 1449153132436
-                 :appealPeriodEndsAt 1449153132436
+                 :verdictGivenAt ts-now
+                 :appealPeriodStartsAt ts-now
+                 :appealPeriodEndsAt ts-now
                  :verdictGivenText "foo") => (partial expected-failure? :error.command-illegal-state)
         (command olli :move-to-final
                  :id app-id
                  :officialAt 123) => (partial expected-failure? :error.command-illegal-state))
 
-      (fact "Authority can publish bulletin"
-        (command olli :move-to-proclaimed
-                 :id app-id
-                 :proclamationStartsAt 1449153132436
-                 :proclamationEndsAt 1449153132436
-                 :proclamationText "foo") => ok?)
+      (facts "Authority publishes"
+        (fact "Authority can publish bulletin where proclamation starts tomorrow"
+          (command olli :move-to-proclaimed
+                        :id app-id
+                        :proclamationStartsAt (util/get-timestamp-from-now :day 1)
+                        :proclamationEndsAt (util/get-timestamp-from-now :day 1)
+                        :proclamationText "foo") => ok?)
+
+        (fact "But bulletin is not included in query until tomorrow"
+          (let [{data :data ok :ok} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil)]
+               ok => true
+               (count data) => 0))
+
+        (fact "Bulletin is published with immediate proclamation"
+          (command olli :move-to-proclaimed
+                        :id app-id
+                        :proclamationStartsAt ts-now
+                        :proclamationEndsAt (util/get-timestamp-from-now :day 1)
+                        :proclamationText "foo2") => ok?
+          (fact "it is visible in query"
+            (->
+              (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil)
+              :data
+              count)) => 1))
+
       (fact "Regular user can't publish bulletin"
         (command pena :move-to-proclaimed
                  :id app-id
                  :proclamationStartsAt 1449153132436
                  :proclamationEndsAt 1449153132436
-                 :proclamationText "foo") => fail?)
+                 :proclamationText "foo") => unauthorized?)
 
       (fact "Not public attachments aren't included in bulletin"
         (let [{bulletin-attachments :attachments} (query-bulletin pena app-id)]

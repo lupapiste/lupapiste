@@ -1,12 +1,13 @@
 (ns lupapalvelu.application-bulletins
   (:require [monger.operators :refer :all]
             [clojure.set :refer [difference]]
+            [sade.util :refer [fn->]]
+            [sade.core :refer :all]
             [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [sade.util :refer [fn->]]
             [lupapalvelu.document.model :as model]))
 
 (def bulletin-state-seq (sm/state-seq states/bulletin-version-states))
@@ -107,3 +108,15 @@
 (defn update-file-metadata [bulletin-id comment-id files]
   (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.bulletinId bulletin-id
                                                                        :metadata.commentId  comment-id}}))
+
+(defn bulletin-date-valid?
+  "Verify that bulletin visibility date is less than current timestamp"
+  [{state :bulletinState :as bulletin-version}]
+  (let [now          (now)
+        proc-start   (:proclamationStartsAt bulletin-version)
+        appeal-start (:appealPeriodStartsAt bulletin-version)
+        final-start  (:officialAt bulletin-version)]
+    (case (keyword state)
+      :proclaimed   (< proc-start now)
+      :verdictGiven (< appeal-start now)
+      :final        (< final-start now))))
