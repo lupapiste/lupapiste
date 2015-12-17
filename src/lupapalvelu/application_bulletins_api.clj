@@ -117,19 +117,12 @@
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
-(defn- in-proclaimed-period
-  [version]
-  (let [[starts ends] (->> (util/select-values version [:proclamationStartsAt :proclamationEndsAt])
-                           (map c/from-long))
-        ends     (t/plus ends (t/days 1))]
-    (t/within? (t/interval starts ends) (c/from-long (now)))))
-
 (defn- bulletin-can-be-commented
   ([{{bulletin-id :bulletinId} :data}]
    (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
          bulletin   (bulletins/get-bulletin bulletin-id projection)]
      (if-not (and (= (:bulletinState bulletin) "proclaimed")
-                  (in-proclaimed-period (-> bulletin :versions last)))
+                  (bulletins/in-proclaimed-period (-> bulletin :versions last)))
        (fail :error.bulletin-not-in-commentable-state))))
   ([command _]
     (bulletin-can-be-commented command)))

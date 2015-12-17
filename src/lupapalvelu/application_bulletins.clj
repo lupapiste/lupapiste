@@ -110,6 +110,14 @@
                                                                        :metadata.bulletinId bulletin-id
                                                                        :metadata.commentId  comment-id}}))
 
+(defn in-proclaimed-period
+  [version]
+  (let [[starts ends] (->> (util/select-values version [:proclamationStartsAt :proclamationEndsAt])
+                           (map c/from-long))
+        ends     (t/plus ends (t/days 1))]
+    (t/within? (t/interval starts ends) (c/from-long (now)))))
+
+
 (defn bulletin-date-valid?
   "Verify that bulletin visibility date is less than current timestamp"
   [{state :bulletinState :as bulletin-version}]
