@@ -23,18 +23,26 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return _.includes(self.statementIdsWithAttachments(), statement.id());
   };
 
-  self.notGiven = function(statement) {
-    return _.contains(["requested", "draft"], util.getIn(statement, ["state"]));
+  self.isGiven = function(statement) {
+    return _.contains(["given", "replyable", "replied", "closed"], util.getIn(statement, ["state"]));
   }
 
+  var isAuthorityOrStatementOwner = function(statement) {
+    var currentUser = lupapisteApp.models.currentUser;
+    return currentUser.isAuthority() || util.getIn(statement, ["person", "userId"]) === currentUser.id();
+  };
+
   self.isRemovable = function(statement) {
-    var userId = lupapisteApp.models.currentUser.id();
-    return util.getIn(statement, ["person", "userId"]) === userId && self.notGiven(statement);
+    return isAuthorityOrStatementOwner(statement) && !self.isGiven(statement);
   }
+
+  self.canAccessStatement = function(statement) {
+    return self.isGiven(statement) || isAuthorityOrStatementOwner(statement);
+  };
 
   self.isStatementOverDue = function(statement) {
     var nowTimeInMs = new Date().getTime();
-    return (statement.dueDate && !self.notGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
+    return (statement.dueDate && self.isGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
   };
 
   var deleteStatementFromServer = function(statementId) {

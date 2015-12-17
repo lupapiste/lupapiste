@@ -1,32 +1,13 @@
 # Lupapiste
 
-## Requirements
 
-* leiningen
-* mongodb running on localhost, on default port
-* pdftk
-* compass
-* optionally pdf2pdf for PDF/A conversions
 
-## Usage
+## Kehitysohje
 
-lein run
+Katso docs/developerguide.md.
 
-## Testing
+## License
 
-### All midje tests
+Copyright © 2015 Solita Oy
 
-    lein verify
-
-### Only unit tests
-
-    lein midje
-
-### End-to-end test (Robot Framework)
-
-    cd robot
-    ./local.sh
-
-## Packaging
-
-lein with-profile uberjar uberjar
+Distributed under the European Union Public Licence (EUPL) version 1.1.
