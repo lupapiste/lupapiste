@@ -14,6 +14,9 @@
     }
   }
   .bulletin-comment__name {
+    @include styled-input( none, none, none,
+                           $text: $orange-link, $hover-text: $orange-hover,
+                           $active-text: $orange-active, $disabled-bg: none);
     &:after {
       content: ",";
     }
