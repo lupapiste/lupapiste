@@ -78,4 +78,8 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
       return "bulletin.comments.sort.desc";
     }
   });
+
+  self.commentIndex = function(index) {
+    return self.asc() ? index + 1 : self.totalComments() - index;
+  };
 };
