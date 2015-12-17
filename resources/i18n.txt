@@ -1,1 +1,4 @@
 statement.reply-draft-not-visible: Vastine tulee näkyviin tähän, kun se on annettu.
+application.statement.reply: Vastine
+statement.reply.state.replyable: Vastine pyydetty
+statement.reply.state.replied: Vastine annettu
