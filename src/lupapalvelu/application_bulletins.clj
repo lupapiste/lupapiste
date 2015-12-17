@@ -112,8 +112,14 @@
                                                                        :metadata.bulletinId bulletin-id
                                                                        :metadata.commentId  comment-id}}))
 
-(defn bulletin-date-in-period
+;;;
+;;; Date checkers
+;;;
+
+(defn bulletin-date-in-period?
   [startdate-kw enddate-kw bulletin-version]
+  {:pre [(contains? bulletin-version startdate-kw)
+         (contains? bulletin-version enddate-kw)]}
   (let [[starts ends] (->> (util/select-values bulletin-version [startdate-kw enddate-kw])
                            (map c/from-long))
         ends     (t/plus ends (t/days 1))]

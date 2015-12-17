@@ -120,7 +120,7 @@
    (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
          bulletin   (bulletins/get-bulletin bulletin-id projection)]
      (if-not (and (= (:bulletinState bulletin) "proclaimed")
-                  (bulletins/bulletin-date-in-period :proclamationStartsAt :proclamationEndsAt (-> bulletin :versions last)))
+                  (bulletins/bulletin-date-in-period? :proclamationStartsAt :proclamationEndsAt (-> bulletin :versions last)))
        (fail :error.bulletin-not-in-commentable-state))))
   ([command _]
     (bulletin-can-be-commented command)))
