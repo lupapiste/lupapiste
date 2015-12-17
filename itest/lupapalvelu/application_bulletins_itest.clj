@@ -95,7 +95,7 @@
             (->
               (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil)
               :data
-              count)) => 1))
+              count) => 1)))
 
       (fact "Regular user can't publish bulletin"
         (command pena :move-to-proclaimed
