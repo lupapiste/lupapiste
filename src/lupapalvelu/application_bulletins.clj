@@ -125,6 +125,11 @@
         ends     (t/plus ends (t/days 1))]
     (t/within? (t/interval starts ends) (c/from-long (now)))))
 
+(defn validate-input-dates [startdate-kw enddate-kw command]
+  (let [start (get-in command [:data startdate-kw])
+        end   (get-in command [:data enddate-kw])]
+    (when-not (< start end)
+      (fail :error.startdate-before-enddate))))
 
 (defn bulletin-date-valid?
   "Verify that bulletin visibility date is less than current timestamp"

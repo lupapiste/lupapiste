@@ -66,21 +66,27 @@
                  :id app-id
                  :verdictGivenAt ts-now
                  :appealPeriodStartsAt ts-now
-                 :appealPeriodEndsAt ts-now
+                 :appealPeriodEndsAt (+ 1 ts-now)
                  :verdictGivenText "foo") => (partial expected-failure? :error.command-illegal-state)
         (command olli :move-to-final
                  :id app-id
                  :officialAt 123) => (partial expected-failure? :error.command-illegal-state))
 
       (facts "Authority publishes"
-        (fact "Authority can publish bulletin where proclamation starts tomorrow"
+        (fact "Cant publish if start date is after end date"
+          (command olli :move-to-proclaimed
+                   :id app-id
+                   :proclamationStartsAt (util/get-timestamp-from-now :day 2)
+                   :proclamationEndsAt (util/get-timestamp-from-now :day 1)
+                   :proclamationText "foo") => (partial expected-failure? :error.startdate-before-enddate))
+        (fact "Can publish bulletin where proclamation starts tomorrow"
           (command olli :move-to-proclaimed
                         :id app-id
                         :proclamationStartsAt (util/get-timestamp-from-now :day 1)
-                        :proclamationEndsAt (util/get-timestamp-from-now :day 1)
+                        :proclamationEndsAt (util/get-timestamp-from-now :day 2)
                         :proclamationText "foo") => ok?)
 
-        (fact "But bulletin is not included in query until tomorrow"
+        (fact "..but bulletin is not included in query until tomorrow"
           (let [{data :data ok :ok} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil)]
                ok => true
                (count data) => 0))

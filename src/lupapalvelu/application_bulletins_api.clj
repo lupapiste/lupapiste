@@ -165,7 +165,8 @@
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
    :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
-                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
+                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])
+                      (partial bulletins/validate-input-dates :proclamationStartsAt :proclamationEndsAt)]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}
@@ -180,7 +181,8 @@
 (defcommand move-to-verdict-given
   {:parameters [id verdictGivenAt appealPeriodStartsAt appealPeriodEndsAt verdictGivenText]
    :input-validators [(partial action/non-blank-parameters [:id :verdictGivenText])
-                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]
+                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])
+                      (partial bulletins/validate-input-dates :appealPeriodStartsAt :appealPeriodEndsAt)]
    :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}
