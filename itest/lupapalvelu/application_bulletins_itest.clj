@@ -95,7 +95,7 @@
             (->
               (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state nil :sort nil)
               :data
-              count)) => 1))
+              count) => 1)))
 
       (fact "Regular user can't publish bulletin"
         (command pena :move-to-proclaimed
@@ -162,13 +162,13 @@
           _ (command sonja :approve-application :id (:id sipoo-app) :lang "fi") => ok?
           _ (command olli :move-to-proclaimed
                      :id (:id oulu-app)
-                     :proclamationStartsAt 1449153132436
-                     :proclamationEndsAt 1449153132436
+                     :proclamationStartsAt (now)
+                     :proclamationEndsAt (util/get-timestamp-from-now :day 1)
                      :proclamationText "testi") => ok?
           _ (command sonja :move-to-proclaimed
                      :id (:id sipoo-app)
-                     :proclamationStartsAt 1449153132436
-                     :proclamationEndsAt 1449153132436
+                     :proclamationStartsAt (now)
+                     :proclamationEndsAt (util/get-timestamp-from-now :day 1)
                      :proclamationText "testi") => ok?
           _ (datatables pena :application-bulletins :page "1"
                                                     :searchText ""
@@ -221,8 +221,8 @@
             (command olli :approve-application :id id :lang "fi") => ok?
             (command olli :move-to-proclaimed
                      :id id
-                     :proclamationStartsAt 1449153132436
-                     :proclamationEndsAt 1449153132436
+                     :proclamationStartsAt (now)
+                     :proclamationEndsAt (util/get-timestamp-from-now :day 1)
                      :proclamationText "testi")))
         (let [{p1-data :data p1-left :left} (datatables pena :application-bulletins :page 1
                                                         :searchText ""
