@@ -137,7 +137,7 @@ Statement giver sees comments
 Statement can export application as PDF
   Element Should Be Visible  xpath=//button[@data-test-id="application-pdf-btn"]
 
-Veikko from Tampere can give verdict to own statement
+Veikko from Tampere can give statement
   Open tab  statement
   Open statement  1
   Wait Until  element should be enabled  statement-text
@@ -145,7 +145,7 @@ Veikko from Tampere can give verdict to own statement
   Select From List By Value  statement-type-select  ehdoilla
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
-  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//td[@data-test-name='Veikko Viranomainen']  Puoltaa ehdoilla
+  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-name='Veikko Viranomainen']  Puoltaa ehdoilla
   [Teardown]  logout
 
 Sonja can see statement indicator

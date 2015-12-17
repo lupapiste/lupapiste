@@ -58,8 +58,7 @@
                                                click: $component.openStatement,
                                                attr: {'data-test-id' : 'open-statement-reply-' + $index()}"></a>
                         <span data-bind="visible: $component.showReplyState($data),
-                                         text: loc(['statement', 'reply', 'state', $data.state()]),
-                                         attr: {'data-test-name' : $data.person.name}"></span>
+                                         text: loc(['statement', 'reply', 'state', $data.state()])"></span>
                       </td>
                       <!-- ko if-not: _.every($component.statements(), $component.isGiven) -->
                         <td>
