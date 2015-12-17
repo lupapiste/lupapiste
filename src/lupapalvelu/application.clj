@@ -5,9 +5,7 @@
             [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
             [clojure.walk :refer [keywordize-keys]]
-            [hiccup.core :as hiccup]
-            [clj-rss.core :as rss]
-            [monger.operators :refer [$set $push $elemMatch $exists]]
+            [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -17,7 +15,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
@@ -424,78 +421,3 @@
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
 
-(defmulti waste-ads (fn [& [fmt lang]] fmt))
-
-(defn max-modified
-  "Returns the max (latest) modified value of the given document part
-  or list of parts."
-  [m]
-  (if-let [modified (:modified m)]
-    modified
-    (apply max (map max-modified
-                    (if (map? m)
-                      (vals m)
-                      m)))))
-
-(defmethod waste-ads :default [& _]
-  (->>
-   ;; 1. Every application that as at least a bit filled available materials.
-   (mongo/select
-    :applications
-    {:documents {$elemMatch {:data.availableMaterials {$exists true }}}})
-   ;; 2. Create materials, contact, modified map.
-   (map (fn [{docs :documents}]
-          (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")
-                   (let [data (select-keys (:data %) [:contact :availableMaterials])
-                         {:keys [contact availableMaterials]} (tools/unwrapped data)]
-                     {:contact contact
-                      :materials (tools/rows-to-list availableMaterials)
-                      :modified (max-modified data)}))
-                docs)))
-   ;; 3. We only check the contact validity. Name and either phone or email
-   ;;    must have been provided.
-   (filter (fn [{{:keys [name phone email]} :contact}]
-             (letfn [(good [s] (-> s ss/blank? false?))]
-               (and (good name) (or (good phone) (good email))))))
-   ;; 4. Sorted in the descending modification time order.
-   (sort-by :modified)
-   (reverse)))
-
-
-(defmethod waste-ads :rss [_ lang]
-  (let [ads (waste-ads)
-        columns    (map :name schemas/availableMaterialsRow)
-        col-row-map (fn [fun]
-                      (->> columns (map fun) (concat [:tr]) vec))
-        items      (for [{:keys [contact materials]} ads
-                         :let [{:keys [name phone email]}  contact
-                               html (hiccup/html [:div [:span (ss/join " " [name phone email])]
-                                                  [:table
-                                                   (col-row-map #(i18n/with-lang lang
-                                                                   [:th (->> %
-                                                                             (str "available-materials.")
-                                                                             i18n/loc)]))
-                                                   (for [m materials]
-                                                     (col-row-map #(vec [:td (-> % keyword m)])))]])]]
-
-                     {:title "Lupapiste"
-                      :link "http://www.lupapiste.fi"
-                      :author name
-                      :description (str "<![CDATA[ " html " ]]>")})]
-    (rss/channel-xml {:title (str "Lupapiste:" (i18n/with-lang lang (i18n/loc "available-materials.contact")))
-                  :link "" :description ""}
-                 items)))
-
-;; Waste feed enpoind parameter validators
-
-(defn valid-org [cmd]
-  (when-not (-> cmd :data :org ss/upper-case organization/get-organization)
-    (fail :error.organization-not-found)))
-
-(defn valid-feed-format [cmd]
-  (when-not (->> cmd :data :fmt ss/lower-case keyword (contains? #{:rss :json}) )
-    (fail :error.invalid-feed-format)))
-
-(defn valid-language [cmd]
-  (when-not  (->> cmd :data :lang ss/lower-case keyword (contains? (set i18n/supported-langs)) )
-    (fail :error.invalid-language)))

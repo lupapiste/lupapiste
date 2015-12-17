@@ -763,7 +763,7 @@
                                     :repeating true
                                     :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}
                            {:name "contact"
-                            :i18nkey "contact"
+                            :i18nkey "available-materials.contact"
                             :type :group
                             :group-help "contact.help"
                             :body [{:name "name" :type :string}
