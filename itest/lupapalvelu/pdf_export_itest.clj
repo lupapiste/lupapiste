@@ -1,17 +1,18 @@
 (ns lupapalvelu.pdf-export-itest
     (:require [clojure.java.io :as io]
-      [lupapalvelu.test-util :refer [dummy-doc]]
-      [lupapalvelu.itest-util :refer [apply-remote-minimal pena query-application] :as itu]
-      [lupapalvelu.factlet :refer :all]
-      [lupapalvelu.pdf.pdf-export :as pdf-export]
-      [lupapalvelu.i18n :refer [with-lang loc]]
-      [sade.util :as util]
-      [midje.sweet :refer :all]
-      [pdfboxing.text :as pdfbox]
-      [lupapalvelu.mongo :as mongo]
-      [lupapalvelu.i18n :as i18n]
-      [lupapalvelu.domain :as domain]
-      [lupapalvelu.document.schemas :as schemas] [lupapalvelu.domain :as domain])
+              [midje.sweet :refer :all]
+              [midje.util :refer [testable-privates]]
+              [pdfboxing.text :as pdfbox]
+              [sade.util :as util]
+              [lupapalvelu.test-util :refer [dummy-doc]]
+              [lupapalvelu.itest-util :refer [apply-remote-minimal pena query-application] :as itu]
+              [lupapalvelu.pdf.pdf-export :as pdf-export]
+              [lupapalvelu.pdf.pdfa-conversion :as pdfa-conversion]
+              [lupapalvelu.i18n :refer [with-lang loc]]
+              [lupapalvelu.mongo :as mongo]
+              [lupapalvelu.i18n :as i18n]
+              [lupapalvelu.domain :as domain]
+              [lupapalvelu.document.schemas :as schemas])
   (:import (java.io File FileOutputStream)))
 
 (apply-remote-minimal)
@@ -19,11 +20,9 @@
 (def pdfa #'lupapalvelu.pdf.pdf-export/generate-pdf-with-child)
 
 (defn- localize-value [value]
-  (cond
-    (= java.lang.Boolean (type value))
-      (let [loc-key (if value "yes" "no")]
-        (loc loc-key))
-    :else value))
+  (if (instance? Boolean value)
+    (loc (if value "yes" "no"))
+    value))
 
 (defn- walk-function [pdf-content node]
   ; What to do when this is a value node
@@ -34,8 +33,8 @@
   ; When do we need to stop going deeper in the tree
   (if (and (vector? node) (#{:_selected :userId} (first node)))
     nil
-    node)
-  )
+    node))
+
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"
                        "hulevedet"
@@ -139,22 +138,24 @@
         (.delete file))))
 
 (facts "Generated statement PDF is valid PDF/A"
-       (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
-             dummy-docs (map dummy-doc schema-names)
-             dummy-statements [(dummy-statement "2" "Matti Malli" "puollettu" "Lorelei ipsum" "Saatteen sisalto")
-                               (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero." "Saatteen sisalto")]
-             application (merge domain/application-skeleton {:id           "LP-1"
-                                                             :address      "Korpikuusen kannon alla 1 "
-                                                             :documents    dummy-docs
-                                                             :statements   dummy-statements
-                                                             :municipality "444"
-                                                             :state        "draft"})]
-            (doseq [lang i18n/languages]
-                   (facts {:midje/description (name lang)}
-                          (let [file (File/createTempFile (str "export-test-statement-pdfa-" (name lang)) ".pdf")
-                                fis (FileOutputStream. file)]
-                               (pdfa application :statements "2" lang fis)
-                               (fact "File exists " (.exists file))
-                               (fact "File not empty " (> (.length file) 1))
-                               (fact "File is valid PDF/A " (lupapalvelu.pdf.pdfa-conversion/convert-file-to-pdf-in-place file))
-                               (.delete file))))))
+  (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
+        dummy-docs (map dummy-doc schema-names)
+        dummy-statements [(dummy-statement "2" "Matti Malli" "puollettu" "Lorelei ipsum" "Saatteen sisalto")
+                          (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero." "Saatteen sisalto")]
+        application (merge domain/application-skeleton {:id           "LP-1"
+                                                        :address      "Korpikuusen kannon alla 1 "
+                                                        :documents    dummy-docs
+                                                        :statements   dummy-statements
+                                                        :municipality "444"
+                                                        :state        "draft"})]
+    (doseq [lang i18n/languages]
+      (fact {:midje/description (name lang)}
+        (against-background
+          [(mongo/update "statistics" {:type "pdfa-conversion"} anything :upsert true) => nil]
+          (let [file (File/createTempFile (str "export-test-statement-pdfa-" (name lang)) ".pdf")
+                fis (FileOutputStream. file)]
+            (pdfa application :statements "2" lang fis)
+            (fact "File exists " (.exists file))
+            (fact "File not empty " (> (.length file) 1))
+            (fact "File is valid PDF/A " (pdfa-conversion/convert-file-to-pdf-in-place file))
+            (.delete file)))))))

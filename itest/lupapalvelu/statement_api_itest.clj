@@ -44,7 +44,7 @@
     (get-statement-giver-by-email org-api-key giver-email)))
 
 (fact "authorityAdmin can't query get-statement-givers"
-  (query sipoo :get-statement-givers) => unauthorized?)
+    (query sipoo :get-statement-givers) => unauthorized?)
 
 (facts "Create statement giver"
   (apply-remote-minimal)
@@ -66,63 +66,54 @@
 
     (fact "new statement giver receives email which contains the (html escaped) input text"
       (let [email (last-email)]
-        (:to email) => (contains ronja-email)
-        (:subject email) => "Lupapiste: Lausunnot"
-        (get-in email [:body :plain]) => (contains "<b>bold</b>")
+      (:to email) => (contains ronja-email)
+      (:subject email) => "Lupapiste: Lausunnot"
+      (get-in email [:body :plain]) => (contains "<b>bold</b>")
         (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;")))))
 
 (facts "Statement giver can be added from another organization"
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-veikko (create-statement-giver sipoo veikko-email)]
 
-    (last-email) => truthy
+        (last-email) => truthy
 
-    (fact "Initially Veikko does not have access to application"
-      (query veikko :application :id application-id) => not-accessible?)
+        (fact "Initially Veikko does not have access to application"
+          (query veikko :application :id application-id) => not-accessible?)
 
-    (let [application-before (query-application sonja application-id)
-          resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000) => ok?
-          application-after  (query-application sonja application-id)
-          emails (sent-emails)
-          email (first emails)]
-      (fact "Veikko receives email"
-        (:to email) => (contains veikko-email)
-        (:subject email) => "Lupapiste: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
-        email => (partial contains-application-link? application-id "authority"))
-      (fact "...but no-one else"
-        (count emails) => 1)
-      (fact "auth array has one entry more (veikko)"
-        (count (:auth application-after)) => (inc (count (:auth application-before)))
-        (count (filter #(= (:username %) "veikko") (:auth application-after))) => 1)
-      (fact "ronja did not get access"
-        (count (filter #(= (:username %) "ronja") (:auth application-after))) => 0)
+        (let [application-before (query-application sonja application-id)
+              resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000) => ok?
+              application-after  (query-application sonja application-id)
+              emails (sent-emails)
+              email (first emails)]
+          (fact "Veikko receives email"
+            (:to email) => (contains veikko-email)
+            (:subject email) => "Lupapiste: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
+            email => (partial contains-application-link? application-id "authority"))
+          (fact "...but no-one else"
+            (count emails) => 1)
+          (fact "auth array has one entry more (veikko)"
+            (count (:auth application-after)) => (inc (count (:auth application-before)))
+            (count (filter #(= (:username %) "veikko") (:auth application-after))) => 1)
+          (fact "ronja did not get access"
+            (count (filter #(= (:username %) "ronja") (:auth application-after))) => 0)
 
-      (fact "Veikko really has access to application"
-        (query veikko :application :id application-id) => ok?))
+          (fact "Veikko really has access to application"
+            (query veikko :application :id application-id) => ok?))
 
     (facts "Veikko gives a statement"
 
       (last-email) ; Inbox zero
 
       (let [application (query-application sonja application-id)
-            statement (some #(when (= veikko-email (-> % :person :email)) %) (:statements application)) => truthy]
+            statement   (some #(when (= veikko-email (-> % :person :email)) %) (:statements application)) => truthy]
 
         (fact* "Veikko is one of the possible statement givers"
-               (let [resp (query sonja :get-statement-givers :id application-id) => ok?
-                     giver-emails (->> resp :data (map :email) set)]
-                 (count giver-emails) => 3
-                 (giver-emails sonja-email) => sonja-email
-                 (giver-emails ronja-email) => ronja-email
-                 (giver-emails veikko-email) => veikko-email))
-
-        (fact "Veikko can see unsubmitted statements"
-          (query veikko :should-see-unsubmitted-statements :id application-id) => ok?)
-
-        (fact "Sonja can see unsubmitted statements"
-          (query sonja :should-see-unsubmitted-statements :id application-id) => ok?)
-
-        (fact "Applicant can not see unsubmitted statements"
-          (query mikko :should-see-unsubmitted-statements :id application-id) => unauthorized?)
+          (let [resp (query sonja :get-statement-givers :id application-id) => ok?
+                giver-emails (->> resp :data (map :email) set)]
+            (count giver-emails) => 3
+            (giver-emails sonja-email) => sonja-email
+            (giver-emails ronja-email) => ronja-email
+            (giver-emails veikko-email) => veikko-email))
 
         (fact "Statement cannot be given by applicant which is not statement owner"
           (command mikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => unauthorized?)
@@ -134,7 +125,7 @@
           (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
 
         (fact* "Statement is given"
-               (command veikko :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+          (command veikko :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
 
         (fact "Applicant got email"
           (let [emails (sent-emails)
@@ -142,7 +133,7 @@
             (count emails) => 1
             (:to email) => (contains mikko-email)
             email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
-        
+
         (fact "One Attachment is generated"
           (->> (query-application sonja application-id)
                :attachments
@@ -177,8 +168,6 @@
               (:auth application-after))) => 1)
     (fact "Pena really has access to application"
       (query pena :application :id application-id) => ok?)
-    (fact "Applicant can not see unsubmitted statements"
-      (query pena :should-see-unsubmitted-statements :id application-id) => ok?)
 
     (facts "Pena gives a statement"
 
@@ -187,7 +176,7 @@
       (let [application (query-application pena application-id)
             statement   (some #(when (= pena-email (-> % :person :email)) %) (:statements application))]
         (fact* "Statement is given"
-               (command pena :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+          (command pena :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
         (fact "Applicant statement giver cannot delete his already-given statement"
           (command pena :delete-statement :id application-id :statementId (:id statement)) => (partial expected-failure? "error.statement-already-given"))
 
@@ -208,42 +197,42 @@
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-ronja (get-statement-giver-by-email sipoo ronja-email)
         resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja] :saateText "saate" :dueDate 1450994400000) => ok?
-        application (query-application ronja application-id)]
-    (auth-contains-statement-giver application ronja-id) => truthy
+            application (query-application ronja application-id)]
+        (auth-contains-statement-giver application ronja-id) => truthy
 
-    (fact "...but not after statement has been deleted"
-      (let [statement-id (:id (get-statement-by-user-id application ronja-id)) => truthy
-            resp (command sonja :delete-statement :id application-id :statementId statement-id) => ok?
-            application (query-application sonja application-id)]
-        (get-statement-by-user-id application ronja-id) => falsey
-        (auth-contains-statement-giver application ronja-id) => falsey))))
+        (fact "...but not after statement has been deleted"
+          (let [statement-id (:id (get-statement-by-user-id application ronja-id)) => truthy
+                resp (command sonja :delete-statement :id application-id :statementId statement-id) => ok?
+                application (query-application sonja application-id)]
+            (get-statement-by-user-id application ronja-id) => falsey
+            (auth-contains-statement-giver application ronja-id) => falsey))))
 
 (fact "Applicant statement giver is able to delete his not-yet-given statement"
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         _ (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-pena] :saateText "saate" :dueDate 1450994400000) => ok?
-        application (query-application ronja application-id)
-        non-given-statement-id (:id (some
-                                     #(when (and (-> % :given not) (= pena-id (get-in % [:person :userId]))) %)
-                                     (:statements application))) => truthy
-        _ (command pena :delete-statement :id application-id :statementId non-given-statement-id) => ok?
-        application (query-application sonja application-id)]
-    (some #(= non-given-statement-id (:id %)) (:statements application)) => falsey
-    (some #(= non-given-statement-id (:statementId %)) (:auth application)) => falsey
-    ))
+            application (query-application ronja application-id)
+            non-given-statement-id (:id (some
+                                          #(when (and (-> % :given not) (= pena-id (get-in % [:person :userId]))) %)
+                                          (:statements application))) => truthy
+            _ (command pena :delete-statement :id application-id :statementId non-given-statement-id) => ok?
+            application (query-application sonja application-id)]
+        (some #(= non-given-statement-id (:id %)) (:statements application)) => falsey
+        (some #(= non-given-statement-id (:statementId %)) (:auth application)) => falsey
+        ))
 
 (facts "Non-existing user"
-  (fact "Non-existing user cannot be added as a statement person (in authority admin view)"
-    (command sipoo :create-statement-giver :email non-existing-user-email :text "hello") => (partial expected-failure? "error.user-not-found"))
+      (fact "Non-existing user cannot be added as a statement person (in authority admin view)"
+        (command sipoo :create-statement-giver :email non-existing-user-email :text "hello") => (partial expected-failure? "error.user-not-found"))
 
-  (fact "Non-existing user can be requested as a statement person (on the Statements tab)"
+      (fact "Non-existing user can be requested as a statement person (on the Statements tab)"
     (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
           _ (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-non-existing-user] :saateText "saate" :dueDate 1450994400000) => ok?
-          application (query-application ronja application-id)
-          resp (query admin :user-by-email :email non-existing-user-email) => ok?
-          user (:user resp) => truthy]
-      (get-statement-by-user-id application (:id user)) => truthy
-      (auth-contains-statement-giver application (:id user)) => truthy)))
-  
+              application (query-application ronja application-id)
+              resp (query admin :user-by-email :email non-existing-user-email) => ok?
+              user (:user resp) => truthy]
+          (get-statement-by-user-id application (:id user)) => truthy
+          (auth-contains-statement-giver application (:id user)) => truthy)))
+
 (facts "Statement reply"
   (create-statement-giver sipoo veikko-email)
   (let [statement-giver-veikko (get-statement-giver-by-email sipoo veikko-email)
@@ -260,7 +249,7 @@
 
     ;; (fact "statement-is-replyable - should fail when statement is not given"
     ;;   (query sonja :statement-is-replyable :id application-id :statementId statement-id) =not=> ok?)
-    
+
     (fact "statement is given"
       (command veikko :give-statement :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
 
@@ -278,3 +267,30 @@
 
     (fact "statement-is-replyable - is replyable when user is requested for reply"
       (query sonja :statement-is-replyable :id application-id :statementId statement-id) => ok?)))
+
+
+(facts "Statement data filtering"
+
+  (create-statement-giver sipoo veikko-email)
+  (let [statement-giver-veikko (get-statement-giver-by-email sipoo veikko-email)
+        application-id (:id (create-and-submit-application pena :propertyId sipoo-property-id :operation "ilmoitus-poikkeuksellisesta-tilanteesta"))
+        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000)
+        application (query-application sonja application-id)
+        statement-id (:id (get-statement-by-user-id application veikko-id)) => truthy
+        all-statement-keys  #{:id :person :state :requested :dueDate :saateText}
+        filtered-statement-keys (disj all-statement-keys :saateText :dueDate)]
+
+
+    (fact "All data of not-given statement data is available for authority Sonja"
+      (:statements application) => (has every? #(= all-statement-keys (-> % keys set))))
+
+    (fact "All data of not-given statement data is available for statementGiver himself"
+      (let [app-veikko (query-application veikko application-id)]
+        (:statements app-veikko) => (has every? #(= all-statement-keys (-> % keys set)))))
+
+    (fact "Some data of not-given statement data is filtered from Pena"
+      (let [app-pena (query-application pena application-id)]
+        (:statements app-pena) => (has every? #(= filtered-statement-keys (-> % keys set)))))
+    ))
+
+
