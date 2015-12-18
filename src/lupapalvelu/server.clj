@@ -18,7 +18,7 @@
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.migration.migration :as migration]
             [lupapalvelu.perf-mon :as perf-mon]
-            [lupapalvelu.control-api :refer [defcontrol]]
+            [lupapalvelu.control-api :refer [defcontrol] :as control]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vetuma]
             [lupapalvelu.fixture.fixture-api]
@@ -90,6 +90,7 @@
   (perf-mon/init)
 
   (server/add-middleware headers/sanitize-header-values)
+  (server/add-middleware control/lockdown-middleware)
 
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl in port 9090")
