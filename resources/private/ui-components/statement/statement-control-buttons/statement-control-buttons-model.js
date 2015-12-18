@@ -11,13 +11,15 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
     return !params.submitAllowed()[self.tab()];
   });
 
-  self.visible = ko.pureComputed(function() {
+  self.submitVisible = ko.pureComputed(function() {
     return self.authModel.ok({
       "statement": "give-statement",
       "reply": "reply-statement",
       "reply-request": "request-for-statement-reply",
     }[self.tab()]);
   });
+
+  self.refreshVisible = self.submitVisible;
 
   self.submit = function() {
     hub.send("statement::submit", {
