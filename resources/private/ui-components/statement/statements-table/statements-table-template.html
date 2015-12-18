@@ -20,6 +20,7 @@
                       <th data-bind="ltext: 'application.statement.maaraaika'"></th>
                       <th data-bind="ltext: 'application.statement.given'"></th>
                       <th data-bind="ltext: 'application.statement.status'"></th>
+                      <th data-bind="ltext: 'application.statement.reply', visible: $component.repliesEnabled"></th>
                       <!-- ko if-not: _.every($data.statements(), $component.isGiven) -->
                         <th data-bind="ltext: 'remove'"></th>
                       <!-- /ko -->
@@ -50,6 +51,14 @@
                         <span data-bind="visible: $component.isGiven($data),
                                          text: $data.status && $data.status() && loc(['statement', $data.status()]),
                                          attr: {'data-test-name' : $data.person.name}"></span>
+                      </td>
+                      <td data-bind="visible: $component.repliesEnabled">
+                        <a href="#" data-bind="visible: $component.isReplyable($data) && !$component.showReplyState($data),
+                                               ltext: 'statement.reply.give-reply-link',
+                                               click: $component.openStatement,
+                                               attr: {'data-test-id' : 'open-statement-reply-' + $index()}"></a>
+                        <span data-bind="visible: $component.showReplyState($data),
+                                         text: loc(['statement', 'reply', 'state', $data.state()])"></span>
                       </td>
                       <!-- ko if-not: _.every($component.statements(), $component.isGiven) -->
                         <td>

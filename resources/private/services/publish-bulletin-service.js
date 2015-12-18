@@ -33,7 +33,7 @@ LUPAPISTE.PublishBulletinService = function() {
     publishBulletin("move-to-proclaimed", {id: event.id,
                                            proclamationEndsAt:   event.proclamationEndsAt,
                                            proclamationStartsAt: event.proclamationStartsAt,
-                                           proclamationText:     event.proclamationText || ""});
+                                           proclamationText:     event.proclamationText});
   });
 
   hub.subscribe("publishBulletinService::saveProclaimedBulletin", function(event) {
@@ -41,7 +41,7 @@ LUPAPISTE.PublishBulletinService = function() {
                                                  bulletinVersionId:    event.bulletinVersionId,
                                                  proclamationEndsAt:   event.proclamationEndsAt,
                                                  proclamationStartsAt: event.proclamationStartsAt,
-                                                 proclamationText:     event.proclamationText || ""});
+                                                 proclamationText:     event.proclamationText});
   });
 
   hub.subscribe("publishBulletinService::moveToVerdictGiven", function(event) {
@@ -49,7 +49,7 @@ LUPAPISTE.PublishBulletinService = function() {
                                               verdictGivenAt:       event.verdictGivenAt,
                                               appealPeriodStartsAt: event.appealPeriodStartsAt,
                                               appealPeriodEndsAt:   event.appealPeriodEndsAt,
-                                              verdictGivenText:     event.verdictGivenText || ""});
+                                              verdictGivenText:     event.verdictGivenText});
   });
 
   hub.subscribe("publishBulletinService::saveVerdictGivenBulletin", function(event) {
@@ -58,7 +58,7 @@ LUPAPISTE.PublishBulletinService = function() {
                                                     verdictGivenAt:       event.verdictGivenAt,
                                                     appealPeriodStartsAt: event.appealPeriodStartsAt,
                                                     appealPeriodEndsAt:   event.appealPeriodEndsAt,
-                                                    verdictGivenText:     event.verdictGivenText || ""});
+                                                    verdictGivenText:     event.verdictGivenText});
   });
 
   hub.subscribe("publishBulletinService::moveToFinal", function(event) {
@@ -85,12 +85,11 @@ LUPAPISTE.PublishBulletinService = function() {
   // bulletin comment pagination
   var skip = 0;
   var limit = 5;
-  var previousVersionId = undefined;
+  var previousVersionId;
   var previousAsc = false;
   var ajaxRunning = false;
 
   var fetchBulletinComments = _.debounce(function(bulletinId, versionId, asc) {
-    // ajax is already running
     if (ajaxRunning) {
       return;
     }
@@ -111,7 +110,7 @@ LUPAPISTE.PublishBulletinService = function() {
         ajaxRunning = false;
       })
       .call();
-  }, 100);
+  }, 400);
 
   hub.subscribe("publishBulletinService::fetchBulletinComments", function(event) {
     if (event.initialQuery || event.versionId !== previousVersionId || event.asc !== previousAsc) {

@@ -50,14 +50,39 @@ Properties-tiedostoissa voi käyttää Jasyptilla kryptattuja arvoja, ks. ohje
 test/lupapalvelu/nested.properties tiedostossa.
 
 ### SSL-avain
+
 Kehitysmoodissa Lupapiste-sovelluksen sisäänrakennettu sovelluspalvelin kuuntelee
 HTTPS-liikennettä portissa 8443. Generoi tätä varten projektin juureen
-SSL/TLS-avain keystore -nimiseen tiedostoon. Salasanaa ei tule käyttää.
-Ks. http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
+SSL/TLS-avain keystore -nimiseen tiedostoon. Keystoren salasanan oletetaan
+olevan "lupapiste". Portin, keystore-tiedoston nimen  ja salasanan voi
+ylikirjoittaa user.properties tiedostossa.
+
+Avaimen voi generoida esimerkiksi JDK:n mukana tulevalla keytool työkalulla seuraavasti:
+
+    $ keytool -keystore keystore -alias jetty -genkey -keyalg RSA -sigalg SHA256withRSA
+
+    Enter keystore password:  lupapiste
+    Re-enter new password: lupapiste
+    What is your first and last name?
+      [Unknown]:  localhost
+    What is the name of your organizational unit?
+      [Unknown]:  kehitys
+    What is the name of your organization?
+      [Unknown]:  lupapiste
+    What is the name of your City or Locality?
+      [Unknown]:  Tampere
+    What is the name of your State or Province?
+      [Unknown]:  Finland
+    What is the two-letter country code for this unit?
+      [Unknown]:  fi
+    Is CN=localhost, OU=kehitys, O=lupapiste, L=Tampere, ST=Finland, C=fi correct?
+      [no]:  yes
+    Enter key password for <jetty>
+            (RETURN if same as keystore password):
 
 Vaihtoehtoisesti voit lisätä user.properties tiedostoon rivin
 
-    feature.ssl    false
+    ssl.enabled    false
 
 Tällöin sovelluspalvelin kuuntelee ainoastaan HTTP-liikennettä.
 
@@ -87,6 +112,10 @@ Sisennys on kaksi välilyöntiä. Merkkijonojen ympärillä käytetään lainaus
 myös JavaScript-koodissa.
 
 JavaScript-koodi tulee tarkastaa JSHint-työkalulla, jonka asetukset ovat projektin juuressa.
+
+## Versionhallinta
+
+Kehitys tehdään develop-haaraan git flow -mallin mukaisesti. Tuotannossa on master-haara.
 
 ## Testaus
 

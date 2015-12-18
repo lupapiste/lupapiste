@@ -376,6 +376,13 @@ LUPAPISTE.ApplicationModel = function() {
     return model.role() !== "owner";
   };
 
+  self.userHasRole = function(userModel, role) {
+    return _(util.getIn(self.roles()))
+      .filter(function(r) { return r.id() === util.getIn(userModel, ["id"]) })
+      .invoke("role")
+      .contains(role);
+  }
+
   self.canSubscribe = function(model) {
     return model.role() !== "statementGiver" &&
            lupapisteApp.models.currentUser &&

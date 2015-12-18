@@ -14,12 +14,16 @@
     }
   }
   .bulletin-comment__name {
+    @include styled-input( none, none, none,
+                           $text: $orange-link, $hover-text: $orange-hover,
+                           $active-text: $orange-active, $disabled-bg: none);
     &:after {
       content: ",";
     }
   }
   .bulletin-comment__body {
     padding: $marginS $marginM;
+    clear: both;
   }
   .bulletin-comment__attachments {
     margin-bottom: $marginS;
