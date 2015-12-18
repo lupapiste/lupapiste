@@ -128,7 +128,7 @@
   nil)
 
 (defn update-by-query
-  "Updates data into collection. Returns the number of documents updated"
+  "Updates data into collection with 'multi' set to true. Returns the number of documents updated"
   [collection query data & opts]
   (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) (merge {:multi true} opts))))
 
