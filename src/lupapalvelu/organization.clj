@@ -254,6 +254,8 @@
     (sequential? m) (apply max (map max-modified (cons 0 m)))
     :default        0))
 
+(def max-number-of-ads 100)
+
 (defmethod waste-ads :default [ org-id & _]
   (->>
    ;; 1. Every application that maybe has available materials.
@@ -286,7 +288,9 @@
                (and (good name) (or (good phone) (good email))
                     (not-empty materials)))))
    ;; 4. Sorted in the descending modification time order.
-   (sort-by (comp - :modified))))
+   (sort-by (comp - :modified))
+   ;; 5. Cap the size of the final list
+   (take max-number-of-ads)))
 
 
 (defmethod waste-ads :rss [org-id _ lang]

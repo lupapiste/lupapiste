@@ -662,7 +662,33 @@
                      :contact {:email "dot@reboot.tv", :phone "12345", :name "Dot"}}
                     {:modified 2222,
                     :materials ({:kuvaus "Rouheaa", :saatavilla "17.12.2015", :yksikko "kg", :maara "2", :aines "Sora"}),
-                     :contact {:email "bob@reboot.tv", :phone "12345", :name "Bob"}})))
+                     :contact {:email "bob@reboot.tv", :phone "12345", :name "Bob"}}))
+         (fact "Ad list size limit"
+               (doseq [id (range 110)]
+                 (mongo/insert :applications
+                               {:_id (str "LP-FILL-" id)
+                                :organization "753-R"
+                                :documents [
+                                            {:schema-info {:name "rakennusjateselvitys"}
+                                             :data {:contact {:name {:value "Bob"
+                                                                     :modified 1 }
+                                                              :phone {:value "12345"
+                                                                      :modified 2 }
+                                                              :email {:value "bob@reboot.tv"
+                                                              :modified 2222 }}
+                                                    :availableMaterials {:0 {:aines {:value "Sora"
+                                                                                     :modified 100}
+                                                                             :maara {:value "2"
+                                                                                     :modified 110}
+                                                                             :yksikko {:value "kg"
+                                                                               :modified 200}
+                                                                             :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                             :kuvaus {:value "Rouheaa"
+                                                                                      :modified 100}}}
+                                            }}]}))
+               (count (local-org-api/waste-ads "753-R")) => 100))
+
        (facts "Validators"
               (fact "Bad format: nil" (local-org-api/valid-feed-format {:data {:fmt nil}})
                     => {:ok false, :text "error.invalid-feed-format"})
