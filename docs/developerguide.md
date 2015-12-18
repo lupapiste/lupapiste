@@ -50,6 +50,7 @@ Properties-tiedostoissa voi käyttää Jasyptilla kryptattuja arvoja, ks. ohje
 test/lupapalvelu/nested.properties tiedostossa.
 
 ### SSL-avain
+
 Kehitysmoodissa Lupapiste-sovelluksen sisäänrakennettu sovelluspalvelin kuuntelee
 HTTPS-liikennettä portissa 8443. Generoi tätä varten projektin juureen
 SSL/TLS-avain keystore -nimiseen tiedostoon. Keystoren salasanan oletetaan
@@ -111,6 +112,10 @@ Sisennys on kaksi välilyöntiä. Merkkijonojen ympärillä käytetään lainaus
 myös JavaScript-koodissa.
 
 JavaScript-koodi tulee tarkastaa JSHint-työkalulla, jonka asetukset ovat projektin juuressa.
+
+## Versionhallinta
+
+Kehitys tehdään develop-haaraan git flow -mallin mukaisesti. Tuotannossa on master-haara.
 
 ## Testaus
 
