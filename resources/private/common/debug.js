@@ -57,6 +57,7 @@ jQuery(function($) {
       .json({value: value})
       .header("npm", "true")
       .success(function() { t.parent().find("b.dev-throttle-" + type).text(value); })
+      .fail(_.noop)
       .call();
   }
 
