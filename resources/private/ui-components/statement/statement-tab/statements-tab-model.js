@@ -7,14 +7,14 @@ LUPAPISTE.StatementsTabModel = function(params) {
 
   self.data = ko.observableArray([]);
   self.manualData = ko.observableArray([]);
-  self.selectedPerson = ko.observable();
+  self.selectedPersons = ko.observableArray([]);
   self.submitting = ko.observable();
   self.showInviteSection = ko.observable();
   self.saateText = ko.observable();
   self.maaraaika = ko.observable();
 
   self.disabled = ko.pureComputed(function() {
-    return !self.selectedPerson() || self.submitting();
+    return _.isEmpty(self.selectedPersons()) || self.submitting();
   });
 
   self.combinedData = ko.computed(function() {
@@ -40,11 +40,11 @@ LUPAPISTE.StatementsTabModel = function(params) {
     });
     selfie.errors = ko.validation.group(selfie);
     selfie.errors.subscribe(function(errs) {
-//      if (errs.length == 0) addManualData();  // TODO: This is temporarily commented out, until the specs for multiple addition of statement givers will be defined
       if (errs.length == 0 && self.showInviteSection && self.showInviteSection()) {
-        self.selectedPerson(selfie);
+        self.selectedPersons.push(selfie);
+        addManualData();
       } else {
-        self.selectedPerson(undefined);
+        self.selectedPersons.remove(selfie);
       }
     });
     return selfie;
@@ -53,27 +53,27 @@ LUPAPISTE.StatementsTabModel = function(params) {
   self.toggleInviteSection = function() {
     self.submitting(false);
     self.saateText("");
-    self.selectedPerson(undefined);
+    self.selectedPersons([]);
     self.maaraaika(undefined);
     self.manualData([new dataTemplate()]);
     self.showInviteSection( !self.showInviteSection() );
   };
 
   self.send = function() {
-    var selPerson = _(ko.mapping.toJS(self.selectedPerson()))
-                      .pick(["id", "email", "name", "text"])
-                      .value();
+    var selPersons = _(ko.mapping.toJS(self.selectedPersons()))
+                           .map(function(p) { return _.pick(p, ["id", "email", "name", "text"]); })
+                           .value();
     var params = {
         functionCode: (self.application.tosFunction() || null),
         id: self.application.id(),
-        selectedPersons: [selPerson],
+        selectedPersons: selPersons,
         saateText: self.saateText(),
         dueDate: self.maaraaika() ? new Date(self.maaraaika()).getTime() : null
         };
     ajax.command("request-for-statement", params)
       .success(function() {
         hub.send("indicator", {style: "positive", message: "application-statement-giver-invite.success"});
-        self.selectedPerson(undefined);
+        self.selectedPersons([]);
         self.maaraaika(undefined);
         repository.load(self.application.id());
       })

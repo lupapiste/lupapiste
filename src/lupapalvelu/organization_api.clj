@@ -536,8 +536,7 @@
   {:description "Organization server and layer details."
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok (-> (user/authority-admins-organization-id user)
-          o/organization-map-layers-data)))
+  (ok (o/organization-map-layers-data (user/authority-admins-organization-id user))))
 
 (defcommand update-map-server-details
   {:parameters [url username password]
@@ -559,3 +558,13 @@
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.layers layers}})
   (ok))
+
+
+(defraw waste-ads-feed
+  {:description "Simple RSS feed for construction waste information."
+   :parameters [fmt org lang]
+   :input-validators [o/valid-feed-format o/valid-org o/valid-language]
+   :user-roles #{:anonymous}}
+  (o/waste-ads (ss/upper-case org)
+               (-> fmt ss/lower-case keyword)
+               (-> lang ss/lower-case keyword)))

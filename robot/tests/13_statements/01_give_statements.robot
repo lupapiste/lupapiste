@@ -19,7 +19,7 @@ Statement giver can be deleted - no questions asked
 Authorities from own municipality can be added as statement giver
   Create statement giver  ronja.sibbo@sipoo.fi  Pelastusviranomainen
 
-Auhtorities from diferent municipality can be added as statement giver
+Auhtorities from different municipality can be added as statement giver
   Create statement giver  veikko.viranomainen@tampere.fi  Tampereen luvat
 
 Authority can be a statement giver multiple times
@@ -49,13 +49,14 @@ Sonja adds five statement givers to application
   Wait and click   xpath=//button[@data-test-id="add-statement"]
   Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
   # We now have 4 statement givers and one empty row (for adding a new statement giver), so there is 5 rows visible
-  Wait until  Page Should Contain Element  xpath=//*[@data-test-id='radio-statement-giver-4']
+  Wait until  Page Should Contain Element  xpath=//*[@data-test-id='statement-giver-checkbox-4']
 
   Input text  xpath=//*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
   Invite read-only statement giver  0  01.06.2018
 
-  # Radio button selection and maaraaika are cleared, the saate text stays filled with value.
-  Wait Until  Radio Button Should Not Be Selected  statementGiverSelectedPerson
+  # Checkbox selection and maaraaika are cleared, the saate text stays filled with value.
+  Wait Until  Checkbox Should Not Be Selected  statement-giver-checkbox-0
+  Checkbox Should Not Be Selected  statement-giver-checkbox-4
   Wait Until  Textfield Value Should Be  //input[contains(@id,'add-statement-giver-maaraaika')]  ${empty}
   Wait Until  Textarea Value Should Be  //*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
 
@@ -138,8 +139,8 @@ Statements are visible for Veikko
   Open tab  statement
   Statement count is  5
 
-Veikko cannot delete statements
-  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-0']
+Veikko can delete his own statement but no others
+  Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-0']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
 Veikko from Tampere can give statement
@@ -167,7 +168,7 @@ Set maaraaika-datepicker field value
 
 Invite read-only statement giver
   [Arguments]  ${index}  ${date}
-  Select Radio Button  statementGiverSelectedPerson  radio-statement-giver-${index}
+  Select Checkbox  statement-giver-checkbox-${index}
   Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
   Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
   Wait and click  xpath=//*[@data-test-id='add-statement-giver']
@@ -179,13 +180,15 @@ Invite 'manual' statement giver
   Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
   Input text  xpath=//*[@data-test-id='statement-giver-role-text-${index}']  ${roletext}
   Input text  xpath=//*[@data-test-id='statement-giver-name-${index}']  ${name}
-  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Element should be disabled  xpath=//*[@data-test-id='statement-giver-checkbox-${index}']
   Input text  xpath=//*[@data-test-id='statement-giver-email-${index}']  something@
-  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Element should be disabled  xpath=//*[@data-test-id='statement-giver-checkbox-${index}']
   Input text  xpath=//*[@data-test-id='statement-giver-email-${index}']  ${email}
-  # Statement giver's radio button can be selected only when all his info fields have content and the email field has a valid email address.
-  Wait until  Element should be enabled  xpath=//*[@data-test-id='radio-statement-giver-${index}']
-  Select Radio Button  statementGiverSelectedPerson  radio-statement-giver-${index}
+  # Statement giver's checkbox can be selected only when all his info fields have content and the email field has a valid email address.
+  Wait until  Element should be enabled  xpath=//*[@data-test-id='statement-giver-checkbox-${index}']
+  Select Checkbox  statement-giver-checkbox-${index}
   # Send button comes enabled only when all fields have content and some user is selected.
   Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
   Wait and click  xpath=//*[@data-test-id='add-statement-giver']

@@ -16,6 +16,7 @@ jQuery(document).ready(function() {
     {name: "docgen-localized-string", model: "docgen-input-model"},
     {name: "docgen-inline-string", model: "docgen-input-model"},
     {name: "docgen-button"},
+    {name: "docgen-date"},
     {name: "construction-waste-report"},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
