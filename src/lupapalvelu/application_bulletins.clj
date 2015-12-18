@@ -114,7 +114,7 @@
 (defn update-bulletin
   "Updates bulletin by query. Opts is map of options for monger."
   [bulletin-id mongo-query changes & opts]
-  (mongo/update-by-query :application-bulletins (assoc mongo-query {:_id bulletin-id}) changes opts))
+  (mongo/update-by-query :application-bulletins (assoc mongo-query :_id bulletin-id) changes opts))
 
 (defn upsert-bulletin-by-id
   "Updates bulletin with upsert set to true."
