@@ -1,6 +1,9 @@
 (ns lupapalvelu.organization-api
   (:import [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.geojson.feature FeatureJSON]
+           [org.opengis.feature.simple SimpleFeature]
+           [org.geotools.geometry.jts JTS]
+           [org.geotools.referencing CRS]
            [org.geotools.feature.simple SimpleFeatureBuilder]
            [org.geotools.referencing.crs DefaultGeographicCRS]
            [java.util ArrayList])
@@ -36,7 +39,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as o]
             [lupapalvelu.logging :as logging]
-            [lupapalvelu.geojson :as geo]))
+            [lupapalvelu.geojson :as geo]
+            [clojure.data.json :as json]))
 ;;
 ;; local api
 ;;
@@ -489,6 +493,27 @@
     (DataUtilities/collection list)))
 
 
+(defn- transform-coordinates-to-wgs84 [collection]
+  "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+  (let [
+        schema (.getSchema collection)
+        crs (.getCoordinateReferenceSystem schema)
+        transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
+        iterator (.features collection)
+        feature (when (.hasNext iterator)
+                  (.next iterator))
+        list (ArrayList.)
+        _ (loop [feature (cast SimpleFeature feature)]
+            (when feature
+              (let [geometry  (.getDefaultGeometry feature)
+                    transformed-geometry (JTS/transform geometry transform)]
+                (.setDefaultGeometry feature transformed-geometry)
+                (.add list feature)))
+            (when (.hasNext iterator)
+              (recur (.next iterator))))]
+    (.close iterator)
+    (DataUtilities/collection list)))
+
 (defraw organization-area
   {:user-roles #{:authorityAdmin}}
   [{user :user {[{:keys [tempfile filename size]}] :files created :created} :data :as action}]
@@ -509,13 +534,19 @@
       (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
             shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
+            _ (prn "foo1")
             new-collection (some-> data-store
-                             .getFeatureSource
-                             .getFeatures
-                             transform-crs-to-wgs84)
+                                   .getFeatureSource
+                                   .getFeatures
+                                   transform-coordinates-to-wgs84
+                                   transform-crs-to-wgs84)
+            _ (prn "new-collection" new-collection)
+            ;areas (json/read-str (.toString (FeatureJSON.) new-collection))
             areas (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON.) new-collection)))
-            ensured-areas (geo/ensure-features areas)]
-        (when (geo/validate-features (:features ensured-areas))
+            _ (prn "areas" areas)
+            ensured-areas (geo/ensure-features areas)
+            _ (prn "ensured-areas" ensured-areas)]
+        #_(when (geo/validate-features (:features ensured-areas))
           (fail! :error.coordinates-not-epsg3067))
         (o/update-organization org-id {$set {:areas ensured-areas}})
         (.dispose data-store)
