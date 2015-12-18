@@ -63,8 +63,18 @@ var ajax = (function($) {
     self.successHandler = function() { };
     self.errorHandler = defaultError;
     self.failHandler = function(jqXHR, textStatus, errorThrown) {
-      if (jqXHR && jqXHR.status > 0 &&jqXHR.status !== 403 && jqXHR.readyState > 0) {
-        error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
+      if (jqXHR && jqXHR.status > 0 && jqXHR.readyState > 0) {
+        switch (jqXHR.status) {
+          case 403:
+            // Ignored
+            break;
+          case 405:
+            notify.error(loc("error.service-lockdown"));
+            break;
+          default:
+            error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
+            break;
+        }
       }
     };
     self.completeHandler = function() { };

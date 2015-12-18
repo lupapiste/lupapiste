@@ -39,6 +39,8 @@
   (or (allowed-methods-in-lockdown (:request-method request))
       (some #(re-matches % (:uri request)) allowed-paths-in-lockdown)))
 
+(defn lockdown? [] @lockdown)
+
 (defn lockdown-middleware
   "Ring middleware. Allow only GET and HEAD methods and POST requests to
    whitelisted paths if the app is in lockdown."
