@@ -14,6 +14,7 @@
   (first (filter #(or (nil? id) (= id (:id %))) (type application))))
 
 (defn- build-attachment [user application type id lang file]
+  {:pre [(map? user) (map? application) (keyword? type) (string? id)]}
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
         type-name (case type
                     :statements (i18n/localize (name lang) "statement.lausunto")
@@ -36,6 +37,7 @@
                  :neighbors (get-in child [:owner :name])
                  type-name)
      :locked true
+     :read-only (or (= :neighbors type) (= :statements type))
      :user user
      :created (now)
      :required false

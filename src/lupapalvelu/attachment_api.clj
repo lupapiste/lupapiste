@@ -49,11 +49,12 @@
           (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defn- attachment-deletable [application attachmentId userRole]
+(defn- attachment-deletable [application attachmentId user]
   (let [attachment (attachment/get-attachment-info application attachmentId)]
-    (if (:required attachment)
-      (= (keyword userRole) :authority)
-      true)))
+    (cond
+      (:readOnly attachment) false
+      (:required attachment)  (user/authority? user)
+      :else                   true)))
 
 (defn- attachment-editable-by-application-state? [application attachmentId userRole]
   (or (ss/blank? attachmentId)
@@ -194,7 +195,7 @@
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
-  (when-not (attachment-deletable application attachmentId (:role user))
+  (when-not (attachment-deletable application attachmentId user)
     (fail! :error.unauthorized :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))
 
   (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
