@@ -8,6 +8,7 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
@@ -310,7 +311,7 @@
    :user-roles #{:authority :applicant}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
   [{:keys [application user] :as command}]
-  (lupapalvelu.attachment/output-attachment attachmentId true
+  (attachment/output-attachment attachmentId true
                                             (partial bulletins/get-bulletin-comment-attachment-file-as user)))
 
 (defquery "publish-bulletin-enabled"
