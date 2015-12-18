@@ -40,8 +40,10 @@ var hub = (function() {
 
   function makeEvent(type, data) {
     var e = {type: type};
-    for (var k in data) {
-      e[k] = data[k];
+    for (var key in data) {
+      if (data.hasOwnProperty(key)) {
+        e[key] = data[key];
+      }
     }
     return e;
   }
