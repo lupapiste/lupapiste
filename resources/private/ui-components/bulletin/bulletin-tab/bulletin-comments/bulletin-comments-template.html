@@ -17,12 +17,7 @@
   <!-- ko foreach: comments -->
   <div class="bulletin-comment">
     <div class="bulletin-comment__header" data-bind="click: $parent.selectComment">
-      <!-- ko if: $parent.asc -->
-      <span class="bulletin-comment__index" data-bind="text: $index() + 1"></span>
-      <!-- /ko -->
-      <!-- ko ifnot: $parent.asc -->
-      <span class="bulletin-comment__index" data-bind="text: $parent.totalComments() - $index()"></span>
-      <!-- /ko -->
+      <span class="bulletin-comment__index" data-bind="text: $parent.commentIndex($index())"></span>
       <span class="bulletin-comment__name"  data-bind="fullName: $data['contact-info']"></span>
       <span data-bind="dateTimeString: $data.created"></span>
       <div class="description-bubble" data-bind="slider: $parent.selectedComment() === $data._id">

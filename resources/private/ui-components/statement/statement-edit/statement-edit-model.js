@@ -31,18 +31,18 @@ LUPAPISTE.StatementEditModel = function(params) {
   });
 
   self.coverNote = ko.pureComputed(function() {
-    var isStatementGiver = util.getIn(self.data(), ["person", "userId"]) === lupapisteApp.models.currentUser.id();
+    var isStatementGiver = util.getIn(self.data, ["person", "userId"]) === lupapisteApp.models.currentUser.id();
     return self.tab === "statement" && isStatementGiver ? util.getIn(self.data, ["saateText"]) : "";
   });
 
   self.text.subscribe(function(value) {
-    if(util.getIn(self.data(), ["text"]) !== value) { 
+    if(util.getIn(self.data, ["text"]) !== value) { 
       dirty(true);
     }
   });
 
   self.selectedStatus.subscribe(function(value) {
-    if(util.getIn(self.data(), ["status"]) !== value) {
+    if(util.getIn(self.data, ["status"]) !== value) {
       dirty(true);
     }
   });

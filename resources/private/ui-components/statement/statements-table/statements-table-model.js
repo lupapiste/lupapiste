@@ -24,7 +24,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.isGiven = function(statement) {
-    return _.contains(["given", "replyable", "replied", "closed"], util.getIn(statement, ["state"]));
+    return _.contains(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
   }
 
   var isAuthorityOrStatementOwner = function(statement) {
@@ -43,6 +43,23 @@ LUPAPISTE.StatementsTableModel = function(params) {
   self.isStatementOverDue = function(statement) {
     var nowTimeInMs = new Date().getTime();
     return (statement.dueDate && self.isGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
+  };
+
+  self.repliesEnabled = ko.pureComputed(function() {
+    return self.authorization.ok("statement-replies-enabled");
+  });
+
+  self.isReplyable = function(statement) {
+    return _.contains(["replyable"], util.getIn(statement, ["state"]));
+  };
+
+  self.showReplyState = function(statement) {
+    var user = lupapisteApp.models.currentUser;
+    if (self.application.userHasRole(user, "owner")) {
+      return _.contains(["replied"], util.getIn(statement, ["state"]));
+    } else {
+      return _.contains(["replyable", "replied"], util.getIn(statement, ["state"]));
+    }
   };
 
   var deleteStatementFromServer = function(statementId) {

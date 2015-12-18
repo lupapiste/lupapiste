@@ -220,7 +220,9 @@
                               app,
                               constructionTimeDocs,
                               authorizationModel,
-                              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                              {dataTestSpecifiers: devMode,
+                               accordionCollapsed: isAuthority,
+                               updateCommand: "update-construction-time-doc"});
 
       // Options
       applicationModel.optionMunicipalityHearsNeighbors(util.getIn(app, ["options", "municipalityHearsNeighbors"]));

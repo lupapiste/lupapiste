@@ -3,6 +3,7 @@
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
+            [clojure.set :refer [rename-keys]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
@@ -25,6 +26,7 @@
             [sade.property :as p]
             [sade.validators :as v]
             [sade.util :as util]
+            [sade.strings :as ss]
             [swiss.arrows :refer [-<>>]]))
 
 
@@ -418,3 +420,4 @@
           {:state to-state, :modified timestamp}
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
+

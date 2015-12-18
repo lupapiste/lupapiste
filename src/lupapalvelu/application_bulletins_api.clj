@@ -1,7 +1,5 @@
 (ns lupapalvelu.application-bulletins-api
-  (:require [clj-time.coerce :as c]
-            [clj-time.core :as t]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
@@ -55,9 +53,10 @@
                (query/fields bulletins/bulletins-fields)
                (query/sort (make-sort sort))
                (query/paginate :page page :per-page bulletin-page-size))]
-    (map
-      #(assoc (first (:versions %)) :id (:_id %))
-      apps)))
+    (->> apps
+         (map
+           #(assoc (first (:versions %)) :id (:_id %)))
+         (filter bulletins/bulletin-date-valid? ))))
 
 (defn- page-size-validator [{{page :page} :data}]
   (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
@@ -65,7 +64,6 @@
 
 (defquery application-bulletins
   {:description "Query for Julkipano"
-   :feature :publish-bulletin
    :parameters [page searchText municipality state sort]
    :input-validators [(partial action/number-parameters [:page])
                       page-size-validator]
@@ -77,7 +75,6 @@
 
 (defquery application-bulletin-municipalities
   {:description "List of distinct municipalities of application bulletins"
-   :feature :publish-bulletin
    :parameters []
    :user-roles #{:anonymous}}
   [_]
@@ -86,7 +83,6 @@
 
 (defquery application-bulletin-states
   {:description "List of distinct states of application bulletins"
-   :feature :publish-bulletin
    :parameters []
    :user-roles #{:anonymous}}
   [_]
@@ -116,19 +112,12 @@
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
-(defn- in-proclaimed-period
-  [version]
-  (let [[starts ends] (->> (util/select-values version [:proclamationStartsAt :proclamationEndsAt])
-                           (map c/from-long))
-        ends     (t/plus ends (t/days 1))]
-    (t/within? (t/interval starts ends) (c/from-long (now)))))
-
 (defn- bulletin-can-be-commented
   ([{{bulletin-id :bulletinId} :data}]
    (let [projection {:bulletinState 1 "versions.proclamationStartsAt" 1 "versions.proclamationEndsAt" 1 :versions {$slice -1}}
          bulletin   (bulletins/get-bulletin bulletin-id projection)]
      (if-not (and (= (:bulletinState bulletin) "proclaimed")
-                  (in-proclaimed-period (-> bulletin :versions last)))
+                  (bulletins/bulletin-date-in-period? :proclamationStartsAt :proclamationEndsAt (-> bulletin :versions last)))
        (fail :error.bulletin-not-in-commentable-state))))
   ([command _]
     (bulletin-can-be-commented command)))
@@ -141,13 +130,14 @@
 
 (defcommand add-bulletin-comment
   {:description      "Add comment to bulletin"
-   :feature          :publish-bulletin
    :pre-checks       [bulletin-can-be-commented user-is-vetuma-authenticated]
    :input-validators [comment-can-be-added referenced-file-can-be-attached]
    :user-roles       #{:anonymous}}
   [{{files :files bulletin-id :bulletinId comment :comment bulletin-version-id :bulletinVersionId
      email :email emailPreferred :emailPreferred otherReceiver :otherReceiver :as data} :data created :created :as action}]
-  (let [address-source (if otherReceiver data (get-in (vetuma/vetuma-session) [:user]))
+  (let [address-source (if otherReceiver
+                         otherReceiver
+                         (get-in (vetuma/vetuma-session) [:user]))
         delivery-address (select-keys address-source delivery-address-fields)
         contact-info (merge delivery-address {:email          email
                                               :emailPreferred emailPreferred})
@@ -171,31 +161,31 @@
 (defcommand move-to-proclaimed
   {:parameters [id proclamationEndsAt proclamationStartsAt proclamationText]
    :input-validators [(partial action/non-blank-parameters [:id :proclamationText])
-                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])]
-   :feature :publish-bulletin
+                      (partial action/number-parameters [:proclamationStartsAt :proclamationEndsAt])
+                      (partial bulletins/validate-input-dates :proclamationStartsAt :proclamationEndsAt)]
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
   [{:keys [application created] :as command}]
-  (let [updates (->> (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
-                                                           :proclamationStartsAt proclamationStartsAt
-                                                           :proclamationText proclamationText}))]
+  (let [updates (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
+                                                      :proclamationStartsAt proclamationStartsAt
+                                                      :proclamationText proclamationText})]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
 (defcommand move-to-verdict-given
   {:parameters [id verdictGivenAt appealPeriodStartsAt appealPeriodEndsAt verdictGivenText]
    :input-validators [(partial action/non-blank-parameters [:id :verdictGivenText])
-                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])]
-   :feature :publish-bulletin
+                      (partial action/number-parameters [:verdictGivenAt :appealPeriodStartsAt :appealPeriodEndsAt])
+                      (partial bulletins/validate-input-dates :appealPeriodStartsAt :appealPeriodEndsAt)]
    :user-roles #{:authority}
    :states     #{:verdictGiven}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
   [{:keys [application created] :as command}]
-  (let [updates (->> (create-bulletin application created {:verdictGivenAt verdictGivenAt
-                                                           :appealPeriodStartsAt appealPeriodStartsAt
-                                                           :appealPeriodEndsAt appealPeriodEndsAt
-                                                           :verdictGivenText verdictGivenText}))]
+  (let [updates (create-bulletin application created {:verdictGivenAt verdictGivenAt
+                                                      :appealPeriodStartsAt appealPeriodStartsAt
+                                                      :appealPeriodEndsAt appealPeriodEndsAt
+                                                      :verdictGivenText verdictGivenText})]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
@@ -203,14 +193,13 @@
   {:parameters [id officialAt]
    :input-validators [(partial action/non-blank-parameters [:id])
                       (partial action/number-parameters [:officialAt])]
-   :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]}
   [{:keys [application created] :as command}]
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
-  (let [updates (->> (create-bulletin application created {:officialAt officialAt
-                                                           :bulletinState :final}))]
+  (let [updates (create-bulletin application created {:officialAt officialAt
+                                                      :bulletinState :final})]
     (mongo/update-by-id :application-bulletins id updates :upsert true)
     (ok)))
 
@@ -222,7 +211,6 @@
   "return only latest version for application bulletin"
   {:parameters [bulletinId]
    :input-validators [(partial action/non-blank-parameters [:bulletinId]) bulletin-exists]
-   :feature    :publish-bulletin
    :user-roles #{:anonymous}}
   [command]
   (if-let [bulletin (bulletins/get-bulletin bulletinId)]
@@ -246,7 +234,6 @@
   "returns all bulletin versions for application bulletin with comments"
   {:parameters [bulletinId]
    :input-validators [(partial action/non-blank-parameters [:bulletinId])]
-   :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
   (let [bulletin-fields (-> bulletins/bulletins-fields
                             (dissoc :versions)
@@ -262,7 +249,6 @@
   "returns paginated comments related to given version id"
   {:parameters [bulletinId versionId]
    :input-validators [(partial action/non-blank-parameters [:bulletinId :versionId])]
-   :feature    :publish-bulletin
    :user-roles #{:authority :applicant}}
   [{{skip :skip limit :limit asc :asc} :data}]
   (let [skip           (util/->int skip)
@@ -291,7 +277,6 @@
 (defcommand save-proclaimed-bulletin
   "updates proclaimed version timestamps and text"
   {:parameters [bulletinId bulletinVersionId proclamationEndsAt proclamationStartsAt proclamationText]
-   :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:sent :complementNeeded}
    :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId])
@@ -307,7 +292,6 @@
 (defcommand save-verdict-given-bulletin
   "updates verdict given version timestamps and text"
   {:parameters [bulletinId bulletinVersionId verdictGivenAt appealPeriodEndsAt appealPeriodStartsAt verdictGivenText]
-   :feature :publish-bulletin
    :user-roles #{:authority}
    :states     #{:verdictGiven}
    :input-validators [(partial action/non-blank-parameters [:bulletinId :bulletinVersionId :verdictGivenText])
@@ -323,7 +307,6 @@
 
 (defraw "download-bulletin-comment-attachment"
   {:parameters [attachmentId]
-   :feature    :publish-bulletin
    :user-roles #{:authority :applicant}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
   [{:keys [application user] :as command}]
@@ -332,6 +315,5 @@
 
 (defquery "publish-bulletin-enabled"
   {:parameters [id]
-   :feature    :publish-bulletin
    :user-roles #{:authority :applicant}
    :pre-checks [(permit/validate-permit-type-is permit/YI permit/YL permit/YM permit/VVVL  permit/MAL)]})

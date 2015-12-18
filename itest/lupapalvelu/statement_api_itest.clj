@@ -71,6 +71,48 @@
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
         (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;")))))
 
+(fact "request-for-statement"
+  (create-statement-giver sipoo ronja-email)
+  (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
+        statement-giver-sonja (get-statement-giver-by-email sipoo sonja-email)
+        statement-giver-ronja (get-statement-giver-by-email sipoo ronja-email)]
+
+    (fact "request one statement giver"
+      (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja]) => ok?
+      (let [application (query-application ronja application-id)]
+        (auth-contains-statement-giver application ronja-id) => truthy
+        (-> (:statements application)
+            (count)) => 1
+        (-> (:statements application)
+            (first)
+            (get :person)) => (assoc statement-giver-ronja :userId ronja-id)))
+
+    (fact "request two statement givers"
+      (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-sonja statement-giver-ronja]) => ok?
+      (let [application (query-application ronja application-id)]
+        (auth-contains-statement-giver application ronja-id) => truthy
+        (auth-contains-statement-giver application sonja-id) => truthy
+        (->> (:statements application)
+             (count)) => 3
+        (->> (:statements application)
+             (map #(get-in % [:person :userId]))) => (contains #{sonja-id ronja-id})))))
+
+(fact "delete-statement"
+  (create-statement-giver sipoo ronja-email)
+  (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
+        statement-giver-ronja (get-statement-giver-by-email sipoo ronja-email)
+        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja] :saateText "saate" :dueDate 1450994400000) => ok?
+        application (query-application ronja application-id) => ok?
+        statement-id (:id (get-statement-by-user-id application ronja-id)) => truthy]
+    (fact "Statement giver has access to application"
+      (auth-contains-statement-giver application ronja-id) => truthy)
+    
+    (fact "...but not after statement has been deleted"
+      (command sonja :delete-statement :id application-id :statementId statement-id) => ok?
+      (let [application (query-application sonja application-id)]
+        (get-statement-by-user-id application ronja-id) => falsey
+        (auth-contains-statement-giver application ronja-id) => falsey))))
+
 (facts "Statement giver can be added from another organization"
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         statement-giver-veikko (create-statement-giver sipoo veikko-email)]
@@ -191,21 +233,6 @@
                :comments
                (filter (comp #{"statement"} :type :target))
                (count)) => 1)))))
-
-(fact "Statement giver has access to application"
-  (create-statement-giver sipoo ronja-email)
-  (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
-        statement-giver-ronja (get-statement-giver-by-email sipoo ronja-email)
-        resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-ronja] :saateText "saate" :dueDate 1450994400000) => ok?
-            application (query-application ronja application-id)]
-        (auth-contains-statement-giver application ronja-id) => truthy
-
-        (fact "...but not after statement has been deleted"
-          (let [statement-id (:id (get-statement-by-user-id application ronja-id)) => truthy
-                resp (command sonja :delete-statement :id application-id :statementId statement-id) => ok?
-                application (query-application sonja application-id)]
-            (get-statement-by-user-id application ronja-id) => falsey
-            (auth-contains-statement-giver application ronja-id) => falsey))))
 
 (fact "Applicant statement giver is able to delete his not-yet-given statement"
   (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))

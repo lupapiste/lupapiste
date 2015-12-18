@@ -40,7 +40,7 @@
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [slingshot "0.12.2"]
                  [com.google.zxing/javase "2.2"]
-                 [prismatic/schema "1.0.3"]
+                 [prismatic/schema "1.0.4"]
                  [cljts "0.3.0-20150228.035522-2" :exclusions [xerces/xercesImpl]]
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
@@ -61,8 +61,9 @@
                  [org.clojure/data.json "0.2.6"]
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
                  [lupapiste/oskari "0.9.55"]
-                 [lupapiste/commons "0.5.38"]
-                 [pdfa-core "0.0.3"]]
+                 [lupapiste/commons "0.5.39"]
+                 [pdfa-core "0.0.3"]
+                 [clj-rss "0.2.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
