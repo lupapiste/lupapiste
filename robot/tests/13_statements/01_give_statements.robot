@@ -11,20 +11,20 @@ Authority admin goes to admin page
   Sipoo logs in
   Wait until page contains  Organisaation viranomaiset
 
-Statement person can be deleted - no questions asked
-  Statement person count is  1
+Statement giver can be deleted - no questions asked
+  Statement giver count is  1
   Wait and click  xpath=//a[@data-test-id='remove-statement-giver']
-  Statement person count is  0
+  Statement giver count is  0
 
-Authorities from own municipality can be added as statement persons
-  Create statement person  ronja.sibbo@sipoo.fi  Pelastusviranomainen
+Authorities from own municipality can be added as statement giver
+  Create statement giver  ronja.sibbo@sipoo.fi  Pelastusviranomainen
 
-Auhtorities from diferent municipality can be added as statement
-  Create statement person  veikko.viranomainen@tampere.fi  Tampereen luvat
+Auhtorities from diferent municipality can be added as statement giver
+  Create statement giver  veikko.viranomainen@tampere.fi  Tampereen luvat
 
-Authority can be a statement person multiple times
-  Create statement person  sonja.sibbo@sipoo.fi  Rakennuslausunto
-  Create statement person  sonja.sibbo@sipoo.fi  Erityslausunto
+Authority can be a statement giver multiple times
+  Create statement giver  sonja.sibbo@sipoo.fi  Rakennuslausunto
+  Create statement giver  sonja.sibbo@sipoo.fi  Erityslausunto
   Logout
 
 New applications does not have statements
@@ -42,7 +42,7 @@ Sonja sees indicators from pre-filled fields
   # The unseen changes count includes changes in property information + "Rakennuksen kayttotarkoitus" and "Huoneistotiedot" documents.
   Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
 
-Sonja adds five statement persons to application
+Sonja adds five statement givers to application
   Open application  ${appname}  753-416-25-22
   Open tab  statement
   Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
@@ -60,18 +60,19 @@ Sonja adds five statement persons to application
   Wait Until  Textarea Value Should Be  //*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
 
   Invite read-only statement giver  1  02.06.2018
+  Invite read-only statement giver  1  12.06.2018
   Invite read-only statement giver  2  03.06.2018
   Invite read-only statement giver  3  04.06.2018
 
   # Invite a new statement giver that is not on the ready-populated list that authority admin has added in his admin view.
   Invite 'manual' statement giver  4  Erikoislausuja  Vainamoinen  vainamoinen@example.com  05.06.2018
 
-  Statement count is  5
+  Statement count is  6
 
 Sonja can delete statement
-  Wait and Click  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
+  Wait and Click  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-5']
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Statement count is  4
+  Wait until  Statement count is  5
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
 Sonja can't give statement to Ronjas statement
@@ -85,24 +86,41 @@ Sonja can comment on Ronjas statement
   [Teardown]  Return from statement
 
 Sonja types in draft
-  Open statement  2
+  Open statement  3
   Wait Until  Element should be enabled  statement-text
-  Input text  statement-text  salibandy on the rocks.
+  Input text  statement-text  typed in statement text but not gonna submit the statement.
+  Wait until  Select From List By Value  statement-type-select  puoltaa
   Sleep  2.5
   Reload Page
-  Wait Until  Text area should contain  statement-text  salibandy on the rocks.
+  Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
+  [Teardown]  Return from statement
 
 Sonja can give statement to own request
+  Open statement  4
+  Input text  statement-text  salibandy on the rocks.
   Wait until  Select From List By Value  statement-type-select  puoltaa
   Wait and click  statement-submit
 
 Comment is added
-  Open statement  2
+  Open statement  4
   Wait until  Comment count is  1
 
 Sonja cannot regive statement to own statement
   Statement is disabled
   Wait until  Element should not be visible  statement-submit
+  [Teardown]  Return from statement
+
+Statement status is visible for given statement in summary table
+  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Puoltaa
+
+...but not for draft
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-3']
+
+Draft is removable
+  Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
+
+...but given statement is not
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-4']
   [Teardown]  logout
 
 Veikko can see statements as he is being requested a statement to the application
@@ -116,22 +134,27 @@ Statement giver sees comments
 Statement can export application as PDF
   Element Should Be Visible  xpath=//button[@data-test-id="application-pdf-btn"]
 
-Veikko from Tampere can give statement
+Statements are visible for Veikko
   Open tab  statement
+  Statement count is  5
+
+Veikko cannot delete statements
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-0']
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
+
+Veikko from Tampere can give statement
   Open statement  1
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  uittotunnelin vieressa on tilaa.
   Select From List By Value  statement-type-select  ehdoilla
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
-  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-name='Veikko Viranomainen']  Puoltaa ehdoilla
+  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-1']  Puoltaa ehdoilla
   [Teardown]  logout
 
 Sonja can see statement indicator
   Sonja logs in
   Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
-
-# add attachment
 
 *** Keywords ***
 
@@ -178,6 +201,7 @@ Return from statement
 
 Open statement
   [Arguments]  ${number}
+  Execute javascript  window.scrollTo(0,0)
   Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-${number}']
   Wait until  element should be visible  statement-type-select
 
@@ -189,11 +213,11 @@ Statement is not disabled
   Wait until  Element should be enabled  statement-type-select
   Wait until  Element should be visible  xpath=//section[@id="statement"]//button[@data-test-id="add-statement-attachment"]
 
-Statement person count is
+Statement giver count is
   [Arguments]  ${amount}
   Wait until  Xpath Should Match X Times  //tr[@data-test-type="statement-giver-row"]  ${amount}
 
-Create statement person
+Create statement giver
   [Arguments]  ${email}  ${text}
   ${count} =  Get Matching Xpath Count  //tr[@data-test-type="statement-giver-row"]
   Click enabled by test id  create-statement-giver
@@ -205,4 +229,4 @@ Create statement person
   Wait Until  Element Should Not Be Visible  statement-giver-save
   Wait Until  Page Should Contain  ${email}
   ${countAfter} =  Evaluate  ${count} + 1
-  Statement person count is  ${countAfter}
+  Statement giver count is  ${countAfter}
