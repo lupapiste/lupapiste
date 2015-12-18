@@ -47,3 +47,14 @@
     box-sizing: border-box;
   }
 }
+
+.admin {
+  .page {
+    margin-top: 130px;
+  }
+  .users-table {
+    .filters {
+      margin-bottom: $marginM;
+    }
+  }
+}
