@@ -168,7 +168,7 @@ Set maaraaika-datepicker field value
 
 Invite read-only statement giver
   [Arguments]  ${index}  ${date}
-  Select Checkbox  statement-giver-checkbox-${index}
+  Wait until  Select Checkbox  statement-giver-checkbox-${index}
   Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
   Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
   Wait and click  xpath=//*[@data-test-id='add-statement-giver']
@@ -206,7 +206,7 @@ Open statement
   [Arguments]  ${number}
   Execute javascript  window.scrollTo(0,0)
   Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-${number}']
-  Wait until  element should be visible  statement-type-select
+  Wait until  element should be visible  xpath=//div[@class='statement-top']//div[@class='tabs-container']
 
 Statement is disabled
   Wait until  Element should be disabled  statement-type-select
