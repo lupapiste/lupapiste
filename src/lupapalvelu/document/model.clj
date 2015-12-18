@@ -157,6 +157,8 @@
 (defmulti validate-element (fn [_ _ _ element]
                            (:validator element)))
 
+(defmethod validate-element :default [& _] nil)
+
 (defmethod validate-element :address
   [info data path element]
   (let [{:keys [postinumero maa]} (tools/unwrapped data)]
@@ -193,6 +195,7 @@
                                   fields-to-validate))]
     (some->> (inspect-repeating-for-duplicate-rows data fields-to-validate)
              (mapcat build-row-result))))
+
 
 ;;
 ;; Neue api:
@@ -240,8 +243,12 @@
     (if (contains? data :value)
       (let [result  (validate-field application element (:value data))]
         (->validation-result info data current-path element result))
-      (let [result (when (:validator element)
-                     (validate-element info data current-path element))]
+      (let [result (validate-element info data current-path element)
+            ;; Assumption: :_selected is always either henkilo or yritys.
+            data (let [selected (-> data :_selected :value)]
+                   (if (ss/blank? selected)
+                     data
+                     (dissoc data (if (= selected "henkilo") :yritys :henkilo))))]
         (filter
          (comp not nil?)
          (concat (flatten [result])

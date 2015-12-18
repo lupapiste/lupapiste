@@ -107,6 +107,24 @@
     (when-let [application (lupapalvelu.domain/get-application-as (get-in attachment-file [:metadata :bulletinId]) user :include-canceled-apps? true)]
       (when (seq application) attachment-file))))
 
+;;
+;; Updates
+;;
+
+(defn update-bulletin
+  "Updates bulletin by query with optional opts"
+  [bulletin-id mongo-query changes & options]
+  (apply mongo/update-by-query
+         :application-bulletins
+         (assoc mongo-query :_id bulletin-id)
+         changes
+         options))
+
+(defn upsert-bulletin-by-id
+  "Updates bulletin with upsert set to true."
+  [bulletin-id changes]
+  (update-bulletin bulletin-id {} changes :upsert true))
+
 (defn update-file-metadata [bulletin-id comment-id files]
   (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.linked     true
                                                                        :metadata.bulletinId bulletin-id

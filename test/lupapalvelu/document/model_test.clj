@@ -254,11 +254,12 @@
                          (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
                          (apply-update [:henkilo :osoite :maa] "FIN")
                          (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
-                         (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
+                         (apply-update [:henkilo :yhteystiedot :puhelin] "050")
+                         (apply-update [:yritys :osoite :postinumero] "bad but not used"))]
 
         document => valid?
         (-> document
-            (apply-update [:_selected])) => valid?
+            (apply-update [:_selected])) => (invalid-with? schema [:warn "bad-postal-code"])
         (-> document
             (apply-update [:henkilo :osoite :katu])) => missing-required-fields?
         (-> document
