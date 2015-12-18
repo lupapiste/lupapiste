@@ -12,11 +12,9 @@ LUPAPISTE.LeafletMapModel = function(params) {
   var geoJsonLayer;
 
   function updateLayer(data) {
-    console.log("data", data);
     if (map && geoJsonLayer) {
       geoJsonLayer.clearLayers();
       if (data.length > 0) {
-        console.log("addData");
         geoJsonLayer.addData(data);
         map.fitBounds(geoJsonLayer.getBounds());
       }
@@ -26,9 +24,6 @@ LUPAPISTE.LeafletMapModel = function(params) {
   ko.computed(function() {
     updateLayer(data().features);
   });
-  // data.subscribe(function(val) {
-  //   updateLayer(val);
-  // });
 
   function onEachFeature(feature, layer) {
     var name = util.getIn(feature, ["properties", "nimi"]) || "";
