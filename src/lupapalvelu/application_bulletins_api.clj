@@ -8,6 +8,7 @@
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [monger.operators :refer :all]
@@ -46,7 +47,10 @@
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
-(defn- get-application-bulletins [page searchText municipality state sort]
+(defn- get-application-bulletins
+  "Queries bulletins from mongo. Returns latest versions of bulletins.
+   Bulletins which have starting dates in the future will be omitted."
+  [page searchText municipality state sort]
   (let [query (or (make-query searchText municipality state) {})
         apps (mongo/with-collection "application-bulletins"
                (query/find query)
@@ -170,7 +174,7 @@
   (let [updates (create-bulletin application created {:proclamationEndsAt proclamationEndsAt
                                                       :proclamationStartsAt proclamationStartsAt
                                                       :proclamationText proclamationText})]
-    (mongo/update-by-id :application-bulletins id updates :upsert true)
+    (bulletins/upsert-bulletin-by-id id updates)
     (ok)))
 
 (defcommand move-to-verdict-given
@@ -186,7 +190,7 @@
                                                       :appealPeriodStartsAt appealPeriodStartsAt
                                                       :appealPeriodEndsAt appealPeriodEndsAt
                                                       :verdictGivenText verdictGivenText})]
-    (mongo/update-by-id :application-bulletins id updates :upsert true)
+    (bulletins/upsert-bulletin-by-id id updates)
     (ok)))
 
 (defcommand move-to-final
@@ -200,7 +204,7 @@
   ; Note there is currently no way to move application to final state so we sent bulletin state manuall
   (let [updates (create-bulletin application created {:officialAt officialAt
                                                       :bulletinState :final})]
-    (mongo/update-by-id :application-bulletins id updates :upsert true)
+    (bulletins/upsert-bulletin-by-id id updates)
     (ok)))
 
 (defn bulletin-exists [{{bulletin-id :bulletinId} :data}]
@@ -286,7 +290,7 @@
   (let [updates {$set {"versions.$.proclamationEndsAt"   proclamationEndsAt
                        "versions.$.proclamationStartsAt" proclamationStartsAt
                        "versions.$.proclamationText"     proclamationText}}]
-    (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
+    (bulletins/update-bulletin bulletinId {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
     (ok)))
 
 (defcommand save-verdict-given-bulletin
@@ -302,7 +306,7 @@
                        "versions.$.appealPeriodEndsAt"   appealPeriodEndsAt
                        "versions.$.appealPeriodStartsAt" appealPeriodStartsAt
                        "versions.$.verdictGivenText"     verdictGivenText}}]
-    (mongo/update-by-query :application-bulletins {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
+    (bulletins/update-bulletin bulletinId {"versions" {$elemMatch {:id bulletinVersionId}}} updates)
     (ok)))
 
 (defraw "download-bulletin-comment-attachment"
@@ -310,7 +314,7 @@
    :user-roles #{:authority :applicant}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
   [{:keys [application user] :as command}]
-  (lupapalvelu.attachment/output-attachment attachmentId true
+  (attachment/output-attachment attachmentId true
                                             (partial bulletins/get-bulletin-comment-attachment-file-as user)))
 
 (defquery "publish-bulletin-enabled"

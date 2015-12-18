@@ -50,7 +50,7 @@
                       <td>
                         <span data-bind="visible: $component.isGiven($data),
                                          text: $data.status && $data.status() && loc(['statement', $data.status()]),
-                                         attr: {'data-test-name' : $data.person.name}"></span>
+                                         attr: {'data-test-id' : 'statement-status-' + $index()}"></span>
                       </td>
                       <td data-bind="visible: $component.repliesEnabled">
                         <a href="#" data-bind="visible: $component.isReplyable($data) && !$component.showReplyState($data),

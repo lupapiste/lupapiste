@@ -20,7 +20,12 @@
      :reply-to "\"Lupapiste\" <no-reply@lupapiste.fi>"}
     (select-keys (env/value :email) [:from :reply-to :bcc :user-agent])))
 
-(def config (select-keys (env/value :email) [:host :port :user :pass :sender :ssl :tls]))
+;; Timeout info need to be of Integer type or javax.mail api will not follow them.
+;; ks. com.sun.mail.util.PropUtil.getIntProperty
+(def config (-> (env/value :email)
+              (select-keys [:host :port :user :pass :sender :ssl :tls :connectiontimeout :timeout])
+              (update-in [:connectiontimeout] int)
+              (update-in [:timeout] int)))
 
 ;;
 ;; Delivery:

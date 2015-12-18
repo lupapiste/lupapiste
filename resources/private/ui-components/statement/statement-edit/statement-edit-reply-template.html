@@ -25,9 +25,8 @@
       <p id="statement-reply-cover-note">
         <span data-bind="text: coverNote">Saate</span>
       </p>
-      <p id="statement-reply-draft-is-not-visible-info" data-bind="visible: !replyVisible()">
-        <span data-bind="ltext: 'statement.reply-draft-not-visible'">Luonnosta ei nayteta</span>
-      </p>
+      <p id="statement-reply-draft-is-not-visible-info" data-bind="visible: !replyVisible(),
+                                                                   ltext: 'statement.reply-draft-not-visible'">Luonnosta ei nayteta</p>
     </div>
 
     <div class="statement-info" data-bind="visible: replyVisible">
