@@ -130,7 +130,7 @@
 (defn update-by-query
   "Updates data into collection with 'multi' set to true. Returns the number of documents updated"
   [collection query data & opts]
-  (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) (merge {:multi true} opts))))
+  (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) (apply hash-map :multi true opts))))
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
