@@ -8,7 +8,7 @@
       <div class="footer-box">
         <ul>
           <li><a href="/palveluinfo" data-bind="ltext: 'footer.service.info'"></a></li>
-          <li><a href="#" data-bind="ltext: 'footer.service.instructions'"></a></li>
+          <li><a data-bind="attr: {href: loc( 'footer.help.href')}, text: loc('footer.help.text')"></a></li>
           <li><a href="/rekisteriseloste" data-bind="ltext: 'footer.register'"></a></li>
           <li><a href="/kayttoehdot" data-bind="ltext: 'footer.terms'"></a></li>
         </ul>
