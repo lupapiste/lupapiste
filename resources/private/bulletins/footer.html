@@ -7,10 +7,11 @@
 
       <div class="footer-box">
         <ul>
-          <li><a data-bind="ltext: 'footer.service.info'" href="http://www.lupapiste.fi/palveluinfo"></a></li>
-          <li><a href="#" data-bind="ltext: 'footer.service.instructions'"></a></li>
+          <li><a href="/palveluinfo" data-bind="ltext: 'footer.service.info'"></a></li>
+          <li><a data-bind="attr: {href: loc( 'footer.help.href')}, text: loc('footer.help.text')"></a></li>
           <li><a href="/rekisteriseloste" data-bind="ltext: 'footer.register'"></a></li>
           <li><a href="/kayttoehdot" data-bind="ltext: 'footer.terms'"></a></li>
+          <li><a href="/lisenssit" data-bind="ltext: 'footer.license'"></a></li>
         </ul>
       </div>
 
