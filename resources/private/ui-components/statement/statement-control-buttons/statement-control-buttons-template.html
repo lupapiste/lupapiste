@@ -6,14 +6,15 @@
       <div class="statement-control-buttons">
         <button data-bind="disable: disabled,
                            click: submit,
-                           visible: visible"
+                           visible: submitVisible"
                 id="statement-submit"
                 type="submit"
                 class="positive">
           <i class="lupicon-check"></i>
           <span data-bind="ltext: 'statement.submit.' + tab()"></span>
         </button>
-        <button data-bind="click: refresh"
+        <button data-bind="click: refresh,
+                           visible: refreshVisible"    
                 id="statement-refresh"
                 type="refresh"
                 class="secondary">
