@@ -1,5 +1,7 @@
 (ns lupapalvelu.i18n
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+            [clj-time.format :as timef]
+            [clj-time.core :as time]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [ontodev.excel :as xls]
@@ -140,6 +142,26 @@
         (commons-resources/write-txt
           (commons-resources/sheet->map sheet)
           (io/file (str "resources/i18n/" sheet-name ".txt")))))))
+
+(defn missing-localizations-excel
+  "Writes missing localizations to excel file.
+   If file is not provided, will create the file to user home dir."
+  ([]
+   (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
+         filename (str (System/getProperty "user.home")
+                       "/lupapiste_translations_"
+                       date-str
+                       ".xlsx")]
+        (missing-localizations-excel (io/file filename))))
+  ([file]
+    (let [i18n-files   (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")
+          loc-maps     (map commons-resources/txt->map i18n-files)
+          langs        (distinct (apply concat (map :languages loc-maps)))
+          translations (apply merge-with conj (map :translations loc-maps))
+          loc-map      {:languages langs :translations translations}]
+    (commons-resources/write-excel
+      (commons-resources/missing-translations loc-map)
+      file))))
 
 (env/in-dev
   ;;
