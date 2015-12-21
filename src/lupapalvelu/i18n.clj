@@ -7,7 +7,8 @@
             [sade.env :as env]
             [sade.core :refer :all]
             [sade.util :as util]
-            [lupapiste-commons.i18n.core :as commons]))
+            [lupapiste-commons.i18n.core :as commons]
+            [lupapiste-commons.i18n.resources :as commons-resources]))
 
 (def supported-langs [:fi :sv])
 (def default-lang (first supported-langs))
@@ -123,6 +124,21 @@
   (when-let [in (io/resource "i18n.txt")]
     (with-open [in (io/reader in)]
       (read-lines (line-seq in)))))
+
+(defn- excel-to-txts
+  "Helper for excel -> txt migration"
+  [resource-name]
+  (with-open [in (io/input-stream (io/resource resource-name))]
+    (let [wb      (xls/load-workbook in)
+          sheets  (seq wb)
+          langs   (-> sheets ffirst xls/read-row rest)
+          headers (cons "key" langs)
+          data    (->> wb (map (partial read-sheet headers)) (apply concat))]
+      (doseq [sheet sheets
+              :let [sheet-name (.getSheetName sheet)]]
+        (commons-resources/write-txt
+          (commons-resources/sheet->map sheet)
+          (io/file (str "resources/i18n/" sheet-name ".txt")))))))
 
 (env/in-dev
   ;;
