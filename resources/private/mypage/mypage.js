@@ -289,19 +289,18 @@
       return false;
     };
 
+    ko.computed(function() {
+      var state = self.state();
+
     // jQuery upload-plugin replaces the input element after each file selection and
     // doing so it loses all listeners. This keeps input up-to-date with 'state':
-    self.state.subscribe(function(value) {
       var $input = $("#dialog-userinfo-architect-upload input[type=file]");
-      if (value < self.stateSending) {
+      if (state < self.stateSending) {
         $input.removeAttr("disabled");
       } else {
         $input.attr("disabled", "disabled");
       }
-    });
 
-    ko.computed(function() {
-      var state = self.state();
       if (state === self.stateDone) {
         hub.send("MyPage::UploadDone");
       }
