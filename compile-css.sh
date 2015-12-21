@@ -1,1 +1,1 @@
-compass compile resources/private/common-html --force
+compass compile resources/private/common-html -e production --force
