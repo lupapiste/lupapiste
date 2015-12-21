@@ -1,4 +1,5 @@
 LUPAPISTE.StatementEditReplyModel = function(params) {
+  "use strict";
   var self = this;
 
   self.tab = "reply";
@@ -24,7 +25,7 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   self.enabled = ko.pureComputed(function() {
     return self.authModel.ok(submitCommand);
   });
-  
+
   self.isDraft = ko.pureComputed(function() {
     return _.contains(["replyable"], util.getIn(self.data, ["state"]));
   });
@@ -34,7 +35,7 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   });
 
   self.text.subscribe(function(value) {
-    if(util.getIn(self.data, ["reply", "text"]) !== value) { 
+    if(util.getIn(self.data, ["reply", "text"]) !== value) {
       dirty(true);
     }
   });
@@ -52,10 +53,10 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   submitAllowed.subscribe(function(value) {
     hub.send("statement::submitAllowed", {tab: self.tab, value: value});
   });
-  
+
   hub.subscribe("statement::submit", function(params) {
     if(applicationId() === params.applicationId && statementId() === params.statementId && self.tab === params.tab) {
-      goingToSubmit(true); 
+      goingToSubmit(true);
     }
   });
 
@@ -67,7 +68,7 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   }
 
   function getCommandParams() {
-    return { 
+    return {
       text: self.text(),
       "nothing-to-add": self.nothingToAdd()
     };
