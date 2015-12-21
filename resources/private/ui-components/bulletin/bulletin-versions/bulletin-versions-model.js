@@ -30,7 +30,7 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
 
   self.editPublishedApplication = function(bulletin) {
     bulletin.edit(!bulletin.edit());
-  }
+  };
 
   self.bulletinUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + util.getIn(self, ["bulletin", "id"]);
 };

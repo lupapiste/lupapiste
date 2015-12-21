@@ -4,6 +4,7 @@ jQuery(function($) {
   function applyFixture(fixture) {
     ajax.query("apply-fixture", {"name": fixture})
       .success(function() { $("#debug-apply-done").text(" DONE!").show().delay(1000).fadeOut(); })
+      // jshint devel: true
       .error(function(e) {alert(e.text);})
       .call();
     return false;

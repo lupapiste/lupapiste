@@ -5,15 +5,8 @@ LUPAPISTE.PasswordFieldModel = function(params) {
 
   var self = this;
 
-  self.id = params.id || util.randomElementId();
-  self.label = params.lLabel ? loc(params.lLabel) : params.label;
-  self.value = params.value;
-  self.placeholder = params.lPlaceholder ? loc(params.lPlaceholder) : params.placeholder;
-
-  self.required = params.required || false;
-  if (self.required) {
-    self.value.extend({required: true});
-  }
+  // Construct super
+  ko.utils.extend(self, new LUPAPISTE.InputFieldModel(params));
 
   self.quality = params.quality || ko.observable("");
 

@@ -94,4 +94,4 @@ LUPAPISTE.StatementEditModel = function(params) {
     init: init,
     getCommandParams: getCommandParams
   })));
-}
+};

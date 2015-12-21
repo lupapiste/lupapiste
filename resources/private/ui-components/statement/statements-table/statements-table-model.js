@@ -25,7 +25,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.isGiven = function(statement) {
     return _.contains(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
-  }
+  };
 
   var isAuthorityOrStatementOwner = function(statement) {
     var currentUser = lupapisteApp.models.currentUser;
@@ -35,7 +35,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.isRemovable = function(statement) {
     return isAuthorityOrStatementOwner(statement) && !self.isGiven(statement);
-  }
+  };
 
   self.canAccessStatement = function(statement) {
     return self.isGiven(statement) || isAuthorityOrStatementOwner(statement);

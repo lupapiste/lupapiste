@@ -73,7 +73,7 @@ jQuery(document).ready(function() {
     {name: "text-field", model: "input-field-model"},
     {name: "textarea-field", model: "input-field-model"},
     {name: "checkbox-field", model: "input-field-model"},
-    {name: "select-field", model: "input-field-model"},
+    {name: "select-field"},
     {name: "radio-field"},
     {name: "search-field"},
     {name: "maaraala-tunnus"},

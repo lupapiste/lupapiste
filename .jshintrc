@@ -70,7 +70,8 @@
     "users": true,
     "util": true,
     "vetuma": true,
-    "warn": true
+    "warn": true,
+    "Waypoint":false
   },
   "exported":
      ["accordion","AccordionState","ajax","attachment",
