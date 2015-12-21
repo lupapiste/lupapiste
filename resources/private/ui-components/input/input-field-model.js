@@ -23,9 +23,4 @@ LUPAPISTE.InputFieldModel = function(params) {
   self.infoMsg = params.infoMsg || "";
   self.infoStyle = params.infoStyle || "";
 
-  // TODO select model
-  self.options = params.options || [];
-  self.optionsValue = params.optionsValue || "";
-  self.optionsText  = params.optionsText || "";
-  self.optionsCaption = params.lOptionsCaption ? loc(params.lOptionsCaption) : params.optionsCaption;
 };
