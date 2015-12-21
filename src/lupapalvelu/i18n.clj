@@ -35,20 +35,24 @@
 (defn- read-sheet [headers sheet]
   (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
 
-(defn- read-translations-txt [resource-name]
-  (commons/keys-by-language (commons/read-translations (io/resource resource-name))))
+(defn- read-translations-txt [name-or-file]
+  (let [resource (if (instance? java.io.File name-or-file)
+                   name-or-file
+                   (io/resource name-or-file))]
+    (commons/keys-by-language (commons/read-translations resource))))
+
+(defn i18n-localizations
+  "Reads all .txt files from i18n/ resource path.
+   Returns them as collection of translation maps, where key is language
+   and value is map of loc-key - loc-value pairs"
+  []
+  (let [i18n-files (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")]
+    (map read-translations-txt i18n-files)))
 
 (defn- load-translations []
-  (merge-with conj
-              (read-translations-txt "shared_translations.txt")
-              (read-translations-txt "i18n/schemas_i18n.txt")
-              (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
-                (let [wb      (xls/load-workbook in)
-                      langs   (-> wb seq first first xls/read-row rest)
-                      headers (cons "key" langs)
-                      data    (->> wb (map (partial read-sheet headers)) (apply concat))
-                      langs-but-default (disj (set langs) (name default-lang))]
-                  (reduce (partial process-row langs-but-default) {} data)))))
+  (apply merge-with conj
+         (read-translations-txt "shared_translations.txt")
+         (i18n-localizations)))
 
 (def- localizations (atom nil))
 (def- excel-data (util/future* (load-translations)))
