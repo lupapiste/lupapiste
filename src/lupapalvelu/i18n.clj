@@ -130,10 +130,7 @@
   [resource-name]
   (with-open [in (io/input-stream (io/resource resource-name))]
     (let [wb      (xls/load-workbook in)
-          sheets  (seq wb)
-          langs   (-> sheets ffirst xls/read-row rest)
-          headers (cons "key" langs)
-          data    (->> wb (map (partial read-sheet headers)) (apply concat))]
+          sheets  (seq wb)]
       (doseq [sheet sheets
               :let [sheet-name (.getSheetName sheet)]]
         (commons-resources/write-txt
