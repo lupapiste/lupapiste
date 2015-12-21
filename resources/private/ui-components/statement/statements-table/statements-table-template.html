@@ -48,26 +48,30 @@
                                      css: {'statement-over-due': $component.isStatementOverDue($data)}"></td>
                       <td data-bind="dateString: $data.given"></td>
                       <td>
-                        <span data-bind="visible: $component.isGiven($data),
-                                         text: $data.status && $data.status() && loc(['statement', $data.status()]),
+                        <!-- ko if: $component.isGiven($data) -->
+                        <span data-bind="text: $data.status && $data.status() && loc(['statement', $data.status()]),
                                          attr: {'data-test-id' : 'statement-status-' + $index()}"></span>
+                        <!-- /ko -->
                       </td>
                       <td data-bind="visible: $component.repliesEnabled">
-                        <a href="#" data-bind="visible: $component.isReplyable($data) && !$component.showReplyState($data),
-                                               ltext: 'statement.reply.give-reply-link',
+                        <!-- ko if: $component.isReplyable($data) && !$component.showReplyState($data) -->
+                        <a href="#" data-bind="ltext: 'statement.reply.give-reply-link',
                                                click: $component.openStatement,
                                                attr: {'data-test-id' : 'open-statement-reply-' + $index()}"></a>
-                        <span data-bind="visible: $component.showReplyState($data),
-                                         text: loc(['statement', 'reply', 'state', $data.state()])"></span>
+                        <!-- /ko -->
+                        <!-- ko if: $component.showReplyState($data) -->
+                        <span data-bind="text: loc(['statement', 'reply', 'state', $data.state()])"></span>
+                        <!-- /ko -->
                       </td>
                       <!-- ko if-not: _.every($component.statements(), $component.isGiven) -->
                         <td>
+                          <!-- ko if: $component.isRemovable($data) -->
                           <span data-bind="click: $component.openDeleteDialog,
                                            clickBubble: false,
-                                           visible: $component.isRemovable($data),
                                            attr: {'class': 'lupicon-remove primary',
                                                   'title': loc('statement.delete'),
                                                   'data-test-id': 'delete-statement-' + $index()}"></span>
+                          <!-- /ko -->
                         </td>
                       <!-- /ko -->
                   </tr>
