@@ -23,6 +23,7 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: firstName,
                                                    id: 'firstName',
+                                                   disable: disable,
                                                    lLabel: 'userinfo.firstName',
                                                    required: true}}"></div>
 
@@ -30,6 +31,7 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: lastName,
                                                    id: 'lastName',
+                                                   disable: disable,
                                                    lLabel: 'userinfo.lastName',
                                                    required: true}}"></div>
 
@@ -37,6 +39,7 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: phone,
                                                    id: 'phone',
+                                                   disable: disable,
                                                    lLabel: 'userinfo.phone'}}"></div>
             </div>
 
@@ -45,12 +48,14 @@
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
                                           params: {value: companyName,
+                                                   disable: disable,
                                                    id: 'architect.company.name',
                                                    lLabel: 'userinfo.architect.company.name'}}"></div>
 
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
                                           params: {value: companyId,
+                                                   disable: disable,
                                                    id: 'architect.company.id',
                                                    lLabel: 'userinfo.architect.company.id',
                                                    placeholder: loc( 'mypage.ytunnus.placeholder')}}"></div>
@@ -61,6 +66,7 @@
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
                                           params: {value: street,
+                                                   disable: disable,
                                                    id: 'stree',
                                                    lLabel: 'userinfo.street',
                                                    required: true}}"></div>
@@ -68,6 +74,7 @@
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
                                           params: {value: zip,
+                                                   disable: disable,
                                                    id: 'zip',
                                                    lLabel: 'userinfo.zip',
                                                    required: true}}"></div>
@@ -75,6 +82,7 @@
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
                                           params: {value: city,
+                                                   disable: disable,
                                                    id: 'city',
                                                    lLabel: 'userinfo.city',
                                                    required: true}}"></div>
@@ -84,6 +92,7 @@
               <div class="col-3"
                   data-bind="component: {name: 'checkbox-field',
                                          params: {value: allowDirectMarketing,
+                                                  disable: disable,
                                                   id: 'allowDirectMarketing',
                                                   lLabel: 'userinfo.allowDirectMarketing'}}"></div>
             </div>
@@ -91,6 +100,7 @@
               <div class="col-3"
                    data-bind="component: {name: 'checkbox-field',
                                           params: {value: architect,
+                                                   disable: disable,
                                                    id: 'architect',
                                                    lLabel: 'userinfo.architect'}}"></div>
             </div>
@@ -105,6 +115,7 @@
                 <div class="col-1"
                      data-bind="component: {name: 'select-field',
                                             params: {value: degree,
+                                                     disable: disable,
                                                      options: availableDegrees,
                                                      optionsValue: 'id',
                                                      optionsText: 'name',
@@ -116,6 +127,7 @@
                 <div class="col-1"
                      data-bind="component: {name: 'text-field',
                                             params: {value: graduatingYear,
+                                                     disable: disable,
                                                      id: 'architect.graduatingYear',
                                                      lLabel: 'userinfo.architect.graduatingYear',
                                                      maxLength: 4}}"></div>
@@ -123,12 +135,14 @@
                 <div class="col-1"
                      data-bind="component: {name: 'text-field',
                                             params: {value: fise,
+                                                     disable: disable,
                                                      id: 'architect.fise',
                                                      lLabel: 'userinfo.architect.fise'}}"></div>
 
                 <div class="col-1"
                      data-bind="component: {name: 'select-field',
                                             params: {value: fiseKelpoisuus,
+                                                     disable: disable,
                                                      options: availableFiseKelpoisuusValues,
                                                      optionsValue: 'id',
                                                      optionsText: 'name',
@@ -157,17 +171,19 @@
                             data-test-id="filename"></div>
                         </td>
                         <td>
+                          <!-- ko ifnot: disable-->
                           <a data-bind="ltext: 'userinfo.architect.attachments.load',
                                         attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
                              data-test-id="load" href="#" target="_blank"></a>
                           <a data-bind="ltext: 'userinfo.architect.attachments.remove',
                                         click: $parent.remove"
                              data-test-id="remove" href="#"></a>
+                          <!-- /ko -->
                         </td>
                       </tr>
                     </tbody>
                   </table>
-                  <button class="positive" data-bind="click: add" data-test-id="test-add-architect-attachment">
+                  <button class="positive" data-bind="click: add, disable: disable" data-test-id="test-add-architect-attachment">
                     <i class="lupicon-upload"></i>
                     <span data-bind="ltext: 'userinfo.architect.attachments.add'"></span>
                   </button>
@@ -178,8 +194,7 @@
 
           <div class="button-group">
             <button data-bind="click: save,
-                               disable: processing,
-                               enable: isValid,
+                               enable: isValid && !disable(),
                                css: {waiting: pending}" class="positive"
                     data-test-id="save-my-userinfo">
                 <i class="lupicon-save"></i>
@@ -210,12 +225,14 @@
                 <div class="col-1"
                      data-bind="component: {name: 'password-field',
                                             params: {value: oldPassword,
+                                                     disable: disable,
                                                      id: 'oldPassword',
                                                      lLabel: 'userinfo.oldPassword'}}"></div>
 
                 <div class="col-1"
                      data-bind="component: {name: 'password-field',
                                             params: {value: newPassword,
+                                                     disable: disable,
                                                      id: 'newPassword',
                                                      lLabel: 'userinfo.newPassword',
                                                      quality: quality}}"></div>
@@ -223,6 +240,7 @@
                 <div class="col-1"
                      data-bind="component: {name: 'password-field',
                                             params: {value: newPassword2,
+                                                     disable: disable,
                                                      id: 'newPassword2',
                                                      lLabel: 'userinfo.newPassword2'}}"></div>
               </div>
@@ -230,7 +248,7 @@
               <div class="row">
                 <div class="col-4">
                   <button data-bind="click: save,
-                                     disable: processing,
+                                     disable: disable,
                                      enable: ok,
                                      css: {waiting: pending}" class="positive"
                           data-test-id="change-my-password">
