@@ -14,7 +14,7 @@
       return ["statement", "reply-request"];
     } else {
       return ["statement"];
-    };
+    }
   });
   var selectedTab = ko.observable("statement");
   var submitAllowed = ko.observable({statement: false, reply: false, "reply-request": false});

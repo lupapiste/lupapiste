@@ -36,7 +36,7 @@
     };
   }
 
-  function OwnInfo() {
+  function OwnInfo(uploadModel) {
 
     var self = this;
 
@@ -153,6 +153,8 @@
       return self;
     };
 
+    self.uploadDoneSubscription = hub.subscribe("MyPage::UploadDone", self.updateAttachments);
+
     self.clear = function() {
       return self.saved(false).error(null);
     };
@@ -205,6 +207,10 @@
     };
 
     self.saved.subscribe(self.updateUserName);
+
+    self.dispose = function() {
+      hub.unsubscribe(self.uploadDoneSubscription);
+    };
   }
 
   function Password() {
@@ -283,28 +289,27 @@
       return false;
     };
 
+    ko.computed(function() {
+      var state = self.state();
+
     // jQuery upload-plugin replaces the input element after each file selection and
     // doing so it loses all listeners. This keeps input up-to-date with 'state':
-    self.state.subscribe(function(value) {
       var $input = $("#dialog-userinfo-architect-upload input[type=file]");
-      if (value < self.stateSending) {
+      if (state < self.stateSending) {
         $input.removeAttr("disabled");
       } else {
         $input.attr("disabled", "disabled");
       }
-    });
 
-    self.state.subscribe(function(value) {
-      if (value === self.stateDone) {
-        ownInfo.updateAttachments();
+      if (state === self.stateDone) {
+        hub.send("MyPage::UploadDone");
       }
     });
-
   }
 
-  var ownInfo = new OwnInfo();
-  var pw = new Password();
   var uploadModel = new UploadModel();
+  var ownInfo = new OwnInfo(uploadModel);
+  var pw = new Password();
 
   hub.onPageLoad("mypage", function() { ownInfo.clear(); pw.clear(); });
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user); });

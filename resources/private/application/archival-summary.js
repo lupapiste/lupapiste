@@ -48,7 +48,9 @@
   var generalAttachmentsStr = "attachments.general";
 
   var getGroupList = function(attachments) {
-    if (_.isEmpty(attachments)) return [];
+    if (_.isEmpty(attachments)) {
+      return [];
+    }
     var grouped = _.groupBy(attachments, function(attachment) {
       return _.isObject(attachment.op) && attachment.op.id ? attachment.op.id() : generalAttachmentsStr;
     });

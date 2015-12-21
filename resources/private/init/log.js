@@ -17,6 +17,7 @@
     var message = args.length === 1 ? args[0]: args;
 
     if (level >= limit && typeof console !== "undefined") {
+      // jshint devel: true
       console.log(levelName[level], message);
     }
 

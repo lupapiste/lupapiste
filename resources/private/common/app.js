@@ -147,9 +147,9 @@ var LUPAPISTE = LUPAPISTE || {};
           if (e.text === "error.unauthorized") {
             hub.send("connection", {status: "session-dead"});
           } else {
-            hub.send("indicator", {style: "negative", message: e.text});
-            setTimeout(self.connectionCheck, 10000);
+            hub.send("connection", {status: "lockdown", text: e.text});
           }
+          setTimeout(self.connectionCheck, 10000);
         })
         .fail(function() {
           hub.send("connection", {status: "offline"});
@@ -177,6 +177,16 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var offline = false;
     var wasLoggedIn = false;
+    var lockdown = false;
+
+    function unlock() {
+      if (lockdown) {
+        lockdown = false;
+        if (lupapisteApp.models.globalAuthModel) {
+          lupapisteApp.models.globalAuthModel.refreshWithCallback({});
+        }
+      }
+    }
 
     hub.subscribe("login", function() { wasLoggedIn = true; });
 
@@ -185,6 +195,7 @@ var LUPAPISTE = LUPAPISTE || {};
         offline = false;
         pageutil.hideAjaxWait();
       }
+      unlock();
     });
 
     hub.subscribe({type: "connection", status: "offline"}, function () {
@@ -200,6 +211,15 @@ var LUPAPISTE = LUPAPISTE || {};
             {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
         hub.subscribe("dialog-close", self.redirectToHashbang, true);
       }
+      unlock();
+    });
+
+    hub.subscribe({type: "connection", status: "lockdown"}, function (e) {
+      if (!lockdown && lupapisteApp.models.globalAuthModel) {
+        lupapisteApp.models.globalAuthModel.refreshWithCallback({});
+      }
+      lockdown = true;
+      hub.send("indicator", {style: "negative", message: e.text});
     });
 
     self.initSubscribtions = function() {

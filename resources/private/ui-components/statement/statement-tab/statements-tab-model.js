@@ -22,7 +22,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
   });
 
   var addManualData = function() {
-    var allManualDatasEnabled = _.every(self.manualData(), function(d) { return d.errors().length == 0; });
+    var allManualDatasEnabled = _.every(self.manualData(), function(d) { return d.errors().length === 0; });
     if (allManualDatasEnabled) {
       self.manualData.push(new dataTemplate());
       return self;
@@ -40,7 +40,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
     });
     selfie.errors = ko.validation.group(selfie);
     selfie.errors.subscribe(function(errs) {
-      if (errs.length == 0 && self.showInviteSection && self.showInviteSection()) {
+      if (errs.length === 0 && self.showInviteSection && self.showInviteSection()) {
         self.selectedPersons.push(selfie);
         addManualData();
       } else {

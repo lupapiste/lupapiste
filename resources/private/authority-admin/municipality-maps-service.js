@@ -143,7 +143,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
         password: server.password || ""
       });
       if( _.size(res.layers) >= 2 ) {
-        var layers = _.map( res.layers, function( layer, i ) {
+        var layers = _.map( res.layers, function( layer ) {
           return new Layer({name: layer.name,
                             id: layer.id,
                             fixed: layer.base });

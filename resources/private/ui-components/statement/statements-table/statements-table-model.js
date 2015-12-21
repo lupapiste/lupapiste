@@ -12,7 +12,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
     var statementIdsWithAttachments = [];
     _.forEach(lupapisteApp.models.application.attachments(), function(attachment) {
       var target = ko.mapping.toJS(attachment.target);
-      if (target && target.type == "statement") {
+      if (target && target.type === "statement") {
         statementIdsWithAttachments.push(target.id);
       }
     });
