@@ -29,7 +29,8 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   var isAuthorityOrStatementOwner = function(statement) {
     var currentUser = lupapisteApp.models.currentUser;
-    return currentUser.isAuthority() || util.getIn(statement, ["person", "userId"]) === currentUser.id();
+    return _.contains(util.getIn(currentUser, ["orgAuthz", self.application.organization()]), "authority")
+      || util.getIn(statement, ["person", "userId"]) === currentUser.id();
   };
 
   self.isRemovable = function(statement) {

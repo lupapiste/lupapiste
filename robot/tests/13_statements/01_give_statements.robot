@@ -140,7 +140,7 @@ Statements are visible for Veikko
   Statement count is  5
 
 Veikko can delete his own statement but no others
-  Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-0']
+  Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
 Veikko from Tampere can give statement
