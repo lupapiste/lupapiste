@@ -146,6 +146,7 @@ var LUPAPISTE = LUPAPISTE || {};
         .error(function(e) {
           if (e.text === "error.unauthorized") {
             hub.send("connection", {status: "session-dead"});
+            setTimeout(self.connectionCheck, 10000);
           } else {
             hub.send("indicator", {style: "negative", message: e.text});
             setTimeout(self.connectionCheck, 10000);
