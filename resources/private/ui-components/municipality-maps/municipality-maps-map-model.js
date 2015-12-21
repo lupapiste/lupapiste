@@ -1,6 +1,6 @@
-
 LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
   "use strict";
+  var self = this;
 
   var PROJECTION = "EPSG:3067";
   var BACKGROUND = {url: "/proxy/wmts/maasto",
@@ -112,5 +112,5 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
     if (map) {
       map.destroy();
     }
-  }
+  };
 };

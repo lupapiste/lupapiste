@@ -1,4 +1,5 @@
 LUPAPISTE.StatementReplyRequestModel = function(params) {
+  "use strict";
   var self = this;
 
   self.tab = "reply-request";
@@ -14,18 +15,18 @@ LUPAPISTE.StatementReplyRequestModel = function(params) {
 
   var dirty = ko.observable(false);
   var goingToSubmit = ko.observable(false);
- 
+
   var submitCommand = "request-for-statement-reply";
 
   self.enabled = ko.pureComputed(function() {
     return self.authModel.ok(submitCommand);
   });
-  
+
   hub.send("statement::submitAllowed", {tab: self.tab, value: true});
-  
+
   hub.subscribe("statement::submit", function(params) {
     if(applicationId() === params.applicationId && statementId() === params.statementId && self.tab === params.tab) {
-      goingToSubmit(true); 
+      goingToSubmit(true);
     }
   });
 

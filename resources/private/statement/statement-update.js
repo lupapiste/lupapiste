@@ -18,7 +18,7 @@ LUPAPISTE.StatementUpdate = function(params) {
   var saving = ko.observable(false);
   var modifyId = ko.observable(util.randomElementId());
 
-  var draftTimerId = undefined;
+  var draftTimerId;
 
   var doSubmit = ko.pureComputed(function() {
     return !saving() && goingToSubmit();

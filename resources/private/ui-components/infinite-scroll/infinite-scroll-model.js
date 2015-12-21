@@ -9,7 +9,7 @@ LUPAPISTE.InfiniteScrollModel = function(params) {
   self.load.extend({notify: "always"});
 
   var loadFn = params.loadFn || _.noop;
-  var waypoint = undefined;
+  var waypoint;
 
   // always refresh waypoint when load parameter triggers event i.e. something was loaded
   // therefore load parameter must trigger always even if the value stays the same

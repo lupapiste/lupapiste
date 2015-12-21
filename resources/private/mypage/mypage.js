@@ -36,7 +36,7 @@
     };
   }
 
-  function OwnInfo() {
+  function OwnInfo(uploadModel) {
 
     var self = this;
 
@@ -153,6 +153,8 @@
       return self;
     };
 
+    self.uploadDoneSubscription = hub.subscribe("MyPage::UploadDone", self.updateAttachments);
+
     self.clear = function() {
       return self.saved(false).error(null);
     };
@@ -205,6 +207,10 @@
     };
 
     self.saved.subscribe(self.updateUserName);
+
+    self.dispose = function() {
+      hub.unsubscribe(self.uploadDoneSubscription);
+    };
   }
 
   function Password() {
@@ -294,17 +300,17 @@
       }
     });
 
-    self.state.subscribe(function(value) {
-      if (value === self.stateDone) {
-        ownInfo.updateAttachments();
+    ko.computed(function() {
+      var state = self.state();
+      if (state === self.stateDone) {
+        hub.send("MyPage::UploadDone");
       }
     });
-
   }
 
-  var ownInfo = new OwnInfo();
-  var pw = new Password();
   var uploadModel = new UploadModel();
+  var ownInfo = new OwnInfo(uploadModel);
+  var pw = new Password();
 
   hub.onPageLoad("mypage", function() { ownInfo.clear(); pw.clear(); });
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user); });

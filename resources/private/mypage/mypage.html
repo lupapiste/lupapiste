@@ -313,6 +313,7 @@
             <div class="col-1">
               <a href="#!/register-company-account-type"
                  class="btn positive"
+                 data-bind="visible: lupapisteApp.models.globalAuthModel.ok('init-sign')"
                  data-test-id="logged-user-register-company-start">
                  <span data-bind="ltext: 'register.company.register'"></span>
                  <i class="lupicon-chevron-right"></i>

@@ -1,8 +1,6 @@
 (function($) {
   "use strict";
 
-  var self = this;
-
   var rememberMeCookieName = "my-email";
 
   var rememberMe = ko.observable(false);
@@ -73,6 +71,7 @@
   }
 
   var handleLoginSubmit = function() {
+    // jshint devel: true
     if (!ie8OrOlder() || confirm(loc("error.old-ie"))) {
       login();
     }
