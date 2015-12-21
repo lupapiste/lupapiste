@@ -78,7 +78,7 @@
       return true;
     },
     message: loc("bulletin.beforeThan")
-  }
+  };
 
   ko.validation.rules.afterThan = {
     validator: function(date, otherDate) {
@@ -88,7 +88,7 @@
       return true;
     },
     message: loc("bulletin.afterThan")
-  }
+  };
 
   /*
    * Determines if a field is required or not based on a function or value

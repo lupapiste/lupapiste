@@ -31,5 +31,5 @@ LUPAPISTE.EditableProclaimedBulletinModel = function(data, bulletin, auth) {
       proclamationStartsAt: self.proclamationStartsAt().getTime(),
       proclamationText: self.proclamationText()
     });
-  }
-}
+  };
+};

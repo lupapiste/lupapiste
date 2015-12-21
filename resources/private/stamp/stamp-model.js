@@ -164,7 +164,7 @@ LUPAPISTE.StampModel = function(params) {
   };
 
   self.start = function() {
-    if (_.some(self.selectedFiles(), 'latestVersion.stamped')) {
+    if (_.some(self.selectedFiles(), "latestVersion.stamped")) {
       hub.send("show-dialog", {ltitle: "application.restamp",
                                size: "medium",
                                component: "yes-no-dialog",
