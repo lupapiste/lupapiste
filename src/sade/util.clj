@@ -371,7 +371,8 @@
 (defn get-files-by-regex
   "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."
   [path ^java.util.regex.Pattern regex]
-  {:pre [(instance? java.util.regex.Pattern regex) (string? path)]}
+  {:pre [(instance? java.util.regex.Pattern regex) (or (string? path)
+                                                       (instance? java.net.URL path))]}
   (filter
     #(re-matches regex (.getName %))
     (-> path io/file (.listFiles) seq)))
