@@ -1,0 +1,1 @@
+error.service-lockdown: Palvelu on hetkellisesti lukutilassa ylläpitotoimien vuoksi. Voit selailla hakemuksia, mutta tietojen muokkaus on tilapäisesti estetty. Pahoittelemme häiriötä, ole hyvä ja yritä hetken kuluttua uudelleen!

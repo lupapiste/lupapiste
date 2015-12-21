@@ -10,6 +10,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.validators :as v]
+            [lupapalvelu.control-api :as control]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
@@ -194,6 +195,10 @@
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
 
+(defn check-lockdown [command]
+  (when (and (control/lockdown?) (= :command (:type (meta-data command))))
+    (fail :error.service-lockdown)))
+
 (defn missing-command [command]
   (when-not (meta-data command)
     (warnf "command '%s' not found" (:action command))
@@ -266,7 +271,8 @@
           (infof "no handler for action '%s'" name))
         (ok)))))
 
-(def authorize-validators [missing-command
+(def authorize-validators [check-lockdown
+                           missing-command
                            missing-feature
                            missing-roles
                            impersonation])

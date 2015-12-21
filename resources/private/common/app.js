@@ -143,8 +143,13 @@ var LUPAPISTE = LUPAPISTE || {};
           hub.send("connection", {status: "online"});
           setTimeout(self.connectionCheck, 10000);
         })
-        .error(function() {
-          hub.send("connection", {status: "session-dead"});
+        .error(function(e) {
+          if (e.text === "error.unauthorized") {
+            hub.send("connection", {status: "session-dead"});
+          } else {
+            hub.send("indicator", {style: "negative", message: e.text});
+            setTimeout(self.connectionCheck, 10000);
+          }
         })
         .fail(function() {
           hub.send("connection", {status: "offline"});

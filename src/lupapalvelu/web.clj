@@ -22,6 +22,7 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
+            [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
@@ -476,7 +477,11 @@
 ;; Server is alive
 ;;
 
-(defjson "/api/alive" [] {:ok (if (user/current-user (request/ring-request)) true false)})
+(defjson "/api/alive" []
+  (cond
+    (control/lockdown?) (fail :error.service-lockdown)
+    (user/current-user (request/ring-request)) (ok)
+    :else (fail :error.unauthorized)))
 
 ;;
 ;; Proxy
