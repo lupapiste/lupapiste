@@ -138,19 +138,6 @@
     (with-open [in (io/reader in)]
       (read-lines (line-seq in)))))
 
-(defn- excel-to-txts
-  "Helper for excel -> txt migration.
-   Writes localization txt files for each sheet in excel."
-  [resource-name]
-  (with-open [in (io/input-stream (io/resource resource-name))]
-    (let [wb      (xls/load-workbook in)
-          sheets  (seq wb)]
-      (doseq [sheet sheets
-              :let [sheet-name (.getSheetName sheet)]]
-        (commons-resources/write-txt
-          (commons-resources/sheet->map sheet)
-          (io/file (str "resources/i18n/" sheet-name ".txt")))))))
-
 (defn missing-localizations-excel
   "Writes missing localizations to excel file.
    If file is not provided, will create the file to user home dir."
