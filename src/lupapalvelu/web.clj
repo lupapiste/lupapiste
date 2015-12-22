@@ -74,8 +74,7 @@
                     (if-let [body (:body request)]
                       (-> body
                         (io/reader :encoding (or (:character-encoding request) "utf-8"))
-                        json/parse-stream
-                        keywordize-keys)
+                        (json/parse-stream (comp keyword ss/strip-non-printables)))
                       {}))]
     (if json-body
       (assoc request :json json-body :params json-body)
