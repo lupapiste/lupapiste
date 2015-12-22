@@ -132,7 +132,8 @@
       (read-lines (line-seq in)))))
 
 (defn- excel-to-txts
-  "Helper for excel -> txt migration"
+  "Helper for excel -> txt migration.
+   Writes localization txt files for each sheet in excel."
   [resource-name]
   (with-open [in (io/input-stream (io/resource resource-name))]
     (let [wb      (xls/load-workbook in)
