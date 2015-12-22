@@ -1,5 +1,5 @@
 (ns lupapalvelu.logging-api
-  (:require [taoensso.timbre :as timbre :refer [errorf]]
+  (:require [taoensso.timbre :as timbre :refer [error errorf]]
             [noir.request :as request]
             [noir.core :refer [defpage]]
             [sade.env :as env]
@@ -39,8 +39,9 @@
 
 (defn- log-csp-report [{csp-report :csp-report}]
   (if (map? csp-report)
-    (let [sanitized-report (-> csp-report (select-keys csp-report-keys) (util/convert-values #(when (string? %) (logging/sanitize 100 %))))]
-      (errorf "FRONTEND: CSP-report %s" sanitized-report))
+    (let [report (select-keys csp-report csp-report-keys)
+          sanitized-report (util/convert-values report #(when (string? %) (logging/sanitize 100 %)))]
+      (error "FRONTEND: CSP-report" sanitized-report))
     (errorf "FRONTEND: CSP-report got posted without valid payload")))
 
 (defpage [:post "/api/csp-report"] request
