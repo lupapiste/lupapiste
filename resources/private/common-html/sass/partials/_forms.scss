@@ -902,42 +902,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
   }
 }
 
-
-
-#neighbor-show {
-
-  [type="checkbox"] {
-    &:disabled {
-      position: relative;
-      visibility: hidden;
-      &:checked {
-        visibility: visible;
-        opacity: 1;
-        border: 1px solid #f6f6f6 !important;
-        -moz-appearance: none;
-        -webkit-appearance: none;
-        appearance: none;
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        background: #f6f6f6 url(https://cdn2.iconfinder.com/data/icons/flat-ui-icons-24-px/24/checkmark-24-512.png) center center no-repeat;
-        background-size: 12px 12px;
-      }
-    }
-
-  }
-  [type="radio"] {
-    &:disabled {
-      position: relative;
-      visibility: hidden;
-      &:checked {
-        visibility: visible;
-        opacity: 1;
-      }
-    }
-  }
-}
-
 .three-col {
   width: 100%;
 

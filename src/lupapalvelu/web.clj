@@ -69,13 +69,13 @@
 
 (defjson "/system/apis" [] @apis)
 
-(defn parse-json-body [request]
-  (let [json-body (if (ss/starts-with (:content-type request) "application/json")
-                    (if-let [body (:body request)]
+(defn parse-json-body [{:keys [content-type character-encoding body] :as request}]
+  (let [json-body (if (or (ss/starts-with content-type "application/json")
+                          (ss/starts-with content-type "application/csp-report"))
+                    (if body
                       (-> body
-                        (io/reader :encoding (or (:character-encoding request) "utf-8"))
-                        json/parse-stream
-                        keywordize-keys)
+                        (io/reader :encoding (or character-encoding "utf-8"))
+                        (json/parse-stream (comp keyword ss/strip-non-printables)))
                       {}))]
     (if json-body
       (assoc request :json json-body :params json-body)
