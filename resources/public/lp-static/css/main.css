@@ -14,7 +14,7 @@
     CSS Reset by ajk (http://ajk.im/)
     Based on http://necolas.github.com/normalize.css/
 */
-@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
 /* line 6, ../../../private/common-html/sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
