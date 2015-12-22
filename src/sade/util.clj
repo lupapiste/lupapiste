@@ -393,7 +393,7 @@
 
 (defn list-jar [jar-path inner-dir]
   (if-let [jar         (JarFile. jar-path)]
-    (let [inner-dir    (if (and (not= "" inner-dir) (not= "/" (last inner-dir)))
+    (let [inner-dir    (if (and (not= "" inner-dir) (not= \/ (last inner-dir)))
                          (str inner-dir "/")
                          inner-dir)
           entries      (enumeration-seq (.entries jar))
