@@ -256,7 +256,7 @@
                   :js ["applications-list.js"]}
 
    :statement    {:depends [:common-html :repository :side-panel]
-                  :js ["statement-update.js" "statement.js"]
+                  :js ["statement-service.js" "statement.js"]
                   :html ["statement.html"]}
 
    :verdict      {:depends [:common-html :repository :attachment]

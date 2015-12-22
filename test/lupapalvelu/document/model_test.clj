@@ -148,6 +148,7 @@
         (apply-update [:osoite :postitoimipaikannimi] "Demola")
         (apply-update [:patevyys :koulutusvalinta] "rakennusmestari")
         (apply-update [:patevyys :koulutus] "tekniikan kandidaatti")
+        (apply-update [:patevyys :valmistumisvuosi] "2010")
         (apply-update [:patevyys :patevyysluokka] "AA")
         (apply-update [:yhteystiedot :email] "tauno@example.com")
         (apply-update [:yhteystiedot :puhelin] "050")) => valid?
