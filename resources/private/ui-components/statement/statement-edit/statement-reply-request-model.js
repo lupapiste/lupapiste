@@ -44,4 +44,4 @@ LUPAPISTE.StatementReplyRequestModel = function(params) {
     init: _.noop,
     getCommandParams: getCommandParams
   })));
-}
+};

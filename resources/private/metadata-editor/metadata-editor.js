@@ -87,7 +87,7 @@
   var getForbiddenFields = function(schema, roles) {
     var naughtyFields = [];
     _.forEach(schema, function (attribute) {
-      if (attribute['require-role'] && !_.contains(roles, attribute['require-role'])) {
+      if (attribute["require-role"] && !_.contains(roles, attribute["require-role"])) {
         naughtyFields.push(attribute.type);
       }
     });
@@ -104,7 +104,7 @@
     self.schema = ko.observableArray();
     self.inputTypeMap = {};
     self.disabledFields = ko.observableArray();
-    
+
     var orgAuthz = ko.unwrap(lupapisteApp.models.currentUser.orgAuthz);
     var organization = ko.unwrap(params.application.organization);
     var roles = orgAuthz && organization ? ko.unwrap(orgAuthz[organization]) : [];

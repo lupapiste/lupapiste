@@ -24,12 +24,12 @@ LUPAPISTE.StatementsTabModel = function(params) {
   var addManualData = function() {
     var allManualDatasEnabled = _.every(self.manualData(), function(d) { return d.errors().length === 0; });
     if (allManualDatasEnabled) {
-      self.manualData.push(new dataTemplate());
+      self.manualData.push(new DataTemplate());
       return self;
     }
   };
 
-  var dataTemplate = function() {
+  var DataTemplate = function() {
     var selfie = this;
     selfie.text = ko.observable("").extend({ required: true });
     selfie.name = ko.observable("").extend({ required: true });
@@ -55,7 +55,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
     self.saateText("");
     self.selectedPersons([]);
     self.maaraaika(undefined);
-    self.manualData([new dataTemplate()]);
+    self.manualData([new DataTemplate()]);
     self.showInviteSection( !self.showInviteSection() );
   };
 
@@ -93,7 +93,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
       .query("get-statement-givers", {id: self.application.id()})
       .success(function(result) {
         var fetchedStatementGivers = _.map(result.data, function(arrObj) {
-          return ko.mapping.fromJS(arrObj, {}, new dataTemplate());
+          return ko.mapping.fromJS(arrObj, {}, new DataTemplate());
         });
         self.data(fetchedStatementGivers);
       })

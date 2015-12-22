@@ -13,9 +13,9 @@ LUPAPISTE.MoveToVerdictGivenModel = function (params) {
   self.appealPeriodEndsAt   = ko.observable();
   self.verdictGivenText     = ko.observable();
 
-  self.verdictGivenAt.extend({ beforeThan: { params: self.appealPeriodStartsAt, message: loc("bulletins.beforeThan.appealPeriodStartsAt") } })
-  self.appealPeriodStartsAt.extend({ beforeThan: self.appealPeriodEndsAt })
-  self.appealPeriodEndsAt.extend({ afterThan: self.appealPeriodStartsAt })
+  self.verdictGivenAt.extend({ beforeThan: { params: self.appealPeriodStartsAt, message: loc("bulletins.beforeThan.appealPeriodStartsAt") } });
+  self.appealPeriodStartsAt.extend({ beforeThan: self.appealPeriodEndsAt });
+  self.appealPeriodEndsAt.extend({ afterThan: self.appealPeriodStartsAt });
 
   self.pending = ko.observable();
 

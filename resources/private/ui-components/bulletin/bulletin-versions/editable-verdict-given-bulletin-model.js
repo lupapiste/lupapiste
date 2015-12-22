@@ -37,5 +37,5 @@ LUPAPISTE.EditableVerdictGivenBulletinModel = function(data, bulletin, auth) {
       appealPeriodEndsAt:   self.appealPeriodEndsAt().getTime(),
       verdictGivenText:     self.verdictGivenText() || ""
     });
-  }
-}
+  };
+};

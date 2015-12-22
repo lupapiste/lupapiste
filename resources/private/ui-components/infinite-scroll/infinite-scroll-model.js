@@ -24,7 +24,7 @@ LUPAPISTE.InfiniteScrollModel = function(params) {
         loadFn();
       }
     }
-  })
+  });
 
   // add waypoint to element after it is added to dom
   _.defer(function() {
@@ -36,7 +36,7 @@ LUPAPISTE.InfiniteScrollModel = function(params) {
           loadFn();
         }
       },
-      offset: 'bottom-in-view'
+      offset: "bottom-in-view"
     });
   });
 };

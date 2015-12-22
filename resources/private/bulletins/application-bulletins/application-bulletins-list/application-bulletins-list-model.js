@@ -18,17 +18,16 @@ LUPAPISTE.ApplicationBulletinsListModel = function(params) {
 
   self.bulletins = ko.pureComputed(function () {
     return _.map(params.bulletins(), function (bulletin) {
-      var commentingType;
-      var commentingEndsAt;
+      var commentingType, commentingEndsAt, enddate;
       if (bulletin.proclamationEndsAt) {
-        commentingType = loc('bulletin.comment.period');
-        var enddate = moment(bulletin.proclamationEndsAt).endOf('day');
-        var commentingEndsAt = enddate.isAfter(moment()) ?
+        commentingType = loc("bulletin.comment.period");
+        enddate = moment(bulletin.proclamationEndsAt).endOf("day");
+        commentingEndsAt = enddate.isAfter(moment()) ?
           enddate.format("D.M.YYYY") : loc("bulletin.period.ended");
       } else if (bulletin.appealPeriodEndsAt) {
-        commentingType = loc('bulletin.appeal.period');
-        var enddate = moment(bulletin.appealPeriodEndsAt).endOf('day');
-        var commentingEndsAt = enddate.isAfter(moment()) ?
+        commentingType = loc("bulletin.appeal.period");
+        enddate = moment(bulletin.appealPeriodEndsAt).endOf("day");
+        commentingEndsAt = enddate.isAfter(moment()) ?
           enddate.format("D.M.YYYY") : loc("bulletin.period.ended");
       }
 
