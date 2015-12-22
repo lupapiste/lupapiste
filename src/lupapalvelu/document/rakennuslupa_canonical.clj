@@ -276,7 +276,9 @@
                             (= operation-name "raktyo-aloit-loppuunsaat"))
                     (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
                       util/assoc-when
-                      :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents-by-type) application)
+                      :rakennuspaikkatieto (get-bulding-places (concat (:rakennuspaikka documents-by-type)
+                                                                       (:rakennuspaikka-ilman-ilmoitusta documents-by-type))
+                                                               application)
                       :toimenpidetieto toimenpiteet
                       :lausuntotieto (get-statements (:statements application)))
                     canonical)]
