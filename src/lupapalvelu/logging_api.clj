@@ -1,5 +1,7 @@
 (ns lupapalvelu.logging-api
   (:require [taoensso.timbre :as timbre :refer [errorf]]
+            [noir.request :as request]
+            [noir.core :refer [defpage]]
             [sade.env :as env]
             [sade.core :refer [ok fail]]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
@@ -31,3 +33,10 @@
     (if (= frontendBuild currentBuild)
       (ok)
       (fail :frontend-too-old))))
+
+(defn- log-csp-report [request]
+  (errorf "FRONTEND: CSP-report %s" request)
+  )
+
+(defpage [:post "/api/csp-report"] request
+  (log-csp-report request))

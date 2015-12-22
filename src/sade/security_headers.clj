@@ -7,7 +7,7 @@
 
 (defn add-security-headers
   "Ring middleware.
-   Sets X-XSS-Protection and X-Frame-Options headers.
+   Sets X-XSS-Protection, Content-Security-Policy and X-Frame-Options headers.
    Ported from Debian Unstable apache2.2-common /etc/apache2/conf.d/security,
    see also http://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Common_non-standard_response_headers"
   [handler]
@@ -21,6 +21,9 @@
           ; including new security issues. This header will tell the XSS filter to
           ; completely block access to the page instead.
           (assoc-in [:headers "X-XSS-Protection"] "1; mode=block")
+
+          ; Content security policy - http://www.w3.org/TR/CSP/
+          (assoc-in [:headers "Content-Security-Policy"] "default-src 'self' ; report-uri /api/csp-report;")
 
           ; Prevents other sites from embedding pages from this
           ; site as frames. This defends against clickjacking attacks.
