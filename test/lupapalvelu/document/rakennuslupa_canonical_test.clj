@@ -230,6 +230,14 @@
           :hallintaperuste {:value "oma"}
           :kaavatilanne {:value "oikeusvaikutteinen yleiskaava"}}})
 
+(def- rakennuspaikka-ilman-ilmoitusta
+  {:id "rakennuspaikka-ilman-ilmoitusta" :schema-info {:name "rakennuspaikka-ilman-ilmoitusta"
+                                                       :version 1}
+   :data {:kiinteisto {:tilanNimi {:value "Eramaa"}
+                       :maaraalaTunnus {:value ""}}
+          :hallintaperuste {:value "vuokra"}
+          :kaavatilanne {:value "oikeusvaikutukseton yleiskaava"}}})
+
 (def- common-rakennus
   {:rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
                               :henkilo henkilo
@@ -411,6 +419,15 @@
                 puun-kaataminen
                 purku])
 
+(def documents-ilman-ilmoitusta [hankkeen-kuvaus
+                                 hakija-henkilo
+                                 paasuunnittelija
+                                 maksaja-yritys
+                                 rakennuspaikka-ilman-ilmoitusta
+                                 rakennuksen-muuttaminen]
+
+  )
+
 (defn op-info [doc]
   (select-keys (-> doc :schema-info :op) [:id :name :description]))
 
@@ -457,6 +474,10 @@
                                       purku])})
 
 (ctc/validate-all-documents application-rakennuslupa)
+
+(def application-rakennuslupa-ilman-ilmoitusta (assoc application-rakennuslupa :documents documents-ilman-ilmoitusta))
+
+(ctc/validate-all-documents application-rakennuslupa-ilman-ilmoitusta)
 
 (def application-tyonjohtajan-nimeaminen
   (merge application-rakennuslupa {:id "LP-753-2013-00002"
@@ -1018,6 +1039,31 @@
            (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
            (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
            (fact "Rakennelman yksilointitieto" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :yksilointitieto) => "kaupunkikuva-id"))))
+
+(fl/facts* "Canonical model ilman ilmoitusta is correct"
+  (let [canonical (application-to-canonical application-rakennuslupa-ilman-ilmoitusta "sv") => truthy
+        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
+        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
+        rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia) => truthy
+        rakennuspaikkatieto2 (first rakennuspaikkatiedot) => truthy
+        rakennuspaikka2 (:Rakennuspaikka rakennuspaikkatieto2) => truthy
+        rakennuspaikanKiinteistotieto2 (:rakennuspaikanKiinteistotieto rakennuspaikka2) => truthy
+        RakennuspaikanKiinteistotieto2 (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto2) => truthy
+        kiinteistotieto2 (:kiinteistotieto RakennuspaikanKiinteistotieto2) => truthy
+        Kiinteisto2 (:Kiinteisto kiinteistotieto2) => truthy
+        kaavatilanne2 (:kaavatilanne rakennuspaikka2) => truthy]
+
+    (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
+    (fact "rakennuspaikkojen maara" (count rakennuspaikkatiedot) => 1)
+    (fact "tilanNimi (ilman ilmoitusta)" (:tilannimi Kiinteisto2) => "Eramaa")
+    (fact "kiinteistotunnus (ilman ilmoitusta)" (:kiinteistotunnus Kiinteisto2) => "21111111111111")
+    (fact "maaraalaTunnus (ilman ilmoitusta)" (:maaraAlaTunnus Kiinteisto2) => nil)
+    (fact "kokotilakytkin (ilman ilmoitusta)" (:kokotilaKytkin RakennuspaikanKiinteistotieto2) => truthy)
+    (fact "hallintaperuste (ilman ilmoitusta)" (:hallintaperuste RakennuspaikanKiinteistotieto2) => "vuokra")
+    (facts "Kaavatilanne (ilman ilmoitusta)"
+      (fact "is 'oikeusvaikutukseton yleiskaava'" kaavatilanne2 => "oikeusvaikutukseton yleiskaava")
+      (fact "mapping has added correct :kaavanaste to canonical" (:kaavanaste rakennuspaikka2) => "ei tiedossa"))))
 
 
 (fl/facts* "Canonical model has correct puolto"
