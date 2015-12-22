@@ -4,10 +4,11 @@
             [clj-time.core :as time]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [ontodev.excel :as xls]
             [cheshire.core :as json]
-            [sade.env :as env]
+            [ontodev.excel :as xls]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
             [sade.util :as util]
             [lupapiste-commons.i18n.core :as commons]
             [lupapiste-commons.i18n.resources :as commons-resources]))
@@ -48,7 +49,13 @@
    Returns them as collection of translation maps, where key is language
    and value is map of loc-key - loc-value pairs"
   []
-  (let [i18n-files (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")]
+  (let [this-path (util/this-jar lupapalvelu.main)
+        i18n-files (if (ss/ends-with this-path ".jar")      ; are we inside jar
+                     (filter #(ss/ends-with % ".txt") (util/list-jar this-path "i18n/"))
+                     (util/get-files-by-regex "resources/i18n/" #".+\.txt$")) ; dev
+        i18n-files (if (every? string? i18n-files)          ; from jar, filenames are strings
+                     (map (partial str "i18n/") i18n-files)
+                     i18n-files)]
     (map read-translations-txt i18n-files)))
 
 (defn- load-translations []
