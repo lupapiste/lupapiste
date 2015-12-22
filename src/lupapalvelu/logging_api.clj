@@ -1,6 +1,5 @@
 (ns lupapalvelu.logging-api
   (:require [taoensso.timbre :as timbre :refer [error errorf]]
-            [noir.request :as request]
             [noir.core :refer [defpage]]
             [sade.env :as env]
             [sade.core :refer [ok fail]]
