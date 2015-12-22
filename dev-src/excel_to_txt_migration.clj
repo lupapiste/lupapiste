@@ -1,7 +1,7 @@
- (ns excel-to-txt-migration
-   (:require [clojure.java.io :as io]
-             [ontodev.excel :as xls]
-             [lupapiste-commons.i18n.resources :as commons-resources]))
+(ns excel-to-txt-migration
+  (:require [clojure.java.io :as io]
+            [ontodev.excel :as xls]
+            [lupapiste-commons.i18n.resources :as commons-resources]))
 
 (defn- excel-to-txts
   "Helper for excel -> txt migration.
