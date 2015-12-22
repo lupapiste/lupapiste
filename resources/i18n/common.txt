@@ -4924,3 +4924,6 @@
 "error.startdate-before-enddate" "fi" "Alkupäivämäärä on ennen loppupäivämäärää"
 "error.startdate-before-enddate" "sv" ""
 "error.service-lockdown" "fi" "Palvelu on hetkellisesti lukutilassa ylläpitotoimien vuoksi. Voit selailla hakemuksia, mutta tietojen muokkaus on tilapäisesti estetty. Pahoittelemme häiriötä!"
+"error.service-lockdown" "sv" ""
+"statement.draft-is-not-visible" "fi" "Lausunto tulee näkyviin tähän, kun se on annettu."
+"statement.draft-is-not-visible" "sv" ""

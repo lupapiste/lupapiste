@@ -1,1 +1,0 @@
-statement.draft-is-not-visible: Lausunto tulee näkyviin tähän, kun se on annettu.

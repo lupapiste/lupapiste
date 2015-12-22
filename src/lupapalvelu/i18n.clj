@@ -133,11 +133,6 @@
     {}
     lines))
 
-(defn- load-add-ons []
-  (when-let [in (io/resource "i18n.txt")]
-    (with-open [in (io/reader in)]
-      (read-lines (line-seq in)))))
-
 (defn missing-localizations-excel
   "Writes missing localizations to excel file.
    If file is not provided, will create the file to user home dir."
@@ -157,12 +152,3 @@
     (commons-resources/write-excel
       (commons-resources/missing-translations loc-map)
       file))))
-
-(env/in-dev
-  ;;
-  ;; Re-define get-localizations so that i18n.txt is always loaded and merged to excel data.
-  ;;
-  (defn get-localizations []
-    (let [lz (get-or-load-localizations)]
-      (update-in lz [default-lang] merge (load-add-ons)))))
-
