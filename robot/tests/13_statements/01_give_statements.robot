@@ -76,9 +76,11 @@ Sonja can delete statement
   Wait until  Statement count is  5
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
-Sonja can't give statement to Ronjas statement
+Sonja can't give statement to Ronjas statement nor see the draft
   Open statement  0
-  Statement is disabled
+  Wait until  Element should contain  //div[@class="statement-info"]//p  Lausunto tulee
+  Element should not be visible  statement-type-select
+  Element should not be visible  statement-text
 
 Sonja can comment on Ronjas statement
   Wait until  Comment count is  0
