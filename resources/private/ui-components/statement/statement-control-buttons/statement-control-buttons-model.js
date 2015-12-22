@@ -4,20 +4,18 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
 
   var applicationId = params.applicationId;
   var statementId = params.statementId;
-
+  var commands = params.commands;
+  var submitAllowed = params.submitAllowed;
+  
   self.authModel = params.authModel;
   self.tab = params.selectedTab;
 
   self.disabled = ko.pureComputed(function() {
-    return !params.submitAllowed()[self.tab()];
+    return !submitAllowed[self.tab()]();
   });
 
   self.submitVisible = ko.pureComputed(function() {
-    return self.authModel.ok({
-      "statement": "give-statement",
-      "reply": "reply-statement",
-      "reply-request": "request-for-statement-reply"
-    }[self.tab()]);
+    return self.authModel.ok(util.getIn(commands, [self.tab(), "submit"]));
   });
 
   self.refreshVisible = self.submitVisible;

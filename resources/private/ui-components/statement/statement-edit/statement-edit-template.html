@@ -10,8 +10,8 @@
           <span>
             <span data-bind="ltext: 'statement.tab.' + tab"></span>:
           </span>
-          <span data-bind="with: application">
-            <span data-bind="text: title"></span>
+          <span>
+            <span data-bind="text: applicationTitle"></span>
           </span>
           <span data-bind="with: data">
             (<span data-bind="text: person.text"></span>)
@@ -28,9 +28,11 @@
     </div>
 
     <div class="statement-info">
-      <form>
-        <div class="form-entry"
-             data-bind="visible: tab === 'statement'">
+      <div data-bind="ifnot: showStatement">
+        <p data-bind="ltext: 'statement.draft-is-not-visible'"></p>
+      </div>
+      <form data-bind="if: showStatement">
+        <div class="form-entry">
           <label for="statement-type-select" class="form-label">
             <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
             <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
