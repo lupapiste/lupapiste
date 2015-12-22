@@ -4,6 +4,7 @@
             [noir.core :refer [defpage]]
             [sade.env :as env]
             [sade.core :refer [ok fail]]
+            [sade.util :as util]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]))
@@ -34,9 +35,14 @@
       (ok)
       (fail :frontend-too-old))))
 
-(defn- log-csp-report [request]
-  (errorf "FRONTEND: CSP-report %s" request)
-  )
+(def csp-report-keys [:blocked-uri :document-uri :line-number :referrer :script-sample :source-file :violated-directive])
+
+(defn- log-csp-report [{csp-report :csp-report}]
+  (if (map? csp-report)
+    (let [sanitized-report (-> csp-report (select-keys csp-report-keys) (util/convert-values #(when (string? %) (logging/sanitize 100 %))))]
+      (errorf "FRONTEND: CSP-report %s" sanitized-report))
+    (errorf "FRONTEND: CSP-report got posted without valid payload")))
 
 (defpage [:post "/api/csp-report"] request
-  (log-csp-report request))
+  (log-csp-report request)
+  "OK")
