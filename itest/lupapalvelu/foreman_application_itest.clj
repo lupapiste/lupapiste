@@ -148,20 +148,27 @@
                                  project-id => application1-id)))))
 
           (facts "Special foreman/designer verdicts"
-                 (let [xml-file   (fn [filename] (-> filename io/resource slurp
-                                                     (xml/parse-string "utf-8")
-                                                     cr/strip-xml-namespaces))
-                       special    (-> "krysp/verdict-r-foremen.xml"
-                                      xml-file
-                                      (enlive/at [:tunnus enlive/any-node]
-                                                 (enlive/replace-vars {:application-id (:id application)})))
-                       typical    (xml-file "krysp/dev/verdict.xml")
-                       normalized (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application special)
-                       poytakirja (-> normalized (enlive/select [:paatostieto :Paatos :poytakirja :> enlive/any-node]))]
+                 (let [xml-file           (fn [filename] (-> filename io/resource slurp
+                                                             (xml/parse-string "utf-8")
+                                                             cr/strip-xml-namespaces))
+                       special            (-> "krysp/verdict-r-foremen.xml"
+                                              xml-file
+                                              (enlive/at [:tunnus enlive/any-node]
+                                                         (enlive/replace-vars {:application-id (:id application)})))
+                       typical            (xml-file "krysp/dev/verdict.xml")
+                       ;; LPK-1120: False positives on (at least) some non-special foreman verdicts.
+                       old-false-positive (-> "krysp/old-false-positive-special-foreman-verdict.xml"
+                                              xml-file
+                                              (enlive/at [:tunnus enlive/any-node]
+                                                         (enlive/replace-vars {:application-id (:id application)})))
+                       normalized         (verdict/verdict-xml-with-foreman-designer-verdicts foreman-application special)
+                       poytakirja         (-> normalized (enlive/select [:paatostieto :Paatos :poytakirja :> enlive/any-node]))]
                    (fact "Special verdict"
                          (verdict/special-foreman-designer-verdict? foreman-application special) => truthy)
                    (fact "Typical verdict"
                          (verdict/special-foreman-designer-verdict? foreman-application typical) => falsey)
+                   (fact "Old false positive verdict"
+                         (verdict/special-foreman-designer-verdict? foreman-application old-false-positive) => falsey)
                    (fact "Paatostieto has replaced the old one"
                           (count (enlive/select normalized [:paatostieto])) => 1)
                    (fact "Paatostieto is in the right place"

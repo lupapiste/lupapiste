@@ -172,7 +172,9 @@ var LUPAPISTE = LUPAPISTE || {};
     if (dialog$.length) {
       LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesButton, no, renderOptions);
       LUPAPISTE.ModalDialog.open(dialog$);
-    } else if (confirm(content)) {
+    }
+    // jshint devel: true
+    else if (confirm(content)) {
       buttonFallback(yesButton);
     } else {
       buttonFallback(no);
@@ -230,7 +232,7 @@ var LUPAPISTE = LUPAPISTE || {};
       progressBarContainer.style.lineHeight = "0";
 
       var progressBarImg = document.createElement("img");
-      progressBarImg.src = "/img/loader-bar.gif";
+      progressBarImg.src = "/lp-static/img/loader-bar.gif";
       progressBarImg.alt = "...";
       progressBarImg.width = 220;
       progressBarImg.height = 19;

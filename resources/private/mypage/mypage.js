@@ -1,8 +1,7 @@
 ;(function() {
   "use strict";
 
-  function isNotBlank(s) { return !/^\s*$/.test(s); }
-  function equals(s1, s2) { return s1 === s2; }
+  var authorization = lupapisteApp.models.globalAuthModel;
 
   function makeSaveFn(commandName, propertyNames) {
     return function(model, event) {
@@ -36,7 +35,7 @@
     };
   }
 
-  function OwnInfo() {
+  function OwnInfo(uploadModel) {
 
     var self = this;
 
@@ -153,6 +152,8 @@
       return self;
     };
 
+    self.uploadDoneSubscription = hub.subscribe("MyPage::UploadDone", self.updateAttachments);
+
     self.clear = function() {
       return self.saved(false).error(null);
     };
@@ -196,7 +197,6 @@
     };
 
     self.editUsers = function() {
-
       pageutil.openPage("company", self.company.id() + "/users/");
     };
 
@@ -205,19 +205,28 @@
     };
 
     self.saved.subscribe(self.updateUserName);
+
+    self.disable = ko.pureComputed(function() {
+      return !authorization.ok("update-user") || self.processing();
+    });
+
+    self.dispose = function() {
+      hub.unsubscribe(self.uploadDoneSubscription);
+    };
   }
 
   function Password() {
-    this.oldPassword = ko.observable("");
-    this.newPassword = ko.observable("");
-    this.newPassword2 = ko.observable("").extend({match: {params: this.newPassword, message: loc("mypage.noMatch")}});
-    this.error = ko.observable(null);
-    this.saved = ko.observable(false);
-    this.pending = ko.observable();
-    this.processing = ko.observable();
+    var self = this;
+    self.oldPassword = ko.observable("");
+    self.newPassword = ko.observable("");
+    self.newPassword2 = ko.observable("").extend({match: {params: self.newPassword, message: loc("mypage.noMatch")}});
+    self.error = ko.observable(null);
+    self.saved = ko.observable(false);
+    self.pending = ko.observable(false);
+    self.processing = ko.observable(false);
 
-    this.clear = function() {
-      return this
+    self.clear = function() {
+      return self
         .oldPassword("")
         .newPassword("")
         .newPassword2("")
@@ -225,11 +234,21 @@
         .error(null);
     };
 
-    this.ok = ko.computed(function() { return isNotBlank(this.oldPassword()) && util.isValidPassword(this.newPassword()) && equals(this.newPassword(), this.newPassword2()); }, this);
-    this.noMatch = ko.computed(function() { return isNotBlank(this.newPassword()) && isNotBlank(this.newPassword2()) && !equals(this.newPassword(), this.newPassword2()); }, this);
+    self.disable = ko.pureComputed(function() {
+      return !authorization.ok("change-passwd") || self.processing();
+    });
 
-    this.save = makeSaveFn("change-passwd", ["oldPassword", "newPassword"]);
-    this.quality = ko.computed(function() { return util.getPwQuality(this.newPassword()); }, this);
+    self.ok = ko.pureComputed(function() {
+      return !self.disable() && !_.isBlank(self.oldPassword()) && util.isValidPassword(self.newPassword()) && self.newPassword() === self.newPassword2(); });
+
+    self.noMatch = ko.computed(function() {
+      return !_.isBlank(self.newPassword()) && !_.isBlank(self.newPassword2()) && self.newPassword() !== self.newPassword2();
+    });
+
+    self.save = makeSaveFn("change-passwd", ["oldPassword", "newPassword"]);
+    self.quality = ko.pureComputed(function() {
+      return util.getPwQuality(self.newPassword());
+    });
   }
 
   function UploadModel() {
@@ -283,28 +302,27 @@
       return false;
     };
 
-    // jQuery upload-plugin replaces the input element after each file selection and
-    // doing so it loses all listeners. This keeps input up-to-date with 'state':
-    self.state.subscribe(function(value) {
+    ko.computed(function() {
+      var state = self.state();
+
+      // jQuery upload-plugin replaces the input element after each file selection and
+      // doing so it loses all listeners. This keeps input up-to-date with 'state':
       var $input = $("#dialog-userinfo-architect-upload input[type=file]");
-      if (value < self.stateSending) {
+      if (state < self.stateSending) {
         $input.removeAttr("disabled");
       } else {
         $input.attr("disabled", "disabled");
       }
-    });
 
-    self.state.subscribe(function(value) {
-      if (value === self.stateDone) {
-        ownInfo.updateAttachments();
+      if (state === self.stateDone) {
+        hub.send("MyPage::UploadDone");
       }
     });
-
   }
 
-  var ownInfo = new OwnInfo();
-  var pw = new Password();
   var uploadModel = new UploadModel();
+  var ownInfo = new OwnInfo(uploadModel);
+  var pw = new Password();
 
   hub.onPageLoad("mypage", function() { ownInfo.clear(); pw.clear(); });
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user); });

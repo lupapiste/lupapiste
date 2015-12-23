@@ -244,7 +244,7 @@ var attachment = (function() {
 
     rotete: function(rotation) {
       var iframe$ = $("#file-preview-iframe");
-      iframe$.attr("src","/img/ajax-loader.gif");
+      iframe$.attr("src","/lp-static/img/ajax-loader.gif");
       ajax.command("rotate-pdf", {id: applicationId, attachmentId: attachmentId, rotation: rotation})
         .success(function() {
           applicationModel.reload();

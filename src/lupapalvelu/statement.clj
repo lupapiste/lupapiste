@@ -49,6 +49,7 @@
                      (sc/optional-key :given)         schemas/Timestamp
                      (sc/optional-key :reminder-sent) schemas/Timestamp
                      (sc/optional-key :modified)      schemas/Timestamp
+                     (sc/optional-key :duedate-reminder-sent)  schemas/Timestamp
                      (sc/optional-key :modify-id)     sc/Str
                      (sc/optional-key :editor-id)     sc/Str
                      (sc/optional-key :reply)         Reply

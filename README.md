@@ -8,7 +8,7 @@ digitaalisen liiketoiminnan asiantuntijayritys [Solita](http://www.solita.fi/).
 
 ## Kehitysohje
 
-Katso docs/developerguide.md.
+Katso [docs/developerguide.md](docs/developerguide.md).
 
 ## License
 

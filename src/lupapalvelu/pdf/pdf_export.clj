@@ -377,7 +377,7 @@
 
 (defn- common-header [app-data]
   [
-   [:image {:xscale 1 :yscale 1} (ImageIO/read (io/resource "public/img/logo-v2-flat.png"))]
+   [:image {:xscale 1 :yscale 1} (ImageIO/read (io/resource "public/lp-static/img/logo-v2-flat.png"))]
    [:spacer]
    [:heading {:style {:size 20}} (:title app-data)]
    [:spacer]

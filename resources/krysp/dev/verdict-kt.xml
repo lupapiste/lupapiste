@@ -82,7 +82,7 @@
               <kiito:liitetieto>
                 <kiito:Liite>
                   <yht:kuvaus>Pöytäkirja</yht:kuvaus>
-                  <yht:linkkiliitteeseen>http://localhost:8000/img/logo.png</yht:linkkiliitteeseen>
+                  <yht:linkkiliitteeseen>http://localhost:8000/lp-static/img/logo.png</yht:linkkiliitteeseen>
                 </kiito:Liite>
               </kiito:liitetieto>
                <kiito:liitetieto>
@@ -119,7 +119,7 @@
               <kiito:liitetieto>
                 <kiito:Liite>
                   <yht:kuvaus>Vain yksi liite</yht:kuvaus>
-                  <yht:linkkiliitteeseen>http://localhost:8000/img/logo-v2.png</yht:linkkiliitteeseen>
+                  <yht:linkkiliitteeseen>http://localhost:8000/lp-static/img/logo-v2.png</yht:linkkiliitteeseen>
                 </kiito:Liite>
               </kiito:liitetieto>
             </kiito:Poytakirja>
@@ -225,13 +225,13 @@
               <kiito:liitetieto>
                 <kiito:Liite>
                   <yht:kuvaus>Pöytäkirja</yht:kuvaus>
-                  <yht:linkkiliitteeseen>http://localhost:8000/img/lupapiste-logo.png</yht:linkkiliitteeseen>
+                  <yht:linkkiliitteeseen>http://localhost:8000/lp-static/img/lupapiste-logo.png</yht:linkkiliitteeseen>
                 </kiito:Liite>
               </kiito:liitetieto>
                <kiito:liitetieto>
                  <kiito:Liite>
                    <yht:kuvaus>Kalenteri-ikoni</yht:kuvaus>
-                   <yht:linkkiliitteeseen>http://localhost:8000/img/calendar.gif</yht:linkkiliitteeseen>
+                   <yht:linkkiliitteeseen>http://localhost:8000/lp-static/img/calendar.gif</yht:linkkiliitteeseen>
                  </kiito:Liite>
                </kiito:liitetieto>
             </kiito:Poytakirja>

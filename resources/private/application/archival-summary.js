@@ -36,8 +36,8 @@
 
   var filterByArchiveStatus = function(attachments, keepArchived) {
     return _.filter(attachments, function(attachment) {
-      if (!attachment.metadata() || !attachment.metadata()["sailytysaika"] || !attachment.metadata()["sailytysaika"]["arkistointi"]()
-        || attachment.metadata()["sailytysaika"]["arkistointi"]() === 'ei') {
+      if (!attachment.metadata() || !attachment.metadata().sailytysaika || !attachment.metadata().sailytysaika.arkistointi()
+        || attachment.metadata().sailytysaika.arkistointi() === "ei") {
         return !keepArchived;
       } else {
         return keepArchived;
@@ -48,7 +48,9 @@
   var generalAttachmentsStr = "attachments.general";
 
   var getGroupList = function(attachments) {
-    if (_.isEmpty(attachments)) return [];
+    if (_.isEmpty(attachments)) {
+      return [];
+    }
     var grouped = _.groupBy(attachments, function(attachment) {
       return _.isObject(attachment.op) && attachment.op.id ? attachment.op.id() : generalAttachmentsStr;
     });
@@ -76,16 +78,16 @@
       }
       attachment.showAdditionalControls = ko.observable(false);
       attachment.retentionDescription = ko.pureComputed(function() {
-        var retention = attachment.metadata() ? attachment.metadata()["sailytysaika"] : null;
-        if (retention && retention["arkistointi"]()) {
-          var retentionMode = retention["arkistointi"]();
+        var retention = attachment.metadata() ? attachment.metadata().sailytysaika : null;
+        if (retention && retention.arkistointi()) {
+          var retentionMode = retention.arkistointi();
           var additionalDetail = "";
           switch(retentionMode) {
             case "toistaiseksi":
-              additionalDetail = ", " + loc("laskentaperuste") + " " + loc(retention["laskentaperuste"]());
+              additionalDetail = ", " + loc("laskentaperuste") + " " + loc(retention.laskentaperuste());
               break;
             case "m\u00E4\u00E4r\u00E4ajan":
-              additionalDetail = ", " + retention["pituus"]() + " " + loc("vuotta");
+              additionalDetail = ", " + retention.pituus() + " " + loc("vuotta");
               break;
           }
           return loc(retentionMode) + additionalDetail.toLowerCase();
@@ -94,7 +96,7 @@
         }
       });
       attachment.personalDataDescription = ko.pureComputed(function() {
-        var personalData = attachment.metadata() ? attachment.metadata()['henkilotiedot'] : null;
+        var personalData = attachment.metadata() ? attachment.metadata().henkilotiedot : null;
         if (_.isFunction(personalData)) {
           return loc(personalData());
         } else {
@@ -102,7 +104,7 @@
         }
       });
       if (attachment.type) {
-        attachment.attachmentType = ko.observable([attachment.type['type-group'](), attachment.type['type-id']()].join('.'));
+        attachment.attachmentType = ko.observable([attachment.type["type-group"](), attachment.type["type-id"]()].join("."));
         attachment.attachmentType.subscribe(function (value) {
           ajax
             .command("set-attachment-type",
@@ -117,15 +119,15 @@
             .call();
         });
       }
-      attachment.archivable = util.getIn(attachment, ["latestVersion", "archivable"]) ? attachment.latestVersion['archivable']() : false;
-      attachment.archivabilityError = util.getIn(attachment, ["latestVersion", "archivabilityError"]) ? attachment.latestVersion['archivabilityError']() : null;
+      attachment.archivable = util.getIn(attachment, ["latestVersion", "archivable"]) ? attachment.latestVersion.archivable() : false;
+      attachment.archivabilityError = util.getIn(attachment, ["latestVersion", "archivabilityError"]) ? attachment.latestVersion.archivabilityError() : null;
       attachment.sendToArchive = ko.observable(false);
       return attachment;
     });
   };
 
   var collectMainDocuments = function(application) {
-    return [{documentNameKey: 'applications.application', metadata: application.metadata}];
+    return [{documentNameKey: "applications.application", metadata: application.metadata}];
   };
 
   var model = function(params) {
@@ -176,7 +178,7 @@
     };
 
     var attachmentTypeLabel = function(groupName, typeName) {
-      return loc(["attachmentType", [groupName, typeName].join('.')].join("."));
+      return loc(["attachmentType", [groupName, typeName].join(".")].join("."));
     };
 
     self.selectableAttachmentTypes = ko.pureComputed(function () {
@@ -186,7 +188,7 @@
           types: _.map(typeGroup[1], function (type) {
             return {
               typeLabel: attachmentTypeLabel(typeGroup[0], type),
-              typeValue: [typeGroup[0], type].join('.')
+              typeValue: [typeGroup[0], type].join(".")
             };
           })
         };
@@ -215,7 +217,7 @@
     };
 
     self.caseFile = ko.observableArray();
-    ajax.query('case-file-data', {id: params.application.id})
+    ajax.query("case-file-data", {id: params.application.id})
       .success(function(data) {
         self.caseFile(data.process);
       })

@@ -18,6 +18,7 @@
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.migration.migration :as migration]
             [lupapalvelu.perf-mon :as perf-mon]
+            [lupapalvelu.control-api :refer [defcontrol] :as control]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vetuma]
             [lupapalvelu.fixture.fixture-api]
@@ -89,6 +90,7 @@
   (perf-mon/init)
 
   (server/add-middleware headers/sanitize-header-values)
+  (server/add-middleware control/lockdown-middleware)
 
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl in port 9090")
@@ -125,29 +127,16 @@
 (defn- stop-jetty! []
   (when-not (nil? @jetty) (swap! jetty server/stop)))
 
-(defpage "/internal/hot-restart" []
-  (if (#{"127.0.0.1" "0:0:0:0:0:0:0:1"} (:remote-addr (noir.request/ring-request)))
-    (do
-      (util/future*
-        (Thread/yield)
-        (env/reload!)
-        (i18n/reload!)
-        (info "Reloaded env and i18n, restarting Jetty...")
-        (stop-jetty!)
-        (mongo/disconnect!)
-        (mongo/connect!)
-        (start-jetty!))
-      (response/status 200 "OK"))
-    (response/status 401 "Unauthorized")))
-
-(defpage "/internal/reload" []
-  (if (#{"127.0.0.1" "0:0:0:0:0:0:0:1"} (:remote-addr (noir.request/ring-request)))
-    (do
-      (env/reload!)
-      (i18n/reload!)
-      (info "Reloaded env and i18n.")
-      (response/status 200 "OK"))
-    (response/status 401 "Unauthorized")))
+(defcontrol "/internal/hot-restart" []
+  (util/future*
+    (Thread/yield)
+    (env/reload!)
+    (i18n/reload!)
+    (info "Reloaded env and i18n, restarting Jetty...")
+    (stop-jetty!)
+    (mongo/disconnect!)
+    (mongo/connect!)
+    (start-jetty!)))
 
 (defn -main [& _]
   (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))

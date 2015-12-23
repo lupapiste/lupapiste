@@ -30,7 +30,13 @@
           <section class="welcome-register-section">
             <h3 data-bind="ltext: 'welcome.notRegistered.title'"></h3>
             <p data-bind="ltext: 'welcome.notRegistered.desc'"></p>
-            <button id="register-button" data-bind="ltext: 'welcome.register'" class="function"></button>
+
+            <!-- ko ifnot: lupapisteApp.models.globalAuthModel.ok("register-user") -->
+            <p data-bind="ltext: 'error.service-lockdown'" class="error-message"></p>
+            <!-- /ko -->
+
+            <button id="register-button" class="function"
+                    data-bind="ltext: 'welcome.register', enable: lupapisteApp.models.globalAuthModel.ok('register-user')"></button>
           </section>
         </div>
       </div>

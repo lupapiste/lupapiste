@@ -8,9 +8,9 @@
 (def kesto (body {:name "kesto" :type :group
                   :body [{:name "alku" :type :date}
                          {:name "loppu" :type :date}
-                         {:name "arki", :type :group, :body [{:name "arkiAlkuAika" :type :time} {:name "arkiLoppuAika" :type :time}]}
-                         {:name "lauantai", :type :group, :body [{:name "lauantaiAlkuAika" :type :time} {:name "lauantaiLoppuAika" :type :time}]}
-                         {:name "sunnuntai", :type :group, :body [{:name "sunnuntaiAlkuAika" :type :time} {:name "sunnuntaiLoppuAika" :type :time}]}]}))
+                         {:name "arki", :type :group, :body [{:name "arkiAlkuAika" :type :string :size "s"} {:name "arkiLoppuAika" :type :string :size "s"}]}
+                         {:name "lauantai", :type :group, :body [{:name "lauantaiAlkuAika" :type :string :size "s"} {:name "lauantaiLoppuAika" :type :string :size "s"}]}
+                         {:name "sunnuntai", :type :group, :body [{:name "sunnuntaiAlkuAika" :type :string :size "s"} {:name "sunnuntaiLoppuAika" :type :string :size "s"}]}]}))
 
 
 (def kesto-mini

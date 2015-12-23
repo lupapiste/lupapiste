@@ -5,6 +5,8 @@ var util = (function($) {
     return _.sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
   }
 
+  function zp(e) { return zeropad.apply(null, e); }
+
   function fluentify(api, context) {
     return _.reduce(_.pairs(api),
                     function(m, pair) {
@@ -63,7 +65,6 @@ var util = (function($) {
     return _.partial(_.join, "").apply(null, _.map(_.zip([3, 3, 4, 4], id.split("-")), zp));
   }
 
-  function zp(e) { return zeropad.apply(null, e); }
 
   function buildingName(building) {
     var buildingObj = (typeof building.index === "function") ? ko.mapping.toJS(building) : building;
@@ -78,7 +79,7 @@ var util = (function($) {
       .addClass("ajax-loading-mask")
       .append($("<div>")
           .addClass("content")
-          .append($("<img src=\"/img/ajax-loader.gif\" class=\"ajax-loader\" width=\"66\" height=\"66\">"))
+          .append($("<img src=\"/lp-static/img/ajax-loader.gif\" class=\"ajax-loader\" width=\"66\" height=\"66\">"))
           .append($("<div>").text(loc("sending"))))
       .fadeIn();
   }
@@ -304,14 +305,14 @@ var util = (function($) {
     );
   }
 
-  function tasksDataBySchemaName(tasks, schemaName, mapper) {
-    return _(tasks).filter(bySchemaName(schemaName)).map(mapper).value();
-  }
-
   function bySchemaName(schemaName) {
     return function(task) {
       return util.getIn(task, ["schema-info", "name"]) === schemaName;
     };
+  }
+
+  function tasksDataBySchemaName(tasks, schemaName, mapper) {
+    return _(tasks).filter(bySchemaName(schemaName)).map(mapper).value();
   }
 
   function calculateVerdictTasks(verdict, tasks) {
