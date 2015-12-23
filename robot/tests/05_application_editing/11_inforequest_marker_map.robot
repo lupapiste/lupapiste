@@ -85,7 +85,7 @@ There are correct amount of correct type of markers on the marker map
   Marker count by type is  1  0  1  1
 
 Open the marker contents window and follow the link displayed in an info card
-  Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-group.png']
+  Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/lp-static/img/map-marker-group.png']
   Wait until  Element should be visible  //div[@id='inforequest-marker-map-contents']
   Click element  xpath=//div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${first-app-id}']/a[@data-test-id='inforequest-link']
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']  ${first-app-id}
@@ -103,10 +103,10 @@ Total marker count is
 
 Marker count by type is
   [Arguments]  ${current-location-amount}  ${same-operation-amount}  ${others-amount}  ${cluster-amount}
-  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-big.png']  ${current-location-amount}
-  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-green.png']  ${same-operation-amount}
-  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-orange.png']  ${others-amount}
-  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/img/map-marker-group.png']  ${cluster-amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/lp-static/img/map-marker-big.png']  ${current-location-amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/lp-static/img/map-marker-green.png']  ${same-operation-amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/lp-static/img/map-marker-orange.png']  ${others-amount}
+  Xpath Should Match X Times  //div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/lp-static/img/map-marker-group.png']  ${cluster-amount}
 
 Total Inforequest info card count on map is
   [Arguments]  ${amount}

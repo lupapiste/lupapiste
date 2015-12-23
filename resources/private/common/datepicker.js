@@ -18,7 +18,7 @@ jQuery(function($){
         dateFormat: "dd.mm.yy",
         firstDay: 1,
         isRTL: false,
-        buttonImage: "/img/calendar.gif",
+        buttonImage: "/lp-static/img/calendar.gif",
         showMonthAfterYear: false,
         yearSuffix: ""
       };
@@ -37,7 +37,7 @@ jQuery(function($){
         dateFormat: "dd.mm.yy",
         firstDay: 1,
         isRTL: false,
-        buttonImage: "/img/calendar.gif",
+        buttonImage: "/lp-static/img/calendar.gif",
         showMonthAfterYear: false,
         yearSuffix: ""
       };

@@ -95,7 +95,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 }
 /* line 109, ../../../private/common-html/sass/partials/_forms.scss */
 .form-indicator .icon {
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   display: none;
   height: 24px;
@@ -893,7 +893,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 /* line 862, ../../../private/common-html/sass/partials/_forms.scss */
 .form-help:before {
   content: " ";
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
@@ -927,7 +927,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 /* line 892, ../../../private/common-html/sass/partials/_forms.scss */
 .form-full-width .form-help:before {
   content: " ";
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
@@ -4052,7 +4052,7 @@ ul.tabs {
 }
 /* line 200, ../../../private/common-html/sass/partials/_modal.scss */
 .dialog-content div.pending div.ajax {
-  background: url(/img/ajax-loader.gif) no-repeat center center;
+  background: url(/lp-static/img/ajax-loader.gif) no-repeat center center;
   margin: auto;
   height: 160px;
 }
@@ -4769,7 +4769,7 @@ ul.no-bullets {
 /* line 107, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
 /* line 112, ../../../private/common-html/sass/partials/_accordion.scss */
@@ -6222,7 +6222,7 @@ div.search i {
   content: "";
   display: block;
   position: absolute;
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0px -3393px;
   height: 22px;
@@ -6236,7 +6236,7 @@ div.search i {
   content: "";
   display: block;
   position: absolute;
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0px -3293px;
   height: 22px;
@@ -7448,7 +7448,7 @@ h2 > i.is-right {
 
 /* line 1, ../../../private/common-html/sass/views/_create_application.scss */
 .ui-autocomplete-loading {
-  background: white url("/img/ajax-loader-16.gif") right center no-repeat;
+  background: white url("/lp-static/img/ajax-loader-16.gif") right center no-repeat;
 }
 
 /* line 5, ../../../private/common-html/sass/views/_create_application.scss */
@@ -7595,7 +7595,7 @@ h2 > i.is-right {
 
 /* line 127, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_close {
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 0px -4100px;
   top: 4px !important;
@@ -8226,7 +8226,7 @@ table.admin-settings td.value .save-indicator {
 #neighbor-show .pending {
   width: 100%;
   height: 100px;
-  background-image: url(/img/ajax-loader.gif);
+  background-image: url(/lp-static/img/ajax-loader.gif);
   background-repeat: no-repeat;
   background-position: center center;
 }
@@ -8329,7 +8329,7 @@ table.admin-settings td.value .save-indicator {
 /* line 75, ../../../private/common-html/sass/views/_register.scss */
 #account-type-selection .account-box.selected:after {
   content: " ";
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   width: 100px;
   height: 100px;
@@ -8702,7 +8702,7 @@ table.admin-settings td.value .save-indicator {
 }
 /* line 43, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .buttons .btn-conversation .unseen-comments, #side-panel .buttons .btn-notice .unseen-comments {
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   background-position: 1px -5396px;
   width: 22px;
@@ -8749,7 +8749,7 @@ table.admin-settings td.value .save-indicator {
 }
 /* line 81, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .close-btn {
-  background-image: url("/img/icons-sprite-1.18.png");
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
@@ -9388,7 +9388,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 #ajax-loader-container div {
   margin-top: 50px;
   padding-top: 100px;
-  background: url(/img/ajax-loader.gif) no-repeat center center;
+  background: url(/lp-static/img/ajax-loader.gif) no-repeat center center;
 }
 /* line 47, ../../../private/common-html/sass/partials/_other.scss */
 #ajax-loader-container p {

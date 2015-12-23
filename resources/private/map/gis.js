@@ -3,12 +3,12 @@ var gis = (function() {
 
   OpenLayers.ImgPath = "/theme/default/img/";
 
-  var iconDefaultPath  = "/img/map-marker-big.png";
+  var iconDefaultPath  = "/lp-static/img/map-marker-big.png";
   var iconLocMapping = {
     "sameLocation"  : iconDefaultPath,
-    "sameOperation" : "/img/map-marker-green.png",
-    "others"        : "/img/map-marker-orange.png",
-    "cluster"       : "/img/map-marker-group.png"
+    "sameOperation" : "/lp-static/img/map-marker-green.png",
+    "others"        : "/lp-static/img/map-marker-orange.png",
+    "cluster"       : "/lp-static/img/map-marker-group.png"
   };
 
   function withSuffix(strOrArr, suffix) {

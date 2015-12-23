@@ -1614,7 +1614,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function loaderImg() {
     var img = document.createElement("img");
-    img.src = "/img/ajax-loader-12.gif";
+    img.src = "/lp-static/img/ajax-loader-12.gif";
     img.alt = "...";
     img.width = 12;
     img.height = 12;
