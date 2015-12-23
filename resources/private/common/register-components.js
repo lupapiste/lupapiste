@@ -42,7 +42,6 @@ jQuery(document).ready(function() {
     {name: "municipality-maps-layers"},
     {name: "municipality-maps-map"},
     {name: "upload"},
-    {name: "leaflet-map"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},
     {name: "vetuma-status"},
