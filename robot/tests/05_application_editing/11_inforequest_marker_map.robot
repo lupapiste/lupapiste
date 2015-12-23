@@ -24,6 +24,7 @@ Mikko as applicant does not see the inforequest marker map
 
 Arto (authority) sees Mikko's new inforequest as a marker on map
   Arto logs in
+  Hide nav-bar
   Open inforequest  ${inforequest-first}  ${propertyId-first}
   Wait until  Element should be visible  //div[@id='inforequest-marker-map']
   Total marker count is  1
@@ -85,6 +86,7 @@ There are correct amount of correct type of markers on the marker map
   Marker count by type is  1  0  1  1
 
 Open the marker contents window and follow the link displayed in an info card
+  Hide nav-bar
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_') and @*='/lp-static/img/map-marker-group.png']
   Wait until  Element should be visible  //div[@id='inforequest-marker-map-contents']
   Click element  xpath=//div[@id='inforequest-marker-map-contents']//div[@data-test-id='inforequest-card-${first-app-id}']/a[@data-test-id='inforequest-link']
