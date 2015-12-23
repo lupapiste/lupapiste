@@ -1,7 +1,7 @@
 var gis = (function() {
   "use strict";
 
-  OpenLayers.ImgPath = "/theme/default/img/";
+  OpenLayers.ImgPath = "/lp-static/lib/openlayers2-img/";
 
   var iconDefaultPath  = "/lp-static/img/map-marker-big.png";
   var iconLocMapping = {
