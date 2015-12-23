@@ -60,7 +60,8 @@
                                                attr: {'data-test-id' : 'open-statement-reply-' + $index()}"></a>
                         <!-- /ko -->
                         <!-- ko if: $component.showReplyState($data) -->
-                        <span data-bind="text: loc(['statement', 'reply', 'state', $data.state()])"></span>
+                        <span data-bind="text: loc(['statement', 'reply', 'state', $data.state()]),
+                                         attr: {'data-test-id' : 'statement-reply-state-' + $index()}"></span>
                         <!-- /ko -->
                       </td>
                       <!-- ko if-not: _.every($component.statements(), $component.isGiven) -->

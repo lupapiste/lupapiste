@@ -101,6 +101,7 @@ Olli requests reply for statement
   Wait until  Element should be visible  statement-submit
   Input text  statement-reply-covering-note  please reply this statement
   Wait and click  statement-submit
+  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-2']  Vastine pyydetty
 
 Olli goes back to statement and sees reply as draft
   Open statement  2
@@ -125,15 +126,27 @@ Veikkos statement is not replyable
   [Teardown]  Return from statement
 
 Mikko writes reply for Olli's statement
-  Open statement  2
+  Wait and click  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//a[@data-test-id='open-statement-reply-2']
   Wait until  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-statement']
   Element should not be visible  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply']
   Wait until  Element should be visible  statement-nothing-to-add
-  # Input text  statement-text  this is my reply
-  # Wait until  Element Should Be Enabled  statement-submit
-  # Click Element  statement-submit
-  [Teardown]  
+  Wait until  Input text  statement-reply-text  this is my reply
+  Wait until  Element Should Be Enabled  statement-submit
+  Click Element  statement-submit
+  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-2']  Vastine annettu
+  [Teardown]  logout
+
+Olli sees statement is replied
+  Olli logs in
+  Open application  ${appname}  564-416-25-22
+  Open tab  statement
+  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-2']  Vastine annettu
+  Open statement  2
+  Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply']
+  Wait until  Textarea Value Should Be  statement-reply-text  this is my reply
+  Wait Until  Element should be disabled  statement-reply-text
+  [Teardown]  logout
 
 *** Keywords ***
 
