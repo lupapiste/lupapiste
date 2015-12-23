@@ -43,7 +43,7 @@
      [:head [:title "Lupapiste.fi"]]
      [:body
       [:div {:style "margin: 40px;"}]
-      [:img {:src (.getAbsolutePath (File. (.toURI (io/resource "public/img/logo-v2-flat.png"))))}]
+      [:img {:src (.getAbsolutePath (File. (.toURI (io/resource "public/lp-static/img/logo-v2-flat.png"))))}]
       [:h1 title]
       [:h2 (:title app)]
       [:hr]

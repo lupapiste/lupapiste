@@ -232,7 +232,7 @@ var LUPAPISTE = LUPAPISTE || {};
       progressBarContainer.style.lineHeight = "0";
 
       var progressBarImg = document.createElement("img");
-      progressBarImg.src = "/img/loader-bar.gif";
+      progressBarImg.src = "/lp-static/img/loader-bar.gif";
       progressBarImg.alt = "...";
       progressBarImg.width = 220;
       progressBarImg.height = 19;

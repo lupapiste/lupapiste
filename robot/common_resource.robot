@@ -114,6 +114,14 @@ Resurrect dev-box
   Execute Javascript  $(".dev-debug").show();
   Wait until  Element should be visible  //div[@class="dev-debug"]
 
+Hide nav-bar
+  Execute Javascript  $("nav.nav-wrapper").hide();
+
+Show nav-bar
+  Execute Javascript  $("nav.nav-wrapper").show();
+  Wait until  Element should be visible  //nav[@class="nav-wrapper"]
+
+
 Language To
   [Arguments]  ${lang}
   Element Should Not Contain  language-select  ${lang}
