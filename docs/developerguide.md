@@ -255,24 +255,23 @@ application-bulletins-list-template.html
 
 Yo. esimerkissä hierarkiassa korkeammalla oleva komponentti on siis saanut koko service-objektin parametrinaan, mutta välittää siitä ainoastaan yhden osan (bulletins) lapsikomponentille. Lapsikomponentti ei taas tiedä mitään servicestä tai muusta sen ylläpitämästä tilasta vaan piirtää itsensä ruudulle pelkästään käyttäen saamiaan tietoja.
 
-Komponentin saamiin tilaobjekteihin liittyy eräs tärkeä konventio:
+![](komponenttiarkkitehtuuri-esimerkki.png)
 
-```
-Parametrina välitetyn tila-objektin tilaa ei pidä muuttaa komponentissa suoraan.
-```
-
-Komponentti toimii seuraavasti:
+Komponentti toimii siis seuraavasti:
 - Saa parametreina ne osat applikaation tilasta, jota tarvitaan komponentin esittämiseen oikein ruudulla
-- Tarjoaa usein joukon joitakin toimintoja käyttäjille, joiden käyttäminen vaikuttaa applikaation tilaan
+  - Koska välitetty tila on yleensä joukko service-kerroksen omistamia ko-observableja, myöhemmät tilan muutokset servicessä propagoituvat komponenttihierarkian läpi komponentille.
+- Välittää lapsikomponenteille ne osat saamastaan tilasta, jotka lapsikomponentti tarvitsee.
+- Tarjoaa käyttöliittymässä yleensä joukon joitakin toimintoja käyttäjille, joiden käyttäminen vaikuttaa applikaation tilaan
 - Signaloi hub.js:n avulla millaisia toimintoja käyttäjä on aktivoinut
+  - Käyttäjän toiminnot signaloidaan aina eteenpäin, annettua tilaa ei koskaan muuteta suoraan (ks. alla)
 
 ### Konventiot
 
-Arkkitehtuuriin liittyvät konventiot, tärkeysjärjestyksessä:
+Arkkitehtuuriin liittyvät konventiot:
 
 * **Lähettäessään eventtiä komponentti ei laita eventin parametreihin callback-funktiota datan palautukselle**
   * Callback-funktio rikkoo ajatuksen yksisuuntaisesta tiedon kulusta. Komponenttien lähettämien eventtien tulisi olla "fire-and-forget" -tyylisiä, eli komponentti vain kertoo käyttäjän triggeröimästä tapahtumasta eikä edes välitä käsitteleekö eventtiä kukaan
-  * Käyttäjän triggeröimä tapahtuma voi olla kuitenkin merkityksellinen komponentin tilan kannalta. Tämä tilan muuttuminen tapahtuu automaattisesti kun service käsittelee eventin ja muuttaa omaa sisäistä tilaansa tapahtuman mukaisesti, jonka johdosta tilamuutos välittyy myös komponenttihierarkian läpi eventin lähettäneelle komponentille
+  * Käyttäjän triggeröimä tapahtuma voi olla kuitenkin merkityksellinen komponentin tilan kannalta. Tämä tilan muuttuminen toteutuu kun service käsittelee eventin ja muuttaa omaa sisäistä tilaansa tapahtuman mukaisesti, jonka johdosta tilamuutos välittyy myös komponenttihierarkian läpi eventin lähettäneelle komponentille
 * **Komponentti ei koskaan muuta suoraan saamansa tila-objektin (yleensä kokoelma knockout-observableja) tilaa vaan ainoastaan signaloi käyttäjän tekemisistä hub.js:n kautta**
   * Myös tilan suora muuttaminen komponentissa rikkoo yksisuuntaisen arkkitehtuurin. Tilan muuttumiseen liittyy lähes aina jotain muutakin logiikkaa kuin uuden arvon asettamiset observable-objektiin. Tämän johdosta service-kerroksen tulisi aina vastata tilan muutoksesta ja mahdollisista sivuvaikutuksista.
 * **Komponentin lähettämä signaali kuvaa käyttäjän pyytämää toimintoa, eikä esimerkiksi sitä miten komponentin mielestä tilaa tulisi muuttaa**
