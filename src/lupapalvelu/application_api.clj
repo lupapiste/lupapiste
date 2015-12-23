@@ -434,6 +434,7 @@
     (do
       (update-application command
                           {$set {:location   (a/->location x y)
+                                 :location-wgs84 (coord/convert "EPSG:3067" "WGS84" 5 [x y])
                                  :address    (ss/trim address)
                                  :propertyId propertyId
                                  :title      (ss/trim address)
