@@ -171,7 +171,7 @@
         op-name (-> application :primaryOperation :name)
         link-permit-id (-> application :linkPermitData first :id)]
     (and (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} op-name)
-         (not-empty (enlive/select xml [:MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
+         (not-empty (enlive/select xml [:luvanTunnisteTiedot :MuuTunnus :tunnus (enlive/text-pred #(= link-permit-id %))])))))
 
 (defn verdict-xml-with-foreman-designer-verdicts
   "Normalizes special foreman/designer verdict by creating a proper
