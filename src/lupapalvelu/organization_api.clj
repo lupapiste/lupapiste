@@ -1,11 +1,12 @@
 (ns lupapalvelu.organization-api
   (:import [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.geojson.feature FeatureJSON]
-           [org.opengis.feature.simple SimpleFeature]
+           [org.geotools.feature.simple SimpleFeatureBuilder]
+           [org.geotools.geojson.geom GeometryJSON]
            [org.geotools.geometry.jts JTS]
            [org.geotools.referencing CRS]
-           [org.geotools.feature.simple SimpleFeatureBuilder]
            [org.geotools.referencing.crs DefaultGeographicCRS]
+           [org.opengis.feature.simple SimpleFeature]
            [java.util ArrayList])
 
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
@@ -464,8 +465,9 @@
   (if (seq orgAuthz)
     (let [organization-areas (mongo/select
                                :organizations
-                               {:_id {$in (keys orgAuthz)} :areas {$exists true}}
-                               [:areas :name])
+                               {:_id {$in (keys orgAuthz)} :areas-wgs84 {$exists true}}
+                               [:areas-wgs84 :name])
+          organization-areas (map #(clojure.set/rename-keys % {:areas-wgs84 :areas}) organization-areas)
           result (map (juxt :id #(select-keys % [:areas :name])) organization-areas)]
       (ok :areas (into {} result)))
     (ok :areas {})))
@@ -492,11 +494,9 @@
     (.close iterator)
     (DataUtilities/collection list)))
 
-
 (defn- transform-coordinates-to-wgs84 [collection]
   "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
-  (let [
-        schema (.getSchema collection)
+  (let [schema (.getSchema collection)
         crs (.getCoordinateReferenceSystem schema)
         transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
         iterator (.features collection)
@@ -505,7 +505,7 @@
         list (ArrayList.)
         _ (loop [feature (cast SimpleFeature feature)]
             (when feature
-              (let [geometry  (.getDefaultGeometry feature)
+              (let [geometry (.getDefaultGeometry feature)
                     transformed-geometry (JTS/transform geometry transform)]
                 (.setDefaultGeometry feature transformed-geometry)
                 (.add list feature)))
@@ -534,21 +534,24 @@
       (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
             shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
             data-store (FileDataStoreFinder/getDataStore shape-file)
-            _ (prn "foo1")
-            new-collection (some-> data-store
+            new-collection-wgs84 (some-> data-store
                                    .getFeatureSource
                                    .getFeatures
                                    transform-coordinates-to-wgs84
                                    transform-crs-to-wgs84)
-            _ (prn "new-collection" new-collection)
-            ;areas (json/read-str (.toString (FeatureJSON.) new-collection))
-            areas (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON.) new-collection)))
-            _ (prn "areas" areas)
+            new-collection (some-> data-store
+                                   .getFeatureSource
+                                   .getFeatures
+                                   transform-crs-to-wgs84)
+            precision      13 ; FeatureJSON shows only 4 decimals by default
+            areas (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
+            areas-wgs84 (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
             ensured-areas (geo/ensure-features areas)
-            _ (prn "ensured-areas" ensured-areas)]
-        #_(when (geo/validate-features (:features ensured-areas))
+            ensured-areas-wgs84 (geo/ensure-features areas-wgs84)]
+        (when (geo/validate-features (:features ensured-areas))
           (fail! :error.coordinates-not-epsg3067))
-        (o/update-organization org-id {$set {:areas ensured-areas}})
+        (o/update-organization org-id {$set {:areas ensured-areas
+                                             :areas-wgs84 ensured-areas-wgs84}})
         (.dispose data-store)
         (->> (assoc file-info :areas ensured-areas :ok true)
           (resp/json)
