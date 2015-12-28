@@ -143,8 +143,8 @@ Go to page
 
 Open tab
   [Arguments]  ${name}
-  Click by test id  application-open-${name}-tab
-  Tab should be visible  ${name}
+  ${is-visible}=  Run Keyword and Return Status  Element should be visible  application-${name}-tab
+  Run keyword unless  ${is-visible}  Run keywords  Click by test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
 
 Tab should be visible
   [Arguments]  ${name}
