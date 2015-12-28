@@ -650,7 +650,7 @@ Assert file latest version
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
-Add first attachment version
+Add attachment version
   [Arguments]  ${path}
   Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
   Click Element  xpath=//button[@id="add-new-attachment-version"]
