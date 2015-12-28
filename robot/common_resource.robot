@@ -860,6 +860,19 @@ Comment count is
 # Invites
 #
 
+Invite ${email} to application
+  Open tab  parties
+  Element should be visible  xpath=//button[@data-test-id='application-invite-person']
+  Click by test id  application-invite-person
+  Wait until  Element should be visible  invite-email
+  Input Text  invite-email  ${email}
+  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
+  Element should be enabled  xpath=//button[@data-test-id='application-invite-submit']
+  Click by test id  application-invite-submit
+  Element should not be visible  xpath=//div[@id='ModalDialogMask']
+  Wait until  Element should not be visible  invite-email
+
+
 Invite count is
   [Arguments]  ${amount}
   Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
