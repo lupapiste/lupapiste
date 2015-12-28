@@ -604,7 +604,7 @@ Add empty attachment template
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
-  [Arguments]  ${kind}  ${path}  ${description}  ${operation}
+  [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=None
   Run Keyword If  '${kind}' == 'application'  Select attachment operation option from dropdown  attachmentsAdd
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
 
@@ -613,7 +613,9 @@ Add attachment
   Select Frame      uploadFrame
   Wait until        Element should be visible  test-save-new-attachment
 
-  Run Keyword If  '${kind}' == 'application'  Set application attachment details on upload  ${operation}
+  Run Keyword If  '${kind}' == 'application'  Set attachment type for upload  ${type}
+  Run Keyword If  '${kind}' == 'application' and '${operation}' is not None  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
+  Run Keyword If  '${kind}' == 'application' and '${operation}' is not None  Select From List  attachmentOperation  ${operation}
 
   Input text        text  ${description}
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
@@ -622,15 +624,13 @@ Add attachment
   Click element     test-save-new-attachment
   Unselect Frame
   Wait until  Element should not be visible  upload-dialog
-  Wait Until Page Contains  Muu liite
+  Run Keyword If  '${kind}' == 'application'  Wait until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='${type}']
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
-Set application attachment details on upload
-  [Arguments]  ${operation}
-  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
-  Select From List  attachmentType  muut.muu
-  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
-  Select From List  attachmentOperation  ${operation}
+Set attachment type for upload
+  [Arguments]  ${type}
+  Wait until  Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='${type}']
+  Select From List  attachmentType  ${type}
 
 Open attachment details
   [Arguments]  ${type}
