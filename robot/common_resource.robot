@@ -604,7 +604,7 @@ Add empty attachment template
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
-  [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=None
+  [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
   Run Keyword If  '${kind}' == 'application'  Select attachment operation option from dropdown  attachmentsAdd
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
 
@@ -614,8 +614,8 @@ Add attachment
   Wait until        Element should be visible  test-save-new-attachment
 
   Run Keyword If  '${kind}' == 'application'  Set attachment type for upload  ${type}
-  Run Keyword If  '${kind}' == 'application' and '${operation}' is not None  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
-  Run Keyword If  '${kind}' == 'application' and '${operation}' is not None  Select From List  attachmentOperation  ${operation}
+  Run Keyword If  '${kind}' == 'application' and $operation  Wait until  Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
+  Run Keyword If  '${kind}' == 'application' and $operation  Select From List  attachmentOperation  ${operation}
 
   Input text        text  ${description}
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
