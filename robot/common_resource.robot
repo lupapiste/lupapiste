@@ -3,6 +3,7 @@
 Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
 Library        String
+Library        OperatingSystem
 
 *** Variables ***
 
@@ -665,7 +666,8 @@ Add attachment version
   # Wait Until     Element Should Be Enabled  test-save-new-attachment
   Click element  test-save-new-attachment
   Unselect Frame
-  Wait until     Page should contain element  xpath=//div[@class='attachment-label']
+  ${path}  ${filename}=  Split Path  ${path}
+  Wait until     Element Text Should Be  xpath=//section[@id='attachment']//span[@id='test-attachment-file-name']/a  ${filename}
 
 Select operation path by permit type
   [Arguments]  ${permitType}
