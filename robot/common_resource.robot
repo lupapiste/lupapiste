@@ -864,6 +864,7 @@ Comment count is
 
 Invite ${email} to application
   Open tab  parties
+  ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/ul/li[@class='party']
   Element should be visible  xpath=//button[@data-test-id='application-invite-person']
   Click by test id  application-invite-person
   Wait until  Element should be visible  invite-email
@@ -871,9 +872,12 @@ Invite ${email} to application
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Element should be enabled  xpath=//button[@data-test-id='application-invite-submit']
   Click by test id  application-invite-submit
-  Element should not be visible  xpath=//div[@id='ModalDialogMask']
-  Wait until  Element should not be visible  invite-email
-
+  Wait Until  Element Should Not Be Visible  invite-email
+  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//li[@class='party'][${invites_count} + 1]
+  ${email_found}=  Run Keyword And Return Status  Element Should Be Visible  xpath=//div[@class='parties-list']//span[@class='person']/span[2][contains(., '${email}')]
+  # If specified email was not found from auths, try to parse username from the email and test if username exists (case of pena)
+  ${username}=  Fetch From Left  ${email}  @
+  Run Keyword Unless  ${email_found}  Element Should Be Visible  xpath=//div[@class='parties-list']//span[@class='person']/span[2][contains(., '${username}')]
 
 Invite count is
   [Arguments]  ${amount}
