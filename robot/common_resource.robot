@@ -633,9 +633,9 @@ Set attachment type for upload
   Select From List  attachmentType  ${type}
 
 Open attachment details
-  [Arguments]  ${type}
+  [Arguments]  ${type}  ${nth}=1
   Open tab  attachments
-  ${path} =  Set Variable  xpath=//div[@id='application-attachments-tab']//a[@data-test-type="${type}"]
+  ${path} =  Set Variable  xpath=//div[@id='application-attachments-tab']//td[@class='attachment-type-id']//a[@data-test-type="${type}"][${nth}]
   Wait Until  Page Should Contain Element  ${path}
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
