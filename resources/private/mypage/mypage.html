@@ -171,7 +171,7 @@
                             data-test-id="filename"></div>
                         </td>
                         <td>
-                          <!-- ko ifnot: disable-->
+                          <!-- ko ifnot: $parent.disable-->
                           <a data-bind="ltext: 'userinfo.architect.attachments.load',
                                         attr: {href: '/api/raw/download-user-attachment?attachment-id=' + $data['attachment-id']}"
                              data-test-id="load" href="#" target="_blank"></a>
