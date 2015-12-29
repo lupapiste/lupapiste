@@ -7,7 +7,8 @@
             [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.disk-writer :as writer]))
+            [lupapalvelu.xml.disk-writer :as writer]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]))
 
 ;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
@@ -270,7 +271,7 @@
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :primaryOperation :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
@@ -322,10 +323,10 @@
                       #(when (= {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %)) %)
                       attachments)
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
-        canonical-attachments (when attachment-target (mapping-common/get-attachments-as-canonical
+        canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
                                                         begin-of-link attachment-target))
-        canonical-pk-liite (first (mapping-common/get-attachments-as-canonical
+        canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
                                      {:attachments [poytakirja] :title (:title application)}
                                      begin-of-link attachment-target))
         canonical-pk (:Liite canonical-pk-liite)

@@ -12,7 +12,8 @@
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.xml.disk-writer :as writer]))
+            [lupapalvelu.xml.disk-writer :as writer]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]))
 
 ;RakVal
 
@@ -373,10 +374,10 @@
   (let [attachments (filter #(= attachment-target (:target %)) (:attachments application))
         poytakirja  (some #(when (=  {:type-group "muut", :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %) ) %) attachments)
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
-        canonical-attachments (when attachment-target (mapping-common/get-attachments-as-canonical
+        canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
                                                         begin-of-link attachment-target))
-        canonical-pk-liite (first (mapping-common/get-attachments-as-canonical
+        canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
                                      {:attachments [poytakirja] :title (:title application)}
                                      begin-of-link attachment-target))
         canonical-pk (:Liite canonical-pk-liite)
@@ -465,7 +466,7 @@
   [application lang krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments (unsent-attachments-to-canonical application lang)
 
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         canonical (assoc-in canonical-without-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-canonical)
@@ -533,7 +534,7 @@
                               (get-in canonical-without-attachments
                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments-canonical
                                           {:Liite
                                            {:kuvaus "Vireille tullut hakemus"
