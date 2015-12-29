@@ -7583,6 +7583,18 @@ table.attachments-template-table td.attachment-version-info {
   background-color: transparent;
 }
 
+/* line 209, ../../../private/common-html/sass/partials/_tables.scss */
+td.positive {
+  background-color: #2ca92c;
+  color: white;
+}
+
+/* line 213, ../../../private/common-html/sass/partials/_tables.scss */
+td.negative {
+  background-color: #df3215;
+  color: white;
+}
+
 /*Tab styles*/
 /* line 42, ../../../private/common-html/sass/partials/_tabs.scss */
 .tab-wrapper {
