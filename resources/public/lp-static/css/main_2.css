@@ -1,14 +1,10 @@
 @charset "UTF-8";
-/* line 524, ../../../private/common-html/sass/partials/_buttons.scss */
-.remove-button .remove-button__row button.primary {
-  margin-right: -3px;
-}
 
-/* line 532, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 534, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 528, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
@@ -5992,22 +5988,22 @@ div.search i {
   color: #f39129;
   background-color: none;
 }
-/* line 220, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 214, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:link, .bulletin-comment .bulletin-comment__name:visited {
   color: #f39129;
   background-color: none;
 }
-/* line 224, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 218, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:hover {
   color: #f7ac2e;
   background-color: none;
 }
-/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 222, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:active, .bulletin-comment .bulletin-comment__name.active {
   color: #fbc732;
   background-color: none;
 }
-/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 226, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:disabled, .bulletin-comment .bulletin-comment__name.disabled, .bulletin-comment .bulletin-comment__name.waiting {
   cursor: default !important;
   color: white !important;
@@ -8929,13 +8925,13 @@ table.admin-settings td.value .save-indicator {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 448, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 442, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 453, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 447, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
