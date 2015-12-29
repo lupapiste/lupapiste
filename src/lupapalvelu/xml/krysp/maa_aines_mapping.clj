@@ -126,7 +126,7 @@
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
-        canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        canonical-with-statement-attachments (attachments-canon/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :liitetieto]

@@ -548,7 +548,7 @@
                                             :muokkausHetki (util/to-xml-datetime (now))
                                             :versionumero 1
                                             :tyyppi "hakemus_taustajarjestelmaan_siirrettaessa"}})
-        canonical-with-statement-attachments  (mapping-common/add-statement-attachments
+        canonical-with-statement-attachments  (attachments-canon/add-statement-attachments
                                                 canonical-without-attachments
                                                 statement-attachments
                                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])

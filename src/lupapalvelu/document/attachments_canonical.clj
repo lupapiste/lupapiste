@@ -121,3 +121,18 @@
 (defn flatten-statement-attachments [statement-attachments]
   (let [attachments (for [statement statement-attachments] (vals statement))]
     (reduce concat (reduce concat attachments))))
+
+(defn add-statement-attachments [canonical statement-attachments lausunto-path]
+  (if (empty? statement-attachments)
+    canonical
+    (reduce
+      (fn [c a]
+        (let [lausuntotieto (get-in c lausunto-path)
+              lausunto-id (name (first (keys a)))
+              paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id) %) lausuntotieto)
+              index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
+              paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
+              paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
+          (assoc-in c lausunto-path paivitetty)))
+      canonical
+      statement-attachments)))
