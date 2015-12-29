@@ -1,4 +1,4 @@
-﻿@charset "UTF-8";
+@charset "UTF-8";
 /*!
  * ajk's Hot New Template
  * Made by ajk (ajk.fi)
@@ -10843,7 +10843,22 @@ span.icon_clear:before {
 }
 /* line 141, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .link-permit-item {
+  color: #f39129;
   text-decoration: none;
+}
+/* line 14, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:link, .application_summary .application_summary_info .link-permit-item:visited {
+  color: #f39129;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 21, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:active {
+  color: #fbc732;
+  text-decoration: underline;
 }
 /* line 145, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info p, .application_summary .application_summary_info .application_summary_text, .application_summary .application_summary_info ul {
