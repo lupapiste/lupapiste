@@ -68,6 +68,18 @@
 (defn documents-without-blanks [{documents :documents}]
   (walk/postwalk empty-strings-to-nil documents))
 
+;;;
+;;; Statement
+;;;
+
+(defn statements-ids-with-status [lausuntotieto]
+  (reduce
+    (fn [r l]
+      (if (get-in l [:Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto])
+        (conj r (get-in l [:Lausunto :id]))
+        r))
+    #{} lausuntotieto))
+
 (def- puolto-mapping {:ehdoilla "ehdoilla"
                       :ei-puolla "ei puolla"
                       :puoltaa "puoltaa"

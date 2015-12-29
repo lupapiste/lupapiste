@@ -7,13 +7,14 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]
+            [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
-            [lupapalvelu.xml.disk-writer :as writer]
-            [lupapalvelu.document.attachments-canonical :as attachments-canon]))
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 ;RakVal
 
@@ -530,7 +531,7 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments  (application-to-canonical application lang)
-        statement-given-ids (mapping-common/statements-ids-with-status
+        statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)

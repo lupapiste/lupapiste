@@ -2,11 +2,12 @@
   (:require [sade.util :as util]
             [sade.core :refer [now]]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]
+            [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.maa-aines-canonical :as maa-aines-canonical]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.disk-writer :as writer]
-            [lupapalvelu.document.attachments-canonical :as attachments-canon]))
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (def maaAineslupaAsia
   [mapping-common/yksilointitieto
@@ -122,7 +123,7 @@
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [krysp-polku-lausuntoon [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :lausuntotieto]
         canonical-without-attachments  (maa-aines-canonical/maa-aines-canonical application lang)
-        statement-given-ids (mapping-common/statements-ids-with-status
+        statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)

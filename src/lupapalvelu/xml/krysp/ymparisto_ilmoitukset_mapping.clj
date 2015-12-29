@@ -2,10 +2,11 @@
   (:require
     [lupapalvelu.xml.emit :refer [element-to-xml]]
     [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+    [lupapalvelu.document.attachments-canonical :as attachments-canon]
+    [lupapalvelu.document.canonical-common :as common]
     [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as ct]
     [lupapalvelu.permit :as permit]
-    [lupapalvelu.xml.disk-writer :as writer]
-    [lupapalvelu.document.attachments-canonical :as attachments-canon]))
+    [lupapalvelu.xml.disk-writer :as writer]))
 
 (def ilmoitus_to_krysp_212
   {:tag :Ilmoitukset
@@ -94,7 +95,7 @@
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [krysp-polku-lausuntoon [:Ilmoitukset :melutarina :Melutarina :lausuntotieto]
         canonical-without-attachments  (ct/meluilmoitus-canonical application lang)
-        statement-given-ids (mapping-common/statements-ids-with-status
+        statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)

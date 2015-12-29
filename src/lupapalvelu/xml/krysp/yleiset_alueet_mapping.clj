@@ -3,12 +3,12 @@
             [sade.core :refer :all]
             [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]
+            [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.disk-writer :as writer]
-            [lupapalvelu.document.attachments-canonical :as attachments-canon]))
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 ;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
@@ -268,11 +268,11 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on YA applications."
   [application lang submitted-application krysp-version output-dir begin-of-link]
-  (let [lupa-name-key (ya-operation-type-to-schema-name-key
+  (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                         (-> application :primaryOperation :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
-        statement-given-ids (mapping-common/statements-ids-with-status
+        statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)

@@ -627,15 +627,6 @@
            %))
       children)))
 
-(defn statements-ids-with-status [lausuntotieto]
-  (reduce
-    (fn [r l]
-      (if (get-in l [:Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto])
-        (conj r (get-in l [:Lausunto :id]))
-        r))
-    #{} lausuntotieto))
-
-
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))

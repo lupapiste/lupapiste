@@ -1,10 +1,11 @@
 (ns lupapalvelu.xml.krysp.poikkeamis-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]
+            [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.xml.disk-writer :as writer]
-            [lupapalvelu.document.attachments-canonical :as attachments-canon]))
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
                                                   {:tag :paakayttotarkoitusKoodi}]}]})
@@ -133,7 +134,7 @@
                       :default nil)
         krysp-polku-lausuntoon (conj krysp-polku :lausuntotieto)
         canonical-without-attachments  (poikkeus-application-to-canonical application lang)
-        statement-given-ids (mapping-common/statements-ids-with-status
+        statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
