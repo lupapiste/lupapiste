@@ -113,3 +113,11 @@
                            meta (get-attachment-meta attachment application)
                            building-ids (get-attachment-building-ids attachment unwrapped-app)]]
                  {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta building-ids)}))))
+
+;;
+;;  Statement attachments
+;;
+
+(defn flatten-statement-attachments [statement-attachments]
+  (let [attachments (for [statement statement-attachments] (vals statement))]
+    (reduce concat (reduce concat attachments))))

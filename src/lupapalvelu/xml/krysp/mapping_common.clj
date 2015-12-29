@@ -674,10 +674,6 @@
       canonical
       statement-attachments)))
 
-(defn flatten-statement-attachments [statement-attachments]
-  (let [attachments (for [statement statement-attachments] (vals statement))]
-    (reduce concat (reduce concat attachments))))
-
 (defn attachment-details-from-canonical
   "Returns sequence of attachment details as maps from canonical"
   [attachments]
