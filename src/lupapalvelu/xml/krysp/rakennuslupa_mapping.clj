@@ -534,7 +534,7 @@
         statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
-        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        statement-attachments (attachments-canon/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments-canonical
                                           {:Liite

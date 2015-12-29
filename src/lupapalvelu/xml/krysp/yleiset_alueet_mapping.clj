@@ -275,7 +275,7 @@
         statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
-        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        statement-attachments (attachments-canon/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         canonical-with-statement-attachments (attachments-canon/add-statement-attachments
                                                canonical-without-attachments
                                                statement-attachments

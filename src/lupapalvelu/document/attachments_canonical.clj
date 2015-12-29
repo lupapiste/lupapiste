@@ -136,3 +136,25 @@
           (assoc-in c lausunto-path paivitetty)))
       canonical
       statement-attachments)))
+
+
+(defn get-liite-for-lausunto [attachment application begin-of-link]
+  (let [type "Lausunto"
+        title (str (:title application) ": " type "-" (:id attachment))
+        file-id (get-in attachment [:latestVersion :fileId])
+        attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+        link (str begin-of-link attachment-file-name)
+        meta (get-attachment-meta attachment application)
+        building-ids (get-attachment-building-ids attachment (tools/unwrapped application))]
+    {:Liite (get-Liite title link attachment type file-id attachment-file-name meta building-ids)}))
+
+(defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
+  (let [statement-attachments-by-id (group-by
+                                      (util/fn-> :target :id keyword)
+                                      (filter
+                                        (util/fn-> :target :type (= "statement"))
+                                        (:attachments application)))
+        canonical-attachments (for [id allowed-statement-ids]
+                                {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]
+                                                (get-liite-for-lausunto attachment application begin-of-link))})]
+    (not-empty canonical-attachments)))
