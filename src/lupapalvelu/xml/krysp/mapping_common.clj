@@ -1,6 +1,5 @@
 (ns lupapalvelu.xml.krysp.mapping-common
-  (:require [clojure.string :as str]
-            [lupapalvelu.permit :as permit]
+  (:require [lupapalvelu.permit :as permit]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -645,7 +644,7 @@
   is returned but not used on this element.  The namespace for this
   element is the ns argument or nothing."
   [k & [ns]]
-  (let [[tag new-ns] (-> k str rest str/join (str/split #"/"))]
+  (let [[tag new-ns] (-> k str rest ss/join (ss/split #"/"))]
     [(merge (when ns {:ns ns})
             {:tag (keyword tag)}) (or new-ns ns)]))
 
