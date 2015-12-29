@@ -302,7 +302,7 @@
 (defn save-jatkoaika-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang organization krysp-version output-dir begin-of-link]
-    (let [lupa-name-key (ya-operation-type-to-schema-name-key
+    (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                           (or
                             (-> application :linkPermitData first :operation keyword)
                             :ya-katulupa-vesi-ja-viemarityot))
@@ -314,7 +314,7 @@
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application katselmus user lang krysp-version output-dir begin-of-link]
-  (let [lupa-name-key (ya-operation-type-to-schema-name-key
+  (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                         (-> application :primaryOperation :name keyword))
         attachment-target {:type "task" :id (:id katselmus)}
 
