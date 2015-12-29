@@ -39,7 +39,7 @@
                       docs)])]
     (->> metas flatten (remove nil?) )))
 
-(defn get-attachment-meta [attachment application]
+(defn- get-attachment-meta [attachment application]
   (let [op-metas (operation-attachment-meta attachment application)
         signatures (:signatures attachment)
         latestVersion (:latestVersion attachment)
@@ -59,7 +59,7 @@
     (remove empty? (concat liitepohja op-metas signatures))))
 
 
-(defn get-Liite [title link attachment type file-id filename & [meta building-ids]]
+(defn- get-Liite [title link attachment type file-id filename & [meta building-ids]]
   {:kuvaus title
    :linkkiliitteeseen link
    :muokkausHetki (util/to-xml-datetime (:modified attachment))
@@ -71,7 +71,7 @@
    :filename filename})
 
 
-(defn get-attachment-building-ids [attachment application]
+(defn- get-attachment-building-ids [attachment application]
   (let [op-ids (attachment-operation-ids attachment application)
         ;; Attachment operations that have buildings
         docs (->> (:documents application)
@@ -138,7 +138,7 @@
       statement-attachments)))
 
 
-(defn get-liite-for-lausunto [attachment application begin-of-link]
+(defn- get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
