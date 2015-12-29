@@ -1,10 +1,6 @@
 (ns lupapalvelu.xml.krysp.mapping-common
   (:require [clojure.string :as str]
-            [lupapalvelu.i18n :refer [with-lang loc localize]]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.disk-writer :as writer]
-            [lupapalvelu.document.attachments-canonical :as attachments-canon]
-            [lupapalvelu.document.tools :as tools]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
