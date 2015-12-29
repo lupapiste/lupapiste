@@ -9,7 +9,8 @@
             [sade.validators :as v]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.statement :as statement]))
 
 
 ; Empty String will be rendered as empty XML element
@@ -94,11 +95,12 @@
                       :poydalle "p\u00f6yd\u00e4lle"})
 
 (defn- get-statement [statement]
-  (let [lausunto {:Lausunto
+  (let [state    (keyword (:state statement))
+        lausunto {:Lausunto
                   {:id (:id statement)
                    :viranomainen (get-in statement [:person :text])
                    :pyyntoPvm (util/to-xml-date (:requested statement))}}]
-    (if-not (:status statement)
+    (if-not (and (:status statement) (statement/post-given-states state))
       lausunto
       (assoc-in lausunto [:Lausunto :lausuntotieto] {:Lausunto
                                                      {:viranomainen (get-in statement [:person :text])
