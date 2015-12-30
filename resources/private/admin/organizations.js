@@ -56,6 +56,16 @@
       return false;
     };
 
+    self.newScope = function(model) {
+      if (!self.pending()) {
+        hub.send("show-dialog", {title: "Lisää lupatyyppi",
+                                       size: "medium",
+                                       component: "create-scope",
+                                       componentParams: {organization: model.organization(),
+                                                         permitTypes:  self.permitTypes()}});
+      }
+    };
+
     self.permanentArchiveEnabled.subscribe(function(value) {
       if (isLoading) {
         return;
@@ -131,6 +141,8 @@
       "loginAsModel": loginAsModel
     });
     $("#organization").applyBindings({organizationModel:organizationModel});
+
+    ko.components.register("create-scope", {viewModel: LUPAPISTE.CreateScopeModel, template: {element: "create-scope-template"}});
   });
 
 })();
