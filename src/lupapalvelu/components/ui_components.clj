@@ -359,10 +359,12 @@
    :admin-app {:depends [:ui-components]
                :js ["admin.js"]}
    :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer]
-               :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"]
+               :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"
+                    "create-scope-model.js"]
                :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
-                      "screenmessages-list.html" "notifications.html"]}
+                      "screenmessages-list.html" "notifications.html"
+                      "create-scope-template.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 

@@ -1,0 +1,12 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="create-scope-template">
+<div class="content">
+  <label>Hakemustyyppi</label>
+  <select data-bind="options: params.permitTypes,
+                     optionsText: _.partial(permitTypeLoc),
+                     value: permitType"></select>
+  <label>Kunta</label>
+  <div data-bind="component: {name: 'autocomplete',
+                              params: {options: municipalities,
+                                       selectedOption: municipality}}"></div>
+</div>
+</script>
