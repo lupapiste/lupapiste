@@ -1,3 +1,17 @@
+/* Autocomplete component provides UI for
+ * autocomplete behaviour. Actual data filtering
+ * should be done outside of this model, using 'query'
+ * and 'options' parameters.
+ * Parameters:
+ *   query (observable string): search text observable
+ *   options (observable array): array of options to show
+ *   optionsCaption: text so show when no selections are selected
+ *   selectedOption (observable): observable for single selection
+ *   selectedOptions (observableArray): observable for multi selections
+ *   tags (boolean): tags mode
+ *   nullable (boolean): true if selected value can be null (ie. Choose... dropdown)
+ *   (lP|p)laholder: search placeholder text, either lockey (lPlaceholder) or text (placeholder)
+ */
 LUPAPISTE.AutocompleteModel = function(params) {
   "use strict";
 
