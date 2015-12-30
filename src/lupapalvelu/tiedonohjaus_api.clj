@@ -9,7 +9,8 @@
             [lupapalvelu.action :as action]
             [lupapiste-commons.tos-metadata-schema :as tms]
             [schema.core :as s]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre]
+            [lupapiste-commons.schema-utils :as schema-utils]))
 
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
@@ -98,8 +99,8 @@
       (fail! "error.invalid.metadata"))))
 
 (defn- update-document-metadata [document metadata user-roles]
-  (let [old-metadata (tms/coerce-metadata-to-schema (:metadata document) [])
-        metadata (->> (tms/coerce-metadata-to-schema metadata [])
+  (let [old-metadata (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap (:metadata document))
+        metadata (->> (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap metadata)
                       (revert-unauthorized-modifications user-roles old-metadata)
                       (#(assoc % :tila (or (:tila old-metadata) :luonnos)))
                       sanitize-metadata)]
