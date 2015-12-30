@@ -1877,11 +1877,7 @@ footer .informations .footer-box a:link, footer .informations .footer-box a:visi
 footer .informations .footer-box a:link:hover, footer .informations .footer-box a:link:active, footer .informations .footer-box a:visited:hover, footer .informations .footer-box a:visited:active {
   color: #fff;
 }
-/* line 45, ../../../private/common-html/sass/partials/_footer.scss */
-footer .informations .footer-box.sade-box a {
-  display: inline;
-}
-/* line 53, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 48, ../../../private/common-html/sass/partials/_footer.scss */
 footer .lupapiste-brand .footer-box {
   color: #0fbbf7;
 }
@@ -1917,58 +1913,58 @@ footer .lupapiste-brand .footer-box a:hover span, footer .lupapiste-brand .foote
 footer .lupapiste-brand .footer-box a span {
   vertical-align: middle;
 }
-/* line 56, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 51, ../../../private/common-html/sass/partials/_footer.scss */
 footer .lupapiste-brand .footer-box a {
   vertical-align: middle;
 }
-/* line 58, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 53, ../../../private/common-html/sass/partials/_footer.scss */
 footer .lupapiste-brand .footer-box a span {
   vertical-align: baseline;
 }
-/* line 62, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 57, ../../../private/common-html/sass/partials/_footer.scss */
 footer .lupapiste-brand .footer-box i {
   vertical-align: middle;
   padding-left: 6px;
 }
-/* line 67, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 62, ../../../private/common-html/sass/partials/_footer.scss */
 footer .lupapiste-brand .footer-align-right {
   float: right;
 }
-/* line 69, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 64, ../../../private/common-html/sass/partials/_footer.scss */
 footer .lupapiste-brand .footer-align-right ul {
   float: right;
 }
 @media (max-width: 991px) {
-  /* line 76, ../../../private/common-html/sass/partials/_footer.scss */
+  /* line 71, ../../../private/common-html/sass/partials/_footer.scss */
   footer .footer-box:nth-child(2n+1) {
     clear: left;
   }
-  /* line 79, ../../../private/common-html/sass/partials/_footer.scss */
+  /* line 74, ../../../private/common-html/sass/partials/_footer.scss */
   footer .footer-box {
     min-width: 49%;
   }
 }
 
 @media (max-width: 991px) {
-  /* line 86, ../../../private/common-html/sass/partials/_footer.scss */
+  /* line 81, ../../../private/common-html/sass/partials/_footer.scss */
   body {
     padding-bottom: 420px !important;
   }
 }
-/* line 91, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 86, ../../../private/common-html/sass/partials/_footer.scss */
 footer ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
 
-/* line 97, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 92, ../../../private/common-html/sass/partials/_footer.scss */
 footer ul li {
   margin-bottom: .5em;
   margin-top: 0;
 }
 
-/* line 104, ../../../private/common-html/sass/partials/_footer.scss */
+/* line 99, ../../../private/common-html/sass/partials/_footer.scss */
 #buildinfo {
   clear: both;
   display: block;

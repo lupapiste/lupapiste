@@ -2443,9 +2443,7 @@
 "final" "fi" "Lainvoimainen"
 "final" "sv" "Lagkraftigt"
 "footer.reload" "fi" "Takaisin ylös"
-"footer.reload" "sv" "Tillbaka till toppen"
-"footer.sade.title" "fi" "SADe-palvelu"
-"footer.sade.title" "sv" "SADe-tjänsten"
+"footer.reload" "sv" "Tillbaka till toppen"t
 "footer.service.info" "fi" "Palveluinfo"
 "footer.service.info" "sv" "Tjänstinfo"
 "footer.service.instructions" "fi" "Palvelun käytön ohjeet"
