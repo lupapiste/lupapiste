@@ -186,6 +186,11 @@
   [_]
   (o/get-organization organizationId))
 
+(defquery permit-types
+  {:user-roles #{:admin}}
+  [_]
+  (ok :permitTypes (keys (permit/permit-types))))
+
 (defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
    :user-roles #{:applicant :authority}}
