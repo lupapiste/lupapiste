@@ -238,7 +238,8 @@ var util = (function($) {
     return _.filter(options.data, function(item) {
       return _.reduce(options.query.split(" "), function(result, word) {
         var dataForLabel = ko.unwrap(item[options.label]);
-        return !_.some(options.selected, item) && dataForLabel !== undefined && _.contains(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
+        var isSelected = _.isArray(options.selected) ? _.some(options.selected, item) : options.selected === item;
+        return !isSelected && dataForLabel !== undefined && _.contains(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }
