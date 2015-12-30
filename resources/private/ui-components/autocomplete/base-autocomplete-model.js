@@ -1,7 +1,7 @@
-/* Autocomplete component provides UI for
+/* Base autocomplete component provides UI for
  * autocomplete behaviour. Actual data filtering
  * should be done outside of this model, using 'query'
- * and 'options' parameters.
+ * and 'options' parameters (see for example, autocomplete-handlers component).
  * Parameters:
  *   query (observable string): search text observable
  *   options (observable array): array of options to show
@@ -12,7 +12,7 @@
  *   nullable (boolean): true if selected value can be null (ie. Choose... dropdown)
  *   (lP|p)laholder: search placeholder text, either lockey (lPlaceholder) or text (placeholder)
  */
-LUPAPISTE.AutocompleteModel = function(params) {
+LUPAPISTE.AutocompleteBaseModel = function(params) {
   "use strict";
 
   var self = this;
