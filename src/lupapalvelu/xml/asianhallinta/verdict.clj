@@ -65,7 +65,7 @@
                               :size file-size
                               :content file
                               :attachment-id attachment-id
-                              :attachment-type {:type-group "muut" :type-id "muu"}
+                              :attachment-type {:type-group "muut" :type-id "paatosote"}
                               :target target
                               :required false
                               :locked true
