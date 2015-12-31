@@ -144,6 +144,32 @@
              :scope.$.opening (when (number? opening) opening)}})
   (ok))
 
+(defcommand add-scope
+  {:description "Admin can add new scopes for organization"
+   :parameters [organization permitType municipality
+                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                opening]
+   :input-validators [permit/permit-type-validator
+                      (fn [{{:keys [municipality]} :data}]
+                        (when-not (and (string? municipality) (= 3 (count municipality)))
+                          (fail :error.invalid-municipality)))]
+   :user-roles #{:admin}}
+  (let [scope-count (mongo/count :organizations {:scope {$elemMatch {:permitType permitType :municipality municipality}}})]
+    (if (zero? scope-count)
+      (do
+        (o/update-organization
+          organization
+          {$push {:scope
+                  {:municipality            municipality
+                   :permitType              permitType
+                   :inforequest-enabled     inforequestEnabled
+                   :new-application-enabled applicationEnabled
+                   :open-inforequest        openInforequestEnabled
+                   :open-inforequest-email  openInforequestEmail
+                   :opening                 (when (number? opening) opening)}}})
+        (ok))
+      (fail :error.organization.duplicate-scope))))
+
 (defcommand add-organization-link
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
