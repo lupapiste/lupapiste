@@ -18,6 +18,9 @@
       <div class="footer-box">
         <h3 data-bind="ltext: 'footer.conversation.title'"></h3>
         <span data-bind="ltext: 'footer.conversation.desc'"></span><br />
+      <!-- ko if: _.includes(sidePanelPages, lupapisteApp.models.rootVMO.currentPage()) -->
+        <a onclick="window.parent.hub.send('show-conversation-panel');return false;" href="#">Avaa keskustelu</a>
+      <!-- /ko -->
       </div>
       <div class="footer-box">
         <h3 data-bind="ltext: 'footer.contact'"></h3>
