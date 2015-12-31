@@ -472,7 +472,7 @@
     (output-attachment preview-id false attachment-fn)))
 
 (defn pre-process-attachment [{:keys [attachment-type filename content]}]
-  (if (= attachment-type {:type-group "muut" :type-id "paatosote"})
+  (if (and (client/enabled?) (= attachment-type {:type-group "muut" :type-id "paatosote"}))
     {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
      :content  (client/convert-to-pdfa filename content)}
     {:filename filename :content  content}))
