@@ -184,7 +184,7 @@
    :input-validators [(partial non-blank-parameters [:organizationId])]
    :user-roles #{:admin}}
   [_]
-  (o/get-organization organizationId))
+  (ok :data (o/get-organization organizationId)))
 
 (defquery permit-types
   {:user-roles #{:admin}}
@@ -193,7 +193,7 @@
 
 (defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
-   :user-roles #{:applicant :authority}}
+   :user-roles #{:applicant :authority :admin}}
   [_]
   (let [munis (municipalities-with-organization)]
     (ok

@@ -28,7 +28,7 @@
               <!-- ko if: $data.municipality == organization.scope[0].municipality && $data.permitType == organization.scope[0].permitType-->
                 <td data-bind="text: organization.id, attr: {'rowspan': organization.scope.length}"></td>
                 <td data-bind="attr: {'rowspan': organization.scope.length}">
-                  <a data-bind="text: organization.name[loc.getCurrentLanguage()], click: $parent.open, attr: {'data-test-id': 'edit-organization-' + organization.id}" href="#"></a>
+                  <a data-bind="text: organization.name[loc.getCurrentLanguage()], click: _.partial(pageutil.openPage, 'organization', $parent.id), attr: {'data-test-id': 'edit-organization-' + organization.id}" href="#"></a>
                 </td>
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
                   [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
