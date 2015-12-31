@@ -1,7 +1,7 @@
 (ns lupapalvelu.pdf.pdf-export
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [clojure.java.io :as io]
-            [pdfa.core :as pdf]
+            [lupapalvelu.pdf.pdfa-core :as pdf]
             [clj-time.local :as tl]
             [clj-time.format :as tf]
             [lupapalvelu.i18n :refer [with-lang loc]]
