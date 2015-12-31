@@ -11,8 +11,7 @@
 
     self.permitTypes = ko.observableArray([]);
 
-    self.open = function(pageLoad) {
-      var orgId = _.last(pageLoad.pagePath);
+    self.open = function(orgId) {
 
       ajax
         .query("organization-by-id", {organizationId: orgId})
@@ -65,10 +64,10 @@
     self.newScope = function(model) {
       if (!self.pending()) {
         hub.send("show-dialog", {title: "Lisää lupatyyppi",
-                                       size: "medium",
-                                       component: "create-scope",
-                                       componentParams: {organization: model.organization(),
-                                                         permitTypes:  self.permitTypes()}});
+                                 size: "medium",
+                                 component: "create-scope",
+                                 componentParams: {organization: model.organization(),
+                                                   permitTypes:  self.permitTypes()}});
       }
     };
 
@@ -95,8 +94,14 @@
 
   var organizationModel = new OrganizationModel();
 
+  hub.onPageLoad("organization", function(pageLoad) {
+    var orgId = _.last(pageLoad.pagePath);
+    organizationModel.open(orgId);
+  });
 
-  hub.onPageLoad("organization", organizationModel.open);
+  hub.subscribe("organization::scope-added", function(data) {
+    organizationModel.open(data.orgId);
+  });
 
 
   $(function() {
