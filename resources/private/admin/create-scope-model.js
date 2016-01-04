@@ -2,9 +2,16 @@ LUPAPISTE.CreateScopeModel = function(params) {
   "use strict";
   var self = this;
   self.params = params;
-  self.organization = self.params.organization;
+  self.organization = params.organization;
   var municipalityNumber = _.first(_.words(self.organization.id(), /-/));
-  self.municipalities = ko.observableArray([{id: "297", label: "Kuopio"}, {id: "295", label: "Luopio"}]);
+  var mappedMunicipalities = _(params.municipalities)
+                              .map(function(muniId) {
+                                return {id: muniId,
+                                        label: loc(["municipality", muniId]) + " (" + muniId + ")"};
+                              })
+                              .sortBy("label")
+                              .value();
+  self.municipalities = ko.observableArray(mappedMunicipalities);
 
   self.permitTypeLoc = function(data) {
     return data + " - " + loc(data);
@@ -26,7 +33,7 @@ LUPAPISTE.CreateScopeModel = function(params) {
     }
     var data = {organization: self.organization.id(),
                 permitType: self.permitType(),
-                municipality: "297",
+                municipality: self.municipality().id,
                 inforequestEnabled: self.infoRequests(),
                 applicationEnabled: self.applicationEnabled(),
                 openInforequestEnabled: self.openInfoRequests(),

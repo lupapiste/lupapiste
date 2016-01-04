@@ -68,7 +68,8 @@
                                  size: "medium",
                                  component: "create-scope",
                                  componentParams: {organization: model.organization(),
-                                                   permitTypes:  self.permitTypes()}});
+                                                   permitTypes:  self.permitTypes(),
+                                                   municipalities: self.municipalities()}});
       }
     };
 
