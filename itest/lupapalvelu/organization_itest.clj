@@ -107,7 +107,7 @@
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
                                :openInforequestEmail "someone@localhost"
                                :opening nil)
-        updated-organization (query admin :organization-by-id :organizationId organization-id)
+        updated-organization (:data (query admin :organization-by-id :organizationId organization-id))
         updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope) updated-organization)]
 
     resp => ok?
@@ -172,7 +172,7 @@
   (fact "An application query correctly returns the 'required fields filling obligatory' and 'kopiolaitos-email' info in the organization meta data"
     (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
           app    (query-application pena app-id)
-          org    (query admin "organization-by-id" :organizationId  (:organization app))
+          org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
           kopiolaitos-email "kopiolaitos@example.com"
           kopiolaitos-orderer-address "Testikatu 1"
           kopiolaitos-orderer-phone "123"
@@ -185,7 +185,7 @@
       (command sipoo "set-organization-app-required-fields-filling-obligatory" :enabled false) => ok?
 
       (let [app    (query-application pena app-id)
-            org    (query admin "organization-by-id" :organizationId  (:organization app))
+            org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
             organizationMeta (:organizationMeta app)]
         (fact "the 'app-required-fields-filling-obligatory' is set to False"
           (:app-required-fields-filling-obligatory org) => false
@@ -211,7 +211,7 @@
         :kopiolaitosOrdererEmail kopiolaitos-orderer-email) => ok?
 
       (let [app    (query-application pena app-id)
-            org    (query admin "organization-by-id" :organizationId  (:organization app))
+            org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
             organizationMeta (:organizationMeta app)]
         (fact "the 'app-required-fields-filling-obligatory' flag is set to true value"
           (:app-required-fields-filling-obligatory org) => true
@@ -278,12 +278,12 @@
 
     (fact "Permanent archive can be enabled"
       (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
-      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:permanent-archive-enabled updated-org) => true))
 
     (fact "Permanent archive can be disabled"
       (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
-      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:permanent-archive-enabled updated-org) => false))))
 
 (facts "Organization names"
