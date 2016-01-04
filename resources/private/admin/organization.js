@@ -10,6 +10,7 @@
     self.pending = ko.observable();
 
     self.permitTypes = ko.observableArray([]);
+    self.municipalities = ko.observableArray([]);
 
     self.open = function(orgId) {
 
@@ -85,9 +86,15 @@
 
     ajax
       .query("permit-types")
-      .pending(self.pending)
       .success(function(d) {
         self.permitTypes(d.permitTypes);
+      })
+      .call();
+
+    ajax
+      .query("municipalities")
+      .success(function(d) {
+        self.municipalities(d.municipalities);
       })
       .call();
   }
