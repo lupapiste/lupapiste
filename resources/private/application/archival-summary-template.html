@@ -18,7 +18,7 @@
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
 
       <div class="buttons">
-        <button class="btn-primary" data-bind="ltext: 'archivalSummary.archiveSelected', enable: archiveButtonEnabled"></button>
+        <button class="btn-primary" data-bind="ltext: 'archivalSummary.archiveSelected', enable: archiveButtonEnabled, click: archiveSelected"></button>
         <a href="#" data-bind="click: selectAll">Valitse kaikki</a>
       </div>
     </div>

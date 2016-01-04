@@ -4,18 +4,23 @@
             [cheshire.core :as json]
             [lupapiste-commons.tos-metadata-schema :as tms]
             [schema.core :as s]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus])
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [clojure.java.io :as io]
+            [lupapalvelu.attachment]
+            [ring.util.codec :as codec])
   (:import (java.text SimpleDateFormat)
            (java.util Date)))
 
-(defn- build-url [& path-parts]
+(defn- build-url [id]
   (let [host (env/value :arkisto :host)
         app-id (env/value :arkisto :app-id)
-        app-key (env/value :arkisto :app-key)]
-    (apply str host path-parts "?app-id=" app-id "&app-key=" app-key)))
+        app-key (env/value :arkisto :app-key)
+        encoded-id (codec/url-encode id)]
+    (str host "/documents/" encoded-id "?app-id=" app-id "&app-key=" app-key)))
 
 (defn- upload-file [id is-or-file content-type metadata]
-  (http/put (build-url "/documents" id) {:multipart
+  (http/put (build-url id) {:multipart
                                          [{:name "metadata"
                                            :mime-type "application/json"
                                            :encoding "UTF-8"
@@ -63,37 +68,48 @@
 (defn- make-version-number [{{{:keys [major minor]} :version} :latestVersion}]
   (str major "." minor))
 
-(defn- generate-archive-metadata [application attachment user]
-  (cond-> {:type               (if attachment (:type attachment) :application)
-           :applicationId      (:_id application)
-           :propertyId         (:propertyId application)
-           :applicant          (:applicant application)
-           :operations         (if (:op attachment)
-                                 (find-op application (get-in attachment [:op :id]))
-                                 (concat [(get-in application [:primaryOperation :name])] (map :name (:secondaryOperations application))))
-           :tosFunction        (first (filter #(= (:tosFunction application) (:code %)) (tiedonohjaus/available-tos-functions (:organization application))))
-           :address            (:address application)
-           :organization       (:organization application)
-           :municipality       (:municipality application)
-           :location           (:location application)
-           :kuntalupatunnukset (map :kuntalupatunnus (:verdicts application))
-           :lupapvm            (get-verdict-date application :lainvoimainen)
-           :paatospvm          (get-verdict-date application :anto)
-           :paatoksentekija    (get-from-verdict-minutes application :paatoksentekija)
-           :tiedostonimi       (if attachment (get-in attachment [:latestVersion :filename] (str (:_id application) ".pdf")))
-           :kasittelija        (select-keys (:authority application) [:username :firstName :lastName])
-           :arkistoija         (select-keys user [:username :firstName :lastName])
-           :kayttotarkoitukset (if (:op attachment)
-                                 (get-usages application (get-in attachment [:op :id]))
-                                 (get-usages application nil))
-           :kieli              "fi"
-           :versio             (if attachment (make-version-number attachment) "1.0")}
+(defn- generate-archive-metadata [application user & [attachment]]
+  (cond-> {:type                (if attachment (:type attachment) :application)
+           :applicationId       (:id application)
+           :buildingIds         (remove nil? (map :buildingId (:buildings application)))
+           :nationalBuildingIds (remove nil? (map :nationalId (:buildings application)))
+           :propertyId          (:propertyId application)
+           :applicant           (:applicant application)
+           :operations          (if (:op attachment)
+                                  (find-op application (get-in attachment [:op :id]))
+                                  (concat [(get-in application [:primaryOperation :name])] (map :name (:secondaryOperations application))))
+           :tosFunction         (first (filter #(= (:tosFunction application) (:code %)) (tiedonohjaus/available-tos-functions (:organization application))))
+           :address             (:address application)
+           :organization        (:organization application)
+           :municipality        (:municipality application)
+           :location            (:location application)
+           :kuntalupatunnukset  (map :kuntalupatunnus (:verdicts application))
+           :lupapvm             (get-verdict-date application :lainvoimainen)
+           :paatospvm           (get-verdict-date application :anto)
+           :paatoksentekija     (get-from-verdict-minutes application :paatoksentekija)
+           :tiedostonimi        (get-in attachment [:latestVersion :filename] (str (:id application) ".pdf"))
+           :kasittelija         (select-keys (:authority application) [:username :firstName :lastName])
+           :arkistoija          (select-keys user [:username :firstName :lastName])
+           :kayttotarkoitukset  (if (:op attachment)
+                                  (get-usages application (get-in attachment [:op :id]))
+                                  (get-usages application nil))
+           :kieli               "fi"
+           :versio              (if attachment (make-version-number attachment) "1.0")}
           (:contents attachment) (conj {:contents (:contents attachment)})
-          (:size attachment) (conj {:size (:size attachment)})
-          (:scale attachment) (conj {:scale (:scale attachment)})))
+          (:size attachment)     (conj {:size (:size attachment)})
+          (:scale attachment)    (conj {:scale (:scale attachment)})
+          true                   (merge (or (:metadata attachment) (:metadata application)))))
 
-(defn send-to-archive [{:keys [attachments] :as application} attachment-ids user archive-application?]
+(defn send-to-archive [{:keys [attachments id] :as application} attachment-ids user archive-application?]
   (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
                                        (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
                                      attachments)]
-    ))
+    (when archive-application?
+      (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
+            metadata (generate-archive-metadata application user)]
+        (upload-file id application-file "application/pdf" metadata)
+        (io/delete-file application-file :silently)))
+    (doseq [attachment selected-attachments]
+      (let [{:keys [content content-type]} (lupapalvelu.attachment/get-attachment-file (get-in attachment [:latestVersion :fileId]))
+            metadata (generate-archive-metadata application user attachment)]
+        (upload-file (:id attachment) (content) content-type metadata)))))

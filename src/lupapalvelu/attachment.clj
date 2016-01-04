@@ -552,4 +552,3 @@
 
 (defn post-process-attachments [application]
   (update-in application [:attachments] (partial map post-process-attachment)))
-

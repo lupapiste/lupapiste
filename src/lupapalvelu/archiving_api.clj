@@ -6,11 +6,11 @@
 
 
 (defcommand archive-documents
-  {:parameters       [:id attachmentIds archiveAppliction]
+  {:parameters       [:id attachmentIds archiveApplication]
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
    :feature          :arkistointi}
   [{:keys [application user] :as command}]
   (if (contains? (get-in user [:orgAuthz (keyword (:organization application))]) :archivist)
-    (archiving/send-to-archive application attachmentIds user archiveApplication)))
+    (archiving/send-to-archive application (set attachmentIds) user archiveApplication)))

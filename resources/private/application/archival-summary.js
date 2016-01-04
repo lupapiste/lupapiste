@@ -195,10 +195,11 @@
       });
     });
 
+    var isSelectedForArchive = function(attachment) {
+      return ko.unwrap(attachment.sendToArchive);
+    };
+
     self.archiveButtonEnabled = ko.pureComputed(function() {
-      var isSelectedForArchive = function(attachment) {
-        return ko.unwrap(attachment.sendToArchive);
-      };
       return _.some(preAttachments(), isSelectedForArchive) || _.some(postAttachments(), isSelectedForArchive) ||
         _.some(mainDocuments(), isSelectedForArchive);
     });
@@ -214,6 +215,27 @@
       _.forEach(self.archivedDocuments(), function(doc) {
         doc.sendToArchive(true);
       });
+    };
+
+    self.archiveSelected = function() {
+      var attachmentIds = _.map(_.filter(self.attachments(), isSelectedForArchive), function(attachment) {
+        return ko.unwrap(attachment.id);
+      });
+      var archiveApplication = ko.unwrap(mainDocuments()[0].sendToArchive);
+      ajax
+        .command("archive-documents",
+          {
+            id: ko.unwrap(params.application.id),
+            attachmentIds: attachmentIds,
+            archiveApplication: archiveApplication
+          })
+        .success(function() {
+          //repository.load(applicationId);
+        })
+        .error(function(e) {
+          error(e.text);
+        })
+        .call();
     };
 
     self.caseFile = ko.observableArray();
