@@ -1,5 +1,5 @@
-(ns lupapalvelu.pdf.pdfa-conversion-client-test
-  (:require [lupapalvelu.pdf.pdfa-conversion-client :as client]
+(ns lupapalvelu.pdf.libreoffice-conversion-client-test
+  (:require [lupapalvelu.pdf.libreoffice-conversion-client :as client]
             [lupapalvelu.pdf.pdf-test-util :as util]
             [midje.sweet :refer :all]
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]

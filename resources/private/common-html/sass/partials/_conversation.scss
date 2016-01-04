@@ -2,7 +2,7 @@
   width:100%;
   display:block;
   margin: $marginL 30px $marginL 0;
-  @include box-sizing(border-box);
+  box-sizing: border-box;
 }
 
 .commenttd{

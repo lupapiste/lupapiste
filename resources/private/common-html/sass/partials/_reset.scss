@@ -78,7 +78,7 @@ button, input[type="button"], input[type="reset"], input[type="submit"] {
 }
 
 input[type="checkbox"], input[type="radio"] {
-  @include box-sizing(border-box);
+  box-sizing: border-box;
 }
 
 input[type="search"] {
