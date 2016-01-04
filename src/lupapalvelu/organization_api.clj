@@ -178,6 +178,11 @@
   [_]
   (o/get-organization organizationId))
 
+(defquery permit-types
+  {:user-roles #{:admin}}
+  [_]
+  (ok :permitTypes (keys (permit/permit-types))))
+
 (defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
    :user-roles #{:applicant :authority}}
@@ -518,7 +523,8 @@
   {:description "Simple RSS feed for construction waste information."
    :parameters [fmt org lang]
    :input-validators [o/valid-feed-format o/valid-org o/valid-language]
-   :user-roles #{:anonymous}}
+   :user-roles #{:anonymous}
+   :feature :rakennusjateilmoitus}
   (o/waste-ads (ss/upper-case org)
                (-> fmt ss/lower-case keyword)
                (-> lang ss/lower-case keyword)))

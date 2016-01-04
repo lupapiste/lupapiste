@@ -4,8 +4,12 @@
 (def municipality-mapping
     "Ajantasaiset kuntaliitokset"
     {"476" "297" ; Maaninka -> Kuopio (2015)
-       "413" "609" ; Lavia -> Pori (2015)
-       "838" "423" ; Tarvasjoki -> Lieto (2015)
+     "413" "609" ; Lavia -> Pori (2015)
+     "838" "423" ; Tarvasjoki -> Lieto (2015)
+     "319" "783" ; Koylio -> Sakyla (2016)
+     "283" "098" ; Hameenkoski -> Hollola (2016)
+     "532" "398" ; Nastola -> Lahti (2016)
+     "164" "301" ; Jalasjarvi -> Kurikka (2016)
      })
 
 (def municipality-codes-2015
@@ -328,6 +332,9 @@
        "989"
        "992"})
 
+(def municipality-codes-2016
+  (disj municipality-codes-2015 "319" "283" "532" "164"))
+
 (def municipality-codes
      "Ajantasaiset kuntanumerot"
-     municipality-codes-2015)
+     municipality-codes-2016)

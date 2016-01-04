@@ -139,7 +139,7 @@ $app-gray-darkest: $gray187;
     }
 
     .link-permit-item {
-      text-decoration: none;
+      @include link;
     }
 
     p, .application_summary_text, ul {

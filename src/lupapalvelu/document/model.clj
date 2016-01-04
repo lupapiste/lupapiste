@@ -189,7 +189,7 @@
         build-row-result   (fn [ind]
                              (map #(hash-map
                                     :path     (-> (map keyword path) (concat [ind %]))
-                                    :element  (assoc (find-by-name (:body element) [%]) :locKey (name %))
+                                    :element  (assoc (find-by-name (:body element) [%]) :locKey (ss/join "." ["huoneistot" (name %)]))
                                     :document (:document info)
                                     :result   [:warn "duplicate-apartment-data"])
                                   fields-to-validate))]

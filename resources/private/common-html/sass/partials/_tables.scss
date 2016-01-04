@@ -205,3 +205,12 @@ table.attachments-template-table {
 .header-table > tfoot > tr:hover {
   background-color: transparent;
 }
+
+td.positive {
+  background-color: $positive;
+  color: white;
+}
+td.negative {
+  background-color: $negative;
+  color: white;
+}

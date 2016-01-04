@@ -19,6 +19,7 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.pdf.pdfa-conversion-client :as client]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
@@ -470,16 +471,25 @@
         (create-preview file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
+(defn pre-process-attachment [{:keys [attachment-type filename content]}]
+  (if (and client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
+    {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
+     :content  (client/convert-to-pdfa filename content)}
+    {:filename filename :content  content}))
+
 (defn attach-file!
-  "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
+  "1) Uploads a file to MongoDB and
+   2) creates a corresponding attachment structure to application and
+   3) creates preview image
+   4) converts to PDF/A if required by attachemnt type
    Content can be a file or input-stream.
    Returns attachment version."
   [options]
   {:pre [(map? (:application options))]}
   (let [db-name mongo/*db-name* ; pass db-name to threadpool context
         file-id (mongo/create-id)
-        {:keys [filename content]} options
         application-id (-> options :application :id)
+        {:keys [filename content]} (pre-process-attachment options)
         sanitazed-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitazed-filename)
         options (merge options {:file-id file-id

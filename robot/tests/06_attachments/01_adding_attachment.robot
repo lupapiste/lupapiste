@@ -27,7 +27,7 @@ Dropdown options for attachment actions should look correct for Mikko
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
@@ -39,7 +39,7 @@ Mikko deletes attachment immediately by using remove icon
 
 Mikko adds again txt attachment with comment
   [Tags]  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  Poistetun liitteen kommentti  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
   Comment count is  1
@@ -101,7 +101,7 @@ Comment is present after delete
 
 Mikko adds txt attachment with comment
   [Tags]  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  operation=Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens application to authorities
   [Tags]  attachments
@@ -245,7 +245,7 @@ Attachment state should be ok
 
 Sonja adds an attachment for Mikko to sign (LPK-517)
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Create new application
@@ -258,7 +258,7 @@ Create new application
 
 Authority adds png attachment without comment
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Signature icon is not visible to authority

@@ -8,6 +8,9 @@
     self.organization = ko.observable({});
     self.permanentArchiveEnabled = ko.observable(false);
     self.indicator = ko.observable(false).extend({notify: "always"});
+    self.pending = ko.observable();
+
+    self.permitTypes = ko.observableArray([]);
 
     self.open = function(organization) {
       // date picker needs an obervable
@@ -65,6 +68,13 @@
         .call();
     });
 
+    ajax
+      .query("permit-types")
+      .pending(self.pending)
+      .success(function(d) {
+        self.permitTypes(d.permitTypes);
+      })
+      .call();
   }
 
   var organizationModel = new OrganizationModel();

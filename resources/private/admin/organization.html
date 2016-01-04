@@ -3,7 +3,8 @@
   <body>
     <section class="page" id="organization">
       <div class="container">
-        <a class="btn btn-nav-back" href="#!/organizations">Organisaatiolistaus</a>
+        <a class="btn secondary" href="#!/organizations">
+                <i class="lupicon-chevron-start"></i><span>Organisaatiolistaus</span></a>
 
         <div data-bind="with: organizationModel">
           <h1 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h1>

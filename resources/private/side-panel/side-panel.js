@@ -28,6 +28,7 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
+  // TODO: sync with app.js sidePanelPages
   var pages = ["application","attachment","statement","neighbors","verdict"];
 
   self.showSidePanel = ko.pureComputed(function() {
@@ -117,6 +118,10 @@ LUPAPISTE.SidePanelModel = function() {
         }}, 1000);
     }
   };
+
+  hub.subscribe({type: "show-conversation-panel"}, function() {
+    self.showConversationPanel(true);
+  });
 
   self.highlightConversation = function() {
     if (!self.showConversationPanel()) {

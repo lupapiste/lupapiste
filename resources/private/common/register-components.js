@@ -21,6 +21,7 @@ jQuery(document).ready(function() {
     {name: "attachments-multiselect"},
     {name: "authority-select"},
     {name: "authority-select-dialog"},
+    {name: "base-autocomplete", model: "autocomplete-base-model"},
     {name: "autocomplete"},
     {name: "export-attachments"},
     {name: "neighbors-owners-dialog"},

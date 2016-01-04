@@ -465,8 +465,18 @@
                           :email "sonja.sibbo@sipoo.fi"
                           :id "516560d6c2e6f603beb85147"}
                  :requested 1368080102631
+                 :state "given"
                  :status "ehdoilla"
-                 :text "Savupiippu pit\u00e4\u00e4 olla."}]
+                 :text "Savupiippu pit\u00e4\u00e4 olla."}
+                {:id "518b3ee60364ff9a63c6d6a2"
+                 :person {:text "Paloviranomainen"
+                          :name "Sonja Sibbo"
+                          :email "sonja.sibbo@sipoo.fi"
+                          :id "516560d6c2e6f603beb85147"}
+                 :requested 1368080102631
+                 :state "draft"
+                 :status "ehdoilla"
+                 :text "Lausunto tulossa..."}]
    :neighbors ctc/neighbors
    :primaryOperation (op-info rakennuksen-muuttaminen)
    :secondaryOperations (map op-info [uusi-rakennus laajentaminen
@@ -1038,7 +1048,18 @@
     (facts "Kaupunkikuvatoimenpide"
            (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
            (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
-           (fact "Rakennelman yksilointitieto" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :yksilointitieto) => "kaupunkikuva-id"))))
+           (fact "Rakennelman yksilointitieto" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :yksilointitieto) => "kaupunkikuva-id"))
+
+    (facts "Statement draft"
+      (let [lausunnot (:lausuntotieto rakennusvalvontaasia)
+            lausunto1 (:Lausunto (first lausunnot))
+            lausunto2 (:Lausunto (second lausunnot))]
+        (count lausunnot) => 2
+        (fact "First is given statement, has lausuntotieto"
+          (:lausuntotieto lausunto1) => truthy)
+        (fact "Second is draft, does not have lausuntotieto"
+          (:lausuntotieto lausunto2) => nil
+          (keys lausunto2) => (just [:id :pyyntoPvm :viranomainen] :in-any-order))))))
 
 (fl/facts* "Canonical model ilman ilmoitusta is correct"
   (let [canonical (application-to-canonical application-rakennuslupa-ilman-ilmoitusta "sv") => truthy
