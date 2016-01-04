@@ -357,18 +357,38 @@
   ^org.geotools.data.simple.SimpleFeatureCollection
   transform-crs-to-wgs84
   "Convert feature crs in collection to WGS84"
-  [^org.geotools.feature.FeatureCollection collection]
-  (let [iterator (.features collection)
+  [org-id ^org.geotools.feature.FeatureCollection collection]
+  (let [existing-areas (mongo/by-id :organizations org-id {:areas.features.id 1 :areas.features.properties.nimi 1 :areas.features.properties.NIMI 1})
+        map-of-existing-areas (into {} (map (fn [a]
+                                              (let [properties (:properties a)
+                                                    nimi (if (contains? properties :NIMI)
+                                                           (:NIMI properties)
+                                                           (:nimi properties))]
+                                                {nimi (:id a)})) (get-in existing-areas [:areas :features])))
+
+        _ (clojure.pprint/pprint map-of-existing-areas)
+        iterator (.features collection)
         list (ArrayList.)
         _ (loop [feature (when (.hasNext iterator)
                            (.next iterator))]
             (when feature
               ; Set CRS to WGS84 to bypass problems when converting to GeoJSON (CRS detection is skipped with WGS84).
               ; Atm we assume only CRS EPSG:3067 is used.
-              (let [feature-type (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
-                    builder (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
-                    _ (.init builder feature) ; init builder with original feature
-                    transformed-feature (.buildFeature builder (mongo/create-id))]
+              ; Always give feature the same id if names match, so that search filters continue to work after reloading shp file
+              ; with same feature names
+              (let [feature-type        (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
+                    name-property       (.getProperty feature "nimi")
+                    name-property       (if-not name-property
+                                          (.getProperty feature "NIMI")
+                                          name-property)
+                    feature-name        (when name-property
+                                          (.getValue name-property))
+                    id                  (if (contains? map-of-existing-areas feature-name)
+                                          (get map-of-existing-areas feature-name)
+                                          (mongo/create-id))
+                    builder             (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
+                    _                   (.init builder feature) ; init builder with original feature
+                    transformed-feature (.buildFeature builder id)]
                 (.add list transformed-feature)))
             (when (.hasNext iterator)
               (recur (.next iterator))))]
@@ -405,11 +425,11 @@
                                      .getFeatureSource
                                      .getFeatures
                                      transform-coordinates-to-wgs84
-                                     transform-crs-to-wgs84)
+                                     ((partial transform-crs-to-wgs84 org-id)))
         new-collection (some-> data-store
                                .getFeatureSource
                                .getFeatures
-                               transform-crs-to-wgs84)
+                               ((partial transform-crs-to-wgs84 org-id)))
         precision      13 ; FeatureJSON shows only 4 decimals by default
         areas (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
         areas-wgs84 (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
@@ -418,6 +438,6 @@
     (when (geo/validate-features (:features ensured-areas))
       (fail! :error.coordinates-not-epsg3067))
     (update-organization org-id {$set {:areas ensured-areas
-                                         :areas-wgs84 ensured-areas-wgs84}})
+                                       :areas-wgs84 ensured-areas-wgs84}})
     (.dispose data-store)
     ensured-areas))
