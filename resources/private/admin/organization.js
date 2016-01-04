@@ -63,7 +63,7 @@
 
     self.newScope = function(model) {
       if (!self.pending()) {
-        hub.send("show-dialog", {title: "Lisää lupatyyppi",
+        hub.send("show-dialog", {title: "Lis&auml;&auml; lupatyyppi",
                                  size: "medium",
                                  component: "create-scope",
                                  componentParams: {organization: model.organization(),
