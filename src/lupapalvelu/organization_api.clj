@@ -1,19 +1,8 @@
 (ns lupapalvelu.organization-api
-  (:import [org.geotools.data FileDataStoreFinder DataUtilities]
-           [org.geotools.geojson.feature FeatureJSON]
-           [org.geotools.feature.simple SimpleFeatureBuilder]
-           [org.geotools.geojson.geom GeometryJSON]
-           [org.geotools.geometry.jts JTS]
-           [org.geotools.referencing CRS]
-           [org.geotools.referencing.crs DefaultGeographicCRS]
-           [org.opengis.feature.simple SimpleFeature]
-           [java.util ArrayList])
-
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [cheshire.core :as cheshire]
             [schema.core :as sc]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
@@ -39,9 +28,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.logging :as logging]
-            [lupapalvelu.geojson :as geo]
-            [clojure.data.json :as json]))
+            [lupapalvelu.logging :as logging]))
 ;;
 ;; local api
 ;;
@@ -472,48 +459,6 @@
       (ok :areas (into {} result)))
     (ok :areas {})))
 
-(defn-
-  ^org.geotools.data.simple.SimpleFeatureCollection
-  transform-crs-to-wgs84
-  "Convert feature crs in collection to WGS84"
-  [^org.geotools.feature.FeatureCollection collection]
-  (let [iterator (.features collection)
-        list (ArrayList.)
-        _ (loop [feature (when (.hasNext iterator)
-                           (.next iterator))]
-            (when feature
-              ; Set CRS to WGS84 to bypass problems when converting to GeoJSON (CRS detection is skipped with WGS84).
-              ; Atm we assume only CRS EPSG:3067 is used.
-              (let [feature-type (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
-                    builder (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
-                    _ (.init builder feature) ; init builder with original feature
-                    transformed-feature (.buildFeature builder (mongo/create-id))]
-                (.add list transformed-feature)))
-            (when (.hasNext iterator)
-              (recur (.next iterator))))]
-    (.close iterator)
-    (DataUtilities/collection list)))
-
-(defn- transform-coordinates-to-wgs84 [collection]
-  "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
-  (let [schema (.getSchema collection)
-        crs (.getCoordinateReferenceSystem schema)
-        transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
-        iterator (.features collection)
-        feature (when (.hasNext iterator)
-                  (.next iterator))
-        list (ArrayList.)
-        _ (loop [feature (cast SimpleFeature feature)]
-            (when feature
-              (let [geometry (.getDefaultGeometry feature)
-                    transformed-geometry (JTS/transform geometry transform)]
-                (.setDefaultGeometry feature transformed-geometry)
-                (.add list feature)))
-            (when (.hasNext iterator)
-              (recur (.next iterator))))]
-    (.close iterator)
-    (DataUtilities/collection list)))
-
 (defraw organization-area
   {:user-roles #{:authorityAdmin}}
   [{user :user {[{:keys [tempfile filename size]}] :files created :created} :data :as action}]
@@ -526,37 +471,12 @@
                    :organization org-id
                    :created      created}
         tmpdir (fs/temp-dir "area")]
-
     (try+
-      (when-not (= content-type "application/zip")
-        (fail! :error.illegal-shapefile))
-
-      (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
-            shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
-            data-store (FileDataStoreFinder/getDataStore shape-file)
-            new-collection-wgs84 (some-> data-store
-                                   .getFeatureSource
-                                   .getFeatures
-                                   transform-coordinates-to-wgs84
-                                   transform-crs-to-wgs84)
-            new-collection (some-> data-store
-                                   .getFeatureSource
-                                   .getFeatures
-                                   transform-crs-to-wgs84)
-            precision      13 ; FeatureJSON shows only 4 decimals by default
-            areas (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
-            areas-wgs84 (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
-            ensured-areas (geo/ensure-features areas)
-            ensured-areas-wgs84 (geo/ensure-features areas-wgs84)]
-        (when (geo/validate-features (:features ensured-areas))
-          (fail! :error.coordinates-not-epsg3067))
-        (o/update-organization org-id {$set {:areas ensured-areas
-                                             :areas-wgs84 ensured-areas-wgs84}})
-        (.dispose data-store)
-        (->> (assoc file-info :areas ensured-areas :ok true)
-          (resp/json)
-          (resp/content-type "application/json")
-          (resp/status 200)))
+      (let [areas (o/parse-shapefile-to-organization-areas org-id tempfile tmpdir file-info)]
+        (->> (assoc file-info :areas areas :ok true)
+             (resp/json)
+             (resp/content-type "application/json")
+             (resp/status 200)))
       (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
         (resp/status 400 text))
       (catch Throwable t
