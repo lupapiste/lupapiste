@@ -152,7 +152,7 @@
                 opening]
    :input-validators [permit/permit-type-validator
                       (fn [{{:keys [municipality]} :data}]
-                        (when-not (and (string? municipality) (= 3 (count municipality)))
+                        (when-not (contains? muni/municipality-codes municipality)
                           (fail :error.invalid-municipality)))]
    :user-roles #{:admin}}
   (let [scope-count (mongo/count :organizations {:scope {$elemMatch {:permitType permitType :municipality municipality}}})]
