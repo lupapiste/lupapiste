@@ -19,7 +19,7 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.pdf.pdfa-conversion-client :as client]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
@@ -472,9 +472,9 @@
     (output-attachment preview-id false attachment-fn)))
 
 (defn pre-process-attachment [{:keys [attachment-type filename content]}]
-  (if (and client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
+  (if (and libreoffice-client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
     {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
-     :content  (client/convert-to-pdfa filename content)}
+     :content  (libreoffice-client/convert-to-pdfa filename content)}
     {:filename filename :content content}))
 
 (defn attach-file!
