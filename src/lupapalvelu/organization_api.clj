@@ -19,10 +19,11 @@
             [me.raynes.fs :as fs]
             [slingshot.slingshot :refer [try+]]
             [sade.core :refer [ok fail fail! now]]
-            [sade.util :as util]
             [sade.env :as env]
-            [sade.strings :as ss]
+            [sade.municipality :as muni]
             [sade.property :as p]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
@@ -225,6 +226,11 @@
     (ok
       :municipalities (:all munis)
       :municipalitiesWithBackendInUse (:with-backend munis))))
+
+(defquery municipalities
+  {:description "Returns a list of all municipality IDs. For admin use."
+   :user-roles #{:admin}}
+  (ok :municipalities muni/municipality-codes))
 
 (defquery municipality-active
   {:parameters [municipality]
