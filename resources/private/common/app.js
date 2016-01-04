@@ -278,7 +278,9 @@ var LUPAPISTE = LUPAPISTE || {};
         currentLanguage: loc.getCurrentLanguage(),
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu,
-        showArchiveMenuOptions: self.showArchiveMenuOptions
+        showArchiveMenuOptions: self.showArchiveMenuOptions,
+        // TODO: sync with side-panel.js sidePanelPages
+        sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
       };
 
       $("#app").applyBindings(lupapisteApp.models.rootVMO);
