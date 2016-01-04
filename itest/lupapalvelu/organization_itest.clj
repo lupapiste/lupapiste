@@ -1,9 +1,11 @@
 (ns lupapalvelu.organization-itest
   (:require [midje.sweet :refer :all]
             [clojure.java.io :as io]
+            [clojure.set :refer [difference]]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.proxy-services :as proxy]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -116,6 +118,46 @@
     (fact "new-application-enabled" (:new-application-enabled updated-scope) => (not (:new-application-enabled orig-scope)))
     (fact "open-inforequest" (:open-inforequest updated-scope) => (not (:open-inforequest orig-scope)))
     (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost")))
+
+(fact "Admin - Add scope"
+  (let [organization   (first (:organizations (query admin :organizations)))
+        org-id         (:id organization)
+        scopes         (:scope organization)
+        first-scope    (first scopes)
+        new-permitType (first
+                         (difference
+                           (set (keys (permit/permit-types)))
+                           (set (map :permitType scopes))))]
+    (fact "Duplicate scope can't be added"
+      (command admin :add-scope
+               :organization org-id
+               :permitType "R" ; Sipoo in minimal
+               :municipality "753" ; Sipoo in minimal
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => (partial expected-failure? :error.organization.duplicate-scope))
+    (fact "invalid muni can't be added"
+      (command admin :add-scope
+               :organization org-id
+               :permitType "R"
+               :municipality "foobar"
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => (partial expected-failure? :error.invalid-municipality))
+    (fact "Admin can add new scope to organization"
+      (command admin :add-scope
+               :organization org-id
+               :permitType new-permitType
+               :municipality (:municipality first-scope) ; Sipoo in minimal
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => ok?)))
 
 (fact* "Tampere-ya sees (only) YA operations and attachments (LUPA-917, LUPA-1006)"
   (let [resp (query tampere-ya :organization-by-user) => ok?
