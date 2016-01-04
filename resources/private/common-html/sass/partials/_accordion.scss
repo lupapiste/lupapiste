@@ -4,7 +4,7 @@
   z-index: 5;
   height: auto;
   margin-bottom: $marginL;
-  @include box-sizing(border-box);
+  box-sizing: border-box;
 
   div.sticky {
     width: 100%;

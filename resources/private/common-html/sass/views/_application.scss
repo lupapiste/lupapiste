@@ -391,7 +391,7 @@ $app-gray-darkest: $gray187;
       padding: $marginL $marginM;
       margin-top: -$marginL *1.75;
       margin-bottom: $marginS;
-      @include box-sizing(border-box);
+      box-sizing: border-box;
       .h2 {
         text-transform: uppercase;
         font-size: 1em;

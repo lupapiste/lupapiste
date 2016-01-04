@@ -60,7 +60,7 @@ body {
 
 }
 .container {
-  @include box-sizing(border-box);
+  box-sizing: border-box;
   padding: $marginM $marginS 0 $marginS;
   width: 100%;
   max-width: $application-max-width;
