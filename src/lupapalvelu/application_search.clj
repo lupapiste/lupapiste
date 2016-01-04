@@ -67,11 +67,9 @@
         orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas-wgs84.features.id {$in areas}} [:areas-wgs84])
         features (flatten (map (comp :features :areas-wgs84) orgs-with-areas))
         selected-areas (set areas)
-        filtered-features (filter (comp selected-areas :id) features)
-        coordinates (map (comp :coordinates :geometry) filtered-features)]
-    (when (seq coordinates)
-      {$or (map (fn [c] {:location-wgs84 {$geoWithin {"$geometry" {:type "MultiPolygon"
-                                                                   :coordinates c}}}}) coordinates)})))
+        filtered-features (filter (comp selected-areas :id) features)]
+    (when (seq filtered-features)
+      {$or (map geo/make-query filtered-features)})))
 
 (def applicant-application-states
   {:state {$in ["open" "submitted" "sent" "complementNeeded" "draft"]}})

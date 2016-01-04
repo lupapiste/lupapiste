@@ -1,7 +1,8 @@
 (ns lupapalvelu.geojson
   (:require [clojure.walk :as walk]
             [sade.coordinate :as coord]
-            [sade.core :refer [fail]]))
+            [sade.core :refer [fail]]
+            [monger.operators :refer [$geoWithin]]))
 
 ;; Resolve polygons from GeoJSON Features
 (defmulti resolve-polygons (comp :type :geometry))
@@ -47,3 +48,8 @@
 (defn ensure-features [areas]
   (update-in areas [:features] ensure-feature-points))
 
+(defn make-query [feature]
+  (let [coordinates (get-in feature [:geometry :coordinates])
+        type (get-in feature [:geometry :type])]
+    {:location-wgs84 {$geoWithin {"$geometry" {:type        type
+                                               :coordinates coordinates}}}}))
