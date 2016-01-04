@@ -1,4 +1,4 @@
-(ns lupapalvelu.pdf.pdfa-conversion-client
+(ns lupapalvelu.pdf.libreoffice-conversion-client
   (:require [clj-http.client :as http]
             [lupapalvelu.mime :as mime]
             [sade.env :as env]))
