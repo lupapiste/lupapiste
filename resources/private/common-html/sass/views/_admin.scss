@@ -57,4 +57,13 @@
       margin-bottom: $marginM;
     }
   }
+  #modal-dialog-content-component {
+    select, input {
+      display: block;
+      margin: $marginS 0;
+    }
+    input[type=text] {
+      width: $cols4;
+    }
+  }
 }

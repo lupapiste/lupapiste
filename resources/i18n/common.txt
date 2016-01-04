@@ -4925,3 +4925,7 @@
 "error.service-lockdown" "sv" ""
 "statement.draft-is-not-visible" "fi" "Lausunto tulee näkyviin tähän, kun se on annettu."
 "statement.draft-is-not-visible" "sv" ""
+"error.organization.duplicate-scope" "fi" "Kunnalle on jo määritelty kyseinen lupatyyppi"
+"error.organization.duplicate-scope" "sv" ""
+"error.invalid-municipality" "fi" "Virheellinen kuntanumero"
+"error.invalid-municipality" "sv" ""

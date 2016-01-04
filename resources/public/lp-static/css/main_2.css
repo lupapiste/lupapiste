@@ -8170,6 +8170,15 @@ td.comment-text {
 .admin .users-table .filters {
   margin-bottom: 12px;
 }
+/* line 61, ../../../private/common-html/sass/views/_admin.scss */
+.admin #modal-dialog-content-component select, .admin #modal-dialog-content-component input {
+  display: block;
+  margin: 6px 0;
+}
+/* line 65, ../../../private/common-html/sass/views/_admin.scss */
+.admin #modal-dialog-content-component input[type=text] {
+  width: 22.5em;
+}
 
 /* line 2, ../../../private/common-html/sass/views/_authority_admin.scss */
 #authority-admin h2 {
@@ -9307,31 +9316,4 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 /* line 202, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlNavigationItemActive:before {
   content: "\e642";
-}
-
-/* line 206, ../../../private/common-html/sass/views/_openlayers2.scss */
-.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemInactive:before {
-  content: "\e904";
-}
-
-/* line 209, ../../../private/common-html/sass/views/_openlayers2.scss */
-.olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemActive:before {
-  content: "\e904";
-  color: #000;
-}
-
-/* line 213, ../../../private/common-html/sass/views/_openlayers2.scss */
-.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemInactive:before {
-  content: "\e63f";
-}
-
-/* line 216, ../../../private/common-html/sass/views/_openlayers2.scss */
-.olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemActive:before {
-  content: "\e63f";
-  color: #000;
-}
-
-/* line 220, ../../../private/common-html/sass/views/_openlayers2.scss */
-.olControlLupapisteEditingToolbar .olControlDrawFeatureCircleItemInactive:before {
-  content: "\e903";
 }

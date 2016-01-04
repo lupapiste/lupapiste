@@ -12513,6 +12513,15 @@ td.comment-text {
 .admin .users-table .filters {
   margin-bottom: 12px;
 }
+/* line 61, ../../../private/common-html/sass/views/_admin.scss */
+.admin #modal-dialog-content-component select, .admin #modal-dialog-content-component input {
+  display: block;
+  margin: 6px 0;
+}
+/* line 65, ../../../private/common-html/sass/views/_admin.scss */
+.admin #modal-dialog-content-component input[type=text] {
+  width: 22.5em;
+}
 
 /* line 2, ../../../private/common-html/sass/views/_authority_admin.scss */
 #authority-admin h2 {

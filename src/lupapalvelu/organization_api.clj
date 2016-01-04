@@ -19,10 +19,11 @@
             [me.raynes.fs :as fs]
             [slingshot.slingshot :refer [try+]]
             [sade.core :refer [ok fail fail! now]]
-            [sade.util :as util]
             [sade.env :as env]
-            [sade.strings :as ss]
+            [sade.municipality :as muni]
             [sade.property :as p]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
@@ -144,6 +145,32 @@
              :scope.$.opening (when (number? opening) opening)}})
   (ok))
 
+(defcommand add-scope
+  {:description "Admin can add new scopes for organization"
+   :parameters [organization permitType municipality
+                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                opening]
+   :input-validators [permit/permit-type-validator
+                      (fn [{{:keys [municipality]} :data}]
+                        (when-not (contains? muni/municipality-codes municipality)
+                          (fail :error.invalid-municipality)))]
+   :user-roles #{:admin}}
+  (let [scope-count (mongo/count :organizations {:scope {$elemMatch {:permitType permitType :municipality municipality}}})]
+    (if (zero? scope-count)
+      (do
+        (o/update-organization
+          organization
+          {$push {:scope
+                  {:municipality            municipality
+                   :permitType              permitType
+                   :inforequest-enabled     inforequestEnabled
+                   :new-application-enabled applicationEnabled
+                   :open-inforequest        openInforequestEnabled
+                   :open-inforequest-email  openInforequestEmail
+                   :opening                 (when (number? opening) opening)}}})
+        (ok))
+      (fail :error.organization.duplicate-scope))))
+
 (defcommand add-organization-link
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
@@ -184,7 +211,7 @@
    :input-validators [(partial non-blank-parameters [:organizationId])]
    :user-roles #{:admin}}
   [_]
-  (o/get-organization organizationId))
+  (ok :data (o/get-organization organizationId)))
 
 (defquery permit-types
   {:user-roles #{:admin}}
@@ -193,12 +220,17 @@
 
 (defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
-   :user-roles #{:applicant :authority}}
+   :user-roles #{:applicant :authority :admin}}
   [_]
   (let [munis (municipalities-with-organization)]
     (ok
       :municipalities (:all munis)
       :municipalitiesWithBackendInUse (:with-backend munis))))
+
+(defquery municipalities
+  {:description "Returns a list of all municipality IDs. For admin use."
+   :user-roles #{:admin}}
+  (ok :municipalities muni/municipality-codes))
 
 (defquery municipality-active
   {:parameters [municipality]
