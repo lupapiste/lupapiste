@@ -365,8 +365,6 @@
                                                            (:NIMI properties)
                                                            (:nimi properties))]
                                                 {nimi (:id a)})) (get-in existing-areas [:areas :features])))
-
-        _ (clojure.pprint/pprint map-of-existing-areas)
         iterator (.features collection)
         list (ArrayList.)
         _ (loop [feature (when (.hasNext iterator)
