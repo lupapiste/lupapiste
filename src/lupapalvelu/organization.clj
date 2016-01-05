@@ -357,8 +357,10 @@
   ^org.geotools.data.simple.SimpleFeatureCollection
   transform-crs-to-wgs84
   "Convert feature crs in collection to WGS84"
-  [org-id ^org.geotools.feature.FeatureCollection collection]
-  (let [existing-areas (mongo/by-id :organizations org-id {:areas.features.id 1 :areas.features.properties.nimi 1 :areas.features.properties.NIMI 1})
+  [org-id existing-areas ^org.geotools.feature.FeatureCollection collection]
+  (let [existing-areas (if-not existing-areas
+                         (mongo/by-id :organizations org-id {:areas.features.id 1 :areas.features.properties.nimi 1 :areas.features.properties.NIMI 1})
+                         {:areas existing-areas})
         map-of-existing-areas (into {} (map (fn [a]
                                               (let [properties (:properties a)
                                                     nimi (if (contains? properties :NIMI)
@@ -419,23 +421,24 @@
   (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
         shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
         data-store (FileDataStoreFinder/getDataStore shape-file)
+        new-collection (some-> data-store
+                               .getFeatureSource
+                               .getFeatures
+                               ((partial transform-crs-to-wgs84 org-id nil)))
+        precision      13 ; FeatureJSON shows only 4 decimals by default
+        areas (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
+        ensured-areas (geo/ensure-features areas)
+
         new-collection-wgs84 (some-> data-store
                                      .getFeatureSource
                                      .getFeatures
                                      transform-coordinates-to-wgs84
-                                     ((partial transform-crs-to-wgs84 org-id)))
-        new-collection (some-> data-store
-                               .getFeatureSource
-                               .getFeatures
-                               ((partial transform-crs-to-wgs84 org-id)))
-        precision      13 ; FeatureJSON shows only 4 decimals by default
-        areas (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
+                                     ((partial transform-crs-to-wgs84 org-id ensured-areas)))
         areas-wgs84 (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
-        ensured-areas (geo/ensure-features areas)
         ensured-areas-wgs84 (geo/ensure-features areas-wgs84)]
     (when (geo/validate-features (:features ensured-areas))
       (fail! :error.coordinates-not-epsg3067))
     (update-organization org-id {$set {:areas ensured-areas
                                        :areas-wgs84 ensured-areas-wgs84}})
     (.dispose data-store)
-    ensured-areas))
+    ensured-areas-wgs84))
