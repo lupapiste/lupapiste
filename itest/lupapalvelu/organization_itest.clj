@@ -1,9 +1,11 @@
 (ns lupapalvelu.organization-itest
   (:require [midje.sweet :refer :all]
             [clojure.java.io :as io]
+            [clojure.set :refer [difference]]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.proxy-services :as proxy]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
@@ -107,7 +109,7 @@
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
                                :openInforequestEmail "someone@localhost"
                                :opening nil)
-        updated-organization (query admin :organization-by-id :organizationId organization-id)
+        updated-organization (:data (query admin :organization-by-id :organizationId organization-id))
         updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope) updated-organization)]
 
     resp => ok?
@@ -116,6 +118,46 @@
     (fact "new-application-enabled" (:new-application-enabled updated-scope) => (not (:new-application-enabled orig-scope)))
     (fact "open-inforequest" (:open-inforequest updated-scope) => (not (:open-inforequest orig-scope)))
     (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost")))
+
+(fact "Admin - Add scope"
+  (let [organization   (first (:organizations (query admin :organizations)))
+        org-id         (:id organization)
+        scopes         (:scope organization)
+        first-scope    (first scopes)
+        new-permitType (first
+                         (difference
+                           (set (keys (permit/permit-types)))
+                           (set (map :permitType scopes))))]
+    (fact "Duplicate scope can't be added"
+      (command admin :add-scope
+               :organization org-id
+               :permitType "R" ; Sipoo in minimal
+               :municipality "753" ; Sipoo in minimal
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => (partial expected-failure? :error.organization.duplicate-scope))
+    (fact "invalid muni can't be added"
+      (command admin :add-scope
+               :organization org-id
+               :permitType "R"
+               :municipality "foobar"
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => (partial expected-failure? :error.invalid-municipality))
+    (fact "Admin can add new scope to organization"
+      (command admin :add-scope
+               :organization org-id
+               :permitType new-permitType
+               :municipality (:municipality first-scope) ; Sipoo in minimal
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => ok?)))
 
 (fact* "Tampere-ya sees (only) YA operations and attachments (LUPA-917, LUPA-1006)"
   (let [resp (query tampere-ya :organization-by-user) => ok?
@@ -172,7 +214,7 @@
   (fact "An application query correctly returns the 'required fields filling obligatory' and 'kopiolaitos-email' info in the organization meta data"
     (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
           app    (query-application pena app-id)
-          org    (query admin "organization-by-id" :organizationId  (:organization app))
+          org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
           kopiolaitos-email "kopiolaitos@example.com"
           kopiolaitos-orderer-address "Testikatu 1"
           kopiolaitos-orderer-phone "123"
@@ -185,7 +227,7 @@
       (command sipoo "set-organization-app-required-fields-filling-obligatory" :enabled false) => ok?
 
       (let [app    (query-application pena app-id)
-            org    (query admin "organization-by-id" :organizationId  (:organization app))
+            org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
             organizationMeta (:organizationMeta app)]
         (fact "the 'app-required-fields-filling-obligatory' is set to False"
           (:app-required-fields-filling-obligatory org) => false
@@ -211,7 +253,7 @@
         :kopiolaitosOrdererEmail kopiolaitos-orderer-email) => ok?
 
       (let [app    (query-application pena app-id)
-            org    (query admin "organization-by-id" :organizationId  (:organization app))
+            org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
             organizationMeta (:organizationMeta app)]
         (fact "the 'app-required-fields-filling-obligatory' flag is set to true value"
           (:app-required-fields-filling-obligatory org) => true
@@ -278,12 +320,12 @@
 
     (fact "Permanent archive can be enabled"
       (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
-      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:permanent-archive-enabled updated-org) => true))
 
     (fact "Permanent archive can be disabled"
       (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
-      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:permanent-archive-enabled updated-org) => false))))
 
 (facts "Organization names"
