@@ -71,7 +71,7 @@ $tree-height: 320px;
     li {
       list-style-type: circle;
       a {
-        color: $color-text;
+        @include link;
       }
     }
     div {

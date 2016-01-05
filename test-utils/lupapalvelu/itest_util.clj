@@ -716,3 +716,12 @@
                target-file-name)))))
       (catch com.jcraft.jsch.JSchException e
         (error e (str "SSH connection " user "@" server))))))
+
+(defn upload-area [apikey & [filename]]
+  (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
+        uploadfile  (io/file filename)
+        uri         (str (server-address) "/api/raw/organization-area")]
+    (http-post uri
+               {:headers {"authorization" (str "apikey=" apikey)}
+                :multipart [{:name "files[]" :content uploadfile}]
+                :throw-exceptions false})))

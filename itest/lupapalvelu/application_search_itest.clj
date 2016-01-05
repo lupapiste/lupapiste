@@ -4,8 +4,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet  :refer :all]
             [sade.property :as p]
-            [sade.util :as util]
-            ))
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -132,16 +131,26 @@
 
     (fact "Tags filter"
       (get-in (datatables sonja :applications-search :tags ["222222222222222222222222"]) [:data :applications 0 :id]) => application-id)
+    (facts "Organization areas"
+      (let [body (:body (decode-response (upload-area sipoo)))
+            features (get-in body [:areas :features])
+            keskusta (first (filter (fn [feature]
+                                      (= "Nikkilä" (get-in feature [:properties :nimi]))) features))]
+        (fact "Area filter"
+          (let [res (datatables sonja :applications-search :areas [(:id keskusta)])]
+            (count (get-in res [:data :applications])) => 1
+            (get-in res [:data :applications 0 :id]) => application-id))
 
-    (fact "Area filter"
-      (let [res (datatables sonja :applications-search :areas ["sipoo_keskusta"])]
-        (count (get-in res [:data :applications])) => 1
-        (get-in res [:data :applications 0 :id]) => application-id))
+        (fact "Combined"
+          (let [res (datatables sonja :applications-search
+                                :areas [(:id keskusta)]
+                                :handlers [sonja-id]
+                                :tags ["222222222222222222222222" "111111111111111111111111"])]
+            (count (get-in res [:data :applications])) => 1
+            (get-in res [:data :applications 0 :id]) => application-id))
 
-    (fact "Combined"
-      (let [res (datatables sonja :applications-search
-                  :areas ["sipoo_keskusta"]
-                  :handlers [sonja-id]
-                  :tags ["222222222222222222222222" "111111111111111111111111"])]
-        (count (get-in res [:data :applications])) => 1
-        (get-in res [:data :applications 0 :id]) => application-id))))
+        (fact "Area filter works with same id after shapefile is uploaded again"
+          (upload-area sipoo)
+          (let [res (datatables sonja :applications-search :areas [(:id keskusta)])]
+            (count (get-in res [:data :applications])) => 1
+            (get-in res [:data :applications 0 :id]) => application-id))))))
