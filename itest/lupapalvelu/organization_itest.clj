@@ -11,7 +11,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
             [monger.operators :refer :all]
-            [sade.core :as sade]))
+            [sade.core :as sade]
+            [lupapalvelu.itest-util :as util]))
 
 (apply-remote-minimal)
 
@@ -374,26 +375,17 @@
         (command sonja :add-application-tags :id id :tags []) => ok?
         (query sipoo :remove-tag-ok :tagId tag-id) => ok?))))
 
-(defn- upload-area [apikey & [filename]]
-  (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
-        uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/raw/organization-area")]
-    (http-post uri
-      {:headers {"authorization" (str "apikey=" apikey)}
-       :multipart [{:name "files[]" :content uploadfile}]
-       :throw-exceptions false})))
-
 (facts "Organization areas zip file upload"
   (fact "only authorityAdmin can upload"
-    (:body (upload-area pena)) => "unauthorized"
-    (:body (upload-area sonja)) => "unauthorized")
+    (:body (util/upload-area pena)) => "unauthorized"
+    (:body (util/upload-area sonja)) => "unauthorized")
 
   (fact "text file is not ok (zip required)"
     (->
-      (upload-area sipoo "dev-resources/test-attachment.txt")
+      (util/upload-area sipoo "dev-resources/test-attachment.txt")
       :body) => "error.illegal-shapefile")
 
-  (let [resp (upload-area sipoo)
+  (let [resp (util/upload-area sipoo)
         body (:body (decode-response resp))]
 
     (fact "zip file with correct shape file can be uploaded by auth admin"
