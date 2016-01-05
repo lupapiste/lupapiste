@@ -31,8 +31,9 @@
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
   (if (= op-id (:id primaryOperation))
-    (:name primaryOperation)
-    (first (filter #(= op-id (:id %)) secondaryOperations))))
+    [(:name primaryOperation)]
+    (->> (filter #(= op-id (:id %)) secondaryOperations)
+         (map :name))))
 
 (defn- ->iso-8601-date [date]
   (let [format (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ssXXX")]
@@ -68,8 +69,11 @@
 (defn- make-version-number [{{{:keys [major minor]} :version} :latestVersion}]
   (str major "." minor))
 
+(defn- make-attachment-type [{{:keys [type-group type-id]} :type}]
+  (str type-group "." type-id))
+
 (defn- generate-archive-metadata [application user & [attachment]]
-  (cond-> {:type                (if attachment (:type attachment) :application)
+  (cond-> {:type                (if attachment (make-attachment-type attachment) :application)
            :applicationId       (:id application)
            :buildingIds         (remove nil? (map :buildingId (:buildings application)))
            :nationalBuildingIds (remove nil? (map :nationalId (:buildings application)))
