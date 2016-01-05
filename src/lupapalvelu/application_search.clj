@@ -69,7 +69,7 @@
         selected-areas (set areas)
         filtered-features (filter (comp selected-areas :id) features)]
     (when (seq filtered-features)
-      {$or (map geo/make-query filtered-features)})))
+      {$or (map (fn [feature] {:location-wgs84 {$geoWithin {"$geometry" (:geometry feature)}}}) filtered-features)})))
 
 (def applicant-application-states
   {:state {$in ["open" "submitted" "sent" "complementNeeded" "draft"]}})
