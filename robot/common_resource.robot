@@ -58,7 +58,7 @@ Go to login page
 
 Go to bulletins page
   Go to  ${BULLETINS URL}
-  Wait Until  Title should be  Lupapiste
+  Wait Until  Title should be  Julkipano - Lupapiste
   Wait Until  Page should contain  Kuntien julkipanoilmoitukset
 
 Open last email
