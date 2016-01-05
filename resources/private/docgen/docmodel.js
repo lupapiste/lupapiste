@@ -1220,8 +1220,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.appendChild(option);
 
     _.each(self.application.auth, function (user) {
-      // LUPA-89: don't print fully empty names
-      if (user.firstName && user.lastName) {
+      // LUPA-89: don't print fully empty names, LPK-1257 Do not add statement givers
+      if (user.firstName && user.lastName && user.role !== "statementGiver") {
         var option = document.createElement("option");
         var value = user.id;
         option.value = value;
