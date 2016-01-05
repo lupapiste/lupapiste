@@ -217,11 +217,12 @@ i.btn-small {
   }
   &:hover {
     color: $hover-text;
-    background-color: $hover-bg
+    background-color: $hover-bg;
+    text-decoration: none;
   }
   &:active, &.active {
     color: $active-text;
-    background-color: $active-bg
+    background-color: $active-bg;
   }
   &:disabled, &.disabled, &.waiting {
     @include disabled( $disabled-text, $disabled-bg );
