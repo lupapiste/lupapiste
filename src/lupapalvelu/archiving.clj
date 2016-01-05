@@ -8,9 +8,28 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [clojure.java.io :as io]
             [lupapalvelu.attachment]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [lupapalvelu.action :as action]
+            [monger.operators :refer :all])
   (:import (java.text SimpleDateFormat)
-           (java.util Date)))
+           (java.util Date)
+           (java.util.concurrent ThreadFactory Executors)))
+
+(defn thread-factory []
+  (let [security-manager (System/getSecurityManager)
+        thread-group (if security-manager
+                       (.getThreadGroup security-manager)
+                       (.getThreadGroup (Thread/currentThread)))]
+    (reify
+      ThreadFactory
+      (newThread [this runnable]
+        (doto (Thread. thread-group runnable "archive-upload-worker")
+          (.setDaemon true)
+          (.setPriority Thread/NORM_PRIORITY))))))
+
+(defonce upload-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
+
+(defonce unfinished-uploads (atom #{}))
 
 (defn- build-url [id]
   (let [host (env/value :arkisto :host)
@@ -20,14 +39,37 @@
     (str host "/documents/" encoded-id "?app-id=" app-id "&app-key=" app-key)))
 
 (defn- upload-file [id is-or-file content-type metadata]
-  (http/put (build-url id) {:multipart
-                                         [{:name "metadata"
-                                           :mime-type "application/json"
-                                           :encoding "UTF-8"
-                                           :content (json/generate-string metadata)}
-                                          {:name "file"
-                                           :content is-or-file
-                                           :mime-type content-type}]}))
+  (http/put (build-url id) {:throw-exceptions false
+                            :multipart        [{:name      "metadata"
+                                                :mime-type "application/json"
+                                                :encoding  "UTF-8"
+                                                :content   (json/generate-string metadata)}
+                                               {:name      "file"
+                                                :content   is-or-file
+                                                :mime-type content-type}]}))
+
+
+(defn- set-attachment-state [application now id]
+  (action/update-application
+    (action/application->command application)
+    {:attachments.id id}
+    {$set {:modified now
+           :attachments.$.modified now
+           :attachments.$.metadata.tila :arkistoitu}}))
+
+(defn- set-application-state [application now _]
+  (action/update-application
+    (action/application->command application)
+    {$set {:modified now
+           :metadata.tila :arkistoitu}}))
+
+(defn- upload-and-set-state [id is-or-file content-type metadata application now state-update-fn]
+  (swap! unfinished-uploads conj id)
+  (let [response (upload-file id is-or-file content-type metadata)]
+    (when (= 200 (:status response))
+      (state-update-fn application now id))
+    (swap! unfinished-uploads disj id)))
+
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
   (if (= op-id (:id primaryOperation))
@@ -104,16 +146,17 @@
           (:scale attachment)    (conj {:scale (:scale attachment)})
           true                   (merge (or (:metadata attachment) (:metadata application)))))
 
-(defn send-to-archive [{:keys [attachments id] :as application} attachment-ids user archive-application?]
+(defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids archive-application?]
   (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
                                        (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
                                      attachments)]
     (when archive-application?
       (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
             metadata (generate-archive-metadata application user)]
-        (upload-file id application-file "application/pdf" metadata)
-        (io/delete-file application-file :silently)))
+        (.submit upload-threadpool (fn []
+                                     (upload-and-set-state id application-file "application/pdf" metadata application created set-application-state)
+                                     (io/delete-file application-file :silently)))))
     (doseq [attachment selected-attachments]
       (let [{:keys [content content-type]} (lupapalvelu.attachment/get-attachment-file (get-in attachment [:latestVersion :fileId]))
             metadata (generate-archive-metadata application user attachment)]
-        (upload-file (:id attachment) (content) content-type metadata)))))
+        (.submit upload-threadpool #(upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))))
