@@ -290,8 +290,8 @@
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
-(defn redirect-after-logout []
-  (resp/redirect (str (env/value :host) (env/value :redirect-after-logout) )))
+(defn redirect-after-logout [lang]
+  (resp/redirect (str (env/value :host) (or (env/value :redirect-after-logout (keyword lang)) "/"))))
 
 (defn redirect-to-frontpage [lang]
   (resp/redirect (str (env/value :host) (or (env/value :frontpage (keyword lang)) "/"))))
@@ -342,10 +342,10 @@
   (merge (logout!) (ok)))
 
 (defpage "/logout" []
-  (merge (logout!) (redirect-after-logout)))
+  (merge (logout!) (redirect-after-logout default-lang)))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (merge (logout!) (redirect-after-logout)))
+  (merge (logout!) (redirect-after-logout lang)))
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
