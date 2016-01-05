@@ -889,10 +889,7 @@ $app-gray-darkest: $gray187;
   .organization-links {
     margin-bottom: 12px;
     a {
-      color: $color-text;
-      &:active, &:visited, &:hover {
-        color: $color-text;
-      }
+      @include link;
     }
   }
 }
