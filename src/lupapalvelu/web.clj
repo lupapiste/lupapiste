@@ -313,22 +313,24 @@
   (resp/set-headers {"Cache-Control" "no-cache", "Last-Modified" (util/to-RFC1123-datetime 0)}
     (single-resource :html :hashbang unauthorized)))
 
-(defn serve-app [app hashbang lang]
+(defn serve-app [app hashbang]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (if-let [hashbang (->hashbang hashbang)]
     (ssess/merge-to-session
-      (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage lang))
+      (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage *lang*))
       {:redirect-after-login hashbang})
     ; If current user has no access to the app, save hashbang using JS on client side.
     ; The next call will then be handled by the "true branch" above.
     (single-resource :html (keyword app) (save-hashbang-on-client))))
 
 (defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
-  (serve-app app hashbang lang))
+  (i18n/with-lang lang
+    (serve-app app hashbang)))
 
 ; Same as above, but with an extra path.
 (defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
-  (serve-app app hashbang lang))
+  (i18n/with-lang lang
+    (serve-app app hashbang)))
 
 ;;
 ;; Login/logout:
