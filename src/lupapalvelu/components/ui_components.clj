@@ -59,11 +59,12 @@
                  :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
-                 :mimeTypePattern       (.toString mime/mime-type-pattern)}]
+                 :mimeTypePattern       (.toString mime/mime-type-pattern)
+                 :supportedLangs        i18n/languages}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
-  (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
+  (str ";loc.setTerms(" (json/generate-string (i18n/get-terms i18n/*lang*)) ");"))
 
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
@@ -121,7 +122,7 @@
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
-                  :js [conf "hub.js" "log.js" ]}
+                  :js [conf "hub.js" "notify.js" "ajax.js" "log.js"]}
 
    ;; Common components
 
@@ -141,7 +142,7 @@
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers :stickyfill :waypoints]
-                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
+                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
