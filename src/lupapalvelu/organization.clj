@@ -1,4 +1,14 @@
 (ns lupapalvelu.organization
+  (:import [org.geotools.data FileDataStoreFinder DataUtilities]
+           [org.geotools.geojson.feature FeatureJSON]
+           [org.geotools.feature.simple SimpleFeatureBuilder]
+           [org.geotools.geojson.geom GeometryJSON]
+           [org.geotools.geometry.jts JTS]
+           [org.geotools.referencing CRS]
+           [org.geotools.referencing.crs DefaultGeographicCRS]
+           [org.opengis.feature.simple SimpleFeature]
+           [java.util ArrayList])
+
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
             [clojure.walk :as walk]
@@ -20,7 +30,10 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.wfs :as wfs]))
+            [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.geojson :as geo]
+            [me.raynes.fs :as fs]
+            [clojure.walk :refer [keywordize-keys]]))
 
 (def scope-skeleton
   {:permitType nil
@@ -339,3 +352,93 @@
 (defn valid-language [cmd]
   (when-not  (->> cmd :data :lang ss/lower-case keyword (contains? (set i18n/supported-langs)) )
     (fail :error.unsupported-language)))
+
+(defn-
+  ^org.geotools.data.simple.SimpleFeatureCollection
+  transform-crs-to-wgs84
+  "Convert feature crs in collection to WGS84"
+  [org-id existing-areas ^org.geotools.feature.FeatureCollection collection]
+  (let [existing-areas (if-not existing-areas
+                         (mongo/by-id :organizations org-id {:areas.features.id 1 :areas.features.properties.nimi 1 :areas.features.properties.NIMI 1})
+                         {:areas existing-areas})
+        map-of-existing-areas (into {} (map (fn [a]
+                                              (let [properties (:properties a)
+                                                    nimi (if (contains? properties :NIMI)
+                                                           (:NIMI properties)
+                                                           (:nimi properties))]
+                                                {nimi (:id a)})) (get-in existing-areas [:areas :features])))
+        iterator (.features collection)
+        list (ArrayList.)
+        _ (loop [feature (when (.hasNext iterator)
+                           (.next iterator))]
+            (when feature
+              ; Set CRS to WGS84 to bypass problems when converting to GeoJSON (CRS detection is skipped with WGS84).
+              ; Atm we assume only CRS EPSG:3067 is used.
+              ; Always give feature the same id if names match, so that search filters continue to work after reloading shp file
+              ; with same feature names
+              (let [feature-type        (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
+                    name-property       (.getProperty feature "nimi")
+                    name-property       (if-not name-property
+                                          (.getProperty feature "NIMI")
+                                          name-property)
+                    feature-name        (when name-property
+                                          (.getValue name-property))
+                    id                  (if (contains? map-of-existing-areas feature-name)
+                                          (get map-of-existing-areas feature-name)
+                                          (mongo/create-id))
+                    builder             (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
+                    _                   (.init builder feature) ; init builder with original feature
+                    transformed-feature (.buildFeature builder id)]
+                (.add list transformed-feature)))
+            (when (.hasNext iterator)
+              (recur (.next iterator))))]
+    (.close iterator)
+    (DataUtilities/collection list)))
+
+(defn- transform-coordinates-to-wgs84 [collection]
+  "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+  (let [schema (.getSchema collection)
+        crs (.getCoordinateReferenceSystem schema)
+        transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
+        iterator (.features collection)
+        feature (when (.hasNext iterator)
+                  (.next iterator))
+        list (ArrayList.)
+        _ (loop [feature (cast SimpleFeature feature)]
+            (when feature
+              (let [geometry (.getDefaultGeometry feature)
+                    transformed-geometry (JTS/transform geometry transform)]
+                (.setDefaultGeometry feature transformed-geometry)
+                (.add list feature)))
+            (when (.hasNext iterator)
+              (recur (.next iterator))))]
+    (.close iterator)
+    (DataUtilities/collection list)))
+
+(defn parse-shapefile-to-organization-areas [org-id tempfile tmpdir file-info]
+  (when-not (= (:content-type file-info) "application/zip")
+    (fail! :error.illegal-shapefile))
+  (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
+        shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
+        data-store (FileDataStoreFinder/getDataStore shape-file)
+        new-collection (some-> data-store
+                               .getFeatureSource
+                               .getFeatures
+                               ((partial transform-crs-to-wgs84 org-id nil)))
+        precision      13 ; FeatureJSON shows only 4 decimals by default
+        areas (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
+        ensured-areas (geo/ensure-features areas)
+
+        new-collection-wgs84 (some-> data-store
+                                     .getFeatureSource
+                                     .getFeatures
+                                     transform-coordinates-to-wgs84
+                                     ((partial transform-crs-to-wgs84 org-id ensured-areas)))
+        areas-wgs84 (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
+        ensured-areas-wgs84 (geo/ensure-features areas-wgs84)]
+    (when (geo/validate-features (:features ensured-areas))
+      (fail! :error.coordinates-not-epsg3067))
+    (update-organization org-id {$set {:areas ensured-areas
+                                       :areas-wgs84 ensured-areas-wgs84}})
+    (.dispose data-store)
+    ensured-areas-wgs84))
