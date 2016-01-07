@@ -82,14 +82,14 @@
           (tc/to-date (tc/from-long (:time env/buildinfo)))
           (:build-number env/buildinfo)))
 
-(defn inject-content [t {:keys [nav info page footer templates]} component]
+(defn inject-content [t {:keys [nav info page footer templates]} component lang]
   (-> t
       (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
       (enlive/transform [:nav] (enlive/content (map :content nav)))
       (enlive/transform [:div.notification] (enlive/content (map :content info)))
       (enlive/transform [:section] (enlive/content page))
       (enlive/transform [:footer] (enlive/content (map :content footer)))
-      (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (str (resource-url :common :js) "?lang=" (name i18n/*lang*))) e)))
+      (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (str (resource-url :common :js) "?lang=" (name lang))) e)))
       (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
       (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
       (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
@@ -111,17 +111,18 @@
             (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]))] ; preserve KnockoutJS comments
     (.compress c html)))
 
-(defn compose-html [component]
+(defn compose-html [component lang]
   (let [out (ByteArrayOutputStream.)]
     (doseq [element (inject-content
                       (enlive/html-resource (c/path "template.html"))
                       (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
-                      component)]
+                      component
+                      lang)]
       (.write out (ss/utf8-bytes element)))
     (-> out (.toString (.name ss/utf8)) (compress-html) (ss/utf8-bytes))))
 
-(defn compose [kind component]
+(defn compose [kind component lang]
   (tracef "Compose %s%s" component kind)
   (if (= :html kind)
-    (compose-html component)
+    (compose-html component lang)
     (compose-resource kind component)))
