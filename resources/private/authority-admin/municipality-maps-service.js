@@ -225,9 +225,11 @@ LUPAPISTE.MunicipalityMapsService = function() {
 
   // Parameter providers
   self.getParameters = function() {
+    var readOnly = !lupapisteApp.models.globalAuthModel.ok( "update-user-organization");
     var ss = storedSettings();
     return {
       server: {
+        readOnly: readOnly,
         server: ss.server,
         waiting: waiting,
         error: error,
@@ -235,6 +237,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
         channel: channel( "server")
       },
       layers: {
+        readOnly: readOnly,
         userLayers: ss.layers,
         serverLayers: serverLayers,
         backgroundVisible: backgroundMapVisible,
