@@ -39,7 +39,7 @@
        :results results})))
 
 (defn- documents-are-valid [applications & ignored-errors]
-  (if-let [validation-results (seq (filter seq (map (partial validate-documents ignored-errors) applications)))]
+  (if-let [validation-results (seq (filter seq (pmap (partial validate-documents ignored-errors) applications)))]
     {:ok false :results validation-results}
     {:ok true}))
 
