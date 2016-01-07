@@ -260,15 +260,16 @@
 (def- compose
   (if (env/feature? :no-cache)
     singlepage/compose
-    (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
+    (memoize (fn [resource-type app lang] (singlepage/compose resource-type app lang)))))
 
 (defn- single-resource [resource-type app failure]
-  (let [request (request/ring-request)]
+  (let [request (request/ring-request)
+        lang    *lang*]
     (if ((auth-methods app nobody) request)
      ; Check If-Modified-Since header, see cache-headers above
      (if (or (never-cache app) (env/feature? :no-cache) (not= (get-in request [:headers "if-modified-since"]) last-modified))
        (->>
-         (java.io.ByteArrayInputStream. (compose resource-type app))
+         (java.io.ByteArrayInputStream. (compose resource-type app lang))
          (resp/content-type (resource-type content-type))
          (resp/set-headers (cache-headers resource-type)))
        {:status 304})
