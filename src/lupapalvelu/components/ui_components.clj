@@ -59,7 +59,8 @@
                  :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
-                 :mimeTypePattern       (.toString mime/mime-type-pattern)}]
+                 :mimeTypePattern       (.toString mime/mime-type-pattern)
+                 :supportedLangs        i18n/languages}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
