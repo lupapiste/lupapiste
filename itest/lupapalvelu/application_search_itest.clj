@@ -135,7 +135,7 @@
       (let [body (:body (decode-response (upload-area sipoo)))
             features (get-in body [:areas :features])
             keskusta (first (filter (fn [feature]
-                                      (= "Nikkilä" (get-in feature [:properties :nimi]))) features))]
+                                      (= "Nikkil\u00e4" (get-in feature [:properties :nimi]))) features))]
         (fact "Area filter"
           (let [res (datatables sonja :applications-search :areas [(:id keskusta)])]
             (count (get-in res [:data :applications])) => 1

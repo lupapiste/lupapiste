@@ -267,8 +267,7 @@
         layers (filter (fn [{id :id}]
                          (not-any? #(= id %) muni-bases)) layers)
         result (concat layers muni-layers)]
-    (if (not-empty result)
-      (resp/json result))))
+    (resp/json result)))
 
 ;; The value of "municipality" is "liiteri" when searching from Liiteri and municipality code when searching from municipalities.
 (defn plan-urls-by-point-proxy [{{:keys [x y municipality]} :params}]
