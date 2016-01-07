@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [clojure.java.io :as io]
             [lupapalvelu.components.ui-components :refer [ui-components] :as uic]
+            [lupapalvelu.i18n :as i18n]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.coerce :as tc]
             [sade.env :as env]
@@ -102,7 +103,7 @@
                         (enlive/transform [:div.notification] (enlive/content (map :content info)))
                         (enlive/transform [:section] (enlive/content page))
                         (enlive/transform [:footer] (enlive/content (map :content footer)))
-                        (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (resource-url :common :js)) e)))
+                        (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (str (resource-url :common :js) "?lang=" (name i18n/*lang*))) e)))
                         (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
                         (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
                         (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
