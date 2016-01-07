@@ -281,7 +281,7 @@
   (let [build-number (:build-number env/buildinfo)]
     (if (= build build-number)
      (single-resource (keyword res-type) (keyword app) unauthorized)
-     (resp/redirect (str "/app/" build-number "/" app "." res-type )))))
+     (resp/redirect (str "/app/" build-number "/" app "." res-type "?lang=" (name *lang*))))))
 
 ;; Single Page App HTML
 (def apps-pattern
