@@ -10,7 +10,8 @@
             [lupapalvelu.attachment]
             [ring.util.codec :as codec]
             [lupapalvelu.action :as action]
-            [monger.operators :refer :all])
+            [monger.operators :refer :all]
+            [taoensso.timbre :refer [info error]])
   (:import (java.text SimpleDateFormat)
            (java.util Date)
            (java.util.concurrent ThreadFactory Executors)))
@@ -64,12 +65,15 @@
            :metadata.tila :arkistoitu}}))
 
 (defn- upload-and-set-state [id is-or-file content-type metadata application now state-update-fn]
+  (info "Trying to archive attachment id" id "from application" (:id application))
   (swap! unfinished-uploads conj id)
   (let [response (upload-file id is-or-file content-type metadata)]
-    (when (= 200 (:status response))
-      (state-update-fn application now id))
+    (if (= 200 (:status response))
+      (do (state-update-fn application now id)
+          (info "Archived attachment id" id "from application" (:id application)))
+      (do (error "Failed to archive attachment id" id "from application" (:id application))
+          (error response)))
     (swap! unfinished-uploads disj id)))
-
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
   (if (= op-id (:id primaryOperation))
