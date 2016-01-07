@@ -632,7 +632,8 @@
 
                             <div class="clear spacerM"></div>
 
-                            <div class="form-grid form-grid--no-border">
+                            <div class="form-grid form-grid--no-border"
+                                 data-bind="visible: municipalityHearsNeighborsVisible">
                               <div class="row">
                                 <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, id: 'optionMunicipalityHearsNeighbors', lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
                               </div>
