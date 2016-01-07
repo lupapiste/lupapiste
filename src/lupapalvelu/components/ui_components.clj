@@ -121,7 +121,7 @@
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
-                  :js [conf "hub.js" "log.js" ]}
+                  :js [conf "hub.js" "notify.js" "ajax.js" "log.js"]}
 
    ;; Common components
 
@@ -141,7 +141,7 @@
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers :stickyfill :waypoints]
-                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
+                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
