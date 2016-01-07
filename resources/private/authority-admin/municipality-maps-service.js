@@ -223,13 +223,16 @@ LUPAPISTE.MunicipalityMapsService = function() {
     };
   }
 
+  self.readOnly = ko.pureComputed( function() {
+    return !lupapisteApp.models.globalAuthModel.ok( "update-user-organization");
+  });
+
   // Parameter providers
   self.getParameters = function() {
-    var readOnly = !lupapisteApp.models.globalAuthModel.ok( "update-user-organization");
     var ss = storedSettings();
     return {
       server: {
-        readOnly: readOnly,
+        readOnly: self.readOnly,
         server: ss.server,
         waiting: waiting,
         error: error,
@@ -237,7 +240,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
         channel: channel( "server")
       },
       layers: {
-        readOnly: readOnly,
+        readOnly: self.readOnly,
         userLayers: ss.layers,
         serverLayers: serverLayers,
         backgroundVisible: backgroundMapVisible,
