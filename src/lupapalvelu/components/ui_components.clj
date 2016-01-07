@@ -64,7 +64,7 @@
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
-  (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
+  (str ";loc.setTerms(" (json/generate-string (i18n/get-terms i18n/*lang*)) ");"))
 
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
