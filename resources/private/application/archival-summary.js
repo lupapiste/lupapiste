@@ -122,6 +122,7 @@
       attachment.archivable = util.getIn(attachment, ["latestVersion", "archivable"]) ? attachment.latestVersion.archivable() : false;
       attachment.archivabilityError = util.getIn(attachment, ["latestVersion", "archivabilityError"]) ? attachment.latestVersion.archivabilityError() : null;
       attachment.sendToArchive = ko.observable(false);
+      attachment.state = util.getIn(attachment, ["metadata", "tila"]) ? attachment.metadata().tila : ko.observable();
       return attachment;
     });
   };
@@ -206,14 +207,16 @@
 
     self.selectAll = function() {
       var selectIfArchivable = function(attachment) {
-        if (attachment.archivable) {
+        if (attachment.archivable && attachment.state() !== 'arkistoitu') {
           attachment.sendToArchive(true);
         }
       };
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
-        doc.sendToArchive(true);
+        if (doc.state() !== 'arkistoitu') {
+          doc.sendToArchive(true);
+        }
       });
     };
 

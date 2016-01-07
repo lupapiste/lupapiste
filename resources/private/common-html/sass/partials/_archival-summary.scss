@@ -19,12 +19,12 @@
 .archival-summary-table {
   margin-bottom: $marginM;
   i {
-    font-size: 22px;
+    font-size: 20px;
     &.enabled {
-      color: $lp-green;
+      color: $green;
     }
     &.disabled {
-      color: $lp-purple;
+      color: $red;
     }
   }
   .attachment-type-container {
@@ -42,7 +42,7 @@
     padding: 6px 0;
   }
   .attachment-type-header {
-    margin-left: 30px;
+    margin-left: 34px;
   }
   .attachment-row {
     font-size: 14px;
@@ -62,7 +62,7 @@
         vertical-align: top;
       }
       position: relative;
-      margin-left: 30px;
+      margin-left: 34px;
     }
     .additional-controls {
       @include clearfix;
@@ -115,17 +115,17 @@
   .archival-status {
     float: left;
     width: 28px;
-    padding: 9px 0 0 3px;
+    padding: 6px 0 0 6px;
+    text-align: center;
     input {
-      position: relative;
-      top: -2px;
-      margin: 0 0 0 1px;
+      margin: 0;
     }
   }
   .archival-status-header {
     float: left;
     width: 28px;
-    padding-left: 8px;
+    padding-left: 6px;
+    text-align: center;
   }
   .attachment-type {
     margin-right: 545px;

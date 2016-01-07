@@ -54,8 +54,9 @@
       <!-- ko foreach: attachments -->
       <div class="attachment-row">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish">
-           <input type="checkbox" data-bind="visible: archivable, checked: sendToArchive">
-           <span class="icon missing" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></span>
+           <input type="checkbox" data-bind="visible: archivable && state() !== 'arkistoitu', checked: sendToArchive">
+           <i class="lupicon-circle-attention disabled" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></i>
+           <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
@@ -63,11 +64,11 @@
             <div class="personal-data" data-bind="text: personalDataDescription"></div>
             <div class="stamped">
               <i class="lupicon-circle-stamp enabled" data-bind="visible: stamped, attr: {title: loc('attachment.stamped')}"></i>
-              <i class="lupicon-remove disabled" data-bind="visible: !stamped(), attr: {title: loc('attachment.stamped')}"></i>
+              <span data-bind="visible: !stamped(), ltext: 'no'"></span>
             </div>
             <div data-bind="if: $parents[1].showWillPublish" class="will-publish">
               <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
-              <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
+              <span data-bind="visible: !metadata()['myyntipalvelu'](), ltext: 'no'"></span>
             </div>
           </div>
           <div class="attachment-type">
@@ -139,7 +140,7 @@
         <div class="small-columns">
           <div class="retention-period" data-bind="ltext: 'sailytysaika'"></div>
           <div class="personal-data" data-bind="ltext: 'henkilotiedot'"></div>
-          <div class="stamped" data-bind="ltext: 'attachment.stamped'"></div>
+          <div class="stamped"></div>
           <div data-bind="if: showWillPublish" class="will-publish"><span data-bind="ltext: 'julkaistaan'"></span></div>
         </div>
         <div class="archival-status-header"  data-bind="visible: showWillPublish">A</div>
@@ -149,7 +150,8 @@
       <!-- ko foreach: documents -->
       <div class="attachment-row">
         <div class="archival-status" data-bind="visible: $parent.showWillPublish">
-           <input type="checkbox" data-bind="checked: sendToArchive">
+           <input type="checkbox" data-bind="visible: state() !== 'arkistoitu', checked: sendToArchive">
+           <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
@@ -158,7 +160,7 @@
             <div class="stamped"></div>
             <div data-bind="if: $parent.showWillPublish" class="will-publish">
               <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
-              <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
+              <span data-bind="visible: !metadata()['myyntipalvelu'](), ltext: 'no'"></span>
             </div>
           </div>
           <div class="attachment-type">
