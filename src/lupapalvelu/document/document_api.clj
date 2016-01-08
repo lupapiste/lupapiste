@@ -27,6 +27,18 @@
                       (get-in [:info :construction-time]))
       (fail :error.document-not-construction-time-doc))))
 
+(defquery document
+  {:parameters       [:id doc collection]
+   :user-roles       #{:applicant :authority}
+   :states           states/all-states
+   :input-validators [doc-persistence/validate-collection]
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
+  [{:keys [application]}]
+  (if-let [document (doc-persistence/by-id application collection doc)]
+    (ok :document document :results (model/validate application document))
+    (fail! :error.document-not-found)))
+
 ;;
 ;; CRUD
 ;;
@@ -122,7 +134,6 @@
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application]}]
-  (debug doc collection)
   (let [document (doc-persistence/by-id application collection doc)]
     (when-not document (fail! :error.document-not-found))
     (ok :results (model/validate application document))))
