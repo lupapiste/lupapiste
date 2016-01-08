@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1452006688333');
+@import url('main-blessed1.css?z=1452249552160');
 
 /* line 71, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .mask {
@@ -2636,6 +2636,7 @@ span.icon_clear:before {
 }
 /* line 191, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div span {
+  color: #909090;
   position: relative;
   padding: 4px 8px 4px 24px;
   display: inline-block;
