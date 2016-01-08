@@ -1544,6 +1544,7 @@
 "authorityrole.authorityAdmin" "sv" "Huvudanvändare"
 "authorityrole.commenter" "fi" "Kommentointioikeus"
 "authorityrole.commenter" "sv" "Kommenteringsrätt"
+"authorityrole.guest" "fi" "Hakemuskohtainen lukuoikeus (kutsuttava)"
 "authorityrole.reader" "fi" "Lukuoikeus"
 "authorityrole.reader" "sv" "Läsrättigheter"
 "authorityrole.tos-editor" "fi" "Tiedonohjaussuunnitelman muokkaaja"
