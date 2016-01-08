@@ -79,10 +79,10 @@
     (fact "2 docs were added" (count (:documents application1)) => (inc (inc (count (:documents application0)))))
 
     (fact "The new document is returned with validation results"
-      (let [resp (query pena :document :id application-id :doc doc-id :collection "documents")]
+      (let [{document :document :as resp} (query pena :document :id application-id :doc doc-id :collection "documents")]
         resp => ok?
-        (:document resp) => map?
-        (:results resp) => seq)))
+        document => map?
+        (:validationErrors document) => seq)))
 
   (facts "paasuunnittelija can be added exactly once"
     (let [application-id (create-app-id pena :operation :puun-kaataminen)]
