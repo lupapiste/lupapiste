@@ -33,3 +33,11 @@
 (defn check-password [candidate hashed]
   (when (and candidate (not (ss/blank? hashed)))
     (BCrypt/checkpw candidate hashed)))
+
+(defn decode-basic-auth
+  "Returns username and password decoded from Authentication header"
+  [request]
+  (let [auth (get-in request [:headers "authorization"])
+        cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))]
+    (when cred
+      (ss/split (str cred) #":" 2))))
