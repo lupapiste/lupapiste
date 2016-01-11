@@ -1,14 +1,14 @@
 var gis = (function() {
   "use strict";
 
-  OpenLayers.ImgPath = "/theme/default/img/";
+  OpenLayers.ImgPath = "/lp-static/lib/openlayers2-img/";
 
-  var iconDefaultPath  = "/img/map-marker-big.png";
+  var iconDefaultPath  = "/lp-static/img/map-marker-big.png";
   var iconLocMapping = {
     "sameLocation"  : iconDefaultPath,
-    "sameOperation" : "/img/map-marker-green.png",
-    "others"        : "/img/map-marker-orange.png",
-    "cluster"       : "/img/map-marker-group.png"
+    "sameOperation" : "/lp-static/img/map-marker-green.png",
+    "others"        : "/lp-static/img/map-marker-orange.png",
+    "cluster"       : "/lp-static/img/map-marker-group.png"
   };
 
   function withSuffix(strOrArr, suffix) {

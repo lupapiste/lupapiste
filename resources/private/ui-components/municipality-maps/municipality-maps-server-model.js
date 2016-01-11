@@ -4,6 +4,7 @@ LUPAPISTE.MunicipalityMapsServerModel = function( params ) {
 
   var self = this;
 
+  self.readOnly = params.readOnly;
   self.waiting = params.waiting;
   self.url = ko.observable();
   self.username = ko.observable();

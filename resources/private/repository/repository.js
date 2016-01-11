@@ -9,15 +9,15 @@ var repository = (function() {
     .error(function(e) { error("can't load schemas", e); })
     .call();
 
+  function schemaNotFound(schemas, name, version) {
+    var message = "unknown schema, name='" + name + "', version='" + version + "'";
+    error(message);
+  }
+
   function findSchema(schemas, name, version) {
     var v = schemas[version] || schemaNotFound(schemas, name, version);
     var s = v[name] || schemaNotFound(schemas, name, version);
     return _.clone(s);
-  }
-
-  function schemaNotFound(schemas, name, version) {
-    var message = "unknown schema, name='" + name + "', version='" + version + "'";
-    error(message);
   }
 
   function calculateAttachmentStateIndicators(attachment, application) {

@@ -1,6 +1,12 @@
 LUPAPISTE.ModalDialogModel = function () {
   "use strict";
   var self = this;
+  var win = $(window);
+
+  var setWindowSize = function(width, height) {
+    self.windowWidth(width);
+    self.windowHeight(height);
+  };
 
   self.showDialog = ko.observable(false);
   self.component = ko.observable();
@@ -90,12 +96,6 @@ LUPAPISTE.ModalDialogModel = function () {
     setWindowSize(win.width(), win.height());
   });
 
-  var setWindowSize = function(width, height) {
-    self.windowWidth(width);
-    self.windowHeight(height);
-  };
-
-  var win = $(window);
   // set initial dialog size
   setWindowSize(win.width(), win.height());
 

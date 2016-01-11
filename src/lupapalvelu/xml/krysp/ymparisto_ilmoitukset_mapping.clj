@@ -2,6 +2,8 @@
   (:require
     [lupapalvelu.xml.emit :refer [element-to-xml]]
     [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+    [lupapalvelu.document.attachments-canonical :as attachments-canon]
+    [lupapalvelu.document.canonical-common :as common]
     [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as ct]
     [lupapalvelu.permit :as permit]
     [lupapalvelu.xml.disk-writer :as writer]))
@@ -93,17 +95,17 @@
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [krysp-polku-lausuntoon [:Ilmoitukset :melutarina :Melutarina :lausuntotieto]
         canonical-without-attachments  (ct/meluilmoitus-canonical application lang)
-        statement-given-ids (mapping-common/statements-ids-with-status
+        statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
-        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
-        canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        statement-attachments (attachments-canon/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
+        canonical-with-statement-attachments (attachments-canon/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:Ilmoitukset :melutarina :Melutarina :liitetieto]
                     attachments-canonical)
         xml (ymparistoilmoitus-element-to-xml canonical krysp-version)
-        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk

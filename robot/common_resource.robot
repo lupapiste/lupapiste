@@ -3,6 +3,7 @@
 Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
 Library        String
+Library        OperatingSystem
 
 *** Variables ***
 
@@ -57,7 +58,7 @@ Go to login page
 
 Go to bulletins page
   Go to  ${BULLETINS URL}
-  Wait Until  Title should be  Lupapiste
+  Wait Until  Title should be  Julkipano - Lupapiste
   Wait Until  Page should contain  Kuntien julkipanoilmoitukset
 
 Open last email
@@ -114,6 +115,14 @@ Resurrect dev-box
   Execute Javascript  $(".dev-debug").show();
   Wait until  Element should be visible  //div[@class="dev-debug"]
 
+Hide nav-bar
+  Execute Javascript  $("nav.nav-wrapper").hide();
+
+Show nav-bar
+  Execute Javascript  $("nav.nav-wrapper").show();
+  Wait until  Element should be visible  //nav[@class="nav-wrapper"]
+
+
 Language To
   [Arguments]  ${lang}
   Element Should Not Contain  language-select  ${lang}
@@ -135,8 +144,8 @@ Go to page
 
 Open tab
   [Arguments]  ${name}
-  Click by test id  application-open-${name}-tab
-  Tab should be visible  ${name}
+  ${is-visible}=  Run Keyword and Return Status  Element should be visible  application-${name}-tab
+  Run keyword unless  ${is-visible}  Run keywords  Click by test id  application-open-${name}-tab  AND  Tab should be visible  ${name}
 
 Tab should be visible
   [Arguments]  ${name}
@@ -596,7 +605,7 @@ Add empty attachment template
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
-  [Arguments]  ${kind}  ${path}  ${description}  ${operation}
+  [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
   Run Keyword If  '${kind}' == 'application'  Select attachment operation option from dropdown  attachmentsAdd
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
 
@@ -605,7 +614,9 @@ Add attachment
   Select Frame      uploadFrame
   Wait until        Element should be visible  test-save-new-attachment
 
-  Run Keyword If  '${kind}' == 'application'  Set application attachment details on upload  ${operation}
+  Run Keyword If  '${kind}' == 'application'  Set attachment type for upload  ${type}
+  Run Keyword If  '${kind}' == 'application' and $operation  Wait until  Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
+  Run Keyword If  '${kind}' == 'application' and $operation  Select From List  attachmentOperation  ${operation}
 
   Input text        text  ${description}
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
@@ -614,20 +625,18 @@ Add attachment
   Click element     test-save-new-attachment
   Unselect Frame
   Wait until  Element should not be visible  upload-dialog
-  Wait Until Page Contains  Muu liite
+  Run Keyword If  '${kind}' == 'application'  Wait until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='${type}']
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
-Set application attachment details on upload
-  [Arguments]  ${operation}
-  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
-  Select From List  attachmentType  muut.muu
-  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
-  Select From List  attachmentOperation  ${operation}
+Set attachment type for upload
+  [Arguments]  ${type}
+  Wait until  Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='${type}']
+  Select From List  attachmentType  ${type}
 
 Open attachment details
-  [Arguments]  ${type}
+  [Arguments]  ${type}  ${nth}=1
   Open tab  attachments
-  ${path} =  Set Variable  xpath=//div[@id='application-attachments-tab']//a[@data-test-type="${type}"]
+  ${path} =  Set Variable  xpath=//div[@id='application-attachments-tab']//td[@class='attachment-type-id']//a[@data-test-type="${type}"][${nth}]
   Wait Until  Page Should Contain Element  ${path}
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
@@ -642,7 +651,7 @@ Assert file latest version
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
-Add first attachment version
+Add attachment version
   [Arguments]  ${path}
   Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
   Click Element  xpath=//button[@id="add-new-attachment-version"]
@@ -657,7 +666,8 @@ Add first attachment version
   # Wait Until     Element Should Be Enabled  test-save-new-attachment
   Click element  test-save-new-attachment
   Unselect Frame
-  Wait until     Page should contain element  xpath=//div[@class='attachment-label']
+  ${path}  ${filename}=  Split Path  ${path}
+  Wait until     Element Text Should Be  xpath=//section[@id='attachment']//span[@id='test-attachment-file-name']/a  ${filename}
 
 Select operation path by permit type
   [Arguments]  ${permitType}
@@ -851,6 +861,23 @@ Comment count is
 #
 # Invites
 #
+
+Invite ${email} to application
+  Open tab  parties
+  ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/ul/li[@class='party']
+  Element should be visible  xpath=//button[@data-test-id='application-invite-person']
+  Click by test id  application-invite-person
+  Wait until  Element should be visible  invite-email
+  Input Text  invite-email  ${email}
+  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
+  Element should be enabled  xpath=//button[@data-test-id='application-invite-submit']
+  Click by test id  application-invite-submit
+  Wait Until  Element Should Not Be Visible  invite-email
+  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//li[@class='party'][${invites_count} + 1]
+  ${email_found}=  Run Keyword And Return Status  Element Should Be Visible  xpath=//div[@class='parties-list']//span[@class='person']/span[2][contains(., '${email}')]
+  # If specified email was not found from auths, try to parse username from the email and test if username exists (case of pena)
+  ${username}=  Fetch From Left  ${email}  @
+  Run Keyword Unless  ${email_found}  Element Should Be Visible  xpath=//div[@class='parties-list']//span[@class='person']/span[2][contains(., '${username}')]
 
 Invite count is
   [Arguments]  ${amount}

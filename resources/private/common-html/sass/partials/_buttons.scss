@@ -30,12 +30,6 @@ button.btn-dialog, .btn-dialog {
   text-transform: uppercase;
 }
 
-.btn-decline {
-  background: red;
-  color: white;
-  text-transform:uppercase;
-}
-
 // ajax loader for buttons
 // Should no longer be used with buttons. See
 // the waiting mechanism below. This class is retained,
@@ -46,7 +40,7 @@ button.btn-dialog, .btn-dialog {
   display:inline-block;
   width:16px;
   height:16px;
-  background-image: url("/img/ajax-loader-grey-small.gif");
+  background-image: url("/lp-static/img/ajax-loader-grey-small.gif");
   position: absolute;
   top: 6px;
   right: 8px;
@@ -223,11 +217,12 @@ i.btn-small {
   }
   &:hover {
     color: $hover-text;
-    background-color: $hover-bg
+    background-color: $hover-bg;
+    text-decoration: none;
   }
   &:active, &.active {
     color: $active-text;
-    background-color: $active-bg
+    background-color: $active-bg;
   }
   &:disabled, &.disabled, &.waiting {
     @include disabled( $disabled-text, $disabled-bg );

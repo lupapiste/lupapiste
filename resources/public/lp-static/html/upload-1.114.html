@@ -6,12 +6,18 @@
   <link rel="stylesheet" href="/app/latest/upload.css" />
   <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"></script>
   <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.10.2/jquery-ui.min.js"></script>
-  <script type="text/javascript">if (typeof jQuery === "undefined") document.write("<script src='/app/latest/cdn-fallback.js'></" + "script>")</script>
-  <script src='/app/latest/common.js'></script>
-  <script src="/app/latest/upload.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var lang = window.parent.loc.getCurrentLanguage();
+    var build = window.parent.LUPAPISTE.config.build;
+    if (typeof jQuery === "undefined") {
+      document.write("<script src='/app/" + build + "/cdn-fallback.js'></" + "script>");
+    }
+    document.write("<script src='/app/" + build + "/common.js?lang=" + lang + "'></" + "script>");
+    document.write("<script src='/app/" + build + "/upload.js'></" + "script>");
+  </script>
 </head>
 <body onload="LUPAPISTE.ModalProgress.init();" style="padding-bottom: 0 !important" class="modal-body">
-  <div id="initLoader"><img src="/img/ajax-loader.gif" alt="..." width="66" height="66"/></div>
+  <div id="initLoader"><img src="/lp-static/img/ajax-loader.gif" alt="..." width="66" height="66"/></div>
   <form id="attachmentUploadForm" action="/api/upload/attachment" method="post" enctype="multipart/form-data" onsubmit="LUPAPISTE.ModalProgress.show();">
     <div class="upload-instructions">
       <p data-bind="ltext: 'attachment.upload.instructions.document'"></p>

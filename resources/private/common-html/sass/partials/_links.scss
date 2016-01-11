@@ -1,9 +1,5 @@
-a {
-  color: $color-text;
-  &:active, &:visited, &:hover {
-    color: $color-text;
-  }
-}
+// General styles for all links without
+// any additional styling
 
 @mixin link ($link: $orange-link,
              $hover: $orange-hover,
@@ -12,8 +8,8 @@ a {
   text-decoration: none;
   // Reminder: ordering is link, visited, hover, active.
   &:link, &:visited {
-            color: $link;
-          }
+    color: $link;
+  }
   &:hover {
     color: $hover;
     text-decoration: underline;
@@ -22,4 +18,8 @@ a {
     color: $active;
     text-decoration: underline;
   }
+}
+
+a {
+  @include link;
 }

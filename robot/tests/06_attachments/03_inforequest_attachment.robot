@@ -15,7 +15,7 @@ Mikko creates an inforequests
   Create inforequest the fast way  ${inforequest}  360603.153  6734222.95  ${propertyId}  kerrostalo-rivitalo  Liitetesti
 
 Mikko adds an attachment
-  Add attachment  inforequest  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  inforequest  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}
 
 Mikko open attachment details
   Click link  xpath=//div[@data-test-id="comments-table"]//a

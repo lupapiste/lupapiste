@@ -11,18 +11,23 @@
 
   var levelName = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"];
   var limit = 1;
-  var serverLimit = 4;
+  var serverLimit = 2;
 
   var logv = function (level, args) {
     var message = args.length === 1 ? args[0]: args;
 
     if (level >= limit && typeof console !== "undefined") {
+      // jshint devel: true
       console.log(levelName[level], message);
     }
 
     var page = location.pathname + location.hash;
     if (level >= serverLimit && typeof ajax !== "undefined" && !filtered(page, message)) {
-      ajax.command("frontend-error", {page: page, message: message, build: LUPAPISTE.config.build}).fail(nop).error(nop).call();
+      ajax.command("frontend-log", {level: levelName[level],
+                                    page: page,
+                                    message: message,
+                                    build: LUPAPISTE.config.build})
+      .fail(nop).error(nop).call();
     }
   };
 

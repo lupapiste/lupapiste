@@ -19,6 +19,7 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
@@ -471,24 +472,32 @@
         (create-preview file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
+(defn pre-process-attachment [{:keys [attachment-type filename content]}]
+  (if (and libreoffice-client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
+    {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
+     :content  (libreoffice-client/convert-to-pdfa filename content)}
+    {:filename filename :content content}))
+
 (defn attach-file!
-  "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
+  "1) Converts file to PDF/A, if required by attachment type and
+   1) uploads the file to MongoDB and
+   2) creates a preview image and
+   3) creates a corresponding attachment structure to application
    Content can be a file or input-stream.
    Returns attachment version."
   [options]
   {:pre [(map? (:application options))]}
   (let [db-name mongo/*db-name* ; pass db-name to threadpool context
         file-id (mongo/create-id)
-        {:keys [filename content]} options
         application-id (-> options :application :id)
-        sanitazed-filename (mime/sanitize-filename filename)
-        content-type (mime/mime-type sanitazed-filename)
+        {:keys [filename content]} (pre-process-attachment options)
+        sanitized-filename (mime/sanitize-filename filename)
+        content-type (mime/mime-type sanitized-filename)
         options (merge options {:file-id file-id
-                                :filename sanitazed-filename
+                                :filename sanitized-filename
                                 :content-type content-type})]
-    (debug "         uploading to mongo: "  content)
-    (mongo/upload file-id sanitazed-filename content-type content :application application-id)
-    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
+    (mongo/upload file-id sanitized-filename content-type content :application application-id)
+    (.submit preview-threadpool #(create-preview file-id sanitized-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation

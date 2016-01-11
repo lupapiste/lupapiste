@@ -37,7 +37,7 @@ LUPAPISTE.ConstructionWasteReportModel = function(params) {
         label: false
       });
     });
-  }
+  };
 
   self.columnHeaders = _.map(plannedWasteData.schema.body, function(schema) {
     return {

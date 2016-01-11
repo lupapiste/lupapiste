@@ -114,7 +114,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
   self.model = ko.validatedObservable(new PlainModel({}, self.keys));
 
   self.model().disabled = ko.computed(function() {
-    return !self.model.isValid() || !self.model().acceptTerms();
+    return !(self.model.isValid() && self.model().acceptTerms() && lupapisteApp.models.globalAuthModel.ok(commandName));
   });
 
   self.reset = self.model().reset;

@@ -4,9 +4,6 @@
  */
 
 @import "partials/_frameless";
-@import "compass/css3";
-@import "compass/css3/user-interface";
-@import "compass/typography/links/link-colors";
 
 // Style wide settings
 
@@ -39,7 +36,7 @@
 }
 
 @mixin spite-bg {
-  background-image: url('/img/icons-sprite-1.18.png');
+  background-image: url('/lp-static/img/icons-sprite-1.18.png');
   background-repeat: no-repeat;
 }
 

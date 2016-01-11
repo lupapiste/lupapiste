@@ -631,12 +631,13 @@
                             <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
 
                             <div class="clear spacerM"></div>
-
+                            <!-- ko if: municipalityHearsNeighborsVisible -->
                             <div class="form-grid form-grid--no-border">
                               <div class="row">
                                 <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, id: 'optionMunicipalityHearsNeighbors', lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
                               </div>
                             </div>
+                            <!-- /ko -->
 
                             <div data-bind="ifnot: submittable">
                                 <p class="error-text" data-test-id="foreman-not-submittable" data-bind="ltext: 'error.not-submittable.foreman-link'"></p>
@@ -1050,8 +1051,10 @@
                                                   <div data-bind='if: lupamaaraykset.vaaditutKatselmukset && lupamaaraykset.vaaditutKatselmukset.length'>
                                                       <h3 data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
                                                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
-                                                          <li data-bind='if: $data.katselmuksenLaji'>
+                                                          <li data-bind="if: $data.katselmuksenLaji">
+                                                              <!-- ko if: loc.hasTerm('task-katselmus.katselmuksenLaji.' + $data.katselmuksenLaji) -->
                                                               <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
+                                                              <!-- /ko -->
                                                               <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
                                                                   (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
                                                               </span>
@@ -1145,7 +1148,7 @@
                         </div>
 
                         <div data-bind="if: neighbors() && neighbors().length > 0">
-                            <table>
+                            <table class="neighbors">
                                 <thead>
                                     <tr>
                                         <th data-bind="ltext: 'neighbors.propertyId'"></th>

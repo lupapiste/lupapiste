@@ -1,6 +1,7 @@
 (ns lupapalvelu.xml.krysp.kiinteistotoimitus-mapping
   (:require [clojure.walk :as walk]
-            [lupapalvelu.document.kiinteistotoimitus-canonical :refer [kiinteistotoimitus-canonical] ]
+            [lupapalvelu.document.kiinteistotoimitus-canonical :refer [kiinteistotoimitus-canonical]]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.emit :as emit]
@@ -79,7 +80,7 @@
   attachment file IDs that were sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments (kiinteistotoimitus-canonical application lang)
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         canonical (bind-attachments canonical-without-attachments attachments-canonical)
         mapping (->mapping)
         xml (emit/element-to-xml canonical mapping)

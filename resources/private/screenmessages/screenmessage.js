@@ -1,10 +1,5 @@
-"use strict";
-
-if (typeof LUPAPISTE === "undefined") {
-  var LUPAPISTE = {};
-}
-
 LUPAPISTE.Screenmessage = new (function () {
+  "use strict";
   var self = this;
 
   self.messages = ko.observableArray([]);

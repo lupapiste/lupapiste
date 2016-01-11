@@ -21,28 +21,13 @@ $tree-height: 320px;
     margin: 0;
     width: $tree-width;
     float: left;
-    /* border: 1px solid darken($lp-light-grey, 10%); */
-    /* display: block; */
-    /* @include box-sizing(border-box); */
-    /* padding: 4px 0px 4px 12px; */
-    /* text-decoration: none; */
-    /* background: white; */
-    /* color: $color-text; */
     width: $tree-width;
-    /* cursor: pointer; */
-    @include user-select(none);
-    @include transition-property(font-size);
-    @include transition-duration(200ms);
-    /* &:HOVER { */
-    /*   background: $lp-light-grey; */
-    /* } */
+    @include disable-select;
+    transition-property: font-size;
+    transition-duration: 200ms;
     span {
-      /* width: $tree-width - 22px; */
       width: 100%;
     }
-    /* span.icon { */
-    /*   width: 20px; */
-    /* } */
   }
   .tree-link.btn {
     overflow-y: hidden;
@@ -86,7 +71,7 @@ $tree-height: 320px;
     li {
       list-style-type: circle;
       a {
-        color: $color-text;
+        @include link;
       }
     }
     div {

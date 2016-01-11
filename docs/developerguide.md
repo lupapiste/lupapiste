@@ -3,11 +3,15 @@
 ## Ympäristön pystytys
 
 Tarvitset kehitysympäristöön seuraavat työkalut:
+
 - [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 - [Leiningen](https://github.com/technomancy/leiningen) 2.5+
 - [MongoDB](https://www.mongodb.org/downloads) (testattu 2.6 ja 3.0 versioilla)
-- Ruby ja compass scss-tyylitiedostojen kääntämistä varten
-  - `gem install compass`
+- CSS ja [Sass](http://sass-lang.com):
+    - [Ruby](https://www.ruby-lang.org)
+    - [Compass](http://compass-style.org/): `gem install compass`
+    - [Node.js](https://nodejs.org)
+    - [Bless](http://blesscss.com): `npm install bless -g`
 - Python 2.x ja Robot Framework selaintestausta varten
   - `pip install robotframework`
   - `pip install robotframework-selenium2library`
@@ -152,27 +156,145 @@ fyysinen pino: front, app, mongodb, geoserver, sftp jne
 
 
 # Frontend arkkitehtuuri
-## Yleiskuvaus
-  SPA intial startup
-  Kommunikointi backendiin
-    Query and Command
+## Yleistä
+
+- SPA initial startup
+- Kommunikointi backendiin
+  - Query and Command
+
+## Uusien näkymien toteutusarkkitehtuuri
+
+Lupapiste on (kirjoitushetkellä) siirtymässä käyttämään [Flux-suunnittelumallin](https://facebook.github.io/flux/docs/overview.html) inspiroimaa frontend-arkkitehtuuria, jossa käyttöliittymä mallinnetaan knockout.js komponenteilla, viestinkuljetuksesta vastaa oma hub.js -komponentti ja sovelluksen tila sekä taustajärjestelmäkommunikaatio on service-komponenteissa.
+
+![](fe-arkkitehtuuri.png)
+
+### hub.js
+
+Hub.js on yksinkertainen, itse toteutettu pub/sub -komponentti, joka tarjoaa mahdollisuuden kirjautua kuuntelemaan sekä lähettää signaaleja (eventtejä). Hub.js:n rooli arkkitehtuurissa on tehdä näkymien ja service-kerroksen välisestä kommunikoinnista löyhästi kytkettyä.
+
+### Servicet
+
+Serviceitä on useita, joista kukin käsittää jonkun tietomallin käsitteen tai toiminnallisen kokonaisuuden tilan ja tapahtumien hallinnoinnin (esim. FileUploadService, ApplicationBulletinsService). Servicen tehtävät ovat:
+
+- Ylläpitää palvelimelta noudettua, tiettyyn käsitteeseen liittyvää tilaa selainpäässä
+  - Tila on yleensä tallennettuna joukkoon [Knockout observable-objekteja](http://knockoutjs.com/documentation/observables.html)
+- Kirjautua (subscribe) kuuntelemaan näkymäkomponenteilta tulevia signaaleja käyttäjän tekemistä toiminnoista
+  - Signaalien käsittelyyn liittyy usein (muttei välttämättä aina) jonkun observable-objektin arvon muuttamista ja/tai AJAX-kutsuja palvelinpäähän
+- Synkronoida muuttunut tila palvelinpäähän parhaaksi näkemällään logiikalla
+  - Joissain tilanteissa on järkevää synkronoida tilaa viivästetysti palvelimelle/tietokantaan, joskus taas service välittää uuden tilan heti tilamuutoksen yhteydessä. Tämä on joka tapauksessa servicen sisäistä toteutusta, joista käyttöliittymäkomponenttien ei tarvitse tietää mitään
+
+Tyypillinen service näyttää jotakuinkin tältä:
+
+```javascript
+LUPAPISTE.VetumaService = function() {
+...
+  // State
+  self.authenticated = ko.observable(false);
+  self.userInfo = ko.mapping.fromJS({
+    firstName: undefined,
+    lastName: undefined
+  });
+
+  // Subscriptions
+  hub.subscribe("vetumaService::authenticateUser", function(params) {
+    // Request authentication info from server
+    // ...
+
+    // Set state to new value
+    self.authenticated(true);
+    self.userInfo.firstName("John");
+  });
+
+  hub.subscribe("vetumaService::logoutRequested", function() {
+    // Handle logout event
+    ajax.command("logout-user", {userInfo: ko.mapping.toJS(self.userInfo)})
+      .success(function() { self.authenticated(false); });
+  });
+};
+
+```
+
+### Näkymä (view)
+
+Näkymä on toteutettu Knockout-komponenttina. Ymmärrämme Lupapisteessä knockout-komponentin käyttöliittymän osana, joka puhtaimmillaan tekee joko yhden asian tai koostaa muista komponenteista isomman kokonaisuuden. Komponentti koostuu ulkoasua kuvaavasta HTML-templaatista (*template*) ja JS-logiikasta (*model*).
+
+Näkymäkomponentit saavat tyypillisesti parametreinaan valikoidun osan niiden serviceiden tila-observableista, joilla on relevanssia komponentin tai sen lapsikomponenttien esittämän tiedon esittämisessä. Yksinkertaistettu esimerkki:
+
+application-bulletins-model.js
+```javascript
+LUPAPISTE.ApplicationBulletinsModel = function(params) {
+  // ...
+  self.bulletins = params.bulletinService.bulletins;
+  // ...
+};
+```
+
+application-bulletins-template.html
+```html
+  <!-- ... -->
+  <div data-bind="component: {name: 'application-bulletins-list',
+                              params: {bulletins: bulletins}}"></div>
+  <!-- ... -->
+```
+
+application-bulletins-list-model.js
+```javascript
+LUPAPISTE.ApplicationBulletinsListModel = function(params) {
+  // ...
+  self.bulletins = params.bulletins;
+  // ...
+};
+```
+
+application-bulletins-list-template.html
+```html
+  <!-- ... -->
+  <tbody data-bind="foreach: bulletins">
+    <!-- ... -->
+    <td data-bind="text: $data.bulletinState"></td>
+    <!-- ... -->
+  </tbody>
+  <!-- ... -->
+```
+
+Yo. esimerkissä hierarkiassa korkeammalla oleva komponentti on siis saanut koko service-objektin parametrinaan, mutta välittää siitä ainoastaan yhden osan (bulletins) lapsikomponentille. Lapsikomponentti ei taas tiedä mitään servicestä tai muusta sen ylläpitämästä tilasta vaan piirtää itsensä ruudulle pelkästään käyttäen saamiaan tietoja. Toinen, samanlainen esimerkki piirroksena:
+
+![](komponenttiarkkitehtuuri-esimerkki.png)
+
+Komponentti toimii siis seuraavasti:
+- Saa parametreina ne osat applikaation tilasta, jota tarvitaan komponentin esittämiseen oikein ruudulla
+  - Koska välitetty tila on yleensä joukko service-kerroksen omistamia observable-objekteja, myöhemmät tilan muutokset servicessä propagoituvat komponenttihierarkian läpi komponentille.
+- Välittää lapsikomponenteille ne osat saamastaan tilasta, jotka lapsikomponentti tarvitsee.
+- Tarjoaa käyttöliittymässä yleensä joukon joitakin toimintoja käyttäjille, joiden käyttäminen vaikuttaa applikaation tilaan
+- Signaloi hub.js:n avulla millaisia toimintoja käyttäjä on aktivoinut
+  - Käyttäjän toiminnot signaloidaan aina eteenpäin, annettua tilaa ei koskaan muuteta suoraan (ks. alla)
+
+### Konventiot
+
+Arkkitehtuuriin liittyvät konventiot:
+
+* **Lähettäessään eventtiä komponentti ei laita eventin parametreihin callback-funktiota datan palautukselle**
+  * Callback-funktio rikkoo ajatuksen yksisuuntaisesta tiedon kulusta. Komponenttien lähettämien eventtien tulisi olla "fire-and-forget" -tyylisiä, eli komponentti vain kertoo käyttäjän triggeröimästä tapahtumasta eikä edes välitä käsitteleekö eventtiä kukaan
+  * Käyttäjän triggeröimä tapahtuma voi olla kuitenkin merkityksellinen komponentin tilan kannalta. Tämä tilan muuttuminen toteutuu kun service käsittelee eventin ja muuttaa omaa sisäistä tilaansa tapahtuman mukaisesti, jonka johdosta tilamuutos välittyy myös komponenttihierarkian läpi eventin lähettäneelle komponentille
+* **Komponentti ei koskaan muuta suoraan saamansa tilan (tyypillisesti kokoelma observable-objekteja) tilaa vaan ainoastaan signaloi käyttäjän tekemisistä hub.js:n kautta**
+  * Myös tilan suora muuttaminen komponentissa rikkoo yksisuuntaisen arkkitehtuurin. Tilan muuttumiseen liittyy lähes aina jotain muutakin logiikkaa kuin uuden arvon asettamiset observable-objektiin. Tämän johdosta service-kerroksen tulisi aina vastata tilan muutoksesta ja mahdollisista sivuvaikutuksista.
+* **Komponentin lähettämä signaali kuvaa käyttäjän pyytämää toimintoa, eikä esimerkiksi sitä miten komponentin mielestä tilaa tulisi muuttaa**
+  * Komponentilla ei pitäisi sinänsä koskaan olla tietoa siitä, miten applikaation tila on järjestetty ja mitä käsitteitä tallennettuun tilaan liittyy. Komponentti tietää ainoastaan toiminnoista, joita se itse tarjoaa käyttäjälle itse määrittelemässään käyttöliittymässä.
+  * Esimerkiksi, käyttäjän vaihtaessa hakemuslistan rivien järjestystä, oikea signaali service-kerrokselle olisi `"applicationListSortChanged"` ja parametreiksi uusi, pyydetty järjestys (esim. `{sortBy: "date", direction: "asc"}`). Esimerkki vääränlaisesta signaalista olisi `"fetchApplicationsOrderedBy"`, koska tämä ei kuvaa käyttäjän toimintaa vaan haluttua lopputulosta.
+
 
 ## Globaalit objektit
-Ajax
-Hub
-User feedback on success and error event
-Localizations
-Lupapiste Map
-lupapisteApp
-- models
-- services
-LUPAPISTE
-- config
-Docgen, viittaus skeemojen määrittelyyn
-
-## KnockoutJS käyttö
-- component, model, template
-- services
+- Ajax
+- Hub
+- User feedback on success and error event
+- Localizations
+- Lupapiste Map
+- lupapisteApp
+  - models
+  - services
+- LUPAPISTE
+  - config
+- Docgen, viittaus skeemojen määrittelyyn
 
 ## Compass + SASS
 

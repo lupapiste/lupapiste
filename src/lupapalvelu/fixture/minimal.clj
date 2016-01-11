@@ -621,7 +621,21 @@
                                                [404059.221 6693545.0867]
                                                [402644.2941 6693912.6002]]]],
                                             :type "MultiPolygon"},
-                                           :type "Feature"}]}}
+                                           :type "Feature"}]}
+                       :areas-wgs84 {:type "FeatureCollection"
+                                     :features [{:id "sipoo_keskusta"
+                                                 :properties { :id 3, :nimi "Keskusta"}
+                                                 :geometry
+                                                 {:coordinates
+                                                        [[[[25.2346903951971, 60.3699135383472]
+                                                           [25.218174131471, 60.3916425519997]
+                                                           [25.2973279375514, 60.382941834376]
+                                                           [25.3000746506076, 60.3686195326001]
+                                                           [25.2605085377224, 60.3669529618652]
+                                                           [25.2605085377224, 60.3669529618652]
+                                                           [25.2346903951971, 60.3699135383472]]]]
+                                                  :type "MultiPolygon"}
+                                                 :type "Feature"}]}}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.

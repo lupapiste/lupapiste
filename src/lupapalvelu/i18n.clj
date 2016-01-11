@@ -1,13 +1,17 @@
 (ns lupapalvelu.i18n
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+            [clj-time.format :as timef]
+            [clj-time.core :as time]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [ontodev.excel :as xls]
             [cheshire.core :as json]
-            [sade.env :as env]
+            [ontodev.excel :as xls]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
             [sade.util :as util]
-            [lupapiste-commons.i18n.core :as commons]))
+            [lupapiste-commons.i18n.core :as commons]
+            [lupapiste-commons.i18n.resources :as commons-resources]))
 
 (def supported-langs [:fi :sv])
 (def default-lang (first supported-langs))
@@ -34,20 +38,30 @@
 (defn- read-sheet [headers sheet]
   (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
 
-(defn- read-translations-txt [resource-name]
-  (commons/keys-by-language (commons/read-translations (io/resource resource-name))))
+(defn- read-translations-txt [name-or-file]
+  (let [resource (if (instance? java.io.File name-or-file)
+                   name-or-file
+                   (io/resource name-or-file))]
+    (commons/keys-by-language (commons/read-translations resource))))
+
+(defn i18n-localizations
+  "Reads all .txt files from i18n/ resource path.
+   Returns them as collection of translation maps, where key is language
+   and value is map of loc-key - loc-value pairs"
+  []
+  (let [this-path (util/this-jar lupapalvelu.main)
+        i18n-files (if (ss/ends-with this-path ".jar")      ; are we inside jar
+                     (filter #(ss/ends-with % ".txt") (util/list-jar this-path "i18n/"))
+                     (util/get-files-by-regex "resources/i18n/" #".+\.txt$")) ; dev
+        i18n-files (if (every? string? i18n-files)          ; from jar, filenames are strings
+                     (map (partial str "i18n/") i18n-files)
+                     i18n-files)]
+    (map read-translations-txt i18n-files)))
 
 (defn- load-translations []
-  (merge-with conj
-              (read-translations-txt "shared_translations.txt")
-              (read-translations-txt "i18n/schemas_i18n.txt")
-              (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
-                (let [wb      (xls/load-workbook in)
-                      langs   (-> wb seq first first xls/read-row rest)
-                      headers (cons "key" langs)
-                      data    (->> wb (map (partial read-sheet headers)) (apply concat))
-                      langs-but-default (disj (set langs) (name default-lang))]
-                  (reduce (partial process-row langs-but-default) {} data)))))
+  (apply merge-with conj
+         (read-translations-txt "shared_translations.txt")
+         (i18n-localizations)))
 
 (def- localizations (atom nil))
 (def- excel-data (util/future* (load-translations)))
@@ -119,16 +133,22 @@
     {}
     lines))
 
-(defn- load-add-ons []
-  (when-let [in (io/resource "i18n.txt")]
-    (with-open [in (io/reader in)]
-      (read-lines (line-seq in)))))
-
-(env/in-dev
-  ;;
-  ;; Re-define get-localizations so that i18n.txt is always loaded and merged to excel data.
-  ;;
-  (defn get-localizations []
-    (let [lz (get-or-load-localizations)]
-      (update-in lz [default-lang] merge (load-add-ons)))))
-
+(defn missing-localizations-excel
+  "Writes missing localizations to excel file.
+   If file is not provided, will create the file to user home dir."
+  ([]
+   (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
+         filename (str (System/getProperty "user.home")
+                       "/lupapiste_translations_"
+                       date-str
+                       ".xlsx")]
+        (missing-localizations-excel (io/file filename))))
+  ([file]
+    (let [i18n-files   (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")
+          loc-maps     (map commons-resources/txt->map i18n-files)
+          langs        (distinct (apply concat (map :languages loc-maps)))
+          translations (apply merge-with conj (map :translations loc-maps))
+          loc-map      {:languages langs :translations translations}]
+    (commons-resources/write-excel
+      (commons-resources/missing-translations loc-map)
+      file))))

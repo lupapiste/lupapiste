@@ -7,6 +7,8 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]
+            [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
@@ -373,10 +375,10 @@
   (let [attachments (filter #(= attachment-target (:target %)) (:attachments application))
         poytakirja  (some #(when (=  {:type-group "muut", :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %) ) %) attachments)
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
-        canonical-attachments (when attachment-target (mapping-common/get-attachments-as-canonical
+        canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
                                                         begin-of-link attachment-target))
-        canonical-pk-liite (first (mapping-common/get-attachments-as-canonical
+        canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
                                      {:attachments [poytakirja] :title (:title application)}
                                      begin-of-link attachment-target))
         canonical-pk (:Liite canonical-pk-liite)
@@ -465,7 +467,7 @@
   [application lang krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments (unsent-attachments-to-canonical application lang)
 
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         canonical (assoc-in canonical-without-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-canonical)
@@ -529,11 +531,11 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments  (application-to-canonical application lang)
-        statement-given-ids (mapping-common/statements-ids-with-status
+        statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
-        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        statement-attachments (attachments-canon/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments-canonical
                                           {:Liite
                                            {:kuvaus "Vireille tullut hakemus"
@@ -547,7 +549,7 @@
                                             :muokkausHetki (util/to-xml-datetime (now))
                                             :versionumero 1
                                             :tyyppi "hakemus_taustajarjestelmaan_siirrettaessa"}})
-        canonical-with-statement-attachments  (mapping-common/add-statement-attachments
+        canonical-with-statement-attachments  (attachments-canon/add-statement-attachments
                                                 canonical-without-attachments
                                                 statement-attachments
                                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
@@ -556,7 +558,7 @@
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-with-generated-pdfs)
         xml (rakennuslupa-element-to-xml canonical krysp-version)
-        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk

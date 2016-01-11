@@ -22,6 +22,7 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
+            [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
@@ -68,13 +69,13 @@
 
 (defjson "/system/apis" [] @apis)
 
-(defn parse-json-body [request]
-  (let [json-body (if (ss/starts-with (:content-type request) "application/json")
-                    (if-let [body (:body request)]
+(defn parse-json-body [{:keys [content-type character-encoding body] :as request}]
+  (let [json-body (if (or (ss/starts-with content-type "application/json")
+                          (ss/starts-with content-type "application/csp-report"))
+                    (if body
                       (-> body
-                        (io/reader :encoding (or (:character-encoding request) "utf-8"))
-                        json/parse-stream
-                        keywordize-keys)
+                        (io/reader :encoding (or character-encoding "utf-8"))
+                        (json/parse-stream (comp keyword ss/strip-non-printables)))
                       {}))]
     (if json-body
       (assoc request :json json-body :params json-body)
@@ -172,9 +173,7 @@
 (defn basic-authentication
   "Returns a user map or nil if authentication fails"
   [request]
-  (let [auth (get-in request [:headers "authorization"])
-        cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))
-        [u p] (and cred (s/split (str cred) #":" 2))]
+  (let [[u p] (http/decode-basic-auth request)]
     (when (and u p)
       (:user (execute-command "login" {:username u :password p} request)))))
 
@@ -259,15 +258,16 @@
 (def- compose
   (if (env/feature? :no-cache)
     singlepage/compose
-    (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
+    (memoize (fn [resource-type app lang] (singlepage/compose resource-type app lang)))))
 
 (defn- single-resource [resource-type app failure]
-  (let [request (request/ring-request)]
+  (let [request (request/ring-request)
+        lang    *lang*]
     (if ((auth-methods app nobody) request)
      ; Check If-Modified-Since header, see cache-headers above
      (if (or (never-cache app) (env/feature? :no-cache) (not= (get-in request [:headers "if-modified-since"]) last-modified))
        (->>
-         (java.io.ByteArrayInputStream. (compose resource-type app))
+         (java.io.ByteArrayInputStream. (compose resource-type app lang))
          (resp/content-type (resource-type content-type))
          (resp/set-headers (cache-headers resource-type)))
        {:status 304})
@@ -280,7 +280,7 @@
   (let [build-number (:build-number env/buildinfo)]
     (if (= build build-number)
      (single-resource (keyword res-type) (keyword app) unauthorized)
-     (resp/redirect (str "/app/" build-number "/" app "." res-type )))))
+     (resp/redirect (str "/app/" build-number "/" app "." res-type "?lang=" (name *lang*))))))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -289,8 +289,8 @@
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
-(defn redirect-after-logout []
-  (resp/redirect (str (env/value :host) (env/value :redirect-after-logout) )))
+(defn redirect-after-logout [lang]
+  (resp/redirect (str (env/value :host) (or (env/value :redirect-after-logout (keyword lang)) "/"))))
 
 (defn redirect-to-frontpage [lang]
   (resp/redirect (str (env/value :host) (or (env/value :frontpage (keyword lang)) "/"))))
@@ -312,22 +312,24 @@
   (resp/set-headers {"Cache-Control" "no-cache", "Last-Modified" (util/to-RFC1123-datetime 0)}
     (single-resource :html :hashbang unauthorized)))
 
-(defn serve-app [app hashbang lang]
+(defn serve-app [app hashbang]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (if-let [hashbang (->hashbang hashbang)]
     (ssess/merge-to-session
-      (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage lang))
+      (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage *lang*))
       {:redirect-after-login hashbang})
     ; If current user has no access to the app, save hashbang using JS on client side.
     ; The next call will then be handled by the "true branch" above.
     (single-resource :html (keyword app) (save-hashbang-on-client))))
 
 (defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
-  (serve-app app hashbang lang))
+  (i18n/with-lang lang
+    (serve-app app hashbang)))
 
 ; Same as above, but with an extra path.
 (defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
-  (serve-app app hashbang lang))
+  (i18n/with-lang lang
+    (serve-app app hashbang)))
 
 ;;
 ;; Login/logout:
@@ -341,10 +343,10 @@
   (merge (logout!) (ok)))
 
 (defpage "/logout" []
-  (merge (logout!) (redirect-after-logout)))
+  (merge (logout!) (redirect-after-logout default-lang)))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (merge (logout!) (redirect-after-logout)))
+  (merge (logout!) (redirect-after-logout lang)))
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
@@ -455,7 +457,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/lp-static/html/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.112.html"
+      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.114.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
@@ -476,7 +478,11 @@
 ;; Server is alive
 ;;
 
-(defjson "/api/alive" [] {:ok (if (user/current-user (request/ring-request)) true false)})
+(defjson "/api/alive" []
+  (cond
+    (control/lockdown?) (fail :error.service-lockdown)
+    (user/current-user (request/ring-request)) (ok)
+    :else (fail :error.unauthorized)))
 
 ;;
 ;; Proxy

@@ -139,7 +139,7 @@ $app-gray-darkest: $gray187;
     }
 
     .link-permit-item {
-      text-decoration: none;
+      @include link;
     }
 
     p, .application_summary_text, ul {
@@ -189,7 +189,7 @@ $app-gray-darkest: $gray187;
       div {
         height: 24px;
         span {
-          //color: darken($lp-light-grey, 10%);
+          color: darken($lp-light-grey, 40%);
           position: relative;
           padding: 4px 8px 4px 24px;
           display: inline-block;
@@ -391,7 +391,7 @@ $app-gray-darkest: $gray187;
       padding: $marginL $marginM;
       margin-top: -$marginL *1.75;
       margin-bottom: $marginS;
-      @include box-sizing(border-box);
+      box-sizing: border-box;
       .h2 {
         text-transform: uppercase;
         font-size: 1em;
@@ -577,6 +577,12 @@ $app-gray-darkest: $gray187;
       display: block;
       font-style: italic;
     }
+  }
+}
+
+.neighbors {
+  .command {
+   margin-right: $marginS;
   }
 }
 
@@ -889,10 +895,7 @@ $app-gray-darkest: $gray187;
   .organization-links {
     margin-bottom: 12px;
     a {
-      color: $color-text;
-      &:active, &:visited, &:hover {
-        color: $color-text;
-      }
+      @include link;
     }
   }
 }
