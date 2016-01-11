@@ -18,14 +18,15 @@ var comments = (function() {
     self.showPreparationComments = ko.observable(false);
     self.isSelected = ko.observable();
 
+    // TODO we only need application id and comments
     self.refresh = function(application, takeAll, target, newCommentRoles) {
       var oldValue = self.text();
-      self.applicationId = application.id;
+      self.applicationId = ko.unwrap(application.id);
       self.target(target || {type: "application"}).text("");
       self.takeAll = takeAll;
       self.newCommentRoles = newCommentRoles;
       var filteredComments =
-        _.filter(application.comments,
+        _.filter(ko.toJS(application.comments),
           function(comment) {
             return self.takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
           });

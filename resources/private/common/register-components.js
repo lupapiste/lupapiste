@@ -99,7 +99,8 @@ jQuery(document).ready(function() {
     {name: "statement-reply-request"},
     {name: "statement-control-buttons"},
     {name: "statement-attachments"},
-    {name: "side-panel"}
+    {name: "side-panel"},
+    {name: "conversation"}
   ];
 
   _.forEach(components, function(component) {
