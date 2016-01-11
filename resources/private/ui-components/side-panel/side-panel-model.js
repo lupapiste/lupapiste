@@ -5,7 +5,7 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.application = lupapisteApp.models.application;
   self.authorization = lupapisteApp.models.applicationAuthModel;
 
-  self.showSidePanel = ko.observable(true);
+  self.showSidePanel = ko.observable(false);
   self.sidePanelOpen = ko.observable(false);
 
   self.showConversationPanel = ko.observable(false);
@@ -42,5 +42,15 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.closeSidePanel = function() {
     self.showNoticePanel(false);
     self.showConversationPanel(false);
+  };
+
+  var pages = ["application", "attachment", "statement", "neighbors", "verdict"];
+
+  var pageLoadSubscription = hub.subscribe({type: "page-load"}, function(data) {
+    self.showSidePanel(_.contains(pages, pageutil.getPage()));
+  });
+
+  self.dispose = function() {
+    hub.unsubscribe(pageLoadSubscription);
   };
 };
