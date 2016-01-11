@@ -13,13 +13,16 @@
           <li><a data-bind="attr: {href: loc( 'footer.help.href' )},
                             text: loc( 'footer.help.text' )"></a>
           </li>
+          <li><a data-bind="attr: {href: loc( 'footer.municipalities.href')},
+                            text: loc( 'footer.municipalities.text')"></a>
+          </li>
         </ul>
       </div>
       <div class="footer-box">
         <h3 data-bind="ltext: 'footer.conversation.title'"></h3>
         <span data-bind="ltext: 'footer.conversation.desc'"></span><br />
       <!-- ko if: _.includes(sidePanelPages, lupapisteApp.models.rootVMO && lupapisteApp.models.rootVMO.currentPage()) -->
-        <a onclick="window.parent.hub.send('show-conversation-panel');return false;" href="#">Avaa keskustelu</a>
+        <a onclick="window.parent.hub.send('show-conversation-panel');return false;" href="#" data-bind="ltext: 'footer.open.conversation'"></a>
       <!-- /ko -->
       </div>
       <div class="footer-box">
@@ -38,7 +41,7 @@
       </div>
       <div class="footer-box">
         <ul>
-          <li><a href="/ota-yhteytta" target="_blank" data-bind="ltext: 'footer.feedback'" ></a></li>
+          <li><a href="/ota-yhteytta" target="_blank" data-bind="ltext: 'footer.feedback'"></a></li>
           <li><a href="/palveluinfo" data-bind="ltext: 'footer.service.info'"></a></li>
           <li><a href="/rekisteriseloste" data-bind="ltext: 'footer.register'"></a></li>
           <li><a href="/kayttoehdot" data-bind="ltext: 'footer.terms'"></a></li>

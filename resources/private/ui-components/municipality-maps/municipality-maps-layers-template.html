@@ -43,6 +43,7 @@
                                      optionsValue: 'name',
                                      optionsCaption: loc( 'choose'),
                                      valueAllowUnset: true,
+                                     disable: $parent.readOnly,
                                      attr: {'data-test-id': 'layer' + $index() + '-select'}">
                   </select>
                 </td>
@@ -65,7 +66,7 @@
             </tbody>
           </table>
           <button class="positive"
-                  data-bind="click: addLayer"
+                  data-bind="click: addLayer, disable: readOnly"
                   data-test-id="layers-add">
             <i class="lupicon-circle-plus"></i>
             <span data-bind="ltext: 'auth-admin.municipality-maps.add'"></span>

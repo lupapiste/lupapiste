@@ -2,6 +2,7 @@ LUPAPISTE.MunicipalityMapsLayersModel = function( params ) {
   "use strict";
   var self = this;
 
+  self.readOnly = params.readOnly;
   self.serverLayers = params.serverLayers;
   self.userLayers = params.userLayers;
   self.backgroundVisible = params.backgroundVisible;

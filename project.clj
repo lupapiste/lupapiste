@@ -61,7 +61,7 @@
                  [org.clojure/data.json "0.2.6"]
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
                  [lupapiste/oskari "0.9.55"]
-                 [lupapiste/commons "0.5.45"]
+                 [lupapiste/commons "0.5.47"]
                  [pdfa-core "0.0.3"]
                  [clj-rss "0.2.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]

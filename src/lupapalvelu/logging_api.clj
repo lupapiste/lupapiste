@@ -1,17 +1,19 @@
 (ns lupapalvelu.logging-api
-  (:require [taoensso.timbre :as timbre :refer [error errorf]]
+  (:require [taoensso.timbre :as timbre :refer [error errorf logf]]
             [noir.core :refer [defpage]]
             [sade.env :as env]
             [sade.core :refer [ok fail]]
+            [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]))
 
-(defcommand "frontend-error"
+(defcommand "frontend-log"
   {:user-roles #{:anonymous}}
-  [{{:keys [page message build]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
+  [{{:keys [level page message build]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit           1000
+        level           (-> level ss/lower-case keyword)
         sanitize        (partial logging/sanitize limit)
         sanitized-page  (sanitize (or page "(unknown)"))
         user            (or (user/canonize-email email) "(anonymous)")
@@ -21,8 +23,8 @@
                          " - CLIENT HAS EXPIRED VERSION"
                          "")
         sanitized-msg   (sanitize (str message))]
-    (errorf "FRONTEND: %s [%s] got an error on page %s (build=%s%s): %s"
-            user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)))
+    (logf level "FRONTEND: %s [%s] on page %s (build=%s%s): %s"
+          user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)))
 
 (defquery "newest-version"
   {:user-roles #{:anonymous}

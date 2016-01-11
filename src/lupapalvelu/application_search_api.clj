@@ -20,7 +20,7 @@
               (select-keys
                 data
                 [:tags :organizations :applicationType :handlers
-                 :limit :searchText :skip :sort :operations :areas]))))
+                 :limit :searchText :skip :sort :operations :areas :areas-wgs84]))))
 
 (defn- selected-ops-by-permit-type [selected-ops]
   (->> operations/operations

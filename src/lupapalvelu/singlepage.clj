@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [clojure.java.io :as io]
             [lupapalvelu.components.ui-components :refer [ui-components] :as uic]
+            [lupapalvelu.i18n :as i18n]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.coerce :as tc]
             [sade.env :as env]
@@ -81,36 +82,20 @@
           (tc/to-date (tc/from-long (:time env/buildinfo)))
           (:build-number env/buildinfo)))
 
-(defn ie-main-css-fallback [template c]
-  {:pre [(> c 1)]}
-  (let [main-css-suffices (drop 2 (range (+ c 1)))
-        link-str (apply str (map
-                              #(str "<link href=\"/lp-static/css/main_" % ".css?" (:build-number env/buildinfo) "\" rel=\"stylesheet\"></link>\n")
-                              main-css-suffices))
-        fallback-str (format "<!--[if lte IE 9]>%s<![endif]-->" link-str)
-        fallback-elements (enlive/html-snippet fallback-str)]
-    (enlive/at
-      template
-      [:head :link#inject-ie-css]
-      (enlive/substitute fallback-elements))))
-
-(defn inject-content [t {:keys [nav info page footer templates]} component]
-  (let [main-css-count (uic/main-css-count)
-        transformed (-> t
-                        (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
-                        (enlive/transform [:nav] (enlive/content (map :content nav)))
-                        (enlive/transform [:div.notification] (enlive/content (map :content info)))
-                        (enlive/transform [:section] (enlive/content page))
-                        (enlive/transform [:footer] (enlive/content (map :content footer)))
-                        (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (resource-url :common :js)) e)))
-                        (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
-                        (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
-                        (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
-                        (enlive/transform [:link#main-css] (fn [e] (update-in e [:attrs :href] #(str % "?" (:build-number env/buildinfo)))))
-                        (enlive/transform [:div.ko-templates] (enlive/content templates)))]
-    (if (> main-css-count 1)
-      (enlive/emit* (ie-main-css-fallback transformed main-css-count))
-      (enlive/emit* transformed))))
+(defn inject-content [t {:keys [nav info page footer templates]} component lang]
+  (-> t
+      (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
+      (enlive/transform [:nav] (enlive/content (map :content nav)))
+      (enlive/transform [:div.notification] (enlive/content (map :content info)))
+      (enlive/transform [:section] (enlive/content page))
+      (enlive/transform [:footer] (enlive/content (map :content footer)))
+      (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (str (resource-url :common :js) "?lang=" (name lang))) e)))
+      (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
+      (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
+      (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary))
+      (enlive/transform [:link#main-css] (fn [e] (update-in e [:attrs :href] #(str % "?" (:build-number env/buildinfo)))))
+      (enlive/transform [:div.ko-templates] (enlive/content templates))
+      enlive/emit*))
 
 (defn- compress-html [^String html]
   (let [c (doto (HtmlCompressor.)
@@ -126,17 +111,18 @@
             (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]))] ; preserve KnockoutJS comments
     (.compress c html)))
 
-(defn compose-html [component]
+(defn compose-html [component lang]
   (let [out (ByteArrayOutputStream.)]
     (doseq [element (inject-content
                       (enlive/html-resource (c/path "template.html"))
                       (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
-                      component)]
+                      component
+                      lang)]
       (.write out (ss/utf8-bytes element)))
     (-> out (.toString (.name ss/utf8)) (compress-html) (ss/utf8-bytes))))
 
-(defn compose [kind component]
+(defn compose [kind component lang]
   (tracef "Compose %s%s" component kind)
   (if (= :html kind)
-    (compose-html component)
+    (compose-html component lang)
     (compose-resource kind component)))

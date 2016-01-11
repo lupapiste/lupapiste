@@ -3,6 +3,7 @@
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
+            [clojure.set]
             [clojure.string :as s]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.authorization :as auth]
@@ -129,7 +130,7 @@
 (defn statement-reminder-due-date []
   (let [timestamp-now (now)
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
-        apps (mongo/select :applications {:state {$nin (->> states/terminal-states vec (map name))}
+        apps (mongo/select :applications {:state {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
                                           :statements {$elemMatch {:given nil
                                                                    $and [{:dueDate {$exists true}}
                                                                          {:dueDate (older-than timestamp-now)}]

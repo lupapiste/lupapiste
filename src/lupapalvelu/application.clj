@@ -27,6 +27,7 @@
             [sade.validators :as v]
             [sade.util :as util]
             [sade.strings :as ss]
+            [sade.coordinate :as coord]
             [swiss.arrows :refer [-<>>]]))
 
 
@@ -300,6 +301,7 @@
                        :history             [(history-entry state created user)]
                        :municipality        municipality
                        :location            (->location x y)
+                       :location-wgs84      (coord/convert "EPSG:3067" "WGS84" 5 (->location x y))
                        :organization        (:id organization)
                        :address             address
                        :propertyId          property-id

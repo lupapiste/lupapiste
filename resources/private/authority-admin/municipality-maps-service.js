@@ -223,11 +223,16 @@ LUPAPISTE.MunicipalityMapsService = function() {
     };
   }
 
+  self.readOnly = ko.pureComputed( function() {
+    return !lupapisteApp.models.globalAuthModel.ok( "update-user-organization");
+  });
+
   // Parameter providers
   self.getParameters = function() {
     var ss = storedSettings();
     return {
       server: {
+        readOnly: self.readOnly,
         server: ss.server,
         waiting: waiting,
         error: error,
@@ -235,6 +240,7 @@ LUPAPISTE.MunicipalityMapsService = function() {
         channel: channel( "server")
       },
       layers: {
+        readOnly: self.readOnly,
         userLayers: ss.layers,
         serverLayers: serverLayers,
         backgroundVisible: backgroundMapVisible,
