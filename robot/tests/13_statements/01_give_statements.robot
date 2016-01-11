@@ -160,10 +160,11 @@ Sonja can see statement indicator
   Sonja logs in
   Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
 
-#There is no possibility to delete the generated statement pdf attachment
-#  Open application  ${appname}  ${appPropertyId}
-#  Open tab  attachments
-#  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-ennakkoluvat_ja_lausunnot.lausunto"]
+There is no possibility to delete the generated statement pdf attachment
+  Open application  ${appname}  ${appPropertyId}
+  Open tab  attachments
+  Wait until  Element should be visible  xpath=//tr[@id="attachment-row-ennakkoluvat_ja_lausunnot-lausunto"]
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-ennakkoluvat_ja_lausunnot.lausunto"]
 
 *** Keywords ***
 
