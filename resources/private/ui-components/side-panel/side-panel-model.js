@@ -5,21 +5,24 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.application = lupapisteApp.models.application;
   self.authorization = lupapisteApp.models.applicationAuthModel;
 
-  self.unseenComments = ko.observable();
-
   self.showSidePanel = ko.observable(true);
-  self.sidePanelOpen = ko.observable();
+  self.sidePanelOpen = ko.observable(false);
 
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
 
+  self.showHelp = ko.observable(false);
 
-  // conversation component
-  self.showHelp = ko.observable();
-  self.permitType = ko.observable('R');
-
-  self.sidePanelOpen = ko.computed(function() {
+  self.sidePanelOpen = ko.pureComputed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
+  });
+
+  self.unseenComments = ko.pureComputed(function() {
+    return util.getIn(self, ["application", "unseenComments"]);
+  });
+
+  self.permitType = ko.pureComputed(function() {
+    return util.getIn(self, ["application", "permitType"]);
   });
 
   self.hideHelp = function() {
