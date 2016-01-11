@@ -173,9 +173,7 @@
 (defn basic-authentication
   "Returns a user map or nil if authentication fails"
   [request]
-  (let [auth (get-in request [:headers "authorization"])
-        cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))
-        [u p] (and cred (s/split (str cred) #":" 2))]
+  (let [[u p] (http/decode-basic-auth request)]
     (when (and u p)
       (:user (execute-command "login" {:username u :password p} request)))))
 
