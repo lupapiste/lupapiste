@@ -86,13 +86,14 @@
         (fact ":read-only"
           (:read-only att) => true)))))
 
-(facts "Generate attachment from dummy application neightbors"
+(facts "Generate attachment from dummy application neighbors"
   (let [dummy-neighbours [(dummy-neighbour "2" "Matti Malli" "response-given" "SigloXX")
                           (dummy-neighbour "1" "Minna Malli" "open" "nada")]
         application (dummy-application "LP-1" :neighbors dummy-neighbours)]
     (doseq [lang i18n/languages]
       (let [file (File/createTempFile (str "child-test-statement-" (name lang)) ".pdf")
-            att (build-attachment {} application :neighbors "2" lang file)]
+            att (build-attachment {} application :neighbors "2" lang file)
+            att-other (build-attachment {} application :verdicts "2" lang file)]
         (fact ":contents"
           (:contents att) => "Matti Malli")
         (fact ":attachment-type"
@@ -100,4 +101,6 @@
         (fact ":archivable"
           (:archivable att) => false)
         (fact ":read-only"
-          (:read-only att) => true)))))
+          (:read-only att) => true)
+        (fact ":read-only of attachment with other type than :neighbors or :statements"
+          (:read-only att-other) => false)))))
