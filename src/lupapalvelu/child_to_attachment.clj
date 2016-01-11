@@ -14,7 +14,7 @@
   (first (filter #(or (nil? id) (= id (:id %))) (type application))))
 
 (defn- build-attachment [user application type id lang file]
-  {:pre [(map? user) (map? application) (keyword? type) (string? id)]}
+  {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts} type)]}
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
         type-name (case type
                     :statements (i18n/localize (name lang) "statement.lausunto")
