@@ -161,7 +161,7 @@ Sonja can see statement indicator
 #There is no possibility to delete the generated statement pdf attachment
 #  Open application  ${appname}  ${appPropertyId}
 #  Open tab  attachments
-#  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-ennakkoluvat_ja_lausunnot.selvitys_naapurien_kuulemisesta"]
+#  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-ennakkoluvat_ja_lausunnot.lausunto"]
 
 *** Keywords ***
 
