@@ -70,30 +70,34 @@
 
 (background (lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false)
 
-(facts " Generate attachment from dummy application statements "
-       (let [dummy-statements [(dummy-statement "2" "Matti Malli" nil "Lorelei ipsum")
-                               (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero.")]
-             application (dummy-application "LP-1" :statements dummy-statements)]
-         (doseq [lang i18n/languages]
-           (let [file (File/createTempFile (str "child-test-statement-" (name lang)) ".pdf")
-                 att (build-attachment nil application :statements "2" lang file)]
-             (fact " :contents"
-                   (:contents att) => "Paloviranomainen")
-             (fact " :attachment-type"
-                   (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"})
-             (fact " :archivable"
-                   (:archivable att) => false)))))
+(facts "Generate attachment from dummy application statements"
+  (let [dummy-statements [(dummy-statement "2" "Matti Malli" nil "Lorelei ipsum")
+                          (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero.")]
+        application (dummy-application "LP-1" :statements dummy-statements)]
+    (doseq [lang i18n/languages]
+      (let [file (File/createTempFile (str "child-test-statement-" (name lang)) ".pdf")
+            att (build-attachment {} application :statements "2" lang file)]
+        (fact ":contents"
+          (:contents att) => "Paloviranomainen")
+        (fact " :attachment-type"
+          (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"})
+        (fact ":archivable"
+          (:archivable att) => false)
+        (fact ":read-only"
+          (:read-only att) => true)))))
 
-(facts " Generate attachment from dummy application neightbors "
-       (let [dummy-neighbours [(dummy-neighbour "2" "Matti Malli" "response-given" "SigloXX")
-                               (dummy-neighbour "1" "Minna Malli" "open" "nada")]
-             application (dummy-application "LP-1" :neighbors dummy-neighbours)]
-         (doseq [lang i18n/languages]
-           (let [file (File/createTempFile (str "child-test-statement-" (name lang)) ".pdf")
-                 att (build-attachment nil application :neighbors "2" lang file)]
-             (fact " :contents"
-                   (:contents att) => "Matti Malli")
-             (fact " :attachment-type"
-                   (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"})
-             (fact " :archivable"
-                   (:archivable att) => false)))))
+(facts "Generate attachment from dummy application neightbors"
+  (let [dummy-neighbours [(dummy-neighbour "2" "Matti Malli" "response-given" "SigloXX")
+                          (dummy-neighbour "1" "Minna Malli" "open" "nada")]
+        application (dummy-application "LP-1" :neighbors dummy-neighbours)]
+    (doseq [lang i18n/languages]
+      (let [file (File/createTempFile (str "child-test-statement-" (name lang)) ".pdf")
+            att (build-attachment {} application :neighbors "2" lang file)]
+        (fact ":contents"
+          (:contents att) => "Matti Malli")
+        (fact ":attachment-type"
+          (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"})
+        (fact ":archivable"
+          (:archivable att) => false)
+        (fact ":read-only"
+          (:read-only att) => true)))))
