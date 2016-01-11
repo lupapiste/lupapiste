@@ -9,7 +9,7 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.authorities = [];
   self.mainConversation = ko.observable(true);
-  self.currentPage = ko.observable(pageutil.getPage());
+  self.currentPage = lupapisteApp.models.rootVMO.currentPage;
 
   self.infoRequest = ko.pureComputed(function() {
     return util.getIn(self, ["application", "infoRequest"]);
@@ -47,9 +47,29 @@ LUPAPISTE.ConversationModel = function(params) {
     refreshConversations(self.currentPage());
   }).extend({ rateLimit: 100 });
 
+  var previousPage = self.currentPage();
+
   var pageLoadSubscription = hub.subscribe({type: "page-load"}, function(data) {
-    // TODO check if there is unsent message when page changes
-    self.currentPage(pageutil.getPage());
+    if (self.currentPage() !== previousPage && self.comment.text()) {
+      hub.send("show-dialog", {ltitle: "application.conversation.unsentMessage.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.conversation.unsentMessage",
+                                                 yesFn: function() {
+                                                   if (data.previousHash) {
+                                                     location.hash = data.previousHash;
+                                                   }
+                                                   // HIGHlight conversation
+                                                 },
+                                                 noFn: function() {
+                                                   self.comment.text(undefined);
+                                                   previousPage = self.currentPage();
+                                                 },
+                                                 lyesTitle: "application.conversation.sendMessage",
+                                                 lnoTitle: "application.conversation.clearMessage"}});
+    } else {
+      previousPage = self.currentPage();
+    }
   });
 
   self.dispose = function() {
