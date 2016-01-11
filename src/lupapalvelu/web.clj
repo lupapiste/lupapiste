@@ -39,7 +39,6 @@
             [lupapalvelu.pdf.pdf-export-api]
             [lupapalvelu.logging-api]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
@@ -174,7 +173,7 @@
 (defn basic-authentication
   "Returns a user map or nil if authentication fails"
   [request]
-  (let [[u p] (security/decode-basic-auth request)]
+  (let [[u p] (http/decode-basic-auth request)]
     (when (and u p)
       (:user (execute-command "login" {:username u :password p} request)))))
 
