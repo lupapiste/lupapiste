@@ -39,4 +39,8 @@ LUPAPISTE.SidePanelModel = function(params) {
     self.showConversationPanel(false);
   };
 
+  self.closeSidePanel = function() {
+    self.showNoticePanel(false);
+    self.showConversationPanel(false);
+  };
 };
