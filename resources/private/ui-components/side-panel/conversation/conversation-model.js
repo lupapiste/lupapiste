@@ -9,7 +9,7 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.authorities = [];
   self.mainConversation = ko.observable(true);
-  self.currentPage = ko.observable();
+  self.currentPage = ko.observable(pageutil.getPage());
 
   self.infoRequest = ko.pureComputed(function() {
     return util.getIn(self, ["application", "infoRequest"]);
