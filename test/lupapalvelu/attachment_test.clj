@@ -84,7 +84,8 @@
                                                                                :notNeeded false
                                                                                :required true
                                                                                :requestedByAuthority true
-                                                                               :forPrinting false}
+                                                                               :forPrinting false
+                                                                               :readOnly false}
                                                                               {:id "123"
                                                                                :locked false
                                                                                :modified 999
@@ -99,7 +100,8 @@
                                                                                :notNeeded false
                                                                                :required true
                                                                                :requestedByAuthority true
-                                                                               :forPrinting false}])
+                                                                               :forPrinting false
+                                                                               :readOnly false}])
   (provided
     (mongo/create-id) => "123"))
 
@@ -195,7 +197,8 @@
                                                                                :required true
                                                                                :requestedByAuthority true
                                                                                :forPrinting false
-                                                                               :metadata {"foo" "bar"}}
+                                                                               :metadata {"foo" "bar"}
+                                                                               :readOnly false}
                                                                               {:id "123"
                                                                                :locked false
                                                                                :modified 999
@@ -211,7 +214,8 @@
                                                                                :required true
                                                                                :requestedByAuthority true
                                                                                :forPrinting false
-                                                                               :metadata {"bar" "baz"}}])
+                                                                               :metadata {"bar" "baz"}
+                                                                               :readOnly false}])
       (provided
         (mongo/create-id) => "123"))))
 
