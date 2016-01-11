@@ -33,17 +33,16 @@
               <div id="conversation-panel" data-bind="visible: showConversationPanel">
                   <div class="header">
                     <h1 class="inline-block title" data-bind="ltext: 'conversation.title'"></h1>
-                    <span data-bind="component: { name: 'help-toggle',
-                                                  params: {flag: showHelp,
-                                                           lhtml: 'help.' + permitType() + '.conversationDesc'}}">
+                    <span data-bind="component: {name: 'help-toggle',
+                                                params: {flag: showHelp,
+                                                         lhtml: 'help.' + permitType() + '.conversationDesc'}}">
                     </span>
                   </div>
                   <div class="content" data-bind="event: { scroll: hideHelp }">
+                    <div data-bind="component: {name: 'conversation',
+                                                params: {application: application,
+                                                         authorization: authorization}}"></div>
                   </div>
-<!--                   <div class="content" data-bind="event: { scroll: hideHelp }, transition: showHelp, class: 'expanded'">
-                      <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>
-                      <div class="process-nav"></div>
-                  </div> -->
               </div>
               <!-- ko if: authorization.ok('add-authority-notice')-->
               <div id="notice-panel" data-bind="visible: showNoticePanel">
