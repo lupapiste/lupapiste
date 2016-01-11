@@ -224,7 +224,7 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
 
-   :attachment   {:depends [:common-html :repository :signing :side-panel]
+   :attachment   {:depends [:common-html :repository :signing]
                   :js ["attachment-multi-select.js"
                        "targeted-attachments-model.js"
                        "attachment.js"
@@ -243,7 +243,7 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "attachments-tab-model.js" "archival-summary.js"
@@ -256,7 +256,7 @@
                   :html ["applications-list.html"]
                   :js ["applications-list.js"]}
 
-   :statement    {:depends [:common-html :repository :side-panel]
+   :statement    {:depends [:common-html :repository]
                   :js ["statement-service.js" "statement.js"]
                   :html ["statement.html"]}
 
@@ -264,7 +264,7 @@
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
-   :neighbors    {:depends [:common-html :repository :side-panel]
+   :neighbors    {:depends [:common-html :repository]
                   :js ["neighbors.js"]
                   :html ["neighbors.html"]}
 
@@ -306,9 +306,6 @@
 
    :notice       {:js ["notice.js"]
                   :html ["notice.html"]}
-
-   :side-panel   {:js ["side-panel.js"]
-                  :html ["side-panel.html"]}
 
    :password-reset {:depends [:common-html]
                     :js ["password-reset.js"]
