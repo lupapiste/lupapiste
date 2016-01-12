@@ -11,7 +11,7 @@
             [ring.util.codec :as codec]
             [lupapalvelu.action :as action]
             [monger.operators :refer :all]
-            [taoensso.timbre :refer [info error]])
+            [taoensso.timbre :refer [info error warn]])
   (:import (java.text SimpleDateFormat)
            (java.util Date)
            (java.util.concurrent ThreadFactory Executors)))
@@ -30,7 +30,7 @@
 
 (defonce upload-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
 
-(defonce unfinished-uploads (atom #{}))
+(defonce unfinished-uploads (atom {}))
 
 (defn- build-url [id]
   (let [host (env/value :arkisto :host)
@@ -64,16 +64,18 @@
     {$set {:modified now
            :metadata.tila :arkistoitu}}))
 
-(defn- upload-and-set-state [id is-or-file content-type metadata application now state-update-fn]
-  (info "Trying to archive attachment id" id "from application" (:id application))
-  (swap! unfinished-uploads conj id)
-  (let [response (upload-file id is-or-file content-type metadata)]
-    (if (= 200 (:status response))
-      (do (state-update-fn application now id)
-          (info "Archived attachment id" id "from application" (:id application)))
-      (do (error "Failed to archive attachment id" id "from application" (:id application))
-          (error response)))
-    (swap! unfinished-uploads disj id)))
+(defn- upload-and-set-state [id is-or-file content-type metadata {app-id :id :as application} now state-update-fn]
+  (info "Trying to archive attachment id" id "from application" app-id)
+  (if-not (get-in @unfinished-uploads [app-id id])
+    (do (swap! unfinished-uploads update app-id #(conj (or % #{}) id))
+        (let [response (upload-file id is-or-file content-type metadata)]
+          (if (= 200 (:status response))
+            (do (state-update-fn application now id)
+                (info "Archived attachment id" id "from application" app-id))
+            (do (error "Failed to archive attachment id" id "from application" app-id)
+                (error response)))
+          (swap! unfinished-uploads update app-id disj id)))
+    (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
   (if (= op-id (:id primaryOperation))
