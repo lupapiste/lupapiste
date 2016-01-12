@@ -7,7 +7,7 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.comment = comments.create();
 
-  self.authorities = [];
+  self.authorities = params.authorities;
   self.mainConversation = ko.observable(true);
   self.currentPage = lupapisteApp.models.rootVMO.currentPage;
   var previousHash = lupapisteApp.models.rootVMO.previousHash;

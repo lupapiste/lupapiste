@@ -4,6 +4,7 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.application = lupapisteApp.models.application;
   self.authorization = lupapisteApp.models.applicationAuthModel;
+  self.authorities = ko.observable();
 
   self.enableSidePanel = ko.observable(false);
   self.showSidePanel = ko.observable(false);
@@ -49,10 +50,21 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   var pageLoadSubscription = hub.subscribe({type: "page-load"}, function(data) {
     self.showSidePanel(_.contains(_.without(pages, "applications"), pageutil.getPage()));
-    self.enableSidePanel(_.contains(pages, pageutil.getPage()));
+    self.enableSidePanel(self.application && _.contains(pages, pageutil.getPage()));
   });
 
   self.dispose = function() {
     hub.unsubscribe(pageLoadSubscription);
   };
+
+  // TODO move to service
+  ko.computed(function() {
+    if (self.application && self.application.id()) {
+      ajax.query("application-authorities", {id: self.application.id()})
+      .success(function(resp) {
+        self.authorities(resp.authorities);
+      })
+      .call();
+    }
+  });
 };
