@@ -110,9 +110,10 @@
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
         id-to-usage (into {} (map (fn [d] {(get-in d [:schema-info :op :id])
                                            (get-in d [:data :kaytto :kayttotarkoitus :value])}) op-docs))]
-    (if op-id
-      [(get id-to-usage op-id)]
-      (vals id-to-usage))))
+    (->> (if op-id
+           [(get id-to-usage op-id)]
+           (vals id-to-usage))
+         (remove nil?))))
 
 (defn- make-version-number [{{{:keys [major minor]} :version} :latestVersion}]
   (str major "." minor))
@@ -160,7 +161,7 @@
       (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
             metadata (generate-archive-metadata application user)]
         (.submit upload-threadpool (fn []
-                                     (upload-and-set-state id application-file "application/pdf" metadata application created set-application-state)
+                                     (upload-and-set-state (str id "-application") application-file "application/pdf" metadata application created set-application-state)
                                      (io/delete-file application-file :silently)))))
     (doseq [attachment selected-attachments]
       (let [{:keys [content content-type]} (lupapalvelu.attachment/get-attachment-file (get-in attachment [:latestVersion :fileId]))
