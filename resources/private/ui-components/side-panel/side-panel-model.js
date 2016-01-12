@@ -59,7 +59,7 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   // TODO move to service
   ko.computed(function() {
-    if (self.application && self.application.id()) {
+    if (self.application && self.application.id() && self.authorization.ok("application-authorities") ) {
       ajax.query("application-authorities", {id: self.application.id()})
       .success(function(resp) {
         self.authorities(resp.authorities);
