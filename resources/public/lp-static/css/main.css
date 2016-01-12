@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1452510949299');
+@import url('main-blessed1.css?z=1452586672586');
 
 /* line 71, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .mask {
@@ -5020,35 +5020,34 @@ table.admin-settings td.value .save-indicator {
 #conversation-panel .header h1 {
   margin-bottom: 0;
 }
-
-/* line 232, ../../../private/common-html/sass/views/_side_panel.scss */
-#conversation-panel.highlight-conversation textarea {
+/* line 230, ../../../private/common-html/sass/views/_side_panel.scss */
+#conversation-panel .highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
 
-/* line 239, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 238, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .message-buttons button {
   margin-bottom: 6px;
 }
 
 @media all and (max-width: 1280px) {
-  /* line 246, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 245, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 400px;
   }
 
-  /* line 251, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 250, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel {
     right: -400px;
   }
 
-  /* line 256, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 255, ../../../private/common-html/sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }
 
-  /* line 260, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 259, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons {
     display: table;
   }
@@ -5062,7 +5061,7 @@ table.admin-settings td.value .save-indicator {
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
-  /* line 262, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 261, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons button {
     margin-bottom: 6px;
   }

@@ -3,7 +3,13 @@
 <body>
   <section class="page container">
     <script type="text/html" id="conversation-template">
-      <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>
+      <div data-bind="template: {name: 'comment-template',
+                                 data: {comment: comment,
+                                        authorities: authorities,
+                                        mainConversation: mainConversation,
+                                        authorization: authorization,
+                                        infoRequest: infoRequest}},
+                      css: {'highlight-conversation': highlightConversation}"></div>
       <div class="process-nav"></div>
     </script>
   </section>

@@ -9,6 +9,8 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.authorities = params.authorities;
   self.mainConversation = ko.observable(true);
+  self.highlightConversation = ko.observable(false);
+
   self.currentPage = lupapisteApp.models.rootVMO.currentPage;
   var previousHash = lupapisteApp.models.rootVMO.previousHash;
 
@@ -46,6 +48,15 @@ LUPAPISTE.ConversationModel = function(params) {
 
   var previousPage = self.currentPage();
 
+  function highlightConversation() {
+    // TODO show comment panel if hidden
+    self.comment.isSelected(true);
+    self.highlightConversation(true);
+    setTimeout(function() {
+      self.highlightConversation(false);
+    }, 2000);
+  }
+
   ko.computed(function() {
     refreshConversations(self.currentPage());
     if (self.currentPage() !== previousPage && self.comment.text()) {
@@ -57,7 +68,7 @@ LUPAPISTE.ConversationModel = function(params) {
                                                    if (previousHash()) {
                                                      location.hash = previousHash();
                                                    }
-                                                   // HIGHlight conversation
+                                                   highlightConversation();
                                                  },
                                                  noFn: function() {
                                                    self.comment.text(undefined);
