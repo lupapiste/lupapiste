@@ -100,7 +100,8 @@ jQuery(document).ready(function() {
     {name: "statement-control-buttons"},
     {name: "statement-attachments"},
     {name: "side-panel"},
-    {name: "conversation"}
+    {name: "conversation"},
+    {name: "authority-notice"}
   ];
 
   _.forEach(components, function(component) {

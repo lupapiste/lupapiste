@@ -73,10 +73,10 @@ LUPAPISTE.NoticeModel = function() {
   self.refresh = function(application) {
     // unsubscribe so that refresh does not trigger save
     unsubscribe();
-    self.applicationId = application.id;
-    self.urgency(application.urgency);
-    self.authorityNotice(application.authorityNotice);
-    self.selectedTags(application.tags);
+    self.applicationId = ko.unwrap(application.id);
+    self.urgency(ko.unwrap(application.urgency));
+    self.authorityNotice(ko.unwrap(application.authorityNotice));
+    self.selectedTags(ko.toJS(application.tags));
     self.showTagsComponent(true);
     subscribe();
   };

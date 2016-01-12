@@ -34,8 +34,8 @@
                   <div class="header">
                     <h1 class="inline-block title" data-bind="ltext: 'conversation.title'"></h1>
                     <span data-bind="component: {name: 'help-toggle',
-                                                params: {flag: showHelp,
-                                                         lhtml: 'help.' + permitType() + '.conversationDesc'}}">
+                                                 params: {flag: showHelp,
+                                                          lhtml: 'help.' + permitType() + '.conversationDesc'}}">
                     </span>
                   </div>
                   <div class="content" data-bind="event: { scroll: hideHelp }">
@@ -50,7 +50,9 @@
                   <div class="header">
                       <h1 data-bind="ltext: 'notice.title'"></h1>
                   </div>
-                  <!-- <div class="content-table" data-bind="template: {name: 'notice-template', data: notice}"></div> -->
+                  <!-- ko component: {name: 'authority-notice',
+                                      params: {application: application}} -->
+                  <!-- /ko -->
               </div>
               <!-- /ko -->
           </div>
