@@ -61,7 +61,7 @@
     (fact (:text readonly-result) => "error-trying-to-update-readonly-field")))
 
 
-(facts "facts about create-doc command"
+(facts "create and query document"
   (let [application-id   (create-app-id pena)
         application0     (query-application pena application-id)
         ok-result        (command pena :create-doc :id application-id :schemaName "hakija-r")
@@ -76,7 +76,13 @@
     (fact no-schema-result => fail?)
     (fact repeating-schema-result => ok?)
     (fact "paasuunnittelija can't be added" non-repeating-result => fail?)
-    (fact (count (:documents application1)) => (inc (inc (count (:documents application0))))))
+    (fact "2 docs were added" (count (:documents application1)) => (inc (inc (count (:documents application0)))))
+
+    (fact "The new document is returned with validation results"
+      (let [{document :document :as resp} (query pena :document :id application-id :doc doc-id :collection "documents")]
+        resp => ok?
+        document => map?
+        (:validationErrors document) => seq)))
 
   (facts "paasuunnittelija can be added exactly once"
     (let [application-id (create-app-id pena :operation :puun-kaataminen)]

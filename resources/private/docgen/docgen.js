@@ -33,18 +33,23 @@ var docgen = (function () {
             var self = this;
             ajax
               .command("create-doc", { schemaName: schema.info.name, id: application.id, collection: docModel.getCollection() })
-              .success(function (data) {
-                var newDoc = {
-                  id: data.doc,
-                  data: {},
-                  meta: {},
-                  validationErrors: doc.validationErrors
-                };
+              .success(function (resp) {
+                var newDocId = resp.doc;
                 var newDocSchema = _.cloneDeep(schema);
                 newDocSchema.info.op = null;
-                var newElem = new DocModel(newDocSchema, newDoc, application, authorizationModel).element;
-                $(self).before(newElem);
-                $(".sticky", newElem).Stickyfill();
+
+                // The new document might contain some default values, get them from backend
+                ajax.query("document", {id: application.id, doc: newDocId, collection: docModel.getCollection()})
+                  .success(function(data) {
+                    var newDoc = new DocModel(newDocSchema, data.document, application, authorizationModel);
+                    newDoc.triggerEvents();
+
+                    $(self).before(newDoc.element);
+                    $(".sticky", newDoc.element).Stickyfill();
+
+                    newDoc.showValidationResults(data.document.validationErrors);
+                  })
+                  .call();
               })
               .call();
           });
