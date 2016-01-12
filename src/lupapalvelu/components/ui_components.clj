@@ -304,8 +304,7 @@
 
    :admins       {:depends [:users]}
 
-   :notice       {:js ["notice.js"]
-                  :html ["notice.html"]}
+   :notice       {:js ["notice.js"]}
 
    :password-reset {:depends [:common-html]
                     :js ["password-reset.js"]
