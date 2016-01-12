@@ -1335,7 +1335,7 @@
                                                               'data-test-state': $data.state,
                                                               'title': loc(['task', statusName, 'title'])}"></i></td>
                                             <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
-                                            <td data-bind="dateString: $data.closed"></td>
+                                            <td data-bind="text: util.getIn($data, ['data', 'katselmus', 'pitoPvm', 'value'])"></td>
                                         </tr>
                                     </tbody>
                                 </table>
