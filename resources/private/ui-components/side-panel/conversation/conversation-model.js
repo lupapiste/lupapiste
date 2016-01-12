@@ -10,6 +10,7 @@ LUPAPISTE.ConversationModel = function(params) {
   self.authorities = [];
   self.mainConversation = ko.observable(true);
   self.currentPage = lupapisteApp.models.rootVMO.currentPage;
+  var previousHash = lupapisteApp.models.rootVMO.previousHash;
 
   self.infoRequest = ko.pureComputed(function() {
     return util.getIn(self, ["application", "infoRequest"]);
@@ -43,21 +44,18 @@ LUPAPISTE.ConversationModel = function(params) {
     }
   }
 
-  ko.computed(function() {
-    refreshConversations(self.currentPage());
-  }).extend({ rateLimit: 100 });
-
   var previousPage = self.currentPage();
 
-  var pageLoadSubscription = hub.subscribe({type: "page-load"}, function(data) {
+  ko.computed(function() {
+    refreshConversations(self.currentPage());
     if (self.currentPage() !== previousPage && self.comment.text()) {
       hub.send("show-dialog", {ltitle: "application.conversation.unsentMessage.header",
                                size: "medium",
                                component: "yes-no-dialog",
                                componentParams: {ltext: "application.conversation.unsentMessage",
                                                  yesFn: function() {
-                                                   if (data.previousHash) {
-                                                     location.hash = data.previousHash;
+                                                   if (previousHash()) {
+                                                     location.hash = previousHash();
                                                    }
                                                    // HIGHlight conversation
                                                  },
@@ -70,9 +68,5 @@ LUPAPISTE.ConversationModel = function(params) {
     } else {
       previousPage = self.currentPage();
     }
-  });
-
-  self.dispose = function() {
-    hub.unsubscribe(pageLoadSubscription);
-  };
+  }).extend({ rateLimit: 100 });
 };
