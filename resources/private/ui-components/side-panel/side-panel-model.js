@@ -34,6 +34,17 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.toggleConversationPanel = function() {
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
+
+    // TODO move to service
+    if (self.showConversationPanel()) {
+      setTimeout(function() {
+        // Mark comments seen after a second
+        if (self.application.id() && self.authorization.ok("mark-seen")) {
+          ajax.command("mark-seen", {id: self.application.id(), type: "comments"})
+          .success(function() {self.application.unseenComments(0);})
+          .call();
+        }}, 1000);
+    }
   };
 
   self.toggleNoticePanel = function() {
