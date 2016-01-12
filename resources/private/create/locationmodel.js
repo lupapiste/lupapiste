@@ -58,7 +58,7 @@ LUPAPISTE.CreateApplicationLocationModel = function() {
               y = data.y;
           self
             .setXY(x,y).center(14)
-            .setPropertyId(util.prop.toDbFormat(id))
+            .propertyId(util.prop.toDbFormat(id))
             .beginUpdateRequest()
             .searchAddress(x, y);
         }
