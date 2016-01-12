@@ -37,7 +37,7 @@
   [{:keys [application]}]
   (if-let [document (doc-persistence/by-id application collection doc)]
     (ok :document (assoc document :validationErrors (model/validate application document)))
-    (fail! :error.document-not-found)))
+    (fail :error.document-not-found)))
 
 ;;
 ;; CRUD
