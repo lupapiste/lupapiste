@@ -157,5 +157,5 @@
     #"^(\S+)$"                                    :>> (apply-search search-poi-or-street lang)
     #"^(\S+)\s+(\d+)\s*,?\s*$"                    :>> (apply-search search-street-with-number lang)
     #"^(\S+)\s+(\S+)$"                            :>> (apply-search search-street-with-city lang)
-    #"^(\S+)\s+(\d+)\s*,?\s*(\S+)$"               :>> (apply-search search-address lang)
+    #"^([\S\s]+)\s+(\d+)\s*,?\s*(\S+)$"           :>> (apply-search search-address lang)
     []))
