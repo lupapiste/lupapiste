@@ -71,13 +71,12 @@
       (ok :users (map user/summary users)))
     (ok :users [])))
 
-(env/in-dev
-  (defquery user-by-email
-    {:parameters [email]
-     :input-validators [(partial action/non-blank-parameters [:email])]
-     :user-roles #{:admin}}
-    [_]
-    (ok :user (user/get-user-by-email email))))
+(defquery user-by-email
+  {:parameters [email]
+   :input-validators [(partial action/non-blank-parameters [:email])]
+   :user-roles #{:admin}}
+  [_]
+  (ok :user (user/get-user-by-email email)))
 
 (defquery users-for-datatables
   {:user-roles #{:admin :authorityAdmin}}

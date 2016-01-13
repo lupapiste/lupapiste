@@ -4269,7 +4269,7 @@ a.link-btn-julkipano:disabled, a.link-btn-julkipano.disabled, a.link-btn-julkipa
   -webkit-animation: spin 4s linear infinite;
   -moz-animation: spin 4s linear infinite;
   animation: spin 4s linear infinite;
-  display: none;
+  vertical-align: middle;
 }
 
 /* line 378, ../../../private/common-html/sass/partials/_buttons.scss */
@@ -4578,7 +4578,7 @@ message-panel {
   display: inline-block;
 }
 /* line 182, ../../../private/common-html/sass/partials/_forms.scss */
-.form-entry .form-input {
+.form-entry .form-input, .form-entry .form-input--inline {
   margin-right: 36px;
 }
 
@@ -4646,7 +4646,7 @@ message-panel {
 }
 
 /* line 242, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input {
+.form-input, .form-input--inline {
   height: 22px;
   line-height: 24px;
   margin: 2px 6px 12px 0;
@@ -4654,17 +4654,17 @@ message-panel {
   display: block;
 }
 /* line 249, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.long {
+.form-input.long, .long.form-input--inline {
   width: 28.75em;
 }
 
 /* line 254, ../../../private/common-html/sass/partials/_forms.scss */
-input.form-input.long {
+input.form-input.long, input.long.form-input--inline {
   width: 28.75em;
 }
 
 /* line 258, ../../../private/common-html/sass/partials/_forms.scss */
-input.form-input.inline {
+input.form-input.inline, input.inline.form-input--inline {
   display: inline;
 }
 
@@ -4674,12 +4674,12 @@ input.form-input.inline {
 }
 
 /* line 266, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.file {
+.form-input.file, .file.form-input--inline {
   height: 24px;
 }
 
 /* line 270, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.checkbox, [type="checkbox"], .form-input.radio, [type="radio"] {
+.form-input.checkbox, .checkbox.form-input--inline, [type="checkbox"], .form-input.radio, .radio.form-input--inline, [type="radio"] {
   width: auto;
   display: inline-block;
   vertical-align: bottom;
@@ -4689,31 +4689,31 @@ input.form-input.inline {
   padding: 0;
 }
 /* line 278, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.checkbox.error, [type="checkbox"].error, .form-input.radio.error, [type="radio"].error {
+.form-input.checkbox.error, .checkbox.error.form-input--inline, [type="checkbox"].error, .form-input.radio.error, .radio.error.form-input--inline, [type="radio"].error {
   outline: 3px solid red;
 }
 /* line 281, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.checkbox.warning, [type="checkbox"].warning, .form-input.radio.warning, [type="radio"].warning {
+.form-input.checkbox.warning, .checkbox.warning.form-input--inline, [type="checkbox"].warning, .form-input.radio.warning, .radio.warning.form-input--inline, [type="radio"].warning {
   outline: 3px solid #f39129;
 }
 /* line 284, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.checkbox.source-value-changed, [type="checkbox"].source-value-changed, .form-input.radio.source-value-changed, [type="radio"].source-value-changed {
+.form-input.checkbox.source-value-changed, .checkbox.source-value-changed.form-input--inline, [type="checkbox"].source-value-changed, .form-input.radio.source-value-changed, .radio.source-value-changed.form-input--inline, [type="radio"].source-value-changed {
   outline: 2px solid #04c714;
 }
 
 /* line 289, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.combobox, select {
+.form-input.combobox, .combobox.form-input--inline, select {
   width: 16.25em;
   height: 30px;
   padding: 4px;
 }
 /* line 293, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.combobox.long, select.long {
+.form-input.combobox.long, .combobox.long.form-input--inline, select.long {
   width: 28.75em;
 }
 
 /* line 298, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.other {
+.form-input.other, .other.form-input--inline {
   display: inline;
   margin-top: -40px;
   margin-left: 17.25em;
@@ -4742,11 +4742,11 @@ input.form-input.inline {
   margin: 6px;
 }
 /* line 327, ../../../private/common-html/sass/partials/_forms.scss */
-.form-group .form-input, .form-choice .form-input, .form-table .form-input {
+.form-group .form-input, .form-group .form-input--inline, .form-choice .form-input, .form-choice .form-input--inline, .form-table .form-input, .form-table .form-input--inline {
   display: block;
 }
 /* line 330, ../../../private/common-html/sass/partials/_forms.scss */
-.form-group .form-input.checkbox, .form-group .form-input.radio, .form-choice .form-input.checkbox, .form-choice .form-input.radio, .form-table .form-input.checkbox, .form-table .form-input.radio {
+.form-group .form-input.checkbox, .form-group .checkbox.form-input--inline, .form-group .form-input.radio, .form-group .radio.form-input--inline, .form-choice .form-input.checkbox, .form-choice .checkbox.form-input--inline, .form-choice .form-input.radio, .form-choice .radio.form-input--inline, .form-table .form-input.checkbox, .form-table .checkbox.form-input--inline, .form-table .form-input.radio, .form-table .radio.form-input--inline {
   margin: 0 6px 0 0;
   display: inline-block;
 }
@@ -4786,11 +4786,11 @@ input.form-input.inline {
   min-width: 45%;
 }
 /* line 367, ../../../private/common-html/sass/partials/_forms.scss */
-.form-choice .form-entry .form-input {
+.form-choice .form-entry .form-input, .form-choice .form-entry .form-input--inline {
   display: inline-block;
 }
 /* line 370, ../../../private/common-html/sass/partials/_forms.scss */
-.form-choice .form-entry .form-input.textarea {
+.form-choice .form-entry .form-input.textarea, .form-choice .form-entry .textarea.form-input--inline {
   height: 72px;
   width: 80%;
 }
@@ -4830,7 +4830,7 @@ input.form-input.inline {
 }
 
 /* line 404, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.textarea {
+.form-input.textarea, .textarea.form-input--inline {
   height: 168px;
   width: 80%;
 }
@@ -4842,23 +4842,23 @@ input.form-input.inline {
 }
 
 /* line 413, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input-and-unit .form-input {
+.form-input-and-unit .form-input, .form-input-and-unit .form-input--inline {
   display: inline-block;
   margin-right: 12px;
 }
 
 /* line 420, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.tiny {
+.form-input.tiny, .tiny.form-input--inline {
   width: 1.875em;
 }
 
 /* line 424, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.short {
+.form-input.short, .short.form-input--inline {
   width: 3.75em;
 }
 
 /* line 428, ../../../private/common-html/sass/partials/_forms.scss */
-.form-input.medium {
+.form-input.medium, .medium.form-input--inline {
   width: 10em;
 }
 
@@ -4914,7 +4914,7 @@ input.form-input.inline {
   display: block;
 }
 /* line 473, ../../../private/common-html/sass/partials/_forms.scss */
-.docgen-content .form-entry.personSelector .form-input, .docgen-content .form-entry.companySelector .form-input {
+.docgen-content .form-entry.personSelector .form-input, .docgen-content .form-entry.personSelector .form-input--inline, .docgen-content .form-entry.companySelector .form-input, .docgen-content .form-entry.companySelector .form-input--inline {
   display: inline-block;
 }
 /* line 478, ../../../private/common-html/sass/partials/_forms.scss */
@@ -4984,16 +4984,16 @@ input.form-input.inline {
   border-right: none;
 }
 /* line 541, ../../../private/common-html/sass/partials/_forms.scss */
-.docgen-content .form-table .form-input {
+.docgen-content .form-table .form-input, .docgen-content .form-table .form-input--inline {
   display: inline;
   margin: 0;
 }
 /* line 547, ../../../private/common-html/sass/partials/_forms.scss */
-.docgen-content .form-table .form-input .text {
+.docgen-content .form-table .form-input .text, .docgen-content .form-table .form-input--inline .text {
   height: 25px;
 }
 /* line 552, ../../../private/common-html/sass/partials/_forms.scss */
-.docgen-content .form-table .form-input.combobox, .docgen-content select {
+.docgen-content .form-table .form-input.combobox, .docgen-content .form-table .combobox.form-input--inline, .docgen-content select {
   min-width: 10em;
 }
 /* line 556, ../../../private/common-html/sass/partials/_forms.scss */
@@ -5063,7 +5063,7 @@ input.form-input.inline {
   display: inline;
 }
 /* line 631, ../../../private/common-html/sass/partials/_forms.scss */
-.kiintun-and-maaraalatunnus .form-input.text {
+.kiintun-and-maaraalatunnus .form-input.text, .kiintun-and-maaraalatunnus .text.form-input--inline {
   display: inline;
   width: 48px;
   margin: 0 4px;
@@ -5351,7 +5351,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   width: 100%;
 }
 /* line 908, ../../../private/common-html/sass/partials/_forms.scss */
-.three-col .form-input {
+.three-col .form-input, .three-col .form-input--inline {
   width: 17.25em;
 }
 /* line 912, ../../../private/common-html/sass/partials/_forms.scss */
@@ -7818,7 +7818,7 @@ ul.tabs {
   background: #dddddd;
 }
 /* line 157, ../../../private/common-html/sass/partials/_tabs.scss */
-.radio-tabs .form-input {
+.radio-tabs .form-input, .radio-tabs .form-input--inline {
   margin-bottom: 7px;
 }
 /* line 160, ../../../private/common-html/sass/partials/_tabs.scss */
@@ -8117,214 +8117,4 @@ ul.tabs {
 .comment-bubble a:active {
   color: #fbc732;
   text-decoration: underline;
-}
-/* line 231, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble .deleted {
-  text-decoration: line-through;
-}
-
-/* line 242, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority {
-  position: relative;
-  color: #333333;
-  background: #f6f6f6;
-  width: 100%;
-  border-radius: 2px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 5px;
-  padding-top: 5px;
-  margin-bottom: 15px;
-  border: 1px solid #bbbbbb;
-}
-/* line 171, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority:after, .comment-bubble-authority:before {
-  top: 100%;
-  left: 95%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-/* line 182, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority:after, .comment-bubble-authority:before {
-  left: 95%;
-}
-/* line 185, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority:after {
-  border-color: rgba(246, 246, 246, 0);
-  border-top-color: #f6f6f6;
-  border-width: 10px;
-  margin-left: -10px;
-}
-/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority:before {
-  border-color: rgba(187, 187, 187, 0);
-  border-top-color: #bbbbbb;
-  border-width: 11px;
-  margin-left: -11px;
-}
-/* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .header {
-  border-bottom: 2px solid #bbbbbb;
-  margin-bottom: 5px;
-  padding-bottom: 5px;
-  width: 100%;
-  overflow-y: hidden;
-  vertical-align: top;
-}
-/* line 204, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .header .sender {
-  float: left;
-  font-weight: bold;
-}
-/* line 207, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .header .sender .role {
-  text-transform: lowercase;
-}
-/* line 209, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .header .sender .role:before {
-  content: "(";
-}
-/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .header .sender .role:after {
-  content: ")";
-}
-/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .header .sender .to:before {
-  margin-left: 12px;
-  margin-right: 12px;
-  content: "→";
-}
-/* line 224, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .header .timestamp {
-  float: right;
-}
-/* line 228, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority a {
-  color: #f39129;
-  text-decoration: none;
-}
-/* line 10, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble-authority a:link, .comment-bubble-authority a:visited {
-  color: #f39129;
-}
-/* line 13, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble-authority a:hover {
-  color: #f7ac2e;
-  text-decoration: underline;
-}
-/* line 17, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble-authority a:active {
-  color: #fbc732;
-  text-decoration: underline;
-}
-/* line 231, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .deleted {
-  text-decoration: line-through;
-}
-/* line 244, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority .header {
-  border-bottom-color: #05d3b9;
-}
-
-/* line 249, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble > span,
-.comment-bubble-authority > span {
-  white-space: pre-wrap;
-}
-
-/* line 257, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble.attachment .header,
-.comment-bubble-authority.attachment .header {
-  border-bottom-color: #f7ac2e;
-}
-
-/* line 264, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble.for-me .header,
-.comment-bubble-authority.for-me .header {
-  border-bottom-color: #46b02d;
-}
-
-/* line 3, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .small {
-  width: 360px;
-}
-/* line 6, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .medium {
-  width: 480px;
-}
-/* line 9, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .large {
-  width: 980px;
-}
-/* line 13, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog {
-  display: none;
-  position: fixed;
-  right: 0;
-  left: 0;
-  margin-top: 50px;
-  margin-left: auto;
-  margin-right: auto;
-  z-index: 9999;
-  padding: 12px;
-  background-color: #fff;
-  min-height: 150px;
-}
-/* line 25, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .component {
-  overflow: auto;
-  margin: 12px 12px 75px 12px;
-  min-height: 50px;
-}
-/* line 29, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .component .button-group {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  left: 12px;
-}
-/* line 34, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .component .button-group .cancel {
-  float: right;
-  margin-right: 12px;
-}
-/* line 39, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .component .button-group.ok {
-  text-align: center;
-}
-/* line 41, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .component .button-group.ok .btn-dialog {
-  position: relative;
-}
-/* line 45, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .component .autocomplete-component {
-  width: 430px;
-  position: static;
-}
-/* line 50, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .header {
-  padding-top: 2px;
-  padding-bottom: 4px;
-  padding-left: 24px;
-  border-bottom: 1px solid;
-  font-size: 20px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* line 58, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .header .title {
-  line-height: 24px;
-}
-/* line 61, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .dialog .header .close {
-  position: absolute;
-  right: 12px;
-  /* cursor: pointer; */
-  /* &:after { */
-  /*   content: "X"; */
-  /* } */
 }

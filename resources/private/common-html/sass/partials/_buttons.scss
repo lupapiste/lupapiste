@@ -372,7 +372,7 @@ a.link-btn-julkipano {
 
 .spin {
   @include rotate( spin );
-  display: none;
+  vertical-align: middle;
 }
 
 i.wait {

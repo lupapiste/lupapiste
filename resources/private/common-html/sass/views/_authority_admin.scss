@@ -58,3 +58,14 @@ table.admin-settings {
   /* cover the tabs*/
   margin-top: -38px;
 }
+
+// Guest authorities
+.guest-authorities {
+  margin-top: 1em;
+}
+
+
+.form-input--inline {
+  @extend .form-input;
+  display: inline-block;
+}

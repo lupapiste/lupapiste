@@ -1,5 +1,215 @@
-@import url('main-blessed1.css?z=1452006688333');
+@import url('main-blessed1.css?z=1452676590609');
 
+/* line 231, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .deleted {
+  text-decoration: line-through;
+}
+
+/* line 242, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority {
+  position: relative;
+  color: #333333;
+  background: #f6f6f6;
+  width: 100%;
+  border-radius: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #bbbbbb;
+}
+/* line 171, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:after, .comment-bubble-authority:before {
+  top: 100%;
+  left: 95%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 182, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:after, .comment-bubble-authority:before {
+  left: 95%;
+}
+/* line 185, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:after {
+  border-color: rgba(246, 246, 246, 0);
+  border-top-color: #f6f6f6;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:before {
+  border-color: rgba(187, 187, 187, 0);
+  border-top-color: #bbbbbb;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header {
+  border-bottom: 2px solid #bbbbbb;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  width: 100%;
+  overflow-y: hidden;
+  vertical-align: top;
+}
+/* line 204, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender {
+  float: left;
+  font-weight: bold;
+}
+/* line 207, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender .role {
+  text-transform: lowercase;
+}
+/* line 209, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender .role:before {
+  content: "(";
+}
+/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender .role:after {
+  content: ")";
+}
+/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender .to:before {
+  margin-left: 12px;
+  margin-right: 12px;
+  content: "→";
+}
+/* line 224, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .timestamp {
+  float: right;
+}
+/* line 228, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority a {
+  color: #f39129;
+  text-decoration: none;
+}
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble-authority a:link, .comment-bubble-authority a:visited {
+  color: #f39129;
+}
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble-authority a:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble-authority a:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
+/* line 231, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .deleted {
+  text-decoration: line-through;
+}
+/* line 244, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header {
+  border-bottom-color: #05d3b9;
+}
+
+/* line 249, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble > span,
+.comment-bubble-authority > span {
+  white-space: pre-wrap;
+}
+
+/* line 257, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble.attachment .header,
+.comment-bubble-authority.attachment .header {
+  border-bottom-color: #f7ac2e;
+}
+
+/* line 264, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble.for-me .header,
+.comment-bubble-authority.for-me .header {
+  border-bottom-color: #46b02d;
+}
+
+/* line 3, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .small {
+  width: 360px;
+}
+/* line 6, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .medium {
+  width: 480px;
+}
+/* line 9, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .large {
+  width: 980px;
+}
+/* line 13, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog {
+  display: none;
+  position: fixed;
+  right: 0;
+  left: 0;
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 9999;
+  padding: 12px;
+  background-color: #fff;
+  min-height: 150px;
+}
+/* line 25, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component {
+  overflow: auto;
+  margin: 12px 12px 75px 12px;
+  min-height: 50px;
+}
+/* line 29, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component .button-group {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  left: 12px;
+}
+/* line 34, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component .button-group .cancel {
+  float: right;
+  margin-right: 12px;
+}
+/* line 39, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component .button-group.ok {
+  text-align: center;
+}
+/* line 41, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component .button-group.ok .btn-dialog {
+  position: relative;
+}
+/* line 45, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component .autocomplete-component {
+  width: 430px;
+  position: static;
+}
+/* line 50, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .header {
+  padding-top: 2px;
+  padding-bottom: 4px;
+  padding-left: 24px;
+  border-bottom: 1px solid;
+  font-size: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* line 58, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .header .title {
+  line-height: 24px;
+}
+/* line 61, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .header .close {
+  position: absolute;
+  right: 12px;
+  /* cursor: pointer; */
+  /* &:after { */
+  /*   content: "X"; */
+  /* } */
+}
 /* line 71, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .mask {
   position: fixed;
@@ -1175,7 +1385,7 @@ ul.no-bullets {
   margin: 0;
 }
 /* line 57, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form .text-input-container .form-input {
+.metadata-editor-container .editor .editor-form .text-input-container .form-input, .metadata-editor-container .editor .editor-form .text-input-container .form-input--inline {
   margin: 0;
 }
 /* line 64, ../../../private/common-html/sass/partials/_metadata-editor.scss */
@@ -3128,7 +3338,7 @@ span.icon_clear:before {
 }
 
 /* line 540, ../../../private/common-html/sass/views/_application.scss */
-.form-input.textarea.high {
+.form-input.textarea.high, .textarea.high.form-input--inline {
   height: 144px;
   width: 80%;
 }
@@ -3469,12 +3679,12 @@ span.icon_clear:before {
   position: relative;
 }
 /* line 852, ../../../private/common-html/sass/views/_application.scss */
-.tasks-foreman .form-input {
+.tasks-foreman .form-input, .tasks-foreman .form-input--inline {
   display: inline-block;
   margin: 0 6px 0 0;
 }
 /* line 858, ../../../private/common-html/sass/views/_application.scss */
-.tasks-foreman .form-input.combobox.long, .tasks-foreman select.long {
+.tasks-foreman .form-input.combobox.long, .tasks-foreman .combobox.long.form-input--inline, .tasks-foreman select.long {
   width: 41.25em;
 }
 /* line 863, ../../../private/common-html/sass/views/_application.scss */
@@ -4344,6 +4554,16 @@ table.admin-settings td.value .save-indicator {
   margin-top: -38px;
 }
 
+/* line 63, ../../../private/common-html/sass/views/_authority_admin.scss */
+.guest-authorities {
+  margin-top: 1em;
+}
+
+/* line 68, ../../../private/common-html/sass/views/_authority_admin.scss */
+.form-input--inline {
+  display: inline-block;
+}
+
 /* line 2, ../../../private/common-html/sass/views/_neighbor.scss */
 #neighbor-show .pending {
   width: 100%;
@@ -4678,7 +4898,7 @@ table.admin-settings td.value .save-indicator {
   color: black;
 }
 /* line 286, ../../../private/common-html/sass/views/_register.scss */
-#register-company .register-form .form-group .form-entry .form-input, #new-company-user .register-form .form-group .form-entry .form-input {
+#register-company .register-form .form-group .form-entry .form-input, #register-company .register-form .form-group .form-entry .form-input--inline, #new-company-user .register-form .form-group .form-entry .form-input, #new-company-user .register-form .form-group .form-entry .form-input--inline {
   height: 40px;
   width: 100%;
   border: none;
@@ -4900,7 +5120,7 @@ table.admin-settings td.value .save-indicator {
   height: 100%;
 }
 /* line 107, ../../../private/common-html/sass/views/_side_panel.scss */
-#side-panel .content .form-input.textarea {
+#side-panel .content .form-input.textarea, #side-panel .content .textarea.form-input--inline {
   width: 100%;
   box-sizing: border-box;
 }
@@ -4912,7 +5132,7 @@ table.admin-settings td.value .save-indicator {
   display: table;
 }
 /* line 120, ../../../private/common-html/sass/views/_side_panel.scss */
-#side-panel .content-table .form-input.textarea {
+#side-panel .content-table .form-input.textarea, #side-panel .content-table .textarea.form-input--inline {
   width: 100%;
   box-sizing: border-box;
 }
@@ -4982,7 +5202,7 @@ table.admin-settings td.value .save-indicator {
   padding-bottom: 62px;
 }
 /* line 190, ../../../private/common-html/sass/views/_side_panel.scss */
-#side-panel #notice-panel .form-input.textarea {
+#side-panel #notice-panel .form-input.textarea, #side-panel #notice-panel .textarea.form-input--inline {
   height: 100%;
   height: 300px\9;
   margin: 0;
