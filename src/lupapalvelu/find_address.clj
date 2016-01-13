@@ -3,10 +3,12 @@
             [clojure.data.zip.xml :refer [xml-> text]]
             [monger.operators :refer :all]
             [monger.query :as q]
+            [sade.municipality :as muni]
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.util :as util]
             [sade.xml :as sxml]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
@@ -30,6 +32,15 @@
     (fn [result] (assoc result :kind k)))
   ([k t]
     (fn [result] (assoc result :kind k :type t))))
+
+;; Municipality data
+
+(defn- municipality-index-for [lang]
+  (map (fn [code] [(ss/lower-case (i18n/localize lang :municipality code)) code])
+       muni/municipality-codes))
+
+(def municipality-index
+  (delay (reduce (fn [m lang] (assoc m lang (municipality-index-for lang))) {} i18n/supported-langs)))
 
 ;;;
 ;;; All search-... functions return a sequence of items, where each item is a map

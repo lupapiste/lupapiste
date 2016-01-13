@@ -13,21 +13,15 @@
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.municipality :as muni]
             [lupapalvelu.find-address :as find-address]
             [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
 
 
-(defn- municipality-index-for [lang]
-  (map (fn [code] [(ss/lower-case (i18n/localize lang :municipality code)) code])
-       muni/municipality-codes))
 
-(def municipality-index
-    (delay (reduce (fn [m lang] (assoc m lang (municipality-index-for lang))) {} i18n/supported-langs)))
 
 (defn municipality-codes [municipality-name-starts lang]
-  (let [index (get @municipality-index (keyword lang))
+  (let [index (get @find-address/municipality-index (keyword lang))
         n (ss/lower-case (ss/trim municipality-name-starts))]
     (when (not (ss/blank? n))
       (->> (filter #(ss/starts-with (first %) n) index)
