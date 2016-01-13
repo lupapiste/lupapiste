@@ -4,6 +4,7 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.application = params.application;
   self.authorization = params.authorization;
+  self.currentPage = params.currentPage;
 
   self.comment = comments.create();
 
@@ -11,7 +12,6 @@ LUPAPISTE.ConversationModel = function(params) {
   self.mainConversation = ko.observable(true);
   self.highlightConversation = ko.observable(false);
 
-  self.currentPage = lupapisteApp.models.rootVMO.currentPage;
   var previousHash = lupapisteApp.models.rootVMO.previousHash;
 
   self.infoRequest = ko.pureComputed(function() {
@@ -49,7 +49,7 @@ LUPAPISTE.ConversationModel = function(params) {
   var previousPage = self.currentPage();
 
   function highlightConversation() {
-    // TODO show comment panel if hidden
+    hub.send("show-conversation");
     self.comment.isSelected(true);
     self.highlightConversation(true);
     setTimeout(function() {

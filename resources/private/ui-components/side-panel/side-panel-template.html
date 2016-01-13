@@ -42,7 +42,8 @@
                     <div data-bind="component: {name: 'conversation',
                                                 params: {application: application,
                                                          authorization: authorization,
-                                                         authorities: authorities}}"></div>
+                                                         authorities: authorities,
+                                                         currentPage: currentPage}}"></div>
                   </div>
               </div>
               <!-- ko if: authorization.ok('add-authority-notice')-->
