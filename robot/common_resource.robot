@@ -387,6 +387,11 @@ Select From List by test id
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
 
+Select From List by id
+  [Arguments]  ${id}  ${value}
+  Wait until page contains element  xpath=//select[@id="${id}"]
+  Select From List  xpath=//select[@id="${id}"]  ${value}
+
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
   Wait until  Element should be visible  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
