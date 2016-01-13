@@ -9,16 +9,10 @@ LUPAPISTE.NoticeModel = function() {
 
   self.authorityNotice = ko.observable();
   self.urgency = ko.observable("normal");
-
-  self.indicator = ko.observable({name: undefined, type: undefined}).extend({notify: "always"});
-
   self.availableUrgencyStates = ko.observableArray(["normal", "urgent", "pending"]);
-
   self.selectedTags = ko.observableArray([]);
 
-  self.applicationTagsProvider = null;
-  self.showTagsComponent = ko.observable(false);
-
+  self.noticeLabel = loc("notice.prompt") + " (" + loc("notice.prompt.info") + ")";
   var subscriptions = [];
 
   var subscribe = function() {
@@ -28,10 +22,10 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           urgency: value})
         .success(function() {
-          self.indicator({name: "urgency", type: "saved"});
+          hub.send("indicator-icon", {style: "positive"});
         })
         .error(function() {
-          self.indicator({name: "urgency", type: "err"});
+          hub.send("indicator-icon", {style: "negative"});
         })
         .call();
     }, 500)));
@@ -42,7 +36,10 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           authorityNotice: value})
         .success(function() {
-          self.indicator({name: "notice", type: "saved"});
+          hub.send("indicator-icon", {style: "positive"});
+        })
+        .error(function() {
+          hub.send("indicator-icon", {style: "negative"});
         })
         .call();
     }, 500)));
@@ -53,10 +50,10 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           tags: _.pluck(tags, "id")})
         .success(function() {
-          self.indicator({name: "tags", type: "saved"});
+          hub.send("indicator-icon", {style: "positive"});
         })
         .error(function() {
-          self.indicator({name: "tags", type: "err"});
+          hub.send("indicator-icon", {style: "negative"});
         })
         .call();
     }, 500)));
@@ -74,10 +71,9 @@ LUPAPISTE.NoticeModel = function() {
     // unsubscribe so that refresh does not trigger save
     unsubscribe();
     self.applicationId = ko.unwrap(application.id);
-    self.urgency(ko.unwrap(application.urgency));
+    self.urgency(application.urgency());
     self.authorityNotice(ko.unwrap(application.authorityNotice));
     self.selectedTags(ko.toJS(application.tags));
-    self.showTagsComponent(true);
     subscribe();
   };
 };

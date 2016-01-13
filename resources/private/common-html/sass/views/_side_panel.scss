@@ -203,6 +203,33 @@
       }
 
     }
+    .form-grid {
+      display: table;
+      height: 100%;
+      .row {
+        display: table-row;
+        margin-bottom: $marginS;
+        .col-1 {
+          display: table-cell;
+          margin-bottom: $grid-margin;
+          label {
+            color: #fff;
+          }
+        }
+      }
+      .row.textarea-wrapper {
+        .col--vertical {
+          height: 100%
+        }
+        .col-1 {
+          height: 100%;
+          padding-bottom: 30px;
+          textarea {
+            height: 100%;
+          }
+        }
+      }
+    }
   }
 }
 

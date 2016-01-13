@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1452586672586');
+@import url('main-blessed1.css?z=1452683346492');
 
 /* line 71, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .mask {
@@ -1765,7 +1765,7 @@ div.search i {
   height: 48px;
   min-width: 48px;
   border-radius: 24px;
-  z-index: 2001;
+  z-index: 2002;
   color: #fff;
   font-size: 18px;
   box-sizing: border-box;
@@ -4996,19 +4996,51 @@ table.admin-settings td.value .save-indicator {
 #side-panel #notice-panel .notice-prompt-info:after {
   content: ")";
 }
-
+/* line 206, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .form-grid {
+  display: table;
+  height: 100%;
+}
 /* line 209, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .form-grid .row {
+  display: table-row;
+  margin-bottom: 6px;
+}
+/* line 212, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .form-grid .row .col-1 {
+  display: table-cell;
+  margin-bottom: 20px;
+}
+/* line 215, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .form-grid .row .col-1 label {
+  color: #fff;
+}
+/* line 221, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .form-grid .row.textarea-wrapper .col--vertical {
+  height: 100%;
+}
+/* line 224, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 {
+  height: 100%;
+  padding-bottom: 30px;
+}
+/* line 227, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 textarea {
+  height: 100%;
+}
+
+/* line 236, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
   bottom: 0;
 }
 
-/* line 214, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 241, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel {
   height: 100%;
   padding-bottom: 46px;
 }
-/* line 216, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 243, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -5016,38 +5048,38 @@ table.admin-settings td.value .save-indicator {
   -o-transition: box-shadow 250ms ease;
   transition: box-shadow 250ms ease;
 }
-/* line 225, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 252, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .header h1 {
   margin-bottom: 0;
 }
-/* line 230, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 257, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
 
-/* line 238, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 265, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .message-buttons button {
   margin-bottom: 6px;
 }
 
 @media all and (max-width: 1280px) {
-  /* line 245, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 272, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 400px;
   }
 
-  /* line 250, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 277, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel {
     right: -400px;
   }
 
-  /* line 255, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 282, ../../../private/common-html/sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }
 
-  /* line 259, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 286, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons {
     display: table;
   }
@@ -5061,7 +5093,7 @@ table.admin-settings td.value .save-indicator {
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
-  /* line 261, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 288, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons button {
     margin-bottom: 6px;
   }

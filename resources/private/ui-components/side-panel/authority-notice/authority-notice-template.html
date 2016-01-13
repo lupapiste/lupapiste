@@ -3,45 +3,33 @@
 <body>
   <section class="page container">
     <script type="text/html" id="authority-notice-template">
-      <div class="content-table" data-bind="with: notice">
-        <div class="content-row application-tags" data-bind="if: authorization.ok('add-application-tags')">
-          <!-- ko if: showTagsComponent() -->
-          <div class="content-cell">
+      <div class="form-grid form-grid--columns-1 form-grid--no-border" data-bind="with: notice">
+        <div class="row application-tags" data-bind="if: authorization.ok('add-application-tags')">
+          <div class="col-1">
             <label data-bind="ltext: 'application.tags'"></label>
-            <span data-bind="saveIndicator: indicator, name: 'tags'"></span>
             <div data-test-id="autocomplete-application-tags-component" data-bind="component: {name: 'autocomplete-application-tags', params: {tags: true, selectedValues: selectedTags}}"></div>
           </div>
-          <!-- /ko -->
         </div>
-        <div class="content-row" data-bind="if: authorization.ok('change-urgency')">
-          <div class="content-cell">
-            <div class="application-urgency">
-              <label data-bind="ltext: 'notice.urgency'"></label>
-              <span data-bind="saveIndicator: indicator, name: 'urgency'"></span>
-              <select data-test-id="notice-urgency-select" data-bind="options: availableUrgencyStates,
-                                 value: urgency,
-                                 optionsText: function(item) {
-                                   return loc(['notice', 'urgency', item]);
-                                 }">
-              </select>
-            </div>
+        <div class="row" data-bind="if: authorization.ok('change-urgency')">
+          <div class="col-1"
+            data-bind="component: {name: 'select-field',
+                                   params: {value: urgency,
+                                            options: availableUrgencyStates,
+                                            optionsText: function(item) {
+                                                           return loc(['notice', 'urgency', item]);
+                                                         },
+                                            lLabel: 'notice.urgency',
+                                            id: 'application-authority-urgency'}}">
           </div>
         </div>
-
-        <div class="content-row">
-          <div class="content-cell textarea-wrapper">
-            <label>
-              <span data-bind="ltext: 'notice.prompt'"/>
-              <span class="notice-prompt-info" data-bind="ltext: 'notice.prompt.info'"/>
-            </label>
-            <span data-bind="saveIndicator: indicator, name: 'notice'"></span>
-
-            <textarea
-              data-bind="attr: {placeholder: loc('comment.placeholder')}, textInput: authorityNotice"
-              data-test-id="application-authority-notice"
-              class="form-input textarea"
-              maxlength="4000">
-            </textarea>
+        <div class="row textarea-wrapper">
+          <div class="col-1"
+               data-bind="component: {name: 'textarea-field',
+                                      params: {value: authorityNotice,
+                                               id: 'application-authority-notice',
+                                               maxlength: 4000,
+                                               label: noticeLabel,
+                                               lPlaceholder: 'comment.placeholder'}}">
           </div>
         </div>
       </div>
