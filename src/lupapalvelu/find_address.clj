@@ -93,17 +93,27 @@
             (wfs/property-is-like "oso:katunumero" (str number "*"))
             (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
 
-(defn search-street-with-city [lang street city]
-  (map
-    (comp (set-kind :address :street-city) wfs/feature-to-address)
-    (wfs/post wfs/maasto
-      (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop lang)] "asc")
-        (wfs/ogc-filter
-          (wfs/ogc-and
-            (wfs/property-is-like "oso:katunimi" (str street "*"))
-            (wfs/property-is-like (municipality-prop lang) (str city "*"))
-            (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
+(defn search-street-maybe-city
+  "Checks if city is in municipality list. If not, calls search-street,
+   else search with street and city."
+  [lang street city]
+  (let [index (get @municipality-index (keyword lang))
+        muniname (ffirst
+                   (filter (fn [[name _]]
+                             (= name (ss/trim city)))
+                           index))]
+    (if-not muniname
+      (search-street lang (str street " " city))
+      (map
+        (comp (set-kind :address :street-city) wfs/feature-to-address)
+        (wfs/post wfs/maasto
+                  (wfs/query {"typeName" "oso:Osoitenimi"}
+                             (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop lang)] "asc")
+                             (wfs/ogc-filter
+                               (wfs/ogc-and
+                                 (wfs/property-is-like "oso:katunimi" (str street "*"))
+                                 (wfs/property-is-like (municipality-prop lang) (str city "*"))
+                                 (wfs/property-is-less "oso:jarjestysnumero" "10")))))))))
 
 (defn search-address [lang street number city]
   (map
@@ -167,6 +177,6 @@
     p/property-id-pattern                         :>> (fn [result] (search-property-id lang (p/to-property-id (first result))))
     #"^(\S+)$"                                    :>> (apply-search search-poi-or-street lang)
     #"^(\S+)\s+(\d+)\s*,?\s*$"                    :>> (apply-search search-street-with-number lang)
-    #"^(\S+)\s+(\S+)$"                            :>> (apply-search search-street-with-city lang)
     #"^([\S\s]+)\s+(\d+)\s*,?\s*(\S+)$"           :>> (apply-search search-address lang)
+    #"^([\S\s]+)\s+(\S+)$"                        :>> (apply-search search-street-maybe-city lang)
     []))
