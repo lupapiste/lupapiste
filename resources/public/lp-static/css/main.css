@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1452683346492');
+@import url('main-blessed1.css?z=1452693215659');
 
 /* line 71, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .mask {
@@ -4978,69 +4978,56 @@ table.admin-settings td.value .save-indicator {
   vertical-align: bottom;
 }
 /* line 186, ../../../private/common-html/sass/views/_side_panel.scss */
-#side-panel #notice-panel .textarea-wrapper {
-  height: 100%;
-  padding-bottom: 62px;
-}
-/* line 191, ../../../private/common-html/sass/views/_side_panel.scss */
-#side-panel #notice-panel .form-input.textarea {
-  height: 100%;
-  height: 300px\9;
-  margin: 0;
-}
-/* line 198, ../../../private/common-html/sass/views/_side_panel.scss */
-#side-panel #notice-panel .notice-prompt-info:before {
-  content: "(";
-}
-/* line 201, ../../../private/common-html/sass/views/_side_panel.scss */
-#side-panel #notice-panel .notice-prompt-info:after {
-  content: ")";
-}
-/* line 206, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid {
   display: table;
   height: 100%;
 }
-/* line 209, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 189, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row {
   display: table-row;
   margin-bottom: 6px;
 }
-/* line 212, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 192, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row .col-1 {
   display: table-cell;
   margin-bottom: 20px;
 }
-/* line 215, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 195, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row .col-1 label {
   color: #fff;
 }
-/* line 221, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 200, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .form-grid .row.textarea-wrapper {
+  height: 100%;
+}
+/* line 202, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col--vertical {
   height: 100%;
+  padding-bottom: 60px;
 }
-/* line 224, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 206, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 {
   height: 100%;
-  padding-bottom: 30px;
 }
-/* line 227, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 208, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 textarea {
   height: 100%;
+  height: 300px\9;
+  box-sizing: border-box;
 }
 
-/* line 236, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 219, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
   bottom: 0;
 }
 
-/* line 241, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 224, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel {
   height: 100%;
   padding-bottom: 46px;
 }
-/* line 243, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 226, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -5048,38 +5035,38 @@ table.admin-settings td.value .save-indicator {
   -o-transition: box-shadow 250ms ease;
   transition: box-shadow 250ms ease;
 }
-/* line 252, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 235, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .header h1 {
   margin-bottom: 0;
 }
-/* line 257, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 240, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
 
-/* line 265, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 248, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .message-buttons button {
   margin-bottom: 6px;
 }
 
 @media all and (max-width: 1280px) {
-  /* line 272, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 255, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 400px;
   }
 
-  /* line 277, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 260, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel {
     right: -400px;
   }
 
-  /* line 282, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 265, ../../../private/common-html/sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }
 
-  /* line 286, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 269, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons {
     display: table;
   }
@@ -5093,7 +5080,7 @@ table.admin-settings td.value .save-indicator {
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
-  /* line 288, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 271, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons button {
     margin-bottom: 6px;
   }
