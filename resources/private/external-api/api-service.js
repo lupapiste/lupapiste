@@ -7,8 +7,8 @@ LUPAPISTE.ExternalApiService = function() {
   });
 
   hub.subscribe("external-api::open-application", function(data) {
-    var eventData = _.get(data, "id");
-    window.parent.LupapisteApi.openInSitoGis(eventData);
+    var id = _.get(data, "id");
+    window.parent.LupapisteApi.openPermit(id);
   });
 
   hub.subscribe("external-api::filtered-permits", function(data) {
