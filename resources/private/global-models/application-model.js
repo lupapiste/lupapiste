@@ -674,4 +674,19 @@ LUPAPISTE.ApplicationModel = function() {
                              size: "medium",
                              component: "add-property-dialog"});
   };
+
+  self.externalApi = {
+    enabled: !_.isUndefined(window.parent.LupapisteApi)
+                && features.enabled("louhipalvelin"),
+    showOnMap: function(model) {
+      var authorityStr = model.authority().id() ? model.authority().lastName() + " " + model.authority().firstName() : "";
+      var operationStr = loc(["operations", model.primaryOperation().name()]);
+      var permit = {id:        model.id(),
+                    location:  ko.mapping.toJS(model.location), // properties 'x' and 'y'
+                    address:   model.address(),
+                    applicant: model.applicant(),
+                    authority: authorityStr,
+                    operation: operationStr};
+      window.parent.LupapisteApi.showPermitOnMap(permit);
+    }};
 };
