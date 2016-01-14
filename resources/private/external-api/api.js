@@ -19,6 +19,7 @@ function LupapisteApi() {
 * @param {Array} permits Permits from Lupapiste view
 */
 LupapisteApi.showPermitsOnMap = function (permits) {
+  console.log(_.keys(permits));
   hub.send("show-dialog", {title: "LupapisteApi.showPermitsOnMap",
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permits, null, 2)}});
@@ -30,6 +31,7 @@ LupapisteApi.showPermitsOnMap = function (permits) {
 * @param {PermitFilter} filter Filter for lupapiste api
 */
 LupapisteApi.showPermitOnMap = function (permit) {
+  console.log(_.keys(permit));
   hub.send("show-dialog", {title: "LupapisteApi.showPermitOnMap",
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permit, null, 2)}});
