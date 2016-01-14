@@ -23,8 +23,31 @@
     (search "foo 1" "fi") => ...result...
     (search "foo 1," "fi") => ...result...)
   (fact
+    (prerequisite (search-street-with-number "fi" "Aleksis kiven katu" "1") => ...result...)
+    (search "Aleksis kiven katu 1" "fi") => ...result...
+    (search "Aleksis kiven katu 1," "fi") => ...result...)
+  (fact
     (prerequisite (search-address "fi" "foo" "1" "bar") => ...result...)
     (search "foo 1 bar" "fi") => ...result...
     (search "foo 1, bar" "fi") => ...result...)
   (fact
-    (search "" "fi") => []))
+    (search "" "fi") => [])
+  (fact
+    (prerequisite (search-address "fi" "foo bar" "1" "M\u00E4ntt\u00E4-Vilppula") => ...result...)
+    (search "foo bar 1, M\u00E4ntt\u00E4-Vilppula" "fi") => ...result...)
+  (fact
+    (prerequisite (search-street-maybe-city "fi" "Aleksis kiven katu" "Helsinki") => ...result...)
+    (search "Aleksis kiven katu Helsinki" "fi") => ...result...
+    (search "Aleksis kiven katu,Helsinki" "fi") => ...result...
+    (search "Aleksis kiven katu, Helsinki" "fi") => ...result...)
+  (fact
+    (prerequisite (search-street-maybe-city "fi" "Aleksis kiven katu " "Helsinki") => ...result...)
+    (search "Aleksis kiven katu , Helsinki" "fi") => ...result...))
+
+(facts "maybe city"
+  (fact "if not city, performs street search"
+    (prerequisite (search-street "fi" "Aleksis kiven katu") => ...street...)
+    (search "Aleksis kiven katu" "fi") => ...street...)
+  (fact "if city is recognized municipality name, performs search with city"
+    (prerequisite (search-street-maybe-city "fi" "Aleksis kiven katu" "Helsinki") => ...city...)
+    (search "Aleksis kiven katu Helsinki" "fi") => ...city...))
