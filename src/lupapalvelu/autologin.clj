@@ -65,6 +65,9 @@
 
     (debug "Debug header" (get-in request [:headers "x-debug"]))
 
+    (when (and ts (ss/blank? email))
+      (debug request))
+
     (when (and secret ts hash
             (env/feature? :louhipalvelin)
             (valid-hash? hash email ip ts secret)
