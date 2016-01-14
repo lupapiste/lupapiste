@@ -931,6 +931,8 @@
 
 (deffixture "minimal" {}
   (mongo/clear!)
+  (mongo/insert-batch :ssoKeys [{:_id 0 :ip "127.0.0.1" :key "LUPAPISTE" :crypto-iv nil}
+                                {:_id 1 :ip "109.204.231.126" :key "LUPAPISTE" :crypto-iv nil}])
   (mongo/insert-batch :users users)
   (mongo/insert-batch :companies companies)
   (mongo/insert-batch :organizations organizations))
