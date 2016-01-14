@@ -25,6 +25,7 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
+            [lupapalvelu.autologin :as autologin]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]
