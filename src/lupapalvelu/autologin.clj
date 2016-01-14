@@ -9,7 +9,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.user :as user]))
 
-; salasana = aikaleima + ”_” + hash
+; salasana = aikaleima + "_" + hash
 ; hash = HMAC-SHA256(tunnus + IP + aikaleima, salaisuus)
 
 (defn- parse-ts-hash [password]
