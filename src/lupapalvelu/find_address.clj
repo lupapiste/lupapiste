@@ -42,6 +42,14 @@
 (def municipality-index
   (delay (reduce (fn [m lang] (assoc m lang (municipality-index-for lang))) {} i18n/supported-langs)))
 
+(defn municipality-codes [municipality-name-starts]
+  (let [index (apply concat (vals @municipality-index))
+        n (ss/lower-case (ss/trim municipality-name-starts))]
+    (when (not (ss/blank? n))
+      (->> (filter #(ss/starts-with (first %) n) index)
+           (map second)
+           set))))
+
 ;;;
 ;;; All search-... functions return a sequence of items, where each item is a map
 ;;; of (at least) following keys:

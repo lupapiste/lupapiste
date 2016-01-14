@@ -17,16 +17,6 @@
             [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
 
-
-
-
-(defn municipality-codes [municipality-name-starts lang]
-  (let [index (get @find-address/municipality-index (keyword lang))
-        n (ss/lower-case (ss/trim municipality-name-starts))]
-    (when (not (ss/blank? n))
-      (->> (filter #(ss/starts-with (first %) n) index)
-           (map second)))))
-
 (defn- trim [s]
   (when-not (ss/blank? s) (ss/trim s)))
 
@@ -46,7 +36,7 @@
 (defn get-addresses-proxy [{{:keys [query lang]} :params}]
   (let [[street number city] (parse-address query)
         nls-query (future (find-address/get-addresses street number city))
-        muni-codes (municipality-codes city lang)
+        muni-codes (find-address/municipality-codes city)
         muni-code  (first muni-codes)
         endpoint (when (= 1 (count muni-codes)) (org/municipality-address-endpoint muni-code))]
     (if endpoint
