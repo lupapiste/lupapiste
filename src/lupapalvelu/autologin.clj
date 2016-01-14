@@ -1,11 +1,14 @@
 (ns lupapalvelu.autologin
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [clojure.core.memoize :as memo]
             [pandect.core :as pandect]
+            [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.http :as http]
             [sade.util :as util]
             [sade.strings :as ss]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.user :as user]))
 
