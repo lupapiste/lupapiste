@@ -12,6 +12,8 @@ var LUPAPISTE = LUPAPISTE || {};
    * startPage (String)        ID of the landing page
    * allowAnonymous (Boolean)  Allow all users to access the app. Default: require login.
    * showUserMenu (Boolean)    Default: complement of allowAnonymous, i.e., show menu for users tthat have logged in
+   * componentPages (Array)    Array of pageId strings. If provided, router skips visibility toggle for the given pageIds.
+   *                            Thus page visibility toggle responsibility for provided pageIds is in controlling component.
    * @param
    */
   LUPAPISTE.App = function (params) {
