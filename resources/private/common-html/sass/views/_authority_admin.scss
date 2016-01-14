@@ -69,3 +69,7 @@ table.admin-settings {
   @extend .form-input;
   display: inline-block;
 }
+
+.form-input--error {
+  border-color: red;
+}

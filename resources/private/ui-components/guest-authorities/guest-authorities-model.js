@@ -17,7 +17,8 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
     dd.firstName = ko.observable();
     dd.lastName  = ko.observable();
     dd.role      = ko.observable();
-    dd.waiting   = ko.observable();
+    dd.waitingEmail = ko.observable();
+    dd.waitingOk = ko.observable();
     dd.error     = ko.observable();
     dd.oldUser   = ko.observable();
     dd.reset = function() {
@@ -25,13 +26,14 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
       dd.firstName( "" );
       dd.lastName( "" );
       dd.role( "" );
-      dd.waiting( false );
+      dd.waitingEmail( false );
+      dd.waitingOk( false );
       dd.error( null );
       dd.oldUser( false );
     };
     dd.isGood = ko.pureComputed( function() {
       return !dd.error()
-          && !dd.waiting()
+          && !(dd.waitingEmail() || dd.waitingOk())
           && util.isValidEmailAddress( dd.email())
         && _.every( ["firstName", "lastName"],
                     function( k ) {
@@ -40,22 +42,29 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
                     });
     });
     dd.namesEditable = ko.pureComputed( function() {
-      return !(dd.waiting()
+      return !(dd.waitingEmail()
              || dd.oldUser());
     });
     dd.getUser = ko.computed( function() {
-      var addr =
-      ajax.query( "user-by-email", {email: dd.email()})
-      .pending( dd.waiting )
-      .success( function( res ) {
-        dd.error( false );
-        dd.oldUser( true );
-        console.log( "Response:", res );
-      })
-      .error( function() {
-        dd.error( true);
+      if( util.isValidEmailAddress( dd.email())) {
+        ajax.query ( "resolve-guest-authority-candidate",
+                     {email: dd.email()})
+        .pending ( dd.waitingEmail )
+        .success ( function( res ) {
+          dd.error( false );
+          dd.firstName( res.user.firstName );
+          dd.lastName( res.user.lastName );
+          dd.oldUser( res.user.firstName || res.user.lastName );
+        })
+        .error ( function() {
+          dd.error( true);
+          dd.oldUser( false );
+        })
+        .call();
+      } else {
+        dd.error( true );
         dd.oldUser( false );
-      });
+      }
     });
   }
 
@@ -75,8 +84,21 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
   };
 
   self.guestClick = function() {
-    _.each( self.dialogData, function( v, k ) {
-      console.log( k, ":", v());
-    });
+    // We always add the user to organization just in case.
+    // Note: for an already existing organization authority,
+    // the role is diminished to guest
+    ajax.command( "update-user-organization", {email: self.dialogData.email(),
+                                              firstName: self.dialogData.firstName(),
+                                              lastName: self.dialogData.lastName(),
+                                              roles: ["guest"]})
+    .pending( self.dialogData.waitingOk )
+    .success( function( res ) {
+      console.log( "success", res);
+    })
+    .error( function (res ) {
+      console.log( "error", res );
+
+    })
+    .call();
   };
 };

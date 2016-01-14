@@ -46,8 +46,11 @@
             <form>
               <label data-bind="ltext: 'auth-admin.add-dialog.email'" class="form-label"></label>
               <div>
-              <input class="form-input--inline" data-bind="value: dialogData.email" type="email"/>
-              <i data-bind="visible: dialogData.waiting" class="spin lupicon-refresh"></i>
+                <input class="form-input--inline"
+                       data-bind="value: dialogData.email,
+                                  css: {'form-input--error': dialogData.error}"
+                       type="email"/>
+              <i data-bind="visible: dialogData.waitingEmail" class="spin lupicon-refresh"></i>
               </div>
               <label data-bind="ltext: 'userinfo.firstName'"
                      class="form-label"></label>
@@ -65,8 +68,13 @@
               <label data-bind="ltext: 'guest-authority.role'" class="form-label"></label>
               <input class="form-input" data-bind="textInput: dialogData.role" type="text"/>
 
-              <button data-bind="click: guestClick, enable: dialogData.isGood, ltext: 'ok'"
-                      class="positive btn-dialog"></button>
+              <button data-bind="click: guestClick,
+                                 enable: dialogData.isGood,
+                                 css: {waiting: dialogData.waitingOk}"
+                      class="positive btn-dialog">
+                <i class="wait spin lupicon-refresh"></i>
+                <span data-bind="ltext: 'ok'"></span>
+              </button>
             </form>
           </div>
         </div>
