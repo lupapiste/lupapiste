@@ -18,8 +18,8 @@
 (def ^:private ciphers
   {:rijndael (fn [encrypt? crypto-key crypto-iv]
                (doto (-> (RijndaelEngine. 256)
-                        (CBCBlockCipher.)
-                        (PaddedBufferedBlockCipher. (ZeroBytePadding.)))
+                         (CBCBlockCipher.)
+                         (PaddedBufferedBlockCipher. (ZeroBytePadding.)))
                  (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
                                                     (into-array Byte/TYPE crypto-iv)))))
 
@@ -58,7 +58,17 @@
 
 (defn url-encode [^String s] (java.net.URLEncoder/encode s "UTF-8"))
 
-(defn decode-aes-string
+(defn encrypt-aes-string
+  "Encrypt string with AES using given base64 passowrd string and IV byte array"
+  [s crypto-key-s crypto-iv]
+  (let [crypto-key (-> crypto-key-s str->bytes base64-decode)]
+    (->> s
+      str->bytes
+      (encrypt crypto-key crypto-iv :aes)
+      base64-encode
+      bytes->str)))
+
+(defn decrypt-aes-string
   "Arguments are expected to be base64 encoded"
   [s crypto-key-s crypto-iv-s]
   (let [crypto-key (-> crypto-key-s str->bytes base64-decode)
