@@ -676,8 +676,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.externalApi = {
-    enabled: !_.isUndefined(window.parent.LupapisteApi)
-                && features.enabled("louhipalvelin"),
+    enabled: window.parent.LupapisteApi && features.enabled("louhipalvelin"), // TODO pseudo query
     showOnMap: function(model) {
       var authorityStr = model.authority().id() ? model.authority().lastName() + " " + model.authority().firstName() : "";
       var operationStr = loc(["operations", model.primaryOperation().name()]);
@@ -687,6 +686,6 @@ LUPAPISTE.ApplicationModel = function() {
                     applicant: model.applicant(),
                     authority: authorityStr,
                     operation: operationStr};
-      window.parent.LupapisteApi.showPermitOnMap(permit);
+      hub.send("external-api::show-on-map", permit);
     }};
 };
