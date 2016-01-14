@@ -4,6 +4,7 @@
             [pandect.core :as pandect]
             [monger.operators :refer :all]
             [sade.core :refer :all]
+            [sade.crypt :as crypt]
             [sade.env :as env]
             [sade.http :as http]
             [sade.util :as util]
@@ -43,13 +44,13 @@
     false))
 
 (defn- load-secret [ip]
+  (when-let [key (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})]
+    ; TODO separate key
+    (if (:crypto-iv key)
+      (crypt/decode-aes-string (:key key) (env/value :backing-system :crypto-key) (:crypto-iv key))
+      (:key key))
+   )
   "LUPAPISTE"
-  #_(when-let [key (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})]
-     ; TODO
-     (if (:crypto-iv key)
-       key
-       key)
-     )
   )
 
 (defn- allowed-ip? [ip organizations]
@@ -70,5 +71,8 @@
             (valid-timestamp? ts (now)))
       (let [user (user/get-user-by-email email)
             organizations (user/users-organizations user)]
+
+        (debug "autologin" (user/session-summary user))
+
         (when (allowed-ip? ip organizations)
           (user/session-summary user))))))
