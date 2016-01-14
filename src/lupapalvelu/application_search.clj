@@ -147,10 +147,12 @@
 
 
 (defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
-  (assoc app :kind (cond
+  (-> app
+      (assoc :kind (cond
                      (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
                      infoRequest "applications.inforequest"
-                     :else       "applications.application")))
+                     :else       "applications.application"))
+      app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant
                           "handler" ["authority.lastName" "authority.firstName"]
