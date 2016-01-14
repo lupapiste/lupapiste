@@ -5,7 +5,6 @@ LUPAPISTE.AuthorityNoticeModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.application = params.application;
-
   self.authorization = params.authorization;
 
   self.urgency = ko.observable();
@@ -14,8 +13,8 @@ LUPAPISTE.AuthorityNoticeModel = function(params) {
 
   self.noticeLabel = loc("notice.prompt") + " (" + loc("notice.prompt.info") + ")";
 
+  // Update inner observables when values change and suppress change events going outside
   var updatingObservables = true;
-
   ko.computed(function() {
     updatingObservables = true;
     self.urgency(params.urgency());
@@ -39,6 +38,7 @@ LUPAPISTE.AuthorityNoticeModel = function(params) {
     self.sendEvent("SidePanelService", "TagsChanged", {tags: _.pluck(val, "id")});
   });
 
+  // Show when any of the values have been processed
   self.addEventListener("SidePanelService", "NoticeChangeProcessed", function(event) {
     if (event.status === "success") {
       hub.send("indicator-icon", {style: "positive"});
