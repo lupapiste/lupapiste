@@ -60,8 +60,10 @@ LupapisteApi.openInSitoGis = function (id) {
 * @static
 * @param {string} id Permit id (asiointitunnus)
 */
-LupapisteApi.moveToSitoGis = function (id) {
-
+LupapisteApi.integrationSent = function (id) {
+  hub.send("show-dialog", {title: "LupapisteApi.integrationSent",
+                           component: "ok-dialog",
+                           componentParams: {text: id}});
 };
 
 /**

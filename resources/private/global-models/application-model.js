@@ -324,6 +324,8 @@ LUPAPISTE.ApplicationModel = function() {
         self.reload();
         if (!resp.integrationAvailable) {
           LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
+        } else if (window.parent.LupapisteApi) {
+          hub.send("external-api::integration-sent", {id: self.id()});
         }
       })
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})

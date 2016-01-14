@@ -16,6 +16,11 @@ LUPAPISTE.ExternalApiService = function() {
     window.parent.LupapisteApi.showPermitsOnMap(eventData);
   });
 
+  hub.subscribe("external-api::integration-sent", function(data) {
+    var id = _.get(data, "id");
+    window.parent.LupapisteApi.integrationSent(id);
+  });
+
   return {
     enabled: function() {
       return window.parent.LupapisteApi;
