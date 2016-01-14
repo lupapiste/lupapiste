@@ -105,12 +105,8 @@
   "Checks if city is in municipality list. If not, calls search-street,
    else search with street and city."
   [lang street city]
-  (let [index (get @municipality-index (keyword lang))
-        muniname (ffirst
-                   (filter (fn [[name _]]
-                             (= name (ss/trim city)))
-                           index))]
-    (if-not muniname
+  (let [street (ss/trim street)]
+    (if (empty? (municipality-codes city))
       (search-street lang (str street " " city))
       (map
         (comp (set-kind :address :street-city) wfs/feature-to-address)
