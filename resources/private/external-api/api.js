@@ -48,7 +48,7 @@ LupapisteApi.openInLupapiste = function (id) {
 * @param {string} id Permit id (asiointitunnus)
 */
 LupapisteApi.openInSitoGis = function (id) {
-	hub.send("show-dialog", {title: "LupapisteApi.openInSitoGis",
+  hub.send("show-dialog", {title: "LupapisteApi.openInSitoGis",
                            component: "ok-dialog",
                            componentParams: {text: id}});
 };
