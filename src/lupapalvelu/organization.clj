@@ -106,16 +106,10 @@
       {:username username :password crypted-password :crypto-iv crypto-iv})))
 
 (defn decode-credentials
-  "Decode password that was originally generated (together with the init-vector )by encode-credentials.
-   Arguments are base64 encoded."
+  "Decode password that was originally generated (together with the init-vector)
+   by encode-credentials. Arguments are base64 encoded."
   [password crypto-iv]
-  (let [crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-        crypto-iv (-> crypto-iv crypt/str->bytes crypt/base64-decode)]
-    (->> password
-                          (crypt/str->bytes)
-                          (crypt/base64-decode)
-                          (crypt/decrypt crypto-key crypto-iv :aes)
-                          (crypt/bytes->str))))
+  (crypt/decode-aes-string password (env/value :backing-system :crypto-key) crypto-iv))
 
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"

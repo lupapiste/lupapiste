@@ -40,12 +40,12 @@
       (byte-array out-len out)
       out)))
 
-(defn encrypt 
+(defn encrypt
   [crypto-key crypto-iv cipher data]
   {:pre [(contains? ciphers cipher)]}
   (crypt ((cipher ciphers) true crypto-key crypto-iv) data))
 
-(defn decrypt 
+(defn decrypt
   [crypto-key crypto-iv cipher data]
   {:pre [(contains? ciphers cipher)]}
   (crypt ((cipher ciphers) false crypto-key crypto-iv) data))
@@ -57,3 +57,14 @@
 (defn base64-decode [^bytes data] (Base64/decodeBase64 data))
 
 (defn url-encode [^String s] (java.net.URLEncoder/encode s "UTF-8"))
+
+(defn decode-aes-string
+  "Arguments are expected to be base64 encoded"
+  [s crypto-key-s crypto-iv-s]
+  (let [crypto-key (-> crypto-key-s str->bytes base64-decode)
+        crypto-iv  (-> crypto-iv-s str->bytes base64-decode)]
+    (->> s
+      str->bytes
+      base64-decode
+      (decrypt crypto-key crypto-iv :aes)
+      bytes->str)))
