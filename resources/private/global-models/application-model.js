@@ -687,5 +687,9 @@ LUPAPISTE.ApplicationModel = function() {
                     authority: authorityStr,
                     operation: operationStr};
       hub.send("external-api::show-on-map", permit);
+    },
+    openApplication: function(model) {
+      var permit = {id: model.id()};
+      hub.send("external-api::open-application", permit);
     }};
 };
