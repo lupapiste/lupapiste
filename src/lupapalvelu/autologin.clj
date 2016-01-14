@@ -63,10 +63,7 @@
         secret (load-secret ip)
         [ts hash] (parse-ts-hash password)]
 
-    (debug (:uri request) " - X-Debug:" (get-in request [:headers "x-debug"]))
-
-    (when (and ts (ss/blank? email))
-      (debug request))
+    (debug (:uri request) "- X-Debug:" (get-in request [:headers "x-debug"]))
 
     (when (and secret ts hash
             (env/feature? :louhipalvelin)
