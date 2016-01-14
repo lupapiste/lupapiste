@@ -1,4 +1,5 @@
 /**
+* -- FOR DEVELOPMENT USE ONLY --
 * Lupapiste - SitoGis - SpatialWeb integration API
 * @constructs LupapisteApi
 */
@@ -19,6 +20,17 @@ function LupapisteApi() {
 */
 LupapisteApi.showPermitsOnMap = function (filter) {
 
+};
+
+/**
+* Show point on map
+* @static
+* @param {PermitFilter} filter Filter for lupapiste api
+*/
+LupapisteApi.showPermitOnMap = function (permit) {
+  hub.send("show-dialog", {title: "LupapisteApi.showPermitOnMap",
+                           component: "ok-dialog",
+                           componentParams: {text: JSON.stringify(permit, null, 2)}});
 };
 
 /**
