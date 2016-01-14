@@ -409,7 +409,7 @@
         expires (:expires session-user)
         expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
         updated-user (and expired? (user/session-summary (user/get-user {:id (:id session-user), :enabled true})))
-        user (or api-key-auth updated-user session-user)]
+        user (or api-key-auth updated-user session-user (autologin/autologin request) )]
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
       (let [response (handler (assoc request :user user))]

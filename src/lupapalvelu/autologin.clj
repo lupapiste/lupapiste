@@ -46,4 +46,4 @@
       (let [user (user/get-user-by-email email)
             organizations (user/users-organizations user)]
         (when (allowed-ip? ip organizations)
-          user)))))
+          (user/session-summary user))))))
