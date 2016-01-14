@@ -1051,8 +1051,10 @@
                                                   <div data-bind='if: lupamaaraykset.vaaditutKatselmukset && lupamaaraykset.vaaditutKatselmukset.length'>
                                                       <h3 data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
                                                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
-                                                          <li data-bind='if: $data.katselmuksenLaji'>
+                                                          <li data-bind="if: $data.katselmuksenLaji">
+                                                              <!-- ko if: loc.hasTerm('task-katselmus.katselmuksenLaji.' + $data.katselmuksenLaji) -->
                                                               <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
+                                                              <!-- /ko -->
                                                               <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
                                                                   (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
                                                               </span>
@@ -1333,7 +1335,7 @@
                                                               'data-test-state': $data.state,
                                                               'title': loc(['task', statusName, 'title'])}"></i></td>
                                             <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
-                                            <td data-bind="dateString: $data.closed"></td>
+                                            <td data-bind="text: util.getIn($data, ['data', 'katselmus', 'pitoPvm', 'value'])"></td>
                                         </tr>
                                     </tbody>
                                 </table>

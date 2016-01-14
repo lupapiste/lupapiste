@@ -25,6 +25,7 @@
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
+            [lupapalvelu.autologin :as autologin]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]
@@ -97,12 +98,9 @@
 (defn user-agent [request]
   (str (get-in request [:headers "user-agent"])))
 
-(defn client-ip [request]
-  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
-
 (defn- web-stuff [request]
   {:user-agent (user-agent request)
-   :client-ip  (client-ip request)
+   :client-ip  (http/client-ip request)
    :host       (host request)})
 
 (defn- logged-in? [request]
@@ -173,9 +171,7 @@
 (defn basic-authentication
   "Returns a user map or nil if authentication fails"
   [request]
-  (let [auth (get-in request [:headers "authorization"])
-        cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))
-        [u p] (and cred (s/split (str cred) #":" 2))]
+  (let [[u p] (http/decode-basic-auth request)]
     (when (and u p)
       (:user (execute-command "login" {:username u :password p} request)))))
 
@@ -413,7 +409,7 @@
         expires (:expires session-user)
         expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
         updated-user (and expired? (user/session-summary (user/get-user {:id (:id session-user), :enabled true})))
-        user (or api-key-auth updated-user session-user)]
+        user (or api-key-auth updated-user session-user (autologin/autologin request) )]
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
       (let [response (handler (assoc request :user user))]
@@ -521,7 +517,7 @@
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (user/current-user request) "???")}
-    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (client-ip request) (get-in request [:headers "referer"]))
+    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (http/client-ip request) (get-in request [:headers "referer"]))
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn anti-csrf

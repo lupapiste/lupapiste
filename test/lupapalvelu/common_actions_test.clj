@@ -40,7 +40,8 @@
                           :add-application-tags
                           :get-organization-tags
                           :get-organization-areas
-                          :preview-attachment}
+                          :preview-attachment
+                          :document}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action user {} application)
@@ -73,7 +74,7 @@
   (let [user {:id "user123" :orgAuthz {:999-R #{:reader}} :role "authority"}
         application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
         allowed-actions #{; queries
-                          :application :validate-doc :fetch-validation-errors
+                          :application :validate-doc :fetch-validation-errors :document
                           :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                           :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                           ; raw

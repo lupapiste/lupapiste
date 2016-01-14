@@ -50,7 +50,7 @@
   (when s (let [normalized (Normalizer/normalize s Normalizer$Form/NFD)]
     (clojure.string/replace normalized #"\p{InCombiningDiacriticalMarks}+" ""))))
 
-(def non-printables #"[^\p{Print}]")
+(def non-printables #"[\p{Cntrl}]")
 
 (defn strip-non-printables [^String s] (when s (s/replace s non-printables "")))
 

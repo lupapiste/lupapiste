@@ -1,6 +1,7 @@
 (ns sade.http
   (:require [taoensso.timbre :as timbre :refer [warn error]]
             [clj-http.client :as http]
+            [sade.strings :as ss]
             [sade.env :as env])
   (:refer-clojure :exclude [get]))
 
@@ -31,3 +32,14 @@
   (if (contains? request-or-response :headers)
     (update request-or-response :headers dissoc "cookie" "set-cookie" "server" "host" "connection")
     request-or-response))
+
+(defn client-ip [request]
+  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
+
+(defn decode-basic-auth
+  "Returns username and password decoded from Authentication header"
+  [request]
+  (let [auth (get-in request [:headers "authorization"])
+        cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))]
+    (when cred
+      (ss/split (str cred) #":" 2))))

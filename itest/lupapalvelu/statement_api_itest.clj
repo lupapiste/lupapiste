@@ -106,7 +106,7 @@
         statement-id (:id (get-statement-by-user-id application ronja-id)) => truthy]
     (fact "Statement giver has access to application"
       (auth-contains-statement-giver application ronja-id) => truthy)
-    
+
     (fact "...but not after statement has been deleted"
       (command sonja :delete-statement :id application-id :statementId statement-id) => ok?
       (let [application (query-application sonja application-id)]
@@ -177,10 +177,16 @@
             email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
 
         (fact "One Attachment is generated"
-          (->> (query-application sonja application-id)
-               :attachments
-               (filter (comp #{"lausunto"} :type-id :type))
-               (count)) => 1)
+          (let [gen-attachments (->> (query-application sonja application-id)
+                                  :attachments
+                                  (filter (comp #{"lausunto"} :type-id :type)))
+                gen-statement-attachement (first gen-attachments)]
+
+            (count gen-attachments) => 1
+
+            (fact "cannot delete it since it is read-only"
+              (:readOnly gen-statement-attachement) => true
+              (command sonja :delete-attachment :id application-id :attachmentId (:id gen-statement-attachement)) => (partial expected-failure? "error.unauthorized"))))
 
         (fact "Comment is added"
           (->> (query-application sonja application-id)
