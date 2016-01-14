@@ -21,6 +21,7 @@
       (rest parts))))
 
 (defn- valid-hash? [hash username ip ts secret]
+  (debug "Hashing" username ip ts "with" secret)
   (let [expected-hash (pandect/sha256-hmac (str username ip ts) secret)]
     (if (= hash expected-hash)
       true
@@ -33,11 +34,22 @@
 (defn- valid-timestamp? [ts now]
   (if (and now ts)
     (let [delta (util/abs (- now (util/to-long ts)))]
-      (< delta five-min-in-ms))
+      (if (< delta five-min-in-ms)
+        true
+        (do
+          (debug "Too much time difference" delta)
+          false))
+      )
     false))
 
 (defn- load-secret [ip]
-  "LUPAPISTE" ; TODO
+  "LUPAPISTE"
+  #_(when-let [key (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})]
+     ; TODO
+     (if (:crypto-iv key)
+       key
+       key)
+     )
   )
 
 (defn- allowed-ip? [ip organizations]
@@ -49,6 +61,9 @@
         ip (http/client-ip request)
         secret (load-secret ip)
         [ts hash] (parse-ts-hash password)]
+
+    (debug "Debug header" (get-in request [:headers "x-debug"]))
+
     (when (and secret ts hash
             (env/feature? :louhipalvelin)
             (valid-hash? hash email ip ts secret)
