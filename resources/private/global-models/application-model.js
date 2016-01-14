@@ -680,12 +680,13 @@ LUPAPISTE.ApplicationModel = function() {
     showOnMap: function(model) {
       var authorityStr = model.authority().id() ? model.authority().lastName() + " " + model.authority().firstName() : "";
       var operationStr = loc(["operations", model.primaryOperation().name()]);
-      var permit = {id:        model.id(),
-                    location:  ko.mapping.toJS(model.location), // properties 'x' and 'y'
-                    address:   model.address(),
-                    applicant: model.applicant(),
-                    authority: authorityStr,
-                    operation: operationStr};
+      var permit = {id:           model.id(),
+                    location:     ko.mapping.toJS(model.location), // properties 'x' and 'y'
+                    address:      model.address(),
+                    applicant:    model.applicant(),
+                    authority:    authorityStr,
+                    municipality: model.municipality(),
+                    operation:    operationStr};
       hub.send("external-api::show-on-map", permit);
     },
     openApplication: function(model) {
