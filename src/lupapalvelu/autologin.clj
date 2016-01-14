@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [pandect.core :as pandect]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.http :as http]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -46,6 +47,7 @@
         secret (load-secret ip)
         [ts hash] (parse-ts-hash password)]
     (when (and secret ts hash
+            (env/feature? :louhipalvelin)
             (valid-hash? hash email ip ts secret)
             (valid-timestamp? ts (now)))
       (let [user (user/get-user-by-email email)
