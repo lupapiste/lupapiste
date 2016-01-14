@@ -1,5 +1,6 @@
 (ns lupapalvelu.autologin
-  (:require [pandect.core :as pandect]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [pandect.core :as pandect]
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.util :as util]
@@ -17,7 +18,11 @@
 
 (defn- valid-hash? [hash username ip ts secret]
   (let [expected-hash (pandect/sha256-hmac (str username ip ts) secret)]
-    (= hash expected-hash)))
+    (if (= hash expected-hash)
+      true
+      (do
+        (error "Expected hash" expected-hash "got" hash)
+        false))))
 
 (def five-min-in-ms (* 5 60 1000))
 
