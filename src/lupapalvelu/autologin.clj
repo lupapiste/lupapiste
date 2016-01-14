@@ -44,14 +44,8 @@
     false))
 
 (defn- load-secret [ip]
-  (when-let [key (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})]
-    ; TODO separate key
-    (if (:crypto-iv key)
-      (crypt/decode-aes-string (:key key) (env/value :backing-system :crypto-key) (:crypto-iv key))
-      (:key key))
-   )
-  "LUPAPISTE"
-  )
+  (when-let [{:keys [key crypto-iv] } (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})]
+    (crypt/decrypt-aes-string key (env/value :sso :basic-auth :crypto-key) crypto-iv)))
 
 (defn- allowed-ip? [ip organizations]
   true ; TODO
