@@ -17,6 +17,8 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.showHelp = ko.observable(false);
 
+  self.sidePanelService = lupapisteApp.services.sidePanelService;
+
   self.sidePanelOpen = ko.pureComputed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });

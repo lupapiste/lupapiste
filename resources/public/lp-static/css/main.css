@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1452693215659');
+@import url('main-blessed1.css?z=1452758597099');
 
 /* line 71, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .mask {
@@ -4954,80 +4954,84 @@ table.admin-settings td.value .save-indicator {
   height: 100%;
 }
 /* line 162, ../../../private/common-html/sass/views/_side_panel.scss */
+#side-panel #notice-panel .notice-component {
+  height: 100%;
+}
+/* line 166, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-urgency {
   width: 215px;
   position: relative;
 }
-/* line 167, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 171, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-tags {
   z-index: 1;
   position: relative;
 }
-/* line 172, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 176, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.urgent {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 177, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 181, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.hold {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 182, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 186, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel label {
   vertical-align: bottom;
 }
-/* line 186, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 190, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid {
   display: table;
   height: 100%;
 }
-/* line 189, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 193, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row {
   display: table-row;
   margin-bottom: 6px;
 }
-/* line 192, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 196, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row .col-1 {
   display: table-cell;
   margin-bottom: 20px;
 }
-/* line 195, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 199, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row .col-1 label {
   color: #fff;
 }
-/* line 200, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 204, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper {
   height: 100%;
 }
-/* line 202, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 206, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col--vertical {
   height: 100%;
   padding-bottom: 60px;
 }
-/* line 206, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 210, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 {
   height: 100%;
 }
-/* line 208, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 212, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 textarea {
   height: 100%;
   height: 300px\9;
   box-sizing: border-box;
 }
 
-/* line 219, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 223, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
   bottom: 0;
 }
 
-/* line 224, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 228, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel {
   height: 100%;
   padding-bottom: 46px;
 }
-/* line 226, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 230, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -5035,38 +5039,38 @@ table.admin-settings td.value .save-indicator {
   -o-transition: box-shadow 250ms ease;
   transition: box-shadow 250ms ease;
 }
-/* line 235, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 239, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .header h1 {
   margin-bottom: 0;
 }
-/* line 240, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 244, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
 
-/* line 248, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 252, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .message-buttons button {
   margin-bottom: 6px;
 }
 
 @media all and (max-width: 1280px) {
-  /* line 255, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 259, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 400px;
   }
 
-  /* line 260, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 264, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel {
     right: -400px;
   }
 
-  /* line 265, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 269, ../../../private/common-html/sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }
 
-  /* line 269, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 273, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons {
     display: table;
   }
@@ -5080,7 +5084,7 @@ table.admin-settings td.value .save-indicator {
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
-  /* line 271, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 275, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons button {
     margin-bottom: 6px;
   }

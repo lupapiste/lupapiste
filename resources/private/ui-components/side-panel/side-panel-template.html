@@ -51,9 +51,12 @@
                   <div class="header">
                       <h1 data-bind="ltext: 'notice.title'"></h1>
                   </div>
-                  <!-- ko component: {name: 'authority-notice',
-                                      params: {application: application}} -->
-                  <!-- /ko -->
+                  <div class="notice-component"
+                       data-bind="component: {name: 'authority-notice',
+                                              params: {authorization: authorization,
+                                                       urgency: sidePanelService.urgency,
+                                                       tags: sidePanelService.tags,
+                                                       authorityNotice: sidePanelService.authorityNotice}}"></div>
               </div>
               <!-- /ko -->
           </div>

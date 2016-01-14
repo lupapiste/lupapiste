@@ -159,6 +159,10 @@
   #notice-panel {
     height: 100%;
 
+    .notice-component {
+      height: 100%;
+    }
+
     .application-urgency {
       width: 215px;
       position: relative;
