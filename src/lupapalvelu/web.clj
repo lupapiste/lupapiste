@@ -517,7 +517,7 @@
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (user/current-user request) "???")}
-    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (client-ip request) (get-in request [:headers "referer"]))
+    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (http/client-ip request) (get-in request [:headers "referer"]))
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn anti-csrf
