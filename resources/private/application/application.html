@@ -276,6 +276,13 @@
                                     <i class="lupicon-circle-arrow-right"></i>
                                     <span data-bind="ltext: 'application.showInBackingSystem'"></span>
                                 </button>
+                                <!-- Add property -->
+                                <button class="function"
+                                        data-bind="click: addProperty, visible: showAddPropertyButton"
+                                        data-test-id="add-property">
+                                  <i class="lupicon-circle-plus"></i>
+                                  <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
+                                </button>
                                 <!-- /ko  -->
                                 <!-- ko if: hasInvites -->
                                 <button class="positive"
@@ -289,12 +296,6 @@
                                     <span data-bind="ltext: 'applications.declineInvite'"></span>
                                 </button>
                                 <!-- /ko -->
-                                <button class="function"
-                                        data-bind="click: addProperty, visible: showAddPropertyButton"
-                                        data-test-id="add-property">
-                                  <i class="lupicon-circle-plus"></i>
-                                  <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
-                                </button>
                             </div>
                         </div>
                     </div>
