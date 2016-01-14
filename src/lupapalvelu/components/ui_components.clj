@@ -340,7 +340,7 @@
                              :statement :docgen :create :mypage :header :debug
                              :company :analytics :register-company :footer]}
 
-   :authority-app {:depends [:ui-components] :js ["authority.js"]}
+   :authority-app {:depends [:ui-components] :js ["authority.js" "api.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer]}
