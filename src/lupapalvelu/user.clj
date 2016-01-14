@@ -184,6 +184,12 @@
     (map (comp name first))
     set))
 
+(defn users-organizations
+  "Returns organizations where user has some role"
+  [user]
+  (when-let [ids (seq (organization-ids user))]
+    (organization/get-organizations {:_id {$in organization-ids}})))
+
 (defn authority-admins-organization-id [user]
   (first (organization-ids-by-roles user #{:authorityAdmin})))
 

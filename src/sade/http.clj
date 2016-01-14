@@ -33,6 +33,9 @@
     (update request-or-response :headers dissoc "cookie" "set-cookie" "server" "host" "connection")
     request-or-response))
 
+(defn client-ip [request]
+  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
+
 (defn decode-basic-auth
   "Returns username and password decoded from Authentication header"
   [request]
