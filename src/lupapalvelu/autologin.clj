@@ -3,6 +3,7 @@
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.user :as user]))
 
@@ -10,7 +11,7 @@
 ; hash = HMAC-SHA256(tunnus + IP + aikaleima, salaisuus)
 
 (defn- parse-ts-hash [password]
-  (when password
+  (when-not (ss/blank? password)
     (let [parts (re-matches #"(\d{13})_([0-9a-f]{64})" password)]
       (rest parts))))
 
@@ -26,15 +27,23 @@
       (< delta five-min-in-ms))
     false))
 
+(defn- load-secret [ip]
+  "LUPAPISTE" ; TODO
+  )
+
+(defn- allowed-ip? [ip organizations]
+  true ; TODO
+  )
+
 (defn autologin [request]
-  (when-let [[username password] (http/decode-basic-auth request)]
-    (let [ip nil ; TODO
-          secret nil ; TODO resolve by ID
-          [ts hash] (parse-ts-hash password)]
-      (when (and secret ts hash
-                 (valid-hash? hash username ip ts secret)
-                 (valid-timestamp?))
-        ; TODO
-        ; load user
-        ; check ip is enebled in user's organization
-        ))))
+  (let [[email password] (http/decode-basic-auth request)
+        ip (http/client-ip request)
+        secret (load-secret ip)
+        [ts hash] (parse-ts-hash password)]
+    (when (and secret ts hash
+            (valid-hash? hash email ip ts secret)
+            (valid-timestamp? ts (now)))
+      (let [user (user/get-user-by-email email)
+            organizations (user/users-organizations user)]
+        (when (allowed-ip? ip organizations)
+          user)))))
