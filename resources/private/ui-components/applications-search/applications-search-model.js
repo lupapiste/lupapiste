@@ -68,4 +68,18 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"});
     pageutil.openPage("create-page-prev-permit");
   };
+
+  self.externalApi = {
+    enabled: window.parent.LupapisteApi && features.enabled("louhipalvelin"), // TODO pseudo query or config
+    showPermitsOnMap: function() {
+      var data = _.map(self.dataProvider.applications(), function(a) {
+        var result = _.pick(a, ["id", "location", "address", "municipality"]);
+        result.authority = a.authority.id ? a.authority.lastName + " " + a.authority.firstName : "";
+        result.operation = loc(["operations", a.primaryOperation.name]);
+        return result;
+      });
+      hub.send("external-api::filtered-permits", data);
+    }
+  };
+
 };

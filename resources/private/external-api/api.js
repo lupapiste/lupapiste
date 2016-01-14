@@ -14,12 +14,14 @@ function LupapisteApi() {
 */
 
 /**
-* Show on map by a filter
+* Show permits on map by a filter
 * @static
-* @param {PermitFilter} filter Filter for lupapiste api
+* @param {Array} permits Permits from Lupapiste view
 */
-LupapisteApi.showPermitsOnMap = function (filter) {
-
+LupapisteApi.showPermitsOnMap = function (permits) {
+  hub.send("show-dialog", {title: "LupapisteApi.showPermitsOnMap",
+                           component: "ok-dialog",
+                           componentParams: {text: JSON.stringify(permits, null, 2)}});
 };
 
 /**

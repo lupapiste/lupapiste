@@ -676,7 +676,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.externalApi = {
-    enabled: window.parent.LupapisteApi && features.enabled("louhipalvelin"), // TODO pseudo query
+    enabled: window.parent.LupapisteApi && features.enabled("louhipalvelin"), // TODO pseudo query or config
     showOnMap: function(model) {
       var authorityStr = model.authority().id() ? model.authority().lastName() + " " + model.authority().firstName() : "";
       var operationStr = loc(["operations", model.primaryOperation().name()]);

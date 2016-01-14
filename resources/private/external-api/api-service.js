@@ -11,6 +11,11 @@ LUPAPISTE.ExternalApiService = function() {
     window.parent.LupapisteApi.openInSitoGis(eventData);
   });
 
+  hub.subscribe("external-api::filtered-permits", function(data) {
+    var eventData = _.omit(data, "type"); // drop event type
+    window.parent.LupapisteApi.showPermitsOnMap(eventData);
+  });
+
   return {
     enabled: function() {
       return window.parent.LupapisteApi;
