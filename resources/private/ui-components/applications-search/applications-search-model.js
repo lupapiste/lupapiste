@@ -70,7 +70,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   };
 
   self.externalApi = {
-    enabled: window.parent.LupapisteApi && features.enabled("louhipalvelin"), // TODO pseudo query or config
+    enabled: lupapisteApp.models.rootVMO.externalApiEnabled(),
     showPermitsOnMap: function() {
       var data = _.map(self.dataProvider.applications(), externalApiTools.toExternalPermit);
       hub.send("external-api::filtered-permits", data);

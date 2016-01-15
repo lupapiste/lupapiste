@@ -54,11 +54,8 @@ LUPAPISTE.ExternalApiService = function() {
     window.parent.LupapisteApi.integrationSent(permit);
   });
 
-  return {
-    enabled: function() {
-      return window.parent.LupapisteApi;
-    }
-  };
+  var enabled = _.isFunction(window.parent.LupapisteApi);
+  return { enabled: enabled};
 };
 
 lupapisteApp.services.externalApiService = new LUPAPISTE.ExternalApiService();

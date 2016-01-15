@@ -679,7 +679,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.externalApi = {
-    enabled: window.parent.LupapisteApi && features.enabled("louhipalvelin"), // TODO pseudo query or config
+    enabled: lupapisteApp.models.rootVMO.externalApiEnabled(),
     showOnMap: function(model) {
       var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::show-on-map", permit);
