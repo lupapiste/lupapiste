@@ -176,7 +176,9 @@
   (->> org-authz keys (map name) set))
 
 (defn organization-ids-by-roles
-  "Returns a set of organization IDs where user has given roles."
+  "Returns a set of organization IDs where user has given roles.
+  Note: the user must have gone through with-org-auth (the orgAuthz
+  must be keywords)."
   [{org-authz :orgAuthz :as user} roles]
   {:pre [(set? roles) (every? keyword? roles)]}
   (->> org-authz

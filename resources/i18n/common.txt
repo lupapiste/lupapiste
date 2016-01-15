@@ -1396,6 +1396,8 @@
 "guest-authority.name" "fi" "Nimi"
 "guest-authority.email" "fi" "Sähköposti"
 "guest-authority.add" "fi" "Lisää lukuoikeus"
+"guest-authority.has-access" "fi" "Käyttäjällä on jo lukuoikeus kaikkiin organisaation hakemuksiin."
+"guest-authority.failure" "fi" "Toimenpide epäonnistui. Yritä myöhemmin uudelleen."
 "auth-admin.kopiolaitosEmail" "fi" "sähköpostiosoite@esimerkki.fi"
 "auth-admin.kopiolaitosEmail" "sv" "e-postadress@exempel.fi"
 "auth-admin.kopiolaitos-email.title" "fi" "Kopiolaitoksen sähköpostiosoite"

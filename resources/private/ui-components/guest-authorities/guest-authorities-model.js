@@ -1,13 +1,22 @@
 LUPAPISTE.GuestAuthoritiesModel = function() {
   "use strict";
   var self = this;
-  self.guests = ko.observableArray([{role: "Rooli", name: "Etu Suku", email: "foo@bar.com"}]);
+  self.guests = ko.observableArray();
   self.readOnly = ko.pureComputed( function() {
     return false;
   });
-  self.removeGuest = function( data ) {
-    console.log( "Remove", data);
-  };
+
+
+  function fetchGuestAuthorities() {
+    ajax.query( "guest-authorities-organization")
+    .success( function( res ) {
+      self.guests( res.guestAuthorities );
+    })
+    .call ();
+  }
+
+  // Initialization
+  fetchGuestAuthorities();
 
   // Dialog
 
@@ -21,6 +30,7 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
     dd.waitingOk = ko.observable();
     dd.error     = ko.observable();
     dd.oldUser   = ko.observable();
+    dd.errorMessage = ko.observable();
     dd.reset = function() {
       dd.email( "" );
       dd.firstName( "" );
@@ -30,9 +40,11 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
       dd.waitingOk( false );
       dd.error( null );
       dd.oldUser( false );
+      dd.errorMessage("");
     };
     dd.isGood = ko.pureComputed( function() {
       return !dd.error()
+          && !dd.errorMessage()
           && !(dd.waitingEmail() || dd.waitingOk())
           && util.isValidEmailAddress( dd.email())
         && _.every( ["firstName", "lastName"],
@@ -55,10 +67,12 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
           dd.firstName( res.user.firstName );
           dd.lastName( res.user.lastName );
           dd.oldUser( res.user.firstName || res.user.lastName );
+          dd.errorMessage( res.user.hasAccess ? "guest-authority.has-access" : "");
         })
         .error ( function() {
-          dd.error( true);
+          dd.error( false );
           dd.oldUser( false );
+          dd.errorMessage( "guest-authority.failure");
         })
         .call();
       } else {
@@ -66,39 +80,48 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
         dd.oldUser( false );
       }
     });
+    dd.guestClick = function() {
+      // We always add the user to organization just in case.
+      // Note: for an already existing organization authority,
+      // the role is diminished to guest
+      ajax.command( "update-user-organization", {email: dd.email(),
+                                                 firstName: dd.firstName(),
+                                                 lastName: dd.lastName(),
+                                                 roles: ["guest"]})
+    .pending( dd.waitingOk )
+    .success( function() {
+      ajax.command( "update-guest-authority-organization",
+                    {email: dd.email(),
+                     name: dd.firstName() + " " + dd.lastName(),
+                     role: dd.role()})
+      .pending( dd.waitingOk )
+      .success( function() {
+        fetchGuestAuthorities();
+        // Organizations users
+        hub.send( "redraw-users-list");
+        LUPAPISTE.ModalDialog.close();
+      })
+      .call();
+    })
+    .error( function () {
+      dd.errorMessage( "guest-authority.failure");
+    })
+    .call();
+  };
   }
 
   self.dialogData = new DialogData();
 
-  self.dialog = function() {
-    if (!self._dialog) {
-      self._dialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
-      self._dialog.createMask();
-    }
-    return self._dialog;
-  };
+
+  // Table operations
 
   self.addGuest = function() {
     self.dialogData.reset();
-    self.dialog().open( "#dialog-add-guest-authority");
+    LUPAPISTE.ModalDialog.open( "#dialog-add-guest-authority");
   };
-
-  self.guestClick = function() {
-    // We always add the user to organization just in case.
-    // Note: for an already existing organization authority,
-    // the role is diminished to guest
-    ajax.command( "update-user-organization", {email: self.dialogData.email(),
-                                              firstName: self.dialogData.firstName(),
-                                              lastName: self.dialogData.lastName(),
-                                              roles: ["guest"]})
-    .pending( self.dialogData.waitingOk )
-    .success( function( res ) {
-      console.log( "success", res);
-    })
-    .error( function (res ) {
-      console.log( "error", res );
-
-    })
+  self.removeGuest = function( data ) {
+    ajax.command( "remove-guest-authority-organization", {email: data.email})
+    .success( fetchGuestAuthorities )
     .call();
   };
 };

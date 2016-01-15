@@ -84,25 +84,7 @@
   [{caller :user {params :params} :data}]
   (ok :data (user/users-for-datatables caller params)))
 
-(defquery resolve-guest-authority-candidate
-  {:parameters [email]
-   :input-validators [(partial action/non-blank-parameters [:email])]
-   :user-roles #{:authorityAdmin}}
-  [{admin :user}]
-  (let [_ (println "Admin:" admin)
-        candidate (-> email user/get-user-by-email user/with-org-auth)
-        admin-org-id (user/authority-admins-organization-id admin)
-        reader-roles (set (remove #{:guest} organization/authority-roles))
-        _ (println "Reader roles:" reader-roles)
-        reader-roles (set (map name reader-roles))
-        candidate-org-ids (user/organization-ids-by-roles candidate #{:authority})
-        _ (println "Org-ids: " candidate-org-ids)
-        already-has-access (->> candidate-org-ids
-                                (filter #(= admin-org-id %))
-                                not-empty
-                                boolean)]
-    (ok :user (assoc (select-keys candidate [:firstName :lastName])
-                     :hasAccess already-has-access))))
+
 
 ;;
 ;; ==============================================================================

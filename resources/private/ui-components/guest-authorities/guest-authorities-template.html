@@ -67,8 +67,10 @@
 
               <label data-bind="ltext: 'guest-authority.role'" class="form-label"></label>
               <input class="form-input" data-bind="textInput: dialogData.role" type="text"/>
-
-              <button data-bind="click: guestClick,
+              <div class="form-error-message"
+                   data-bind="if: dialogData.errorMessage,
+                              ltext: dialogData.errorMessage"></div>
+              <button data-bind="click: dialogData.guestClick,
                                  enable: dialogData.isGood,
                                  css: {waiting: dialogData.waitingOk}"
                       class="positive btn-dialog">
