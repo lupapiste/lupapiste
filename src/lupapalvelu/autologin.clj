@@ -13,6 +13,9 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.user :as user]))
 
+
+(def cache-ttl (* 10 60 1000)) ; 10 min
+
 ; salasana = aikaleima + "_" + hash
 ; hash = HMAC-SHA256(tunnus + IP + aikaleima, salaisuus)
 
@@ -31,7 +34,7 @@
   (let [delta (util/abs (- now (util/to-long ts)))]
     (boolean (or (< delta five-min-in-ms) (debug "Too much time difference" delta)))))
 
-(defn- load-secret [ip]
+(defn- load-secret-from-db [ip]
   (let [{:keys [key crypto-iv] } (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})
         master-key (env/value :sso :basic-auth :crypto-key)]
     (if (and key crypto-iv)
@@ -43,11 +46,9 @@
         (error "Failed to load master key"))
       (error "No key for" ip))))
 
-(defn allowed-ip? [ip organization-id]
-  (organization/allowed-ip? ip organization-id))
+(def load-secret (memo/ttl load-secret-from-db :ttl/threshold cache-ttl))
 
-#_(def allowed-ip?
-   (memo/ttl organization/allowed-ip? :ttl/threshold 10000))
+(def allowed-ip? (memo/ttl organization/allowed-ip? :ttl/threshold cache-ttl))
 
 (defn autologin [request]
   (let [[email password] (http/decode-basic-auth request)
