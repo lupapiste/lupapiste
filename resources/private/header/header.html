@@ -6,9 +6,7 @@
     <div class="nav-top">
         <div class="nav-box">
             <div class="brand" >
-                <a data-bind="click: $data.openStartPage" class="logo">
-                    <img alt="Lupapiste" src="/lp-static/img/logo.png">
-                </a>
+                <a data-bind="click: $data.openStartPage" class="logo"></a>
             </div>
             <div id="language-select" data-bind="css: {'language-open': $root.languageMenuVisible,
                                                  'language-closed': $root.languageMenuVisible() == false}">
@@ -51,7 +49,7 @@
                               data-bind="text: lupapisteApp.models.currentUser.displayName, attr: {'data-test-role' : lupapisteApp.models.currentUser.role}"></span>
                     </a>
                 </div>
-                <div class="header-box">
+                <div id="logout-header-box" class="header-box">
                     <a data-bind="attr: {href: '/app/' + $root.currentLanguage + '/logout', 'title': loc('logout')}" >
                         <span class="lupicon-log-out"></span>
                         <span class="narrow-hide" data-bind="ltext: 'logout'"></span>
