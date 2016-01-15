@@ -19,40 +19,38 @@ LUPAPISTE.ExternalApiService = function() {
    * @param {PermitFilter}
    */
   hub.subscribe("external-api::show-on-map", function(data) {
-    var eventData = _.omit(data, "eventType"); // drop event type
-    window.parent.LupapisteApi.showPermitOnMap(eventData);
+    var permit = _.omit(data, "eventType"); // drop event type
+    window.parent.LupapisteApi.showPermitOnMap(permit);
   });
 
   /*
    * LupapisteApi.openPermit
-   * Description: Open permit, provides ID of the permit.
-   * @param {string} id id of the permit (ie. 'LP-123-2016-00001')
-   * @param {string} type'application' OR 'inforequest'
+   * Description: Open permit.
+   * @param {PermitFilter}
    */
   hub.subscribe("external-api::open-application", function(data) {
-    var id = _.get(data, "id");
-    var type = _.get(data, "type");
-    window.parent.LupapisteApi.openPermit(id, type);
+    var permit = _.omit(data, "eventType"); // drop event type
+    window.parent.LupapisteApi.openPermit(permit);
   });
 
   /*
    * LupapisteApi.showPermitsOnMap
-   * Description: Show given permits on map.
+   * Description: Show given permits on map (button in application list view).
    * @param {Array<PermitFilter>} data Array of PermitFilter objects
    */
   hub.subscribe("external-api::filtered-permits", function(data) {
-    var eventData = _.omit(data, "eventType"); // drop event type
-    window.parent.LupapisteApi.showPermitsOnMap(eventData);
+    var permit = _.omit(data, "eventType"); // drop event type
+    window.parent.LupapisteApi.showPermitsOnMap(permit);
   });
 
   /*
    * LupapisteApi.integrationSent
    * Description: Function is called when integration (KRYSP) was successully sent.
-   * @param {string} id Lupapiste ID for permit
+   * @param {PermitFilter}
    */
   hub.subscribe("external-api::integration-sent", function(data) {
-    var id = _.get(data, "id");
-    window.parent.LupapisteApi.integrationSent(id);
+    var permit = _.omit(data, "eventType"); // drop event type
+    window.parent.LupapisteApi.integrationSent(permit);
   });
 
   return {

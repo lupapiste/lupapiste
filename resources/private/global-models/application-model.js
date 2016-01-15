@@ -325,7 +325,8 @@ LUPAPISTE.ApplicationModel = function() {
         if (!resp.integrationAvailable) {
           LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
         } else if (window.parent.LupapisteApi) {
-          hub.send("external-api::integration-sent", {id: self.id()});
+          var permit = externalApiTools.toExternalPermit(self._js);
+          hub.send("external-api::integration-sent", permit);
         }
       })
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
@@ -684,7 +685,7 @@ LUPAPISTE.ApplicationModel = function() {
       hub.send("external-api::show-on-map", permit);
     },
     openApplication: function(model) {
-      var permit = {id: model.id()};
+      var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::open-application", permit);
     }};
 };

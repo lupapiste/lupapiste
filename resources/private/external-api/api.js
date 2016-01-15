@@ -49,24 +49,23 @@ LupapisteApi.openInLupapiste = function (id) {
 /**
 * Opens SitoGis tab and shows a permit
 * @static
-* @param {string} id Permit id (asiointitunnus)
-* @param {string} type Permit type ('application' or 'inforequest')
+* @param {PermitFilter} permit
 */
-LupapisteApi.openPermit = function (id, type) {
+LupapisteApi.openPermit = function (permit) {
   hub.send("show-dialog", {title: "LupapisteApi.openPermit",
                            component: "ok-dialog",
-                           componentParams: {text: id + "(" + type + ")"}});
+                           componentParams: {text: JSON.stringify(permit, null, 2)}});
 };
 
 /**
 * Opens SitoGis KRYSP page for permit
 * @static
-* @param {string} id Permit id (asiointitunnus)
+* @param {PermitFilter} permit
 */
-LupapisteApi.integrationSent = function (id) {
+LupapisteApi.integrationSent = function (permit) {
   hub.send("show-dialog", {title: "LupapisteApi.integrationSent",
                            component: "ok-dialog",
-                           componentParams: {text: id}});
+                           componentParams: {text: JSON.stringify(permit, null, 2)}});
 };
 
 /**
