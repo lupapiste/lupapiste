@@ -18,8 +18,8 @@
 (def ^:private ciphers
   {:rijndael (fn [encrypt? crypto-key crypto-iv]
                (doto (-> (RijndaelEngine. 256)
-                        (CBCBlockCipher.)
-                        (PaddedBufferedBlockCipher. (ZeroBytePadding.)))
+                         (CBCBlockCipher.)
+                         (PaddedBufferedBlockCipher. (ZeroBytePadding.)))
                  (.init encrypt? (ParametersWithIV. (KeyParameter. (into-array Byte/TYPE crypto-key))
                                                     (into-array Byte/TYPE crypto-iv)))))
 
@@ -40,12 +40,12 @@
       (byte-array out-len out)
       out)))
 
-(defn encrypt 
+(defn encrypt
   [crypto-key crypto-iv cipher data]
   {:pre [(contains? ciphers cipher)]}
   (crypt ((cipher ciphers) true crypto-key crypto-iv) data))
 
-(defn decrypt 
+(defn decrypt
   [crypto-key crypto-iv cipher data]
   {:pre [(contains? ciphers cipher)]}
   (crypt ((cipher ciphers) false crypto-key crypto-iv) data))
@@ -57,3 +57,24 @@
 (defn base64-decode [^bytes data] (Base64/decodeBase64 data))
 
 (defn url-encode [^String s] (java.net.URLEncoder/encode s "UTF-8"))
+
+(defn encrypt-aes-string
+  "Encrypt string with AES using given base64 passowrd string and IV byte array"
+  [s crypto-key-s crypto-iv]
+  (let [crypto-key (-> crypto-key-s str->bytes base64-decode)]
+    (->> s
+      str->bytes
+      (encrypt crypto-key crypto-iv :aes)
+      base64-encode
+      bytes->str)))
+
+(defn decrypt-aes-string
+  "Arguments are expected to be base64 encoded"
+  [s crypto-key-s crypto-iv-s]
+  (let [crypto-key (-> crypto-key-s str->bytes base64-decode)
+        crypto-iv  (-> crypto-iv-s str->bytes base64-decode)]
+    (->> s
+      str->bytes
+      base64-decode
+      (decrypt crypto-key crypto-iv :aes)
+      bytes->str)))

@@ -37,3 +37,13 @@
        resp (http-get url {:basic-auth [email password]})]
 
    (-> resp :trace-redirects last) => (str (server-address) "/app/fi/authority")))
+
+(fact "Sipoo does not have allowed IPs in fixture, autologin fails"
+  (let [email (email-for "sonja")
+       ts (now)
+       hash (pandect/sha256-hmac (str email my-public-ip ts) "LUPAPISTE")
+       password (str ts "_" hash)
+       url (str (server-address) "/app/fi/")
+       resp (http-get url {:basic-auth [email password]})]
+
+   (-> resp :trace-redirects last) => (str (server-address) "/app/fi/welcome")))
