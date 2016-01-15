@@ -192,7 +192,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     hub.subscribe("login", function() { wasLoggedIn = true; });
 
-    hub.subscribe({type: "connection", status: "online"}, function () {
+    hub.subscribe({eventType: "connection", status: "online"}, function () {
       if (offline) {
         offline = false;
         pageutil.hideAjaxWait();
@@ -200,14 +200,14 @@ var LUPAPISTE = LUPAPISTE || {};
       unlock();
     });
 
-    hub.subscribe({type: "connection", status: "offline"}, function () {
+    hub.subscribe({eventType: "connection", status: "offline"}, function () {
       if (!offline) {
         offline = true;
         pageutil.showAjaxWait(loc("connection.offline"));
       }
     });
 
-    hub.subscribe({type: "connection", status: "session-dead"}, function () {
+    hub.subscribe({eventType: "connection", status: "session-dead"}, function () {
       if (wasLoggedIn) {
         LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
             {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
@@ -216,7 +216,7 @@ var LUPAPISTE = LUPAPISTE || {};
       unlock();
     });
 
-    hub.subscribe({type: "connection", status: "lockdown"}, function (e) {
+    hub.subscribe({eventType: "connection", status: "lockdown"}, function (e) {
       if (!lockdown && lupapisteApp.models.globalAuthModel) {
         lupapisteApp.models.globalAuthModel.refreshWithCallback({});
       }
@@ -225,7 +225,7 @@ var LUPAPISTE = LUPAPISTE || {};
     });
 
     self.initSubscribtions = function() {
-      hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
+      hub.subscribe({eventType: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
       hub.subscribe("logout", function () {
         window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
       });

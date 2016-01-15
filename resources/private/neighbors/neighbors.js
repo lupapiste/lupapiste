@@ -158,7 +158,7 @@
   }
 
   hub.subscribe("LupapisteEditingToolbar::featureAdded", openOwnersDialog);
-  hub.subscribe({type:"dialog-close", id:"neighbors-owners-dialog"}, function() {
+  hub.subscribe({eventType:"dialog-close", id:"neighbors-owners-dialog"}, function() {
     if (model.map) {
       model.map.clearManualDrawings();
     }

@@ -241,7 +241,7 @@
     });
   }
 
-  hub.subscribe({type: "dialog-close", id: "dialog-valtuutus"}, function() {
+  hub.subscribe({eventType: "dialog-close", id: "dialog-valtuutus"}, function() {
     inviteModel.reset();
   });
 
