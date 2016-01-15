@@ -44,7 +44,7 @@
                           :document}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
-    (doseq [command (ca/foreach-action user {} application)
+    (doseq [command (ca/foreach-action {} user {} application)
             :let [action (keyword (:action command))
                   result (user-is-not-allowed-to-access? command application)]]
       (fact {:midje/description (name action)}
@@ -79,7 +79,7 @@
                           :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                           ; raw
                           :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export}]
-    (doseq [command (ca/foreach-action user {} application)
+    (doseq [command (ca/foreach-action {} user {} application)
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]
       (when (and user-roles (not (user-roles :anonymous)))
