@@ -55,7 +55,7 @@
         ip (http/client-ip request)
         [ts hash] (parse-ts-hash password)]
 
-    (debug (:uri request) "- X-Debug:" (get-in request [:headers "x-debug"]))
+    (trace (:uri request) "- X-Debug:" (get-in request [:headers "x-debug"]))
 
     (when (and ts hash
             (env/feature? :louhipalvelin)
@@ -64,7 +64,7 @@
       (let [user (user/get-user-by-email email)
             organization-ids (user/organization-ids user)]
 
-        (debug "autologin" (user/session-summary user))
+        (trace "autologin (if allowed by organization)" (user/session-summary user))
 
         (when (and (seq organization-ids) (some (partial allowed-ip? ip) organization-ids))
           (user/session-summary user))))))
