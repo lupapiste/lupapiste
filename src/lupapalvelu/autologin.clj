@@ -44,10 +44,14 @@
     false))
 
 (defn- load-secret [ip]
-  (let [{:keys [key crypto-iv] } (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})]
+  (let [{:keys [key crypto-iv] } (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})
+        master-key (env/value :sso :basic-auth :crypto-key)]
     (if (and key crypto-iv)
-      (if-let [master-key (env/value :sso :basic-auth :crypto-key)]
-        (crypt/decrypt-aes-string key master-key crypto-iv)
+      (if-not (ss/blank? master-key)
+        (try
+          (crypt/decrypt-aes-string key master-key crypto-iv)
+          (catch Exception e
+            (error "Failed to decrypt" key crypto-iv (.getMessage e))))
         (error "Failed to load master key"))
       (error "No key for" ip))))
 
