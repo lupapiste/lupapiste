@@ -39,8 +39,9 @@ LUPAPISTE.ExternalApiService = function() {
    * @param {Array<PermitFilter>} data Array of PermitFilter objects
    */
   hub.subscribe("external-api::filtered-permits", function(data) {
-    var permit = _.omit(data, "eventType"); // drop event type
-    window.parent.LupapisteApi.showPermitsOnMap(permit);
+    var eventData = _.omit(data, "eventType"); // drop event type
+    var permits = _.values(eventData);
+    window.parent.LupapisteApi.showPermitsOnMap(permits);
   });
 
   /*
