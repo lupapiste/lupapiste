@@ -1,5 +1,3 @@
-require 'shellwords'
-
 # Require any additional compass plugins here.
 
 # Set this to the root of your project when deployed:
@@ -28,5 +26,12 @@ sass_options = {:unix_newlines => true}
 
 
 on_stylesheet_saved do |path|
-  system( "blessc --force " + Shellwords.escape( path )) unless path[/\d+$/]
+  base = Pathname.getwd()
+  relativepath = Pathname.new(path).relative_path_from(base).to_s
+
+  # http://stackoverflow.com/questions/7173000/slash-and-backslash-in-ruby
+  USING_WINDOWS = !!((RUBY_PLATFORM =~ /(win|w)(32|64)$/) || (RUBY_PLATFORM=~ /mswin|mingw/))
+  p = (USING_WINDOWS ? relativepath.gsub('/', '\\') : relativepath)
+
+  system("blessc --force " + p) unless path[/\d+$/]
 end
