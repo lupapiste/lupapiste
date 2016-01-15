@@ -9,7 +9,8 @@ var externalApiTools = (function() {
     var result = _.pick(application, ["id", "location", "address", "municipality", "applicant"]);
     result.type = application.infoRequest ? "inforequest" : "application";
     result.authority = application.authority.id ? application.authority.lastName + " " + application.authority.firstName : "";
-    result.operation = loc(["operations", application.primaryOperation.name]);
+    var op = util.getIn(application, ["primaryOperation", "name"]);
+    result.operation = op ? loc(["operations", op]) : "";
     return result;
   }
 
