@@ -22,26 +22,14 @@
       (rest parts))))
 
 (defn- valid-hash? [hash username ip ts secret]
-  (debug "Hashing" username ip ts "with" secret)
   (let [expected-hash (pandect/sha256-hmac (str username ip ts) secret)]
-    (if (= hash expected-hash)
-      true
-      (do
-        (error "Expected hash" expected-hash "got" hash)
-        false))))
+    (boolean (or (= hash expected-hash) (error "Expected hash" expected-hash "of" username ip ts "- got" hash )))))
 
 (def five-min-in-ms (* 5 60 1000))
 
 (defn- valid-timestamp? [ts now]
-  (if (and now ts)
-    (let [delta (util/abs (- now (util/to-long ts)))]
-      (if (< delta five-min-in-ms)
-        true
-        (do
-          (debug "Too much time difference" delta)
-          false))
-      )
-    false))
+  (let [delta (util/abs (- now (util/to-long ts)))]
+    (boolean (or (< delta five-min-in-ms) (debug "Too much time difference" delta)))))
 
 (defn- load-secret [ip]
   (let [{:keys [key crypto-iv] } (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})
