@@ -276,14 +276,15 @@
                                     <i class="lupicon-circle-arrow-right"></i>
                                     <span data-bind="ltext: 'application.showInBackingSystem'"></span>
                                 </button>
-                                <div data-bind="if: externalApi.enabled,
-                                                css: {'feature': features.enabled('louhipalvelin')}">
+                                <!-- ko if: externalApi.enabled -->
+                                <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
                                   <button class="function"
                                           data-bind="click: externalApi.openApplication">
                                       <i class="lupicon-circle-arrow-right"></i>
                                       <span data-bind="ltext: 'application.showInBackingSystem'"></span>
                                   </button>
                                 </div>
+                                <!-- /ko -->
                                 <!-- Add property -->
                                 <button class="function"
                                         data-bind="click: addProperty, visible: showAddPropertyButton"
@@ -291,9 +292,8 @@
                                   <i class="lupicon-circle-plus"></i>
                                   <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
                                 </button>
-                                <!-- LupapisteApi: show on map -->
-                                <div data-bind="if: externalApi.enabled,
-                                                css: {'feature': features.enabled('louhipalvelin')}">
+                                <!-- ko if: externalApi.enabled -->
+                                <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
                                   <button class="function"
                                           data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
                                           data-test-id="external-show-on-map">
@@ -301,6 +301,7 @@
                                     <span data-bind="text: 'Siirry kartalle'"></span>
                                   </button>
                                 </div>
+                                <!-- /ko -->
                                 <!-- /ko  -->
                                 <!-- ko if: hasInvites -->
                                 <button class="positive"
