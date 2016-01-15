@@ -43,12 +43,11 @@
         (error "Failed to load master key"))
       (error "No key for" ip))))
 
+(defn allowed-ip? [ip organization-id]
+  (organization/allowed-ip? ip organization-id))
+
 #_(def allowed-ip?
    (memo/ttl organization/allowed-ip? :ttl/threshold 10000))
-
-(defn allowed-ip? [ip organization-id]
-  true ; TODO
-  )
 
 (defn autologin [request]
   (let [[email password] (http/decode-basic-auth request)
