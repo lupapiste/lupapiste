@@ -215,7 +215,7 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
-   :external-api {:js ["api.js" "api-service.js"]}
+   :external-api {:js ["api.js" "api-service.js" "api-tools.js"]}
 
    :verdict-attachment-prints {:depends [:common-html]
                                :html ["verdict-attachment-prints-order-template.html"
