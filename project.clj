@@ -71,7 +71,7 @@
                                   [pdfboxing "0.1.5"]]
                    :plugins [[lein-midje "3.1.1"]
                              [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
-                             [lupapiste/lein-buildid "0.4.0"]
+                             [lupapiste/lein-buildid "0.4.2"]
                              [lupapiste/lein-nitpicker "0.5.1"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
