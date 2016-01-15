@@ -1,3 +1,4 @@
+require 'shellwords'
 
 # Require any additional compass plugins here.
 
@@ -25,8 +26,7 @@ javascripts_dir = "js"
 # sass-convert -R --from scss --to sass sass scss && rm -rf sass && mv scss sass
 sass_options = {:unix_newlines => true}
 
+
 on_stylesheet_saved do |path|
-  system( "blessc --force " + path ) unless path[/\d+$/]
+  system( "blessc --force " + Shellwords.escape( path )) unless path[/\d+$/]
 end
-
-

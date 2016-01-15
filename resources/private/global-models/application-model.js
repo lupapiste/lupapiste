@@ -57,7 +57,7 @@ LUPAPISTE.ApplicationModel = function() {
     return !lupapisteApp.models.applicationAuthModel.ok("set-municipality-hears-neighbors");
   });
   self.municipalityHearsNeighborsVisible = ko.pureComputed( function() {
-    return _.contains( [ "R", "P"], self.permitType());
+    return lupapisteApp.models.applicationAuthModel.ok( "municipality-hears-neighbors-visible");
   });
 
   // Application indicator metadata fields

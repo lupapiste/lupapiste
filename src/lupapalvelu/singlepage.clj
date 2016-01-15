@@ -77,7 +77,7 @@
 (def- buildinfo-summary
   (format "%s %s [%s] %4$tF %4$tT (%5$s)"
           env/target-env
-          (:hg-branch env/buildinfo)
+          (:git-branch env/buildinfo)
           (name env/mode)
           (tc/to-date (tc/from-long (:time env/buildinfo)))
           (:build-number env/buildinfo)))
