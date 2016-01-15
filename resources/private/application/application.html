@@ -276,6 +276,14 @@
                                     <i class="lupicon-circle-arrow-right"></i>
                                     <span data-bind="ltext: 'application.showInBackingSystem'"></span>
                                 </button>
+                                <div data-bind="if: externalApi.enabled,
+                                                css: {'feature': features.enabled('louhipalvelin')}">
+                                  <button class="function"
+                                          data-bind="click: externalApi.openApplication">
+                                      <i class="lupicon-circle-arrow-right"></i>
+                                      <span data-bind="ltext: 'application.showInBackingSystem'"></span>
+                                  </button>
+                                </div>
                                 <!-- Add property -->
                                 <button class="function"
                                         data-bind="click: addProperty, visible: showAddPropertyButton"
