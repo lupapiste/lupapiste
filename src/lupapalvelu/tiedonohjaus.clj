@@ -46,6 +46,24 @@
   (memo/ttl get-metadata-for-document-from-toj
             :ttl/threshold 10000))
 
+(defn- get-metadata-for-process-from-toj [organization tos-function]
+  (if (env/feature? :tiedonohjaus)
+    (when (and organization tos-function)
+      (try
+        (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function)
+              response (http/get url {:as :json
+                                      :throw-exceptions false})]
+          (if (= 200 (:status response))
+            (:body response)
+            {}))
+        (catch Exception _
+          {})))
+    {}))
+
+(def metadata-for-process
+  (memo/ttl get-metadata-for-process-from-toj
+            :ttl/threshold 10000))
+
 (defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function & [type]]
   (let [document-type (or type (:type document))
         existing-tila (:tila metadata)
