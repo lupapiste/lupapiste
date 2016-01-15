@@ -16,7 +16,7 @@ function LupapisteApi() {
 /**
 * Show permits on map by a filter
 * @static
-* @param {Array} permits Permits from Lupapiste view
+* @param {Array<PermitFilter>} permits Permits from Lupapiste view
 */
 LupapisteApi.showPermitsOnMap = function (permits) {
   console.log(_.keys(permits));
@@ -50,11 +50,12 @@ LupapisteApi.openInLupapiste = function (id) {
 * Opens SitoGis tab and shows a permit
 * @static
 * @param {string} id Permit id (asiointitunnus)
+* @param {string} type Permit type ('application' or 'inforequest')
 */
-LupapisteApi.openPermit = function (id) {
+LupapisteApi.openPermit = function (id, type) {
   hub.send("show-dialog", {title: "LupapisteApi.openPermit",
                            component: "ok-dialog",
-                           componentParams: {text: id}});
+                           componentParams: {text: id + "(" + type + ")"}});
 };
 
 /**

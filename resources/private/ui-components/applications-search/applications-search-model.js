@@ -72,12 +72,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   self.externalApi = {
     enabled: window.parent.LupapisteApi && features.enabled("louhipalvelin"), // TODO pseudo query or config
     showPermitsOnMap: function() {
-      var data = _.map(self.dataProvider.applications(), function(a) {
-        var result = _.pick(a, ["id", "location", "address", "municipality"]);
-        result.authority = a.authority.id ? a.authority.lastName + " " + a.authority.firstName : "";
-        result.operation = loc(["operations", a.primaryOperation.name]);
-        return result;
-      });
+      var data = _.map(self.dataProvider.applications(), externalApiTools.toExternalPermit);
       hub.send("external-api::filtered-permits", data);
     }
   };

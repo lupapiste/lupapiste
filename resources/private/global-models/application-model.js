@@ -680,15 +680,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.externalApi = {
     enabled: window.parent.LupapisteApi && features.enabled("louhipalvelin"), // TODO pseudo query or config
     showOnMap: function(model) {
-      var authorityStr = model.authority().id() ? model.authority().lastName() + " " + model.authority().firstName() : "";
-      var operationStr = loc(["operations", model.primaryOperation().name()]);
-      var permit = {id:           model.id(),
-                    location:     ko.mapping.toJS(model.location), // properties 'x' and 'y'
-                    address:      model.address(),
-                    applicant:    model.applicant(),
-                    authority:    authorityStr,
-                    municipality: model.municipality(),
-                    operation:    operationStr};
+      var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::show-on-map", permit);
     },
     openApplication: function(model) {
