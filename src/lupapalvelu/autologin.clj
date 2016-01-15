@@ -51,7 +51,10 @@
         (error "Failed to load master key"))
       (error "No key for" ip))))
 
-(defn- allowed-ip? [ip organizations]
+#_(def allowed-ip?
+   (memo/ttl organization/allowed-ip? :ttl/threshold 10000))
+
+(defn allowed-ip? [ip organization-id]
   true ; TODO
   )
 
@@ -68,9 +71,9 @@
             (valid-hash? hash email ip ts secret)
             (valid-timestamp? ts (now)))
       (let [user (user/get-user-by-email email)
-            organizations (user/users-organizations user)]
+            organization-ids (user/organization-ids user)]
 
         (debug "autologin" (user/session-summary user))
 
-        (when (allowed-ip? ip organizations)
+        (when (and (seq organization-ids) (some (partial allowed-ip? ip) organization-ids))
           (user/session-summary user))))))

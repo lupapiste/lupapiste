@@ -61,11 +61,11 @@
     (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))
     org))
 
-(defn- remove-sensitive-data
-  [org]
-  (if (:krysp org)
-    (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
-    org))
+(defn- remove-sensitive-data [organization]
+  (let [org (dissoc organization :allowedAutologinIPs)]
+    (if (:krysp org)
+      (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
+      org)))
 
 (defn get-organizations
   ([]
@@ -91,6 +91,9 @@
 
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
+
+(defn allowed-ip? [ip organization-id]
+  (pos? (mongo/count :organizations {:_id organization-id, :allowedAutologinIPs ip})))
 
 (defn encode-credentials
   [username password]
