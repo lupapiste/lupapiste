@@ -737,6 +737,7 @@
                                {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                 :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "YI" "YL"} (name (:permit-type v)))) operations/operations))
+                       :allowedAutologinIPs ["127.0.0.1" "109.204.231.126"]
                        :permanent-archive-enabled false}
 
                       ;; Oulu R
@@ -931,6 +932,8 @@
 
 (deffixture "minimal" {}
   (mongo/clear!)
+  (mongo/insert-batch :ssoKeys [{:_id 0 :ip "127.0.0.1" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
+                                {:_id 1 :ip "109.204.231.126" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}])
   (mongo/insert-batch :users users)
   (mongo/insert-batch :companies companies)
   (mongo/insert-batch :organizations organizations))
