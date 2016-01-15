@@ -35,6 +35,19 @@
       </tbody>
     </table>
   </div>
+  <div data-bind="if: $root.authorization.ok('store-tos-metadata-for-application')">
+      <button id="show-tos-metadata" class="btn" data-bind="click: toggleTosMetadata">
+        <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),
+                            'lupicon-chevron-small-down': showTosMetadata}"></i>
+        <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+      </button>
+
+      <div class="tos-metadata-content" data-bind="slider: showTosMetadata">
+        <div data-bind="component: {name: 'metadata-editor',
+                                    params: {metadata: application.processMetadata, application: application, caseFile: true}}">
+        </div>
+      </div>
+  </div>
   </script>
 
 </section>

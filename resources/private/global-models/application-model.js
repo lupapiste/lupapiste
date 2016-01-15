@@ -50,6 +50,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
   self.metadata = ko.observable();
+  self.processMetadata = ko.observable();
 
   // Options
   self.optionMunicipalityHearsNeighbors = ko.observable(false);
