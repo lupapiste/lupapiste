@@ -256,16 +256,16 @@
 (def- compose
   (if (env/feature? :no-cache)
     singlepage/compose
-    (memoize (fn [resource-type app lang] (singlepage/compose resource-type app lang)))))
+    (memoize singlepage/compose)))
 
-(defn- single-resource [resource-type app failure]
+(defn- single-resource [resource-type app theme failure]
   (let [request (request/ring-request)
         lang    *lang*]
     (if ((auth-methods app nobody) request)
      ; Check If-Modified-Since header, see cache-headers above
      (if (or (never-cache app) (env/feature? :no-cache) (not= (get-in request [:headers "if-modified-since"]) last-modified))
        (->>
-         (java.io.ByteArrayInputStream. (compose resource-type app lang))
+         (java.io.ByteArrayInputStream. (compose resource-type app lang theme))
          (resp/content-type (resource-type content-type))
          (resp/set-headers (cache-headers resource-type)))
        {:status 304})
@@ -277,7 +277,7 @@
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
   (let [build-number (:build-number env/buildinfo)]
     (if (= build build-number)
-     (single-resource (keyword res-type) (keyword app) unauthorized)
+     (single-resource (keyword res-type) (keyword app) nil unauthorized)
      (resp/redirect (str "/app/" build-number "/" app "." res-type "?lang=" (name *lang*))))))
 
 ;; Single Page App HTML
@@ -306,28 +306,28 @@
   (when (and s (= -1 (.indexOf s ":")))
     (->> (s/replace-first s "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
 
-(defn- save-hashbang-on-client []
+(defn- save-hashbang-on-client [theme]
   (resp/set-headers {"Cache-Control" "no-cache", "Last-Modified" (util/to-RFC1123-datetime 0)}
-    (single-resource :html :hashbang unauthorized)))
+    (single-resource :html :hashbang theme unauthorized)))
 
-(defn serve-app [app hashbang]
+(defn serve-app [app hashbang theme]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (if-let [hashbang (->hashbang hashbang)]
     (ssess/merge-to-session
-      (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage *lang*))
+      (request/ring-request) (single-resource :html (keyword app) theme (redirect-to-frontpage *lang*))
       {:redirect-after-login hashbang})
     ; If current user has no access to the app, save hashbang using JS on client side.
     ; The next call will then be handled by the "true branch" above.
-    (single-resource :html (keyword app) (save-hashbang-on-client))))
+    (single-resource :html (keyword app) theme (save-hashbang-on-client theme))))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang theme :theme}
   (i18n/with-lang lang
-    (serve-app app hashbang)))
+    (serve-app app hashbang theme)))
 
 ; Same as above, but with an extra path.
-(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang theme :theme}
   (i18n/with-lang lang
-    (serve-app app hashbang)))
+    (serve-app app hashbang theme)))
 
 ;;
 ;; Login/logout:

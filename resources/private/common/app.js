@@ -161,9 +161,10 @@ var LUPAPISTE = LUPAPISTE || {};
     self.getHashbangUrl = function() {
       var href = window.location.href;
       var hash = window.location.hash;
+      var separator = href.indexOf("?") >= 0 ? "&" : "?";
       if (hash && hash.length > 0) {
         var withoutHash = href.substring(0, href.indexOf("#"));
-        return withoutHash + "?redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
+        return withoutHash + separator + "redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
       } else {
         // No hashbang. Go directly to front page.
         return "/app/" + loc.getCurrentLanguage();
