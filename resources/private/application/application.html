@@ -358,6 +358,12 @@
                                     <span data-bind="ltext: 'arkistointi'"></span>
                                 </a></li>
 
+                            <li data-bind="if: tosFunction() && $root.authorization.ok('permanent-archive-enabled') && features.enabled('tiedonohjaus'),
+                                             css: {'active': $parent.selectedTabName() === 'caseFile'}">
+                              <a data-bind="click: changeTab" href="#" data-target="caseFile" data-test-id="application-open-caseFile-tab" class="link-btn">
+                                <span data-bind="ltext: 'caseFile.tab'"></span>
+                              </a></li>
+
                             <li data-bind="if: $root.authorization.ok('publish-bulletin-enabled'),
                                            css: {'active': $parent.selectedTabName() === 'bulletin'}">
                                 <a data-bind="click: changeTab" href="#" data-target="bulletin" data-test-id="application-open-bulletin-tab" class="link-btn">
@@ -882,10 +888,18 @@
 
                     <!-- Archival tab -->
 
-                     <!--ko if: selectedTabName() === 'archival' && features.enabled('arkistointi') && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() -->
+                    <!--ko if: selectedTabName() === 'archival' && features.enabled('arkistointi') && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() -->
                     <div id="application-archival-tab" class="tab-content">
                       <div>
                         <div data-bind="component: {name: 'archival-summary', params: {application: application}}"></div>
+                      </div>
+                    </div>
+                    <!-- /ko -->
+
+                    <!--ko if: selectedTabName() === 'caseFile' && features.enabled('tiedonohjaus') && $root.authorization.ok("permanent-archive-enabled") -->
+                    <div id="application-caseFile-tab" class="tab-content">
+                      <div>
+                        <div data-bind="component: {name: 'case-file', params: {application: application}}"></div>
                       </div>
                     </div>
                     <!-- /ko -->

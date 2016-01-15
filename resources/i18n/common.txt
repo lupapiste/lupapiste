@@ -4931,3 +4931,5 @@
 "error.organization.duplicate-scope" "sv" ""
 "error.invalid-municipality" "fi" "Virheellinen kuntanumero"
 "error.invalid-municipality" "sv" ""
+"caseFile.tab" "fi" "Käsittelytiedot"
+"caseFile.tab" "sv" ""
