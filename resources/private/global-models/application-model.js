@@ -679,7 +679,10 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.externalApi = {
-    enabled: lupapisteApp.models.rootVMO.externalApiEnabled(),
+    enabled: ko.pureComputed(function() {
+      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
+             lupapisteApp.models.applicationAuthModel.ok("external-api-enabled");
+    }),
     showOnMap: function(model) {
       var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::show-on-map", permit);
