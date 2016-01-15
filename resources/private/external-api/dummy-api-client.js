@@ -1,6 +1,7 @@
 /**
 * -- FOR DEVELOPMENT USE ONLY --
-* Lupapiste - SitoGis - SpatialWeb integration API
+* Mimics API implemented by 3rd parties.
+* Outputs data in modal dialog for debugging purposes.
 * @constructs LupapisteApi
 */
 function LupapisteApi() {
@@ -8,18 +9,11 @@ function LupapisteApi() {
 }
 
 /**
-* @typedef PermitFilter
-* @type {object}
-* @property {string} id - asiointitunnus
-*/
-
-/**
 * Show permits on map by a filter
 * @static
 * @param {Array<PermitFilter>} permits Permits from Lupapiste view
 */
 LupapisteApi.showPermitsOnMap = function (permits) {
-  console.log(permits);
   hub.send("show-dialog", {title: "LupapisteApi.showPermitsOnMap",
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permits, null, 2)}});
@@ -31,23 +25,13 @@ LupapisteApi.showPermitsOnMap = function (permits) {
 * @param {PermitFilter} filter Filter for lupapiste api
 */
 LupapisteApi.showPermitOnMap = function (permit) {
-  console.log(_.keys(permit));
   hub.send("show-dialog", {title: "LupapisteApi.showPermitOnMap",
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permit, null, 2)}});
 };
 
 /**
-* Opens Lupapiste tab and shows a permit
-* @static
-* @param {string} id Permit id (asiointitunnus)
-*/
-LupapisteApi.openInLupapiste = function (id) {
-
-};
-
-/**
-* Opens SitoGis tab and shows a permit
+* Opens open permit
 * @static
 * @param {PermitFilter} permit
 */
@@ -58,7 +42,7 @@ LupapisteApi.openPermit = function (permit) {
 };
 
 /**
-* Opens SitoGis KRYSP page for permit
+* Permit is emited when integration (KRYSP) was sent successfully
 * @static
 * @param {PermitFilter} permit
 */
