@@ -70,8 +70,10 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   };
 
   self.externalApi = {
-    enabled: lupapisteApp.models.rootVMO.externalApiEnabled() &&
-             lupapisteApp.models.globalAuthModel.ok("external-api-enabled"),
+    enabled: ko.pureComputed(function() {
+      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
+             lupapisteApp.models.globalAuthModel.ok("external-api-enabled");
+    }),
     showPermitsOnMap: function() {
       var data = _.map(self.dataProvider.applications(), externalApiTools.toExternalPermit);
       hub.send("external-api::filtered-permits", data);
