@@ -49,7 +49,8 @@
            "sailytysaika" {"arkistointi" "ikuisesti"
                            "perustelu" "foo"}
            "myyntipalvelu" false
-           "nakyvyys" "julkinen"}) => {:ok true}
+           "nakyvyys" "julkinen"
+           "kieli" "fi"}) => {:ok true}
         (provided
           (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
                                                                                                                :henkilotiedot :ei-sisalla
@@ -57,7 +58,8 @@
                                                                                                                               :perustelu "foo"}
                                                                                                                :myyntipalvelu false
                                                                                                                :nakyvyys :julkinen
-                                                                                                               :tila :luonnos}}]}}) => nil)))
+                                                                                                               :tila :luonnos
+                                                                                                               :kieli :fi}}]}}) => nil)))
 
     (fact "user with insufficient rights cannot update retention metadata"
       (let [command {:application {:organization "753-R"
@@ -78,7 +80,8 @@
            "sailytysaika" {"arkistointi" "ei"
                            "perustelu" "foo"}
            "myyntipalvelu" false
-           "nakyvyys" "julkinen"}) => {:ok true}
+           "nakyvyys" "julkinen"
+           "kieli" "fi"}) => {:ok true}
         (provided
           (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
                                                                                                                :henkilotiedot :ei-sisalla
@@ -86,6 +89,7 @@
                                                                                                                               :perustelu "foo"}
                                                                                                                :myyntipalvelu false
                                                                                                                :nakyvyys :julkinen
-                                                                                                               :tila :luonnos}}]}}) => nil))))
+                                                                                                               :tila :luonnos
+                                                                                                               :kieli :fi}}]}}) => nil))))
 
   )  ;; /env/feature? :tiedonohjaus
