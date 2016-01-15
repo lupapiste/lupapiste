@@ -52,14 +52,13 @@
 (defn autologin [request]
   (let [[email password] (http/decode-basic-auth request)
         ip (http/client-ip request)
-        secret (load-secret ip)
         [ts hash] (parse-ts-hash password)]
 
     (debug (:uri request) "- X-Debug:" (get-in request [:headers "x-debug"]))
 
-    (when (and secret ts hash
+    (when (and ts hash
             (env/feature? :louhipalvelin)
-            (valid-hash? hash email ip ts secret)
+            (valid-hash? hash email ip ts (load-secret ip))
             (valid-timestamp? ts (now)))
       (let [user (user/get-user-by-email email)
             organization-ids (user/organization-ids user)]
