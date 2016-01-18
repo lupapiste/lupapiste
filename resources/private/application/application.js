@@ -85,7 +85,6 @@
   }
 
   var updateMetadataFields = function(application) {
-    console.log('updating metadata');
     if (!_.isEmpty(application.metadata)) {
       ko.mapping.fromJS(application.metadata, applicationModel.metadata);
     } else {
@@ -96,7 +95,6 @@
     } else {
       applicationModel.processMetadata({});
     }
-
   };
 
   function updateTosFunction(value) {
