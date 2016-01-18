@@ -63,24 +63,24 @@
 (defn- run-pdf-to-pdf-a-conversion [input-file output-file]
   (let [{:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file))
         log-lines (parse-log-file output-file)]
-    (case exit
-      0 {:pdfa? true
-         :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
-         :output-file (File. output-file)}
-      5 (do (warn "pdf2pdf conversion was not lossless")
-            (warn log-lines)
-            {:pdfa? true
-             :output-file (File. output-file)})
-      6 (let [error-lines (parse-errors-from-log-lines log-lines)]
-          (io/delete-file output-file :silently)
-          (if-let [fonts (parse-missing-fonts-from-log-lines error-lines)]
-            {:pdfa? false
-             :missing-fonts fonts}
-            (do (error error-lines)
-                {:pdfa? false})))
-      (do (error "pdf2pdf error:" err "exit status:" exit)
-          (error (parse-errors-from-log-lines log-lines))
-          {:pdfa? false}))))
+    (cond
+      (= exit 0) {:pdfa? true
+                  :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
+                  :output-file (File. output-file)}
+      (= exit 5) (do (warn "pdf2pdf conversion was not lossless")
+                     (warn log-lines)
+                     {:pdfa? true
+                      :output-file (File. output-file)})
+      (#{6 139} exit) (let [error-lines (parse-errors-from-log-lines log-lines)]
+                        (io/delete-file output-file :silently)
+                        (if-let [fonts (parse-missing-fonts-from-log-lines error-lines)]
+                          {:pdfa? false
+                           :missing-fonts fonts}
+                          (do (error error-lines)
+                              {:pdfa? false})))
+      :else (do (error "pdf2pdf error:" err "exit status:" exit)
+                (error (parse-errors-from-log-lines log-lines))
+                {:pdfa? false}))))
 
 (defn- get-pdf-page-count [input-file]
   (with-open [reader (PdfReader. input-file)]
