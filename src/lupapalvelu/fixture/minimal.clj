@@ -260,7 +260,7 @@
      :email "pekka.borga@porvoo.fi"
      :enabled true
      :role "authority"
-     :orgAuthz {:638-R #{:authority}}
+     :orgAuthz {:638-R #{:authority :approver}}
      :firstName "Pekka"
      :lastName "Borga"
      :phone "121212"
