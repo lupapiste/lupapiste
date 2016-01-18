@@ -1,6 +1,12 @@
+/**
+ * Works as Facade for window.parent.LupapisteApi external API
+ * by subscribing to hub's external-api events.
+ */
 LUPAPISTE.ExternalApiService = function() {
   "use strict";
+
  /**
+  * Permit data sent via external API.
   * @typedef PermitFilter
   * @type {object}
   * @property {string} id - asiointitunnus
