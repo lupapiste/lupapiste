@@ -121,7 +121,7 @@
       }
     });
 
-    ajax.query("tos-metadata-schema")
+    ajax.query("tos-metadata-schema", {schema: params.caseFile ? 'caseFile' : 'document'})
       .success(function(data) {
         self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), data.schema, roles));
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);
@@ -141,7 +141,14 @@
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap);
-      var command = self.attachmentId() ? "store-tos-metadata-for-attachment" : "store-tos-metadata-for-application";
+      var command;
+      if (params.caseFile) {
+        command = "store-tos-metadata-for-process";
+      } else if (self.attachmentId()) {
+        command = "store-tos-metadata-for-attachment";
+      } else {
+        command = "store-tos-metadata-for-application";
+      }
       ajax.command(command)
         .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
         .success(function() {

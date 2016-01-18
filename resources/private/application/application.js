@@ -84,15 +84,28 @@
       .call();
   }
 
+  var updateMetadataFields = function(application) {
+    console.log('updating metadata');
+    if (!_.isEmpty(application.metadata)) {
+      ko.mapping.fromJS(application.metadata, applicationModel.metadata);
+    } else {
+      applicationModel.metadata({});
+    }
+    if (!_.isEmpty(application.processMetadata)) {
+      ko.mapping.fromJS(application.processMetadata, applicationModel.processMetadata);
+    } else {
+      applicationModel.processMetadata({});
+    }
+
+  };
+
   function updateTosFunction(value) {
     if (!isInitializing) {
       LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
-          repository.load(currentId, applicationModel.pending, function(application) {
-            ko.mapping.fromJS(application.metadata, applicationModel.metadata);
-          });
+          repository.load(currentId, applicationModel.pending, updateMetadataFields);
         })
         .call();
     }
@@ -305,7 +318,11 @@
         }
       }
       currentId = newId;
+
       repository.load(currentId, applicationModel.pending, function(application) {
+
+        updateMetadataFields(application);
+
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
             var name = application.primaryOperation.name;

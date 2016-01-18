@@ -114,7 +114,7 @@
         {:pdfa? false})))
 
 (defn pdf-a-required? [organization-id]
-  (and (env/feature? :arkistointi)
+  (and (env/feature? :tiedonohjaus)
        (organization/some-organization-has-archive-enabled? #{organization-id})))
 
 (defn convert-file-to-pdf-in-place [src-file]
