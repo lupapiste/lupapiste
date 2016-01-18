@@ -32,7 +32,7 @@
   (env/value :pdf2pdf :license-key))
 
 (defn- pdftools-pdfa-command [input-file output-file]
-  [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) input-file output-file])
+  [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) "-fd" "/usr/share/fonts/msttcore" input-file output-file])
 
 (defn- parse-log-file [output-filename]
   (try
