@@ -4,7 +4,8 @@
             [monger.operators :refer :all]
             [sade.env :as env]
             [lupapalvelu.tiedonohjaus-api :refer :all]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.action :refer [execute]]))
 
 (when (env/feature? :tiedonohjaus)
 
@@ -90,6 +91,30 @@
                                                                                                                :myyntipalvelu false
                                                                                                                :nakyvyys :julkinen
                                                                                                                :tila :luonnos
-                                                                                                               :kieli :fi}}]}}) => nil))))
 
+                                                                                                               :kieli :fi}}]}}) => nil)))
+    (fact "process metadata is updated correctly"
+      (let [command {:application {:organization "753-R"
+                                   :processMetadata {}
+                                   :id "ABC123"
+                                   :state "submitted"}
+                     :created 1000
+                     :user {:orgAuthz {:753-R #{:authority :archivist}}
+                            :organizations ["753-R"]
+                            :role :authority}
+                     :action "store-tos-metadata-for-process"
+                     :data {:metadata {"julkisuusluokka" "julkinen"
+                                       "henkilotiedot" "ei-sisalla"
+                                       "sailytysaika" {"arkistointi" "ikuisesti"
+                                                       "perustelu" "foo"}
+                                       "kieli" "fi"}
+                            :id "ABC123"}}]
+        (execute command) => {:ok true}
+        (provided
+          (lupapalvelu.action/update-application command {$set {:modified 1000
+                                                                :processMetadata {:julkisuusluokka :julkinen
+                                                                                  :henkilotiedot :ei-sisalla
+                                                                                  :sailytysaika {:arkistointi :ikuisesti
+                                                                                                 :perustelu "foo"}
+                                                                                  :kieli :fi}}}) => nil))))
   )  ;; /env/feature? :tiedonohjaus
