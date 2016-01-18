@@ -279,9 +279,17 @@
                                 <!-- ko if: externalApi.enabled -->
                                 <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
                                   <button class="function"
-                                          data-bind="click: externalApi.openApplication">
+                                          data-bind="click: externalApi.openApplication, visible: externalApi.enabled">
                                       <i class="lupicon-circle-arrow-right"></i>
                                       <span data-bind="ltext: 'application.showInBackingSystem'"></span>
+                                  </button>
+                                </div>
+                                <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
+                                  <button class="function"
+                                          data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
+                                          data-test-id="external-show-on-map">
+                                    <i class="lupicon-location"></i>
+                                    <span data-bind="text: 'Siirry kartalle'"></span>
                                   </button>
                                 </div>
                                 <!-- /ko -->
@@ -292,16 +300,6 @@
                                   <i class="lupicon-circle-plus"></i>
                                   <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
                                 </button>
-                                <!-- ko if: externalApi.enabled -->
-                                <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
-                                  <button class="function"
-                                          data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
-                                          data-test-id="external-show-on-map">
-                                    <i class="lupicon-location"></i>
-                                    <span data-bind="text: 'Siirry kartalle'"></span>
-                                  </button>
-                                </div>
-                                <!-- /ko -->
                                 <!-- /ko  -->
                                 <!-- ko if: hasInvites -->
                                 <button class="positive"
