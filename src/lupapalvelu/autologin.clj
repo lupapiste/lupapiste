@@ -66,5 +66,7 @@
 
         (trace "autologin (if allowed by organization)" (user/session-summary user))
 
-        (when (and (seq organization-ids) (some (partial allowed-ip? ip) organization-ids))
+        (when (and (:enabled user)
+                   (seq organization-ids)
+                   (some (partial allowed-ip? ip) organization-ids))
           (user/session-summary user))))))
