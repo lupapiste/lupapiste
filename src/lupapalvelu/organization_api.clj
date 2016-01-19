@@ -555,8 +555,7 @@
   {:description "Simple RSS feed for construction waste information."
    :parameters [fmt org lang]
    :input-validators [o/valid-feed-format o/valid-org o/valid-language]
-   :user-roles #{:anonymous}
-   :feature :rakennusjateilmoitus}
+   :user-roles #{:anonymous}}
   (o/waste-ads (ss/upper-case org)
                (-> fmt ss/lower-case keyword)
                (-> lang ss/lower-case keyword)))
