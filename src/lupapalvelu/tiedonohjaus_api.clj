@@ -15,8 +15,7 @@
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
    :parameters [organizationId]
-   :input-validators [(partial non-blank-parameters [:organizationId])]
-   :feature :tiedonohjaus}
+   :input-validators [(partial non-blank-parameters [:organizationId])]}
   (let [functions (t/available-tos-functions organizationId)]
     (ok :functions functions)))
 
@@ -33,8 +32,7 @@
 (defcommand set-tos-function-for-operation
   {:parameters [operation functionCode]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:functionCode :operation])]
-   :feature :tiedonohjaus}
+   :input-validators [(partial non-blank-parameters [:functionCode :operation])]}
   [{user :user}]
   (store-function-code operation functionCode user))
 
@@ -42,8 +40,7 @@
   {:parameters [:id functionCode]
    :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
+   :states states/all-but-draft-or-terminal}
   [{:keys [application created user] :as command}]
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
@@ -84,8 +81,7 @@
 (defquery tos-metadata-schema
   {:user-roles #{:anonymous}
    :parameters [schema]
-   :input-validators [(partial non-blank-parameters [:schema])]
-   :feature    :tiedonohjaus}
+   :input-validators [(partial non-blank-parameters [:schema])]}
   (let [fields (if (= "caseFile" schema) tms/common-metadata-fields editable-metadata-fields)]
     (ok :schema (map metadata-schema-for-ui fields))))
 
@@ -132,8 +128,7 @@
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
+   :states states/all-but-draft-or-terminal}
   [command]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
@@ -142,8 +137,7 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
+   :states states/all-but-draft-or-terminal}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         {processed-metadata :metadata} (update-document-metadata application metadata user-roles)]
@@ -156,8 +150,7 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
+   :states states/all-but-draft-or-terminal}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         processed-metadata (process-case-file-metadata (:processMetadata application) metadata user-roles)]
@@ -168,7 +161,6 @@
 (defquery case-file-data
   {:parameters [:id]
    :user-roles #{:authority}
-   :states states/all-application-states
-   :feature :tiedonohjaus}
+   :states states/all-application-states}
   [{:keys [application]}]
   (ok :process (t/generate-case-file-data application)))

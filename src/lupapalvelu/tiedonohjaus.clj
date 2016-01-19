@@ -10,36 +10,34 @@
   (apply str (env/value :toj :host) path-parts))
 
 (defn- get-tos-functions-from-toj [organization-id]
-  (let [has-archive? (:permanent-archive-enabled (o/get-organization organization-id))]
-    (if (and (env/feature? :tiedonohjaus) has-archive?)
-      (try
-        (let [url (build-url "/tiedonohjaus/api/org/" organization-id "/asiat")
-              response (http/get url {:as :json
-                                      :throw-exceptions false})]
-          (if (= 200 (:status response))
-            (:body response)
-            []))
-        (catch Exception _
+  (if (:permanent-archive-enabled (o/get-organization organization-id))
+    (try
+      (let [url (build-url "/tiedonohjaus/api/org/" organization-id "/asiat")
+            response (http/get url {:as :json
+                                    :throw-exceptions false})]
+        (if (= 200 (:status response))
+          (:body response)
           []))
-      [])))
+      (catch Exception _
+        []))
+    []))
 
 (def available-tos-functions
   (memo/ttl get-tos-functions-from-toj
             :ttl/threshold 10000))
 
 (defn- get-metadata-for-document-from-toj [organization tos-function document-type]
-  (if (env/feature? :tiedonohjaus)
-    (when (and organization tos-function document-type)
-      (try
-        (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)
-              url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/document/" doc-id)
-              response (http/get url {:as :json
-                                      :throw-exceptions false})]
-          (if (= 200 (:status response))
-            (:body response)
-            {}))
-        (catch Exception _
-          {})))
+  (if (and organization tos-function document-type)
+    (try
+      (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)
+            url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/document/" doc-id)
+            response (http/get url {:as :json
+                                    :throw-exceptions false})]
+        (if (= 200 (:status response))
+          (:body response)
+          {}))
+      (catch Exception _
+        {}))
     {}))
 
 (def metadata-for-document
@@ -47,17 +45,16 @@
             :ttl/threshold 10000))
 
 (defn- get-metadata-for-process-from-toj [organization tos-function]
-  (if (env/feature? :tiedonohjaus)
-    (when (and organization tos-function)
-      (try
-        (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function)
-              response (http/get url {:as :json
-                                      :throw-exceptions false})]
-          (if (= 200 (:status response))
-            (:body response)
-            {}))
-        (catch Exception _
-          {})))
+  (if (and organization tos-function)
+    (try
+      (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function)
+            response (http/get url {:as :json
+                                    :throw-exceptions false})]
+        (if (= 200 (:status response))
+          (:body response)
+          {}))
+      (catch Exception _
+        {}))
     {}))
 
 (def metadata-for-process
@@ -72,17 +69,16 @@
     (assoc document :metadata new-metadata)))
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
-  (if (env/feature? :tiedonohjaus)
-    (when (and organization tos-function state)
-      (try
-        (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/toimenpide-for-state/" state)
-              response (http/get url {:as :json
-                                      :throw-exceptions false})]
-          (if (= 200 (:status response))
-            (:body response)
-            {}))
-        (catch Exception _
-          {})))
+  (if (and organization tos-function state)
+    (try
+      (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/toimenpide-for-state/" state)
+            response (http/get url {:as :json
+                                    :throw-exceptions false})]
+        (if (= 200 (:status response))
+          (:body response)
+          {}))
+      (catch Exception _
+        {}))
     {}))
 
 (def toimenpide-for-state
@@ -129,7 +125,7 @@
     doc))
 
 (defn change-app-and-attachments-metadata-state! [{:keys [created application] :as command} from-state to-state]
-  (when (and (env/feature? :tiedonohjaus) (seq (:metadata application)))
+  (when (seq (:metadata application))
     (let [{{new-tila :tila} :metadata} (change-document-metadata-state application from-state to-state created)
           updated-attachments (map #(change-document-metadata-state % from-state to-state created) (:attachments application))]
       (action/update-application
@@ -140,7 +136,7 @@
 
 (defn change-attachment-metadata-state! [application now attachment-id from-state to-state]
   (let [attachment (first (filter #(= (:id %) attachment-id) (:attachments application)))]
-    (when (and (env/feature? :tiedonohjaus) (seq (:metadata attachment)))
+    (when (seq (:metadata attachment))
       (let [{{new-tila :tila} :metadata} (change-document-metadata-state attachment from-state to-state now)]
         (action/update-application
           (action/application->command application)

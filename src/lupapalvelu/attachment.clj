@@ -186,7 +186,7 @@
            :signatures []
            :versions []
            :contents contents}
-          (and (seq metadata) (env/feature? :tiedonohjaus)) (assoc :metadata metadata)))
+          (seq metadata) (assoc :metadata metadata)))
 
 (defn make-attachments
   "creates attachments with nil target"

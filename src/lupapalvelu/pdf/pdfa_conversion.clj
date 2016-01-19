@@ -114,8 +114,7 @@
         {:pdfa? false})))
 
 (defn pdf-a-required? [organization-id]
-  (and (env/feature? :tiedonohjaus)
-       (organization/some-organization-has-archive-enabled? #{organization-id})))
+  (organization/some-organization-has-archive-enabled? #{organization-id}))
 
 (defn convert-file-to-pdf-in-place [src-file]
   "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwie true.
