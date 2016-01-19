@@ -3,10 +3,12 @@
             [clojure.data.zip.xml :refer [xml-> text]]
             [monger.operators :refer :all]
             [monger.query :as q]
+            [sade.municipality :as muni]
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.util :as util]
             [sade.xml :as sxml]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.property-location :as plocation]
             [lupapalvelu.wfs :as wfs]))
@@ -30,6 +32,23 @@
     (fn [result] (assoc result :kind k)))
   ([k t]
     (fn [result] (assoc result :kind k :type t))))
+
+;; Municipality data
+
+(defn- municipality-index-for [lang]
+  (map (fn [code] [(ss/lower-case (i18n/localize lang :municipality code)) code])
+       muni/municipality-codes))
+
+(def municipality-index
+  (delay (reduce (fn [m lang] (assoc m lang (municipality-index-for lang))) {} i18n/supported-langs)))
+
+(defn municipality-codes [municipality-name-starts]
+  (let [index (apply concat (vals @municipality-index))
+        n (ss/lower-case (ss/trim municipality-name-starts))]
+    (when (not (ss/blank? n))
+      (->> (filter #(ss/starts-with (first %) n) index)
+           (map second)
+           set))))
 
 ;;;
 ;;; All search-... functions return a sequence of items, where each item is a map
@@ -82,17 +101,23 @@
             (wfs/property-is-like "oso:katunumero" (str number "*"))
             (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
 
-(defn search-street-with-city [lang street city]
-  (map
-    (comp (set-kind :address :street-city) wfs/feature-to-address)
-    (wfs/post wfs/maasto
-      (wfs/query {"typeName" "oso:Osoitenimi"}
-        (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop lang)] "asc")
-        (wfs/ogc-filter
-          (wfs/ogc-and
-            (wfs/property-is-like "oso:katunimi" (str street "*"))
-            (wfs/property-is-like (municipality-prop lang) (str city "*"))
-            (wfs/property-is-less "oso:jarjestysnumero" "10")))))))
+(defn search-street-maybe-city
+  "Checks if city is in municipality list. If not, calls search-street,
+   else search with street and city."
+  [lang street city]
+  (let [street (ss/trim street)]
+    (if (empty? (municipality-codes city))
+      (search-street lang (str street " " city))
+      (map
+        (comp (set-kind :address :street-city) wfs/feature-to-address)
+        (wfs/post wfs/maasto
+                  (wfs/query {"typeName" "oso:Osoitenimi"}
+                             (wfs/ogc-sort-by ["oso:katunimi" "oso:katunumero" (municipality-prop lang)] "asc")
+                             (wfs/ogc-filter
+                               (wfs/ogc-and
+                                 (wfs/property-is-like "oso:katunimi" (str street "*"))
+                                 (wfs/property-is-like (municipality-prop lang) (str city "*"))
+                                 (wfs/property-is-less "oso:jarjestysnumero" "10")))))))))
 
 (defn search-address [lang street number city]
   (map
@@ -155,7 +180,7 @@
     #"^(\d{14})$"                                 :>> (apply-search search-property-id lang)
     p/property-id-pattern                         :>> (fn [result] (search-property-id lang (p/to-property-id (first result))))
     #"^(\S+)$"                                    :>> (apply-search search-poi-or-street lang)
-    #"^(\S+)\s+(\d+)\s*,?\s*$"                    :>> (apply-search search-street-with-number lang)
-    #"^(\S+)\s+(\S+)$"                            :>> (apply-search search-street-with-city lang)
-    #"^(\S+)\s+(\d+)\s*,?\s*(\S+)$"               :>> (apply-search search-address lang)
+    #"^(\D+)\s+(\d+)\s*,?\s*$"                    :>> (apply-search search-street-with-number lang)
+    #"^(.+)\s+(\d+)\s*,?\s*(.+)$"                 :>> (apply-search search-address lang)
+    #"^([^,]+)[,\s]+(\D+)$"                       :>> (apply-search search-street-maybe-city lang)
     []))

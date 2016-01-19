@@ -9,13 +9,13 @@
             [lupapalvelu.action :as action]
             [lupapiste-commons.tos-metadata-schema :as tms]
             [schema.core :as s]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre]
+            [lupapiste-commons.schema-utils :as schema-utils]))
 
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
    :parameters [organizationId]
-   :input-validators [(partial non-blank-parameters [:organizationId])]
-   :feature :tiedonohjaus}
+   :input-validators [(partial non-blank-parameters [:organizationId])]}
   (let [functions (t/available-tos-functions organizationId)]
     (ok :functions functions)))
 
@@ -32,8 +32,7 @@
 (defcommand set-tos-function-for-operation
   {:parameters [operation functionCode]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:functionCode :operation])]
-   :feature :tiedonohjaus}
+   :input-validators [(partial non-blank-parameters [:functionCode :operation])]}
   [{user :user}]
   (store-function-code operation functionCode user))
 
@@ -41,18 +40,19 @@
   {:parameters [:id functionCode]
    :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
+   :states states/all-but-draft-or-terminal}
   [{:keys [application created user] :as command}]
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
     (if code-valid?
       (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode) (:attachments application))
-            {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode "hakemus")]
+            {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode "hakemus")
+            process-metadata (t/metadata-for-process orgId functionCode)]
         (action/update-application command
                                    {$set {:modified created
                                           :tosFunction functionCode
                                           :metadata updated-metadata
+                                          :processMetadata process-metadata
                                           :attachments updated-attachments}}))
       (fail "Invalid TOS function code"))))
 
@@ -80,8 +80,10 @@
 
 (defquery tos-metadata-schema
   {:user-roles #{:anonymous}
-   :feature :tiedonohjaus}
-  (ok :schema (map metadata-schema-for-ui editable-metadata-fields)))
+   :parameters [schema]
+   :input-validators [(partial non-blank-parameters [:schema])]}
+  (let [fields (if (= "caseFile" schema) tms/common-metadata-fields editable-metadata-fields)]
+    (ok :schema (map metadata-schema-for-ui fields))))
 
 (defn- revert-unauthorized-modifications [roles old-metadata new-metadata]
   (let [disallowed-metadata (filter (fn [field] (when-let [role (:require-role field)]
@@ -95,11 +97,12 @@
   (try
     (tms/sanitize-metadata m)
     (catch Throwable t
+      (timbre/warn t)
       (fail! "error.invalid.metadata"))))
 
 (defn- update-document-metadata [document metadata user-roles]
-  (let [old-metadata (tms/coerce-metadata-to-schema (:metadata document) [])
-        metadata (->> (tms/coerce-metadata-to-schema metadata [])
+  (let [old-metadata (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap (:metadata document))
+        metadata (->> (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap metadata)
                       (revert-unauthorized-modifications user-roles old-metadata)
                       (#(assoc % :tila (or (:tila old-metadata) :luonnos)))
                       sanitize-metadata)]
@@ -114,13 +117,18 @@
       (ok))
     (fail "error.child.id")))
 
+(defn- process-case-file-metadata [old-metadata new-metadata user-roles]
+  (let [coerced-old-metadata (schema-utils/coerce-metadata-to-schema tms/MetaDataMap old-metadata)]
+    (->> (schema-utils/coerce-metadata-to-schema tms/MetaDataMap new-metadata)
+         (revert-unauthorized-modifications user-roles coerced-old-metadata)
+         sanitize-metadata)))
+
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
+   :states states/all-but-draft-or-terminal}
   [command]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
@@ -129,20 +137,30 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
-   :feature :tiedonohjaus}
+   :states states/all-but-draft-or-terminal}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-        processed-metadata (->> (update-document-metadata application metadata user-roles)
-                                (:metadata))]
+        {processed-metadata :metadata} (update-document-metadata application metadata user-roles)]
     (action/update-application command {$set {:modified created
                                               :metadata processed-metadata}})
+    (ok)))
+
+(defcommand store-tos-metadata-for-process
+  {:parameters [:id metadata]
+   :input-validators [(partial non-blank-parameters [:id])
+                      (partial action/map-parameters [:metadata])]
+   :user-roles #{:authority}
+   :states states/all-but-draft-or-terminal}
+  [{:keys [application created user] :as command}]
+  (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
+        processed-metadata (process-case-file-metadata (:processMetadata application) metadata user-roles)]
+    (action/update-application command {$set {:modified created
+                                              :processMetadata processed-metadata}})
     (ok)))
 
 (defquery case-file-data
   {:parameters [:id]
    :user-roles #{:authority}
-   :states states/all-application-states
-   :feature :tiedonohjaus}
+   :states states/all-application-states}
   [{:keys [application]}]
   (ok :process (t/generate-case-file-data application)))

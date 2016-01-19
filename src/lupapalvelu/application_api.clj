@@ -434,6 +434,7 @@
     (do
       (update-application command
                           {$set {:location   (a/->location x y)
+                                 :location-wgs84 (coord/convert "EPSG:3067" "WGS84" 5 (a/->location x y))
                                  :address    (ss/trim address)
                                  :propertyId propertyId
                                  :title      (ss/trim address)
@@ -457,6 +458,7 @@
 
 (defquery app-matches-for-link-permits
   {:parameters [id]
+   :description "Retuns a list of application IDs that can be linked to current application."
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but (conj states/terminal-states :sent))}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
@@ -469,6 +471,8 @@
         results (mongo/select :applications
                               (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
                                                                           :infoRequest     false
+                                                                          ; Backend systems support only the same kind of link permits.
+                                                                          ; We COULD filter the other kinds from XML messages in the future...
                                                                           :permitType      (:permitType application)
                                                                           :secondaryOperations.name {$nin ["ya-jatkoaika"]}
                                                                           :primaryOperation.name {$nin ["ya-jatkoaika"]}})
@@ -714,4 +718,3 @@
         redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))
-

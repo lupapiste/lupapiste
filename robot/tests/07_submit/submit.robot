@@ -111,7 +111,7 @@ Mikko selects the "not needed" checkbox of some other attachment template than t
 
 Mikko adds txt attachment to the attachment template added by Sonja
   Open attachment details  muut.muu
-  Add first attachment version  ${TXT_TESTFILE_PATH}
+  Add attachment version  ${TXT_TESTFILE_PATH}
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
   Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]

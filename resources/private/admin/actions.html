@@ -38,7 +38,7 @@
                   <span data-bind="text: description"></span>
                 <!-- /ko -->
               </td>
-              <td  data-bind="attr: {'class' : $data['user-roles'][0] === 'anonymous' ? 'btn-decline' : ''}">
+              <td  data-bind="css: {'negative' : $data['user-roles'][0] === 'anonymous'}">
                 <ul data-bind="foreach: $data['user-roles']">
                   <li data-bind="text: $data"></li>
                 </ul>
@@ -64,10 +64,10 @@
                 </ul>
                 <!-- /ko -->
               </td>
-              <td data-bind="attr: {'class': $data.notified ? 'btn-primary' : ''}">
-                <span data-bind="text: $data.notify || ''"></span>
+              <td data-bind="css: {'positive': $data.notified}">
+                <span data-bind="text: $data.notified || ''"></span>
               </td>
-              <td data-bind="attr: {'class': $data.feature ? features.enabled($data.feature) ? 'btn-primary' : 'btn-decline' : ''}">
+              <td data-bind="attr: {'class': $data.feature ? features.enabled($data.feature) ? 'positive' : 'negative' : ''}">
                 <span data-bind="text: $data.feature || ''"></span>
               </td>
               <td>

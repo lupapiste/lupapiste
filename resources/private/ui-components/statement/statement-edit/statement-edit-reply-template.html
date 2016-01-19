@@ -10,8 +10,8 @@
           <span>
             <span data-bind="ltext: 'statement.tab.' + tab"></span>:
           </span>
-          <span data-bind="with: application">
-            <span data-bind="text: title"></span>
+          <span>
+            <span data-bind="text: applicationTitle"></span>
           </span>
           <span data-bind="with: data">
             (<span data-bind="text: person.text"></span>)
@@ -25,9 +25,8 @@
       <p id="statement-reply-cover-note">
         <span data-bind="text: coverNote">Saate</span>
       </p>
-      <p id="statement-reply-draft-is-not-visible-info" data-bind="visible: !replyVisible()">
-        <span data-bind="ltext: 'statement.reply-draft-not-visible'">Luonnosta ei nayteta</span>
-      </p>
+      <p id="statement-reply-draft-is-not-visible-info" data-bind="visible: !replyVisible(),
+                                                                   ltext: 'statement.reply-draft-not-visible'">Luonnosta ei nayteta</p>
     </div>
 
     <div class="statement-info" data-bind="visible: replyVisible">
@@ -48,7 +47,7 @@
             data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')}, 
                        textInput: text, 
                        readonly: !enabled()"
-            id="statement-text"
+            id="statement-reply-text"
             rows="15">
           </textarea>
         </div>

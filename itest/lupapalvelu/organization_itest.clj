@@ -1,15 +1,18 @@
 (ns lupapalvelu.organization-itest
   (:require [midje.sweet :refer :all]
             [clojure.java.io :as io]
+            [clojure.set :refer [difference]]
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.proxy-services :as proxy]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
             [monger.operators :refer :all]
-            [sade.core :as sade]))
+            [sade.core :as sade]
+            [lupapalvelu.itest-util :as util]))
 
 (apply-remote-minimal)
 
@@ -107,7 +110,7 @@
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
                                :openInforequestEmail "someone@localhost"
                                :opening nil)
-        updated-organization (query admin :organization-by-id :organizationId organization-id)
+        updated-organization (:data (query admin :organization-by-id :organizationId organization-id))
         updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope) updated-organization)]
 
     resp => ok?
@@ -116,6 +119,46 @@
     (fact "new-application-enabled" (:new-application-enabled updated-scope) => (not (:new-application-enabled orig-scope)))
     (fact "open-inforequest" (:open-inforequest updated-scope) => (not (:open-inforequest orig-scope)))
     (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost")))
+
+(fact "Admin - Add scope"
+  (let [organization   (first (:organizations (query admin :organizations)))
+        org-id         (:id organization)
+        scopes         (:scope organization)
+        first-scope    (first scopes)
+        new-permitType (first
+                         (difference
+                           (set (keys (permit/permit-types)))
+                           (set (map :permitType scopes))))]
+    (fact "Duplicate scope can't be added"
+      (command admin :add-scope
+               :organization org-id
+               :permitType "R" ; Sipoo in minimal
+               :municipality "753" ; Sipoo in minimal
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => (partial expected-failure? :error.organization.duplicate-scope))
+    (fact "invalid muni can't be added"
+      (command admin :add-scope
+               :organization org-id
+               :permitType "R"
+               :municipality "foobar"
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => (partial expected-failure? :error.invalid-municipality))
+    (fact "Admin can add new scope to organization"
+      (command admin :add-scope
+               :organization org-id
+               :permitType new-permitType
+               :municipality (:municipality first-scope) ; Sipoo in minimal
+               :inforequestEnabled true
+               :applicationEnabled true
+               :openInforequestEnabled false
+               :openInforequestEmail ""
+               :opening nil) => ok?)))
 
 (fact* "Tampere-ya sees (only) YA operations and attachments (LUPA-917, LUPA-1006)"
   (let [resp (query tampere-ya :organization-by-user) => ok?
@@ -172,7 +215,7 @@
   (fact "An application query correctly returns the 'required fields filling obligatory' and 'kopiolaitos-email' info in the organization meta data"
     (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
           app    (query-application pena app-id)
-          org    (query admin "organization-by-id" :organizationId  (:organization app))
+          org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
           kopiolaitos-email "kopiolaitos@example.com"
           kopiolaitos-orderer-address "Testikatu 1"
           kopiolaitos-orderer-phone "123"
@@ -185,7 +228,7 @@
       (command sipoo "set-organization-app-required-fields-filling-obligatory" :enabled false) => ok?
 
       (let [app    (query-application pena app-id)
-            org    (query admin "organization-by-id" :organizationId  (:organization app))
+            org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
             organizationMeta (:organizationMeta app)]
         (fact "the 'app-required-fields-filling-obligatory' is set to False"
           (:app-required-fields-filling-obligatory org) => false
@@ -211,7 +254,7 @@
         :kopiolaitosOrdererEmail kopiolaitos-orderer-email) => ok?
 
       (let [app    (query-application pena app-id)
-            org    (query admin "organization-by-id" :organizationId  (:organization app))
+            org    (:data (query admin "organization-by-id" :organizationId  (:organization app)))
             organizationMeta (:organizationMeta app)]
         (fact "the 'app-required-fields-filling-obligatory' flag is set to true value"
           (:app-required-fields-filling-obligatory org) => true
@@ -278,12 +321,12 @@
 
     (fact "Permanent archive can be enabled"
       (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
-      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:permanent-archive-enabled updated-org) => true))
 
     (fact "Permanent archive can be disabled"
       (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
-      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+      (let [updated-org (:data (query admin "organization-by-id" :organizationId id))]
         (:permanent-archive-enabled updated-org) => false))))
 
 (facts "Organization names"
@@ -332,26 +375,17 @@
         (command sonja :add-application-tags :id id :tags []) => ok?
         (query sipoo :remove-tag-ok :tagId tag-id) => ok?))))
 
-(defn- upload-area [apikey & [filename]]
-  (let [filename    (or filename "dev-resources/sipoon_alueet.zip")
-        uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/raw/organization-area")]
-    (http-post uri
-      {:headers {"authorization" (str "apikey=" apikey)}
-       :multipart [{:name "files[]" :content uploadfile}]
-       :throw-exceptions false})))
-
 (facts "Organization areas zip file upload"
   (fact "only authorityAdmin can upload"
-    (:body (upload-area pena)) => "unauthorized"
-    (:body (upload-area sonja)) => "unauthorized")
+    (:body (util/upload-area pena)) => "unauthorized"
+    (:body (util/upload-area sonja)) => "unauthorized")
 
   (fact "text file is not ok (zip required)"
     (->
-      (upload-area sipoo "dev-resources/test-attachment.txt")
+      (util/upload-area sipoo "dev-resources/test-attachment.txt")
       :body) => "error.illegal-shapefile")
 
-  (let [resp (upload-area sipoo)
+  (let [resp (util/upload-area sipoo)
         body (:body (decode-response resp))]
 
     (fact "zip file with correct shape file can be uploaded by auth admin"
@@ -496,3 +530,220 @@
              (command sipoo :set-organization-neighbor-order-email :emails "") => ok?
              (-> (query sipoo :organization-by-user)
                  (get-in [:organization :notifications :neighbor-order-emails])) => empty?))
+
+(facts "Construction waste feeds"
+       (mongo/with-db local-db-name
+         (mongo/insert :applications
+                       {:_id "LP-1"
+                        :organization "753-R"
+                        :documents [
+                                    {:schema-info {:name "rakennusjateselvitys"}
+                                     :data {:contact {:name {:value "Bob"
+                                                             :modified 1 }
+                                                      :phone {:value "12345"
+                                                              :modified 2 }
+                                                      :email {:value "bob@reboot.tv"
+                                                              :modified 2222 }}
+                                            :availableMaterials {:0 {:aines {:value "Sora"
+                                                                             :modified 100}
+                                                                     :maara {:value "2"
+                                                                             :modified 110}
+                                                                     :yksikko {:value "kg"
+                                                                               :modified 200}
+                                                                     :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                     :kuvaus {:value "Rouheaa"
+                                                                              :modified 100}}}
+                                            }}]})
+         (fact "Waste ads: one row"
+               (local-org-api/waste-ads "753-R") => '({:modified 2222,
+                                                       :materials ({:kuvaus "Rouheaa",
+                                                                    :saatavilla "17.12.2015",
+                                                                    :yksikko "kg", :maara "2", :aines "Sora"}),
+                                                       :contact {:email "bob@reboot.tv", :phone "12345", :name "Bob"}}))
+         (fact "No ads for 753-YA"
+               (local-org-api/waste-ads "753-YA") => '())
+         (mongo/insert :applications
+                       {:_id "LP-NO-NAME"
+                        :organization "753-R"
+                        :documents [
+                                    {:schema-info {:name "rakennusjateselvitys"}
+                                     :data {:contact {:name {:value ""}
+                                                      :phone {:value "12345"
+                                                              :modified 2 }
+                                                      :email {:value "bob@reboot.tv"
+                                                              :modified 2222 }}
+                                            :availableMaterials {:0 {:aines {:value "Sora"
+                                                                             :modified 100}
+                                                                     :maara {:value "2"
+                                                                             :modified 110}
+                                                                     :yksikko {:value "kg"
+                                                                               :modified 200}
+                                                                     :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                     :kuvaus {:value "Rouheaa"
+                                                                              :modified 100}}}
+                                            }}]})
+         (mongo/insert :applications
+                       {:_id "LP-NO-PHONE-EMAIL"
+                        :organization "753-R"
+                        :documents [
+                                    {:schema-info {:name "rakennusjateselvitys"}
+                                     :data {:contact {:name {:value "Bob"
+                                                             :modified 21}
+                                                      :phone {:value ""}
+                                                      :email {:value ""}}
+                                            :availableMaterials {:0 {:aines {:value "Sora"
+                                                                             :modified 100}
+                                                                     :maara {:value "2"
+                                                                             :modified 110}
+                                                                     :yksikko {:value "kg"
+                                                                               :modified 200}
+                                                                     :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                     :kuvaus {:value "Rouheaa"
+                                                                              :modified 100}}}
+                                            }}]})
+                  (mongo/insert :applications
+                       {:_id "LP-NO-AINES"
+                        :organization "753-R"
+                        :documents [
+                                    {:schema-info {:name "rakennusjateselvitys"}
+                                     :data {:contact {:name {:value "Bob"
+                                                             :modified 1 }
+                                                      :phone {:value "12345"
+                                                              :modified 2 }
+                                                      :email {:value "bob@reboot.tv"
+                                                              :modified 2222 }}
+                                            :availableMaterials {:0 {:aines {:value ""}
+                                                                     :maara {:value "2"
+                                                                             :modified 110}
+                                                                     :yksikko {:value "kg"
+                                                                               :modified 200}
+                                                                     :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                     :kuvaus {:value "Rouheaa"
+                                                                              :modified 100}}}
+                                            }}]})
+                  (mongo/insert :applications
+                       {:_id "LP-NO-MAARA"
+                        :organization "753-R"
+                        :documents [
+                                    {:schema-info {:name "rakennusjateselvitys"}
+                                     :data {:contact {:name {:value "Bob"
+                                                             :modified 1 }
+                                                      :phone {:value "12345"
+                                                              :modified 2 }
+                                                      :email {:value "bob@reboot.tv"
+                                                              :modified 2222 }}
+                                            :availableMaterials {:0 {:aines {:value "Sora"
+                                                                             :modified 100}
+                                                                     :maara {:value ""}
+                                                                     :yksikko {:value "kg"
+                                                                               :modified 200}
+                                                                     :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                     :kuvaus {:value "Rouheaa"
+                                                                              :modified 100}}}
+                                            }}]})
+         (fact "Ads only include proper information"
+               (count (local-org-api/waste-ads "753-R")) => 1)
+         (mongo/insert :applications
+                       {:_id "LP-2"
+                        :organization "753-R"
+                        :documents [
+                                    {:schema-info {:name "rakennusjateselvitys"}
+                                     :data {:contact {:name {:value "Dot"
+                                                             :modified 1 }
+                                                      :phone {:value "12345"
+                                                              :modified 2 }
+                                                      :email {:value "dot@reboot.tv"
+                                                              :modified 2221 }}
+                                            :availableMaterials {:0 {:aines {:value "Kivi"
+                                                                             :modified 12345}
+                                                                     :maara {:value "100"
+                                                                             :modified 110}
+                                                                     :yksikko {:value "tonni"
+                                                                               :modified 200}
+                                                                     :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                     :kuvaus {:value "Rouheaa"
+                                                                              :modified 100}}
+                                                                 :1 {:aines {:value ""}
+                                                                     :maara {:value "100"
+                                                                             :modified 999999}
+                                                                     :yksikko {:value "tonni"
+                                                                               :modified 200}
+                                                                     :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                     :kuvaus {:value "Ignored"
+                                                                              :modified 100}}
+                                                                 :2 {:aines {:value "Puu"}
+                                                                     :maara {:value "8"
+                                                                             :modified 88}
+                                                                     :yksikko {:value "m3"
+                                                                               :modified 200}
+                                                                     :saatavilla {:value "20.12.2015"
+                                                                                  :modified 170}
+                                                                     :kuvaus {:value ""}}}
+                                            }}]})
+         (fact "Two ads"
+               (local-org-api/waste-ads "753-R")
+               => '({:modified 999999,
+                     :materials
+                     ({:kuvaus "Rouheaa", :saatavilla "17.12.2015", :yksikko "tonni", :maara "100", :aines "Kivi"}
+                      {:kuvaus "", :saatavilla "20.12.2015", :yksikko "m3", :maara "8", :aines "Puu"}),
+                     :contact {:email "dot@reboot.tv", :phone "12345", :name "Dot"}}
+                    {:modified 2222,
+                    :materials ({:kuvaus "Rouheaa", :saatavilla "17.12.2015", :yksikko "kg", :maara "2", :aines "Sora"}),
+                     :contact {:email "bob@reboot.tv", :phone "12345", :name "Bob"}}))
+         (fact "Ad list size limit"
+               (doseq [id (range 110)]
+                 (mongo/insert :applications
+                               {:_id (str "LP-FILL-" id)
+                                :organization "753-R"
+                                :documents [
+                                            {:schema-info {:name "rakennusjateselvitys"}
+                                             :data {:contact {:name {:value "Bob"
+                                                                     :modified 1 }
+                                                              :phone {:value "12345"
+                                                                      :modified 2 }
+                                                              :email {:value "bob@reboot.tv"
+                                                              :modified 2222 }}
+                                                    :availableMaterials {:0 {:aines {:value "Sora"
+                                                                                     :modified 100}
+                                                                             :maara {:value "2"
+                                                                                     :modified 110}
+                                                                             :yksikko {:value "kg"
+                                                                               :modified 200}
+                                                                             :saatavilla {:value "17.12.2015"
+                                                                                  :modified 170}
+                                                                             :kuvaus {:value "Rouheaa"
+                                                                                      :modified 100}}}
+                                            }}]}))
+               (count (local-org-api/waste-ads "753-R")) => 100))
+
+       (facts "Validators"
+              (fact "Bad format: nil" (local-org-api/valid-feed-format {:data {:fmt nil}})
+                    => {:ok false, :text "error.invalid-feed-format"})
+              (fact "Bad format: ''" (local-org-api/valid-feed-format {:data {:fmt ""}})
+                    => {:ok false, :text "error.invalid-feed-format"})
+              (fact "Bad format: foo" (local-org-api/valid-feed-format {:data {:fmt "foo"}})
+                    => {:ok false, :text "error.invalid-feed-format"})
+
+              (fact "Good format: rSs" (local-org-api/valid-feed-format {:data {:fmt "rSs"}})
+                    => nil)
+              (fact "Good format: jsON" (local-org-api/valid-feed-format {:data {:fmt "jsON"}})
+                    => nil)
+              (fact "Valid organization 753-R" (local-org-api/valid-org {:data {:org "753-R"}})
+                    => nil)
+                            (fact "Valid organization 753-r" (local-org-api/valid-org {:data {:org "753-r"}})
+                    => nil)
+              (fact "Invalid organization 888-X" (local-org-api/valid-org {:data {:org "888-X"}})
+                    => {:ok false, :text "error.organization-not-found"})
+              (fact "Supported language FI" (local-org-api/valid-language {:data {:lang "FI"}})
+                    => nil)
+              (fact "Supported language sV" (local-org-api/valid-language {:data {:lang "sV"}})
+                    => nil)
+              (fact "Unsupported language CN" (local-org-api/valid-language {:data {:lang "CN"}})
+                    => {:ok false, :text "error.unsupported-language"})))

@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
             [monger.operators :refer :all]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defcommand update-application] :as action]
+            [lupapalvelu.action :refer [defcommand update-application defquery] :as action]
             [lupapalvelu.application :as a]))
 
 (defcommand set-municipality-hears-neighbors
@@ -14,3 +14,15 @@
   [command]
   (update-application command {$set {"options.municipalityHearsNeighbors" enabled}})
   (ok))
+
+(defn- permit-type-supported [_ application]
+  (when-not (contains? #{"P" "R"} (:permitType application))
+    (fail :error.unsupported-permit-type)))
+
+(defquery municipality-hears-neighbors-visible
+  {:description "Pseudo query for Municipality hears neighbors
+  checkbox visibility. The option is available only for R and P permit
+  types."
+   :user-roles #{:applicant :authority}
+   :pre-checks [permit-type-supported]}
+  [_])

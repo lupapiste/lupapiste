@@ -58,7 +58,7 @@
     hub.onPageLoad("setpw", function(e) { self.token(e.pagePath[0]);});
   }
 
-  hub.subscribe({type: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
+  hub.subscribe({eventType: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
 
   //
   // Initialize:

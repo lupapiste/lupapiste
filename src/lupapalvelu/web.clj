@@ -22,8 +22,10 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
+            [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
+            [lupapalvelu.autologin :as autologin]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]
@@ -68,13 +70,13 @@
 
 (defjson "/system/apis" [] @apis)
 
-(defn parse-json-body [request]
-  (let [json-body (if (ss/starts-with (:content-type request) "application/json")
-                    (if-let [body (:body request)]
+(defn parse-json-body [{:keys [content-type character-encoding body] :as request}]
+  (let [json-body (if (or (ss/starts-with content-type "application/json")
+                          (ss/starts-with content-type "application/csp-report"))
+                    (if body
                       (-> body
-                        (io/reader :encoding (or (:character-encoding request) "utf-8"))
-                        json/parse-stream
-                        keywordize-keys)
+                        (io/reader :encoding (or character-encoding "utf-8"))
+                        (json/parse-stream (comp keyword ss/strip-non-printables)))
                       {}))]
     (if json-body
       (assoc request :json json-body :params json-body)
@@ -96,12 +98,9 @@
 (defn user-agent [request]
   (str (get-in request [:headers "user-agent"])))
 
-(defn client-ip [request]
-  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
-
 (defn- web-stuff [request]
   {:user-agent (user-agent request)
-   :client-ip  (client-ip request)
+   :client-ip  (http/client-ip request)
    :host       (host request)})
 
 (defn- logged-in? [request]
@@ -172,9 +171,7 @@
 (defn basic-authentication
   "Returns a user map or nil if authentication fails"
   [request]
-  (let [auth (get-in request [:headers "authorization"])
-        cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))
-        [u p] (and cred (s/split (str cred) #":" 2))]
+  (let [[u p] (http/decode-basic-auth request)]
     (when (and u p)
       (:user (execute-command "login" {:username u :password p} request)))))
 
@@ -259,15 +256,16 @@
 (def- compose
   (if (env/feature? :no-cache)
     singlepage/compose
-    (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
+    (memoize singlepage/compose)))
 
-(defn- single-resource [resource-type app failure]
-  (let [request (request/ring-request)]
+(defn- single-resource [resource-type app theme failure]
+  (let [request (request/ring-request)
+        lang    *lang*]
     (if ((auth-methods app nobody) request)
      ; Check If-Modified-Since header, see cache-headers above
      (if (or (never-cache app) (env/feature? :no-cache) (not= (get-in request [:headers "if-modified-since"]) last-modified))
        (->>
-         (java.io.ByteArrayInputStream. (compose resource-type app))
+         (java.io.ByteArrayInputStream. (compose resource-type app lang theme))
          (resp/content-type (resource-type content-type))
          (resp/set-headers (cache-headers resource-type)))
        {:status 304})
@@ -279,8 +277,8 @@
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
   (let [build-number (:build-number env/buildinfo)]
     (if (= build build-number)
-     (single-resource (keyword res-type) (keyword app) unauthorized)
-     (resp/redirect (str "/app/" build-number "/" app "." res-type )))))
+     (single-resource (keyword res-type) (keyword app) nil unauthorized)
+     (resp/redirect (str "/app/" build-number "/" app "." res-type "?lang=" (name *lang*))))))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -289,8 +287,8 @@
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
-(defn redirect-after-logout []
-  (resp/redirect (str (env/value :host) (env/value :redirect-after-logout) )))
+(defn redirect-after-logout [lang]
+  (resp/redirect (str (env/value :host) (or (env/value :redirect-after-logout (keyword lang)) "/"))))
 
 (defn redirect-to-frontpage [lang]
   (resp/redirect (str (env/value :host) (or (env/value :frontpage (keyword lang)) "/"))))
@@ -308,26 +306,28 @@
   (when (and s (= -1 (.indexOf s ":")))
     (->> (s/replace-first s "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
 
-(defn- save-hashbang-on-client []
+(defn- save-hashbang-on-client [theme]
   (resp/set-headers {"Cache-Control" "no-cache", "Last-Modified" (util/to-RFC1123-datetime 0)}
-    (single-resource :html :hashbang unauthorized)))
+    (single-resource :html :hashbang theme unauthorized)))
 
-(defn serve-app [app hashbang lang]
+(defn serve-app [app hashbang theme]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (if-let [hashbang (->hashbang hashbang)]
     (ssess/merge-to-session
-      (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage lang))
+      (request/ring-request) (single-resource :html (keyword app) theme (redirect-to-frontpage *lang*))
       {:redirect-after-login hashbang})
     ; If current user has no access to the app, save hashbang using JS on client side.
     ; The next call will then be handled by the "true branch" above.
-    (single-resource :html (keyword app) (save-hashbang-on-client))))
+    (single-resource :html (keyword app) theme (save-hashbang-on-client theme))))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
-  (serve-app app hashbang lang))
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang theme :theme}
+  (i18n/with-lang lang
+    (serve-app app hashbang theme)))
 
 ; Same as above, but with an extra path.
-(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
-  (serve-app app hashbang lang))
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang theme :theme}
+  (i18n/with-lang lang
+    (serve-app app hashbang theme)))
 
 ;;
 ;; Login/logout:
@@ -341,10 +341,10 @@
   (merge (logout!) (ok)))
 
 (defpage "/logout" []
-  (merge (logout!) (redirect-after-logout)))
+  (merge (logout!) (redirect-after-logout default-lang)))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (merge (logout!) (redirect-after-logout)))
+  (merge (logout!) (redirect-after-logout lang)))
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
@@ -409,7 +409,7 @@
         expires (:expires session-user)
         expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
         updated-user (and expired? (user/session-summary (user/get-user {:id (:id session-user), :enabled true})))
-        user (or api-key-auth updated-user session-user)]
+        user (or api-key-auth updated-user session-user (autologin/autologin request) )]
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
       (let [response (handler (assoc request :user user))]
@@ -455,7 +455,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/lp-static/html/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.112.html"
+      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.114.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
@@ -476,7 +476,11 @@
 ;; Server is alive
 ;;
 
-(defjson "/api/alive" [] {:ok (if (user/current-user (request/ring-request)) true false)})
+(defjson "/api/alive" []
+  (cond
+    (control/lockdown?) (fail :error.service-lockdown)
+    (user/current-user (request/ring-request)) (ok)
+    :else (fail :error.unauthorized)))
 
 ;;
 ;; Proxy
@@ -513,7 +517,7 @@
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (user/current-user request) "???")}
-    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (client-ip request) (get-in request [:headers "referer"]))
+    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (http/client-ip request) (get-in request [:headers "referer"]))
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn anti-csrf

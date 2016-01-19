@@ -3,6 +3,7 @@
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
+            [clojure.set :refer [rename-keys]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
@@ -25,6 +26,8 @@
             [sade.property :as p]
             [sade.validators :as v]
             [sade.util :as util]
+            [sade.strings :as ss]
+            [sade.coordinate :as coord]
             [swiss.arrows :refer [-<>>]]))
 
 
@@ -298,6 +301,7 @@
                        :history             [(history-entry state created user)]
                        :municipality        municipality
                        :location            (->location x y)
+                       :location-wgs84      (coord/convert "EPSG:3067" "WGS84" 5 (->location x y))
                        :organization        (:id organization)
                        :address             address
                        :propertyId          property-id
@@ -308,7 +312,8 @@
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
                        :schema-version      (schemas/get-latest-schema-version)
                        :tosFunction         tos-function
-                       :metadata            (tos/metadata-for-document (:id organization) tos-function "hakemus")})]
+                       :metadata            (tos/metadata-for-document (:id organization) tos-function "hakemus")
+                       :processMetadata     (tos/metadata-for-process (:id organization) tos-function)})]
     (merge application (when-not info-request?
                          {:attachments (make-attachments created op organization state tos-function)
                           :documents   (make-documents user created op application manual-schema-datas)}))))
@@ -418,3 +423,4 @@
           {:state to-state, :modified timestamp}
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
+

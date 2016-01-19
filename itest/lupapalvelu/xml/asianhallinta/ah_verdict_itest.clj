@@ -103,48 +103,52 @@
     (fixture/apply-fixture "minimal"))
   (setup-target-folder!)
 
-  (fact "Successful batchrun"
-    (mongo/with-db db-name
-      (let [zip (fs/copy
-                 (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path])
-                 (fs/file (str local-target-folder "/verdict1.zip")))
-            app (create-local-ah-app)
-            app-id (:id app)]
-        (generate-documents app pena true)
-        (local-command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
+  (against-background
+    [(lupapalvelu.application/make-application-id anything) => "LP-297-2015-00001"]
+    (fact "Successful batchrun"
+      (mongo/with-db db-name
+        (let [zip (fs/copy
+                    (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path])
+                    (fs/file (str local-target-folder "/verdict1.zip")))
+              app (create-local-ah-app)
+              app-id (:id app)]
+          (generate-documents app pena true)
+          (local-command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
 
-        (count (:verdicts (query-application local-query pena app-id))) => 0
+          (count (:verdicts (query-application local-query pena app-id))) => 0
 
-        (batch/fetch-asianhallinta-verdicts)
+          (batch/fetch-asianhallinta-verdicts)
 
-        (fact "Zip has been moved from to_lupapiste to archive folder"
-          (count (util/get-files-by-regex local-target-folder #"verdict1\.zip$")) => 0
-          (count (util/get-files-by-regex (str local-target-folder "/archive") #"verdict1\.zip$")) => 1)
+          (fact "Zip has been moved from to_lupapiste to archive folder"
+            (count (util/get-files-by-regex local-target-folder #"verdict1\.zip$")) => 0
+            (count (util/get-files-by-regex (str local-target-folder "/archive") #"verdict1\.zip$")) => 1)
 
-        (fact "application has verdict"
-          (count (:verdicts (query-application local-query pena app-id))) => 1))))
+          (fact "application has verdict"
+            (count (:verdicts (query-application local-query pena app-id))) => 1)))))
 
-  (fact "Batchrun with unsuccessful verdict save (no xml inside zip)"
-    (mongo/with-db db-name
-      (let [zip (fs/copy
-                 (build-zip! [example-ah-attachment-path example-ah-attachment2-path])
-                 (fs/file (str local-target-folder "/verdict2.zip")))
-            app (create-local-ah-app)
-            app-id (:id app)]
+  (against-background
+    [(lupapalvelu.application/make-application-id anything) => "LP-297-2015-00002"]
+    (fact "Batchrun with unsuccessful verdict save (no xml inside zip)"
+      (mongo/with-db db-name
+        (let [zip (fs/copy
+                    (build-zip! [example-ah-attachment-path example-ah-attachment2-path])
+                    (fs/file (str local-target-folder "/verdict2.zip")))
+              app (create-local-ah-app)
+              app-id (:id app)]
 
-        (generate-documents app pena true)
-        (local-command velho :application-to-asianhallinta :id app-id :lang "fi")
+          (generate-documents app pena true)
+          (local-command velho :application-to-asianhallinta :id app-id :lang "fi")
 
-        (count (:verdicts (query-application local-query pena app-id))) => 0
+          (count (:verdicts (query-application local-query pena app-id))) => 0
 
-        (batch/fetch-asianhallinta-verdicts)
+          (batch/fetch-asianhallinta-verdicts)
 
-        (fact "Zip has been moved from to_lupapiste to error folder"
-          (count (util/get-files-by-regex local-target-folder #"verdict2\.zip$")) => 0
-          (count (util/get-files-by-regex (str local-target-folder "/error") #"verdict2\.zip$")) => 1)
+          (fact "Zip has been moved from to_lupapiste to error folder"
+            (count (util/get-files-by-regex local-target-folder #"verdict2\.zip$")) => 0
+            (count (util/get-files-by-regex (str local-target-folder "/error") #"verdict2\.zip$")) => 1)
 
-        (fact "application doesn't have verdict"
-          (count (:verdicts (query-application local-query pena app-id))) => 0)))))
+          (fact "application doesn't have verdict"
+            (count (:verdicts (query-application local-query pena app-id))) => 0))))))
 
 (facts "Processing asianhallinta verdicts"
   (mongo/with-db db-name
@@ -217,7 +221,9 @@
                 (let [email (last (dummy-email/messages :reset true))]
                   (:to email) => (contains (email-for-key pena))
                   (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
-                  email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))))))))))
+                  email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant")))))))))
+  (against-background
+    (lupapalvelu.application/make-application-id anything) => "LP-297-2015-00001"))
 
 (facts "unit tests"
   (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path]))]

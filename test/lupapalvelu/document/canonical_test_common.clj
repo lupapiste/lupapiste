@@ -32,8 +32,18 @@
                            :email "sonja.sibbo@sipoo.fi"
                            :id "516560d6c2e6f603beb85147"}
                   :requested 1379423095616
+                  :state "given"
                   :status "puoltaa"
-                  :text "Lausunto liitteen\u00e4."}])
+                  :text "Lausunto liitteen\u00e4."}
+                 {:id "52385377da063788effc1e94"
+                  :person {:text "Paloviranomainen"
+                           :name "Sonja Sibbo"
+                           :email "sonja.sibbo@sipoo.fi"
+                           :id "516560d6c2e6f603beb85147"}
+                  :requested 1379423095616
+                  :state "draft"
+                  :status "puoltaa"
+                  :text "Lausunto tulossa..."}])
 
 (def yrityshakija {:id "52f3676442067dc3ba4f1ba8",
                    :created 1391683428266,

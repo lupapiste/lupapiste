@@ -276,6 +276,31 @@
                                     <i class="lupicon-circle-arrow-right"></i>
                                     <span data-bind="ltext: 'application.showInBackingSystem'"></span>
                                 </button>
+                                <!-- ko if: externalApi.enabled -->
+                                <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
+                                  <button class="function"
+                                          data-bind="click: externalApi.openApplication, visible: externalApi.enabled"
+                                          data-test-id="external-open-permit">
+                                      <i class="lupicon-circle-arrow-right"></i>
+                                      <span data-bind="ltext: 'application.showInBackingSystem'"></span>
+                                  </button>
+                                </div>
+                                <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
+                                  <button class="function"
+                                          data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
+                                          data-test-id="external-show-on-map">
+                                    <i class="lupicon-location"></i>
+                                    <span data-bind="text: 'Siirry kartalle'"></span>
+                                  </button>
+                                </div>
+                                <!-- /ko -->
+                                <!-- Add property -->
+                                <button class="function"
+                                        data-bind="click: addProperty, visible: showAddPropertyButton"
+                                        data-test-id="add-property">
+                                  <i class="lupicon-circle-plus"></i>
+                                  <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
+                                </button>
                                 <!-- /ko  -->
                                 <!-- ko if: hasInvites -->
                                 <button class="positive"
@@ -289,12 +314,6 @@
                                     <span data-bind="ltext: 'applications.declineInvite'"></span>
                                 </button>
                                 <!-- /ko -->
-                                <button class="function"
-                                        data-bind="click: addProperty, visible: showAddPropertyButton"
-                                        data-test-id="add-property">
-                                  <i class="lupicon-circle-plus"></i>
-                                  <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -352,12 +371,17 @@
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
-                            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application') && features.enabled('arkistointi'),
-                                           css: {'active': $parent.selectedTabName() === 'metadata'}">
-                                <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab"
-                                   class="link-btn">
-                                    <span data-bind="ltext: 'attachment.tosMetadata'"></span>
+                            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.application.inPostVerdictState(),
+                                           css: {'active': $parent.selectedTabName() === 'archival'}">
+                                <a data-bind="click: changeTab" href="#" data-target="archival" data-test-id="application-open-archival-tab" class="link-btn">
+                                    <span data-bind="ltext: 'arkistointi'"></span>
                                 </a></li>
+
+                            <li data-bind="if: tosFunction() && $root.authorization.ok('permanent-archive-enabled'),
+                                             css: {'active': $parent.selectedTabName() === 'caseFile'}">
+                              <a data-bind="click: changeTab" href="#" data-target="caseFile" data-test-id="application-open-caseFile-tab" class="link-btn">
+                                <span data-bind="ltext: 'caseFile.tab'"></span>
+                              </a></li>
 
                             <li data-bind="if: $root.authorization.ok('publish-bulletin-enabled'),
                                            css: {'active': $parent.selectedTabName() === 'bulletin'}">
@@ -631,12 +655,13 @@
                             <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
 
                             <div class="clear spacerM"></div>
-
+                            <!-- ko if: municipalityHearsNeighborsVisible -->
                             <div class="form-grid form-grid--no-border">
                               <div class="row">
                                 <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, id: 'optionMunicipalityHearsNeighbors', lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
                               </div>
                             </div>
+                            <!-- /ko -->
 
                             <div data-bind="ifnot: submittable">
                                 <p class="error-text" data-test-id="foreman-not-submittable" data-bind="ltext: 'error.not-submittable.foreman-link'"></p>
@@ -880,19 +905,21 @@
                     </div>
                     <!-- /ko -->
 
-                    <!-- Metadata tab -->
+                    <!-- Archival tab -->
 
-                    <!-- ko if: selectedTabName() === 'metadata' && $root.authorization.ok("store-tos-metadata-for-application") -->
-                    <div id="application-metadata-tab" class="tab-content">
-                        <div data-bind="if: features.enabled('arkistointi')">
-                            <div class="feature">
-                                <!-- ko if: $root.application.inPostVerdictState() -->
+                    <!--ko if: selectedTabName() === 'archival' && features.enabled('arkistointi') && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() -->
+                    <div id="application-archival-tab" class="tab-content">
+                      <div>
+                        <div data-bind="component: {name: 'archival-summary', params: {application: application}}"></div>
+                      </div>
+                    </div>
+                    <!-- /ko -->
 
-                                <!-- /ko -->
-                                <div data-bind="component: {name: 'archival-summary',
-                                                params: {application: application}}"></div>
-                            </div>
-                        </div>
+                    <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") -->
+                    <div id="application-caseFile-tab" class="tab-content">
+                      <div>
+                        <div data-bind="component: {name: 'case-file', params: {application: application}}"></div>
+                      </div>
                     </div>
                     <!-- /ko -->
 
@@ -1050,8 +1077,10 @@
                                                   <div data-bind='if: lupamaaraykset.vaaditutKatselmukset && lupamaaraykset.vaaditutKatselmukset.length'>
                                                       <h3 data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
                                                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
-                                                          <li data-bind='if: $data.katselmuksenLaji'>
+                                                          <li data-bind="if: $data.katselmuksenLaji">
+                                                              <!-- ko if: loc.hasTerm('task-katselmus.katselmuksenLaji.' + $data.katselmuksenLaji) -->
                                                               <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
+                                                              <!-- /ko -->
                                                               <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
                                                                   (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
                                                               </span>
@@ -1145,7 +1174,7 @@
                         </div>
 
                         <div data-bind="if: neighbors() && neighbors().length > 0">
-                            <table>
+                            <table class="neighbors">
                                 <thead>
                                     <tr>
                                         <th data-bind="ltext: 'neighbors.propertyId'"></th>
@@ -1332,7 +1361,7 @@
                                                               'data-test-state': $data.state,
                                                               'title': loc(['task', statusName, 'title'])}"></i></td>
                                             <td><a href="#" data-bind="click: openTask, text: displayName"></a></td>
-                                            <td data-bind="dateString: $data.closed"></td>
+                                            <td data-bind="text: util.getIn($data, ['data', 'katselmus', 'pitoPvm', 'value'])"></td>
                                         </tr>
                                     </tbody>
                                 </table>

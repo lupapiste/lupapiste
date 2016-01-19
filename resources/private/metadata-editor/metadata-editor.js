@@ -87,7 +87,7 @@
   var getForbiddenFields = function(schema, roles) {
     var naughtyFields = [];
     _.forEach(schema, function (attribute) {
-      if (attribute['require-role'] && !_.contains(roles, attribute['require-role'])) {
+      if (attribute["require-role"] && !_.contains(roles, attribute["require-role"])) {
         naughtyFields.push(attribute.type);
       }
     });
@@ -104,7 +104,7 @@
     self.schema = ko.observableArray();
     self.inputTypeMap = {};
     self.disabledFields = ko.observableArray();
-    
+
     var orgAuthz = ko.unwrap(lupapisteApp.models.currentUser.orgAuthz);
     var organization = ko.unwrap(params.application.organization);
     var roles = orgAuthz && organization ? ko.unwrap(orgAuthz[organization]) : [];
@@ -121,7 +121,7 @@
       }
     });
 
-    ajax.query("tos-metadata-schema")
+    ajax.query("tos-metadata-schema", {schema: params.caseFile ? 'caseFile' : 'document'})
       .success(function(data) {
         self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), data.schema, roles));
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);
@@ -141,7 +141,14 @@
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap);
-      var command = self.attachmentId() ? "store-tos-metadata-for-attachment" : "store-tos-metadata-for-application";
+      var command;
+      if (params.caseFile) {
+        command = "store-tos-metadata-for-process";
+      } else if (self.attachmentId()) {
+        command = "store-tos-metadata-for-attachment";
+      } else {
+        command = "store-tos-metadata-for-application";
+      }
       ajax.command(command)
         .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
         .success(function() {

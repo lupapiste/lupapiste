@@ -4,7 +4,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.xml.emit :as emit]))
+            [lupapalvelu.xml.emit :as emit]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]))
 
 
 (defn ->mapping [muutos]
@@ -49,7 +50,7 @@
   attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments  (maankayton-muutos-canonical/maankayton-muutos-canonical application lang)
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         muutos (-> canonical-without-attachments :Maankaytonmuutos :maankayttomuutosTieto first key)
         canonical (assoc-in
                     canonical-without-attachments

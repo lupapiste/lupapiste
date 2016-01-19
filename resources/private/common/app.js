@@ -12,6 +12,8 @@ var LUPAPISTE = LUPAPISTE || {};
    * startPage (String)        ID of the landing page
    * allowAnonymous (Boolean)  Allow all users to access the app. Default: require login.
    * showUserMenu (Boolean)    Default: complement of allowAnonymous, i.e., show menu for users tthat have logged in
+   * componentPages (Array)    Array of pageId strings. If provided, router skips visibility toggle for the given pageIds.
+   *                            Thus page visibility toggle responsibility for provided pageIds is in controlling component.
    * @param
    */
   LUPAPISTE.App = function (params) {
@@ -143,8 +145,13 @@ var LUPAPISTE = LUPAPISTE || {};
           hub.send("connection", {status: "online"});
           setTimeout(self.connectionCheck, 10000);
         })
-        .error(function() {
-          hub.send("connection", {status: "session-dead"});
+        .error(function(e) {
+          if (e.text === "error.unauthorized") {
+            hub.send("connection", {status: "session-dead"});
+          } else {
+            hub.send("connection", {status: "lockdown", text: e.text});
+          }
+          setTimeout(self.connectionCheck, 10000);
         })
         .fail(function() {
           hub.send("connection", {status: "offline"});
@@ -156,9 +163,10 @@ var LUPAPISTE = LUPAPISTE || {};
     self.getHashbangUrl = function() {
       var href = window.location.href;
       var hash = window.location.hash;
+      var separator = href.indexOf("?") >= 0 ? "&" : "?";
       if (hash && hash.length > 0) {
         var withoutHash = href.substring(0, href.indexOf("#"));
-        return withoutHash + "?redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
+        return withoutHash + separator + "redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
       } else {
         // No hashbang. Go directly to front page.
         return "/app/" + loc.getCurrentLanguage();
@@ -172,33 +180,53 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var offline = false;
     var wasLoggedIn = false;
+    var lockdown = false;
+
+    function unlock() {
+      if (lockdown) {
+        lockdown = false;
+        if (lupapisteApp.models.globalAuthModel) {
+          lupapisteApp.models.globalAuthModel.refreshWithCallback({});
+        }
+      }
+    }
 
     hub.subscribe("login", function() { wasLoggedIn = true; });
 
-    hub.subscribe({type: "connection", status: "online"}, function () {
+    hub.subscribe({eventType: "connection", status: "online"}, function () {
       if (offline) {
         offline = false;
         pageutil.hideAjaxWait();
       }
+      unlock();
     });
 
-    hub.subscribe({type: "connection", status: "offline"}, function () {
+    hub.subscribe({eventType: "connection", status: "offline"}, function () {
       if (!offline) {
         offline = true;
         pageutil.showAjaxWait(loc("connection.offline"));
       }
     });
 
-    hub.subscribe({type: "connection", status: "session-dead"}, function () {
+    hub.subscribe({eventType: "connection", status: "session-dead"}, function () {
       if (wasLoggedIn) {
         LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
             {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
         hub.subscribe("dialog-close", self.redirectToHashbang, true);
       }
+      unlock();
+    });
+
+    hub.subscribe({eventType: "connection", status: "lockdown"}, function (e) {
+      if (!lockdown && lupapisteApp.models.globalAuthModel) {
+        lupapisteApp.models.globalAuthModel.refreshWithCallback({});
+      }
+      lockdown = true;
+      hub.send("indicator", {style: "negative", message: e.text});
     });
 
     self.initSubscribtions = function() {
-      hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
+      hub.subscribe({eventType: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
       hub.subscribe("logout", function () {
         window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
       });
@@ -253,7 +281,9 @@ var LUPAPISTE = LUPAPISTE || {};
         currentLanguage: loc.getCurrentLanguage(),
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu,
-        showArchiveMenuOptions: self.showArchiveMenuOptions
+        showArchiveMenuOptions: self.showArchiveMenuOptions,
+        // TODO: sync with side-panel.js sidePanelPages
+        sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
       };
 
       $("#app").applyBindings(lupapisteApp.models.rootVMO);

@@ -34,22 +34,22 @@
 
             <table class="table table-striped" data-test-id="table-application-statements-givers">
                 <thead>
-                      <tr>
-                          <th></th>
-                          <th data-bind="ltext: 'application.statement.desc'"></th>
-                          <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
-                          <th data-bind="ltext: 'userinfo.email'"></th>
-                      </tr>
-                  </thead>
+                    <tr>
+                        <th></th>
+                        <th data-bind="ltext: 'application.statement.desc'"></th>
+                        <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                        <th data-bind="ltext: 'userinfo.email'"></th>
+                    </tr>
+                </thead>
                 <tbody data-bind="foreach: combinedData">
                     <tr class="statement-giver-row">
                         <td>
-                            <input class="form-input" type="radio"
+                            <input class="form-input" type="checkbox"
                                    data-bind="checkedValue: $data,
-                                              checked: $component.selectedPerson,
-                                              attr: {'id': 'radio-statement-giver-' + $index(),
-                                                     'data-test-id': 'radio-statement-giver-' + $index(),
-                                                     'name': 'statementGiverSelectedPerson',
+                                              checked: $component.selectedPersons,
+                                              attr: {'id': 'statement-giver-checkbox-' + $index(),
+                                                     'data-test-id': 'statement-giver-checkbox-' + $index(),
+                                                     'name': 'statementGiverSelectedPerson-' + $index(),
                                                      'disabled': errors().length != 0}" />
                         </td>
                         <td>
@@ -93,7 +93,7 @@
               <span data-bind="ltext: 'application.statement.add'"></span>
             </button>
 
-          <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
+          <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
 
         </div>
         <!-- /ko -->
@@ -124,11 +124,13 @@
         <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-neigbors"></p>
       </div>
 
-      <div class="form-grid form-grid--no-border">
+      <!-- ko if: features.enabled("kunta-kuulee-naapurit") -->
+      <div class="form-grid form-grid--no-border feature">
         <div class="row">
           <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
         </div>
       </div>
+      <!-- /ko -->
 
       <div data-bind="if: neighbors() && neighbors().length > 0">
         <table>

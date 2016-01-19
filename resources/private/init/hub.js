@@ -29,7 +29,7 @@ var hub = (function() {
     if (!(listener && listener.call)) { throw "Parameter 'listener' must be a function"; }
     var id = nextId;
     nextId += 1;
-    if (_.isString(filter)) { filter = { type: filter }; }
+    if (_.isString(filter)) { filter = { eventType: filter }; }
     subscriptions[id] = new Subscription(listener, filter, oneshot);
     return id;
   }
@@ -38,17 +38,19 @@ var hub = (function() {
     delete subscriptions[id];
   }
 
-  function makeEvent(type, data) {
-    var e = {type: type};
-    for (var k in data) {
-      e[k] = data[k];
+  function makeEvent(eventType, data) {
+    var e = {eventType: eventType};
+    for (var key in data) {
+      if (data.hasOwnProperty(key)) {
+        e[key] = data[key];
+      }
     }
     return e;
   }
 
-  function send(type, data) {
+  function send(eventType, data) {
     var count = 0;
-    var event = makeEvent(type, data || {});
+    var event = makeEvent(eventType, data || {});
 
     if (debugEvents) {
       debug(event);
@@ -68,10 +70,10 @@ var hub = (function() {
 
   // Helpers for page change events:
   function onPageLoad(pageId, listener, oneshot) {
-    return hub.subscribe({type: "page-load", pageId: pageId}, listener, oneshot);
+    return hub.subscribe({eventType: "page-load", pageId: pageId}, listener, oneshot);
   }
   function onPageUnload(pageId, listener, oneshot) {
-    return hub.subscribe({type: "page-unload", pageId: pageId}, listener, oneshot);
+    return hub.subscribe({eventType: "page-unload", pageId: pageId}, listener, oneshot);
   }
 
   return {

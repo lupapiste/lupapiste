@@ -3,7 +3,8 @@
             [sade.core :refer :all]
             [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
+            [lupapalvelu.document.attachments-canonical :as attachments-canon]
+            [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
@@ -267,15 +268,15 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on YA applications."
   [application lang submitted-application krysp-version output-dir begin-of-link]
-  (let [lupa-name-key (ya-operation-type-to-schema-name-key
+  (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                         (-> application :primaryOperation :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
-        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
-        statement-given-ids (mapping-common/statements-ids-with-status
+        attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
+        statement-given-ids (common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
-        statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        canonical-with-statement-attachments (mapping-common/add-statement-attachments
+        statement-attachments (attachments-canon/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
+        canonical-with-statement-attachments (attachments-canon/add-statement-attachments
                                                canonical-without-attachments
                                                statement-attachments
                                                [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto])
@@ -284,7 +285,7 @@
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments-canonical)
         xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
-        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk
@@ -301,7 +302,7 @@
 (defn save-jatkoaika-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang organization krysp-version output-dir begin-of-link]
-    (let [lupa-name-key (ya-operation-type-to-schema-name-key
+    (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                           (or
                             (-> application :linkPermitData first :operation keyword)
                             :ya-katulupa-vesi-ja-viemarityot))
@@ -313,7 +314,7 @@
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application katselmus user lang krysp-version output-dir begin-of-link]
-  (let [lupa-name-key (ya-operation-type-to-schema-name-key
+  (let [lupa-name-key (common/ya-operation-type-to-schema-name-key
                         (-> application :primaryOperation :name keyword))
         attachment-target {:type "task" :id (:id katselmus)}
 
@@ -322,10 +323,10 @@
                       #(when (= {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %)) %)
                       attachments)
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
-        canonical-attachments (when attachment-target (mapping-common/get-attachments-as-canonical
+        canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
                                                         begin-of-link attachment-target))
-        canonical-pk-liite (first (mapping-common/get-attachments-as-canonical
+        canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
                                      {:attachments [poytakirja] :title (:title application)}
                                      begin-of-link attachment-target))
         canonical-pk (:Liite canonical-pk-liite)

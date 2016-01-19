@@ -22,6 +22,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]))
 
+(def themes #{"louhi"})
+
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
               :name "common"})
@@ -59,11 +61,12 @@
                  :attachmentVisibilities attachment-meta/visibilities
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
-                 :mimeTypePattern       (.toString mime/mime-type-pattern)}]
+                 :mimeTypePattern       (.toString mime/mime-type-pattern)
+                 :supportedLangs        i18n/languages}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
-  (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
+  (str ";loc.setTerms(" (json/generate-string (i18n/get-terms i18n/*lang*)) ");"))
 
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
@@ -105,7 +108,7 @@
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
-   :knockout       {:js ["knockout-3.3.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
+   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -121,7 +124,7 @@
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
-                  :js [conf "hub.js" "log.js" ]}
+                  :js [conf "hub.js" "notify.js" "ajax.js" "log.js"]}
 
    ;; Common components
 
@@ -141,7 +144,7 @@
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers :stickyfill :waypoints]
-                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
+                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
@@ -214,6 +217,12 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
+   :external-api {:js (apply
+                        conj
+                        ["external-api-service.js" "external-api-tools.js"]
+                        (when (env/dev-mode?)
+                          ["dummy-api-client.js"]))}
+
    :verdict-attachment-prints {:depends [:common-html]
                                :html ["verdict-attachment-prints-order-template.html"
                                       "verdict-attachment-prints-order-history-template.html"
@@ -245,18 +254,19 @@
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "add-party.js" "attachments-tab-model.js" "archival-summary.js"
+                       "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
                        "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
-                         "foreman-template.html" "archival-summary-template.html" "organization-links.html"]}
+                         "foreman-template.html" "archival-summary-template.html" "organization-links.html"
+                         "case-file-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]
                   :js ["applications-list.js"]}
 
    :statement    {:depends [:common-html :repository :side-panel]
-                  :js ["statement-update.js" "statement.js"]
+                  :js ["statement-service.js" "statement.js"]
                   :html ["statement.html"]}
 
    :verdict      {:depends [:common-html :repository :attachment]
@@ -340,7 +350,7 @@
                              :company :analytics :register-company :footer]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
-   :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
+   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer]}
 
@@ -359,10 +369,12 @@
    :admin-app {:depends [:ui-components]
                :js ["admin.js"]}
    :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer]
-               :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"]
+               :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"
+                    "create-scope-model.js"]
                :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
-                      "screenmessages-list.html" "notifications.html"]}
+                      "screenmessages-list.html" "notifications.html"
+                      "create-scope-template.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 

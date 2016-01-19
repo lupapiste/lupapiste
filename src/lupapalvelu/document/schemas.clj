@@ -421,7 +421,7 @@
 
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
-               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
+               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                {:name "fise" :type :string :required false}
                {:name "fiseKelpoisuus" :type :select :sortBy :displayname :i18nkey "fisekelpoisuus" :size "l" :required false :body fise-kelpoisuus-lajit}
                {:name "patevyysluokka" :type :select :sortBy nil :required true
@@ -713,6 +713,12 @@
                               (assoc rakennusjatemaara :name "painoT")
                               {:name "jatteenToimituspaikka" :type :string :max-len 50}])
 
+(def availableMaterialsRow [{:name "aines" :type :string}
+                            rakennusjatemaara
+                            jateyksikko
+                            {:name "saatavilla" :type :date}
+                            {:name "kuvaus" :type :string}])
+
 (def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
                                :i18nkey "rakennusJaPurkujate"
                                :type :table
@@ -755,7 +761,23 @@
                                    {:name "suunnittelematonJate"
                                     :type :table
                                     :repeating true
-                                    :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}])
+                                    :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}
+                           {:name "contact"
+                            :i18nkey "available-materials.contact"
+                            :type :group
+                            :group-help "contact.help"
+                            :body [{:name "name" :type :string}
+                                   {:name "phone" :type :string :subtype :tel}
+                                   {:name "email" :type :string :subtype :email}]}
+                           {:name "availableMaterials"
+                            :i18nkey "available-materials"
+                            :type :table
+                            :uicomponent :docgenTable
+                            :approvable false
+                            :repeating true
+                            :body (body availableMaterialsRow)}])
+
+
 
 
 ;; Usage type definitions have moved to lupapiste-commons.usage-types

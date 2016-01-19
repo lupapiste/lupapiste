@@ -67,7 +67,7 @@
         .call();
     };
 
-    hub.subscribe({type: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
+    hub.subscribe({eventType: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
 
     hub.onPageLoad("new-company-user", function(e) {
       self.reset().token(e.pagePath[0]);

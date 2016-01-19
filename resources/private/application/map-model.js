@@ -229,7 +229,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     var x = (location && location.x) ? location.x : 0;
     var y = (location && location.y) ? location.y : 0;
     hub.send("oskari-center-map", {
-      data:  [{location: {x: x, y: y}, iconUrl: "/img/map-marker-orange.png"}],
+      data:  [{location: {x: x, y: y}, iconUrl: "/lp-static/img/map-marker-orange.png"}],
       clear: true
     });
   });

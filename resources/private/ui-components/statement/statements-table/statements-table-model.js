@@ -12,7 +12,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
     var statementIdsWithAttachments = [];
     _.forEach(lupapisteApp.models.application.attachments(), function(attachment) {
       var target = ko.mapping.toJS(attachment.target);
-      if (target && target.type == "statement") {
+      if (target && target.type === "statement") {
         statementIdsWithAttachments.push(target.id);
       }
     });
@@ -25,16 +25,17 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.isGiven = function(statement) {
     return _.contains(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
-  }
+  };
 
   var isAuthorityOrStatementOwner = function(statement) {
     var currentUser = lupapisteApp.models.currentUser;
-    return currentUser.isAuthority() || util.getIn(statement, ["person", "userId"]) === currentUser.id();
+    return _.contains(util.getIn(currentUser, ["orgAuthz", self.application.organization()]), "authority")
+      || util.getIn(statement, ["person", "userId"]) === currentUser.id();
   };
 
   self.isRemovable = function(statement) {
     return isAuthorityOrStatementOwner(statement) && !self.isGiven(statement);
-  }
+  };
 
   self.canAccessStatement = function(statement) {
     return self.isGiven(statement) || isAuthorityOrStatementOwner(statement);

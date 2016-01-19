@@ -1,9 +1,6 @@
 ;(function() {
   "use strict";
 
-  var required = {required: true};
-  var notRequired = {required: false};
-
   function getUserLimit(c) {
     if (c.accountType === "custom") {
       return c.customAccountLimit ? c.customAccountLimit : 0;

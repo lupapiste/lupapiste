@@ -19,6 +19,7 @@
               <th data-bind="ltext: 'organization.application.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.email'"></th>
+              <th data-bind="ltext: 'organization.krysp.ftp-user'"></th>
               <th>Palvelu avataan</th>
             </tr>
           </thead>
@@ -28,7 +29,7 @@
               <!-- ko if: $data.municipality == organization.scope[0].municipality && $data.permitType == organization.scope[0].permitType-->
                 <td data-bind="text: organization.id, attr: {'rowspan': organization.scope.length}"></td>
                 <td data-bind="attr: {'rowspan': organization.scope.length}">
-                  <a data-bind="text: organization.name[loc.getCurrentLanguage()], click: $parent.open, attr: {'data-test-id': 'edit-organization-' + organization.id}" href="#"></a>
+                  <a data-bind="text: organization.name[loc.getCurrentLanguage()], click: _.partial(pageutil.openPage, 'organization', $parent.id), attr: {'data-test-id': 'edit-organization-' + organization.id}" href="#"></a>
                 </td>
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
                   [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
@@ -43,6 +44,7 @@
               <td data-bind="text: $data['new-application-enabled'] || false, attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['open-inforequest'] || false, attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: util.getIn(organization, ['krysp', $data.permitType, 'ftpUser']), attr: {'data-test-id': 'krysp-ftpUser-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="dateString: $data['opening']"></td>
             </tr>
             <!-- /ko -->

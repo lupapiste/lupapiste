@@ -10,7 +10,7 @@
        <div>
          <div class="form-entry">
            <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
-           <img alt="" src="/img/ajax-loader-16.gif" data-bind="visible: processing">
+           <img alt="" src="/lp-static/img/ajax-loader-16.gif" data-bind="visible: processing">
            <input data-bind="textInput: propertyIdHumanReadable"
                   data-test-id="create-property-id" type="text" readonly="readonly"
                   class="form-input text bottom-marginM">
@@ -26,7 +26,7 @@
            <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
            <span data-bind="text: municipalityName, attr: {'data-test-value': municipalityCode}"
                  data-test-id="create-municipality-select"></span>
-           <img alt="" src="/img/ajax-loader-16.gif" data-bind="visible: processingAddress">
+           <img alt="" src="/lp-static/img/ajax-loader-16.gif" data-bind="visible: processingAddress">
          </div>
 
          <div data-bind="if: !municipalitySupported()">

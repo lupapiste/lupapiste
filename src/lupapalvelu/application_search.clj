@@ -8,13 +8,14 @@
             [sade.util :as util]
             [sade.property :as p]
             [sade.core :refer :all]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
-            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.geojson :as geo]))
 
 ;; Operations
@@ -64,13 +65,12 @@
 (defn- make-area-query [areas user]
   {:pre [(sequential? areas)]}
   (let [orgs (user/organization-ids-by-roles user #{:authority :commenter :reader})
-        orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas.features.id {$in areas}} [:areas])
-        features (flatten (map (comp :features :areas) orgs-with-areas))
+        orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas-wgs84.features.id {$in areas}} [:areas-wgs84])
+        features (flatten (map (comp :features :areas-wgs84) orgs-with-areas))
         selected-areas (set areas)
-        filtered-features (filter (comp selected-areas :id) features)
-        coordinates (apply concat (map geo/resolve-polygons filtered-features))]
-    (when (seq coordinates)
-      {$or (map (fn [c] {:location {$geoWithin {"$polygon" c}}}) coordinates)})))
+        filtered-features (filter (comp selected-areas :id) features)]
+    (when (seq filtered-features)
+      {$or (map (fn [feature] {:location-wgs84 {$geoWithin {"$geometry" (:geometry feature)}}}) filtered-features)})))
 
 (def applicant-application-states
   {:state {$in ["open" "submitted" "sent" "complementNeeded" "draft"]}})
@@ -127,7 +127,7 @@
   [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
    :_attachment_indicator_reset :address :applicant :attachments
    :auth :authority :authorityNotice :comments :created :documents
-   :foreman :foremanRole :infoRequest :modified :municipality
+   :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitSubtype :primaryOperation :state :statements
    :submitted :tasks :urgency :verdicts])
 
@@ -136,7 +136,7 @@
 
 (def- frontend-fields
   [:id :address :applicant :authority :authorityNotice
-   :infoRequest :kind :modified :municipality
+   :infoRequest :kind :location :modified :municipality
    :primaryOperation :state :submitted :urgency :verdicts
    :foreman :foremanRole])
 
@@ -147,10 +147,12 @@
 
 
 (defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
-  (assoc app :kind (cond
+  (-> app
+      (assoc :kind (cond
                      (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
                      infoRequest "applications.inforequest"
-                     :else       "applications.application")))
+                     :else       "applications.application"))
+      app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant
                           "handler" ["authority.lastName" "authority.firstName"]

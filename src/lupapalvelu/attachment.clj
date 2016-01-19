@@ -19,6 +19,7 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
             [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
@@ -166,11 +167,12 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents]]
+(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents read-only?]]
   (cond-> {:id (or attachment-id (mongo/create-id))
            :type attachment-type
            :modified now
            :locked locked?
+           :readOnly (boolean read-only?)
            :applicationState (if (and (= "verdict" (:type target)) (not (states/post-verdict-states (keyword application-state))))
                                "verdictGiven"
                                application-state)
@@ -184,7 +186,7 @@
            :signatures []
            :versions []
            :contents contents}
-          (and (seq metadata) (env/feature? :tiedonohjaus)) (assoc :metadata metadata)))
+          (seq metadata) (assoc :metadata metadata)))
 
 (defn make-attachments
   "creates attachments with nil target"
@@ -192,12 +194,15 @@
   (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
 
 (defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
-  (tos/metadata-for-document organization tosFunction type))
+  (let [metadata (tos/metadata-for-document organization tosFunction type)]
+    (if (seq metadata)
+      metadata
+      {:nakyvyys :julkinen})))
 
-(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents]]
+(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only?]]
   {:pre [(map? application)]}
   (let [metadata (default-metadata-for-attachment-type attachment-type application)
-        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents)]
+        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents read-only?)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -348,13 +353,13 @@
 (defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required contents] :as options}]
+  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required contents read-only] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
         att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents)
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents read-only)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents))]
+                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents read-only))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]
@@ -470,24 +475,32 @@
         (create-preview file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
+(defn pre-process-attachment [{:keys [attachment-type filename content]}]
+  (if (and libreoffice-client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
+    {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
+     :content  (libreoffice-client/convert-to-pdfa filename content)}
+    {:filename filename :content content}))
+
 (defn attach-file!
-  "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
+  "1) Converts file to PDF/A, if required by attachment type and
+   1) uploads the file to MongoDB and
+   2) creates a preview image and
+   3) creates a corresponding attachment structure to application
    Content can be a file or input-stream.
    Returns attachment version."
   [options]
   {:pre [(map? (:application options))]}
   (let [db-name mongo/*db-name* ; pass db-name to threadpool context
         file-id (mongo/create-id)
-        {:keys [filename content]} options
         application-id (-> options :application :id)
-        sanitazed-filename (mime/sanitize-filename filename)
-        content-type (mime/mime-type sanitazed-filename)
+        {:keys [filename content]} (pre-process-attachment options)
+        sanitized-filename (mime/sanitize-filename filename)
+        content-type (mime/mime-type sanitized-filename)
         options (merge options {:file-id file-id
-                                :filename sanitazed-filename
+                                :filename sanitized-filename
                                 :content-type content-type})]
-    (debug "         uploading to mongo: "  content)
-    (mongo/upload file-id sanitazed-filename content-type content :application application-id)
-    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id db-name))
+    (mongo/upload file-id sanitized-filename content-type content :application application-id)
+    (.submit preview-threadpool #(create-preview file-id sanitized-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation

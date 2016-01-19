@@ -11,7 +11,7 @@
          <span data-bind ="ltext: 'application.return'"></span>
       </a>
       <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="positive"></button>
-      <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="btn-decline"></button>
+      <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>
       <button data-test-id="send-task"
               data-bind="click: sendTask,
                          visible: $root.authorization.ok('send-task'),

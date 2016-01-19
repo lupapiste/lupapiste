@@ -1,9 +1,21 @@
 (ns lupapalvelu.organization
+  (:import [org.geotools.data FileDataStoreFinder DataUtilities]
+           [org.geotools.geojson.feature FeatureJSON]
+           [org.geotools.feature.simple SimpleFeatureBuilder]
+           [org.geotools.geojson.geom GeometryJSON]
+           [org.geotools.geometry.jts JTS]
+           [org.geotools.referencing CRS]
+           [org.geotools.referencing.crs DefaultGeographicCRS]
+           [org.opengis.feature.simple SimpleFeature]
+           [java.util ArrayList])
+
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
             [clojure.walk :as walk]
             [monger.operators :refer :all]
             [cheshire.core :as json]
+            [hiccup.core :as hiccup]
+            [clj-rss.core :as rss]
             [schema.core :as sc]
             [sade.core :refer [fail fail!]]
             [sade.env :as env]
@@ -13,10 +25,15 @@
             [sade.http :as http]
             [sade.xml :as sxml]
             [sade.schemas :as ssc]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.wfs :as wfs]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.geojson :as geo]
+            [me.raynes.fs :as fs]
+            [clojure.walk :refer [keywordize-keys]]))
 
 (def scope-skeleton
   {:permitType nil
@@ -44,11 +61,11 @@
     (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))
     org))
 
-(defn- remove-sensitive-data
-  [org]
-  (if (:krysp org)
-    (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
-    org))
+(defn- remove-sensitive-data [organization]
+  (let [org (dissoc organization :allowedAutologinIPs)]
+    (if (:krysp org)
+      (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
+      org)))
 
 (defn get-organizations
   ([]
@@ -75,30 +92,22 @@
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
 
+(defn allowed-ip? [ip organization-id]
+  (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
+
 (defn encode-credentials
   [username password]
   (when-not (s/blank? username)
-    (let [crypto-key       (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-          crypto-iv        (crypt/make-iv-128)
-          crypted-password (->> password
-                                (crypt/str->bytes)
-                                (crypt/encrypt crypto-key crypto-iv :aes)
-                                (crypt/base64-encode)
-                                (crypt/bytes->str))
-          crypto-iv        (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
-      {:username username :password crypted-password :crypto-iv crypto-iv})))
+    (let [crypto-iv        (crypt/make-iv-128)
+          crypted-password (crypt/encrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv)
+          crypto-iv-s      (-> crypto-iv crypt/base64-encode crypt/bytes->str)]
+      {:username username :password crypted-password :crypto-iv crypto-iv-s})))
 
 (defn decode-credentials
-  "Decode password that was originally generated (together with the init-vector )by encode-credentials.
-   Arguments are base64 encoded."
+  "Decode password that was originally generated (together with the init-vector)
+   by encode-credentials. Arguments are base64 encoded."
   [password crypto-iv]
-  (let [crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-        crypto-iv (-> crypto-iv crypt/str->bytes crypt/base64-decode)]
-    (->> password
-                          (crypt/str->bytes)
-                          (crypt/base64-decode)
-                          (crypt/decrypt crypto-key crypto-iv :aes)
-                          (crypt/bytes->str))))
+  (crypt/decrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv))
 
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
@@ -203,6 +212,7 @@
 
 ;;
 ;; Organization/municipality provided map support.
+;;
 
 (defn query-organization-map-server
   [org-id params headers]
@@ -232,3 +242,195 @@
                       (encode-credentials username password))
         server      (assoc credentials :url url)]
    (update-organization org-id {$set {:map-layers.server server}})))
+
+;;
+;; Construction waste feeds
+;;
+
+(defmulti waste-ads (fn [org-id & [fmt lang]] fmt))
+
+(defn max-modified
+  "Returns the max (latest) modified value of the given document part
+  or list of parts."
+  [m]
+  (cond
+    (:modified m)   (:modified m)
+    (map? m)        (max-modified (vals m))
+    (sequential? m) (apply max (map max-modified (cons 0 m)))
+    :default        0))
+
+(def max-number-of-ads 100)
+
+(defmethod waste-ads :default [ org-id & _]
+  (->>
+   ;; 1. Every application that maybe has available materials.
+   (mongo/select
+    :applications
+    {:organization org-id
+     :documents {$elemMatch {:data.availableMaterials {$exists true }
+                             :data.contact {$nin ["" nil]}}}})
+   ;; 2. Create materials, contact, modified map.
+   (map (fn [{docs :documents}]
+          (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")
+                   (let [data (select-keys (:data %) [:contact :availableMaterials])
+                         {:keys [contact availableMaterials]} (tools/unwrapped data)]
+                     {:contact contact
+                      ;; Material and amount information are mandatory. If the information
+                      ;; is not present, the row is not included.
+                      :materials (->> availableMaterials
+                                      tools/rows-to-list
+                                      (filter (fn [m]
+                                                (->> (select-keys m [:aines :maara])
+                                                       vals
+                                                       (not-any? ss/blank?)))))
+                      :modified (max-modified data)}))
+                docs)))
+   ;; 3. We only check the contact validity. Name and either phone or email
+   ;;    must have been provided and (filtered) materials list cannot be empty.
+   (filter (fn [{{:keys [name phone email]} :contact
+                 materials                  :materials}]
+             (letfn [(good [s] (-> s ss/blank? false?))]
+               (and (good name) (or (good phone) (good email))
+                    (not-empty materials)))))
+   ;; 4. Sorted in the descending modification time order.
+   (sort-by (comp - :modified))
+   ;; 5. Cap the size of the final list
+   (take max-number-of-ads)))
+
+
+(defmethod waste-ads :rss [org-id _ lang]
+  (let [ads         (waste-ads org-id)
+        columns     (map :name schemas/availableMaterialsRow)
+        loc         (fn [prefix term] (if (ss/blank? term)
+                                        term
+                                        (i18n/with-lang lang (i18n/loc (str prefix term)))))
+        col-value   (fn [col-key col-data]
+                      (let [k (keyword col-key)
+                            v (k col-data)]
+                        (case k
+                          :yksikko (loc "jateyksikko." v)
+                          v)))
+        col-row-map (fn [fun]
+                      (->> columns (map fun) (concat [:tr]) vec))
+        items       (for [{:keys [contact materials]} ads
+                          :let [{:keys [name phone email]}  contact
+                                html (hiccup/html [:div [:span (ss/join " " [name phone email])]
+                                                   [:table
+                                                    (col-row-map #(vec [:th (loc "available-materials." %)]))
+                                                    (for [m materials]
+                                                      (col-row-map #(vec [:td (col-value % m)])))]])]]
+
+                      {:title "Lupapiste"
+                       :link "http://www.lupapiste.fi"
+                       :author name
+                       :description (str "<![CDATA[ " html " ]]>")})]
+    (rss/channel-xml {:title (str "Lupapiste:" (i18n/with-lang lang (i18n/loc "available-materials.contact")))
+                      :link "" :description ""}
+                     items)))
+
+(defmethod waste-ads :json [org-id & _]
+  (json/generate-string (waste-ads org-id)))
+
+;; Waste feed enpoint parameter validators
+
+(defn valid-org [cmd]
+  (when-not (-> cmd :data :org ss/upper-case get-organization)
+    (fail :error.organization-not-found)))
+
+(defn valid-feed-format [cmd]
+  (when-not (->> cmd :data :fmt ss/lower-case keyword (contains? #{:rss :json}) )
+    (fail :error.invalid-feed-format)))
+
+(defn valid-language [cmd]
+  (when-not  (->> cmd :data :lang ss/lower-case keyword (contains? (set i18n/supported-langs)) )
+    (fail :error.unsupported-language)))
+
+(defn-
+  ^org.geotools.data.simple.SimpleFeatureCollection
+  transform-crs-to-wgs84
+  "Convert feature crs in collection to WGS84"
+  [org-id existing-areas ^org.geotools.feature.FeatureCollection collection]
+  (let [existing-areas (if-not existing-areas
+                         (mongo/by-id :organizations org-id {:areas.features.id 1 :areas.features.properties.nimi 1 :areas.features.properties.NIMI 1})
+                         {:areas existing-areas})
+        map-of-existing-areas (into {} (map (fn [a]
+                                              (let [properties (:properties a)
+                                                    nimi (if (contains? properties :NIMI)
+                                                           (:NIMI properties)
+                                                           (:nimi properties))]
+                                                {nimi (:id a)})) (get-in existing-areas [:areas :features])))
+        iterator (.features collection)
+        list (ArrayList.)
+        _ (loop [feature (when (.hasNext iterator)
+                           (.next iterator))]
+            (when feature
+              ; Set CRS to WGS84 to bypass problems when converting to GeoJSON (CRS detection is skipped with WGS84).
+              ; Atm we assume only CRS EPSG:3067 is used.
+              ; Always give feature the same id if names match, so that search filters continue to work after reloading shp file
+              ; with same feature names
+              (let [feature-type        (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
+                    name-property       (.getProperty feature "nimi")
+                    name-property       (if-not name-property
+                                          (.getProperty feature "NIMI")
+                                          name-property)
+                    feature-name        (when name-property
+                                          (.getValue name-property))
+                    id                  (if (contains? map-of-existing-areas feature-name)
+                                          (get map-of-existing-areas feature-name)
+                                          (mongo/create-id))
+                    builder             (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
+                    _                   (.init builder feature) ; init builder with original feature
+                    transformed-feature (.buildFeature builder id)]
+                (.add list transformed-feature)))
+            (when (.hasNext iterator)
+              (recur (.next iterator))))]
+    (.close iterator)
+    (DataUtilities/collection list)))
+
+(defn- transform-coordinates-to-wgs84 [collection]
+  "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+  (let [schema (.getSchema collection)
+        crs (.getCoordinateReferenceSystem schema)
+        transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
+        iterator (.features collection)
+        feature (when (.hasNext iterator)
+                  (.next iterator))
+        list (ArrayList.)
+        _ (loop [feature (cast SimpleFeature feature)]
+            (when feature
+              (let [geometry (.getDefaultGeometry feature)
+                    transformed-geometry (JTS/transform geometry transform)]
+                (.setDefaultGeometry feature transformed-geometry)
+                (.add list feature)))
+            (when (.hasNext iterator)
+              (recur (.next iterator))))]
+    (.close iterator)
+    (DataUtilities/collection list)))
+
+(defn parse-shapefile-to-organization-areas [org-id tempfile tmpdir file-info]
+  (when-not (= (:content-type file-info) "application/zip")
+    (fail! :error.illegal-shapefile))
+  (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
+        shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
+        data-store (FileDataStoreFinder/getDataStore shape-file)
+        new-collection (some-> data-store
+                               .getFeatureSource
+                               .getFeatures
+                               ((partial transform-crs-to-wgs84 org-id nil)))
+        precision      13 ; FeatureJSON shows only 4 decimals by default
+        areas (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection)))
+        ensured-areas (geo/ensure-features areas)
+
+        new-collection-wgs84 (some-> data-store
+                                     .getFeatureSource
+                                     .getFeatures
+                                     transform-coordinates-to-wgs84
+                                     ((partial transform-crs-to-wgs84 org-id ensured-areas)))
+        areas-wgs84 (keywordize-keys (json/parse-string (.toString (FeatureJSON. (GeometryJSON. precision)) new-collection-wgs84)))
+        ensured-areas-wgs84 (geo/ensure-features areas-wgs84)]
+    (when (geo/validate-features (:features ensured-areas))
+      (fail! :error.coordinates-not-epsg3067))
+    (update-organization org-id {$set {:areas ensured-areas
+                                       :areas-wgs84 ensured-areas-wgs84}})
+    (.dispose data-store)
+    ensured-areas-wgs84))

@@ -25,7 +25,7 @@ Mikko can't approve application
 
 Mikko adds an attachment
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Mikko decides to submit application
@@ -38,7 +38,6 @@ Mikko still can't approve application
 Ronja tries to approve application without permission
   Ronja logs in
   Open application  ${appname}  753-416-25-30
-  #Sleep  600s
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   Kill session
 
@@ -225,12 +224,12 @@ Sonja group rejected
 Click reject
   [Arguments]  ${name}
   Wait Until  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
-  Click Button  jquery=button[data-test-id=reject-doc-${name}]
+  Click by test id  reject-doc-${name}
 
 Click approve
   [Arguments]  ${name}
   Wait Until  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
-  Click Button  jquery=button[data-test-id=approve-doc-${name}]
+  Click by test id  approve-doc-${name}
 
 Approve accordion
   [Arguments]  ${name}

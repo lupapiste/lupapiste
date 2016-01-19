@@ -28,6 +28,7 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
+  // TODO: sync with app.js sidePanelPages
   var pages = ["application","attachment","statement","neighbors","verdict"];
 
   self.showSidePanel = ko.pureComputed(function() {
@@ -118,6 +119,10 @@ LUPAPISTE.SidePanelModel = function() {
     }
   };
 
+  hub.subscribe({eventType: "show-conversation-panel"}, function() {
+    self.showConversationPanel(true);
+  });
+
   self.highlightConversation = function() {
     if (!self.showConversationPanel()) {
       self.toggleConversationPanel();
@@ -181,7 +186,7 @@ LUPAPISTE.SidePanelModel = function() {
     }
   };
 
-  hub.subscribe({type: "dialog-close"}, function(data) {
+  hub.subscribe({eventType: "dialog-close"}, function(data) {
     // Application error occurred
     if (data.id === "dialog-application-load-error") {
       self.comment().text(undefined);
@@ -196,7 +201,7 @@ LUPAPISTE.SidePanelModel = function() {
     }
   });
 
-  hub.subscribe({type: "page-load"}, function(data) {
+  hub.subscribe({eventType: "page-load"}, function(data) {
     if(_.contains(pages.concat("applications"), pageutil.getPage())) {
       refreshSidePanel(data.previousHash);
     }

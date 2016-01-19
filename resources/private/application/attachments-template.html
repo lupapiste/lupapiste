@@ -115,8 +115,8 @@
               <td class="attachment-delete-single">
                 <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
                                  clickBubble: false,
-                                 visible: $root.authorization.ok('delete-attachment') && $parent.editable && authorized,
-                                 enable: $root.authorization.ok('delete-attachment') && $parent.editable && authorized,
+                                 visible: $root.authorization.ok('delete-attachment') && $parent.editable && authorized && !$data.readOnly,
+                                 enable: $root.authorization.ok('delete-attachment') && $parent.editable && authorized && !$data.readOnly,
                                  attr: {'class': 'lupicon-remove primary',
                                         'title': loc('attachment.delete'),
                                         'data-test-icon': 'delete-' + type['type-group'] + '.' + type['type-id']}"></span>

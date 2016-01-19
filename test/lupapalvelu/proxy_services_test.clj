@@ -20,7 +20,7 @@
   ((secure (fn [r _] r) "WMS") {:headers {"set-cookie" "cookie" "x-foo" "bar"}}) => {:headers {"x-foo" "bar"}}
   ((secure identity) {:headers {"cookie" "cookie-x=value;cookie-y=1" "x-foo" "bar"}}) => {:headers {"x-foo" "bar"}}
   ((secure identity) {:params {:a "null-char(\0);"}
-                      :query-params {:WKT "POLYGON(1,\n\n2);"}
+                      :query-params {:WKT "POLYGON(1,\n\n2);" :term "it\u00E4inen"}
                       :form-params {:WKT "POLYGON(1,\t2);"}}) => {:params {:a "null-char();"}
-                                                                  :query-params {:WKT "POLYGON(1,2);"}
+                                                                  :query-params {:WKT "POLYGON(1,2);" :term "it\u00E4inen"}
                                                                   :form-params {:WKT "POLYGON(1,2);"}})

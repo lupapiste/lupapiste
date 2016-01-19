@@ -1,7 +1,7 @@
 (ns lupapalvelu.pdf.pdf-export
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [clojure.java.io :as io]
-            [lupapalvelu.pdf.pdfa-core :as pdf]
+            [pdfa.core :as pdf]
             [clj-time.local :as tl]
             [clj-time.format :as tf]
             [lupapalvelu.i18n :refer [with-lang loc]]
@@ -377,7 +377,7 @@
 
 (defn- common-header [app-data]
   [
-   [:image {:xscale 1 :yscale 1} (ImageIO/read (io/resource "public/img/logo-v2-flat.png"))]
+   [:image {:xscale 1 :yscale 1} (ImageIO/read (io/resource "public/lp-static/img/logo-v2-flat.png"))]
    [:spacer]
    [:heading {:style {:size 20}} (:title app-data)]
    [:spacer]

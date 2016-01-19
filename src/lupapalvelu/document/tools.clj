@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.tools
   (:require [clojure.walk :as walk]
             [clojure.zip :as zip]
+            [clojure.edn :as edn]
             [sade.strings :as ss]))
 
 (defn nil-values [_] nil)
@@ -264,3 +265,14 @@
                             (conj disabled-paths [(get-root-path loc) current-whitelist])
                             disabled-paths)]
        (recur (zip/next loc) disabled-paths)))))
+
+(defn rows-to-list
+  "Some schema types (e.g., table) model sequences as maps where keys
+  are sparse indexes. This function transforms the map into list.
+  {:0 {:foo 4} :2 {:foo :dii}} -> [{:foo 4} {:foo :dii}]"
+  [row-map]
+  (->> row-map
+       keys
+       (map #(-> % name edn/read-string))
+       sort
+       (map #(-> % str keyword row-map))))

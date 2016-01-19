@@ -1,15 +1,8 @@
 (ns lupapalvelu.organization-api
-  (:import [org.geotools.data FileDataStoreFinder DataUtilities]
-           [org.geotools.geojson.feature FeatureJSON]
-           [org.geotools.feature.simple SimpleFeatureBuilder]
-           [org.geotools.referencing.crs DefaultGeographicCRS]
-           [java.util ArrayList])
-
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
-            [cheshire.core :as cheshire]
             [schema.core :as sc]
             [monger.operators :refer :all]
             [noir.core :refer [defpage]]
@@ -19,10 +12,11 @@
             [me.raynes.fs :as fs]
             [slingshot.slingshot :refer [try+]]
             [sade.core :refer [ok fail fail! now]]
-            [sade.util :as util]
             [sade.env :as env]
-            [sade.strings :as ss]
+            [sade.municipality :as muni]
             [sade.property :as p]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
@@ -35,8 +29,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.logging :as logging]
-            [lupapalvelu.geojson :as geo]))
+            [lupapalvelu.logging :as logging]))
 ;;
 ;; local api
 ;;
@@ -144,6 +137,32 @@
              :scope.$.opening (when (number? opening) opening)}})
   (ok))
 
+(defcommand add-scope
+  {:description "Admin can add new scopes for organization"
+   :parameters [organization permitType municipality
+                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                opening]
+   :input-validators [permit/permit-type-validator
+                      (fn [{{:keys [municipality]} :data}]
+                        (when-not (contains? muni/municipality-codes municipality)
+                          (fail :error.invalid-municipality)))]
+   :user-roles #{:admin}}
+  (let [scope-count (mongo/count :organizations {:scope {$elemMatch {:permitType permitType :municipality municipality}}})]
+    (if (zero? scope-count)
+      (do
+        (o/update-organization
+          organization
+          {$push {:scope
+                  {:municipality            municipality
+                   :permitType              permitType
+                   :inforequest-enabled     inforequestEnabled
+                   :new-application-enabled applicationEnabled
+                   :open-inforequest        openInforequestEnabled
+                   :open-inforequest-email  openInforequestEmail
+                   :opening                 (when (number? opening) opening)}}})
+        (ok))
+      (fail :error.organization.duplicate-scope))))
+
 (defcommand add-organization-link
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
@@ -184,16 +203,26 @@
    :input-validators [(partial non-blank-parameters [:organizationId])]
    :user-roles #{:admin}}
   [_]
-  (o/get-organization organizationId))
+  (ok :data (o/get-organization organizationId)))
+
+(defquery permit-types
+  {:user-roles #{:admin}}
+  [_]
+  (ok :permitTypes (keys (permit/permit-types))))
 
 (defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
-   :user-roles #{:applicant :authority}}
+   :user-roles #{:applicant :authority :admin}}
   [_]
   (let [munis (municipalities-with-organization)]
     (ok
       :municipalities (:all munis)
       :municipalitiesWithBackendInUse (:with-backend munis))))
+
+(defquery municipalities
+  {:description "Returns a list of all municipality IDs. For admin use."
+   :user-roles #{:admin}}
+  (ok :municipalities muni/municipality-codes))
 
 (defquery municipality-active
   {:parameters [municipality]
@@ -460,34 +489,12 @@
   (if (seq orgAuthz)
     (let [organization-areas (mongo/select
                                :organizations
-                               {:_id {$in (keys orgAuthz)} :areas {$exists true}}
-                               [:areas :name])
+                               {:_id {$in (keys orgAuthz)} :areas-wgs84 {$exists true}}
+                               [:areas-wgs84 :name])
+          organization-areas (map #(clojure.set/rename-keys % {:areas-wgs84 :areas}) organization-areas)
           result (map (juxt :id #(select-keys % [:areas :name])) organization-areas)]
       (ok :areas (into {} result)))
     (ok :areas {})))
-
-(defn-
-  ^org.geotools.data.simple.SimpleFeatureCollection
-  transform-crs-to-wgs84
-  "Convert feature crs in collection to WGS84"
-  [^org.geotools.feature.FeatureCollection collection]
-  (let [iterator (.features collection)
-        list (ArrayList.)
-        _ (loop [feature (when (.hasNext iterator)
-                           (.next iterator))]
-            (when feature
-              ; Set CRS to WGS84 to bypass problems when converting to GeoJSON (CRS detection is skipped with WGS84).
-              ; Atm we assume only CRS EPSG:3067 is used.
-              (let [feature-type (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
-                    builder (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
-                    _ (.init builder feature) ; init builder with original feature
-                    transformed-feature (.buildFeature builder (mongo/create-id))]
-                (.add list transformed-feature)))
-            (when (.hasNext iterator)
-              (recur (.next iterator))))]
-    (.close iterator)
-    (DataUtilities/collection list)))
-
 
 (defraw organization-area
   {:user-roles #{:authorityAdmin}}
@@ -501,28 +508,12 @@
                    :organization org-id
                    :created      created}
         tmpdir (fs/temp-dir "area")]
-
     (try+
-      (when-not (= content-type "application/zip")
-        (fail! :error.illegal-shapefile))
-
-      (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
-            shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
-            data-store (FileDataStoreFinder/getDataStore shape-file)
-            new-collection (some-> data-store
-                             .getFeatureSource
-                             .getFeatures
-                             transform-crs-to-wgs84)
-            areas (keywordize-keys (cheshire/parse-string (.toString (FeatureJSON.) new-collection)))
-            ensured-areas (geo/ensure-features areas)]
-        (when (geo/validate-features (:features ensured-areas))
-          (fail! :error.coordinates-not-epsg3067))
-        (o/update-organization org-id {$set {:areas ensured-areas}})
-        (.dispose data-store)
-        (->> (assoc file-info :areas ensured-areas :ok true)
-          (resp/json)
-          (resp/content-type "application/json")
-          (resp/status 200)))
+      (let [areas (o/parse-shapefile-to-organization-areas org-id tempfile tmpdir file-info)]
+        (->> (assoc file-info :areas areas :ok true)
+             (resp/json)
+             (resp/content-type "application/json")
+             (resp/status 200)))
       (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
         (resp/status 400 text))
       (catch Throwable t
@@ -536,8 +527,7 @@
   {:description "Organization server and layer details."
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok (-> (user/authority-admins-organization-id user)
-          o/organization-map-layers-data)))
+  (ok (o/organization-map-layers-data (user/authority-admins-organization-id user))))
 
 (defcommand update-map-server-details
   {:parameters [url username password]
@@ -559,3 +549,13 @@
   (o/update-organization (user/authority-admins-organization-id user)
                          {$set {:map-layers.layers layers}})
   (ok))
+
+
+(defraw waste-ads-feed
+  {:description "Simple RSS feed for construction waste information."
+   :parameters [fmt org lang]
+   :input-validators [o/valid-feed-format o/valid-org o/valid-language]
+   :user-roles #{:anonymous}}
+  (o/waste-ads (ss/upper-case org)
+               (-> fmt ss/lower-case keyword)
+               (-> lang ss/lower-case keyword)))

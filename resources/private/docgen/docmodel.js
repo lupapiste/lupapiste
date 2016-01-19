@@ -152,7 +152,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
       if (listenEvent === "muutostapaChanged") {
         var prefix = _.dropRight(path.split("."));
-        self.subscriptions.push(hub.subscribe({type: listenEvent, path: prefix.join(".")}, function(event) {
+        self.subscriptions.push(hub.subscribe({eventType: listenEvent, path: prefix.join(".")}, function(event) {
           $(element).prop("disabled", _.isEmpty(event.value));
         }));
       }
@@ -279,7 +279,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.approvalHubSubscribe = function(fun, listenBroadcasts) {
-    var filter = {type: "approval-status-" + self.docId,
+    var filter = {eventType: "approval-status-" + self.docId,
                   broadcast: Boolean(listenBroadcasts) };
     self.subscriptions.push(hub.subscribe( filter, fun ));
   };
@@ -1220,8 +1220,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.appendChild(option);
 
     _.each(self.application.auth, function (user) {
-      // LUPA-89: don't print fully empty names
-      if (user.firstName && user.lastName) {
+      // LUPA-89: don't print fully empty names, LPK-1257 Do not add statement givers
+      if (user.firstName && user.lastName && user.role !== "statementGiver") {
         var option = document.createElement("option");
         var value = user.id;
         option.value = value;
@@ -1614,7 +1614,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function loaderImg() {
     var img = document.createElement("img");
-    img.src = "/img/ajax-loader-12.gif";
+    img.src = "/lp-static/img/ajax-loader-12.gif";
     img.alt = "...";
     img.width = 12;
     img.height = 12;
