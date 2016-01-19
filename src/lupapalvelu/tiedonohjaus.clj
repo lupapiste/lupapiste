@@ -88,10 +88,14 @@
   (memo/ttl get-tos-toimenpide-for-application-state-from-toj
     :ttl/threshold 10000))
 
+(defn- full-name [{:keys [lastName firstName]}]
+  (str lastName " " firstName))
+
 (defn- get-documents-from-application [application]
   [{:type :hakemus
     :category :document
-    :ts (:created application)}])
+    :ts (:created application)
+    :user (:applicant application)}])
 
 (defn- get-attachments-from-application [application]
   (reduce (fn [acc attachment]
@@ -101,7 +105,9 @@
                           {:type (:type attachment)
                            :category :attachment
                            :version (:version ver)
-                           :ts (:created ver)}))
+                           :ts (:created ver)
+                           :contents (:contents attachment)
+                           :user (full-name (:user ver))}))
                   (concat acc))
               acc))
     []
@@ -111,11 +117,12 @@
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
         all-docs (sort-by :ts (concat documents attachments))]
-    (map (fn [[{:keys [state ts]} next]]
+    (map (fn [[{:keys [state ts user]} next]]
            (let [api-response (toimenpide-for-state (:organization application) (:tosFunction application) state)
                  action-name (or (:name api-response) "Ei asetettu tiedonohjaussuunnitelmassa")]
              {:action action-name
               :start ts
+              :user (full-name user)
               :documents (filter (fn [{doc-ts :ts}]
                                    (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
                            all-docs)}))
