@@ -10,8 +10,8 @@ LUPAPISTE.RootViewModel = function() {
   });
 
   self.externalApiEnabled = ko.pureComputed(function() {
-  	return lupapisteApp.services.externalApiService &&
-  	       lupapisteApp.services.externalApiService.enabled &&
-  	       features.enabled("louhipalvelin");
+    return lupapisteApp.services.externalApiService &&
+           lupapisteApp.services.externalApiService.enabled &&
+           features.enabled("louhipalvelin");
   });
 };
