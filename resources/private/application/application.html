@@ -279,7 +279,8 @@
                                 <!-- ko if: externalApi.enabled -->
                                 <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
                                   <button class="function"
-                                          data-bind="click: externalApi.openApplication, visible: externalApi.enabled">
+                                          data-bind="click: externalApi.openApplication, visible: externalApi.enabled"
+                                          data-test-id="external-open-permit">
                                       <i class="lupicon-circle-arrow-right"></i>
                                       <span data-bind="ltext: 'application.showInBackingSystem'"></span>
                                   </button>

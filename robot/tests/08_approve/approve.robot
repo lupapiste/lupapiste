@@ -38,7 +38,6 @@ Mikko still can't approve application
 Ronja tries to approve application without permission
   Ronja logs in
   Open application  ${appname}  753-416-25-30
-  #Sleep  600s
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
   Kill session
 

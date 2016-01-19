@@ -738,7 +738,8 @@
                                 :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "YI" "YL"} (name (:permit-type v)))) operations/operations))
                        :allowedAutologinIPs ["0:0:0:0:0:0:0:1" "127.0.0.1" "109.204.231.126"]
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :krysp {:R {:url local-krysp, :ftpUser "dev_porvoo", :version "2.1.6"}}}
 
                       ;; Oulu R
                       {:id "564-R"
