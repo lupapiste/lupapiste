@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1453191320732');
+@import url('main-blessed1.css?z=1453202373840');
 
 /* line 17, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:active {
@@ -4274,13 +4274,18 @@ td.comment-text {
   margin-bottom: 12px;
 }
 
-/* line 265, ../../../private/common-html/sass/views/_attachment.scss */
-.archive-valid .icon {
+/* line 264, ../../../private/common-html/sass/views/_attachment.scss */
+.archive-valid {
+  margin-top: 12px;
+}
+/* line 266, ../../../private/common-html/sass/views/_attachment.scss */
+.archive-valid [class^="lupicon-"] {
   vertical-align: middle;
-  margin-left: 5px;
+  margin-left: 2px;
+  font-size: 18px;
 }
 
-/* line 271, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 273, ../../../private/common-html/sass/views/_attachment.scss */
 .modal-body p {
   max-width: 600px;
 }
