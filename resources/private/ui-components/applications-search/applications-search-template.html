@@ -54,6 +54,14 @@
 
           <!-- ko if: showApplicationsSearch -->
           <div data-bind="component: {name: 'applications-search-filter', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
+          <!-- ko if: externalApi.enabled -->
+          <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
+            <button data-bind="click: externalApi.showPermitsOnMap, visible: gotResults"
+                    data-test-id="external-show-on-map">
+              <i class="lupicon-location"></i>
+              <span data-bind="text: 'N\u00E4yt\u00E4 hankkeet kartalla'"></span></button>
+          </div>
+          <!-- /ko -->
           <div data-bind="component: {name: 'applications-search-tabs', params: {dataProvider: dataProvider, gotResults: gotResults}}" class="applications-search-component"></div>
           <!-- /ko -->
           <!-- ko if: showForemanSearch -->

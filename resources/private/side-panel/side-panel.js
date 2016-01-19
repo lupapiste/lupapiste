@@ -119,7 +119,7 @@ LUPAPISTE.SidePanelModel = function() {
     }
   };
 
-  hub.subscribe({type: "show-conversation-panel"}, function() {
+  hub.subscribe({eventType: "show-conversation-panel"}, function() {
     self.showConversationPanel(true);
   });
 
@@ -186,7 +186,7 @@ LUPAPISTE.SidePanelModel = function() {
     }
   };
 
-  hub.subscribe({type: "dialog-close"}, function(data) {
+  hub.subscribe({eventType: "dialog-close"}, function(data) {
     // Application error occurred
     if (data.id === "dialog-application-load-error") {
       self.comment().text(undefined);
@@ -201,7 +201,7 @@ LUPAPISTE.SidePanelModel = function() {
     }
   });
 
-  hub.subscribe({type: "page-load"}, function(data) {
+  hub.subscribe({eventType: "page-load"}, function(data) {
     if(_.contains(pages.concat("applications"), pageutil.getPage())) {
       refreshSidePanel(data.previousHash);
     }

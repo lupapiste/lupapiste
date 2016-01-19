@@ -8,13 +8,14 @@
             [sade.util :as util]
             [sade.property :as p]
             [sade.core :refer :all]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
-            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.geojson :as geo]))
 
 ;; Operations
@@ -126,7 +127,7 @@
   [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
    :_attachment_indicator_reset :address :applicant :attachments
    :auth :authority :authorityNotice :comments :created :documents
-   :foreman :foremanRole :infoRequest :modified :municipality
+   :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitSubtype :primaryOperation :state :statements
    :submitted :tasks :urgency :verdicts])
 
@@ -135,7 +136,7 @@
 
 (def- frontend-fields
   [:id :address :applicant :authority :authorityNotice
-   :infoRequest :kind :modified :municipality
+   :infoRequest :kind :location :modified :municipality
    :primaryOperation :state :submitted :urgency :verdicts
    :foreman :foremanRole])
 
@@ -146,10 +147,12 @@
 
 
 (defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
-  (assoc app :kind (cond
+  (-> app
+      (assoc :kind (cond
                      (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
                      infoRequest "applications.inforequest"
-                     :else       "applications.application")))
+                     :else       "applications.application"))
+      app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant
                           "handler" ["authority.lastName" "authority.firstName"]

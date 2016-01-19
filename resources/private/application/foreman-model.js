@@ -194,7 +194,7 @@ LUPAPISTE.ForemanModel = function() {
     return false;
   };
 
-  hub.subscribe({type: "dialog-close", id: "dialog-invite-foreman"}, function() {
+  hub.subscribe({eventType: "dialog-close", id: "dialog-invite-foreman"}, function() {
     if (self.application() && self.finished()) {
       repository.load(self.application().id);
     }

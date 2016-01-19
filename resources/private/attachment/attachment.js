@@ -538,7 +538,7 @@ var attachment = (function() {
 
   hub.subscribe("upload-cancelled", LUPAPISTE.ModalDialog.close);
 
-  hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
+  hub.subscribe({eventType: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
   });
 

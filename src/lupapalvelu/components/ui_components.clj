@@ -217,6 +217,12 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
+   :external-api {:js (apply
+                        conj
+                        ["external-api-service.js" "external-api-tools.js"]
+                        (when (env/dev-mode?)
+                          ["dummy-api-client.js"]))}
+
    :verdict-attachment-prints {:depends [:common-html]
                                :html ["verdict-attachment-prints-order-template.html"
                                       "verdict-attachment-prints-order-history-template.html"
@@ -344,7 +350,7 @@
                              :company :analytics :register-company :footer]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
-   :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
+   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer]}
 

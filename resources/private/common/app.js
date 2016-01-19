@@ -12,6 +12,8 @@ var LUPAPISTE = LUPAPISTE || {};
    * startPage (String)        ID of the landing page
    * allowAnonymous (Boolean)  Allow all users to access the app. Default: require login.
    * showUserMenu (Boolean)    Default: complement of allowAnonymous, i.e., show menu for users tthat have logged in
+   * componentPages (Array)    Array of pageId strings. If provided, router skips visibility toggle for the given pageIds.
+   *                            Thus page visibility toggle responsibility for provided pageIds is in controlling component.
    * @param
    */
   LUPAPISTE.App = function (params) {
@@ -191,7 +193,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     hub.subscribe("login", function() { wasLoggedIn = true; });
 
-    hub.subscribe({type: "connection", status: "online"}, function () {
+    hub.subscribe({eventType: "connection", status: "online"}, function () {
       if (offline) {
         offline = false;
         pageutil.hideAjaxWait();
@@ -199,14 +201,14 @@ var LUPAPISTE = LUPAPISTE || {};
       unlock();
     });
 
-    hub.subscribe({type: "connection", status: "offline"}, function () {
+    hub.subscribe({eventType: "connection", status: "offline"}, function () {
       if (!offline) {
         offline = true;
         pageutil.showAjaxWait(loc("connection.offline"));
       }
     });
 
-    hub.subscribe({type: "connection", status: "session-dead"}, function () {
+    hub.subscribe({eventType: "connection", status: "session-dead"}, function () {
       if (wasLoggedIn) {
         LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
             {title: loc("session-dead.logout"), fn: self.redirectToHashbang});
@@ -215,7 +217,7 @@ var LUPAPISTE = LUPAPISTE || {};
       unlock();
     });
 
-    hub.subscribe({type: "connection", status: "lockdown"}, function (e) {
+    hub.subscribe({eventType: "connection", status: "lockdown"}, function (e) {
       if (!lockdown && lupapisteApp.models.globalAuthModel) {
         lupapisteApp.models.globalAuthModel.refreshWithCallback({});
       }
@@ -224,7 +226,7 @@ var LUPAPISTE = LUPAPISTE || {};
     });
 
     self.initSubscribtions = function() {
-      hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
+      hub.subscribe({eventType: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
       hub.subscribe("logout", function () {
         window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
       });

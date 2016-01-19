@@ -205,7 +205,7 @@ var repository = (function() {
       loc("error.application-not-found"), loc("error.application-not-accessible"),
       loc("navigation"), showApplicationList, loc("logout"), function() {hub.send("logout");});
 
-  hub.subscribe({type: "dialog-close", id : "dialog-application-load-error"}, function() {
+  hub.subscribe({eventType: "dialog-close", id : "dialog-application-load-error"}, function() {
     showApplicationList();
   });
 

@@ -93,7 +93,7 @@
   (-> organization :operations-attachments ((-> operation :name keyword))))
 
 (defn allowed-ip? [ip organization-id]
-  (pos? (mongo/count :organizations {:_id organization-id, :allowedAutologinIPs ip})))
+  (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
 
 (defn encode-credentials
   [username password]
