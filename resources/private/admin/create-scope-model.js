@@ -3,7 +3,8 @@ LUPAPISTE.CreateScopeModel = function(params) {
   var self = this;
   self.params = params;
   self.organization = params.organization;
-  var municipalityNumber = _.first(_.words(self.organization.id(), /-/));
+  // Use the first municipapity in scope, or try to guess by organizations id (should it follow the convention)
+  var municipalityNumber = util.getIn(params.organization, ["scope", 0, "municipality"], _.first(_.words(self.organization.id(), /-/)));
   var mappedMunicipalities = _(params.municipalities)
                               .map(function(muniId) {
                                 return {id: muniId,
