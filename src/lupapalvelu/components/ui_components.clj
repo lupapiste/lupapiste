@@ -219,7 +219,7 @@
 
    :external-api {:js (apply
                         conj
-                        ["api-service.js" "api-tools.js"]
+                        ["external-api-service.js" "external-api-tools.js"]
                         (when (env/dev-mode?)
                           ["dummy-api-client.js"]))}
 
