@@ -620,7 +620,7 @@
                             (when (empty? versions)
                               (fail :error.attachment.no-versions)))))
                       access/has-attachment-auth]
-   :states           states/pre-verdict-states}
+   :states           (lupapalvelu.states/all-application-states-but lupapalvelu.states/terminal-states)}
   [command]
   (update-application command
                       {:attachments {$elemMatch {:id attachmentId}}}
