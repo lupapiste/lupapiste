@@ -279,7 +279,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.approvalHubSubscribe = function(fun, listenBroadcasts) {
-    var filter = {type: "approval-status-" + self.docId,
+    var filter = {eventType: "approval-status-" + self.docId,
                   broadcast: Boolean(listenBroadcasts) };
     self.subscriptions.push(hub.subscribe( filter, fun ));
   };
