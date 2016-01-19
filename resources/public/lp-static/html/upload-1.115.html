@@ -21,8 +21,8 @@
   <form id="attachmentUploadForm" action="/api/upload/attachment" method="post" enctype="multipart/form-data" onsubmit="LUPAPISTE.ModalProgress.show();">
     <div class="upload-instructions">
       <p data-bind="ltext: 'attachment.upload.instructions.document'"></p>
-      <div data-bind="if: features.enabled('arkistointi')">
-        <div class="feature">
+      <div data-bind="if: archiveEnabled">
+        <div>
           <p data-bind="ltext: 'attachment.upload.instructions.pdfa'"></p>
         </div>
       </div>
