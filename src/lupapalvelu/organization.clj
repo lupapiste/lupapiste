@@ -55,10 +55,10 @@
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
-  "Reader role has access to every application within org. Guest can
+  "Reader role has access to every application within org. guestAuthority can
   only access those applications that have extended an explicit
   invitation."
-  (concat [:authority :approver :commenter :reader :guest] permanent-archive-authority-roles))
+  (concat [:authority :approver :commenter :reader :guestAuthority] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
   (if (:scope org)

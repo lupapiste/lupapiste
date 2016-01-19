@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1453213074449');
+@import url('main-blessed1.css?z=1453225651436');
 
 /* line 17, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:active {
@@ -2414,7 +2414,7 @@ div.search i {
   color: #f7ac2e;
 }
 /* line 48, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog input, .bubble-dialog textarea {
+.bubble-dialog input[type=text], .bubble-dialog textarea {
   box-sizing: border-box;
   width: 100%;
   padding: 4px;
@@ -2435,6 +2435,19 @@ div.search i {
   border: 1px solid red;
   color: red;
   padding: 20px;
+}
+/* line 72, ../../../private/common-html/sass/partials/__guests.scss */
+.bubble-dialog table.mandatory tr {
+  background-color: initial;
+}
+/* line 74, ../../../private/common-html/sass/partials/__guests.scss */
+.bubble-dialog table.mandatory tr td {
+  border: 1px solid #f7ac2e;
+  background-color: none;
+}
+/* line 78, ../../../private/common-html/sass/partials/__guests.scss */
+.bubble-dialog table.mandatory tr td.full {
+  width: 33%;
 }
 
 /* VIEWS

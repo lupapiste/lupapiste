@@ -11,7 +11,7 @@
                                usr/get-user-by-email
                                usr/with-org-auth)
         admin-org-id       (usr/authority-admins-organization-id admin)
-        reader-roles       (set (remove #{:guest} org/authority-roles))
+        reader-roles       (set (remove #{:guestAuthority} org/authority-roles))
         candidate-org-ids  (usr/organization-ids-by-roles candidate reader-roles)
         already-has-access (->> candidate-org-ids
                                 (filter #(= admin-org-id %))

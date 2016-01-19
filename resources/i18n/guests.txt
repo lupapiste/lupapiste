@@ -1,4 +1,5 @@
 "auth-admin.guest-authorities.help" "fi" "Käyttäjät, joille viranomainen voi antaa lukuoikeuden yksittäiselle hankkeelle. Nämä käyttäjät liitetään myös organisaation viranomaisiksi. Tarvittaessa luodaan uusi käyttäjä."
+"authorityrole.guestAuthority" "fi" "Hankekohtainen lukuoikeus (kutsuttava)"
 "guest-authorities.title" "fi" "Hankekohtainen lukuoikeus"
 "guest-authority.role" "fi" "Rooli"
 "guest-authority.name" "fi" "Nimi"
@@ -11,3 +12,4 @@
 "application-guests.message" "fi" "Viesti"
 "application-guests.message.default" "fi" "Hei! Sinulle on annettu lukuoikeus hakemukselle Lupapisteessä."
 "error.already-has-access" "fi" "Käyttäjällä on jo lukuoikeus hakemukselle."
+"application-guests.caption" "fi" "Valitse henkilö, jolle lukuoikdeudet annetaan"

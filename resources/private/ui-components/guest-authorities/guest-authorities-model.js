@@ -83,31 +83,35 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
     dd.guestClick = function() {
       // We always add the user to organization just in case.
       // Note: for an already existing organization authority,
-      // the role is diminished to guest
+      // the role is diminished to guestAuthority
       ajax.command( "update-user-organization", {email: dd.email(),
                                                  firstName: dd.firstName(),
                                                  lastName: dd.lastName(),
-                                                 roles: ["guest"]})
-    .pending( dd.waitingOk )
-    .success( function() {
-      ajax.command( "update-guest-authority-organization",
-                    {email: dd.email(),
-                     name: dd.firstName() + " " + dd.lastName(),
-                     role: dd.role()})
+                                                 roles: ["guestAuthority"]})
       .pending( dd.waitingOk )
       .success( function() {
-        fetchGuestAuthorities();
-        // Organizations users
-        hub.send( "redraw-users-list");
-        LUPAPISTE.ModalDialog.close();
+        ajax.command( "update-guest-authority-organization",
+                      {email: dd.email(),
+                       name: dd.firstName() + " " + dd.lastName(),
+                       role: dd.role()})
+     .pending( dd.waitingOk )
+        .success( function() {
+          fetchGuestAuthorities();
+          // Organizations users
+          hub.send( "redraw-users-list");
+          LUPAPISTE.ModalDialog.close();
+        })
+        .call();
+      })
+      .error( function ( res ) {
+        var err = res.text;
+        if( err === "error.user-not-found") {
+          err = "error.not-authority";
+        }
+        dd.errorMessage( err || "guest-authority.failure" );
       })
       .call();
-    })
-    .error( function () {
-      dd.errorMessage( "guest-authority.failure");
-    })
-    .call();
-  };
+    };
   }
 
   self.dialogData = new DialogData();

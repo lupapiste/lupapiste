@@ -3,7 +3,16 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
 
   var self = this;
 
-  self.isAuthority = lupapisteApp.models.currentUser.isAuthority();
+  self.isAuthority = ko.pureComputed( function() {
+    return lupapisteApp.models.currentUser.isAuthority();
+  });
+
+    self.guestAuthorities = [{name: "Hello world",
+                            email: "hello@world.com",
+                            role: "shijie"},
+                           {name: "Foo Bar",
+                            email: "foo@bar.com",
+                            role: "Baz"}];
 
   self.emailId = _.uniqueId( "guest-email-");
   self.messageId = _.uniqueId( "guest-message-");
@@ -17,18 +26,10 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     self.bubbleVisible( !self.bubbleVisible());
   };
 
-  self.guestAuthority = ko.observable();
-
   self.email = ko.observable();
 
   self.sendEnabled = ko.pureComputed( function() {
-    var enabled = true;
-    if( self.isAuthority ) {
-      enabled = self.guestAuthority();
-    } else {
-      enabled = util.isValidEmailAddress( self.email());
-    }
-    return Boolean( enabled );
+    return util.isValidEmailAddress( self.email());
   });
 
 
@@ -49,7 +50,7 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
   function sendInvite( args ) {
     ajax.command( "invite-with-role",
                 _.assign( args, {text: self.message(),
-                                role: "guest",
+                                role: self.isAuthority() ? "guestAuthority" : "guest",
                                 path: "",
                                 documentId: "",
                                 documentName: ""}))

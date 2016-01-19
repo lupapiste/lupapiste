@@ -45,7 +45,7 @@
     content: " *";
     color: $orange;
   }
-  input, textarea {
+  input[type=text], textarea {
     box-sizing: border-box;
     width: 100%;
     padding: 4px;
@@ -66,5 +66,18 @@
     border: 1px solid red;
     color: red;
     padding: $pad;
+  }
+
+  table.mandatory {
+    tr {
+      background-color: initial;
+      td {
+        border: 1px solid $orange;
+        background-color: none;
+      }
+      td.full {
+        width: 33%;
+      }
+    }
   }
 }
