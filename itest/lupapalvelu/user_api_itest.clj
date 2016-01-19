@@ -87,11 +87,19 @@
     (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "a") => fail?)
 
   (fact (command ronja :save-application-filter :title "titteli" :filter {} :sort {:field "applicant" :asc true} :filterId "beefcace" :filterType "application") => ok?)
-  (fact "Filter is saved"
-    (let [{user :user} (query admin :user-by-email :email "ronja.sibbo@sipoo.fi")]
-      (get-in user [:applicationFilters 0 :title]) => "titteli"
+  (fact (command ronja :save-application-filter :title "TJt" :filter {} :sort {:field "foremanRole" :asc true} :filterId "abbacace" :filterType "foreman") => ok?)
+
+  (let [{:keys [applicationFilters foremanFilters defaultFilter]} (query ronja :saved-application-filters)]
+
+    (fact "Application filter is saved"
+      (get-in applicationFilters [0 :title]) => "titteli"
       (fact "as default"
-        (->> user :defaultFilter :id) => "beefcace"))))
+        (:id defaultFilter) => "beefcace"))
+
+    (fact "Foreman filter is saved"
+      (get-in foremanFilters [0 :title]) => "TJt"
+      (fact "as default"
+        (:foremanFilterId defaultFilter) => "abbacace"))))
 
 (facts update-default-application-filter
   (apply-remote-minimal)

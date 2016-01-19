@@ -38,14 +38,18 @@
 ;; ==============================================================================
 ;;
 
+(defn- get-user [user]
+  (if (user/virtual-user? user)
+    user
+    (let [full-user (user/get-user-by-id (:id user))]
+      (dissoc full-user :private :personId))))
+
 (defquery user
   {:user-roles auth/all-authenticated-user-roles}
   [{user :user}]
-  (if (user/virtual-user? user)
-    (ok :user user)
-    (if-let [full-user (user/get-user-by-id (:id user))]
-      (ok :user (dissoc full-user :private :personId))
-      (fail))))
+  (if-let [full-user (get-user user)]
+    (ok :user (dissoc full-user :private :personId))
+    (fail)))
 
 (defquery users
   {:user-roles #{:admin}}
@@ -286,6 +290,14 @@
                       (when (= (get-in user [:defaultFilter id-key]) filterId)
                         {$set {(str "defaultFilter." id-key) ""}}))]
     (mongo/update-by-id :users user-id update)))
+
+(defquery saved-application-filters
+  {:user-roles auth/all-authenticated-user-roles
+   :description "Returns search filters for external services. The same data is provided by user query."}
+  [{user :user}]
+  (if-let [full-user (get-user user)]
+    (ok (select-keys full-user [:applicationFilters :foremanFilters :defaultFilter]))
+    (fail)))
 
 ;;
 ;; Change organization data:
