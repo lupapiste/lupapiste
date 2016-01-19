@@ -51,6 +51,14 @@ LUPAPISTE.SidePanelService = function() {
   self.showAllComments = ko.observable(true);
   self.mainConversation = ko.observable(true);
   self.target = ko.observable({type: "application"});
+  var commentRoles = undefined;
+
+  var commentPending = ko.observable();
+
+  ko.computed(function() {
+    var state = commentPending() ? "pending" : "finished";
+    hub.send("SidePanelService::AddCommentProcessing", {state: state});
+  });
 
   self.comments = ko.computed(function() {
     var filteredComments =
@@ -66,17 +74,17 @@ LUPAPISTE.SidePanelService = function() {
     var page = self.currentPage();
     if (page) {
       var type = pageutil.getPage();
+      commentRoles = ["applicant", "authority"];
+      self.mainConversation(false);
+      self.showAllComments(false);
+      self.target({type: type, id: pageutil.lastSubPage()});
+
       switch(type) {
         case "attachment":
         case "statement":
-          self.mainConversation(false);
-          self.showAllComments(false);
-          self.target({type: type, id: pageutil.lastSubPage()});
           break;
         case "verdict":
-          self.mainConversation(false);
-          self.showAllComments(false);
-          self.target({type: type, id: pageutil.lastSubPage()}, ["authority"]);
+          commentRoles = ["authority"];
           break;
         default:
           self.mainConversation(true);
@@ -100,4 +108,30 @@ LUPAPISTE.SidePanelService = function() {
     }
   });
 
+  hub.subscribe("SidePanelService::AddComment", function(event) {
+    var markAnswered = event.markAnswered;
+    var openApplication = event.openApplication;
+    var text = event.text || "";
+    var to = event.to;
+    ajax.command("add-comment", {
+        id: ko.unwrap(application.id),
+        text: _.trim(text),
+        target: self.target(),
+        to: to,
+        roles: commentRoles,
+        "mark-answered": markAnswered,
+        openApplication: openApplication
+    })
+    .pending(commentPending)
+    .success(function() {
+      hub.send("SidePanelService::AddCommentProcessed", {status: "success"});
+      if (markAnswered) {
+        // TODO show component dialog
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("comment-request-mark-answered-label"), loc("comment-request-mark-answered.ok"));
+      }
+      // Just to show new comment?
+      repository.load(ko.unwrap(application.id));
+    })
+    .call();
+  });
 };

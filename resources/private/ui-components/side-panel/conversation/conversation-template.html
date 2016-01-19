@@ -21,17 +21,25 @@
 
           <div class="row conversation-button-group">
             <button class="positive"
-                    data-bind="disable: sendingDisabled, click: stateOpenApplication, visible: showStateOpenApplication"
+                    data-bind="disable: submitDisabled,
+                               click: stateOpenApplication,
+                               visible: showStateOpenApplication,
+                               css: {waiting: pending}"
                     data-test-id="application-open-application-btn"
                     type="submit">
               <i class="lupicon-comment"></i>
+              <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: 'application.conversationOpen'"></span>
             </button>
             <button class="positive"
-                    data-bind="visible: authorization.ok('add-comment'), disable: sendingDisabled, click: submit"
+                    data-bind="visible: authorization.ok('add-comment'),
+                               disable: submitDisabled,
+                               click: submit,
+                               css: {waiting: pending}"
                     data-test-id="application-new-comment-btn"
                     type="submit">
               <i class="lupicon-comment"></i>
+              <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: 'application.conversationSend'"></span>
             </button>
           </div>

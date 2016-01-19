@@ -2,6 +2,8 @@ LUPAPISTE.ConversationModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   self.application = params.application;
   self.authorization = params.authorization;
   self.currentPage = params.currentPage;
@@ -10,9 +12,8 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.text = ko.observable();
   self.textSelected = ko.observable();
-  self.sendingDisabled = ko.observable();
   self.processing = ko.observable();
-  self.pending = ko.observable();
+  self.pending = ko.observable(false);
   self.to = ko.observable();
   self.showAttachmentComments = ko.observable(true);
   self.showPreparationComments = ko.observable(false);
@@ -24,6 +25,10 @@ LUPAPISTE.ConversationModel = function(params) {
   self.highlightConversation = ko.observable(false);
 
   var previousHash = lupapisteApp.models.rootVMO.previousHash;
+
+  self.submitDisabled = ko.pureComputed(function() {
+    return self.pending() || _.isEmpty(self.text());
+  });
 
   self.infoRequest = ko.pureComputed(function() {
     return util.getIn(self, ["application", "infoRequest"]);
@@ -47,7 +52,10 @@ LUPAPISTE.ConversationModel = function(params) {
   };
 
   self.submit = function() {
-    console.log("submit");
+    self.sendEvent("SidePanelService", "AddComment", {markAnswered: false,
+                                                      openApplication: false,
+                                                      text: self.text(),
+                                                      to: self.to()});
   };
 
   self.markAnswered = function () {
@@ -112,4 +120,18 @@ LUPAPISTE.ConversationModel = function(params) {
   self.isForMe = function(comment) {
     return util.getIn(comment, ["to", "id"]) === lupapisteApp.models.currentUser.id();
   };
+
+  self.addEventListener("SidePanelService", "AddCommentProcessing", function(event) {
+    self.pending(event.state === "pending");
+  });
+
+  self.addEventListener("SidePanelService", "AddCommentProcessed", function(event) {
+    self.pending(false);
+    if (event.status === "success") {
+      self.text("");
+      hub.send("indicator", {style: "positive", message: "comment.save.success"});
+    } else {
+      hub.send("indicator", {style: "negative", message: "comment.save.failed"});
+    }
+  });
 };
