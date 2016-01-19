@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1452871277038');
+@import url('main-blessed1.css?z=1453191320732');
 
 /* line 17, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:active {
@@ -4482,7 +4482,7 @@ td.comment-text {
   margin-bottom: 12px;
 }
 /* line 61, ../../../private/common-html/sass/views/_admin.scss */
-.admin #modal-dialog-content-component select, .admin #modal-dialog-content-component input {
+.admin #modal-dialog-content-component select, .admin #modal-dialog-content-component input[type=text] {
   display: block;
   margin: 6px 0;
 }
