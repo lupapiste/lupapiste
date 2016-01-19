@@ -42,9 +42,10 @@
                     <div data-bind="component: {name: 'conversation',
                                                 params: {application: application,
                                                          authorization: authorization,
-                                                         authorities: authorities,
+                                                         authorities: sidePanelService.authorities,
                                                          currentPage: currentPage,
-                                                         comments: sidePanelService.comments}}"></div>
+                                                         comments: sidePanelService.comments,
+                                                         showAllComments: sidePanelService.showAllComments}}"></div>
                   </div>
               </div>
               <!-- ko if: authorization.ok('add-authority-notice')-->

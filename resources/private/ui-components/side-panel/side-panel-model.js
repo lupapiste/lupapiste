@@ -4,9 +4,6 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.application = lupapisteApp.models.application;
   self.authorization = lupapisteApp.models.applicationAuthModel;
-  self.currentPage = lupapisteApp.models.rootVMO ? lupapisteApp.models.rootVMO.currentPage : ko.observable();
-
-  self.authorities = ko.observable();
 
   self.enableSidePanel = ko.observable(false);
   self.showSidePanel = ko.observable(false);
@@ -18,6 +15,7 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.showHelp = ko.observable(false);
 
   self.sidePanelService = lupapisteApp.services.sidePanelService;
+  self.currentPage = self.sidePanelService.currentPage;
 
   self.sidePanelOpen = ko.pureComputed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
@@ -77,15 +75,4 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.dispose = function() {
     hub.unsubscribe(subscription);
   };
-
-  // TODO move to service
-  ko.computed(function() {
-    if (self.application && self.application.id() && self.authorization.ok("application-authorities") ) {
-      ajax.query("application-authorities", {id: self.application.id()})
-      .success(function(resp) {
-        self.authorities(resp.authorities);
-      })
-      .call();
-    }
-  });
 };

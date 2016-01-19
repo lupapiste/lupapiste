@@ -18,6 +18,7 @@ LUPAPISTE.ConversationModel = function(params) {
   self.showPreparationComments = ko.observable(false);
 
   self.comments = params.comments;
+  self.showAllComments = params.showAllComments;
 
   self.mainConversation = ko.observable(true);
   self.highlightConversation = ko.observable(false);
@@ -53,63 +54,39 @@ LUPAPISTE.ConversationModel = function(params) {
     console.log("answered");
   };
 
-  // function refreshConversations(page) {
-  //   if (page) {
-  //     var type = pageutil.getPage();
-  //     self.mainConversation(true);
-  //     switch(type) {
-  //       case "attachment":
-  //         self.mainConversation(false);
-  //         self.comment.refresh(self.application, false, {type: type, id: pageutil.lastSubPage()});
-  //         break;
-  //       case "statement":
-  //         self.mainConversation(false);
-  //         self.comment.refresh(self.application, false, {type: type, id: pageutil.lastSubPage()});
-  //         break;
-  //       case "verdict":
-  //         self.mainConversation(false);
-  //         self.comment.refresh(self.application, false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
-  //         break;
-  //       default:
-  //         self.comment.refresh(self.application, true);
-  //         break;
-  //     }
-  //   }
-  // }
-
   var previousPage = self.currentPage();
 
   function highlightConversation() {
     hub.send("show-conversation");
-    self.comment.isSelected(true);
+    self.textSelected(true);
     self.highlightConversation(true);
     setTimeout(function() {
       self.highlightConversation(false);
     }, 2000);
   }
 
+  // TODO move to side-panel or maybe service
   ko.computed(function() {
-    // refreshConversations(self.currentPage());
-    // if (self.currentPage() !== previousPage && self.comment.text()) {
-    //   hub.send("show-dialog", {ltitle: "application.conversation.unsentMessage.header",
-    //                            size: "medium",
-    //                            component: "yes-no-dialog",
-    //                            componentParams: {ltext: "application.conversation.unsentMessage",
-    //                                              yesFn: function() {
-    //                                                if (previousHash()) {
-    //                                                  location.hash = previousHash();
-    //                                                }
-    //                                                highlightConversation();
-    //                                              },
-    //                                              noFn: function() {
-    //                                                self.comment.text(undefined);
-    //                                                previousPage = self.currentPage();
-    //                                              },
-    //                                              lyesTitle: "application.conversation.sendMessage",
-    //                                              lnoTitle: "application.conversation.clearMessage"}});
-    // } else {
-    //   previousPage = self.currentPage();
-    // }
+    if (self.currentPage() !== previousPage && self.text()) {
+      hub.send("show-dialog", {ltitle: "application.conversation.unsentMessage.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.conversation.unsentMessage",
+                                                 yesFn: function() {
+                                                   if (previousHash()) {
+                                                     location.hash = previousHash();
+                                                   }
+                                                   highlightConversation();
+                                                 },
+                                                 noFn: function() {
+                                                   self.text(undefined);
+                                                   previousPage = self.currentPage();
+                                                 },
+                                                 lyesTitle: "application.conversation.sendMessage",
+                                                 lnoTitle: "application.conversation.clearMessage"}});
+    } else {
+      previousPage = self.currentPage();
+    }
   }).extend({ rateLimit: 100 });
 
 
@@ -127,7 +104,7 @@ LUPAPISTE.ConversationModel = function(params) {
   }
 
   self.isVisible = function(comment) {
-    return !self.takeAll ||
+    return !self.showAllComments() ||
              ((self.showAttachmentComments()  || !self.isForAttachment(comment)) &&
               (!isPreparationComment(comment) || self.showPreparationComments()));
   };
