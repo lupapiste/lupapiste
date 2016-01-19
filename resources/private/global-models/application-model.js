@@ -103,6 +103,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.urgency = ko.observable();
   self.authorityNotice = ko.observable();
   self.tags = ko.observable();
+  self.comments = ko.observable([]);
+
   self.summaryAvailable = ko.pureComputed(function() {
     return self.inPostVerdictState() || self.state() === "canceled";
   });

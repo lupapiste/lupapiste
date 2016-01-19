@@ -4,6 +4,7 @@ LUPAPISTE.SidePanelService = function() {
 
   var application = lupapisteApp.models.application;
 
+  // Notice
   self.urgency = ko.computed(function() {
     return ko.unwrap(application.urgency);
   });
@@ -38,5 +39,18 @@ LUPAPISTE.SidePanelService = function() {
 
   hub.subscribe("SidePanelService::TagsChanged", function(event) {
     changeNoticeInfo("add-application-tags", _.pick(event, "tags"));
+  });
+
+  // Conversation
+  self.comments = ko.observableArray([]);
+
+  self.comments = ko.computed(function() {
+    var filteredComments =
+      _.filter(ko.mapping.toJS(application.comments),
+        function(comment) {
+          // return self.takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
+          return true;
+        });
+    return filteredComments;
   });
 };

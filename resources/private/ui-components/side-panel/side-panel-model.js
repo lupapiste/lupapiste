@@ -88,5 +88,4 @@ LUPAPISTE.SidePanelModel = function(params) {
       .call();
     }
   });
-
 };

@@ -1,5 +1,33 @@
-@import url('main-blessed1.css?z=1452758597099');
+@import url('main-blessed1.css?z=1453200010175');
 
+/* line 45, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component .autocomplete-component {
+  width: 430px;
+  position: static;
+}
+/* line 50, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .header {
+  padding-top: 2px;
+  padding-bottom: 4px;
+  padding-left: 24px;
+  border-bottom: 1px solid;
+  font-size: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* line 58, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .header .title {
+  line-height: 24px;
+}
+/* line 61, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .header .close {
+  position: absolute;
+  right: 12px;
+  /* cursor: pointer; */
+  /* &:after { */
+  /*   content: "X"; */
+  /* } */
+}
 /* line 71, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .mask {
   position: fixed;
@@ -5048,29 +5076,33 @@ table.admin-settings td.value .save-indicator {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
+/* line 249, ../../../private/common-html/sass/views/_side_panel.scss */
+#conversation-panel label {
+  color: #fff;
+}
 
-/* line 252, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 255, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .message-buttons button {
   margin-bottom: 6px;
 }
 
 @media all and (max-width: 1280px) {
-  /* line 259, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 262, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 400px;
   }
 
-  /* line 264, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 267, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel {
     right: -400px;
   }
 
-  /* line 269, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 272, ../../../private/common-html/sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }
 
-  /* line 273, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 276, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons {
     display: table;
   }
@@ -5084,7 +5116,7 @@ table.admin-settings td.value .save-indicator {
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
-  /* line 275, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 278, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons button {
     margin-bottom: 6px;
   }

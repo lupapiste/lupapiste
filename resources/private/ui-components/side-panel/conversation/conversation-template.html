@@ -3,13 +3,118 @@
 <body>
   <section class="page container">
     <script type="text/html" id="conversation-template">
-      <div data-bind="template: {name: 'comment-template',
-                                 data: {comment: comment,
-                                        authorities: authorities,
-                                        mainConversation: mainConversation,
-                                        authorization: authorization,
-                                        infoRequest: infoRequest}},
-                      css: {'highlight-conversation': highlightConversation}"></div>
+
+      <div>
+        <form class="form-grid form-grid--columns-2 form-grid--no-border">
+          <div class="row row--no-margin">
+            <div class="col-2"
+                 data-bind="component: {name: 'textarea-field',
+                                        params: {value: text,
+                                                 id: 'application-new-comment-text',
+                                                 maxlength: 4000,
+                                                 lLabel: 'application.conversationPrompt',
+                                                 lPlaceholder: 'comment.placeholder'}},
+                            hasFocus: textSelected,
+                            visible: authorization.ok('add-comment')"></div>
+          </div>
+
+          <div class="row conversation-button-group">
+            <button class="positive"
+                    data-bind="disable: sendingDisabled, click: stateOpenApplication, visible: showStateOpenApplication"
+                    data-test-id="application-open-application-btn"
+                    type="submit">
+              <i class="lupicon-comment"></i>
+              <span data-bind="ltext: 'application.conversationOpen'"></span>
+            </button>
+            <button class="positive"
+                    data-bind="visible: authorization.ok('add-comment'), disable: sendingDisabled, click: submit"
+                    data-test-id="application-new-comment-btn"
+                    type="submit">
+              <i class="lupicon-comment"></i>
+              <span data-bind="ltext: 'application.conversationSend'"></span>
+            </button>
+          </div>
+
+          <!-- ko if: authorization.ok('can-mark-answered') -->
+          <div class="row">
+            <button data-bind="click: markAnswered"
+                    data-test-id="comment-request-mark-answered"
+                    type="submit"
+                    class="positive">
+              <span data-bind="ltext: 'comment-request-mark-answered-label'"></span>
+            </button>
+          </div>
+          <!-- /ko -->
+          <div class="row"
+               data-bind="visible: canTargetToAuthority">
+            <div class="col-2" data-bind="component: {name: 'select-field',
+                                        params: {value: to,
+                                                 options: authorities,
+                                                 optionsText: function(item) {
+                                                                return item.lastName + ' ' + item.firstName;
+                                                              },
+                                                 optionsValue: 'id',
+                                                 lOptionsCaption: 'comment-request-prompt',
+                                                 lLabel: 'comment-request-label',
+                                                 id: 'side-panel-assigneed-authority'}}"></div>
+          </div>
+          <!-- ko if: mainConversation -->
+          <div class="row row--no-margin">
+            <div class="col-2 col--no-margin" data-bind="component: {name: 'checkbox-field',
+                                                      params: {value: showAttachmentComments,
+                                                               lLabel: 'conversation.attachment.toggle',
+                                                               is: 'show-attachment-comments'}}"></div>
+          </div>
+          <!-- /ko -->
+          <!-- ko if: authorization.ok('save-verdict-draft') -->
+          <div class="row row--no-margin">
+            <div class="col-2 col--no-margin" data-bind="component: {name: 'checkbox-field',
+                                                      params: {value: showPreparationComments,
+                                                               lLabel: 'conversation.preparation.toggle',
+                                                               id: 'show-preparation-comments'}}"></div>
+          </div>
+          <!-- /ko -->
+        </form>
+
+        <div data-bind="foreach: comments().slice(0).reverse()" data-test-id="comments-table">
+
+         <div class="is-comment"
+              data-bind="css: {
+                          'comment-bubble-authority':  $parent.isAuthorityComment($data),
+                          'comment-bubble':            !$parent.isAuthorityComment($data),
+                          'attachment': $parent.isForAttachment($data),
+                          'for-me':     $parent.isForMe($data),
+                          },
+                          visible: $parent.isVisible($data)">
+            <div class="header">
+                <span class="sender">
+                    <span data-bind="fullName: user"></span>
+                    <span class="role" data-bind="ltext: user.role"></span>
+              <!-- ko with: $data.to -->
+                <span class="to" data-bind="fullName: $data"></span>
+                <!-- /ko -->
+                </span>
+                <span class="timestamp" data-bind="dateTimeString: created"></span>
+            </div>
+            <div class="content">
+              <!-- ko if: $parent.isForAttachment($data) -->
+              <span class="target" data-bind="if: target.id">
+                <!-- ko if: target.attachmentType -->
+                <a data-bind="attr: {href: '#!/attachment/' + $parent.applicationId() + '/' + target.id},
+                              text: target.attachmentType"></a>
+                <!-- /ko -->
+                <!-- ko ifnot: target.attachmentType -->
+                <span class="deleted" data-bind="ltext: 'attachment.removed'"></span>
+                <!-- /ko -->
+              </span>
+              <!-- /ko -->
+              <span data-bind="text: text"></span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <div class="process-nav"></div>
     </script>
   </section>
