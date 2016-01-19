@@ -19,7 +19,7 @@ Statement giver can be deleted - no questions asked
 Authorities from own municipality can be added as statement giver
   Create statement giver  ronja.sibbo@sipoo.fi  Pelastusviranomainen
 
-Auhtorities from different municipality can be added as statement giver
+Authorities from different municipality can be added as statement giver
   Create statement giver  veikko.viranomainen@tampere.fi  Tampereen luvat
 
 Authority can be a statement giver multiple times
@@ -31,7 +31,8 @@ New applications does not have statements
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
-  Create application with state  ${appname}  753-416-25-22  kerrostalo-rivitalo  open
+  Set Suite Variable  ${appPropertyId}  753-416-25-22
+  Create application with state  ${appname}  ${appPropertyId}  kerrostalo-rivitalo  open
 
   Open tab  statement
   Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
@@ -43,7 +44,7 @@ Sonja sees indicators from pre-filled fields
   Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
 
 Sonja adds five statement givers to application
-  Open application  ${appname}  753-416-25-22
+  Open application  ${appname}  ${appPropertyId}
   Open tab  statement
   Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
   Wait and click   xpath=//button[@data-test-id="add-statement"]
@@ -128,7 +129,7 @@ Draft is removable
 
 Veikko can see statements as he is being requested a statement to the application
   Veikko logs in
-  Open application  ${appname}  753-416-25-22
+  Open application  ${appname}  ${appPropertyId}
 
 Statement giver sees comments
   # 1+1 statement comments, 1 auto generated attachment
@@ -158,6 +159,12 @@ Veikko from Tampere can give statement
 Sonja can see statement indicator
   Sonja logs in
   Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//i[@class='lupicon-star']
+
+There is no possibility to delete the generated statement pdf attachment
+  Open application  ${appname}  ${appPropertyId}
+  Open tab  attachments
+  Wait until  Element should be visible  xpath=//tr[@id="attachment-row-ennakkoluvat_ja_lausunnot-lausunto"]
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-ennakkoluvat_ja_lausunnot.lausunto"]
 
 *** Keywords ***
 

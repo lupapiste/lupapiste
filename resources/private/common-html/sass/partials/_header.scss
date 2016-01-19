@@ -41,8 +41,8 @@ $language-padding: 20px;
   }
 }
 
-@mixin language-select( $link: $orange, $hover: white, $bg: inherit ) {
-  @include nav-link( $link: $link, $hover: $hover, $hover-bg: $language-bg );
+@mixin language-select( $link: $orange, $hover: white, $bg: inherit, $hover-bg: $language-bg ) {
+  @include nav-link( $link: $link, $hover: $hover, $hover-bg: $hover-bg );
   background-color: $bg;
   display: inline-block;
   margin: 0;
@@ -103,11 +103,12 @@ nav {
     width: $brand-width;
     display: inline-block;
     float: left;
-    a img {
+    a.logo {
       float: left;
       width: 164px;
       height: 35px;
       margin: 12px;
+      background: url("/lp-static/img/logo.png");
     }
   }
   .language-closed {
@@ -165,6 +166,10 @@ nav {
 
 nav {
   .julkipano-brand {
+    a.logo {
+      background: none;
+    }
+
     .header-box {
       @include nav-link($link: $blue, $hover: white);
     }
@@ -244,4 +249,28 @@ $notification-bottom: -60px;
   }
 
   h2 {margin-top: $marginL}
+}
+
+/* Louhi theme */
+
+.louhi {
+  nav {
+    a.logo {
+      background: url("/lp-static/img/logo-v2-flat.png");
+    }
+
+    .nav-top {
+      background-color: #fff;
+    }
+    .language-closed {
+      @include language-select( $link: black, $hover: $orange, $hover-bg: inherit );
+    }
+    .language-open {
+      @include language-select( $link: black, $hover: $orange, $hover-bg: inherit );
+    }
+      .header-box {
+      @include nav-link($link: black, $hover: $orange);
+      }
+    }
+    #logout-header-box { display: none; }
 }

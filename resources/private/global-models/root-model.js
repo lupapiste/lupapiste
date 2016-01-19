@@ -10,4 +10,10 @@ LUPAPISTE.RootViewModel = function() {
     self.currentPage(data.pageId);
     self.previousHash(data.previousHash);
   });
+
+  self.externalApiEnabled = ko.pureComputed(function() {
+    return lupapisteApp.services.externalApiService &&
+           lupapisteApp.services.externalApiService.enabled &&
+           features.enabled("louhipalvelin");
+  });
 };

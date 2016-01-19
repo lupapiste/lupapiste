@@ -318,6 +318,10 @@ As Olli
   Go to login page
   Olli logs in
 
+As Pekka
+  Go to login page
+  Pekka logs in
+
 Olli logs in
   Authority logs in  olli  olli  Olli Ule\u00e5borg
 
@@ -341,6 +345,9 @@ Sonja logs in
 
 Ronja logs in
   Authority logs in  ronja  sonja  Ronja Sibbo
+
+Pekka logs in
+  Authority logs in  pekka  pekka  Pekka Borga
 
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri

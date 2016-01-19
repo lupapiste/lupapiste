@@ -262,9 +262,11 @@ td.comment-text {
 }
 
 .archive-valid {
-  .icon {
+  margin-top: $marginM;
+  [class^="lupicon-"] {
     vertical-align: middle;
-    margin-left: 5px;
+    margin-left: 2px;
+    font-size: 18px;
   }
 }
 

@@ -27,23 +27,6 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
     };
   };
 
-  self.setPropertyId = function(id) {
-    var currentMuni = self.municipalityCode();
-    self.propertyId(id);
-    if (id && (!currentMuni || !_.startsWith(id, currentMuni))) {
-      ajax.query("municipality-by-property-id", {propertyId: id})
-        .success(function(resp) {
-          self.municipalityCode(resp.municipality);
-        })
-        .error(function(e) {
-          error("Failed to find municipality", id, e);
-        })
-        .processing(self.processingAddress)
-        .call();
-    }
-    return self;
-  };
-
   self.municipalityName = ko.pureComputed(function() {
     return self.municipalityCode() ? loc(["municipality", self.municipalityCode()]): "";
   });
@@ -148,7 +131,7 @@ LUPAPISTE.LocationModelBase = function(mapOptions) {
   self.searchPropertyId = function(x, y) {
     if (x && y) {
       locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
-        self.setPropertyId(id);
+        self.propertyId(id);
         self.propertyIdValidated(true);
       }, self.onError, self.processing);
     }

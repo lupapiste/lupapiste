@@ -5,15 +5,6 @@
             [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.property-location :as plocation]))
 
-(defquery municipality-by-property-id
-  {:parameters [propertyId]
-   :input-validators [(partial action/property-id-parameters [:propertyId])]
-   :user-roles #{:anonymous}}
-  [_]
-  (if-let [municipality (p/municipality-id-by-property-id propertyId)]
-    (ok :municipality municipality)
-    (fail :municipalitysearch.notfound)))
-
 (defquery property-borders
   {:parameters [propertyIds]
    :description "Returns property borders as POLYGON WKT strings"

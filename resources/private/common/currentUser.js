@@ -93,7 +93,7 @@ LUPAPISTE.CurrentUser = function() {
     }
   });
 
-  hub.subscribe({type: "dialog-close", id: "user-notification-dialog"}, function() {
+  hub.subscribe({eventType: "dialog-close", id: "user-notification-dialog"}, function() {
     ajax.command("remove-user-notification")
       .complete(function () {
         hub.send("reload-current-user");

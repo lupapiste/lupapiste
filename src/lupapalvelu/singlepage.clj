@@ -77,14 +77,20 @@
 (def- buildinfo-summary
   (format "%s %s [%s] %4$tF %4$tT (%5$s)"
           env/target-env
-          (:hg-branch env/buildinfo)
+          (:git-branch env/buildinfo)
           (name env/mode)
           (tc/to-date (tc/from-long (:time env/buildinfo)))
           (:build-number env/buildinfo)))
 
-(defn inject-content [t {:keys [nav info page footer templates]} component lang]
+(defn- set-body-class [t component theme]
+  (let [css-classes (if (uic/themes theme)
+                      (str (name component) \space theme)
+                      (name component))]
+    (enlive/transform t [:body] (fn [e] (assoc-in e [:attrs :class] css-classes)))))
+
+(defn inject-content [t {:keys [nav info page footer templates]} component lang theme]
   (-> t
-      (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
+      (set-body-class component theme)
       (enlive/transform [:nav] (enlive/content (map :content nav)))
       (enlive/transform [:div.notification] (enlive/content (map :content info)))
       (enlive/transform [:section] (enlive/content page))
@@ -111,18 +117,19 @@
             (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]))] ; preserve KnockoutJS comments
     (.compress c html)))
 
-(defn compose-html [component lang]
+(defn compose-html [component lang theme]
   (let [out (ByteArrayOutputStream.)]
     (doseq [element (inject-content
                       (enlive/html-resource (c/path "template.html"))
                       (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
                       component
-                      lang)]
+                      lang
+                      theme)]
       (.write out (ss/utf8-bytes element)))
     (-> out (.toString (.name ss/utf8)) (compress-html) (ss/utf8-bytes))))
 
-(defn compose [kind component lang]
+(defn compose [kind component lang theme]
   (tracef "Compose %s%s" component kind)
   (if (= :html kind)
-    (compose-html component lang)
+    (compose-html component lang theme)
     (compose-resource kind component)))

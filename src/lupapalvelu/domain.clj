@@ -358,6 +358,7 @@
    :urgency                  "normal"
    :verdicts                 []
    :tosFunction              nil
-   :metadata                 {}})
+   :metadata                 {}
+   :processMetadata          {}})
 
 

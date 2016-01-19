@@ -189,7 +189,7 @@ $app-gray-darkest: $gray187;
       div {
         height: 24px;
         span {
-          //color: darken($lp-light-grey, 10%);
+          color: darken($lp-light-grey, 40%);
           position: relative;
           padding: 4px 8px 4px 24px;
           display: inline-block;
@@ -900,7 +900,7 @@ $app-gray-darkest: $gray187;
   }
 }
 
-#application-metadata-tab {
+#application-archival-tab {
   h1 {
     float: none;
   }

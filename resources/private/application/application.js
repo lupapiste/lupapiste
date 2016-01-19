@@ -84,15 +84,26 @@
       .call();
   }
 
+  var updateMetadataFields = function(application) {
+    if (!_.isEmpty(application.metadata)) {
+      applicationModel.metadata(ko.mapping.fromJS(application.metadata));
+    } else {
+      applicationModel.metadata({});
+    }
+    if (!_.isEmpty(application.processMetadata)) {
+      applicationModel.processMetadata(ko.mapping.fromJS(application.processMetadata));
+    } else {
+      applicationModel.processMetadata({});
+    }
+  };
+
   function updateTosFunction(value) {
     if (!isInitializing) {
       LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
-          repository.load(currentId, applicationModel.pending, function(application) {
-            ko.mapping.fromJS(application.metadata, applicationModel.metadata);
-          });
+          repository.load(currentId, applicationModel.pending, updateMetadataFields);
         })
         .call();
     }
@@ -241,7 +252,7 @@
     });
   }
 
-  hub.subscribe({type: "dialog-close", id: "dialog-valtuutus"}, function() {
+  hub.subscribe({eventType: "dialog-close", id: "dialog-valtuutus"}, function() {
     inviteModel.reset();
   });
 
@@ -305,7 +316,11 @@
         }
       }
       currentId = newId;
+
       repository.load(currentId, applicationModel.pending, function(application) {
+
+        updateMetadataFields(application);
+
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
             var name = application.primaryOperation.name;

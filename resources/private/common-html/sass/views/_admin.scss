@@ -58,7 +58,7 @@
     }
   }
   #modal-dialog-content-component {
-    select, input {
+    select, input[type=text] {
       display: block;
       margin: $marginS 0;
     }

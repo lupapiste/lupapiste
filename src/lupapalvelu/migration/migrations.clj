@@ -1423,6 +1423,22 @@
       (assoc attachment :auth (distinct (map attaccess/auth-from-version versions))))
     {:attachments.0 {$exists true}}))
 
+(defn add-missing-person-data-to-statement [statement]
+  (let [user-id (-> (get-in statement [:person :email] "")
+                    user/get-user-by-email
+                    :id)]
+    (->> (:person statement)
+         (merge {:userId (or user-id "") :email "" :name "" :text ""})
+         (assoc statement :person))))
+
+(defmigration statement-person-userId
+  {:apply-when (pos? (mongo/count :applications {:statements {$elemMatch {:person.email {$exists true},
+                                                                          :person.userId {$exists false}}}}))}
+  (update-applications-array :statements
+                             add-missing-person-data-to-statement
+                             {:statements {$elemMatch {:person.email {$exists true},
+                                                       :person.userId {$exists false}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

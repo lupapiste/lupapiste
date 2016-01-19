@@ -22,6 +22,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]))
 
+(def themes #{"louhi"})
+
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
               :name "common"})
@@ -217,6 +219,12 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
+   :external-api {:js (apply
+                        conj
+                        ["external-api-service.js" "external-api-tools.js"]
+                        (when (env/dev-mode?)
+                          ["dummy-api-client.js"]))}
+
    :verdict-attachment-prints {:depends [:common-html]
                                :html ["verdict-attachment-prints-order-template.html"
                                       "verdict-attachment-prints-order-history-template.html"
@@ -248,11 +256,12 @@
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "add-party.js" "attachments-tab-model.js" "archival-summary.js"
+                       "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
                        "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
-                         "foreman-template.html" "archival-summary-template.html" "organization-links.html"]}
+                         "foreman-template.html" "archival-summary-template.html" "organization-links.html"
+                         "case-file-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]
@@ -339,7 +348,7 @@
                              :company :analytics :register-company :footer]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
-   :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
+   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer]}
 
