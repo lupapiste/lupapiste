@@ -86,12 +86,12 @@
 
   var updateMetadataFields = function(application) {
     if (!_.isEmpty(application.metadata)) {
-      ko.mapping.fromJS(application.metadata, applicationModel.metadata);
+      applicationModel.metadata(ko.mapping.fromJS(application.metadata));
     } else {
       applicationModel.metadata({});
     }
     if (!_.isEmpty(application.processMetadata)) {
-      ko.mapping.fromJS(application.processMetadata, applicationModel.processMetadata);
+      applicationModel.processMetadata(ko.mapping.fromJS(application.processMetadata));
     } else {
       applicationModel.processMetadata({});
     }
