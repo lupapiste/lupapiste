@@ -6,4 +6,4 @@
 
 call remote-config.bat
 
-pybot -d target --include ie8 --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable WAIT_DELAY:15 --variable SELENIUM:http://%remotexp%:4444/wd/hub --variable SERVER:%server% %target%
+pybot -d target --include ie8 --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable WAIT_DELAY:15 --variable SELENIUM:http://%remoteie%:4444/wd/hub --variable SERVER:%server% %target%
