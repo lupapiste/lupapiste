@@ -19,8 +19,8 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.comments = params.comments;
   self.showAllComments = params.showAllComments;
+  self.mainConversation = params.mainConversation;
 
-  self.mainConversation = ko.observable(true);
   self.highlightConversation = ko.observable(false);
 
   var previousHash = lupapisteApp.models.rootVMO.previousHash;
