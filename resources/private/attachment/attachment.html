@@ -182,8 +182,8 @@
                                        value: visibility,
                                        enable: $root.authorization.ok('set-attachment-visibility') && editable"/>
                   </div>
-                  <div data-bind="if: features.enabled('tiedonohjaus') && $root.authorization.ok('permanent-archive-enabled') && latestVersion">
-                    <div class="feature archive-valid" data-bind="with: latestVersion">
+                  <div data-bind="if: $root.authorization.ok('permanent-archive-enabled') && latestVersion">
+                    <div class="archive-valid" data-bind="with: latestVersion">
                       <div>
                         <span data-bind="ltext: 'archive.valid-format'"></span>:
                         <span class="icon ok" data-bind="visible: $data.archivable"></span>
@@ -222,8 +222,8 @@
                 </button>
               </div>
 
-              <!-- ko if: features.enabled('tiedonohjaus') && $root.authorization.ok('permanent-archive-enabled') && !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
-              <div class="feature" style="margin-top: 15px;">
+              <!-- ko if: $root.authorization.ok('permanent-archive-enabled') && !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+              <div style="margin-top: 15px;">
                 <button id="show-tos-metadata" class="btn"
                         data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application')">
                   <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),
