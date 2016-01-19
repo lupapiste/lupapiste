@@ -64,9 +64,12 @@
 (defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function & [type]]
   (let [document-type (or type (:type document))
         existing-tila (:tila metadata)
-        new-metadata (cond-> (metadata-for-document organization tos-function document-type)
-                             existing-tila (assoc :tila (keyword existing-tila)))]
-    (assoc document :metadata new-metadata)))
+        existing-nakyvyys (:nakyvyys metadata)
+        new-metadata (metadata-for-document organization tos-function document-type)
+        processed-metadata (cond-> new-metadata
+                                   existing-tila (assoc :tila (keyword existing-tila))
+                                   (and (not (:nakyvyys new-metadata)) existing-nakyvyys) (assoc :nakyvyys existing-nakyvyys))]
+    (assoc document :metadata processed-metadata)))
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
   (if (and organization tos-function state)
