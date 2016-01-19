@@ -9,9 +9,9 @@
 (def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl))
 
 (def default-authz-writer-roles #{:owner :writer :foreman})
-(def default-authz-reader-roles (conj default-authz-writer-roles :reader))
+(def default-authz-reader-roles (conj default-authz-writer-roles :reader :guest))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
-(def all-authz-roles (conj all-authz-writer-roles :reader))
+(def all-authz-roles (conj all-authz-writer-roles :reader :guest))
 
 (def default-org-authz-roles #{:authority :approver})
 (def commenter-org-authz-roles (conj default-org-authz-roles :commenter))

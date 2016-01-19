@@ -99,7 +99,9 @@ jQuery(document).ready(function() {
     {name: "statement-reply-request"},
     {name: "statement-control-buttons"},
     {name: "statement-attachments"},
-    {name: "guest-authorities"}
+    {name: "guest-authorities"},
+    {name: "bubble-dialog"},
+    {name: "application-guests"}
   ];
 
   _.forEach(components, function(component) {

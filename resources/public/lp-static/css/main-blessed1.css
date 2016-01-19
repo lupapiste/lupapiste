@@ -4422,6 +4422,11 @@ button:focus {
   border-color: #bbbbbb;
 }
 
+/* line 534, ../../../private/common-html/sass/partials/_buttons.scss */
+.left-buttons > button {
+  margin-right: 12px;
+}
+
 /* line 1, ../../../private/common-html/sass/partials/_forms.scss */
 legend {
   font-size: 21.6px;
@@ -8111,10 +8116,5 @@ ul.tabs {
 /* line 13, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:hover {
   color: #f7ac2e;
-  text-decoration: underline;
-}
-/* line 17, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble a:active {
-  color: #fbc732;
   text-decoration: underline;
 }

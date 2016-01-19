@@ -36,3 +36,10 @@
    :user-roles #{:authorityAdmin}}
   [{admin :user}]
   (guest/remove-guest admin email))
+
+(defquery add-guest-pseudo-query
+  {:description "Different checks before invite-with-role"
+   :parameters [email id]
+   :user-roles #{:applicant :authority}
+   :pre-checks [guest/no-duplicate-guests]
+   :input-validators [(partial action/non-blank-parameters [:email])]})
