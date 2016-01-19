@@ -1,8 +1,14 @@
 LUPAPISTE.CreateScopeModel = function(params) {
   "use strict";
   var self = this;
+  var oldPermitTypes = ko.toJS(_.pluck(params.organization.scope(), "permitType"));
+
   self.params = params;
   self.organization = params.organization;
+  self.permitTypes = _.filter(params.permitTypes, function (pt) {
+    return !_.contains(oldPermitTypes, pt);
+  });
+
   // Use the first municipapity in scope, or try to guess by organizations id (should it follow the convention)
   var municipalityNumber = util.getIn(params.organization, ["scope", 0, "municipality"], _.first(_.words(self.organization.id(), /-/)));
   var mappedMunicipalities = _(params.municipalities)
@@ -18,7 +24,7 @@ LUPAPISTE.CreateScopeModel = function(params) {
     return data + " - " + loc(data);
   };
 
-  self.permitType = ko.observable("R");
+  self.permitType = ko.observable();
   self.municipality = ko.observable(_.find(self.municipalities(), {id: municipalityNumber}));
   self.applicationEnabled = ko.observable(false);
   self.infoRequests = ko.observable(true);
