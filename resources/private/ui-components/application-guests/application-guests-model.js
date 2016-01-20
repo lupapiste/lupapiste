@@ -7,7 +7,7 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     return lupapisteApp.models.currentUser.isAuthority();
   });
 
-    self.guestAuthorities = [{name: "Hello world",
+  self.guestAuthorities = [{name: "Hello world",
                             email: "hello@world.com",
                             role: "shijie"},
                            {name: "Foo Bar",

@@ -23,7 +23,7 @@
     (assoc (select-keys candidate [:firstName :lastName])
            :hasAccess already-has-access)))
 
-(defn- guest-list
+(defn- org-guest-authorities
   ([org-id & [ignore-email]]
    (->> org-id
         org/get-organization
@@ -35,20 +35,20 @@
   [admin email name role]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)
-        guests (concat (guest-list org-id email)
+        guests (concat (org-guest-authorities org-id email)
                        [{:email email
                          :name name
                          :role role}])]
     (org/update-organization org-id {$set {:guestAuthorities guests}})))
 
 (defn guests [admin]
-  (guest-list (usr/authority-admins-organization-id admin)))
+  (org-guest-authorities (usr/authority-admins-organization-id admin)))
 
 (defn remove-guest
   [admin email]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)]
-    (org/update-organization org-id {$set {:guestAuthorities (guest-list org-id email)}})))
+    (org/update-organization org-id {$set {:guestAuthorities (org-guest-authorities org-id email)}})))
 
 (defn no-duplicate-guests
   "Pre check for avoiding duplicate guests or unnecessary access.
@@ -78,7 +78,36 @@
       (let [guest (usr/get-or-create-user-by-email email user)
             auth (usr/user-in-role guest (keyword role))]
         (action/update-application command
-                            {$push {:auth     auth}
-                             $set  {:modified timestamp}})
+                                   {$push {:auth     (assoc auth :inviter (:id user))}
+                                    $set  {:modified timestamp}})
         (notifications/notify! :invite (assoc command :recipients [guest]))
         (ok)))))
+
+(defn- guest-authority-role-map
+  "email role map"
+  [org-id]
+  (reduce (fn [acc {:keys [email role]}]
+            (assoc acc email role)) {}
+          (org-guest-authorities org-id)))
+
+(defn- usercatname [{:keys [firstName lastName]}]
+  (str firstName " " lastName))
+
+(defn- auth-info [ga-role-map {:keys [id role unsubscribed inviter] :as auth}]
+  (let [role (keyword role)
+        {:keys [email] :as user} (usr/get-user-by-id id)
+        inviter (usr/get-user-by-id inviter)]
+    ;; We only add the role information is the guest has been added by
+    ;; authority.
+    {:authorityRole (when (= role :guestAuthority)
+                      (get ga-role-map email))
+     :name (usercatname user)
+     :email email
+     :unsubscribed unsubscribed
+     :inviter (usercatname inviter)}))
+
+(defn application-guest-list
+  [{:keys [application user]}]
+  (let [ga-roles (guest-authority-role-map (:organization application))]
+    (map (partial auth-info ga-roles)
+         (auth/get-auths-by-roles application [:guest :guestAuthority]))))

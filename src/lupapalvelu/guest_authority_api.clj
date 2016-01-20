@@ -53,3 +53,10 @@
    :notified            true}
   [command]
   (guest/invite command))
+
+(defquery application-guests
+  {:description "List of application guest and guest authorities."
+   :user-roles #{:applicant :authority}
+   :parameters [:id]}
+  [command]
+  (ok :guests (guest/application-guest-list command)))
