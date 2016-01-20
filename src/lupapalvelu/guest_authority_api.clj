@@ -57,6 +57,30 @@
 (defquery application-guests
   {:description "List of application guest and guest authorities."
    :user-roles #{:applicant :authority}
-   :parameters [:id]}
+   :parameters [:id]
+   :states states/all-states}
   [command]
   (ok :guests (guest/application-guest-list command)))
+
+(defcommand toggle-guest-subscription
+  {:description "Un/subscribes notifications for guests. Corresponding
+  command in authorization_api is not feasible, since the rights are
+  different for guests: guestAuthority can modify any subscription and
+  guest's can change each others subscriptions."
+   :user-roles #{:applicant :authority}
+   :parameters [:id :username :unsubscribe?]
+   :input-validators [(partial action/non-blank-parameters [:username])]
+   :pre-checks [guest/auth-modification-check]
+   :states states/all-application-states}
+  [command]
+  (guest/toggle-subscription command))
+
+(defcommand delete-guest-application
+  {:description "Cancels the guest access from application."
+   :user-roles #{:applicant :authority}
+   :parameters [:id :username]
+   :input-validators [(partial action/non-blank-parameters [:username])]
+   :pre-checks [guest/auth-modification-check]
+   :states states/all-application-states}
+  [command]
+  (guest/delete-application-guest command))

@@ -3,6 +3,52 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
 
   var self = this;
 
+  self.allGuests = ko.observableArray();
+
+  function appId() {
+    return lupapisteApp.models.application.id();
+  }
+
+  function fetchGuests() {
+    ajax.query( "application-guests",
+                {id: appId()})
+    .success( function( res ) {
+      self.allGuests( res.guests );
+    })
+    .call();
+  }
+
+  hub.subscribe( "application-model-updated", fetchGuests);
+
+  self.nameAndUsername = _.template( "<%- name %> (<%- username %>)");
+
+  self.subscriptionLinkText = function( unsubscribed ) {
+    return loc( "application-guests."
+              + (unsubscribed ? "subscribe" : "unsubscribe"));
+  };
+
+  self.subscriptionLinkClick = function( data ) {
+    ajax.command( "toggle-guest-subscription",
+                  {id: appId(),
+                   username: data.username,
+                   "unsubscribe?": !data.unsubscribed})
+    .success( fetchGuests)
+    .call();
+  };
+
+  self.canModify = function( data ) {
+    return self.isAuthority() || data.role === "guest";
+  };
+
+  self.deleteGuest = function( data ) {
+    ajax.command( "delete-guest-application",
+                {id: appId(), username: data.username})
+    .success( fetchGuests)
+    .call();
+  };
+
+
+
   self.isAuthority = ko.pureComputed( function() {
     return lupapisteApp.models.currentUser.isAuthority();
   });
@@ -51,10 +97,13 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     ajax.command( "invite-guest",
                   {email: self.email(),
                    text: self.message(),
-                   id: lupapisteApp.models.application.id(),
+                   id: appId(),
                    role: self.isAuthority() ? "guestAuthority" : "guest"} )
     .pending( self.waiting)
-    .success( _.partial( self.bubbleVisible, false))
+    .success( function() {
+      fetchGuests();
+      self.bubbleVisible( false );
+    })
     .error( errorFun )
     .call();
   };

@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1453225651436');
+@import url('main-blessed1.css?z=1453302460059');
 
 /* line 17, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:active {
@@ -2373,13 +2373,12 @@ div.search i {
 /* line 2, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog {
   margin-top: 30px;
-  margin-bottom: 20px;
   padding: 20px 20px 20px 20px;
   position: relative;
   background: white;
   border: 1px solid #dddddd;
 }
-/* line 15, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 14, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog:after, .bubble-dialog:before {
   bottom: 100%;
   left: 60px;
@@ -2390,64 +2389,78 @@ div.search i {
   position: absolute;
   pointer-events: none;
 }
-/* line 27, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 26, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: white;
   border-width: 20px;
   margin-left: -20px;
 }
-/* line 33, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 32, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog:before {
   border-color: rgba(221, 221, 221, 0);
   border-bottom-color: #dddddd;
   border-width: 21px;
   margin-left: -21px;
 }
-/* line 40, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 39, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog .left-buttons {
   margin-top: 20px;
 }
-/* line 44, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 43, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog label.mandatory:after {
   content: " *";
   color: #f7ac2e;
 }
-/* line 48, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 47, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog input[type=text], .bubble-dialog textarea {
   box-sizing: border-box;
   width: 100%;
   padding: 4px;
   display: block;
 }
-/* line 55, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 54, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog textarea {
   min-height: 8em;
 }
-/* line 59, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 58, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog input.mandatory {
   border-color: #f7ac2e;
   margin-bottom: 20px;
 }
-/* line 64, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 63, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog .error {
   margin-top: 20px;
   border: 1px solid red;
   color: red;
   padding: 20px;
 }
-/* line 72, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 71, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog table.mandatory tr {
   background-color: initial;
 }
-/* line 74, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 73, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog table.mandatory tr td {
   border: 1px solid #f7ac2e;
   background-color: none;
 }
-/* line 78, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 77, ../../../private/common-html/sass/partials/__guests.scss */
 .bubble-dialog table.mandatory tr td.full {
   width: 33%;
+}
+
+/* line 85, ../../../private/common-html/sass/partials/__guests.scss */
+.auth-table tr {
+  background-color: initial;
+}
+/* line 87, ../../../private/common-html/sass/partials/__guests.scss */
+.auth-table tr:active {
+  background-color: initial;
+}
+
+/* line 93, ../../../private/common-html/sass/partials/__guests.scss */
+.application-guests {
+  margin-bottom: 20px;
 }
 
 /* VIEWS

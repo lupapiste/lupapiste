@@ -54,9 +54,10 @@
   "Pre check for avoiding duplicate guests or unnecessary access.
   Note: only application-defined access is checked."
   [{{email :email} :data} application]
-  (let [guest (usr/get-user-by-email email)]
-    (when (auth/user-authz? auth/all-authz-roles application guest)
-      (fail :error.already-has-access))))
+  (when email
+   (let [guest (usr/get-user-by-email email)]
+     (when (auth/user-authz? auth/all-authz-roles application guest)
+       (fail :error.already-has-access)))))
 
 (defn valid-guest-role [{{role :role} :data}]
   (when-not (#{:guest :guestAuthority} (keyword role))
@@ -93,21 +94,54 @@
 (defn- usercatname [{:keys [firstName lastName]}]
   (str firstName " " lastName))
 
-(defn- auth-info [ga-role-map {:keys [id role unsubscribed inviter] :as auth}]
+(defn- auth-info [ga-role-map {:keys [id role unsubscribed username inviter] :as auth}]
   (let [role (keyword role)
         {:keys [email] :as user} (usr/get-user-by-id id)
         inviter (usr/get-user-by-id inviter)]
-    ;; We only add the role information is the guest has been added by
+    ;; We only add the role information if the guest has been added by
     ;; authority.
     {:authorityRole (when (= role :guestAuthority)
                       (get ga-role-map email))
      :name (usercatname user)
-     :email email
+     :username username
+     :role role
      :unsubscribed unsubscribed
      :inviter (usercatname inviter)}))
+
+(defn- application-guest-auths [app]
+  (auth/get-auths-by-roles app [:guest :guestAuthority]))
 
 (defn application-guest-list
   [{:keys [application user]}]
   (let [ga-roles (guest-authority-role-map (:organization application))]
-    (map (partial auth-info ga-roles)
-         (auth/get-auths-by-roles application [:guest :guestAuthority]))))
+    (map (partial auth-info ga-roles) (application-guest-auths application))))
+
+(defn auth-modification-check
+  "User can manipulate every guest but only organization authority can
+  modify guestAuthorities."
+  [{{:keys [username]} :data user :user} application]
+  (when username
+    (let [role (->> application
+                    application-guest-auths
+                    (some #(and (= username (:username %)) (:role %)))
+                    keyword)]
+      (when-not (or (= role :guest)
+                    (some (partial = (:organization application))
+                          (usr/organization-ids-by-roles user #{:authority})))
+        (fail :error.unauthorized)))))
+
+
+(defn toggle-subscription
+  [{{:keys [username unsubscribe?]} :data
+    application :application
+    :as command}]
+  (action/update-application command
+                             {:auth {$elemMatch {:username username}}}
+                             {$set {:auth.$.unsubscribed unsubscribe?}}))
+
+(defn delete-application-guest
+  [{{:keys [username]} :data
+    application :application
+    :as command}]
+  (action/update-application command
+                             {$pull {:auth {:username username}}}))

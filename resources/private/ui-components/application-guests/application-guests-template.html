@@ -4,6 +4,29 @@
     <section class="page container">
       <script type="text/x-jquery-tmpl" id="application-guests-template">
         <div class="application-guests">
+          <table class="auth-table"
+                 data-bind="visible: allGuests">
+            <thead>
+              <th data-bind="ltext: 'application-guests.user'"></th>
+              <th data-bind="ltext: 'application-guests.inviter'"></th>
+              <th data-bind="ltext: 'guest-authority.role'"></th>
+              <th data-bind="ltext: 'application-guests.notifications'"></th>
+              <th data-bind="ltext: 'application-guests.remove'"></th>
+            </thead>
+            <tbody data-bind="foreach: allGuests">
+              <tr>
+                <td data-bind="text: $parent.nameAndUsername( $data )"></td>
+                <td data-bind="text: inviter"></td>
+                <td data-bind="text: authorityRole"></td>
+                <td><a data-bind="visible: $parent.canModify( $data ),
+                                  text: $parent.subscriptionLinkText( unsubscribed ),
+                                  click: $parent.subscriptionLinkClick"></a></td>
+                <td><i data-bind="visible: $parent.canModify( $data ),
+                                  click: $parent.deleteGuest"
+                       class="primary lupicon-remove"></i></td>
+              </tr>
+            </tbody>
+          </table>
           <button class="positive" data-bind="click: toggleBubble">
             <i class="lupicon-circle-plus"></i>
             <span data-bind="ltext: 'guest-authority.add'"></span>

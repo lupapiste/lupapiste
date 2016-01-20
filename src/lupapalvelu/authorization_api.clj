@@ -164,7 +164,7 @@
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
     (if (or (= username (:username user))
-         (some (partial = (:organization application)) (user/organization-ids-by-roles user #{:authority})))
+            (some (partial = (:organization application)) (user/organization-ids-by-roles user #{:authority})))
       (update-application command
         {:auth {$elemMatch {:username username}}}
         {$set {:auth.$.unsubscribed unsubscribe?}})

@@ -6,7 +6,6 @@
   $pad: 20px;
 
   margin-top: 1.5 * $nubbin;
-  margin-bottom: $nubbin;
   padding: $pad $pad $pad $pad;
   position: relative;
   background: $bg-color;
@@ -80,4 +79,17 @@
       }
     }
   }
+}
+
+.auth-table {
+  tr {
+    background-color: initial;
+    &:active {
+      background-color: initial;
+    }
+  }
+}
+
+.application-guests {
+  margin-bottom: 20px;
 }
