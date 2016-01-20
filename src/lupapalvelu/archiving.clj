@@ -14,7 +14,8 @@
             [taoensso.timbre :refer [info error warn]])
   (:import (java.text SimpleDateFormat)
            (java.util Date)
-           (java.util.concurrent ThreadFactory Executors)))
+           (java.util.concurrent ThreadFactory Executors)
+           (java.io File)))
 
 (defn thread-factory []
   (let [security-manager (System/getSecurityManager)
@@ -40,8 +41,7 @@
     (str host "/documents/" encoded-id "?app-id=" app-id "&app-key=" app-key)))
 
 (defn- upload-file [id is-or-file content-type metadata]
-  (http/put (build-url id) {:throw-exceptions false
-                            :multipart        [{:name      "metadata"
+  (http/put (build-url id) {:multipart        [{:name      "metadata"
                                                 :mime-type "application/json"
                                                 :encoding  "UTF-8"
                                                 :content   (json/generate-string metadata)}
@@ -68,13 +68,19 @@
   (info "Trying to archive attachment id" id "from application" app-id)
   (if-not (get-in @unfinished-uploads [app-id id])
     (do (swap! unfinished-uploads update app-id #(conj (or % #{}) id))
-        (let [response (upload-file id is-or-file content-type metadata)]
-          (if (= 200 (:status response))
-            (do (state-update-fn application now id)
-                (info "Archived attachment id" id "from application" app-id))
-            (do (error "Failed to archive attachment id" id "from application" app-id)
-                (error response)))
-          (swap! unfinished-uploads update app-id disj id)))
+        (.submit
+          upload-threadpool
+          (fn []
+            (try
+              (upload-file id is-or-file content-type metadata)
+              (state-update-fn application now id)
+              (info "Archived attachment id" id "from application" app-id)
+              (catch Exception e
+                (error e)
+                (error "Failed to archive attachment id" id "from application" app-id)))
+            (when (instance? File is-or-file)
+              (io/delete-file is-or-file :silently))
+            (swap! unfinished-uploads update app-id disj id))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
@@ -160,10 +166,8 @@
     (when archive-application?
       (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
             metadata (generate-archive-metadata application user)]
-        (.submit upload-threadpool (fn []
-                                     (upload-and-set-state (str id "-application") application-file "application/pdf" metadata application created set-application-state)
-                                     (io/delete-file application-file :silently)))))
+        (upload-and-set-state (str id "-application") application-file "application/pdf" metadata application created set-application-state)))
     (doseq [attachment selected-attachments]
       (let [{:keys [content content-type]} (lupapalvelu.attachment/get-attachment-file (get-in attachment [:latestVersion :fileId]))
             metadata (generate-archive-metadata application user attachment)]
-        (.submit upload-threadpool #(upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))))
+        (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state)))))
