@@ -11,35 +11,60 @@
     (let [application {:organization "753-R"
                        :tosFunction  "10 03 00 01"
                        :created      100
+                       :applicant "Testaaja Testi"
                        :attachments  [{:type     {:foo :bar}
                                        :versions [{:version 1
-                                                   :created 200}
+                                                   :created 200
+                                                   :user {:firstName "Testi"
+                                                          :lastName "Testaaja"}}
                                                   {:version 2
-                                                   :created 500}]}
+                                                   :created 500
+                                                   :user {:firstName "Testi"
+                                                          :lastName "Testaaja"}}]
+                                       :user {:firstName "Testi"
+                                              :lastName "Testaaja"}
+                                       :contents "Great attachment"}
                                       {:type     {:foo :qaz}
                                        :versions [{:version 1
-                                                   :created 300}]}]
-                       :history      [{:state "draft" :ts 100}
-                                      {:state "open" :ts 250}]}]
+                                                   :created 300
+                                                   :user {:firstName "Testi"
+                                                          :lastName "Testaaja"}}]}]
+                       :history      [{:state "draft"
+                                       :ts 100
+                                       :user {:firstName "Testi"
+                                              :lastName "Testaaja"}}
+                                      {:state "open"
+                                       :ts 250
+                                       :user {:firstName "Testi"
+                                              :lastName "Testaaja"}}]}]
       (generate-case-file-data application) => [{:action    "Valmisteilla"
                                                  :start     100
+                                                 :user "Testaaja Testi"
                                                  :documents [{:type     :hakemus
                                                               :category :document
-                                                              :ts       100}
+                                                              :ts       100
+                                                              :user "Testaaja Testi"}
                                                              {:type     {:foo :bar}
                                                               :category :attachment
                                                               :version  1
-                                                              :ts       200}]}
+                                                              :ts       200
+                                                              :user "Testaaja Testi"
+                                                              :contents "Great attachment"}]}
                                                 {:action    "K\u00e4sittelyss\u00e4"
                                                  :start     250
+                                                 :user "Testaaja Testi"
                                                  :documents [{:type     {:foo :qaz}
                                                               :category :attachment
                                                               :version  1
-                                                              :ts       300}
+                                                              :ts       300
+                                                              :user "Testaaja Testi"
+                                                              :contents nil}
                                                              {:type     {:foo :bar}
                                                               :category :attachment
                                                               :version  2
-                                                              :ts       500}]}]
+                                                              :ts       500
+                                                              :user "Testaaja Testi"
+                                                              :contents "Great attachment"}]}]
       (provided
         (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})))
