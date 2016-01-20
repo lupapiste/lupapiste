@@ -27,6 +27,14 @@
       color: $red;
     }
   }
+  .waiting {
+    input {
+      display: none;
+    }
+    .wait {
+      display: inline;
+    }
+  }
   .attachment-type-container {
     @include clearfix;
     .group-label, .type-id {

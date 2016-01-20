@@ -128,7 +128,7 @@
   };
 
   var collectMainDocuments = function(application) {
-    return [{documentNameKey: "applications.application", metadata: application.metadata}];
+    return [{documentNameKey: "applications.application", metadata: application.metadata, id: application.id() + '-application'}];
   };
 
   var model = function(params) {
@@ -200,9 +200,11 @@
       return ko.unwrap(attachment.sendToArchive);
     };
 
+    self.archivingInProgressIds = ko.observableArray();
+
     self.archiveButtonEnabled = ko.pureComputed(function() {
-      return _.some(preAttachments(), isSelectedForArchive) || _.some(postAttachments(), isSelectedForArchive) ||
-        _.some(mainDocuments(), isSelectedForArchive);
+      return _.isEmpty(self.archivingInProgressIds()) && (_.some(preAttachments(), isSelectedForArchive) ||
+        _.some(postAttachments(), isSelectedForArchive) || _.some(mainDocuments(), isSelectedForArchive));
     });
 
     self.selectAll = function() {
@@ -220,11 +222,29 @@
       });
     };
 
+    var pollArchiveStatus = function() {
+      ajax.query("archive-upload-pending", {id: params.application.id})
+        .success(function(data) {
+          var finished = _.difference(self.archivingInProgressIds(), data.unfinished);
+          self.archivingInProgressIds(data.unfinished);
+          if (data.unfinished.length > 0) {
+            window.setTimeout(pollArchiveStatus, 1000);
+          }
+        })
+        .call();
+    };
+    pollArchiveStatus();
+
     self.archiveSelected = function() {
       var attachmentIds = _.map(_.filter(self.attachments(), isSelectedForArchive), function(attachment) {
         return ko.unwrap(attachment.id);
       });
       var archiveApplication = ko.unwrap(mainDocuments()[0].sendToArchive);
+      self.archivingInProgressIds(attachmentIds);
+      if (archiveApplication) {
+        self.archivingInProgressIds.push(mainDocuments()[0].id);
+      }
+      window.setTimeout(pollArchiveStatus, 1000);
       ajax
         .command("archive-documents",
           {
@@ -232,16 +252,12 @@
             attachmentIds: attachmentIds,
             archiveApplication: archiveApplication
           })
-        .success(function() {
-          //repository.load(applicationId);
-        })
         .error(function(e) {
           error(e.text);
         })
         .call();
     };
 
-    
   };
 
   ko.components.register("archival-summary", {

@@ -18,8 +18,14 @@
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
 
       <div class="buttons">
-        <button class="btn-primary" data-bind="ltext: 'archivalSummary.archiveSelected', enable: archiveButtonEnabled, click: archiveSelected"></button>
-        <a href="#" data-bind="click: selectAll">Valitse kaikki</a>
+        <button class="btn-primary" data-bind="enable: archiveButtonEnabled, click: archiveSelected">
+          <span class="waiting" data-bind="css: { waiting: !_.isEmpty(archivingInProgressIds()) }">
+            <i class="spin lupicon-refresh wait"></i>
+          </span>
+          <span data-bind="ltext: 'arkistoidaan', visible: !_.isEmpty(archivingInProgressIds())"></span>
+          <span data-bind="ltext: 'archivalSummary.archiveSelected', visible: _.isEmpty(archivingInProgressIds())"></span>
+        </button>
+        <a href="#" data-bind="click: selectAll, ltext: 'stamp.all'"></a>
       </div>
     </div>
 
@@ -53,10 +59,11 @@
 
       <!-- ko foreach: attachments -->
       <div class="attachment-row">
-        <div class="archival-status" data-bind="visible: $parents[1].showWillPublish">
+        <div class="archival-status" data-bind="visible: $parents[1].showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id()) }">
            <input type="checkbox" data-bind="visible: archivable && state() !== 'arkistoitu', checked: sendToArchive">
            <i class="lupicon-circle-attention disabled" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></i>
            <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
@@ -149,9 +156,10 @@
 
       <!-- ko foreach: documents -->
       <div class="attachment-row">
-        <div class="archival-status" data-bind="visible: $parent.showWillPublish">
+        <div class="archival-status" data-bind="visible: $parent.showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
            <input type="checkbox" data-bind="visible: state() !== 'arkistoitu', checked: sendToArchive">
            <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
