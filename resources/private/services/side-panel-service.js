@@ -2,27 +2,26 @@ LUPAPISTE.SidePanelService = function() {
   "use strict";
   var self = this;
 
-  var application = lupapisteApp.models.application;
-
+  self.application = lupapisteApp.models.application;
   self.currentPage = lupapisteApp.models.rootVMO ? lupapisteApp.models.rootVMO.currentPage : ko.observable();
   self.authorization = lupapisteApp.models.applicationAuthModel;
 
   // Notice
   self.urgency = ko.computed(function() {
-    return ko.unwrap(application.urgency);
+    return ko.unwrap(self.application.urgency);
   });
 
   self.authorityNotice = ko.computed(function() {
-    return ko.unwrap(application.authorityNotice);
+    return ko.unwrap(self.application.authorityNotice);
   });
 
   self.tags = ko.computed(function() {
-    return ko.toJS(application.tags);
+    return ko.toJS(self.application.tags);
   });
 
   var changeNoticeInfo = _.debounce(function(command, data) {
     ajax
-      .command(command, _.assign({id: application.id()}, data))
+      .command(command, _.assign({id: self.application.id()}, data))
       .success(function() {
         hub.send("SidePanelService::NoticeChangeProcessed", {status: "success"});
       })
@@ -61,7 +60,7 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   self.comments = ko.computed(function() {
-    return _(ko.mapping.toJS(application.comments))
+    return _(ko.mapping.toJS(self.application.comments))
       .filter(
          function(comment) {
            return self.showAllComments() || self.target().type === comment.target.type && self.target().id === comment.target.id;
@@ -97,7 +96,7 @@ LUPAPISTE.SidePanelService = function() {
 
   // Fetch authorities when application changes
   ko.computed(function() {
-    var applicationId = ko.unwrap(application.id);
+    var applicationId = ko.unwrap(self.application.id);
     if (applicationId && self.authorization.ok("application-authorities") ) {
       ajax.query("application-authorities", {id: applicationId})
       .success(function(resp) {
@@ -113,7 +112,7 @@ LUPAPISTE.SidePanelService = function() {
     var text = event.text || "";
     var to = event.to;
     ajax.command("add-comment", {
-        id: ko.unwrap(application.id),
+        id: ko.unwrap(self.application.id),
         text: _.trim(text),
         target: self.target(),
         to: to,
@@ -131,7 +130,7 @@ LUPAPISTE.SidePanelService = function() {
                                  componentParams: {ltext: "comment-request-mark-answered.ok"}});
       }
       // Just to show new comment?
-      repository.load(ko.unwrap(application.id));
+      repository.load(ko.unwrap(self.application.id));
     })
     .call();
   });

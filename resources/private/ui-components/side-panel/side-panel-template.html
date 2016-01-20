@@ -40,10 +40,10 @@
                   </div>
                   <div class="content" data-bind="event: { scroll: hideHelp }">
                     <div data-bind="component: {name: 'conversation',
-                                                params: {application: application,
-                                                         authorization: authorization,
+                                                params: {application: sidePanelService.application,
+                                                         authorization: sidePanelService.authorization,
                                                          authorities: sidePanelService.authorities,
-                                                         currentPage: currentPage,
+                                                         currentPage: sidePanelService.currentPage,
                                                          comments: sidePanelService.comments,
                                                          showAllComments: sidePanelService.showAllComments,
                                                          mainConversation: sidePanelService.mainConversation}}"></div>
@@ -56,7 +56,7 @@
                   </div>
                   <div class="notice-component"
                        data-bind="component: {name: 'authority-notice',
-                                              params: {authorization: authorization,
+                                              params: {authorization: sidePanelService.authorization,
                                                        urgency: sidePanelService.urgency,
                                                        tags: sidePanelService.tags,
                                                        authorityNotice: sidePanelService.authorityNotice}}"></div>
