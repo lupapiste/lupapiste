@@ -5,7 +5,6 @@ LUPAPISTE.SidePanelService = function() {
   var application = lupapisteApp.models.application;
 
   self.currentPage = lupapisteApp.models.rootVMO ? lupapisteApp.models.rootVMO.currentPage : ko.observable();
-
   self.authorization = lupapisteApp.models.applicationAuthModel;
 
   // Notice
@@ -51,8 +50,9 @@ LUPAPISTE.SidePanelService = function() {
   self.showAllComments = ko.observable(true);
   self.mainConversation = ko.observable(true);
   self.target = ko.observable({type: "application"});
-  var commentRoles = undefined;
+  self.authorities = ko.observableArray([]);
 
+  var commentRoles = undefined;
   var commentPending = ko.observable();
 
   ko.computed(function() {
@@ -69,7 +69,7 @@ LUPAPISTE.SidePanelService = function() {
     return filteredComments;
   });
 
-  // refresh conversation
+  // refresh conversation when page changes
   ko.computed(function() {
     var page = self.currentPage();
     if (page) {
@@ -93,8 +93,6 @@ LUPAPISTE.SidePanelService = function() {
       }
     }
   });
-
-  self.authorities = ko.observableArray([]);
 
   // Fetch authorities when application changes
   ko.computed(function() {

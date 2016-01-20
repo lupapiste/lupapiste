@@ -48,18 +48,23 @@ LUPAPISTE.ConversationModel = function(params) {
   });
 
   self.stateOpenApplication = function() {
-    console.log("open");
-  };
-
-  self.submit = function() {
-    self.sendEvent("SidePanelService", "AddComment", {markAnswered: false,
-                                                      openApplication: false,
+    hub.send("track-click", {category:"Conversation", event:"stateOpenApplication"});
+    self.sendEvent("SidePanelService", "AddComment", {openApplication: true,
                                                       text: self.text(),
                                                       to: self.to()});
   };
 
+  self.submit = function() {
+    hub.send("track-click", {category:"Conversation", event:"submit"});
+    self.sendEvent("SidePanelService", "AddComment", {text: self.text(),
+                                                      to: self.to()});
+  };
+
   self.markAnswered = function () {
-    console.log("answered");
+    hub.send("track-click", {category:"Conversation", event:"markAnswered"});
+    self.sendEvent("SidePanelService", "AddComment", {markAnswered: true,
+                                                      text: self.text(),
+                                                      to: self.to()});
   };
 
   var previousPage = self.currentPage();
@@ -126,7 +131,6 @@ LUPAPISTE.ConversationModel = function(params) {
   });
 
   self.addEventListener("SidePanelService", "AddCommentProcessed", function(event) {
-    self.pending(false);
     if (event.status === "success") {
       self.text("");
       hub.send("indicator", {style: "positive", message: "comment.save.success"});
