@@ -133,9 +133,6 @@ LUPAPISTE.ConversationModel = function(params) {
   self.addEventListener("SidePanelService", "AddCommentProcessed", function(event) {
     if (event.status === "success") {
       self.text("");
-      hub.send("indicator", {style: "positive", message: "comment.save.success"});
-    } else {
-      hub.send("indicator", {style: "negative", message: "comment.save.failed"});
     }
   });
 };
