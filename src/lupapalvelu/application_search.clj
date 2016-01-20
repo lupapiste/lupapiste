@@ -112,7 +112,7 @@
       (when-not (empty? handlers)
         (if ((set handlers) no-handler)
           {$or [{:authority.id  {$exists false}}, {:authority.id {$in [nil ""]}}]}
-          (let [handler-ids (remove nil? (map handler-email-to-id handlers))]
+          (when-let [handler-ids (seq (remove nil? (map handler-email-to-id handlers)))]
             {$or [{:auth.id {$in handler-ids}}
                   {:authority.id {$in handler-ids}}]})))
       (when-not (empty? tags)
