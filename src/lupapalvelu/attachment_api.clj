@@ -57,14 +57,12 @@
       (and required (not (user/authority? user))) (fail :error.unauthorized
                                                         :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))))
 
-(defn- attachment-editable-by-application-state? [application attachmentId userRole]
-  (or (ss/blank? attachmentId)
-      (let [attachment (attachment/get-attachment-info application attachmentId)
-            attachmentApplicationState (keyword (:applicationState attachment))
-            currentState (keyword (:state application))]
-        (or (not (states/post-verdict-states currentState))
-            (states/post-verdict-states attachmentApplicationState)
-            (= (keyword userRole) :authority)))))
+(defn- attachment-editable-by-application-state? [{{attachmentId :attachmentId} :data user :user} {current-state :state :as application}]
+  (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
+    (when-not (or (not (states/post-verdict-states (keyword current-state)))
+                  (states/post-verdict-states (keyword create-state))
+                  (user/authority? user))
+      (fail! :error.pre-verdict-attachment))))
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
@@ -114,11 +112,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks [a/validate-authority-in-drafts]}
+   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state?]}
   [{:keys [application user created] :as command}]
-
-  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
-    (fail! :error.pre-verdict-attachment))
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? attachment-type application)
@@ -193,12 +188,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts attachment-deletable]}
+   :pre-checks  [a/validate-authority-in-drafts attachment-deletable attachment-editable-by-application-state?]}
   [{:keys [application user]}]
-
-  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
-    (fail! :error.pre-verdict-attachment))
-
   (attachment/delete-attachment application attachmentId)
   (ok))
 
@@ -209,11 +200,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts]}
+   :pre-checks  [a/validate-authority-in-drafts attachment-editable-by-application-state?]}
   [{:keys [application user]}]
-
-  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
-    (fail! :error.pre-verdict-attachment))
 
   (if (attachment/file-id-in-application? application attachmentId fileId)
     (attachment/delete-attachment-version application attachmentId fileId)
@@ -283,10 +271,7 @@
 (def attachment-modification-precheks
   [attachment-is-not-locked
    (partial if-not-authority-state-must-not-be #{:sent})
-   (fn [{{attachment-id :attachmentId} :data, user :user} application]
-     (when attachment-id
-       (when-not (attachment-editable-by-application-state? application attachment-id (:role user))
-         (fail :error.pre-verdict-attachment))))
+   attachment-editable-by-application-state?
    validate-attachment-type
    a/validate-authority-in-drafts])
 
@@ -566,10 +551,8 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
-   :pre-checks [a/validate-authority-in-drafts]}
+   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state?]}
   [{:keys [application user created] :as command}]
-  (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
-    (fail! :error.pre-verdict-attachment))
   ; FIXME yhdella updatella!
   (doseq [[k v] meta]
     (attachment/update-attachment-key command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
