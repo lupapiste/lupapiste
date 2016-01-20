@@ -190,9 +190,7 @@
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:screenmessages :analytics]
-                   :js ["comment.js"]
-                   :html ["comments.html"]}
+   :authenticated {:depends [:screenmessages :analytics]}
 
    :invites      {:depends [:common-html]
                   :js ["invites-model.js" "invites.js"]}
@@ -315,8 +313,6 @@
 
    :admins       {:depends [:users]}
 
-   :notice       {:js ["notice.js"]}
-
    :password-reset {:depends [:common-html]
                     :js ["password-reset.js"]
                     :html ["password-reset.html"]}
@@ -348,13 +344,13 @@
                              :company :analytics :register-company :footer]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
-   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :notice :application
+   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics :header :footer]
+                       :docgen :debug :analytics :header :footer]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
