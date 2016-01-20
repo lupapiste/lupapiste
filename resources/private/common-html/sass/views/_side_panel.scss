@@ -47,7 +47,6 @@
         width: $lupicon-size;
         height: 30px;
         padding-top: 3px;
-        margin-bottom: 4px;
         color: $color-text;
         text-shadow: none;
       }
@@ -261,6 +260,9 @@
   #side-panel {
     .content-wrapper {
       width: 400px;
+    }
+    .btn-title {
+      display: none;
     }
   }
 
