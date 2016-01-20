@@ -1,5 +1,122 @@
-@import url('main-blessed1.css?z=1453202373840');
+@import url('main-blessed1.css?z=1453272736239');
 
+/* line 131, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls .comment-request select {
+  display: block;
+}
+/* line 136, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls .mark-answered {
+  margin-left: 24px;
+  display: inline-block;
+}
+/* line 139, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls .mark-answered label, .comment-controls .mark-answered input {
+  display: inline;
+}
+
+/* line 146, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-toggle {
+  margin-bottom: 8px;
+}
+
+/* line 150, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-message {
+  white-space: pre-line;
+}
+
+/* line 237, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble {
+  position: relative;
+  color: #333333;
+  background: #f6f6f6;
+  width: 100%;
+  border-radius: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #bbbbbb;
+}
+/* line 171, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble:after, .comment-bubble:before {
+  top: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 182, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble:after, .comment-bubble:before {
+  left: 5%;
+}
+/* line 185, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble:after {
+  border-color: rgba(246, 246, 246, 0);
+  border-top-color: #f6f6f6;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble:before {
+  border-color: rgba(187, 187, 187, 0);
+  border-top-color: #bbbbbb;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header {
+  border-bottom: 2px solid #bbbbbb;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  width: 100%;
+  overflow-y: hidden;
+  vertical-align: top;
+}
+/* line 204, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender {
+  float: left;
+  font-weight: bold;
+}
+/* line 207, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender .role {
+  text-transform: lowercase;
+}
+/* line 209, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender .role:before {
+  content: "(";
+}
+/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender .role:after {
+  content: ")";
+}
+/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender .to:before {
+  margin-left: 12px;
+  margin-right: 12px;
+  content: "→";
+}
+/* line 224, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .timestamp {
+  float: right;
+}
+/* line 228, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble a {
+  color: #f39129;
+  text-decoration: none;
+}
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble a:link, .comment-bubble a:visited {
+  color: #f39129;
+}
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble a:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
 /* line 17, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:active {
   color: #fbc732;

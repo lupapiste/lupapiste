@@ -1293,12 +1293,12 @@ h1 .icon {
 
 /* NAV
 ----------------------------------------------------------------------------- */
-/* line 75, ../../../private/common-html/sass/partials/_header.scss */
+/* line 83, ../../../private/common-html/sass/partials/_header.scss */
 .nav-wrapper {
   width: 100%;
 }
 
-/* line 79, ../../../private/common-html/sass/partials/_header.scss */
+/* line 87, ../../../private/common-html/sass/partials/_header.scss */
 .nav-box {
   width: 100%;
   max-width: 1280px;
@@ -1310,7 +1310,7 @@ h1 .icon {
   margin-right: auto;
 }
 
-/* line 92, ../../../private/common-html/sass/partials/_header.scss */
+/* line 100, ../../../private/common-html/sass/partials/_header.scss */
 nav {
   position: fixed;
   top: 0;
@@ -1318,7 +1318,7 @@ nav {
   box-sizing: border-box;
   width: 100%;
 }
-/* line 98, ../../../private/common-html/sass/partials/_header.scss */
+/* line 106, ../../../private/common-html/sass/partials/_header.scss */
 nav .nav-top {
   width: 100%;
   background-color: #333333;
@@ -1327,14 +1327,14 @@ nav .nav-top {
   box-sizing: border-box;
   overflow: hidden;
 }
-/* line 101, ../../../private/common-html/sass/partials/_header.scss */
+/* line 109, ../../../private/common-html/sass/partials/_header.scss */
 nav .brand {
   position: relative;
   width: 188px;
   display: inline-block;
   float: left;
 }
-/* line 106, ../../../private/common-html/sass/partials/_header.scss */
+/* line 114, ../../../private/common-html/sass/partials/_header.scss */
 nav .brand a.logo {
   float: left;
   width: 164px;
@@ -1342,7 +1342,7 @@ nav .brand a.logo {
   margin: 12px;
   background: url("/lp-static/img/logo.png");
 }
-/* line 114, ../../../private/common-html/sass/partials/_header.scss */
+/* line 122, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-closed {
   background-color: inherit;
   display: inline-block;
@@ -1370,32 +1370,43 @@ nav .language-closed a:link span, nav .language-closed a:visited span {
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-closed a:hover, nav .language-closed a:active {
-  color: white;
   background-color: #555555;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-nav .language-closed a:hover span, nav .language-closed a:active span {
+nav .language-closed a:hover {
   color: white;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+nav .language-closed a:hover span {
+  color: white;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+nav .language-closed a:active {
+  color: white;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+nav .language-closed a:active span {
+  color: white;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-closed a span {
   vertical-align: middle;
 }
-/* line 50, ../../../private/common-html/sass/partials/_header.scss */
+/* line 58, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-closed a {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 0;
   padding-bottom: 0;
 }
-/* line 58, ../../../private/common-html/sass/partials/_header.scss */
+/* line 66, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-closed a, nav .language-closed span {
   vertical-align: middle;
   line-height: 60px;
   text-transform: uppercase;
   overflow: hidden;
 }
-/* line 117, ../../../private/common-html/sass/partials/_header.scss */
+/* line 125, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-open {
   background-color: #555555;
   display: inline-block;
@@ -1423,38 +1434,49 @@ nav .language-open a:link span, nav .language-open a:visited span {
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-open a:hover, nav .language-open a:active {
-  color: #f7ac2e;
   background-color: #555555;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-nav .language-open a:hover span, nav .language-open a:active span {
+nav .language-open a:hover {
   color: #f7ac2e;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+nav .language-open a:hover span {
+  color: #f7ac2e;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+nav .language-open a:active {
+  color: #f7ac2e;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+nav .language-open a:active span {
+  color: #f7ac2e;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-open a span {
   vertical-align: middle;
 }
-/* line 50, ../../../private/common-html/sass/partials/_header.scss */
+/* line 58, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-open a {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 0;
   padding-bottom: 0;
 }
-/* line 58, ../../../private/common-html/sass/partials/_header.scss */
+/* line 66, ../../../private/common-html/sass/partials/_header.scss */
 nav .language-open a, nav .language-open span {
   vertical-align: middle;
   line-height: 60px;
   text-transform: uppercase;
   overflow: hidden;
 }
-/* line 120, ../../../private/common-html/sass/partials/_header.scss */
+/* line 128, ../../../private/common-html/sass/partials/_header.scss */
 nav .header-menu {
   display: inline-block;
   position: absolute;
   right: 0px;
 }
-/* line 125, ../../../private/common-html/sass/partials/_header.scss */
+/* line 133, ../../../private/common-html/sass/partials/_header.scss */
 nav .header-menu .header-box {
   padding-left: 12px;
   padding-right: 12px;
@@ -1482,28 +1504,39 @@ nav .header-menu .header-box a:link span, nav .header-menu .header-box a:visited
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 nav .header-menu .header-box a:hover, nav .header-menu .header-box a:active {
-  color: white;
   background-color: inherit;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-nav .header-menu .header-box a:hover span, nav .header-menu .header-box a:active span {
+nav .header-menu .header-box a:hover {
   color: white;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+nav .header-menu .header-box a:hover span {
+  color: white;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+nav .header-menu .header-box a:active {
+  color: white;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+nav .header-menu .header-box a:active span {
+  color: white;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 nav .header-menu .header-box a span {
   vertical-align: middle;
 }
-/* line 130, ../../../private/common-html/sass/partials/_header.scss */
+/* line 138, ../../../private/common-html/sass/partials/_header.scss */
 nav .header-menu .header-box a {
   max-width: 300px;
   outline: 0;
 }
-/* line 134, ../../../private/common-html/sass/partials/_header.scss */
+/* line 142, ../../../private/common-html/sass/partials/_header.scss */
 nav .header-menu .header-box a, nav .header-menu .header-box span {
   line-height: 60px;
 }
 
-/* line 141, ../../../private/common-html/sass/partials/_header.scss */
+/* line 149, ../../../private/common-html/sass/partials/_header.scss */
 .nav-bottom {
   width: 100%;
   background-color: #555555;
@@ -1512,7 +1545,7 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   box-sizing: border-box;
   overflow: hidden;
 }
-/* line 143, ../../../private/common-html/sass/partials/_header.scss */
+/* line 151, ../../../private/common-html/sass/partials/_header.scss */
 .nav-bottom .language-menu {
   width: 100%;
   clear: both;
@@ -1521,13 +1554,13 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   padding-bottom: .5em;
   background-color: #555555;
 }
-/* line 152, ../../../private/common-html/sass/partials/_header.scss */
+/* line 160, ../../../private/common-html/sass/partials/_header.scss */
 .nav-bottom .language-menu ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
-/* line 156, ../../../private/common-html/sass/partials/_header.scss */
+/* line 164, ../../../private/common-html/sass/partials/_header.scss */
 .nav-bottom .language-menu ul li {
   margin-bottom: .5em;
   margin-top: 0;
@@ -1553,19 +1586,30 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 .nav-bottom .language-menu ul li a:hover, .nav-bottom .language-menu ul li a:active {
-  color: #f7ac2e;
   background-color: inherit;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-.nav-bottom .language-menu ul li a:hover span, .nav-bottom .language-menu ul li a:active span {
+.nav-bottom .language-menu ul li a:hover {
   color: #f7ac2e;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+.nav-bottom .language-menu ul li a:hover span {
+  color: #f7ac2e;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+.nav-bottom .language-menu ul li a:active {
+  color: #f7ac2e;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+.nav-bottom .language-menu ul li a:active span {
+  color: #f7ac2e;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 .nav-bottom .language-menu ul li a span {
   vertical-align: middle;
 }
 
-/* line 169, ../../../private/common-html/sass/partials/_header.scss */
+/* line 177, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand a.logo {
   background: none;
 }
@@ -1590,24 +1634,35 @@ nav .julkipano-brand .header-box a:link span, nav .julkipano-brand .header-box a
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .header-box a:hover, nav .julkipano-brand .header-box a:active {
-  color: white;
   background-color: inherit;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-nav .julkipano-brand .header-box a:hover span, nav .julkipano-brand .header-box a:active span {
+nav .julkipano-brand .header-box a:hover {
   color: white;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .header-box a:hover span {
+  color: white;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .header-box a:active {
+  color: white;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .header-box a:active span {
+  color: white;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .header-box a span {
   vertical-align: middle;
 }
-/* line 176, ../../../private/common-html/sass/partials/_header.scss */
+/* line 184, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand #header-user-menu {
   display: inline-block;
   position: absolute;
   right: 0px;
 }
-/* line 181, ../../../private/common-html/sass/partials/_header.scss */
+/* line 189, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .header-box, nav .julkipano-brand .julkipano-user {
   font-size: 16px;
   vertical-align: middle;
@@ -1620,11 +1675,11 @@ nav .julkipano-brand .header-box, nav .julkipano-brand .julkipano-user {
   color: #fff;
   margin-right: 24px;
 }
-/* line 192, ../../../private/common-html/sass/partials/_header.scss */
+/* line 200, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .header-box span, nav .julkipano-brand .julkipano-user span {
   vertical-align: middle;
 }
-/* line 196, ../../../private/common-html/sass/partials/_header.scss */
+/* line 204, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-closed {
   background-color: inherit;
   display: inline-block;
@@ -1652,32 +1707,43 @@ nav .julkipano-brand .language-closed a:link span, nav .julkipano-brand .languag
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-closed a:hover, nav .julkipano-brand .language-closed a:active {
-  color: white;
   background-color: #555555;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-nav .julkipano-brand .language-closed a:hover span, nav .julkipano-brand .language-closed a:active span {
+nav .julkipano-brand .language-closed a:hover {
   color: white;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .language-closed a:hover span {
+  color: white;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .language-closed a:active {
+  color: white;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .language-closed a:active span {
+  color: white;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-closed a span {
   vertical-align: middle;
 }
-/* line 50, ../../../private/common-html/sass/partials/_header.scss */
+/* line 58, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-closed a {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 0;
   padding-bottom: 0;
 }
-/* line 58, ../../../private/common-html/sass/partials/_header.scss */
+/* line 66, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-closed a, nav .julkipano-brand .language-closed span {
   vertical-align: middle;
   line-height: 60px;
   text-transform: uppercase;
   overflow: hidden;
 }
-/* line 199, ../../../private/common-html/sass/partials/_header.scss */
+/* line 207, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-open {
   background-color: #555555;
   display: inline-block;
@@ -1705,25 +1771,36 @@ nav .julkipano-brand .language-open a:link span, nav .julkipano-brand .language-
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-open a:hover, nav .julkipano-brand .language-open a:active {
-  color: #0fbbf7;
   background-color: #555555;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-nav .julkipano-brand .language-open a:hover span, nav .julkipano-brand .language-open a:active span {
+nav .julkipano-brand .language-open a:hover {
   color: #0fbbf7;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .language-open a:hover span {
+  color: #0fbbf7;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .language-open a:active {
+  color: #0fbbf7;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .language-open a:active span {
+  color: #0fbbf7;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-open a span {
   vertical-align: middle;
 }
-/* line 50, ../../../private/common-html/sass/partials/_header.scss */
+/* line 58, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-open a {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 0;
   padding-bottom: 0;
 }
-/* line 58, ../../../private/common-html/sass/partials/_header.scss */
+/* line 66, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .language-open a, nav .julkipano-brand .language-open span {
   vertical-align: middle;
   line-height: 60px;
@@ -1751,19 +1828,30 @@ nav .julkipano-brand .nav-bottom ul li a:link span, nav .julkipano-brand .nav-bo
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .nav-bottom ul li a:hover, nav .julkipano-brand .nav-bottom ul li a:active {
-  color: #0fbbf7;
   background-color: inherit;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-nav .julkipano-brand .nav-bottom ul li a:hover span, nav .julkipano-brand .nav-bottom ul li a:active span {
+nav .julkipano-brand .nav-bottom ul li a:hover {
   color: #0fbbf7;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .nav-bottom ul li a:hover span {
+  color: #0fbbf7;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .nav-bottom ul li a:active {
+  color: #0fbbf7;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+nav .julkipano-brand .nav-bottom ul li a:active span {
+  color: #0fbbf7;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 nav .julkipano-brand .nav-bottom ul li a span {
   vertical-align: middle;
 }
 
-/* line 220, ../../../private/common-html/sass/partials/_header.scss */
+/* line 228, ../../../private/common-html/sass/partials/_header.scss */
 .nav-notification {
   width: 100%;
   background-color: #f39129;
@@ -1777,43 +1865,43 @@ nav .julkipano-brand .nav-bottom ul li a span {
   margin-top: 60px;
   margin-bottom: -60px;
 }
-/* line 231, ../../../private/common-html/sass/partials/_header.scss */
+/* line 239, ../../../private/common-html/sass/partials/_header.scss */
 .nav-notification:after {
   clear: both;
 }
 
-/* line 238, ../../../private/common-html/sass/partials/_header.scss */
+/* line 246, ../../../private/common-html/sass/partials/_header.scss */
 .admin .nav-notification, .authority-admin .nav-notification {
   margin-top: 106px;
   margin-bottom: -48px;
 }
-/* line 245, ../../../private/common-html/sass/partials/_header.scss */
+/* line 253, ../../../private/common-html/sass/partials/_header.scss */
 .admin .breadcrumb, .authority-admin .breadcrumb {
   background-color: #4F4F4F;
 }
-/* line 247, ../../../private/common-html/sass/partials/_header.scss */
+/* line 255, ../../../private/common-html/sass/partials/_header.scss */
 .admin .breadcrumb .container, .authority-admin .breadcrumb .container {
   margin-top: 0;
 }
-/* line 248, ../../../private/common-html/sass/partials/_header.scss */
+/* line 256, ../../../private/common-html/sass/partials/_header.scss */
 .admin .breadcrumb a.selected, .authority-admin .breadcrumb a.selected {
   color: #000;
 }
-/* line 251, ../../../private/common-html/sass/partials/_header.scss */
+/* line 259, ../../../private/common-html/sass/partials/_header.scss */
 .admin h2, .authority-admin h2 {
   margin-top: 24px;
 }
 
 /* Louhi theme */
-/* line 258, ../../../private/common-html/sass/partials/_header.scss */
+/* line 266, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav a.logo {
   background: url("/lp-static/img/logo-v2-flat.png");
 }
-/* line 262, ../../../private/common-html/sass/partials/_header.scss */
+/* line 270, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .nav-top {
   background-color: #fff;
 }
-/* line 265, ../../../private/common-html/sass/partials/_header.scss */
+/* line 273, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-closed {
   background-color: inherit;
   display: inline-block;
@@ -1841,32 +1929,43 @@ nav .julkipano-brand .nav-bottom ul li a span {
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-closed a:hover, .louhi nav .language-closed a:active {
-  color: #f7ac2e;
   background-color: inherit;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-.louhi nav .language-closed a:hover span, .louhi nav .language-closed a:active span {
+.louhi nav .language-closed a:hover {
   color: #f7ac2e;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .language-closed a:hover span {
+  color: #f7ac2e;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .language-closed a:active {
+  color: #f7ac2e;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .language-closed a:active span {
+  color: #f7ac2e;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-closed a span {
   vertical-align: middle;
 }
-/* line 50, ../../../private/common-html/sass/partials/_header.scss */
+/* line 58, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-closed a {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 0;
   padding-bottom: 0;
 }
-/* line 58, ../../../private/common-html/sass/partials/_header.scss */
+/* line 66, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-closed a, .louhi nav .language-closed span {
   vertical-align: middle;
   line-height: 60px;
   text-transform: uppercase;
   overflow: hidden;
 }
-/* line 268, ../../../private/common-html/sass/partials/_header.scss */
+/* line 276, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-open {
   background-color: inherit;
   display: inline-block;
@@ -1894,25 +1993,36 @@ nav .julkipano-brand .nav-bottom ul li a span {
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-open a:hover, .louhi nav .language-open a:active {
-  color: #f7ac2e;
   background-color: inherit;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-.louhi nav .language-open a:hover span, .louhi nav .language-open a:active span {
+.louhi nav .language-open a:hover {
   color: #f7ac2e;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .language-open a:hover span {
+  color: #f7ac2e;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .language-open a:active {
+  color: #f7ac2e;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .language-open a:active span {
+  color: #f7ac2e;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-open a span {
   vertical-align: middle;
 }
-/* line 50, ../../../private/common-html/sass/partials/_header.scss */
+/* line 58, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-open a {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 0;
   padding-bottom: 0;
 }
-/* line 58, ../../../private/common-html/sass/partials/_header.scss */
+/* line 66, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .language-open a, .louhi nav .language-open span {
   vertical-align: middle;
   line-height: 60px;
@@ -1931,27 +2041,38 @@ nav .julkipano-brand .nav-bottom ul li a span {
 }
 /* line 24, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .header-box a:link, .louhi nav .header-box a:visited {
-  color: black;
+  color: #f39129;
   text-decoration: none;
 }
 /* line 27, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .header-box a:link span, .louhi nav .header-box a:visited span {
-  color: black;
+  color: #f39129;
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .header-box a:hover, .louhi nav .header-box a:active {
-  color: #f7ac2e;
   background-color: inherit;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-.louhi nav .header-box a:hover span, .louhi nav .header-box a:active span {
+.louhi nav .header-box a:hover {
   color: #f7ac2e;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .header-box a:hover span {
+  color: #f7ac2e;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .header-box a:active {
+  color: #fbc732;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+.louhi nav .header-box a:active span {
+  color: #fbc732;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 .louhi nav .header-box a span {
   vertical-align: middle;
 }
-/* line 275, ../../../private/common-html/sass/partials/_header.scss */
+/* line 283, ../../../private/common-html/sass/partials/_header.scss */
 .louhi #logout-header-box {
   display: none;
 }
@@ -2066,14 +2187,25 @@ footer .lupapiste-brand .footer-box a:link span, footer .lupapiste-brand .footer
 }
 /* line 31, ../../../private/common-html/sass/partials/_header.scss */
 footer .lupapiste-brand .footer-box a:hover, footer .lupapiste-brand .footer-box a:active {
-  color: white;
   background-color: inherit;
 }
 /* line 34, ../../../private/common-html/sass/partials/_header.scss */
-footer .lupapiste-brand .footer-box a:hover span, footer .lupapiste-brand .footer-box a:active span {
+footer .lupapiste-brand .footer-box a:hover {
   color: white;
 }
-/* line 38, ../../../private/common-html/sass/partials/_header.scss */
+/* line 36, ../../../private/common-html/sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a:hover span {
+  color: white;
+}
+/* line 40, ../../../private/common-html/sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a:active {
+  color: white;
+}
+/* line 42, ../../../private/common-html/sass/partials/_header.scss */
+footer .lupapiste-brand .footer-box a:active span {
+  color: white;
+}
+/* line 46, ../../../private/common-html/sass/partials/_header.scss */
 footer .lupapiste-brand .footer-box a span {
   vertical-align: middle;
 }
@@ -8152,121 +8284,4 @@ ul.tabs {
 /* line 128, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-controls .comment-request label {
   display: block;
-}
-/* line 131, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-controls .comment-request select {
-  display: block;
-}
-/* line 136, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-controls .mark-answered {
-  margin-left: 24px;
-  display: inline-block;
-}
-/* line 139, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-controls .mark-answered label, .comment-controls .mark-answered input {
-  display: inline;
-}
-
-/* line 146, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-toggle {
-  margin-bottom: 8px;
-}
-
-/* line 150, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-message {
-  white-space: pre-line;
-}
-
-/* line 237, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble {
-  position: relative;
-  color: #333333;
-  background: #f6f6f6;
-  width: 100%;
-  border-radius: 2px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 5px;
-  padding-top: 5px;
-  margin-bottom: 15px;
-  border: 1px solid #bbbbbb;
-}
-/* line 171, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble:after, .comment-bubble:before {
-  top: 100%;
-  left: 5%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-/* line 182, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble:after, .comment-bubble:before {
-  left: 5%;
-}
-/* line 185, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble:after {
-  border-color: rgba(246, 246, 246, 0);
-  border-top-color: #f6f6f6;
-  border-width: 10px;
-  margin-left: -10px;
-}
-/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble:before {
-  border-color: rgba(187, 187, 187, 0);
-  border-top-color: #bbbbbb;
-  border-width: 11px;
-  margin-left: -11px;
-}
-/* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble .header {
-  border-bottom: 2px solid #bbbbbb;
-  margin-bottom: 5px;
-  padding-bottom: 5px;
-  width: 100%;
-  overflow-y: hidden;
-  vertical-align: top;
-}
-/* line 204, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble .header .sender {
-  float: left;
-  font-weight: bold;
-}
-/* line 207, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble .header .sender .role {
-  text-transform: lowercase;
-}
-/* line 209, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble .header .sender .role:before {
-  content: "(";
-}
-/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble .header .sender .role:after {
-  content: ")";
-}
-/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble .header .sender .to:before {
-  margin-left: 12px;
-  margin-right: 12px;
-  content: "→";
-}
-/* line 224, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble .header .timestamp {
-  float: right;
-}
-/* line 228, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble a {
-  color: #f39129;
-  text-decoration: none;
-}
-/* line 10, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble a:link, .comment-bubble a:visited {
-  color: #f39129;
-}
-/* line 13, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble a:hover {
-  color: #f7ac2e;
-  text-decoration: underline;
 }
