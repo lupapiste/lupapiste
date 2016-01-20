@@ -108,7 +108,7 @@ LUPAPISTE.SidePanelService = function() {
 
   hub.subscribe("SidePanelService::AddComment", function(event) {
     var markAnswered = event.markAnswered || false;
-    var openApplication = event.openApplication || false;
+    var openApplication = event.openApplication || false;
     var text = event.text || "";
     var to = event.to;
     ajax.command("add-comment", {
