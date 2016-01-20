@@ -1,9 +1,12 @@
 (ns lupapalvelu.guest-authority
   (:require [monger.operators :refer :all]
-            [sade.core :refer [fail]]
+            [sade.core :refer [fail ok]]
             [lupapalvelu.user :as usr]  ;; usr works better with code completion.
             [lupapalvelu.organization :as org]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.action :as action]))
 
 (defn resolve-candidate [admin email]
   (let [candidate          (-> email
@@ -53,4 +56,29 @@
   [{{email :email} :data} application]
   (let [guest (usr/get-user-by-email email)]
     (when (auth/user-authz? auth/all-authz-roles application guest)
-      (fail "error.already-has-access"))))
+      (fail :error.already-has-access))))
+
+(defn valid-guest-role [{{role :role} :data}]
+  (when-not (#{:guest :guestAuthority} (keyword role))
+    (fail :error.illegal-role :parameters role)))
+
+(defn invite
+  "Invites and grants access to application guest. Sends invitation
+  email and updates application auth."
+  [{{:keys [email role]} :data
+    user                         :user
+    timestamp                    :created
+    application                  :application
+    :as                          command}]
+  (let [email (usr/canonize-email email)
+        existing-user (usr/get-user-by-email email)]
+    (if (or (domain/invite application email)
+            (auth/has-auth? application (:id existing-user)))
+      (fail :error.already-has-access)
+      (let [guest (usr/get-or-create-user-by-email email user)
+            auth (usr/user-in-role guest (keyword role))]
+        (action/update-application command
+                            {$push {:auth     auth}
+                             $set  {:modified timestamp}})
+        (notifications/notify! :invite (assoc command :recipients [guest]))
+        (ok)))))

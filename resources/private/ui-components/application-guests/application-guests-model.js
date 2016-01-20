@@ -47,25 +47,14 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     self.guestError( res.text );
   }
 
-  function sendInvite( args ) {
-    ajax.command( "invite-with-role",
-                _.assign( args, {text: self.message(),
-                                role: self.isAuthority() ? "guestAuthority" : "guest",
-                                path: "",
-                                documentId: "",
-                                documentName: ""}))
+  self.send = function() {
+    ajax.command( "invite-guest",
+                  {email: self.email(),
+                   text: self.message(),
+                   id: lupapisteApp.models.application.id(),
+                   role: self.isAuthority() ? "guestAuthority" : "guest"} )
     .pending( self.waiting)
     .success( _.partial( self.bubbleVisible, false))
-    .error( errorFun )
-    .call();
-  }
-
-  self.send = function() {
-    var args = {email: self.email(),
-                id: lupapisteApp.models.application.id()};
-    ajax.query( "add-guest-pseudo-query", args )
-    .pending( self.waiting)
-    .success( _.partial( sendInvite, args ))
     .error( errorFun )
     .call();
   };

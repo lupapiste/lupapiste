@@ -1,6 +1,7 @@
 (ns lupapalvelu.guest-authority-api
   (:require [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.states :as states]
             [lupapalvelu.guest-authority :as guest]))
 
 (defquery resolve-guest-authority-candidate
@@ -37,9 +38,18 @@
   [{admin :user}]
   (guest/remove-guest admin email))
 
-(defquery add-guest-pseudo-query
-  {:description "Different checks before invite-with-role"
-   :parameters [email id]
-   :user-roles #{:applicant :authority}
-   :pre-checks [guest/no-duplicate-guests]
-   :input-validators [(partial action/non-blank-parameters [:email])]})
+(defcommand invite-guest
+  {:description         "Sends invitation email and grants guest (or
+  guestAuthority) access. Guest 'authorization' does not need to be
+  explicitly acknowledged by the invitee."
+   :user-roles          #{:applicant :authority}
+   :parameters          [:id :email :role]
+   :optional-parameters [:text]
+   :pre-checks          [guest/no-duplicate-guests]
+   :input-validators    [(partial action/non-blank-parameters [:email])
+                         action/email-validator
+                         guest/valid-guest-role]
+   :states              (states/all-application-states-but states/terminal-states)
+   :notified            true}
+  [command]
+  (guest/invite command))
