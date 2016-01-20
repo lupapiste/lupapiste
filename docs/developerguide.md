@@ -19,8 +19,12 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
   - Chromella ajettavia testejä varten ajuri osoitteesta http://chromedriver.storage.googleapis.com/index.html
 - [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
   PDF-tiedostojen kääntämistä ja korjaamista varten
-- Valinnaisesti: [pdf2pdf](https://www.pdf-tools.com/pdf/Products-Shop/Evaluate.aspx?p=CNV&back=%2fpdf%2fpdf-to-pdfa-converter-signature.aspx)
+
+Valinnaisesti:
+
+- [pdf2pdf](https://www.pdf-tools.com/pdf/Products-Shop/Evaluate.aspx?p=CNV&back=%2fpdf%2fpdf-to-pdfa-converter-signature.aspx)
   PDF/A-konversioita varten
+- [KnockoutJS context debugger](https://chrome.google.com/webstore/detail/knockoutjs-context-debugg/oddcpmchholgcjgjdnfjmildmlielhof) Chrome plugin, joka helpottaa DOM elementtien binding kontekstien hahmottamista
 
 ## Kehitysympäristön konfigurointi
 
