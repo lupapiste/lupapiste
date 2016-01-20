@@ -85,6 +85,16 @@
           (:displayNameFi primary) => "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, p\u00e4iv\u00e4koti-, palvelu-, hoitolaitos- tai muu rakennus)"
           (:displayNameSv primary) => seq)
 
+        (fact "Result contains all and only only the documented keys"
+          (keys application) => (just [:id :address :applicant :authority
+                                       :drawings :infoRequest :location
+                                       :modified :municipality
+                                       :primaryOperation :secondaryOperations
+                                       :permitType
+                                       :state :stateNameFi :stateNameSv
+                                       :submitted] :in-any-order)
+          (keys (:location application)) => (just [:x :y] :in-any-order))
+
         (fact "Secondary operation is localized"
           (count secondaries) => 1
           (-> secondaries first :name) => "pientalo"
