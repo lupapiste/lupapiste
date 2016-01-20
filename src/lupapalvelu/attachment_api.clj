@@ -49,12 +49,13 @@
           (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defn- attachment-deletable [application attachmentId user]
-  (let [attachment (attachment/get-attachment-info application attachmentId)]
-    (cond
-      (:readOnly attachment) false
-      (:required attachment)  (user/authority? user)
-      :else                   true)))
+(defn- attachment-deletable [{{attachmentId :attachmentId} :data user :user} application]
+  (let [{read-only :readOnly required :required} (attachment/get-attachment-info application attachmentId)]
+    (cond 
+      read-only (fail :error.unauthorized 
+                      :desc "Readonly attachments cannot be removed.")
+      (and required (not (user/authority? user))) (fail :error.unauthorized
+                                                        :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))))
 
 (defn- attachment-editable-by-application-state? [application attachmentId userRole]
   (or (ss/blank? attachmentId)
@@ -192,11 +193,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts]}
+   :pre-checks  [a/validate-authority-in-drafts attachment-deletable]}
   [{:keys [application user]}]
-
-  (when-not (attachment-deletable application attachmentId user)
-    (fail! :error.unauthorized :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))
 
   (when-not (attachment-editable-by-application-state? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
