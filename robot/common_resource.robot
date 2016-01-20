@@ -225,14 +225,11 @@ Login
   Wait until  Element should be visible  login-username
   Input text  login-username  ${username}
   Input text  login-password  ${password}
-  # for IE8
   Wait and click  login-button
-  Run Keyword And Ignore Error  Confirm Action
 
 Login fails
   [Arguments]  ${username}  ${password}
   Login  ${username}  ${password}
-  Run Keyword And Ignore Error  Confirm Action
   User should not be logged in
 
 User should be logged in

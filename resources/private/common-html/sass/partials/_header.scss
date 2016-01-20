@@ -11,7 +11,7 @@ $language-padding: 20px;
   }
 }
 
-@mixin nav-link( $link: $orange, $hover: white, $hover-bg: inherit ) {
+@mixin nav-link( $link: $orange, $hover: white, $hover-bg: inherit, $active: $hover ) {
   a {
     font-size: 16px;
     vertical-align: middle;
@@ -29,12 +29,20 @@ $language-padding: 20px;
               }
             }
     &:hover, &:active {
-               color: $hover;
-               background-color: $hover-bg;
-               span {
-                 color: $hover;
-               }
-             }
+      background-color: $hover-bg;
+    }
+    &:hover {
+      color: $hover;
+      span {
+        color: $hover;
+      }
+    }
+    &:active {
+      color: $active;
+      span {
+        color: $active;
+      }
+    }
     span {
       vertical-align: middle;
     }
@@ -269,7 +277,7 @@ $notification-bottom: -60px;
       @include language-select( $link: black, $hover: $orange, $hover-bg: inherit );
     }
       .header-box {
-      @include nav-link($link: black, $hover: $orange);
+      @include nav-link( $link: $orange-link, $hover: $orange-hover, $active: $orange-active );
       }
     }
     #logout-header-box { display: none; }
