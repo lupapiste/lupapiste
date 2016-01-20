@@ -28,6 +28,9 @@
 (defn post [uri & options]
   (logged-call http/post uri (apply merge-to-defaults options)))
 
+(defn put [uri & options]
+  (logged-call http/put uri (apply merge-to-defaults options)))
+
 (defn secure-headers [request-or-response]
   (if (contains? request-or-response :headers)
     (update request-or-response :headers dissoc "cookie" "set-cookie" "server" "host" "connection")

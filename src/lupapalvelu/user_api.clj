@@ -677,9 +677,9 @@
 
 (defquery permanent-archive-enabled
   {:user-roles #{:applicant :authority}
-   :pre-checks [(fn [command {:keys [organization] :as application}]
+   :pre-checks [(fn [command {:keys [organization]}]
                   (let [org-set (if organization
-                                  (set/intersection #{organization})
+                                  #{organization}
                                   (user/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher :archivist}))]
                     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
