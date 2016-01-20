@@ -61,12 +61,13 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   self.comments = ko.computed(function() {
-    var filteredComments =
-      _.filter(ko.mapping.toJS(application.comments),
-        function(comment) {
-          return self.showAllComments() || self.target().type === comment.target.type && self.target().id === comment.target.id;
-        });
-    return filteredComments;
+    return _(ko.mapping.toJS(application.comments))
+      .filter(
+         function(comment) {
+           return self.showAllComments() || self.target().type === comment.target.type && self.target().id === comment.target.id;
+       })
+       .reverse()
+       .value();
   });
 
   // refresh conversation when page changes

@@ -86,8 +86,7 @@
           <!-- /ko -->
         </form>
 
-        <div data-bind="foreach: comments().slice(0).reverse()" data-test-id="comments-table">
-
+        <div data-bind="foreach: comments" data-test-id="comments-table">
          <div class="is-comment"
               data-bind="css: {
                           'comment-bubble-authority':  $parent.isAuthorityComment($data),
