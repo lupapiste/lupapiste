@@ -371,7 +371,7 @@
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
-                            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.authorization.ok('store-tos-metadata-for-application') && $root.application.inPostVerdictState(),
+                            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.authorization.ok('archive-documents') && $root.application.inPostVerdictState(),
                                            css: {'active': $parent.selectedTabName() === 'archival'}">
                                 <a data-bind="click: changeTab" href="#" data-target="archival" data-test-id="application-open-archival-tab" class="link-btn">
                                     <span data-bind="ltext: 'arkistointi'"></span>
@@ -907,7 +907,7 @@
 
                     <!-- Archival tab -->
 
-                    <!--ko if: selectedTabName() === 'archival' && features.enabled('arkistointi') && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() && $root.authorization.ok('store-tos-metadata-for-application')-->
+                    <!--ko if: selectedTabName() === 'archival' && features.enabled('arkistointi') && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() && $root.authorization.ok('archive-documents')-->
                     <div id="application-archival-tab" class="tab-content">
                       <div>
                         <div data-bind="component: {name: 'archival-summary', params: {application: application}}"></div>

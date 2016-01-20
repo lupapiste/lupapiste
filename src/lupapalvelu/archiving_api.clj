@@ -2,14 +2,21 @@
   (:require [lupapalvelu.states :as states]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archiving :as archiving]
-            [sade.core :refer [ok]]))
+            [sade.core :refer [ok unauthorized]]
+            [lupapalvelu.user :as user]
+            [clojure.set :as set]
+            [lupapalvelu.organization :as organization]))
 
 (defcommand archive-documents
   {:parameters       [:id attachmentIds archiveApplication]
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
-   :feature          :arkistointi}
+   :feature          :arkistointi
+   :pre-checks       [(fn [{:keys [user]} {:keys [organization]}]
+                        (let [org-set (set/intersection #{organization} (user/organization-ids-by-roles user #{:archivist}))]
+                          (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
+                            unauthorized)))]}
   [{:keys [application user] :as command}]
   (when (contains? (get-in user [:orgAuthz (keyword (:organization application))]) :archivist)
     (archiving/send-to-archive command (set attachmentIds) archiveApplication)
