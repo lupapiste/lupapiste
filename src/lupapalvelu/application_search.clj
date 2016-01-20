@@ -78,7 +78,7 @@
 (def authority-application-states
   {:state {$in ["submitted" "sent" "complementNeeded"]}})
 
-(defn make-query [query {:keys [searchText kind applicationType handlers tags organizations operations areas]} user]
+(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas]} user]
   {$and
    (filter seq
      [query
@@ -174,7 +174,7 @@
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
-(defn applications-for-user [user {application-type :applicationType :as params}]
+(defn applications-for-user [user params]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
