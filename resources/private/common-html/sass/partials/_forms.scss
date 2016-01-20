@@ -1026,6 +1026,7 @@ $max-columns: 12;
     }
   }
   .col--no-margin {
+    padding: 0 !important;
     .checkbox-wrapper {
       border: none;
     }

@@ -68,20 +68,21 @@
                                                  id: 'side-panel-assigneed-authority'}}"></div>
           </div>
           <!-- ko if: mainConversation -->
-          <div class="row row--no-margin">
-            <div class="col-2 col--no-margin" data-bind="component: {name: 'checkbox-field',
-                                                      params: {value: showAttachmentComments,
-                                                               lLabel: 'conversation.attachment.toggle',
-                                                               is: 'show-attachment-comments'}}"></div>
+          <div class="row">
+            <div class="col-2 col--no-margin"
+                 data-bind="component: {name: 'checkbox-field',
+                                        params: {value: showAttachmentComments,
+                                                 lLabel: 'conversation.attachment.toggle',
+                                                 id: 'show-attachment-comments'}}"></div>
+            <!-- ko if: authorization.ok('save-verdict-draft') -->
+            <div class="col-2 col--no-margin"
+                 data-bind="component: {name: 'checkbox-field',
+                                        params: {value: showPreparationComments,
+                                                 lLabel: 'conversation.preparation.toggle',
+                                                 id: 'show-preparation-comments'}}"></div>
+            <!-- /ko -->
+
           </div>
-          <!-- ko if: authorization.ok('save-verdict-draft') -->
-          <div class="row row--no-margin">
-            <div class="col-2 col--no-margin" data-bind="component: {name: 'checkbox-field',
-                                                      params: {value: showPreparationComments,
-                                                               lLabel: 'conversation.preparation.toggle',
-                                                               id: 'show-preparation-comments'}}"></div>
-          </div>
-          <!-- /ko -->
           <!-- /ko -->
         </form>
 
