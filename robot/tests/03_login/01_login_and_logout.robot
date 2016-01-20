@@ -28,9 +28,9 @@ Login fails with invalid username and password
 
 Username is locked after 3 failures
   Login fails  invalid  whatever
-  Wait Until  Page Should Contain  Tunnus tai salasana on väärin
+  Wait Until  Element should contain  login-message  Tunnus tai salasana on väärin
   Login fails  invalid  whatever
-  Wait Until  Page Should Contain  Tunnus on lukittu
+  Wait Until  Element should contain  login-message  Tunnus on lukittu
 
 Username lock expires after 10 seconds
   Sleep  10
