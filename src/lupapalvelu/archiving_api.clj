@@ -30,7 +30,7 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial vector-parameters [:documentIds])]
    :user-roles       #{:authority}
-   :states           states/all-application-states
+   :states           (states/all-application-states-but :draft)
    :feature          :arkistointi}
   [{:keys [application] :as command}]
   (let [id-set (set documentIds)
