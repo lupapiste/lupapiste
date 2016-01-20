@@ -49,7 +49,6 @@
                                                 :content   is-or-file
                                                 :mime-type content-type}]}))
 
-
 (defn- set-attachment-state [application now id]
   (action/update-application
     (action/application->command application)
