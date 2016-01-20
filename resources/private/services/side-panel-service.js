@@ -52,7 +52,7 @@ LUPAPISTE.SidePanelService = function() {
   self.target = ko.observable({type: "application"});
   self.authorities = ko.observableArray([]);
 
-  var commentRoles = undefined;
+  var commentRoles;
   var commentPending = ko.observable();
 
   ko.computed(function() {
@@ -125,8 +125,10 @@ LUPAPISTE.SidePanelService = function() {
     .success(function() {
       hub.send("SidePanelService::AddCommentProcessed", {status: "success"});
       if (markAnswered) {
-        // TODO show component dialog
-        LUPAPISTE.ModalDialog.showDynamicOk(loc("comment-request-mark-answered-label"), loc("comment-request-mark-answered.ok"));
+        hub.send("show-dialog", {ltitle: "comment-request-mark-answered-label",
+                                 component: "ok-dialog",
+                                 size: "small",
+                                 componentParams: {ltext: "comment-request-mark-answered.ok"}});
       }
       // Just to show new comment?
       repository.load(ko.unwrap(application.id));
