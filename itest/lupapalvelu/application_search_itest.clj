@@ -85,7 +85,7 @@
           (:displayNameFi primary) => "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, p\u00e4iv\u00e4koti-, palvelu-, hoitolaitos- tai muu rakennus)"
           (:displayNameSv primary) => seq)
 
-        (fact "Result contains all and only only the documented keys"
+        (fact "Result contains all - and only - the documented keys"
           (keys application) => (just [:id :address :applicant :authority
                                        :drawings :infoRequest :location
                                        :modified :municipality
