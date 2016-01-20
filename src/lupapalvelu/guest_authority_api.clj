@@ -84,3 +84,12 @@
    :states states/all-application-states}
   [command]
   (guest/delete-application-guest command))
+
+(defquery guest-authorities-application-organization
+  {:description "Guest authorities that are defined for this
+  applications organization."
+   :parameters [:id]
+   :user-roles #{:authority}
+   :states states/all-application-states}
+  [command]
+  (ok :guestAuthorities (guest/application-org-authorities command)))

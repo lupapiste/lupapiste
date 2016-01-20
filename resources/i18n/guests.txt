@@ -19,3 +19,4 @@
 "application-guests.remove" "fi" "Poista lukuoikeus"
 "application-guests.subscribe" "fi" "Tilaa ilmoitukset"
 "application-guests.unsubscribe" "fi" "Peruuta ilmoitukset"
+"application-guests.no-more-authorities" "fi" "Organisaatiossa ei ole enempää viranomaisia, joille olisi määritelty hankekohtainen lukuoikeus."

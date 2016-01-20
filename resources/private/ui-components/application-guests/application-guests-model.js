@@ -18,7 +18,40 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     .call();
   }
 
-  hub.subscribe( "application-model-updated", fetchGuests);
+  self.allGuestAuthorities = ko.observableArray();
+
+  function fetchGuestAuthorities() {
+    ajax.query( "guest-authorities-application-organization",
+              {id: appId()})
+    .success( function( res ) {
+      self.allGuestAuthorities( res.guestAuthorities );
+    })
+    .call();
+  }
+
+  hub.subscribe( "application-model-updated", function() {
+    if( self.isAuthority()) {
+      fetchGuestAuthorities();
+    }
+    fetchGuests();
+  });
+
+  // Resolved list of of guest authorities that only
+  // only include those authorities that have not yet
+  // been given access
+  self.guestAuthorities = ko.pureComputed( function() {
+    var used = _.reduce( self.allGuests(),
+                       function( acc, g ) {
+                         if( g.role === "guestAuthority") {
+                           acc[g.email] = true;
+                           return acc;
+                         }
+                       }, {} );
+    return  _.filter( self.allGuestAuthorities(),
+                      function( ga ) {
+                        return !used[ga.email];
+                      });
+  });
 
   self.nameAndUsername = _.template( "<%- name %> (<%- username %>)");
 
@@ -53,12 +86,7 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     return lupapisteApp.models.currentUser.isAuthority();
   });
 
-  self.guestAuthorities = [{name: "Hello world",
-                            email: "hello@world.com",
-                            role: "shijie"},
-                           {name: "Foo Bar",
-                            email: "foo@bar.com",
-                            role: "Baz"}];
+
 
   self.emailId = _.uniqueId( "guest-email-");
   self.messageId = _.uniqueId( "guest-message-");
@@ -67,6 +95,12 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
   self.waiting = ko.observable( false );
 
   self.guestError = ko.observable();
+
+  self.error = ko.pureComputed( function() {
+    return self.guestError()
+        || (self.isAuthority () && self.guestAuthorities ().length
+           ? null : "application-guests.no-more-authorities");
+  });
 
   self.toggleBubble = function() {
     self.bubbleVisible( !self.bubbleVisible());

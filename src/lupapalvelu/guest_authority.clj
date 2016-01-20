@@ -104,6 +104,7 @@
                       (get ga-role-map email))
      :name (usercatname user)
      :username username
+     :email email
      :role role
      :unsubscribed unsubscribed
      :inviter (usercatname inviter)}))
@@ -145,3 +146,7 @@
     :as command}]
   (action/update-application command
                              {$pull {:auth {:username username}}}))
+
+(defn application-org-authorities
+  [{:keys [application]}]
+  (org-guest-authorities (:organization application)))
