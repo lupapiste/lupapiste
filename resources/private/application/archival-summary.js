@@ -222,10 +222,40 @@
       });
     };
 
+    var updateState = function(docs, stateMap) {
+      _.forEach(docs, function(doc) {
+        var newState = stateMap[ko.unwrap(doc.id)];
+        if (newState) {
+          doc.metadata().tila(newState);
+          if (newState === 'arkistoitu') {
+            doc.sendToArchive(false);
+          }
+        }
+      });
+    };
+
+    var pollChangedState = function(documentIds) {
+      ajax
+        .command("document-states",
+          {
+            id: ko.unwrap(params.application.id),
+            documentIds: documentIds
+          })
+        .success(function(data) {
+          updateState(mainDocuments(), data.state);
+          updateState(archivedPreAttachments(), data.state);
+          updateState(archivedPostAttachments(), data.state);
+        })
+        .call();
+    };
+
     var pollArchiveStatus = function() {
-      ajax.query("archive-upload-pending", {id: params.application.id})
+      ajax.query("archive-upload-pending", {id: ko.unwrap(params.application.id)})
         .success(function(data) {
           var finished = _.difference(self.archivingInProgressIds(), data.unfinished);
+          if (finished.length > 0) {
+            pollChangedState(finished);
+          }
           self.archivingInProgressIds(data.unfinished);
           if (data.unfinished.length > 0) {
             window.setTimeout(pollArchiveStatus, 1000);
