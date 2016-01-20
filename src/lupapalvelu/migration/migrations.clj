@@ -20,7 +20,8 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.user :as user]
             [sade.env :as env]
-            [sade.excel-reader :as er]))
+            [sade.excel-reader :as er]
+            [sade.coordinate :as coord]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -1439,6 +1440,17 @@
                              {:statements {$elemMatch {:person.email {$exists true},
                                                        :person.userId {$exists false}}}}))
 
+(defn convert-coordinates [application]
+  (let [location       (:location application)
+        location-wgs84 (coord/convert "EPSG:3067" "WGS84" 5 location)]
+    {$set {:location-wgs84 location-wgs84}}))
+
+(defmigration add-wgs84-location-for-applications
+  {:apply-when (pos? (mongo/count :applications {:location-wgs84 {$exists false}}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:location-wgs84 {$exists false}})]
+        (count (map #(mongo/update-by-id collection (:id %) (convert-coordinates %)) applications))))))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
