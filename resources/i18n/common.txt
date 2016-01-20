@@ -4939,3 +4939,5 @@
 "help.bulletin.comments" "sv" " "
 "help.bulletin.attachments" "fi" " "
 "help.bulletin.attachments" "sv" " "
+"arkistoidaan" "fi" "Arkistoidaan"
+"arkistoidaan" "sv" ""

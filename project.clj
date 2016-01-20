@@ -1,6 +1,6 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/data.zip "0.1.1"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.6"]
@@ -66,7 +66,7 @@
                  [clj-rss "0.2.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
-                                  [clj-ssh "0.5.7"]
+                                  [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.5"]
                                   [pdfboxing "0.1.5"]]
                    :plugins [[lein-midje "3.1.1"]

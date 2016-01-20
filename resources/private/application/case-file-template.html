@@ -10,26 +10,28 @@
       <tr>
         <th data-bind="ltext: 'caseFile.action'"></th>
         <th data-bind="ltext: 'document'"></th>
-        <th data-bind="ltext: 'attachment'"></th>
-        <th data-bind="ltext: 'caseFile.actionDate'"></th>
         <th data-bind="ltext: 'caseFile.documentDate'"></th>
+        <th>Lis\u00e4\u00e4j\u00e4</th>
       </tr>
       </thead>
       <tbody data-bind="foreach: caseFile">
       <tr>
         <td data-bind="text: action"></td>
         <td></td>
-        <td></td>
         <td data-bind="dateString: start"></td>
-        <td></td>
+        <td data-bind="text: user"></td>
       </tr>
       <!-- ko foreach: documents -->
       <tr>
         <td></td>
-        <td><div data-bind="if: category == 'document'"><span data-bind="ltext: type"></span></div></td>
-        <td><div data-bind="if: category == 'attachment'"><span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>, v. <span data-bind="version: version"></span></div></td>
-        <td></td>
+        <td>
+          <div data-bind="if: category == 'document'"><span data-bind="ltext: type"></span></div>
+          <div data-bind="if: category == 'attachment'">
+            <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span><span data-bind="if: contents">, <span data-bind="text: contents"></span></span>, v. <span data-bind="version: version"></span>
+          </div>
+        </td>
         <td data-bind="dateString: ts"></td>
+        <td data-bind="text: $data.user"></td>
       </tr>
       <!-- /ko -->
       </tbody>

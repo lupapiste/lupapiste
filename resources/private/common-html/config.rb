@@ -30,8 +30,8 @@ on_stylesheet_saved do |path|
   relativepath = Pathname.new(path).relative_path_from(base).to_s
 
   # http://stackoverflow.com/questions/7173000/slash-and-backslash-in-ruby
-  USING_WINDOWS = !!((RUBY_PLATFORM =~ /(win|w)(32|64)$/) || (RUBY_PLATFORM=~ /mswin|mingw/))
-  p = (USING_WINDOWS ? relativepath.gsub('/', '\\') : relativepath)
+  using_windows = !!((RUBY_PLATFORM =~ /(win|w)(32|64)$/) || (RUBY_PLATFORM=~ /mswin|mingw/))
+  p = (using_windows ? relativepath.gsub('/', '\\') : relativepath)
 
   system("blessc --force " + p) unless path[/\d+$/]
 end
