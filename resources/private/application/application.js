@@ -472,7 +472,8 @@
       verdictModel: verdictModel,
       attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
-      tosFunctions: tosFunctions
+      tosFunctions: tosFunctions,
+      sidePanelService: lupapisteApp.services.sidePanelService
     };
 
     $("#application").applyBindings(bindings);

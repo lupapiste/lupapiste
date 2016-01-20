@@ -78,7 +78,6 @@ LUPAPISTE.SidePanelService = function() {
       self.mainConversation(false);
       self.showAllComments(false);
       self.target({type: type, id: pageutil.lastSubPage()});
-
       switch(type) {
         case "attachment":
         case "statement":
@@ -87,6 +86,7 @@ LUPAPISTE.SidePanelService = function() {
           commentRoles = ["authority"];
           break;
         default:
+          self.target({type: "application"});
           self.mainConversation(true);
           self.showAllComments(true);
           break;
@@ -107,8 +107,8 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   hub.subscribe("SidePanelService::AddComment", function(event) {
-    var markAnswered = event.markAnswered;
-    var openApplication = event.openApplication;
+    var markAnswered = event.markAnswered || false;
+    var openApplication = event.openApplication || false;
     var text = event.text || "";
     var to = event.to;
     ajax.command("add-comment", {
