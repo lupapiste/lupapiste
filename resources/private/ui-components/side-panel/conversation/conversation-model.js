@@ -44,7 +44,7 @@ LUPAPISTE.ConversationModel = function(params) {
   });
 
   self.showStateOpenApplication = ko.pureComputed(function() {
-    return lupapisteApp.models.currentUser.isApplicant();
+    return lupapisteApp.models.currentUser.isApplicant() && util.getIn(self, ["application", "state"]) === "draft";
   });
 
   self.stateOpenApplication = function() {
