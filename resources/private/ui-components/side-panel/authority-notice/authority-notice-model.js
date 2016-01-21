@@ -23,17 +23,17 @@ LUPAPISTE.AuthorityNoticeModel = function(params) {
     updatingObservables = false;
   });
 
-  self.urgency.subscribe(function(val) {
+  self.disposedSubscribe(self.urgency, function(val) {
     if (updatingObservables) { return; }
     self.sendEvent("SidePanelService", "UrgencyChanged", {urgency: val});
   });
 
-  self.authorityNotice.subscribe(function(val) {
+  self.disposedSubscribe(self.authorityNotice, function(val) {
     if (updatingObservables) { return; }
     self.sendEvent("SidePanelService", "AuthorityNoticeChanged", {authorityNotice: val});
   });
 
-  self.tags.subscribe(function(val) {
+  self.disposedSubscribe(self.tags, function(val) {
     if (updatingObservables) { return; }
     self.sendEvent("SidePanelService", "TagsChanged", {tags: _.pluck(val, "id")});
   });

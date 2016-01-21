@@ -2,19 +2,27 @@ LUPAPISTE.ComponentBaseModel = function() {
   "use strict";
   var self = this;
 
-  var subscriptions = [];
+  var hubSubscriptions = [];
+  var koSubscriptions = [];
 
   self.sendEvent = function(service, event, data) {
     hub.send(service + "::" + event, data);
   };
 
   self.addEventListener = function(service, event, fn) {
-    subscriptions.push(hub.subscribe(service + "::" + event, fn));
+    hubSubscriptions.push(hub.subscribe(service + "::" + event, fn));
+  };
+
+  self.disposedSubscribe = function(observable, fn) {
+    koSubscriptions.push(observable.subscribe(fn));
   };
 
   self.dispose = function() {
-    while(subscriptions.length !== 0) {
-      hub.unsubscribe(subscriptions.pop());
+    while(hubSubscriptions.length !== 0) {
+      hub.unsubscribe(hubSubscriptions.pop());
+    }
+    while(koSubscriptions.length !== 0) {
+      (koSubscriptions.pop()).dispose();
     }
   };
 };
