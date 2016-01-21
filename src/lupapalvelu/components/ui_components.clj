@@ -62,7 +62,8 @@
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
-                 :supportedLangs        i18n/languages}]
+                 :supportedLangs        i18n/languages
+                 :urgencyStates         ["normal" "urgent" "pending"]}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -165,7 +166,8 @@
                    "publish-bulletin-service.js"
                    "application-filters-service.js"
                    "document-data-service.js"
-                   "fileupload-service.js"]}
+                   "fileupload-service.js"
+                   "side-panel-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -188,9 +190,7 @@
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:screenmessages :analytics]
-                   :js ["comment.js"]
-                   :html ["comments.html"]}
+   :authenticated {:depends [:screenmessages :analytics]}
 
    :invites      {:depends [:common-html]
                   :js ["invites-model.js" "invites.js"]}
@@ -232,7 +232,7 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
 
-   :attachment   {:depends [:common-html :repository :signing :side-panel]
+   :attachment   {:depends [:common-html :repository :signing]
                   :js ["attachment-multi-select.js"
                        "targeted-attachments-model.js"
                        "attachment.js"
@@ -251,7 +251,7 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
@@ -265,7 +265,7 @@
                   :html ["applications-list.html"]
                   :js ["applications-list.js"]}
 
-   :statement    {:depends [:common-html :repository :side-panel]
+   :statement    {:depends [:common-html :repository]
                   :js ["statement-service.js" "statement.js"]
                   :html ["statement.html"]}
 
@@ -273,7 +273,7 @@
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
-   :neighbors    {:depends [:common-html :repository :side-panel]
+   :neighbors    {:depends [:common-html :repository]
                   :js ["neighbors.js"]
                   :html ["neighbors.html"]}
 
@@ -313,12 +313,6 @@
 
    :admins       {:depends [:users]}
 
-   :notice       {:js ["notice.js"]
-                  :html ["notice.html"]}
-
-   :side-panel   {:js ["side-panel.js"]
-                  :html ["side-panel.html"]}
-
    :password-reset {:depends [:common-html]
                     :js ["password-reset.js"]
                     :html ["password-reset.html"]}
@@ -350,13 +344,13 @@
                              :company :analytics :register-company :footer]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
-   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :notice :application
+   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics :header :footer]
+                       :docgen :debug :analytics :header :footer]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]

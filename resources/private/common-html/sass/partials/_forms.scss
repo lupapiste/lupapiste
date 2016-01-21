@@ -1025,6 +1025,12 @@ $max-columns: 12;
       cursor: pointer;
     }
   }
+  .col--no-margin {
+    padding: 0 !important;
+    .checkbox-wrapper {
+      border: none;
+    }
+  }
 
   select::-ms-expand {
       display: none;

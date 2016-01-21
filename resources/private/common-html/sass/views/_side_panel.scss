@@ -23,6 +23,7 @@
   position: fixed;
   right: -500px;
   top: 60px;
+  bottom: 0px;
 
   .comment-controls {
     margin-left: 0;
@@ -46,7 +47,6 @@
         width: $lupicon-size;
         height: 30px;
         padding-top: 3px;
-        margin-bottom: 4px;
         color: $color-text;
         text-shadow: none;
       }
@@ -158,6 +158,10 @@
   #notice-panel {
     height: 100%;
 
+    .notice-component {
+      height: 100%;
+    }
+
     .application-urgency {
       width: 215px;
       position: relative;
@@ -182,25 +186,35 @@
       vertical-align: bottom;
     }
 
-    .textarea-wrapper {
+    .form-grid {
+      display: table;
       height: 100%;
-      padding-bottom: 62px;
-    }
-
-    .form-input.textarea {
-      height: 100%;
-      height: 300px\9;
-      margin: 0;
-    }
-
-    .notice-prompt-info {
-      &:before {
-        content: "(";
+      .row {
+        display: table-row;
+        margin-bottom: $marginS;
+        .col-1 {
+          display: table-cell;
+          margin-bottom: $grid-margin;
+          label {
+            color: #fff;
+          }
+        }
       }
-      &:after {
-        content: ")";
+      .row.textarea-wrapper {
+        height: 100%;
+        .col--vertical {
+          height: 100%;
+          padding-bottom: 60px;
+        }
+        .col-1 {
+          height: 100%;
+          textarea {
+            height: 100%;
+            height: 300px\9;
+            box-sizing: border-box;
+          }
+        }
       }
-
     }
   }
 }
@@ -225,12 +239,14 @@
       margin-bottom: 0;
     }
   }
-}
-
-#conversation-panel.highlight-conversation {
-  textarea {
-    box-shadow: inset 0 0 10px darken($lp-orange, 10%);
-    border-color: $lp-orange;
+  .highlight-conversation {
+    textarea {
+      box-shadow: inset 0 0 10px darken($lp-orange, 10%);
+      border-color: $lp-orange;
+    }
+  }
+  label {
+    color: #fff;
   }
 }
 
@@ -240,10 +256,13 @@
   }
 }
 
-@media all and (max-width: 1280px) {
+@media all and (max-width: $narrow-breakpoint) {
   #side-panel {
     .content-wrapper {
       width: 400px;
+    }
+    .btn-title {
+      display: none;
     }
   }
 
