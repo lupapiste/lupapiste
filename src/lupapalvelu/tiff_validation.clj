@@ -9,7 +9,7 @@
   (-> (->> (BaselineTIFFTagSet/getInstance)
            (.getTagNumbers)
            (into #{}))
-      (conj 700)))
+      (conj 700 34377 34665))) ;; XMP, Photoshop, Exif IFD
 
 (defn- find-tiff-errors [file]
   (let [readers (ImageIO/getImageReadersByFormatName "tiff")
