@@ -108,6 +108,21 @@ LUPAPISTE.SidePanelService = function() {
     }
   }).extend({throttle: 100});
 
+  hub.subscribe("SidePanelService::UnseenCommentsSeen", function() {
+    // Mark comments seen after a second
+    if (self.application.unseenComments()) {
+      setTimeout(function() {
+        if (self.application.id() && self.authorization.ok("mark-seen")) {
+          ajax.command("mark-seen", {id: self.application.id(), type: "comments"})
+          .success(function() {
+            self.application.unseenComments(0);
+          })
+          .call();
+        }
+      }, 1000);
+    }
+  });
+
   hub.subscribe("SidePanelService::AddComment", function(event) {
     var markAnswered = Boolean(event.markAnswered);
     var openApplication = Boolean(event.openApplication);

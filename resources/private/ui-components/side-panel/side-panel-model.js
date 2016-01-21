@@ -2,6 +2,8 @@ LUPAPISTE.SidePanelModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   self.sidePanelService = lupapisteApp.services.sidePanelService;
 
   self.application = self.sidePanelService.application;
@@ -38,15 +40,8 @@ LUPAPISTE.SidePanelModel = function(params) {
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
 
-    // TODO move to service
     if (self.showConversationPanel()) {
-      setTimeout(function() {
-        // Mark comments seen after a second
-        if (self.application.id() && self.authorization.ok("mark-seen")) {
-          ajax.command("mark-seen", {id: self.application.id(), type: "comments"})
-          .success(function() {self.application.unseenComments(0);})
-          .call();
-        }}, 1000);
+      self.sendEvent("SidePanelService", "UnseenCommentsSeen");
     }
   };
 
@@ -67,13 +62,9 @@ LUPAPISTE.SidePanelModel = function(params) {
     self.enableSidePanel(self.application && _.contains(pages, self.currentPage()));
   });
 
-  var subscription = hub.subscribe("show-conversation", function() {
+  self.addEventListener("side-panel", "show-conversation", function() {
     if (!self.showConversationPanel()) {
       self.toggleConversationPanel();
     }
   });
-
-  self.dispose = function() {
-    hub.unsubscribe(subscription);
-  };
 };

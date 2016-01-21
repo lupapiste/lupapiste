@@ -72,7 +72,7 @@ LUPAPISTE.ConversationModel = function(params) {
   var previousPage = self.currentPage();
 
   function highlightConversation() {
-    hub.send("show-conversation");
+    self.sendEvent("side-panel", "show-conversation");
     self.textSelected(true);
     self.highlightConversation(true);
     setTimeout(function() {
