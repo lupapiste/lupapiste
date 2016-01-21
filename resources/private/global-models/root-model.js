@@ -9,6 +9,10 @@ LUPAPISTE.RootViewModel = function() {
     self.currentPage(data.pageId);
   });
 
+  self.isCurrentPage = function(page) {
+    return page === self.currentPage();
+  };
+
   self.externalApiEnabled = ko.pureComputed(function() {
     return lupapisteApp.services.externalApiService &&
            lupapisteApp.services.externalApiService.enabled &&
