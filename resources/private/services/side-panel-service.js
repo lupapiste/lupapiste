@@ -92,7 +92,7 @@ LUPAPISTE.SidePanelService = function() {
           break;
       }
     }
-  });
+  }).extend({throttle: 100});
 
   // Fetch authorities when application changes
   ko.computed(function() {
@@ -104,7 +104,7 @@ LUPAPISTE.SidePanelService = function() {
       })
       .call();
     }
-  });
+  }).extend({throttle: 100});
 
   hub.subscribe("SidePanelService::AddComment", function(event) {
     var markAnswered = event.markAnswered || false;
