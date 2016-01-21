@@ -31,8 +31,11 @@
 (defn- pdf2pdf-key []
   (env/value :pdf2pdf :license-key))
 
-(defn- pdftools-pdfa-command [input-file output-file]
-  [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) "-fd" "/usr/share/fonts/msttcore" input-file output-file])
+(defn- pdftools-pdfa-command [input-file output-file cl]
+  [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-fd" "/usr/share/fonts/msttcore" input-file output-file])
+
+(defn- pdftools-analyze-command [input-file output-file]
+  [(pdf2pdf-executable) "-ma" "-rd" "-lk" (pdf2pdf-key) "-cl" "pdfa-2b" input-file output-file])
 
 (defn- parse-log-file [output-filename]
   (try
@@ -60,8 +63,17 @@
 (defn- pdf-was-already-compliant? [lines]
   (ss/contains? (apply str lines) "will be copied only since it is already conformant"))
 
+(defn- compliance-level [input-file output-file]
+  (apply shell/sh (pdftools-analyze-command input-file output-file))
+  (let [log (apply str (parse-log-file output-file))
+        required-part (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d'." log))
+        cl (str "pdfa-" (or required-part "2") "b")]
+    (debug "Determined required compliance to be:" cl)
+    cl))
+
 (defn- run-pdf-to-pdf-a-conversion [input-file output-file]
-  (let [{:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file))
+  (let [cl (compliance-level input-file output-file)
+        {:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file cl))
         log-lines (parse-log-file output-file)]
     (cond
       (= exit 0) {:pdfa? true
