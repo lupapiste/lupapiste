@@ -34,7 +34,7 @@ LUPAPISTE.ConversationModel = function(params) {
     return util.getIn(self, ["application", "infoRequest"]);
   });
 
-  self.applicationId = ko.computed(function() {
+  self.applicationId = ko.pureComputed(function() {
     return util.getIn(self, ["application", "id"]);
   });
 
@@ -80,7 +80,7 @@ LUPAPISTE.ConversationModel = function(params) {
     }, 2000);
   }
 
-  ko.computed(function() {
+  self.disposedComputed(function() {
     if (self.currentPage() !== previousPage && self.text()) {
       hub.send("show-dialog", {ltitle: "application.conversation.unsentMessage.header",
                                size: "medium",
@@ -102,7 +102,6 @@ LUPAPISTE.ConversationModel = function(params) {
       previousPage = self.currentPage();
     }
   }).extend({ rateLimit: 100 });
-
 
   self.isAuthorityComment = function(comment) {
     return util.getIn(comment, ["user", "role"]) === "authority";

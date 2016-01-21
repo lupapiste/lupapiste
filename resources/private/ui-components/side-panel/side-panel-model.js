@@ -57,7 +57,7 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   var pages = ["applications", "application", "attachment", "statement", "neighbors", "verdict"];
 
-  ko.computed(function() {
+  self.disposedComputed(function() {
     self.showSidePanel(_.contains(_.without(pages, "applications"), self.currentPage()));
     self.enableSidePanel(self.application && _.contains(pages, self.currentPage()));
   });

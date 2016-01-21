@@ -15,7 +15,7 @@ LUPAPISTE.AuthorityNoticeModel = function(params) {
 
   // Update inner observables when values change and suppress change events going outside
   var updatingObservables = true;
-  ko.computed(function() {
+  self.disposedComputed(function() {
     updatingObservables = true;
     self.urgency(params.urgency());
     self.authorityNotice(params.authorityNotice());

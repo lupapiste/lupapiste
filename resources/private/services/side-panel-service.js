@@ -7,15 +7,15 @@ LUPAPISTE.SidePanelService = function() {
   self.authorization = lupapisteApp.models.applicationAuthModel;
 
   // Notice
-  self.urgency = ko.computed(function() {
+  self.urgency = ko.pureComputed(function() {
     return ko.unwrap(self.application.urgency);
   });
 
-  self.authorityNotice = ko.computed(function() {
+  self.authorityNotice = ko.pureComputed(function() {
     return ko.unwrap(self.application.authorityNotice);
   });
 
-  self.tags = ko.computed(function() {
+  self.tags = ko.pureComputed(function() {
     return ko.toJS(self.application.tags);
   });
 
@@ -59,7 +59,7 @@ LUPAPISTE.SidePanelService = function() {
     hub.send("SidePanelService::AddCommentProcessing", {state: state});
   });
 
-  self.comments = ko.computed(function() {
+  self.comments = ko.pureComputed(function() {
     return _(ko.mapping.toJS(self.application.comments))
       .filter(
          function(comment) {
