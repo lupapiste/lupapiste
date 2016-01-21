@@ -41,7 +41,8 @@
                           :get-organization-tags
                           :get-organization-areas
                           :preview-attachment
-                          :document}
+                          :document
+                          :mark-seen}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)

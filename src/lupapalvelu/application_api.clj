@@ -101,6 +101,7 @@
   {:parameters       [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (a/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
    :states           states/all-states
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]
