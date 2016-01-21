@@ -48,7 +48,7 @@
   {:user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
-    (ok :user (dissoc full-user :private :personId))
+    (ok :user full-user)
     (fail)))
 
 (defquery users
