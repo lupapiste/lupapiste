@@ -3,6 +3,8 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   var defaultData = {applications: [],
                      totalCount: -1,
                      userTotalCount: -1};
@@ -52,7 +54,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
              skip: self.skip() };
   }).extend({rateLimit: 0});
 
-  ko.computed(function() {
+  self.disposedComputed(function() {
     self.searchFieldDelayed();
     lupapisteApp.services.tagFilterService.selected();
     lupapisteApp.services.organizationFilterService.selected();
