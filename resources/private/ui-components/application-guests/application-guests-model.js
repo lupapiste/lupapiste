@@ -118,7 +118,11 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
 
 
   self.canModify = function( data ) {
-    return self.isAuthority() || data.role === "guest";
+    var result = hasAuth( "delete-guest-application");
+    if( result && data && data.role === "guestAuthority") {
+      result = self.isAuthority();
+    }
+    return result;
   };
 
 
@@ -152,7 +156,6 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
   self.show = {
     addButton: function() {
       return hasAuth( "invite-guest");
-
     },
     inviteTable: ko.pureComputed( function() {
       return self.guestAuthorities().length;
