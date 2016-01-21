@@ -2,16 +2,18 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   var application = params.application;
   var applicationId = params.applicationId;
   var statementId = params.statementId;
   var authModel = params.authModel;
-  
+
   self.tab = params.selectedTab;
 
   self.attachments = ko.observableArray([]);
 
-  ko.computed(function() {
+  self.disposedComputed(function() {
     self.attachments(
       _(util.getIn(application, ["attachments"]))
         .filter(function(attachment) {
