@@ -31,7 +31,7 @@ LUPAPISTE.StatementService = function(params) {
     return !saving() && !!submitId();
   });
 
-  application.subscribe(function(application) {
+  ko.computed(function() {
     statements(_(util.getIn(application, ["statements"]))
       .map(function(statement) {
         return [statement.id, ko.mapping.fromJS(_.extend({

@@ -85,6 +85,16 @@
           (:displayNameFi primary) => "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, p\u00e4iv\u00e4koti-, palvelu-, hoitolaitos- tai muu rakennus)"
           (:displayNameSv primary) => seq)
 
+        (fact "Result contains all - and only - the documented keys"
+          (keys application) => (just [:id :address :applicant :authority
+                                       :drawings :infoRequest :location
+                                       :modified :municipality
+                                       :primaryOperation :secondaryOperations
+                                       :permitType
+                                       :state :stateNameFi :stateNameSv
+                                       :submitted] :in-any-order)
+          (keys (:location application)) => (just [:x :y] :in-any-order))
+
         (fact "Secondary operation is localized"
           (count secondaries) => 1
           (-> secondaries first :name) => "pientalo"
@@ -117,9 +127,15 @@
     (count (get-in (datatables sonja :applications-search :handlers [sonja-id]) [:data :applications])) => 2
     (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?
 
-    (fact "Handler filter"
-      (count (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications])) => 1
-      (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications 0 :id]) => application-id)
+    (fact "Handler ID filter"
+      (let [resp (datatables sonja :applications-search :handlers [ronja-id])]
+        (count (get-in resp [:data :applications])) => 1
+        (get-in (datatables sonja :applications-search :handlers [ronja-id]) [:data :applications 0 :id]) => application-id))
+
+    (fact "Handler email filter"
+      (let [resp (datatables sonja :applications-search :handlers [(email-for "ronja")])]
+        (count (get-in resp [:data :applications])) => 1
+        (get-in resp [:data :applications 0 :id]) => application-id))
 
     (command sonja :add-application-tags :id application-id :tags ["222222222222222222222222"]) => ok?
     (fact "$and query returns 1"
