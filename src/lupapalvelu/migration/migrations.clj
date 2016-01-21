@@ -1449,7 +1449,8 @@
       (mongo/update-n :applications {"history.state" "constructionStarted"} {$pull {:history {:state "constructionStarted"}}} :multi true))))
 
 (defn populate-application-history [{:keys [opened submitted sent canceled started complementNeeded closed startedBy closedBy history verdicts] :as application}]
-  (let [history-states (set (map :state history))
+  (let [user-summary (fn [user] (when (seq user) (user/summary user)))
+        history-states (set (map :state history))
         verdict-state (sm/verdict-given-state application)
         verdict-ts  (:timestamp (->>  verdicts (remove :draft) (sort-by :timestamp) first))
         all-entries [(when (and opened (not (history-states "open"))) {:state :open, :ts opened, :user nil})
@@ -1457,8 +1458,8 @@
                      (when (and sent (not (history-states "sent"))) {:state :sent, :ts sent, :user nil})
                      (when (and complementNeeded (not (history-states "complementNeeded"))) {:state :complementNeeded, :ts complementNeeded, :user nil})
                      (when (and verdict-ts (not (history-states verdict-state))) {:state verdict-state, :ts verdict-ts, :user nil})
-                     (when (and started (not (history-states "constructionStarted"))) {:state :constructionStarted, :ts started, :user (user/summary startedBy)})
-                     (when (and closed (not (history-states "closed"))) {:state :closed, :ts closed, :user (user/summary closedBy)})
+                     (when (and started (not (history-states "constructionStarted"))) {:state :constructionStarted, :ts started, :user (user-summary startedBy)})
+                     (when (and closed (not (history-states "closed"))) {:state :closed, :ts closed, :user (user-summary closedBy)})
                      (when (and canceled (not (history-states "canceled"))) {:state :canceled, :ts canceled, :user nil})]
         new-entries (remove nil? all-entries)]
     {$push {:history {$each new-entries}}}))
