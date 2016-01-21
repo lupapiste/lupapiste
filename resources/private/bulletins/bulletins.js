@@ -27,7 +27,6 @@
         {name: "bulletin-comment-box"},
         {name: "bulletin-attachments-tab"},
         {name: "bulletin-verdicts-tab"},
-        {name: "begin-vetuma-auth-button"},
         {name: "bulletin-info-tab"},
         {name: "bulletin-instructions-tab"}];
 
