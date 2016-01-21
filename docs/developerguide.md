@@ -98,6 +98,15 @@ Tällöin sovelluspalvelin kuuntelee ainoastaan HTTP-liikennettä.
 
 Karttojen ja paikkatietoaineiston käyttö vaatii käyttäjätunnukset Maanmittauslaitokselta.
 
+Kartan saa testaustapauksissa toimimaan käyttämällä Maanmittauslaitoksen avointa [palvelualustaa](http://www.maanmittauslaitos.fi/aineistot-palvelut/rajapintapalvelut/paikkatiedon-palvelualustan-pilotti). Tesitkäyttö onnistuu asettamalla user.properties tiedostoon seuraava rivi:
+
+    maps.open-nls-wmts   http://avoindata.maanmittauslaitos.fi/mapcache/wmts
+
+Tällöin selainpään karttakutsut lähetetään ko. karttapalvelimelle.
+
+[Maanmittauslaitoksen avoimen datan lisenssi (CC 4.0)](http://www.maanmittauslaitos.fi/avoimen-tietoaineiston-cc-40-lisenssi)
+
+
 ## Palvelun käynnistys
 
 Kun työkalut on asennettu ja lisätty polkuun sekä MongoDB käynnistetty,
@@ -110,6 +119,8 @@ Sovellus on ajossa osoitteessa http://localhost:8000.
 Klikkaa oikean reunan Development palkissa "Apply minimal" linkkiä.
 Tämä alustaa tietokantaan muutamia käyttäjiä ja organisaatioita. Voit kirjautua
 sisään esimerkiksi hakijatunnuksella pena/pena tai viranomaistunnuksella sonja/sonja.
+
+Hakemuksen voi luoda samaisesta Development
 
 
 ## Tyylikäytännöt
