@@ -63,11 +63,13 @@ LUPAPISTE.SidePanelService = function() {
     return _(ko.mapping.toJS(self.application.comments))
       .filter(
          function(comment) {
-           return self.showAllComments() || self.target().type === comment.target.type && self.target().id === comment.target.id;
+           return self.showAllComments()
+             || self.target().type === comment.target.type
+             && self.target().id   === comment.target.id;
        })
        .reverse()
        .value();
-  });
+  }).extend({rateLimit: 100});
 
   // refresh conversation when page changes
   ko.computed(function() {
@@ -107,8 +109,8 @@ LUPAPISTE.SidePanelService = function() {
   }).extend({throttle: 100});
 
   hub.subscribe("SidePanelService::AddComment", function(event) {
-    var markAnswered = event.markAnswered || false;
-    var openApplication = event.openApplication || false;
+    var markAnswered = Boolean(event.markAnswered);
+    var openApplication = Boolean(event.openApplication);
     var text = event.text || "";
     var to = event.to;
     ajax.command("add-comment", {
@@ -129,7 +131,6 @@ LUPAPISTE.SidePanelService = function() {
                                  size: "small",
                                  componentParams: {ltext: "comment-request-mark-answered.ok"}});
       }
-      // Just to show new comment?
       repository.load(ko.unwrap(self.application.id));
     })
     .call();

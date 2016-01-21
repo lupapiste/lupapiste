@@ -80,7 +80,6 @@ LUPAPISTE.ConversationModel = function(params) {
     }, 2000);
   }
 
-  // TODO move to side-panel or maybe service
   ko.computed(function() {
     if (self.currentPage() !== previousPage && self.text()) {
       hub.send("show-dialog", {ltitle: "application.conversation.unsentMessage.header",

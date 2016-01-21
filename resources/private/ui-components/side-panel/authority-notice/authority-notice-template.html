@@ -7,7 +7,10 @@
         <div class="row application-tags" data-bind="if: authorization.ok('add-application-tags')">
           <div class="col-1">
             <label data-bind="ltext: 'application.tags'"></label>
-            <div data-test-id="autocomplete-application-tags-component" data-bind="component: {name: 'autocomplete-application-tags', params: {tags: true, selectedValues: tags}}"></div>
+            <div data-test-id="autocomplete-application-tags-component"
+                 data-bind="component: {name: 'autocomplete-application-tags',
+                                        params: {tags: true,
+                                                 selectedValues: tags}}"></div>
           </div>
         </div>
         <div class="row" data-bind="if: authorization.ok('change-urgency')">

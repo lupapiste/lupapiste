@@ -2,8 +2,10 @@ LUPAPISTE.SidePanelModel = function(params) {
   "use strict";
   var self = this;
 
-  self.application = lupapisteApp.models.application;
-  self.authorization = lupapisteApp.models.applicationAuthModel;
+  self.sidePanelService = lupapisteApp.services.sidePanelService;
+
+  self.application = self.sidePanelService.application;
+  self.authorization = self.sidePanelService.authorization;
 
   self.enableSidePanel = ko.observable(false);
   self.showSidePanel = ko.observable(false);
@@ -14,7 +16,6 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.showHelp = ko.observable(false);
 
-  self.sidePanelService = lupapisteApp.services.sidePanelService;
   self.currentPage = self.sidePanelService ? self.sidePanelService.currentPage : ko.observable();
 
   self.sidePanelOpen = ko.pureComputed(function() {
