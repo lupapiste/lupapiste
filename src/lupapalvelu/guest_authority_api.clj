@@ -2,7 +2,8 @@
   (:require [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.states :as states]
-            [lupapalvelu.guest-authority :as guest]))
+            [lupapalvelu.guest-authority :as guest]
+            [lupapalvelu.authorization :as auth]))
 
 (defquery resolve-guest-authority-candidate
   {:parameters [email]
@@ -55,10 +56,11 @@
   (guest/invite command))
 
 (defquery application-guests
-  {:description "List of application guest and guest authorities."
+  {:description "List of application guests and guest authorities."
    :user-roles #{:applicant :authority}
+   :user-authz-roles auth/default-authz-reader-roles
    :parameters [:id]
-   :states states/all-states}
+   :states states/all-application-states}
   [command]
   (ok :guests (guest/application-guest-list command)))
 
