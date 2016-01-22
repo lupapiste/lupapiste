@@ -861,6 +861,7 @@ Input comment and mark answered
 
 Mark answered
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
+  Confirm notification dialog
 
 Comment count is
   [Arguments]  ${amount}
