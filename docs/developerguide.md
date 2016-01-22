@@ -107,6 +107,8 @@ Tällöin selainpään karttakutsut lähetetään ko. karttapalvelimelle.
 
 [Maanmittauslaitoksen avoimen datan lisenssi (CC 4.0)](http://www.maanmittauslaitos.fi/avoimen-tietoaineiston-cc-40-lisenssi)
 
+Palvelun käyttämiä kiinteistö- ja osoitetietorajapintoja ei ole saatavina avoimina palveluina, lisätietoa rajapinnoista [Maanmittauslaitoksen](http://www.maanmittauslaitos.fi/aineistot-palvelut/rajapintapalvelut) sivuilta.
+
 
 ## Palvelun käynnistys
 
@@ -118,7 +120,7 @@ Lupapiste käynnistyy komennolla:
 Sovellus on ajossa osoitteessa http://localhost:8000.
 
 Klikkaa oikean reunan Development palkissa "Apply minimal" linkkiä.
-Tämä alustaa tietokantaan muutamia käyttäjiä ja organisaatioita. Voit kirjautua
+Tämä alustaa tietokantaan muutamia käyttäjiä ja organisaatioita (kts. _minimal.clj_). Voit kirjautua
 sisään esimerkiksi hakijatunnuksella pena/pena tai viranomaistunnuksella sonja/sonja.
 
 Hakemuksen voi luoda samaisesta Development
@@ -163,7 +165,26 @@ Muista käyttää kahta välilyöntiä .robot-tiedostoissa erottamaan avainsanaa
 TODO
 
 ## Tietomalli
+
+Käsite | Selite
+--- | ---
+Lupatyyppi (permit type) | Lupatyyppi määrittää millaisesta lupa-asioinnista on kyse. Esimerkiksi rakennusvalvonta, yleiset alueet ja ympäristötoimi ovat omia lupatyyppejään.
+Hakemus (application) | Hakija täyttää palvelussa hakemuksen, joka sisältää mm. lomaketietoja ja liitteitä. Hakemuksella on aina tila (state), joka kuvaa hakemuksen tilaa lupa- tai ilmoitusprosessissa. Viranomainen tarkastaa ja käsittelee palveluun jätetyn hakemuksen.
+Toimenpide (operation) | Toimenpiteet määrittävät hakemuksen tyypin eli millaisia tietoja hakemukseen täytyy täyttää. Toimenpide kuuluu aina tiettyyn lupatyyppiin. Esimerkiksi toimenpide "Aidan rakentaminen" kuuluu rakennusvalvonnan lupatyyppiin. Toimenpiteellä on skeema (schema), joka määrittää hakemuksella täytettävät lomaketiedot.
+Organisaatio (organization) | Viranomainen kuuluu aina yhteen tai useampaan organisaatioon. Viranomaisella on oikeus nähdä ja käsitellä omaan organisaatioonsa jäteyt hakemukset. Organisaatio on useissa tapauksessa kunnan tietty viranomaisorganisaatio (esimerkiksi rakennusvalvonta). Tietomalli mahdollistaa helposti ylikunnallisen lupakäsittelyn, sillä yksi organisaatio on konfiguroitavissa usean kunnan käyttöön.
+Neuvontapyyntö (info request) | Hakemuksen esiversio. Neuvontapyynnön avulla hakija voi pyytää  viranomaiselta neuvoa jo ennen varsinaisen hakemuksen tekoa. Neuvontapyyntö voidaan muuntaa hakemukseksi, jolloin asioinnin valmistelun voi aloittaa suoraan neuvontapyynnön pohjalta.
+
 ## Roolit
+
+Rooli | Selite
+--- | ---
+Pääkäyttäjä (admin) | Palvelun hallinnointi
+Organisaation pääkäyttäjä (authorityAdmin) | Organisaation pääkäyttäjä hallitsee organisaation tietoja ja konfiguraatioita
+Viranomainen (authority) | Viranomainen kuuluu yhteen tai useampaan organisaatioon. Viranomainen voi käsitellä organisaatioon tulleita hakemuksia. Viranomaisrooleja organisaatioihin hallinnoi organisaation pääkäyttäjä
+Hakija (applicant) | Vahvasti tunnistautunut hakija. Hakijat voivat luoda hakemuksia palveluun. Hakija voi myös saada valtuutuksia muiden hakijoiden tekemiin hakemuksiin, jolloin samaa hakemusta voi valmistella useampi henkilö
+Avoimen neuvontapyynnön viranomaiskäyttäjä (oirAuthority) | Käyttäjä saa ilmoituksia avoimista neuvontapyynnöistä. Käyttäjä voi antaa vastauksen hakijan avoimeen neuvontapyyntön. Käytössä organisaatioissa, jotka eivät vielä ole ottaneet varsinaista asiointia käyttöön.
+Dummy (dummy) | Dummy käyttäjä, joka ei ole vielä rekisteröitynyt ja vahvasti tunnistautunut palveluun. Dummy käyttäjä syntyy esimerkiksi kun hakemukselle valtuutetaan käyttäjä, jonka sähköpostiosoite ei ole vielä rekisteröitynyt palvelun käyttäjäksi.
+
 
 # Arkkitehtuuri yleiskuvaus
 
@@ -470,11 +491,27 @@ TODO tietomalli (collectionit)
 
 ## Koodauskäytännöt
 - Käytetään omia apu-namespaceja (ss, mongo jne)
+- Actionit määritellään "-api" päätteisiin nimiavaruuksiin (tästä on käännösaikainen assertio actionin rekisteröinnissä)
 
 
 # Laajennuspisteet
 
 ## Uuden hakemustyypin lisääminen
+
+1. Luo uusi hakemustyyppi _permit.clj_ tiedostossa _defpermit_ makrolla.
+2. Määritä hakemustyypissä käytettävät liitteet _attachment.clj_ tiedostossa. Varsinainen liitteiden määritys tehdään [lupapiste-commons](https://github.com/lupapiste/commons) projektiin (*attachment_types.cljc*).
+3. Lisää hakemustyypille tarvittavat toimenpiteet ja luo hakemustyypin toimenpidepuu (operation tree) _operations.clj_ tiedostoon.
+4. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteestä ulospäin)
+  1. Tee mapping halutusta XML formaatista (kts. esimerkiksi _src/lupapalvelu/xml/_ hakemistosta 'mapping.clj' päätteiset tiedostot). Rekisteröi KRYSP mapper funktio, joka luo XML tiedoston ja kirjoittaa sen levylle. Esimerkki funktion KRYSP mapper rekisteröinnistä **KT** lupatyypille (*rakennuslupa_mapping.clj*): `(permit/register-function permit/KT :app-krysp-mapper save-application-as-krysp)`.
+  2. Toteuta funktiot muunnokseen hakemus->kanoninenXML (esimerkkiä *vesihuolto_canonical.clj*). Kanonisesta mallista luodaan mappingin perusteella XML esitys.
+  3. Katso mallia KRYSP putkesta, joka alkaa *integrations_api.clj* tiedoston **approve-application** commandista. Tarkempi kuvaus TODO.
+5. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteeseen luku)
+  1. Rekisteröi päätösten validointi- ja lukufunktio, esimerkkejä varten katso _reader.clj_. Siellä luotu esimerkiksi lupatyypille YA päätösten lukija `(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdicts)` ja validaattori `(permit/register-function permit/YA :verdict-krysp-validator simple-verdicts-validator)`
+  2. Katso mallia päätösten lukemisesta *verdict_api.clj* tiedoston *do-check-for-verdict* funktiosta, joka hakee annetulle hakemukselle päätöksen kunnan taustajärjestelmästä.
+5. Jos hakemustyyppiin tulee asianhallinta integraatio
+  1. Määritä _lupapalvelu.xml.validator_ (validator.clj) nimiavaruuteen skeema validaattori(t) (_schema-validator_) uudelle lupatyypille.
+  2. Tarkista että halutuilla toimenpiteillä on asianhallinta konfiguraatiossa arvo 'true' (_operations.clj_)
+
 
 ## Uudet toimenpidetyypin lisääminen
 ### metatiedot, puu, näiden lokalisaatiot
