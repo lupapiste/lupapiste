@@ -156,6 +156,8 @@ Kehitys tehdään develop-haaraan git flow -mallin mukaisesti. Tuotannossa on ma
    ajaa Robot Frameworkilla testit, jotka käyttävät ulkoisia palveluita kuten
    VETUMA-kirjautumispalvelun testijärjestelmää.
 
+Muista käyttää kahta välilyöntiä .robot-tiedostoissa erottamaan avainsanaa ja parametreja!
+
 # Korkean tason domain-kuvaus
 
 TODO
@@ -352,10 +354,6 @@ Oletuksena CSS-tiedostot minimoidaan, tätä voidaan säätää compassin _envir
 
 ## Oskari Map
   The hub between Lupapiste and Oskari Map
-
-## Robot Framework
-
-  Muista 2 välilyöntiä.
 
 # Backend arkkitehtuuri
 ## Yleiskuvaus
