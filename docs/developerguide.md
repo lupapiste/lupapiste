@@ -297,6 +297,35 @@ Arkkitehtuuriin liittyvät konventiot:
   * Komponentilla ei pitäisi sinänsä koskaan olla tietoa siitä, miten applikaation tila on järjestetty ja mitä käsitteitä tallennettuun tilaan liittyy. Komponentti tietää ainoastaan toiminnoista, joita se itse tarjoaa käyttäjälle itse määrittelemässään käyttöliittymässä.
   * Esimerkiksi, käyttäjän vaihtaessa hakemuslistan rivien järjestystä, oikea signaali service-kerrokselle olisi `"applicationListSortChanged"` ja parametreiksi uusi, pyydetty järjestys (esim. `{sortBy: "date", direction: "asc"}`). Esimerkki vääränlaisesta signaalista olisi `"fetchApplicationsOrderedBy"`, koska tämä ei kuvaa käyttäjän toimintaa vaan haluttua lopputulosta.
 
+## Ilmoitus toimintojen onnistumisesta tai epäonnistumisesta
+
+Toiminnon lopuksi voi näyttää käyttäjälle vihreässä tai punaisessa palkissa
+välähtävän viestin:
+
+```javascript
+hub.send("indicator", {style: "positive"});
+
+hub.send("indicator", {style: "negative"});
+```
+
+Ajax-pyyntöjen callback-funktioina voi käyttää util.showSavedIndicator:ia:
+
+```javascript
+ajax.command("some-command")
+  .success(util.showSavedIndicator)
+  .error(util.showSavedIndicator)
+  .call();
+```
+
+Tai oman callback-funktion sisällä:
+```javascript
+ajax.command("some-command")
+  .success(function(resp){
+    util.showSavedIndicator(resp);
+    doOtherStuff();
+  })
+  .call();
+```
 
 ## Globaalit objektit
 - Ajax
