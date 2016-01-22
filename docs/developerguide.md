@@ -98,7 +98,8 @@ Tällöin sovelluspalvelin kuuntelee ainoastaan HTTP-liikennettä.
 
 Karttojen ja paikkatietoaineiston käyttö vaatii käyttäjätunnukset Maanmittauslaitokselta.
 
-Kartan saa testaustapauksissa toimimaan käyttämällä Maanmittauslaitoksen avointa [palvelualustaa](http://www.maanmittauslaitos.fi/aineistot-palvelut/rajapintapalvelut/paikkatiedon-palvelualustan-pilotti). Tesitkäyttö onnistuu asettamalla user.properties tiedostoon seuraava rivi:
+Kartan saa testaustapauksissa toimimaan käyttämällä Maanmittauslaitoksen avointa [palvelualustaa](http://www.maanmittauslaitos.fi/aineistot-palvelut/rajapintapalvelut/paikkatiedon-palvelualustan-pilotti).
+Tesitkäyttö onnistuu asettamalla user.properties tiedostoon seuraava rivi:
 
     maps.open-nls-wmts   http://avoindata.maanmittauslaitos.fi/mapcache/wmts
 
