@@ -329,12 +329,13 @@
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
             next-version (next-attachment-version latest-version user)
+            user-summary (user/summary user)            
             user-role (if stamped :stamper :uploader)
             version-model {:version  next-version
                            :fileId   file-id
                            :created  now
                            :accepted nil
-                           :user    (user/summary user)
+                           :user     user-summary
                            ; File name will be presented in ASCII when the file is downloaded.
                            ; Conversion could be done here as well, but we don't want to lose information.
                            :filename filename
@@ -364,7 +365,7 @@
                                     :attachments.$.state  state
                                     :attachments.$.latestVersion version-model}
                               $push {:attachments.$.versions version-model}
-                              $addToSet {:attachments.$.auth (user/user-in-role user user-role)}})
+                              $addToSet {:attachments.$.auth (user/user-in-role user-summary user-role)}})
                            true)]
         ; Check return value and try again with new version number
         (if (pos? result-count)
