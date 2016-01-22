@@ -118,6 +118,8 @@
 
 (def summary-keys [:id :username :firstName :lastName :role])
 
+(def SummaryUser (select-keys User (mapcat (juxt identity sc/optional-key) summary-keys)))
+
 (defn summary
   "Returns common information about the user or nil"
   [user]

@@ -2,6 +2,8 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
+            [schema.core :as sc]
+            [sade.schemas :as ssc]
             [sade.util :as util]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -73,6 +75,8 @@
    :B5
    :muu])
 
+(def attachment-states #{:ok :requires_user_action :requires_authority_action})
+
 (def- attachment-types-by-permit-type-unevaluated
   {:R 'attachment-types/Rakennusluvat
    :P 'attachment-types/Rakennusluvat
@@ -94,6 +98,64 @@
 (def all-attachment-type-ids
   (attachment-ids-from-tree
     (apply concat (set (vals attachment-types-by-permit-type)))))
+
+(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
+
+(def AttachmentUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader")))
+
+(def Target    {(sc/optional-key :id)      sc/Str
+                :type                      sc/Str
+                (sc/optional-key :urlHash) sc/Str})
+
+(def Operation {:id      sc/Str
+                (sc/optional-key :name)    sc/Str
+                (sc/optional-key :description)    (sc/maybe sc/Str)
+                (sc/optional-key :created) ssc/Timestamp})
+
+(def VersionNumber {:minor     sc/Int
+                    :major     sc/Int})
+
+(def Signature {:user    user/SummaryUser
+                :created ssc/Timestamp
+                :version VersionNumber})
+
+(def Version   {:version             VersionNumber
+                :fileId              sc/Str 
+                :created             ssc/Timestamp
+                :accepted            (sc/maybe ssc/Timestamp) ;; Always nil !!!
+                :user                user/SummaryUser
+                :filename            sc/Str
+                :contentType         sc/Str
+                :size                sc/Int
+                (sc/optional-key :stamped)             sc/Bool
+                (sc/optional-key :archivable)          (sc/maybe sc/Bool) 
+                (sc/optional-key :archivabilityError)  (sc/maybe (apply sc/enum (map name archivability-errors))) 
+                (sc/optional-key :missing-fonts)       (sc/maybe [sc/Str])})
+
+(def Attachment {:id                                     sc/Str
+                 :type                                   {:type-id    (apply sc/enum (map name all-attachment-type-ids))
+                                                          :type-group sc/Str}
+                 :modified                               ssc/Timestamp
+                 (sc/optional-key :sent)                 ssc/Timestamp
+                 (sc/optional-key :locked)               sc/Bool              ;; 13  $exists-false-count @ talos
+                 (sc/optional-key :readOnly)             sc/Bool              ;; 18137
+                 :applicationState                       (apply sc/enum (conj (map name states/all-states)
+                                                                              "complement-needed"))
+                 :state                                  (apply sc/enum (map name attachment-states))
+                 (sc/optional-key :target)               (sc/maybe Target)    ;; 11
+                 :required                               sc/Bool
+                 (sc/optional-key :requestedByAuthority) sc/Bool              ;; 1566
+                 (sc/optional-key :notNeeded)            sc/Bool              ;; 1564
+                 :forPrinting                            sc/Bool
+                 (sc/optional-key :op)                   (sc/maybe Operation) ;; 13
+                 (sc/optional-key :signatures)           [Signature]          ;; 489
+                 :versions                               [Version]
+                 (sc/optional-key :latestVersion)        (sc/maybe Version)   ;; 5216
+                 (sc/optional-key :contents)             (sc/maybe sc/Str)    ;; 10375
+                 (sc/optional-key :scale)                sc/Str               ;; 14586
+                 (sc/optional-key :size)                 sc/Str               ;; 15025
+                 (sc/optional-key :auth)                 [AttachmentUser]     ;; 489
+                 (sc/optional-key :metadata)             {sc/Any sc/Any}})    ;; 17960
 
 ;; Helper for reporting purposes
 (defn localised-attachments-by-permit-type [permit-type]
