@@ -38,8 +38,8 @@ LUPAPISTE.FileuploadService = function() {
         data.submit();
       } else {
         var message = !acceptedFile ?
-          "error.illegal-file-type" :
-          "error.bulletins.illegal-upload-size";
+          "error.file-upload.illegal-file-type" :
+          "error.file-upload.illegal-upload-size";
 
         hub.send("indicator", {
           style: "negative",
