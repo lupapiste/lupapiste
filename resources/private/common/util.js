@@ -158,7 +158,7 @@ var util = (function($) {
   }
 
   function isValidOVT(ovt) {
-    var m = /^0037(\d{7})(\d)\d{0,5}$/.exec(ovt || ""),
+    var m = /^0037(\d{7})(\d)\w{0,5}$/.exec(ovt || ""),
         y = m && m[1],
         c = m && m[2];
     if (!y || !c) { return false; }
