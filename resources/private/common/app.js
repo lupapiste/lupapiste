@@ -291,7 +291,9 @@ var LUPAPISTE = LUPAPISTE || {};
         sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
       };
 
-      $("#app").applyBindings(lupapisteApp.models.rootVMO);
+      if (lupapisteApp.models.rootVMO) {
+        $("#app").applyBindings(lupapisteApp.models.rootVMO);
+      }
 
       if (LUPAPISTE.Screenmessage) {
           LUPAPISTE.Screenmessage.refresh();
