@@ -2,6 +2,7 @@
   (:require [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.guest-authority :as guest]
             [lupapalvelu.authorization :as auth]))
 
@@ -23,14 +24,14 @@
    :user-roles #{:authorityAdmin}
    :description "Add or update organization's guest authority."}
   [{admin :user}]
-  (guest/update-guest-authority-organizatioin admin email name role))
+  (guest/update-guest-authority-organization admin email name role))
 
 (defquery guest-authorities-organization
   {:user-roles #{:authorityAdmin}
    :description "List of guest authorities for the authority admin's
    organization."}
   [{admin :user}]
-  (ok :guestAuthorities (guest/guest-authorities-organization admin)))
+  (ok :guestAuthorities (guest/organization-guest-authorities (usr/authority-admins-organization-id admin))))
 
 (defcommand remove-guest-authority-organization
   {:parameters [email]

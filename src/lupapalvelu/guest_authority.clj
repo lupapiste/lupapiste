@@ -36,23 +36,20 @@
   [admin email name role]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)
-        guests (concat (organization-guest-authorities org-id email)
-                       [{:email email
-                         :name name
-                         :role role}])]
+        guests (->> org-id
+                    organization-guest-authorities
+                    (remove #(= email (:email %)))
+                    (concat [{:email email
+                              :name name
+                              :role role}]))]
     (org/update-organization org-id {$set {:guestAuthorities guests}})))
-
-(defn guest-authorities-organization
-  "Namesake query implementation."
-  [admin]
-  (organization-guest-authorities (usr/authority-admins-organization-id admin)))
 
 (defn remove-guest-authority-organization
   "Namesake command implementation."
   [admin email]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)]
-    (org/update-organization org-id {$set {:guestAuthorities (organization-guest-authorities org-id email)}})))
+    (org/update-organization org-id {$pull {:guestAuthorities {:email email}}})))
 
 (defn no-duplicate-guests
   "Pre check for avoiding duplicate guests or unnecessary access.
