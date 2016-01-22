@@ -15,7 +15,7 @@
    the organization. The latter is needed in order to avoid
    unnecessary authority additions."}
   [{admin :user}]
-  (ok :user (guest/resolve-candidate admin email)))
+  (ok :user (guest/resolve-guest-authority-candidate admin email)))
 
 (defcommand update-guest-authority-organization
   {:parameters [email name role]
@@ -23,21 +23,21 @@
    :user-roles #{:authorityAdmin}
    :description "Add or update organization's guest authority."}
   [{admin :user}]
-  (guest/update-guest admin email name role))
+  (guest/update-guest-authority-organizatioin admin email name role))
 
 (defquery guest-authorities-organization
   {:user-roles #{:authorityAdmin}
    :description "List of guest authorities for the authority admin's
    organization."}
   [{admin :user}]
-  (ok :guestAuthorities (guest/guests admin)))
+  (ok :guestAuthorities (guest/guest-authorities-organization admin)))
 
 (defcommand remove-guest-authority-organization
   {:parameters [email]
    :input-validators [(partial action/non-blank-parameters [:email])]
    :user-roles #{:authorityAdmin}}
   [{admin :user}]
-  (guest/remove-guest admin email))
+  (guest/remove-guest-authority-organization admin email))
 
 (defcommand invite-guest
   {:description         "Sends invitation email and grants guest (or
@@ -50,10 +50,10 @@
    :input-validators    [(partial action/non-blank-parameters [:email])
                          action/email-validator
                          guest/valid-guest-role]
-   :states              (states/all-application-states-but states/terminal-states)
+   :states              states/all-application-states
    :notified            true}
   [command]
-  (guest/invite command))
+  (guest/invite-guest command))
 
 (defquery application-guests
   {:description "List of application guests and guest authorities."
@@ -62,20 +62,19 @@
    :parameters [:id]
    :states states/all-application-states}
   [command]
-  (ok :guests (guest/application-guest-list command)))
+  (ok :guests (guest/application-guests command)))
 
 (defcommand toggle-guest-subscription
-  {:description "Un/subscribes notifications for guests. Corresponding
+  {:description      "Un/subscribes notifications for guests. Corresponding
   command in authorization_api is not feasible, since the rights are
-  different for guests: guestAuthority can modify any subscription and
-  guest's can change each others subscriptions."
-   :user-roles #{:applicant :authority}
-   :parameters [:id :username :unsubscribe?]
+  different for guests."
+   :user-roles       #{:applicant :authority}
+   :user-authz-roles #{:guest :guestAuthority :writer}
+   :parameters       [:id :username :unsubscribe]
    :input-validators [(partial action/non-blank-parameters [:username])]
-   :pre-checks [guest/auth-modification-check]
-   :states states/all-application-states}
+   :states           states/all-application-states}
   [command]
-  (guest/toggle-subscription command))
+  (guest/toggle-guest-subscription command))
 
 (defcommand delete-guest-application
   {:description "Cancels the guest access from application."
@@ -85,13 +84,13 @@
    :pre-checks [guest/auth-modification-check]
    :states states/all-application-states}
   [command]
-  (guest/delete-application-guest command))
+  (guest/delete-guest-application command))
 
 (defquery guest-authorities-application-organization
   {:description "Guest authorities that are defined for this
-  applications organization."
+  application's organization."
    :parameters [:id]
    :user-roles #{:authority}
    :states states/all-application-states}
   [command]
-  (ok :guestAuthorities (guest/application-org-authorities command)))
+  (ok :guestAuthorities (guest/guest-authorities-application-organization command)))

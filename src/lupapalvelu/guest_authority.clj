@@ -8,7 +8,9 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.action :as action]))
 
-(defn resolve-candidate [admin email]
+(defn resolve-guest-authority-candidate
+  "Namesake query implementation."
+  [admin email]
   (let [candidate          (-> email
                                usr/canonize-email
                                usr/get-user-by-email
@@ -23,32 +25,34 @@
     (assoc (select-keys candidate [:firstName :lastName])
            :hasAccess already-has-access)))
 
-(defn- org-guest-authorities
-  ([org-id & [ignore-email]]
+(defn organization-guest-authorities
+  ([org-id]
    (->> org-id
         org/get-organization
-        :guestAuthorities
-        (filter #(not= ignore-email (:email %))))))
+        :guestAuthorities)))
 
-(defn update-guest
-  "Either updates existing guest authority or adds new one."
+(defn update-guest-authority-organization
+  "Namesake command implementation."
   [admin email name role]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)
-        guests (concat (org-guest-authorities org-id email)
+        guests (concat (organization-guest-authorities org-id email)
                        [{:email email
                          :name name
                          :role role}])]
     (org/update-organization org-id {$set {:guestAuthorities guests}})))
 
-(defn guests [admin]
-  (org-guest-authorities (usr/authority-admins-organization-id admin)))
+(defn guest-authorities-organization
+  "Namesake query implementation."
+  [admin]
+  (organization-guest-authorities (usr/authority-admins-organization-id admin)))
 
-(defn remove-guest
+(defn remove-guest-authority-organization
+  "Namesake command implementation."
   [admin email]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)]
-    (org/update-organization org-id {$set {:guestAuthorities (org-guest-authorities org-id email)}})))
+    (org/update-organization org-id {$set {:guestAuthorities (organization-guest-authorities org-id email)}})))
 
 (defn no-duplicate-guests
   "Pre check for avoiding duplicate guests or unnecessary access.
@@ -63,9 +67,10 @@
   (when-not (#{:guest :guestAuthority} (keyword role))
     (fail :error.illegal-role :parameters role)))
 
-(defn invite
-  "Invites and grants access to application guest. Sends invitation
-  email and updates application auth."
+(defn invite-guest
+  "Namesake command implementation. Invites and grants access to
+  application guest. Sends invitation email and updates application
+  auth."
   [{{:keys [email role]} :data
     user                         :user
     timestamp                    :created
@@ -89,7 +94,7 @@
   [org-id]
   (reduce (fn [acc {:keys [email role]}]
             (assoc acc email role)) {}
-          (org-guest-authorities org-id)))
+          (organization-guest-authorities org-id)))
 
 (defn- usercatname [{:keys [firstName lastName]}]
   (str firstName " " lastName))
@@ -112,41 +117,65 @@
 (defn- application-guest-auths [app]
   (auth/get-auths-by-roles app [:guest :guestAuthority]))
 
-(defn application-guest-list
+(defn application-guests
+  "Namesake query implementation."
   [{:keys [application user]}]
   (let [ga-roles (guest-authority-role-map (:organization application))]
     (map (partial auth-info ga-roles) (application-guest-auths application))))
+
+(defn- username-auth-role
+  "Given username's role in the application auth, if any"
+  [application username]
+  (->> application
+       application-guest-auths
+       (some #(and (= username (:username %)) (:role %)))
+       keyword))
+
+(defn- username-auth [application username]
+  (some #(when (= username (:username %)) %) (:auth application)))
 
 (defn auth-modification-check
   "User can manipulate every guest but only organization authority can
   modify guestAuthorities."
   [{{:keys [username]} :data user :user} application]
   (when username
-    (let [role (->> application
-                    application-guest-auths
-                    (some #(and (= username (:username %)) (:role %)))
-                    keyword)]
+    (let [role (username-auth-role application username)]
       (when-not (or (= role :guest)
                     (some (partial = (:organization application))
                           (usr/organization-ids-by-roles user #{:authority})))
         (fail :error.unauthorized)))))
 
 
-(defn toggle-subscription
-  [{{:keys [username unsubscribe?]} :data
+(defn toggle-guest-subscription
+  "Namesake command implementation.
+  Organization authorities can un/subscribe anybody.
+  Owner/writer can un/subscribe guests.
+  Guests can un/subscribe themselves."
+  [{{:keys [username unsubscribe]} :data
     application :application
+    user :user
     :as command}]
-  (action/update-application command
-                             {:auth {$elemMatch {:username username}}}
-                             {$set {:auth.$.unsubscribed unsubscribe?}}))
+  (let [authority? (auth/has-organization-authz-roles? #{:authority} application user)
+        writer?    (auth/user-authz? #{:owner :writer} application user)
+        guest?     (-> (username-auth application username) :role (= "guest"))
+        own?       (= (:username user) username)]
+    (println "authority?" authority? "writer?" writer? "guest?" guest? "own?" own?)
+    (if (or authority? (and writer? guest?) own?)
+      (action/update-application command
+                                 {:auth {$elemMatch {:username username}}}
+                                 {$set {:auth.$.unsubscribed unsubscribe}})
+      (fail :error.unauthorized))))
 
-(defn delete-application-guest
+(defn delete-guest-application
+  "Namesake command implementation."
   [{{:keys [username]} :data
     application :application
     :as command}]
   (action/update-application command
                              {$pull {:auth {:username username}}}))
 
-(defn application-org-authorities
+
+(defn guest-authorities-application-organization
+  "Namesake query implementation."
   [{:keys [application]}]
-  (org-guest-authorities (:organization application)))
+  (organization-guest-authorities (:organization application)))

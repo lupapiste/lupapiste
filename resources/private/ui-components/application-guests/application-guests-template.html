@@ -10,8 +10,10 @@
               <th data-bind="ltext: 'application-guests.user'"></th>
               <th data-bind="ltext: 'application-guests.inviter'"></th>
               <th data-bind="ltext: 'guest-authority.role'"></th>
-              <!-- ko if: canModify() -->
+              <!-- ko if: show.subscribeColumn -->
               <th data-bind="ltext: 'application-guests.notifications'"></th>
+              <!-- /ko -->
+              <!-- ko if: canDelete() -->
               <th data-bind="ltext: 'application-guests.remove'"></th>
               <!-- /ko -->
             </thead>
@@ -20,11 +22,13 @@
                 <td data-bind="text: $parent.nameAndUsername( $data )"></td>
                 <td data-bind="text: inviter"></td>
                 <td data-bind="text: authorityRole"></td>
-                <!-- ko if: $parent.canModify() -->
-                <td><a data-bind="visible: $parent.canModify( $data ),
+                <!-- ko if: $parent.show.subscribeColumn -->
+                <td><a data-bind="visible: $parent.canSubscribe( $data ),
                                   text: $parent.subscriptionLinkText( unsubscribed ),
                                   click: $parent.subscriptionLinkClick"></a></td>
-                <td><i data-bind="visible: $parent.canModify( $data ),
+                <!-- /ko -->
+                <!-- ko if: $parent.canDelete() -->
+                <td><i data-bind="visible: $parent.canDelete( $data ),
                                   click: $parent.deleteGuest"
                        class="primary lupicon-remove"></i></td>
                 <!-- /ko -->
@@ -33,7 +37,7 @@
           </table>
           <button class="positive"
                   data-bind="click: toggleBubble,
-                             visible: show.addButton()">
+                             visible: canDelete()">
             <i class="lupicon-circle-plus"></i>
             <span data-bind="ltext: 'guest-authority.add'"></span>
           </button>

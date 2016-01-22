@@ -24,6 +24,10 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     return lupapisteApp.models.application.id();
   }
 
+  function currentUsername() {
+    return lupapisteApp.models.currentUser.username();
+  }
+
   function hasAuth( action ) {
     return lupapisteApp.models.applicationAuthModel.ok( action );
   }
@@ -79,7 +83,7 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     ajax.command( "toggle-guest-subscription",
                   {id: appId(),
                    username: data.username,
-                   "unsubscribe?": !data.unsubscribed})
+                   unsubscribe: !data.unsubscribed})
     .success( fetchGuests)
     .call();
   };
@@ -103,6 +107,7 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
                          }
                          return acc;
                        }, {} );
+
     return  _.filter( self.allGuestAuthorities(),
                       function( ga ) {
                         return !used[ga.email];
@@ -116,13 +121,22 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
               + (unsubscribed ? "subscribe" : "unsubscribe"));
   };
 
+  self.canInvite = function() {
+    return hasAuth( "invite-guest");
+  };
 
-  self.canModify = function( data ) {
+  self.canDelete = function( data ) {
     var result = hasAuth( "delete-guest-application");
     if( result && data && data.role === "guestAuthority") {
       result = self.isAuthority();
     }
     return result;
+  };
+
+  self.canSubscribe = function( data ) {
+    return self.canInvite()
+         ? self.isAuthority() || data.role === "guest"
+         : data.username === currentUsername();
   };
 
 
@@ -154,9 +168,9 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
   // Visibility flags
 
   self.show = {
-    addButton: function() {
-      return hasAuth( "invite-guest");
-    },
+    subscribeColumn: ko.pureComputed( function() {
+      return _.find( self.allGuests(), self.canSubscribe );
+    }),
     inviteTable: ko.pureComputed( function() {
       return self.guestAuthorities().length;
     }),
@@ -164,6 +178,5 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
       return !self.isAuthority() || self.guestAuthorities().length;
     })
   };
-
 
 };
