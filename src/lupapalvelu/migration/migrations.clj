@@ -1513,6 +1513,18 @@
                                           {:attachments.op                   {$exists false}}
                                           {:attachments.signatures           {$exists false}}
                                           {:attachments.auth                 {$exists false}}]}]}))
+
+(defn applicationState-as-camelCase [attachment]
+  (if (= (:applicationState attachment) "complement-needed")
+    (assoc attachment :applicationState "complementNeeded")
+    attachment))
+
+(defmigration attachment-applicationState-as-camelCase
+  {:apply-when (pos? (+ (mongo/count :applications {:attachments.applicationState "complement-needed"})
+                        (mongo/count :submitted-applications {:attachments.applicationState "complement-needed"})))}
+  (update-applications-array :attachments
+                             applicationState-as-camelCase
+                             {:attachments.applicationState "complement-needed"}))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

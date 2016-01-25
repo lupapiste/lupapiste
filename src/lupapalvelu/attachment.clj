@@ -139,8 +139,7 @@
                  (sc/optional-key :sent)                 ssc/Timestamp
                  :locked                                 sc/Bool
                  (sc/optional-key :readOnly)             sc/Bool
-                 :applicationState                       (apply sc/enum (conj (map name states/all-states)
-                                                                              "complement-needed"))
+                 :applicationState                       (apply sc/enum (map name states/all-states))
                  :state                                  (apply sc/enum (map name attachment-states))
                  :target                                 (sc/maybe Target)
                  :required                               sc/Bool
