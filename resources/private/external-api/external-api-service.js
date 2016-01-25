@@ -17,6 +17,7 @@ LUPAPISTE.ExternalApiService = function() {
   * @property {string} municipality - municipality code of the permit
   * @property {string} type - is the permit 'application' or 'inforequest'
   * @property {string} operation - primary operation name localized in user's language
+  * @property {string} permitType - application's permit type
   */
 
   /*
