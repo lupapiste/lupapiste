@@ -1471,6 +1471,16 @@
       (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :complementNeeded :started :closed :startedBy :closedBy :history :verdicts :permitType :primaryOperation :state])]
         (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
 
+(defn remove-unwanted-fields-from-attachment-auth [attachment]
+  (update attachment :auth (partial mapv user/summary)))
+
+(defmigration cleanup-user-summary-from-attachment-auth
+  {:apply-when (pos? (+ (mongo/count :applications {:attachments.auth.email {$exists true}})
+                        (mongo/count :submitted-applications {:attachments.auth.email {$exists true}})))}
+  (update-applications-array :attachments 
+                             remove-unwanted-fields-from-attachment-auth
+                             {:attachments.auth.email {$exists true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
