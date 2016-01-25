@@ -188,10 +188,24 @@ Dummy (dummy) | Dummy käyttäjä, joka ei ole vielä rekisteröitynyt ja vahvas
 
 # Arkkitehtuuri yleiskuvaus
 
-TODO
+Asiointisovellus on toteutettu HTML5 Single-page application-pohjaisesti. Käyttöliittymäkerros kutsuu taustapalvelua, joka edelleen lukee ja muokkaa tietokannan tietoja. Järjestelmä tietosisältö muodostuu hakemuksista, niiden lomaketiedoista ja liitetiedostoista sekä käyttäjistä. Rakenteisen tiedon osalta pääroolissa ovat hakemuksen lomaketiedot, joten sovelluksen käyttöön on valittu dokumenttitietokanta, johon monimuotoiset lomakkeet on helppo mallintaa.
+
+Sovellus on toteutettu Command Query Responsibility Segregation periaatteiden mukaisesti. Commandeja käytetään komentojen suorittamiseen (tiedon muokkaamiseen) ja Queryjä käytetään tiedon kyselemiseen. Frontendistä kutsutaan backendin tarjoamia JSON rajapintoja (*/api/command/<nimi>* (POST metodi) ja */api/query/<nimi>* (GET metodi)).
+
+
 
 front+back
 fyysinen pino: front, app, mongodb, geoserver, sftp jne
+
+Frontend:
+- [KnockoutJS](http://knockoutjs.com/documentation/introduction.html)
+- jQuery
+- lo-dash
+
+Backend:
+- Clojure
+- MongoDB
+
 
 
 # Frontend arkkitehtuuri
