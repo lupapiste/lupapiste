@@ -137,25 +137,25 @@
                                                           :type-group sc/Str}
                  :modified                               ssc/Timestamp
                  (sc/optional-key :sent)                 ssc/Timestamp
-                 (sc/optional-key :locked)               sc/Bool              ;; 13  $exists-false-count @ talos
-                 (sc/optional-key :readOnly)             sc/Bool              ;; 18137
+                 :locked                                 sc/Bool
+                 (sc/optional-key :readOnly)             sc/Bool
                  :applicationState                       (apply sc/enum (conj (map name states/all-states)
                                                                               "complement-needed"))
                  :state                                  (apply sc/enum (map name attachment-states))
-                 (sc/optional-key :target)               (sc/maybe Target)    ;; 11
+                 :target                                 (sc/maybe Target)
                  :required                               sc/Bool
-                 (sc/optional-key :requestedByAuthority) sc/Bool              ;; 1566
-                 (sc/optional-key :notNeeded)            sc/Bool              ;; 1564
+                 :requestedByAuthority                   sc/Bool
+                 :notNeeded                              sc/Bool
                  :forPrinting                            sc/Bool
-                 (sc/optional-key :op)                   (sc/maybe Operation) ;; 13
-                 (sc/optional-key :signatures)           [Signature]          ;; 489
+                 :op                                     (sc/maybe Operation)
+                 :signatures                             [Signature]
                  :versions                               [Version]
-                 (sc/optional-key :latestVersion)        (sc/maybe Version)   ;; 5216
-                 (sc/optional-key :contents)             (sc/maybe sc/Str)    ;; 10375
-                 (sc/optional-key :scale)                sc/Str               ;; 14586
-                 (sc/optional-key :size)                 sc/Str               ;; 15025
-                 (sc/optional-key :auth)                 [AttachmentUser]     ;; 489
-                 (sc/optional-key :metadata)             {sc/Any sc/Any}})    ;; 17960
+                 (sc/optional-key :latestVersion)        (sc/maybe Version)
+                 (sc/optional-key :contents)             (sc/maybe sc/Str)
+                 (sc/optional-key :scale)                sc/Str
+                 (sc/optional-key :size)                 sc/Str
+                 :auth                                   [AttachmentUser]
+                 (sc/optional-key :metadata)             {sc/Any sc/Any}})
 
 ;; Helper for reporting purposes
 (defn localised-attachments-by-permit-type [permit-type]

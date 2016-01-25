@@ -1481,6 +1481,38 @@
                              remove-unwanted-fields-from-attachment-auth
                              {:attachments.auth.email {$exists true}}))
 
+(defn merge-required-fields-into-attachment [attachment]
+  (merge {:locked               false
+          :applicationState     "draft"
+          :target               nil
+          :requestedByAuthority false
+          :notNeeded            false
+          :op                   nil
+          :signatures           []
+          :auth                 []}
+         attachment))
+
+(defmigration add-required-fields-into-attachments
+  {:apply-when (pos? (mongo/count :applications {$and [{:attachments.id {$exists true}}                                 ;; tot: 2058
+                                                       {$or [{:attachments.locked               {$exists false}}        ;; 13
+                                                             {:attachments.applicationState     {$exists false}}        ;; 2
+                                                             {:attachments.target               {$exists false}}        ;; 11
+                                                             {:attachments.requestedByAuthority {$exists false}}        ;; 1566
+                                                             {:attachments.notNeeded            {$exists false}}        ;; 1564
+                                                             {:attachments.op                   {$exists false}}        ;; 13
+                                                             {:attachments.signatures           {$exists false}}        ;; 489
+                                                             {:attachments.auth                 {$exists false}}]}]}))} ;; 489
+  (update-applications-array :attachments 
+                             merge-required-fields-into-attachment
+                             {$and [{:attachments.id {$exists true}}
+                                    {$or [{:attachments.locked               {$exists false}}
+                                          {:attachments.applicationState     {$exists false}}
+                                          {:attachments.target               {$exists false}}
+                                          {:attachments.requestedByAuthority {$exists false}}
+                                          {:attachments.notNeeded            {$exists false}}
+                                          {:attachments.op                   {$exists false}}
+                                          {:attachments.signatures           {$exists false}}
+                                          {:attachments.auth                 {$exists false}}]}]}))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

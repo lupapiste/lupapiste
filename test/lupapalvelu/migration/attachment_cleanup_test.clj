@@ -1,5 +1,6 @@
 (ns lupapalvelu.migration.attachment-cleanup-test
-  (:require [lupapalvelu.migration.migrations :refer [remove-unwanted-fields-from-attachment-auth]]
+  (:require [lupapalvelu.migration.migrations :refer [remove-unwanted-fields-from-attachment-auth
+                                                      merge-required-fields-into-attachment]]
             [lupapalvelu.attachment :refer [Attachment AttachmentUser]]
             [schema.core :as sc]
             [clojure.test.check.clojure-test :refer [defspec]]
@@ -24,3 +25,10 @@
                        (= (dissoc cleaned-attachment :auth) (dissoc attachment :auth))
                        (= (count (:auth extended-auth)) (count (:auth cleaned-attachment)))))))
 
+(defspec complete-missing-attachment-fields 20 ;; num-tests has to be small enough. Too big value result in out of memory error!
+  (prop/for-all [attachment     (ssg/generator Attachment)
+                 missing-fields (ssg/generator [(apply sc/enum [:locked :applicationState :target :requestedByAuthority
+                                                                 :notNeeded :op :signatures :auth])])]
+                (let [failing-attachment   (apply dissoc attachment missing-fields)
+                      completed-attachment (merge-required-fields-into-attachment failing-attachment)]
+                  (and (nil? (sc/check Attachment completed-attachment))))))
