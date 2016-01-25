@@ -19,6 +19,8 @@
   (util/get-timestamp-ago :hour 2))
 
 (defn cleanup-uploaded-files []
+  (when-not @mongo/connection
+    (mongo/connect!))
   (mongo/delete-file {$and [{:metadata.linked {$exists true}}
                             {:metadata.linked false}
                             {:metadata.uploaded {$lt (two-hours-ago)}}]}))
