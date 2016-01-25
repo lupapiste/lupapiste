@@ -27,7 +27,6 @@
           <div class="hr"></div>
 
           <div class="inner-margins">
-              <!-- ko with: $root.approve -->
               <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()"
                       class="positive caps">
                   <i class="lupicon-check"></i>
@@ -35,7 +34,6 @@
               </button>
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()"
                       class="negative caps">Tarkennettavaa</button>
-              <!-- /ko -->
               <button class="secondary" data-test-id="change-attachment-type"
                       data-bind="click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized">
                   <span data-bind="ltext: 'attachment.changeType'"></span>
