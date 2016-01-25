@@ -342,10 +342,10 @@
                                   :mitat {:tilavuus {:value "1500"}
                                           :kerrosala {:value "180"}
                                           :rakennusoikeudellinenKerrosala {:value "160"}
-                                          :kokonaisala {:value "150"}
+                                          :kokonaisala {:value "-10"}
                                           :huoneistoala {:0 {:pintaAla {:value "150"}
                                                              :kayttotarkoitusKoodi {:value "asuntotilaa(ei vapaa-ajan asunnoista)"}}
-                                                         :1 {:pintaAla {:value "10"}
+                                                         :1 {:pintaAla {:value "-10"}
                                                              :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}})})
 
 (def- purku {:id "purku"
@@ -1030,10 +1030,20 @@
     (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 3)
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
-    (fact "Laajennuksen pintaalat" (-> laajennus-t (get-in [:laajennus :laajennuksentiedot :huoneistoala]) count) => 2)
-    (fact "Laajennuksen pintaala keys" (-> laajennus-t (get-in [:laajennus :laajennuksentiedot :huoneistoala]) first keys) => (just #{:kayttotarkoitusKoodi :pintaAla}))
+
+    (fact "Laajennuksen pinta-alat"
+      (let [huoneistoalat (get-in laajennus-t [:laajennus :laajennuksentiedot :huoneistoala])]
+        (fact "x 2" (count huoneistoalat) => 2)
+        (fact "Laajennuksen pintaala keys" (keys (first huoneistoalat)) => (just #{:kayttotarkoitusKoodi :pintaAla}))
+
+        (fact "positive and negative numbers"
+          (-> huoneistoalat first :pintaAla) => "150"
+          (-> huoneistoalat second :pintaAla) => "-10")))
+
     (fact "Laajennuksen kerrosala" (get-in laajennus-t [:laajennus :laajennuksentiedot :kerrosala]) => "180")
+    (fact "Laajennuksen kokonaisala" (get-in laajennus-t [:laajennus :laajennuksentiedot :kokonaisala]) => "-10")
     (fact "Laajennuksen rakennusoikeudellinenKerrosala" (get-in laajennus-t [:laajennus :laajennuksentiedot :rakennusoikeudellinenKerrosala]) => "160")
+
     (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
     (fact "Purku: syy" (-> purku-t :purkaminen :purkamisenSyy) => "tuhoutunut")
