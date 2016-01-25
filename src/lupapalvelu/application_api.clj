@@ -101,6 +101,7 @@
   {:parameters       [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (a/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
    :states           states/all-states
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]
@@ -458,6 +459,7 @@
 
 (defquery app-matches-for-link-permits
   {:parameters [id]
+   :description "Retuns a list of application IDs that can be linked to current application."
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but (conj states/terminal-states :sent))}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
@@ -470,6 +472,8 @@
         results (mongo/select :applications
                               (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
                                                                           :infoRequest     false
+                                                                          ; Backend systems support only the same kind of link permits.
+                                                                          ; We COULD filter the other kinds from XML messages in the future...
                                                                           :permitType      (:permitType application)
                                                                           :secondaryOperations.name {$nin ["ya-jatkoaika"]}
                                                                           :primaryOperation.name {$nin ["ya-jatkoaika"]}})

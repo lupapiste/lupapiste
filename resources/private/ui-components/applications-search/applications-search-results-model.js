@@ -3,6 +3,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.dataProvider = params.dataProvider;
   self.data = ko.pureComputed(function() {
@@ -33,7 +34,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   self.dispose = _.partial(hub.unsubscribe, self.onPageLoad);
 
-  ko.computed(function () {
+  self.disposedComputed(function () {
     ko.mapping.toJS(self.dataProvider.sort);
     self.dataProvider.skip(0);
   });

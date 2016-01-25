@@ -55,7 +55,9 @@
             [lupapalvelu.application-tabs-api]
             [lupapalvelu.application-options-api]
             [lupapalvelu.file-upload-api]
-            [lupapalvelu.guest-authority-api]))
+            [lupapalvelu.guest-authority-api]
+            [lupapalvelu.archiving-api]))
+
 
 (defonce jetty (atom nil))
 

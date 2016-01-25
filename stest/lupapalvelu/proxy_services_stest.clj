@@ -323,3 +323,10 @@
       (fact (:street body) => "Liljankuja")
       (fact (:number body) => "77")
       (fact (:fi (:name body)) => "J\u00e4rvenp\u00e4\u00e4"))))
+
+(facts "municipality-by-point"
+  (fact "Helsinki"
+    (municipality-by-point 386169.912 6671577.21) => "091")
+
+  (fact "Jalasjarvi, as of 2016 part of Kurikka and shoud return Kurikka's code"
+    (municipality-by-point 281160 6936532.8125001) => "301"))

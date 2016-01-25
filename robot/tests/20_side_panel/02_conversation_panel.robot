@@ -22,8 +22,7 @@ Mikko opens applications page
   Go to page  applications
 
 Mikko can send unsent message via dialog
-  Wait Until  Element Should Be Visible  dynamic-yes-no-confirm-dialog
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element Should Be Visible  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='Kirjoitan viestin, mutta unohdan lähettää sen... tarkoituksella!']

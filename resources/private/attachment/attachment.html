@@ -27,7 +27,6 @@
           <div class="hr"></div>
 
           <div class="inner-margins">
-              <!-- ko with: $root.approve -->
               <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()"
                       class="positive caps">
                   <i class="lupicon-check"></i>
@@ -35,7 +34,6 @@
               </button>
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()"
                       class="negative caps">Tarkennettavaa</button>
-              <!-- /ko -->
               <button class="secondary" data-test-id="change-attachment-type"
                       data-bind="click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized">
                   <span data-bind="ltext: 'attachment.changeType'"></span>
@@ -182,12 +180,12 @@
                                        value: visibility,
                                        enable: $root.authorization.ok('set-attachment-visibility') && editable"/>
                   </div>
-                  <div data-bind="if: features.enabled('arkistointi') && latestVersion">
-                    <div class="feature archive-valid" data-bind="with: latestVersion">
+                  <div data-bind="if: $root.authorization.ok('permanent-archive-enabled') && latestVersion">
+                    <div class="archive-valid" data-bind="with: latestVersion">
                       <div>
                         <span data-bind="ltext: 'archive.valid-format'"></span>:
-                        <span class="icon ok" data-bind="visible: $data.archivable"></span>
-                        <span class="icon missing" data-bind="visible: !$data.archivable, attr: {title: loc($data.archivabilityError)}"></span>
+                        <span class="lupicon-circle-check positive" data-bind="visible: $data.archivable"></span>
+                        <span class="lupicon-circle-attention negative" data-bind="visible: !$data.archivable, attr: {title: loc($data.archivabilityError)}"></span>
                       </div>
                       <div data-bind="if: $data['missing-fonts'] && $data['missing-fonts'].length > 0">
                         <h4><span data-bind="ltext: 'attachment.missing-fonts'"></span>:</h4>
@@ -222,8 +220,8 @@
                 </button>
               </div>
 
-              <!-- ko if: features.enabled('tiedonohjaus') && !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
-              <div class="feature" style="margin-top: 15px;">
+              <!-- ko if: $root.authorization.ok('permanent-archive-enabled') && !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+              <div style="margin-top: 15px;">
                 <button id="show-tos-metadata" class="btn"
                         data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application')">
                   <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),

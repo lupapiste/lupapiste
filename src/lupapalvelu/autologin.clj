@@ -4,6 +4,7 @@
             [pandect.core :as pandect]
             [monger.operators :refer :all]
             [sade.core :refer :all]
+            [sade.crypt :as crypt]
             [sade.env :as env]
             [sade.http :as http]
             [sade.util :as util]
@@ -11,6 +12,9 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.user :as user]))
+
+
+(def cache-ttl (* 10 60 1000)) ; 10 min
 
 ; salasana = aikaleima + "_" + hash
 ; hash = HMAC-SHA256(tunnus + IP + aikaleima, salaisuus)
@@ -22,38 +26,47 @@
 
 (defn- valid-hash? [hash username ip ts secret]
   (let [expected-hash (pandect/sha256-hmac (str username ip ts) secret)]
-    (if (= hash expected-hash)
-      true
-      (do
-        (error "Expected hash" expected-hash "got" hash)
-        false))))
+    (boolean (or (= hash expected-hash) (error "Expected hash" expected-hash "of" username ip ts "- got" hash )))))
 
 (def five-min-in-ms (* 5 60 1000))
 
 (defn- valid-timestamp? [ts now]
-  (if (and now ts)
-    (let [delta (util/abs (- now (util/to-long ts)))]
-      (< delta five-min-in-ms))
-    false))
+  (let [delta (util/abs (- now (util/to-long ts)))]
+    (boolean (or (< delta five-min-in-ms) (debug "Too much time difference" delta)))))
 
-(defn- load-secret [ip]
-  "LUPAPISTE" ; TODO
-  )
+(defn- load-secret-from-db [ip]
+  (let [{:keys [key crypto-iv] } (mongo/select-one :ssoKeys {:ip ip} {:key 1 :crypto-iv 1})
+        master-key (env/value :sso :basic-auth :crypto-key)]
+    (if (and key crypto-iv)
+      (if-not (ss/blank? master-key)
+        (try
+          (crypt/decrypt-aes-string key master-key crypto-iv)
+          (catch Exception e
+            (error "Failed to decrypt" key crypto-iv (.getMessage e))))
+        (error "Failed to load master key"))
+      (error "No key for" ip))))
 
-(defn- allowed-ip? [ip organizations]
-  true ; TODO
-  )
+(def load-secret (memo/ttl load-secret-from-db :ttl/threshold cache-ttl))
+
+(def allowed-ip? (memo/ttl organization/allowed-ip? :ttl/threshold cache-ttl))
 
 (defn autologin [request]
   (let [[email password] (http/decode-basic-auth request)
         ip (http/client-ip request)
-        secret (load-secret ip)
         [ts hash] (parse-ts-hash password)]
-    (when (and secret ts hash
+
+    (trace (:uri request) "- X-Debug:" (get-in request [:headers "x-debug"]))
+
+    (when (and ts hash
             (env/feature? :louhipalvelin)
-            (valid-hash? hash email ip ts secret)
+            (valid-hash? hash email ip ts (load-secret ip))
             (valid-timestamp? ts (now)))
       (let [user (user/get-user-by-email email)
-            organizations (user/users-organizations user)]
-        (when (allowed-ip? ip organizations)
+            organization-ids (user/organization-ids user)]
+
+        (trace "autologin (if allowed by organization)" (user/session-summary user))
+
+        (when (and (:enabled user)
+                   (seq organization-ids)
+                   (some (partial allowed-ip? ip) organization-ids))
           (user/session-summary user))))))

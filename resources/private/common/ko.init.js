@@ -452,12 +452,19 @@
   ko.bindingHandlers.documentEvent = {
     init: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      $(document).keyup(function(e) {
+      var keyupHandler = function(e) {
         if (e.keyCode === value.key) {
           if (value.keypress) {
             value.keypress();
           }
         }
+      };
+
+      $(document).on("keyup", keyupHandler);
+
+      // http://www.knockmeout.net/2014/10/knockout-cleaning-up.html  - 3.
+      ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+        $(document).off("keyup", keyupHandler);
       });
     }
   };

@@ -2,9 +2,10 @@
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof info error errorf]]
             [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
-            [lupapalvelu.action :refer [defcommand update-application notify] :as action]
+            [lupapalvelu.action :refer [defcommand defquery update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.autologin :as autologin]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
@@ -325,3 +326,17 @@
                                      $set data-argument})
         (ok))
       (fail :error.sending-unsent-attachments-failed))))
+
+(defquery external-api-enabled
+  {:description "Dummy query to check if external API use is configured. Organization from application or user orgs."
+   :parameters [id]
+   :user-roles #{:authority}
+   :states     states/all-states
+   :pre-checks [(fn [{{ip :client-ip} :web user :user} {:keys [organization]}]
+                  (if organization
+                    (when-not (autologin/allowed-ip? ip organization)
+                      (fail :error.ip-not-allowed))
+                    (when-not (some
+                                (partial autologin/allowed-ip? ip)
+                                (user/organization-ids user))
+                      (fail :error.ip-not-allowed))))]})

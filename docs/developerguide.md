@@ -19,8 +19,12 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
   - Chromella ajettavia testejä varten ajuri osoitteesta http://chromedriver.storage.googleapis.com/index.html
 - [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
   PDF-tiedostojen kääntämistä ja korjaamista varten
-- Valinnaisesti: [pdf2pdf](https://www.pdf-tools.com/pdf/Products-Shop/Evaluate.aspx?p=CNV&back=%2fpdf%2fpdf-to-pdfa-converter-signature.aspx)
+
+Valinnaisesti:
+
+- [pdf2pdf](https://www.pdf-tools.com/pdf/Products-Shop/Evaluate.aspx?p=CNV&back=%2fpdf%2fpdf-to-pdfa-converter-signature.aspx)
   PDF/A-konversioita varten
+- [KnockoutJS context debugger](https://chrome.google.com/webstore/detail/knockoutjs-context-debugg/oddcpmchholgcjgjdnfjmildmlielhof) Chrome plugin, joka helpottaa DOM elementtien binding kontekstien hahmottamista
 
 ## Kehitysympäristön konfigurointi
 
@@ -94,6 +98,18 @@ Tällöin sovelluspalvelin kuuntelee ainoastaan HTTP-liikennettä.
 
 Karttojen ja paikkatietoaineiston käyttö vaatii käyttäjätunnukset Maanmittauslaitokselta.
 
+Kartan saa testaustapauksissa toimimaan käyttämällä Maanmittauslaitoksen avointa [palvelualustaa](http://www.maanmittauslaitos.fi/aineistot-palvelut/rajapintapalvelut/paikkatiedon-palvelualustan-pilotti).
+Tesitkäyttö onnistuu asettamalla user.properties tiedostoon seuraava rivi:
+
+    maps.open-nls-wmts   http://avoindata.maanmittauslaitos.fi/mapcache/wmts
+
+Tällöin selainpään karttakutsut lähetetään ko. karttapalvelimelle.
+
+[Maanmittauslaitoksen avoimen datan lisenssi (CC 4.0)](http://www.maanmittauslaitos.fi/avoimen-tietoaineiston-cc-40-lisenssi)
+
+Palvelun käyttämiä kiinteistö- ja osoitetietorajapintoja ei ole saatavina avoimina palveluina, lisätietoa rajapinnoista [Maanmittauslaitoksen](http://www.maanmittauslaitos.fi/aineistot-palvelut/rajapintapalvelut) sivuilta.
+
+
 ## Palvelun käynnistys
 
 Kun työkalut on asennettu ja lisätty polkuun sekä MongoDB käynnistetty,
@@ -104,8 +120,10 @@ Lupapiste käynnistyy komennolla:
 Sovellus on ajossa osoitteessa http://localhost:8000.
 
 Klikkaa oikean reunan Development palkissa "Apply minimal" linkkiä.
-Tämä alustaa tietokantaan muutamia käyttäjiä ja organisaatioita. Voit kirjautua
+Tämä alustaa tietokantaan muutamia käyttäjiä ja organisaatioita (kts. _minimal.clj_). Voit kirjautua
 sisään esimerkiksi hakijatunnuksella pena/pena tai viranomaistunnuksella sonja/sonja.
+
+Hakemuksen voi luoda samaisesta Development
 
 
 ## Tyylikäytännöt
@@ -140,19 +158,54 @@ Kehitys tehdään develop-haaraan git flow -mallin mukaisesti. Tuotannossa on ma
    ajaa Robot Frameworkilla testit, jotka käyttävät ulkoisia palveluita kuten
    VETUMA-kirjautumispalvelun testijärjestelmää.
 
+Muista käyttää kahta välilyöntiä .robot-tiedostoissa erottamaan avainsanaa ja parametreja!
+
 # Korkean tason domain-kuvaus
 
 TODO
 
 ## Tietomalli
+
+Käsite | Selite
+--- | ---
+Lupatyyppi (permit type) | Lupatyyppi määrittää millaisesta lupa-asioinnista on kyse. Esimerkiksi rakennusvalvonta, yleiset alueet ja ympäristötoimi ovat omia lupatyyppejään.
+Hakemus (application) | Hakija täyttää palvelussa hakemuksen, joka sisältää mm. lomaketietoja ja liitteitä. Hakemuksella on aina tila (state), joka kuvaa hakemuksen tilaa lupa- tai ilmoitusprosessissa. Viranomainen tarkastaa ja käsittelee palveluun jätetyn hakemuksen.
+Toimenpide (operation) | Toimenpiteet määrittävät hakemuksen tyypin eli millaisia tietoja hakemukseen täytyy täyttää. Toimenpide kuuluu aina tiettyyn lupatyyppiin. Esimerkiksi toimenpide "Aidan rakentaminen" kuuluu rakennusvalvonnan lupatyyppiin. Toimenpiteellä on skeema (schema), joka määrittää hakemuksella täytettävät lomaketiedot.
+Organisaatio (organization) | Viranomainen kuuluu aina yhteen tai useampaan organisaatioon. Viranomaisella on oikeus nähdä ja käsitellä omaan organisaatioonsa jäteyt hakemukset. Organisaatio on useissa tapauksessa kunnan tietty viranomaisorganisaatio (esimerkiksi rakennusvalvonta). Tietomalli mahdollistaa helposti ylikunnallisen lupakäsittelyn, sillä yksi organisaatio on konfiguroitavissa usean kunnan käyttöön.
+Neuvontapyyntö (info request) | Hakemuksen esiversio. Neuvontapyynnön avulla hakija voi pyytää  viranomaiselta neuvoa jo ennen varsinaisen hakemuksen tekoa. Neuvontapyyntö voidaan muuntaa hakemukseksi, jolloin asioinnin valmistelun voi aloittaa suoraan neuvontapyynnön pohjalta.
+
 ## Roolit
+
+Rooli | Selite
+--- | ---
+Pääkäyttäjä (admin) | Palvelun hallinnointi
+Organisaation pääkäyttäjä (authorityAdmin) | Organisaation pääkäyttäjä hallitsee organisaation tietoja ja konfiguraatioita
+Viranomainen (authority) | Viranomainen kuuluu yhteen tai useampaan organisaatioon. Viranomainen voi käsitellä organisaatioon tulleita hakemuksia. Viranomaisrooleja organisaatioihin hallinnoi organisaation pääkäyttäjä
+Hakija (applicant) | Vahvasti tunnistautunut hakija. Hakijat voivat luoda hakemuksia palveluun. Hakija voi myös saada valtuutuksia muiden hakijoiden tekemiin hakemuksiin, jolloin samaa hakemusta voi valmistella useampi henkilö
+Avoimen neuvontapyynnön viranomaiskäyttäjä (oirAuthority) | Käyttäjä saa ilmoituksia avoimista neuvontapyynnöistä. Käyttäjä voi antaa vastauksen hakijan avoimeen neuvontapyyntön. Käytössä organisaatioissa, jotka eivät vielä ole ottaneet varsinaista asiointia käyttöön.
+Dummy (dummy) | Dummy käyttäjä, joka ei ole vielä rekisteröitynyt ja vahvasti tunnistautunut palveluun. Dummy käyttäjä syntyy esimerkiksi kun hakemukselle valtuutetaan käyttäjä, jonka sähköpostiosoite ei ole vielä rekisteröitynyt palvelun käyttäjäksi.
+
 
 # Arkkitehtuuri yleiskuvaus
 
-TODO
+Asiointisovellus on toteutettu HTML5 Single-page application-pohjaisesti. Käyttöliittymäkerros kutsuu taustapalvelua, joka edelleen lukee ja muokkaa tietokannan tietoja. Järjestelmä tietosisältö muodostuu hakemuksista, niiden lomaketiedoista ja liitetiedostoista sekä käyttäjistä. Rakenteisen tiedon osalta pääroolissa ovat hakemuksen lomaketiedot, joten sovelluksen käyttöön on valittu dokumenttitietokanta, johon monimuotoiset lomakkeet on helppo mallintaa.
+
+Sovellus on toteutettu Command Query Responsibility Segregation periaatteiden mukaisesti. Commandeja käytetään komentojen suorittamiseen (tiedon muokkaamiseen) ja Queryjä käytetään tiedon kyselemiseen. Frontendistä kutsutaan backendin tarjoamia JSON rajapintoja (*/api/command/<nimi>* (POST metodi) ja */api/query/<nimi>* (GET metodi)).
+
+
 
 front+back
 fyysinen pino: front, app, mongodb, geoserver, sftp jne
+
+Frontend:
+- [KnockoutJS](http://knockoutjs.com/documentation/introduction.html)
+- jQuery
+- lo-dash
+
+Backend:
+- Clojure
+- MongoDB
+
 
 
 # Frontend arkkitehtuuri
@@ -282,6 +335,35 @@ Arkkitehtuuriin liittyvät konventiot:
   * Komponentilla ei pitäisi sinänsä koskaan olla tietoa siitä, miten applikaation tila on järjestetty ja mitä käsitteitä tallennettuun tilaan liittyy. Komponentti tietää ainoastaan toiminnoista, joita se itse tarjoaa käyttäjälle itse määrittelemässään käyttöliittymässä.
   * Esimerkiksi, käyttäjän vaihtaessa hakemuslistan rivien järjestystä, oikea signaali service-kerrokselle olisi `"applicationListSortChanged"` ja parametreiksi uusi, pyydetty järjestys (esim. `{sortBy: "date", direction: "asc"}`). Esimerkki vääränlaisesta signaalista olisi `"fetchApplicationsOrderedBy"`, koska tämä ei kuvaa käyttäjän toimintaa vaan haluttua lopputulosta.
 
+## Ilmoitus toimintojen onnistumisesta tai epäonnistumisesta
+
+Toiminnon lopuksi voi näyttää käyttäjälle vihreässä tai punaisessa palkissa
+välähtävän viestin:
+
+```javascript
+hub.send("indicator", {style: "positive"});
+
+hub.send("indicator", {style: "negative"});
+```
+
+Ajax-pyyntöjen callback-funktioina voi käyttää util.showSavedIndicator:ia:
+
+```javascript
+ajax.command("some-command")
+  .success(util.showSavedIndicator)
+  .error(util.showSavedIndicator)
+  .call();
+```
+
+Tai oman callback-funktion sisällä:
+```javascript
+ajax.command("some-command")
+  .success(function(resp){
+    util.showSavedIndicator(resp);
+    doOtherStuff();
+  })
+  .call();
+```
 
 ## Globaalit objektit
 - Ajax
@@ -307,10 +389,6 @@ Oletuksena CSS-tiedostot minimoidaan, tätä voidaan säätää compassin _envir
 
 ## Oskari Map
   The hub between Lupapiste and Oskari Map
-
-## Robot Framework
-
-  Muista 2 välilyöntiä.
 
 # Backend arkkitehtuuri
 ## Yleiskuvaus
@@ -427,11 +505,27 @@ TODO tietomalli (collectionit)
 
 ## Koodauskäytännöt
 - Käytetään omia apu-namespaceja (ss, mongo jne)
+- Actionit määritellään "-api" päätteisiin nimiavaruuksiin (tästä on käännösaikainen assertio actionin rekisteröinnissä)
 
 
 # Laajennuspisteet
 
 ## Uuden hakemustyypin lisääminen
+
+1. Luo uusi hakemustyyppi _permit.clj_ tiedostossa _defpermit_ makrolla.
+2. Määritä hakemustyypissä käytettävät liitteet _attachment.clj_ tiedostossa. Varsinainen liitteiden määritys tehdään [lupapiste-commons](https://github.com/lupapiste/commons) projektiin (*attachment_types.cljc*).
+3. Lisää hakemustyypille tarvittavat toimenpiteet ja luo hakemustyypin toimenpidepuu (operation tree) _operations.clj_ tiedostoon.
+4. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteestä ulospäin)
+  1. Tee mapping halutusta XML formaatista (kts. esimerkiksi _src/lupapalvelu/xml/_ hakemistosta 'mapping.clj' päätteiset tiedostot). Rekisteröi KRYSP mapper funktio, joka luo XML tiedoston ja kirjoittaa sen levylle. Esimerkki funktion KRYSP mapper rekisteröinnistä **KT** lupatyypille (*rakennuslupa_mapping.clj*): `(permit/register-function permit/KT :app-krysp-mapper save-application-as-krysp)`.
+  2. Toteuta funktiot muunnokseen hakemus->kanoninenXML (esimerkkiä *vesihuolto_canonical.clj*). Kanonisesta mallista luodaan mappingin perusteella XML esitys.
+  3. Katso mallia KRYSP putkesta, joka alkaa *integrations_api.clj* tiedoston **approve-application** commandista. Tarkempi kuvaus TODO.
+5. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteeseen luku)
+  1. Rekisteröi päätösten validointi- ja lukufunktio, esimerkkejä varten katso _reader.clj_. Siellä luotu esimerkiksi lupatyypille YA päätösten lukija `(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdicts)` ja validaattori `(permit/register-function permit/YA :verdict-krysp-validator simple-verdicts-validator)`
+  2. Katso mallia päätösten lukemisesta *verdict_api.clj* tiedoston *do-check-for-verdict* funktiosta, joka hakee annetulle hakemukselle päätöksen kunnan taustajärjestelmästä.
+5. Jos hakemustyyppiin tulee asianhallinta integraatio
+  1. Määritä _lupapalvelu.xml.validator_ (validator.clj) nimiavaruuteen skeema validaattori(t) (_schema-validator_) uudelle lupatyypille.
+  2. Tarkista että halutuilla toimenpiteillä on asianhallinta konfiguraatiossa arvo 'true' (_operations.clj_)
+
 
 ## Uudet toimenpidetyypin lisääminen
 ### metatiedot, puu, näiden lokalisaatiot

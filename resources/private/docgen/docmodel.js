@@ -152,7 +152,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
       if (listenEvent === "muutostapaChanged") {
         var prefix = _.dropRight(path.split("."));
-        self.subscriptions.push(hub.subscribe({type: listenEvent, path: prefix.join(".")}, function(event) {
+        self.subscriptions.push(hub.subscribe({eventType: listenEvent, path: prefix.join(".")}, function(event) {
           $(element).prop("disabled", _.isEmpty(event.value));
         }));
       }
@@ -279,7 +279,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.approvalHubSubscribe = function(fun, listenBroadcasts) {
-    var filter = {type: "approval-status-" + self.docId,
+    var filter = {eventType: "approval-status-" + self.docId,
                   broadcast: Boolean(listenBroadcasts) };
     self.subscriptions.push(hub.subscribe( filter, fun ));
   };

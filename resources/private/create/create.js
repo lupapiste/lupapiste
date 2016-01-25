@@ -401,9 +401,9 @@
       }
     }
 
-    hub.subscribe({type: "keyup", keyCode: 37}, _.partial(ifStep2, tree.back));  // left arrow
-    hub.subscribe({type: "keyup", keyCode: 33}, _.partial(ifStep2, tree.start)); // page up
-    hub.subscribe({type: "keyup", keyCode: 36}, _.partial(ifStep2, tree.start)); // home
+    hub.subscribe({eventType: "keyup", keyCode: 37}, _.partial(ifStep2, tree.back));  // left arrow
+    hub.subscribe({eventType: "keyup", keyCode: 33}, _.partial(ifStep2, tree.start)); // page up
+    hub.subscribe({eventType: "keyup", keyCode: 36}, _.partial(ifStep2, tree.start)); // home
 
   });
 

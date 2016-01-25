@@ -65,11 +65,11 @@
     (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))
     org))
 
-(defn- remove-sensitive-data
-  [org]
-  (if (:krysp org)
-    (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
-    org))
+(defn- remove-sensitive-data [organization]
+  (let [org (dissoc organization :allowedAutologinIPs)]
+    (if (:krysp org)
+      (update org :krysp #(into {} (map (fn [[permit-type config]] [permit-type (dissoc config :password :crypto-iv)]) %)))
+      org)))
 
 (defn get-organizations
   ([]
@@ -96,30 +96,22 @@
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
 
+(defn allowed-ip? [ip organization-id]
+  (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
+
 (defn encode-credentials
   [username password]
   (when-not (s/blank? username)
-    (let [crypto-key       (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-          crypto-iv        (crypt/make-iv-128)
-          crypted-password (->> password
-                                (crypt/str->bytes)
-                                (crypt/encrypt crypto-key crypto-iv :aes)
-                                (crypt/base64-encode)
-                                (crypt/bytes->str))
-          crypto-iv        (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str))]
-      {:username username :password crypted-password :crypto-iv crypto-iv})))
+    (let [crypto-iv        (crypt/make-iv-128)
+          crypted-password (crypt/encrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv)
+          crypto-iv-s      (-> crypto-iv crypt/base64-encode crypt/bytes->str)]
+      {:username username :password crypted-password :crypto-iv crypto-iv-s})))
 
 (defn decode-credentials
-  "Decode password that was originally generated (together with the init-vector )by encode-credentials.
-   Arguments are base64 encoded."
+  "Decode password that was originally generated (together with the init-vector)
+   by encode-credentials. Arguments are base64 encoded."
   [password crypto-iv]
-  (let [crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
-        crypto-iv (-> crypto-iv crypt/str->bytes crypt/base64-decode)]
-    (->> password
-                          (crypt/str->bytes)
-                          (crypt/base64-decode)
-                          (crypt/decrypt crypto-key crypto-iv :aes)
-                          (crypt/bytes->str))))
+  (crypt/decrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv))
 
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"

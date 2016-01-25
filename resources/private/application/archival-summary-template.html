@@ -18,8 +18,14 @@
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
 
       <div class="buttons">
-        <button class="btn-primary" data-bind="ltext: 'archivalSummary.archiveSelected', enable: archiveButtonEnabled"></button>
-        <a href="#" data-bind="click: selectAll">Valitse kaikki</a>
+        <button class="btn-primary" data-bind="enable: archiveButtonEnabled, click: archiveSelected">
+          <span class="waiting" data-bind="css: { waiting: !_.isEmpty(archivingInProgressIds()) }">
+            <i class="spin lupicon-refresh wait"></i>
+          </span>
+          <span data-bind="ltext: 'arkistoidaan', visible: !_.isEmpty(archivingInProgressIds())"></span>
+          <span data-bind="ltext: 'archivalSummary.archiveSelected', visible: _.isEmpty(archivingInProgressIds())"></span>
+        </button>
+        <a href="#" data-bind="click: selectAll, ltext: 'stamp.all'"></a>
       </div>
     </div>
 
@@ -35,9 +41,6 @@
       <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
     </div>
-
-    <div data-bind="template: {name: 'case-file-report-template', data: {actions: caseFile}}"></div>
-
   </script>
   <script type="text/x-jquery-tmpl" id="archival-summary-attachment-table">
     <div class="table archival-summary-table" data-bind="foreach: groups">
@@ -56,9 +59,11 @@
 
       <!-- ko foreach: attachments -->
       <div class="attachment-row">
-        <div class="archival-status" data-bind="visible: $parents[1].showWillPublish">
-           <input type="checkbox" data-bind="visible: archivable, checked: sendToArchive">
-           <span class="icon missing" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></span>
+        <div class="archival-status" data-bind="visible: $parents[1].showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id()) }">
+           <input type="checkbox" data-bind="visible: archivable && state() !== 'arkistoitu', checked: sendToArchive">
+           <i class="lupicon-circle-attention disabled" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></i>
+           <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
@@ -66,11 +71,11 @@
             <div class="personal-data" data-bind="text: personalDataDescription"></div>
             <div class="stamped">
               <i class="lupicon-circle-stamp enabled" data-bind="visible: stamped, attr: {title: loc('attachment.stamped')}"></i>
-              <i class="lupicon-remove disabled" data-bind="visible: !stamped(), attr: {title: loc('attachment.stamped')}"></i>
+              <span data-bind="visible: !stamped(), ltext: 'no'"></span>
             </div>
             <div data-bind="if: $parents[1].showWillPublish" class="will-publish">
               <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
-              <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
+              <span data-bind="visible: !metadata()['myyntipalvelu'](), ltext: 'no'"></span>
             </div>
           </div>
           <div class="attachment-type">
@@ -100,7 +105,7 @@
           </div>
         </div>
 
-        <div data-bind="slider: $data.showAdditionalControls" class="additional-controls">
+        <div data-bind="if: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'attachment.changeType'"></div>
@@ -142,7 +147,7 @@
         <div class="small-columns">
           <div class="retention-period" data-bind="ltext: 'sailytysaika'"></div>
           <div class="personal-data" data-bind="ltext: 'henkilotiedot'"></div>
-          <div class="stamped" data-bind="ltext: 'attachment.stamped'"></div>
+          <div class="stamped"></div>
           <div data-bind="if: showWillPublish" class="will-publish"><span data-bind="ltext: 'julkaistaan'"></span></div>
         </div>
         <div class="archival-status-header"  data-bind="visible: showWillPublish">A</div>
@@ -151,8 +156,10 @@
 
       <!-- ko foreach: documents -->
       <div class="attachment-row">
-        <div class="archival-status" data-bind="visible: $parent.showWillPublish">
-           <input type="checkbox" data-bind="checked: sendToArchive">
+        <div class="archival-status" data-bind="visible: $parent.showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
+           <input type="checkbox" data-bind="visible: state() !== 'arkistoitu', checked: sendToArchive">
+           <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
           <div class="small-columns">
@@ -161,7 +168,7 @@
             <div class="stamped"></div>
             <div data-bind="if: $parent.showWillPublish" class="will-publish">
               <i data-bind="visible: metadata()['myyntipalvelu']" class="lupicon-check enabled"></i>
-              <i data-bind="visible: !metadata()['myyntipalvelu']()" class="lupicon-remove disabled"></i>
+              <span data-bind="visible: !metadata()['myyntipalvelu'](), ltext: 'no'"></span>
             </div>
           </div>
           <div class="attachment-type">
@@ -193,41 +200,6 @@
       </div>
       <!-- /ko -->
     </div>
-  </script>
-
-  <script type="text/x-jquery-tmpl" id="case-file-report-template">
-    <div class="table case-file-table">
-    <h1 data-bind="ltext: 'caseFile.heading'"></h1>
-    <table>
-      <thead>
-      <tr>
-        <th data-bind="ltext: 'caseFile.action'"></th>
-        <th data-bind="ltext: 'document'"></th>
-        <th data-bind="ltext: 'attachment'"></th>
-        <th data-bind="ltext: 'caseFile.actionDate'"></th>
-        <th data-bind="ltext: 'caseFile.documentDate'"></th>
-      </tr>
-      </thead>
-      <tbody data-bind="foreach: actions">
-      <tr>
-        <td data-bind="text: action"></td>
-        <td></td>
-        <td></td>
-        <td data-bind="dateString: start"></td>
-        <td></td>
-      </tr>
-      <!-- ko foreach: documents -->
-      <tr>
-        <td></td>
-        <td><div data-bind="if: category == 'document'"><span data-bind="ltext: type"></span></div></td>
-        <td><div data-bind="if: category == 'attachment'"><span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>, v. <span data-bind="version: version"></span></div></td>
-        <td></td>
-        <td data-bind="dateString: ts"></td>
-      </tr>
-      <!-- /ko -->
-      </tbody>
-    </table>
-  </div>
   </script>
 
 </section>

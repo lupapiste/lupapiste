@@ -50,6 +50,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
   self.metadata = ko.observable();
+  self.processMetadata = ko.observable();
 
   // Options
   self.optionMunicipalityHearsNeighbors = ko.observable(false);
@@ -99,6 +100,11 @@ LUPAPISTE.ApplicationModel = function() {
   self.hasFieldWarnings = ko.computed(function() {
     return self.fieldWarnings() && self.fieldWarnings().length > 0;
   });
+
+  self.urgency = ko.observable();
+  self.authorityNotice = ko.observable();
+  self.tags = ko.observable();
+  self.comments = ko.observable([]);
 
   self.summaryAvailable = ko.pureComputed(function() {
     return self.inPostVerdictState() || self.state() === "canceled";
@@ -324,6 +330,9 @@ LUPAPISTE.ApplicationModel = function() {
         self.reload();
         if (!resp.integrationAvailable) {
           LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
+        } else if (self.externalApi.enabled()) {
+          var permit = externalApiTools.toExternalPermit(self._js);
+          hub.send("external-api::integration-sent", permit);
         }
       })
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
@@ -674,4 +683,18 @@ LUPAPISTE.ApplicationModel = function() {
                              size: "medium",
                              component: "add-property-dialog"});
   };
+
+  self.externalApi = {
+    enabled: ko.pureComputed(function() {
+      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
+             lupapisteApp.models.applicationAuthModel.ok("external-api-enabled");
+    }),
+    showOnMap: function(model) {
+      var permit = externalApiTools.toExternalPermit(model._js);
+      hub.send("external-api::show-on-map", permit);
+    },
+    openApplication: function(model) {
+      var permit = externalApiTools.toExternalPermit(model._js);
+      hub.send("external-api::open-application", permit);
+    }};
 };

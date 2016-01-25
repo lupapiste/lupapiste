@@ -35,7 +35,7 @@ Sonja can leave notice
 
 Sonja can set application urgency to urgent
   Open side panel  notice
-  Select From List by test id  notice-urgency-select  Kiireellinen
+  Select From List by id  application-authority-urgency  urgent
   # wait for debounce
   Sleep  1
   Logout
@@ -53,7 +53,7 @@ Sonja can set application urgency to pending
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   Open side panel  notice
-  Select From List by test id  notice-urgency-select  Odottaa
+  Select From List by id  application-authority-urgency  pending
   # wait for debounce
   Sleep  1
   Logout

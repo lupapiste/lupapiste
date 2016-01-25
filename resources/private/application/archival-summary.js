@@ -122,12 +122,13 @@
       attachment.archivable = util.getIn(attachment, ["latestVersion", "archivable"]) ? attachment.latestVersion.archivable() : false;
       attachment.archivabilityError = util.getIn(attachment, ["latestVersion", "archivabilityError"]) ? attachment.latestVersion.archivabilityError() : null;
       attachment.sendToArchive = ko.observable(false);
+      attachment.state = util.getIn(attachment, ["metadata", "tila"]) ? attachment.metadata().tila : ko.observable();
       return attachment;
     });
   };
 
   var collectMainDocuments = function(application) {
-    return [{documentNameKey: "applications.application", metadata: application.metadata}];
+    return [{documentNameKey: "applications.application", metadata: application.metadata, id: application.id() + '-application'}];
   };
 
   var model = function(params) {
@@ -195,33 +196,98 @@
       });
     });
 
+    var isSelectedForArchive = function(attachment) {
+      return ko.unwrap(attachment.sendToArchive);
+    };
+
+    self.archivingInProgressIds = ko.observableArray();
+
     self.archiveButtonEnabled = ko.pureComputed(function() {
-      var isSelectedForArchive = function(attachment) {
-        return ko.unwrap(attachment.sendToArchive);
-      };
-      return _.some(preAttachments(), isSelectedForArchive) || _.some(postAttachments(), isSelectedForArchive) ||
-        _.some(mainDocuments(), isSelectedForArchive);
+      return _.isEmpty(self.archivingInProgressIds()) && (_.some(preAttachments(), isSelectedForArchive) ||
+        _.some(postAttachments(), isSelectedForArchive) || _.some(mainDocuments(), isSelectedForArchive));
     });
 
     self.selectAll = function() {
       var selectIfArchivable = function(attachment) {
-        if (attachment.archivable) {
+        if (attachment.archivable && attachment.state() !== 'arkistoitu') {
           attachment.sendToArchive(true);
         }
       };
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
-        doc.sendToArchive(true);
+        if (doc.state() !== 'arkistoitu') {
+          doc.sendToArchive(true);
+        }
       });
     };
 
-    self.caseFile = ko.observableArray();
-    ajax.query("case-file-data", {id: params.application.id})
-      .success(function(data) {
-        self.caseFile(data.process);
-      })
-      .call();
+    var updateState = function(docs, stateMap) {
+      _.forEach(docs, function(doc) {
+        var newState = stateMap[ko.unwrap(doc.id)];
+        if (newState) {
+          doc.metadata().tila(newState);
+          if (newState === 'arkistoitu') {
+            doc.sendToArchive(false);
+          }
+        }
+      });
+    };
+
+    var pollChangedState = function(documentIds) {
+      ajax
+        .command("document-states",
+          {
+            id: ko.unwrap(params.application.id),
+            documentIds: documentIds
+          })
+        .success(function(data) {
+          updateState(mainDocuments(), data.state);
+          updateState(archivedPreAttachments(), data.state);
+          updateState(archivedPostAttachments(), data.state);
+        })
+        .call();
+    };
+
+    var pollArchiveStatus = function() {
+      ajax.query("archive-upload-pending", {id: ko.unwrap(params.application.id)})
+        .success(function(data) {
+          var finished = _.difference(self.archivingInProgressIds(), data.unfinished);
+          if (finished.length > 0) {
+            pollChangedState(finished);
+          }
+          self.archivingInProgressIds(data.unfinished);
+          if (data.unfinished.length > 0) {
+            window.setTimeout(pollArchiveStatus, 1000);
+          }
+        })
+        .call();
+    };
+    pollArchiveStatus();
+
+    self.archiveSelected = function() {
+      var attachmentIds = _.map(_.filter(self.attachments(), isSelectedForArchive), function(attachment) {
+        return ko.unwrap(attachment.id);
+      });
+      var archiveApplication = ko.unwrap(mainDocuments()[0].sendToArchive);
+      self.archivingInProgressIds(attachmentIds);
+      if (archiveApplication) {
+        self.archivingInProgressIds.push(mainDocuments()[0].id);
+      }
+      window.setTimeout(pollArchiveStatus, 1000);
+      ajax
+        .command("archive-documents",
+          {
+            id: ko.unwrap(params.application.id),
+            attachmentIds: attachmentIds,
+            archiveApplication: archiveApplication
+          })
+        .error(function(e) {
+          error(e.text);
+        })
+        .call();
+    };
+
   };
 
   ko.components.register("archival-summary", {

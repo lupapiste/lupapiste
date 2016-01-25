@@ -482,9 +482,10 @@
      (generate-pdf-with-child app child-type id lang out)
      (ByteArrayInputStream. (.toByteArray out)))))
 
-(defn generate-pdf-a
+(defn generate-pdf-a-application-to-file
   "Returns application data in PDF/A temp file"
   [application lang]
   (let [file (File/createTempFile "application-pdf-a-" ".tmp")]
     (generate application lang file)
-    (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))))
+    (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
+    file))

@@ -225,14 +225,11 @@ Login
   Wait until  Element should be visible  login-username
   Input text  login-username  ${username}
   Input text  login-password  ${password}
-  # for IE8
   Wait and click  login-button
-  Run Keyword And Ignore Error  Confirm Action
 
 Login fails
   [Arguments]  ${username}  ${password}
   Login  ${username}  ${password}
-  Run Keyword And Ignore Error  Confirm Action
   User should not be logged in
 
 User should be logged in
@@ -318,6 +315,10 @@ As Olli
   Go to login page
   Olli logs in
 
+As Pekka
+  Go to login page
+  Pekka logs in
+
 Olli logs in
   Authority logs in  olli  olli  Olli Ule\u00e5borg
 
@@ -344,6 +345,9 @@ Sonja logs in
 
 Ronja logs in
   Authority logs in  ronja  sonja  Ronja Sibbo
+
+Pekka logs in
+  Authority logs in  pekka  pekka  Pekka Borga
 
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
@@ -389,6 +393,11 @@ Select From List by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Select From List by id
+  [Arguments]  ${id}  ${value}
+  Wait until page contains element  xpath=//select[@id="${id}"]
+  Select From List  xpath=//select[@id="${id}"]  ${value}
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
@@ -737,6 +746,12 @@ Deny yes no dialog
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
 
+Confirm ok dialog
+  Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+
 Confirm
   [Arguments]  ${modalId}
   Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
@@ -844,16 +859,12 @@ Input comment and mark answered
   [Arguments]  ${message}
   Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
-  Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
+  Confirm ok dialog
   Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'is-comment')]//span[text()='${message}']
 
 Mark answered
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
-  Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
+  Confirm notification dialog
 
 Comment count is
   [Arguments]  ${amount}

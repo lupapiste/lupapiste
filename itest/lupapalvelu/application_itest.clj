@@ -461,7 +461,7 @@
                          :submit-application :create-foreman-application}
         user (find-user-from-minimal-by-apikey sonja)]
     app => map?
-    (doseq [command (ca/foreach-action user {} app)
+    (doseq [command (ca/foreach-action {} user {} app)
             :let [action (keyword (:action command))
                   result (a/validate-authority-in-drafts command app)]]
       (fact {:midje/description (name action)}

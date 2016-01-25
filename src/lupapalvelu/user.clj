@@ -34,7 +34,7 @@
 (def SearchFilter
   {:id        sc/Str
    :title     sc/Str
-   :sort     {:field (sc/enum "type" "location" "operation" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
+   :sort     {:field (sc/enum "type" "location" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
               :asc    sc/Bool}
    :filter   {(sc/optional-key :handlers)      [sc/Str]
               (sc/optional-key :tags)          [sc/Str]
@@ -185,12 +185,6 @@
     (filter (fn [[org org-roles]] (some roles org-roles)))
     (map (comp name first))
     set))
-
-(defn users-organizations
-  "Returns organizations where user has some role"
-  [user]
-  (when-let [ids (seq (organization-ids user))]
-    (organization/get-organizations {:_id {$in organization-ids}})))
 
 (defn authority-admins-organization-id [user]
   (first (organization-ids-by-roles user #{:authorityAdmin})))

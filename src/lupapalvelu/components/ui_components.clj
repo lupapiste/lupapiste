@@ -22,6 +22,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]))
 
+(def themes #{"louhi"})
+
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
               :name "common"})
@@ -60,7 +62,8 @@
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
-                 :supportedLangs        i18n/languages}]
+                 :supportedLangs        i18n/languages
+                 :urgencyStates         ["normal" "urgent" "pending"]}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -163,7 +166,8 @@
                    "publish-bulletin-service.js"
                    "application-filters-service.js"
                    "document-data-service.js"
-                   "fileupload-service.js"]}
+                   "fileupload-service.js"
+                   "side-panel-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -186,9 +190,7 @@
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:screenmessages :analytics]
-                   :js ["comment.js"]
-                   :html ["comments.html"]}
+   :authenticated {:depends [:screenmessages :analytics]}
 
    :invites      {:depends [:common-html]
                   :js ["invites-model.js" "invites.js"]}
@@ -215,6 +217,12 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
+   :external-api {:js (apply
+                        conj
+                        ["external-api-service.js" "external-api-tools.js"]
+                        (when (env/dev-mode?)
+                          ["dummy-api-client.js"]))}
+
    :verdict-attachment-prints {:depends [:common-html]
                                :html ["verdict-attachment-prints-order-template.html"
                                       "verdict-attachment-prints-order-history-template.html"
@@ -224,7 +232,7 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
 
-   :attachment   {:depends [:common-html :repository :signing :side-panel]
+   :attachment   {:depends [:common-html :repository :signing]
                   :js ["attachment-multi-select.js"
                        "targeted-attachments-model.js"
                        "attachment.js"
@@ -243,20 +251,21 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "add-party.js" "attachments-tab-model.js" "archival-summary.js"
+                       "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
                        "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
-                         "foreman-template.html" "archival-summary-template.html" "organization-links.html"]}
+                         "foreman-template.html" "archival-summary-template.html" "organization-links.html"
+                         "case-file-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]
                   :js ["applications-list.js"]}
 
-   :statement    {:depends [:common-html :repository :side-panel]
+   :statement    {:depends [:common-html :repository]
                   :js ["statement-service.js" "statement.js"]
                   :html ["statement.html"]}
 
@@ -264,7 +273,7 @@
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
-   :neighbors    {:depends [:common-html :repository :side-panel]
+   :neighbors    {:depends [:common-html :repository]
                   :js ["neighbors.js"]
                   :html ["neighbors.html"]}
 
@@ -304,12 +313,6 @@
 
    :admins       {:depends [:users]}
 
-   :notice       {:js ["notice.js"]
-                  :html ["notice.html"]}
-
-   :side-panel   {:js ["side-panel.js"]
-                  :html ["side-panel.html"]}
-
    :password-reset {:depends [:common-html]
                     :js ["password-reset.js"]
                     :html ["password-reset.html"]}
@@ -341,13 +344,13 @@
                              :company :analytics :register-company :footer]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
-   :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
+   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics :header :footer]
+                       :docgen :debug :analytics :header :footer]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
@@ -372,7 +375,7 @@
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer]
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer :global-models]
              :js ["company-user.js"]
 
              :html ["index.html" "login.html" "company-user.html"]}
@@ -389,7 +392,6 @@
                :html ["header.html" "footer.html"
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
-                      "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
@@ -410,7 +412,6 @@
                     "application-bulletins-service.js"
                     "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"
-                    "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
                     "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"

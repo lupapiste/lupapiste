@@ -8,13 +8,14 @@
             [sade.util :as util]
             [sade.property :as p]
             [sade.core :refer :all]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
-            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.geojson :as geo]))
 
 ;; Operations
@@ -77,7 +78,14 @@
 (def authority-application-states
   {:state {$in ["submitted" "sent" "complementNeeded"]}})
 
-(defn make-query [query {:keys [searchText kind applicationType handlers tags organizations operations areas]} user]
+(def no-handler "no-authority")
+
+(defn- handler-email-to-id [handler]
+  (if (ss/contains? handler "@")
+    (:id (user/get-user-by-email handler))
+    handler))
+
+(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas]} user]
   {$and
    (filter seq
      [query
@@ -102,10 +110,11 @@
           "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           {:state {$nin ["draft" "canceled"]}}))
       (when-not (empty? handlers)
-        (if ((set handlers) "no-authority")
+        (if ((set handlers) no-handler)
           {$or [{:authority.id  {$exists false}}, {:authority.id {$in [nil ""]}}]}
-          {$or [{:auth.id {$in handlers}}
-                {:authority.id {$in handlers}}]}))
+          (when-let [handler-ids (seq (remove nil? (map handler-email-to-id handlers)))]
+            {$or [{:auth.id {$in handler-ids}}
+                  {:authority.id {$in handler-ids}}]})))
       (when-not (empty? tags)
         {:tags {$in tags}})
       (when-not (empty? organizations)
@@ -126,7 +135,7 @@
   [:_comments-seen-by :_statements-seen-by :_verdicts-seen-by
    :_attachment_indicator_reset :address :applicant :attachments
    :auth :authority :authorityNotice :comments :created :documents
-   :foreman :foremanRole :infoRequest :modified :municipality
+   :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitSubtype :primaryOperation :state :statements
    :submitted :tasks :urgency :verdicts])
 
@@ -135,7 +144,7 @@
 
 (def- frontend-fields
   [:id :address :applicant :authority :authorityNotice
-   :infoRequest :kind :modified :municipality
+   :infoRequest :kind :location :modified :municipality
    :primaryOperation :state :submitted :urgency :verdicts
    :foreman :foremanRole])
 
@@ -146,10 +155,12 @@
 
 
 (defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
-  (assoc app :kind (cond
+  (-> app
+      (assoc :kind (cond
                      (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
                      infoRequest "applications.inforequest"
-                     :else       "applications.application")))
+                     :else       "applications.application"))
+      app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant
                           "handler" ["authority.lastName" "authority.firstName"]
@@ -171,7 +182,7 @@
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
-(defn applications-for-user [user {application-type :applicationType :as params}]
+(defn applications-for-user [user params]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)

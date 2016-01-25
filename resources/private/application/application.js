@@ -8,7 +8,6 @@
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
-  var commentModel = comments.create(true);
 
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
@@ -84,15 +83,26 @@
       .call();
   }
 
+  var updateMetadataFields = function(application) {
+    if (!_.isEmpty(application.metadata)) {
+      applicationModel.metadata(ko.mapping.fromJS(application.metadata));
+    } else {
+      applicationModel.metadata({});
+    }
+    if (!_.isEmpty(application.processMetadata)) {
+      applicationModel.processMetadata(ko.mapping.fromJS(application.processMetadata));
+    } else {
+      applicationModel.processMetadata({});
+    }
+  };
+
   function updateTosFunction(value) {
     if (!isInitializing) {
       LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
-          repository.load(currentId, applicationModel.pending, function(application) {
-            ko.mapping.fromJS(application.metadata, applicationModel.metadata);
-          });
+          repository.load(currentId, applicationModel.pending, updateMetadataFields);
         })
         .call();
     }
@@ -150,9 +160,6 @@
 
       // Invite
       inviteModel.setApplicationId(app.id);
-
-      // Comments
-      commentModel.refresh(app, true);
 
       // Verdict details
       verdictModel.refresh(app, applicationDetails.authorities);
@@ -241,7 +248,7 @@
     });
   }
 
-  hub.subscribe({type: "dialog-close", id: "dialog-valtuutus"}, function() {
+  hub.subscribe({eventType: "dialog-close", id: "dialog-valtuutus"}, function() {
     inviteModel.reset();
   });
 
@@ -305,7 +312,11 @@
         }
       }
       currentId = newId;
+
       repository.load(currentId, applicationModel.pending, function(application) {
+
+        updateMetadataFields(application);
+
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
             var name = application.primaryOperation.name;
@@ -441,7 +452,6 @@
       addPartyModel: addPartyModel,
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
-      applicationComment: commentModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
       invite: inviteModel,
@@ -457,7 +467,8 @@
       verdictModel: verdictModel,
       attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
-      tosFunctions: tosFunctions
+      tosFunctions: tosFunctions,
+      sidePanelService: lupapisteApp.services.sidePanelService
     };
 
     $("#application").applyBindings(bindings);

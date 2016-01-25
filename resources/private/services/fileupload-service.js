@@ -38,8 +38,8 @@ LUPAPISTE.FileuploadService = function() {
         data.submit();
       } else {
         var message = !acceptedFile ?
-          "error.illegal-file-type" :
-          "error.bulletins.illegal-upload-size";
+          "error.file-upload.illegal-file-type" :
+          "error.file-upload.illegal-upload-size";
 
         hub.send("indicator", {
           style: "negative",
@@ -67,10 +67,6 @@ LUPAPISTE.FileuploadService = function() {
       var progress = parseInt(data.loaded / data.total * 100, 10);
       hub.send("fileuploadService::filesUploadingProgress", {progress: progress});
     }
-  });
-
-  hub.subscribe("fileuploadService::uploadFile", function() {
-    $("#fileupload-input").click();
   });
 
   hub.subscribe("fileuploadService::removeFile", function(event) {

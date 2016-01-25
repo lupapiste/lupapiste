@@ -1,0 +1,4 @@
+"error.file-upload.illegal-upload-size" "fi" "Tiedoston koko ylitti sallitun ylärajan (15 Mt)"
+"error.file-upload.illegal-upload-size" "sv" "Filen större än tillåtet (15 Mb)"
+"error.file-upload.illegal-file-type" "fi" "Tiedoston tyyppi ei ole sallittu. Valitse PDF-, kuva-, Microsoft Office-, OpenOffice- tai zip-tiedosto."
+"error.file-upload.illegal-file-type" "sv" "Filtypen är inte tillåten. Välj en Pdf-, bild-, Microsoft Office-, OpenOffice- eller zip-fil."

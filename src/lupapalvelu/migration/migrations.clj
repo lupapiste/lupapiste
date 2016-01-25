@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.validators :as v]
+            [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment-accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
@@ -16,11 +17,12 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
             [sade.env :as env]
-            [sade.excel-reader :as er]))
+            [sade.excel-reader :as er]
+            [sade.coordinate :as coord]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -1244,24 +1246,6 @@
     update-valid-pdfa-to-arhivable-on-attachment-versions
     {"attachments.versions.valid-pdfa" {$exists true}}))
 
-
-(defn populate-application-history [application]
-  (let [{:keys [opened submitted sent canceled started complementNeeded closed startedBy closedBy history]} application
-        all-entries [(when (not= "open" (-> history first :state)) {:state :open, :ts opened, :user nil})
-                     (when submitted {:state :submitted, :ts submitted, :user nil})
-                     (when sent {:state :sent, :ts sent, :user nil})
-                     (when canceled {:state :canceled, :ts canceled, :user nil})
-                     (when complementNeeded {:state complementNeeded, :ts complementNeeded, :user nil})
-                     (when started {:state :constructionStarted, :ts started, :user (user/summary startedBy)})
-                     (when closed {:state :constructionStarted, :ts closed, :user (user/summary closedBy)})]]
-    {$push {:history {$each (remove nil? all-entries)}}}))
-
-(defmigration populate-history
-  (reduce + 0
-    (for [collection [:applications :submitted-applications]]
-      (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :complementNeeded :started :closed :startedBy :closedBy :history])]
-        (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
-
 (defn update-document-tila-metadata [doc]
   (if-let [tila (get-in doc [:metadata :tila])]
     (let [new-tila (if (.equalsIgnoreCase "valmis" tila) :valmis :luonnos)]
@@ -1362,7 +1346,7 @@
 
 (defmigration statement-state
   {:apply-when (pos? (mongo/count :applications {:statements {$elemMatch {"state" {$exists false}}}}))}
-  (update-applications-array :statements 
+  (update-applications-array :statements
                              update-statement-state-by-status
                              {:statements {$elemMatch {"state" {$exists false}}}}))
 
@@ -1438,6 +1422,54 @@
                              add-missing-person-data-to-statement
                              {:statements {$elemMatch {:person.email {$exists true},
                                                        :person.userId {$exists false}}}}))
+
+(defn convert-coordinates [application]
+  (let [location       (:location application)
+        location-wgs84 (coord/convert "EPSG:3067" "WGS84" 5 location)]
+    {$set {:location-wgs84 location-wgs84}}))
+
+(defmigration add-wgs84-location-for-applications
+  {:apply-when (pos? (mongo/count :applications {:location-wgs84 {$exists false}}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:location-wgs84 {$exists false}})]
+        (count (map #(mongo/update-by-id collection (:id %) (convert-coordinates %)) applications))))))
+
+
+(defmigration cleanup-numeric-history-state
+  {:apply-when (pos? (mongo/count :applications {"history.state" {$type 18}}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (mongo/update-n :applications {"history.state" {$type 18}} {$pull {:history {:state {$type 18}}}} :multi true))))
+
+(defmigration cleanup-construction-started-history-state
+  {:apply-when (pos? (mongo/count :applications {"history.state" "constructionStarted"}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (mongo/update-n :applications {"history.state" "constructionStarted"} {$pull {:history {:state "constructionStarted"}}} :multi true))))
+
+(defn populate-application-history [{:keys [opened submitted sent canceled started complementNeeded closed startedBy closedBy history verdicts] :as application}]
+  (let [user-summary (fn [user] (when (seq user) (user/summary user)))
+        history-states (set (map :state history))
+        verdict-state (sm/verdict-given-state application)
+        verdict-ts  (:timestamp (->>  verdicts (remove :draft) (sort-by :timestamp) first))
+        all-entries [(when (and opened (not (history-states "open"))) {:state :open, :ts opened, :user nil})
+                     (when (and submitted(not (history-states "submitted"))) {:state :submitted, :ts submitted, :user nil})
+                     (when (and sent (not (history-states "sent"))) {:state :sent, :ts sent, :user nil})
+                     (when (and complementNeeded (not (history-states "complementNeeded"))) {:state :complementNeeded, :ts complementNeeded, :user nil})
+                     (when (and verdict-ts (not (history-states verdict-state))) {:state verdict-state, :ts verdict-ts, :user nil})
+                     (when (and started (not (history-states "constructionStarted"))) {:state :constructionStarted, :ts started, :user (user-summary startedBy)})
+                     (when (and closed (not (history-states "closed"))) {:state :closed, :ts closed, :user (user-summary closedBy)})
+                     (when (and canceled (not (history-states "canceled"))) {:state :canceled, :ts canceled, :user nil})]
+        new-entries (remove nil? all-entries)]
+    {$push {:history {$each new-entries}}}))
+
+(defmigration populate-history-v2
+  {:apply-when (pos? (mongo/count :applications {:history.1 {$exists false}, :state {$nin ["draft", "open", "canceled"]}, :infoRequest false}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :complementNeeded :started :closed :startedBy :closedBy :history :verdicts :permitType :primaryOperation :state])]
+        (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
 
 ;;
 ;; ****** NOTE! ******

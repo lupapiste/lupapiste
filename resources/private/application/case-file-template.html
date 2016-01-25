@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="case-file" style="visibility: hidden; display: block;">
+  <script type="text/x-jquery-tmpl" id="case-file-template">
+    <div class="table case-file-table">
+    <h1 data-bind="ltext: 'caseFile.heading'"></h1>
+    <table>
+      <thead>
+      <tr>
+        <th data-bind="ltext: 'caseFile.action'"></th>
+        <th data-bind="ltext: 'document'"></th>
+        <th data-bind="ltext: 'caseFile.documentDate'"></th>
+        <th data-bind="ltext: 'lisaaja'"></th>
+      </tr>
+      </thead>
+      <tbody data-bind="foreach: caseFile">
+      <tr>
+        <td data-bind="text: action"></td>
+        <td></td>
+        <td data-bind="dateString: start"></td>
+        <td data-bind="text: user"></td>
+      </tr>
+      <!-- ko foreach: documents -->
+      <tr>
+        <td></td>
+        <td>
+          <div data-bind="if: category == 'document'"><span data-bind="ltext: type"></span></div>
+          <div data-bind="if: category == 'attachment'">
+            <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span><span data-bind="if: contents">, <span data-bind="text: contents"></span></span>, v. <span data-bind="version: version"></span>
+          </div>
+        </td>
+        <td data-bind="dateString: ts"></td>
+        <td data-bind="text: $data.user"></td>
+      </tr>
+      <!-- /ko -->
+      </tbody>
+    </table>
+  </div>
+  <div data-bind="if: $root.authorization.ok('store-tos-metadata-for-application')">
+      <button id="show-tos-metadata" class="btn" data-bind="click: toggleTosMetadata">
+        <i data-bind="css: {'lupicon-chevron-small-right': !showTosMetadata(),
+                            'lupicon-chevron-small-down': showTosMetadata}"></i>
+        <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+      </button>
+
+      <div class="tos-metadata-content" data-bind="slider: showTosMetadata">
+        <div data-bind="component: {name: 'metadata-editor',
+                                    params: {metadata: application.processMetadata, application: application, caseFile: true}}">
+        </div>
+      </div>
+  </div>
+  </script>
+
+</section>
+</body>
+</html>

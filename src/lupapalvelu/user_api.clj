@@ -38,14 +38,18 @@
 ;; ==============================================================================
 ;;
 
+(defn- get-user [user]
+  (if (user/virtual-user? user)
+    user
+    (let [full-user (user/get-user-by-id (:id user))]
+      (dissoc full-user :private :personId))))
+
 (defquery user
   {:user-roles auth/all-authenticated-user-roles}
   [{user :user}]
-  (if (user/virtual-user? user)
-    (ok :user user)
-    (if-let [full-user (user/get-user-by-id (:id user))]
-      (ok :user (dissoc full-user :private :personId))
-      (fail))))
+  (if-let [full-user (get-user user)]
+    (ok :user full-user)
+    (fail)))
 
 (defquery users
   {:user-roles #{:admin}}
@@ -288,6 +292,14 @@
                       (when (= (get-in user [:defaultFilter id-key]) filterId)
                         {$set {(str "defaultFilter." id-key) ""}}))]
     (mongo/update-by-id :users user-id update)))
+
+(defquery saved-application-filters
+  {:user-roles auth/all-authenticated-user-roles
+   :description "Returns search filters for external services. The same data is provided by user query."}
+  [{user :user}]
+  (if-let [full-user (get-user user)]
+    (ok (select-keys full-user [:applicationFilters :foremanFilters :defaultFilter]))
+    (fail)))
 
 ;;
 ;; Change organization data:
@@ -588,7 +600,7 @@
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
-    (when-not (mime/allowed-file? filename) (fail! :error.illegal-file-type))
+    (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
@@ -678,11 +690,11 @@
   [_])
 
 (defquery permanent-archive-enabled
-  {:user-roles #{:authority}
-   :pre-checks [(fn [command application]
-                  (let [org-set (user/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher})]
-                    (if-not application
-                      (when-not (organization/some-organization-has-archive-enabled? org-set)
-                        unauthorized)
+  {:user-roles #{:applicant :authority}
+   :pre-checks [(fn [command {:keys [organization]}]
+                  (let [org-set (if organization
+                                  #{organization}
+                                  (user/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher :archivist}))]
+                    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
   [_])

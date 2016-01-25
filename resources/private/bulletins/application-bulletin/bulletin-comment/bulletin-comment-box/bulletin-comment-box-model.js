@@ -59,10 +59,6 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     return isPending || !self.basicCommentFields.comment() || !self.basicCommentFields.email.isValid() || !allOtherInfoIsValid;
   });
 
-  self.addAttachment = function() {
-    hub.send("fileuploadService::uploadFile");
-  };
-
   self.removeAttachment = function(attachment) {
     hub.send("fileuploadService::removeFile", {attachmentId: attachment.id});
   };

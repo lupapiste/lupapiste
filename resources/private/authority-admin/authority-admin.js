@@ -427,9 +427,6 @@
     statementGiversModel.load();
   });
 
-  hub.onPageLoad("applications", function() {
-  });
-
   hub.onPageLoad("backends", function() {
     wfsModel.load();
     kopiolaitosModel.load();
