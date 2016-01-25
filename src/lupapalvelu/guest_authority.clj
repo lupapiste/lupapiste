@@ -26,6 +26,7 @@
            :hasAccess already-has-access)))
 
 (defn organization-guest-authorities
+  "Guest auhtorities for the given organisation."
   ([org-id]
    (->> org-id
         org/get-organization

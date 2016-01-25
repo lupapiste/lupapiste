@@ -5,6 +5,7 @@
       <script type="text/x-jquery-tmpl" id="application-guests-template">
         <div class="application-guests">
           <table class="auth-table"
+                 data-test-id="application-guest-table"
                  data-bind="visible: allGuests().length">
             <thead>
               <th data-bind="ltext: 'application-guests.user'"></th>
@@ -18,24 +19,31 @@
               <!-- /ko -->
             </thead>
             <tbody data-bind="foreach: allGuests">
-              <tr>
-                <td data-bind="text: $parent.nameAndUsername( $data )"></td>
-                <td data-bind="text: inviter"></td>
-                <td data-bind="text: authorityRole"></td>
+              <tr data-bind="attr: {'data-test-id': username}">
+                <td data-bind="text: $parent.nameAndUsername( $data )"
+                    data-test-id="guest-name"></td>
+                <td data-bind="text: inviter"
+                    data-test-id="guest-inviter"></td>
+                <td data-bind="text: authorityRole"
+                    data-test-id="guest-role"></td>
                 <!-- ko if: $parent.show.subscribeColumn -->
-                <td><a data-bind="visible: $parent.canSubscribe( $data ),
+                <td data-test-id="guest-subscribe">
+                  <a data-bind="visible: $parent.canSubscribe( $data ),
                                   text: $parent.subscriptionLinkText( unsubscribed ),
-                                  click: $parent.subscriptionLinkClick"></a></td>
+                                  click: $parent.subscriptionLinkClick"></a>
+                </td>
                 <!-- /ko -->
                 <!-- ko if: $parent.canDelete() -->
                 <td><i data-bind="visible: $parent.canDelete( $data ),
                                   click: $parent.deleteGuest"
+                       data-test-id="guest-delete"
                        class="primary lupicon-remove"></i></td>
                 <!-- /ko -->
               </tr>
             </tbody>
           </table>
           <button class="positive"
+                  data-test-id="application-guest-add"
                   data-bind="click: toggleBubble,
                              visible: canDelete()">
             <i class="lupicon-circle-plus"></i>
@@ -53,15 +61,15 @@
               <label class="mandatory"
                      data-bind="ltext: 'application-guests.caption'">
               </label>
-              <table class="mandatory">
+              <table class="mandatory" data-test-id="application-guest-authorities">
                 <tbody data-bind="foreach: $parent.guestAuthorities">
-                  <tr>
+                  <tr data-bind="attr: {'data-test-id': role}">
                     <td><input type="radio" name="guest-authorities"
-                               data-bind="attr: {value: $data.email},
-                                          checked: $parents[1].email" /></td>
-                    <td class="full" data-bind="text: $data.name"></td>
-                    <td class="full" data-bind="text: $data.email"></td>
-                    <td class="full" data-bind="text: $data.role"></td>
+                               data-bind="attr: {value: email},
+                                          checked: $parents[1].email"/></td>
+                    <td class="full" data-bind="text: name"></td>
+                    <td class="full" data-bind="text: email"></td>
+                    <td class="full" data-bind="text: role"></td>
                   </tr>
                 </tbody>
               </table>
@@ -72,6 +80,7 @@
                               attr: {'for': $parent.emailId}"
                    class="mandatory"></label>
             <input type="text" class="mandatory"
+                   data-test-id="application-guest-email"
                    data-bind="textInput: $parent.email,
                               attr: {id: $parent.emailId}" />
             <!-- /ko -->
@@ -79,9 +88,11 @@
               <label data-bind="ltext: 'application-guests.message',
                                 attr: {'for': $parent.messageId }"></label>
               <textarea data-bind="value: $parent.message,
-                                   attr: {id: $parent.messageId}"></textarea>
+                                   attr: {id: $parent.messageId}"
+                        data-test-id="application-guest-message"></textarea>
             </div>
             <div class="error"
+                 data-test-id="application-guest-error"
                  data-bind="visible: $parent.error,
                             ltext: $parent.error"></div>
           </bubble-dialog>

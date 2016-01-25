@@ -60,6 +60,7 @@
   {:description "List of application guests and guest authorities."
    :user-roles #{:applicant :authority}
    :user-authz-roles auth/default-authz-reader-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :parameters [:id]
    :states states/all-application-states}
   [command]
@@ -70,7 +71,7 @@
   command in authorization_api is not feasible, since the rights are
   different for guests."
    :user-roles       #{:applicant :authority}
-   :user-authz-roles #{:guest :guestAuthority :writer}
+   :user-authz-roles #{:guest :guestAuthority :writer :owner}
    :parameters       [:id :username :unsubscribe]
    :input-validators [(partial action/non-blank-parameters [:username])]
    :states           states/all-application-states}

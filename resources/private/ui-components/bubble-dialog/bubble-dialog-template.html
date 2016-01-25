@@ -8,6 +8,7 @@
 
           <div class="left-buttons">
             <button class="positive"
+                    data-test-id="bubble-dialog-ok"
                     data-bind="click: ok,
                                enable: buttonEnabled,
                                css: {waiting: waiting}">
@@ -16,6 +17,7 @@
               <span data-bind="ltext: buttonText"></span>
             </button>
             <button class="secondary"
+                    data-test-id="bubble-dialog-cancel"
                     data-bind="click: cancel">
               <i class="lupicon-remove"></i>
               <span data-bind="ltext: 'cancel'"></span>
