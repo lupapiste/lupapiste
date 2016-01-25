@@ -44,65 +44,12 @@ var attachment = (function() {
     return false;
   }
 
-  function ApproveModel(authorizationModel) {
-    var self = this;
-
-    self.authorizationModel = authorizationModel;
-
-    self.setApplication = function(application) { self.application = application; };
-    self.setAuthorizationModel = function(authorizationModel) { self.authorizationModel = authorizationModel; };
-    self.setAttachmentId = function(attachmentId) { self.attachmentId = attachmentId; };
-
-    self.stateIs = function(state) {
-      var att = self.application &&
-        _.find(self.application.attachments,
-            function(attachment) {
-              return attachment.id === self.attachmentId;
-            });
-      return att.state === state;
-    };
-
-    self.isNotOk = function() { return !self.stateIs("ok");};
-    self.doesNotRequireUserAction = function() { return !self.stateIs("requires_user_action");};
-    self.isApprovable = function() { return self.authorizationModel.ok("approve-attachment"); };
-    self.isRejectable = function() { return self.authorizationModel.ok("reject-attachment"); };
-
-    self.rejectAttachment = function() {
-      var id = self.application.id;
-      ajax.command("reject-attachment", { id: id, attachmentId: self.attachmentId})
-        .success(function() {
-          repository.load(id);
-        })
-        .error(function() {
-          repository.load(id);
-        })
-        .call();
-        hub.send("track-click", {category:"Attachments", label: "", event:"rejectAttachment"});
-      return false;
-    };
-
-    self.approveAttachment = function() {
-      var id = self.application.id;
-      ajax.command("approve-attachment", { id: id, attachmentId: self.attachmentId})
-        .success(function() {
-          repository.load(id);
-        })
-        .error(function() {
-          repository.load(id);
-        })
-        .call();
-        hub.send("track-click", {category:"Attachments", label: "", event:"approveAttachment"});
-      return false;
-    };
-  }
-
-  var approveModel = new ApproveModel(authorizationModel);
-
   model = {
     id:                           ko.observable(),
     application:                  applicationModel,
     applicationState:             ko.observable(),
     authorized:                   ko.observable(false),
+    state:                        ko.observable(),
     filename:                     ko.observable(),
     latestVersion:                ko.observable({}),
     versions:                     ko.observable([]),
@@ -261,7 +208,40 @@ var attachment = (function() {
       if (model.dirty) {
         repository.load(model.application.id());
       }
-    }
+    },
+
+    stateIs: function(state) {
+      return model.state() === state;
+    },
+
+    rejectAttachment: function() {
+      var id = model.application.id();
+      ajax.command("reject-attachment", { id: id, attachmentId: model.id()})
+        .success(function() {
+          model.state("requires_user_action");
+          model.dirty = true;
+        })
+        .call();
+        hub.send("track-click", {category:"Attachments", label: "", event:"rejectAttachment"});
+      return false;
+    },
+
+    approveAttachment: function() {
+      var id = model.application.id();
+      ajax.command("approve-attachment", { id: id, attachmentId: model.id()})
+        .success(function() {
+          model.state("ok");
+          model.dirty = true;
+        })
+        .call();
+        hub.send("track-click", {category:"Attachments", label: "", event:"approveAttachment"});
+      return false;
+    },
+
+    isNotOk: function() { return !model.stateIs("ok");},
+    doesNotRequireUserAction: function() { return !model.stateIs("requires_user_action");},
+    isApprovable: function() { return authorizationModel.ok("approve-attachment"); },
+    isRejectable: function() { return authorizationModel.ok("reject-attachment"); }
   };
 
   model.changeTypeDialogModel = new ChangeTypeDialogModel();
@@ -458,6 +438,7 @@ var attachment = (function() {
     model.latestVersion(attachment.latestVersion);
     model.versions(attachment.versions);
     model.signatures(attachment.signatures || []);
+    model.state(attachment.state);
     model.filename(attachment.filename);
     model.type(attachment.type);
     model.selectableOperations(application.allOperations);
@@ -473,9 +454,6 @@ var attachment = (function() {
     model.metadata(attachment.metadata);
 
     model.id(attachmentId);
-
-    approveModel.setApplication(application);
-    approveModel.setAttachmentId(attachmentId);
 
     model.showAttachmentVersionHistory(false);
     model.showTosMetadata(false);
@@ -550,7 +528,6 @@ var attachment = (function() {
   $(function() {
     $("#attachment").applyBindings({
       attachment: model,
-      approve: approveModel,
       authorization: authorizationModel
     });
     $("#upload-page").applyBindings({});
