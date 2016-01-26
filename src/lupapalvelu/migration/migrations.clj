@@ -1499,38 +1499,37 @@
 (defn remove-unwanted-fields-from-attachment-versions-user [attachment]
   (update attachment :versions (partial mapv (fn [v] (update v :user user-summary)))))
 
-(defmigration cleanup-attachment-versions-user-summary
-  {:apply-when (pos? (+ (mongo/count :applications 
-                                     {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
-                                           {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
-                                                                                             :user.username {$exists false}}}}}}]})
-                        (mongo/count :submitted-applications 
-                                     {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
-                                           {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
-                                                                                             :user.username {$exists false}}}}}}]})))}
-  (update-applications-array :attachments 
-                             remove-unwanted-fields-from-attachment-versions-user
-                             {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
-                                   {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
-                                                                                     :user.username {$exists false}}}}}}]}))
-
 (defn remove-unwanted-fields-from-attachment-latestVersion-user [attachment]
   (if (:latestVersion attachment)
     (update-in attachment [:latestVersion :user] user-summary)
     attachment))
 
-(defmigration cleanup-attachment-latestVersion-user-summary
+(defn remove-unwanted-fields-from-attachment-versions-user-and-latestVersion-user [attachment]
+  (-> attachment
+      remove-unwanted-fields-from-attachment-versions-user 
+      remove-unwanted-fields-from-attachment-latestVersion-user))
+
+(defmigration cleanup-attachment-versions-user-summary
   {:apply-when (pos? (+ (mongo/count :applications 
-                                     {$or [{:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                                     {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                             :user.username {$exists false}}}}}}
+                                           {:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
                                            {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
                                                                       :latestVersion.user.username {$exists false}}}}]})
-                        (mongo/count :submitted-applications
-                                     {$or [{:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                        (mongo/count :submitted-applications 
+                                     {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                             :user.username {$exists false}}}}}}
+                                           {:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
                                            {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
                                                                       :latestVersion.user.username {$exists false}}}}]})))}
   (update-applications-array :attachments 
-                             remove-unwanted-fields-from-attachment-latestVersion-user
-                             {$or [{:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                             remove-unwanted-fields-from-attachment-versions-user-and-latestVersion-user
+                             {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                   {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                     :user.username {$exists false}}}}}}
+                                   {:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
                                    {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
                                                               :latestVersion.user.username {$exists false}}}}]}))
 
