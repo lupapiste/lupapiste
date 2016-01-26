@@ -136,9 +136,6 @@ var attachment = (function() {
       if (previousId) {
         pageutil.openPage("attachment", applicationId + "/" + previousId);
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
-        if (model.dirty) {
-          repository.load(model.application.id(), undefined, undefined, true);
-        }
       }
     },
 
@@ -147,9 +144,6 @@ var attachment = (function() {
       if (nextId) {
         pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
-        if (model.dirty) {
-          repository.load(model.application.id(), undefined, undefined, true);
-        }
       }
     },
 
