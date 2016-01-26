@@ -146,7 +146,7 @@
     }
   }
 
-  function showApplication(applicationDetails) {
+  function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
@@ -210,30 +210,33 @@
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
-      var devMode = LUPAPISTE.config.mode === "dev";
-      var isAuthority = lupapisteApp.models.currentUser.isAuthority();
+      if (!lightLoad) {
+        var devMode = LUPAPISTE.config.mode === "dev";
+        var isAuthority = lupapisteApp.models.currentUser.isAuthority();
 
-      docgen.displayDocuments("#applicationDocgen",
-                              app,
-                              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
-                              authorizationModel,
-                              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
-      docgen.displayDocuments("#partiesDocgen",
-                              app,
-                              sortedPartyDocs,
-                              authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
-      docgen.displayDocuments("#applicationAndPartiesDocgen",
-                              app,
-                              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
-                              authorizationModel,
-                              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
-      docgen.displayDocuments("#constructionTimeDocgen",
-                              app,
-                              constructionTimeDocs,
-                              authorizationModel,
-                              {dataTestSpecifiers: devMode,
-                               accordionCollapsed: isAuthority,
-                               updateCommand: "update-construction-time-doc"});
+        docgen.displayDocuments("#applicationDocgen",
+                                app,
+                                applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
+                                authorizationModel,
+                                {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+        docgen.displayDocuments("#partiesDocgen",
+                                app,
+                                sortedPartyDocs,
+                                authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+        docgen.displayDocuments("#applicationAndPartiesDocgen",
+                                app,
+                                applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
+                                authorizationModel,
+                                {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
+        docgen.displayDocuments("#constructionTimeDocgen",
+                                app,
+                                constructionTimeDocs,
+                                authorizationModel,
+                                {dataTestSpecifiers: devMode,
+                                 accordionCollapsed: isAuthority,
+                                 updateCommand: "update-construction-time-doc"});
+
+      }
 
       // Options
       applicationModel.optionMunicipalityHearsNeighbors(util.getIn(app, ["options", "municipalityHearsNeighbors"]));
@@ -343,7 +346,7 @@
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
 
   hub.subscribe("application-loaded", function(e) {
-    showApplication(e.applicationDetails);
+    showApplication(e.applicationDetails, e.lightLoad);
     updateWindowTitle(e.applicationDetails.application.title);
   });
 
