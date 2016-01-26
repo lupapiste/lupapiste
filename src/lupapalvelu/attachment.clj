@@ -134,7 +134,7 @@
                                        (select-keys user/User [:firstName :lastName]))
                 :filename            sc/Str
                 :contentType         sc/Str
-                :size                sc/Int
+                :size                (sc/maybe sc/Int)
                 (sc/optional-key :stamped)             sc/Bool
                 (sc/optional-key :archivable)          (sc/maybe sc/Bool) 
                 (sc/optional-key :archivabilityError)  (sc/maybe (apply sc/enum (map name archivability-errors))) 
