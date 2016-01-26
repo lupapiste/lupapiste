@@ -841,35 +841,44 @@
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
-  (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
-                                                :lammonlahde  {:value "turve"}
-                                                :muu-lammonlahde {:value nil}}})
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+  (let [doc (tools/unwrapped {:data {:lammitys {:lammitystapa {:value nil}
+                                               :lammonlahde  {:value "turve"}
+                                               :muu-lammonlahde {:value nil}}}})
+        rakennus (get-rakennus application-rakennuslupa doc)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
 (fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is inluded"
-  (let [toimenpide (tools/unwrapped {:luokitus {:energiatehokkuusluku {:value "124"}
-                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}})
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+  (let [doc (tools/unwrapped {:data {:luokitus {:energiatehokkuusluku {:value "124"}
+                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
+        rakennus (get-rakennus application-rakennuslupa doc)]
     (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => "kWh/m2"))
 
 (fact "LPK-427: When energiatehokkuusluku is not set, energiatehokkuusluvunYksikko is excluded"
-  (let [toimenpide (tools/unwrapped {:luokitus {:energiatehokkuusluku {:value ""}
-                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}})
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+  (let [doc (tools/unwrapped {:data {:luokitus {:energiatehokkuusluku {:value ""}
+                                               :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
+        rakennus (get-rakennus application-rakennuslupa doc)]
     (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => nil))
 
 (facts "When muu-lammonlahde is specified, it is used"
-  (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
-                                                :lammonlahde  {:value "other"}
-                                                :muu-lammonlahde {:value "fuusioenergialla"}}})
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} (tools/unwrapped application-rakennuslupa))]
+  (let [doc (tools/unwrapped {:data {:lammitys {:lammitystapa {:value nil}
+                                               :lammonlahde  {:value "other"}
+                                               :muu-lammonlahde {:value "fuusioenergialla"}}}})
+        rakennus (get-rakennus application-rakennuslupa doc)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (facts "rakennuksenTiedot"
-  (let [toimenpide {:varusteet {:liitettyJatevesijarjestelmaanKytkin true}}
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} (tools/unwrapped application-rakennuslupa))]
-    (fact (-> rakennus :rakennuksenTiedot :liitettyJatevesijarjestelmaanKytkin) => true)))
+  (let [doc (tools/unwrapped (assoc-in uusi-rakennus [:data :varusteet :liitettyJatevesijarjestelmaanKytkin :value] true))
+        {tiedot :rakennuksenTiedot} (get-rakennus application-rakennuslupa doc)]
+
+    (fact "liitettyJatevesijarjestelmaanKytkin"
+      (:liitettyJatevesijarjestelmaanKytkin tiedot) => true)
+
+    (fact "rakennustunnus"
+      (:rakennustunnus tiedot) => {:jarjestysnumero nil,
+                                   :kiinttun "21111111111111"}
+      )
+
+    ))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]

@@ -54,7 +54,7 @@
                                                :rakennuksenSelite (operation-description application op-id))
       :default defaults)))
 
-(defn- get-rakennus [toimenpide application {id :id created :created info :schema-info}]
+(defn- get-rakennus [application {id :id created :created info :schema-info toimenpide :data :as doc}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
         kuvaus (:toimenpiteenKuvaus toimenpide)
         kantava-rakennus-aine-map (muu-select-map :muuRakennusaine (:muuRakennusaine rakenne)
@@ -112,18 +112,17 @@
                       :rakennuksenTiedot rakennuksen-tiedot}
       :omistajatieto (remove nil? (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))))))
 
-(defn- get-rakennus-data [toimenpide application doc]
-  {:Rakennus (get-rakennus toimenpide application doc)})
+(defn- get-rakennus-data [application doc]
+  {:Rakennus (get-rakennus application doc)})
 
 (defn- get-toimenpiteen-kuvaus [doc]
   ;Uses fi as default since krysp uses finnish in enumeration values
   {:kuvaus (i18n/localize "fi" (str "operations." (-> doc :schema-info :op :name)))})
 
 (defn get-uusi-toimenpide [doc application]
-  (let [toimenpide (:data doc)]
-    {:Toimenpide {:uusi (get-toimenpiteen-kuvaus doc)
-                  :rakennustieto (get-rakennus-data toimenpide application doc)}
-     :created (:created doc)}))
+  {:Toimenpide {:uusi (get-toimenpiteen-kuvaus doc)
+                :rakennustieto (get-rakennus-data application doc)}
+   :created (:created doc)})
 
 (defn fix-typo-in-kayttotarkotuksen-muutos [v]
   (if (= v lupapalvelu.document.schemas/kayttotarkotuksen-muutos)
@@ -131,44 +130,41 @@
     v))
 
 (defn- get-rakennuksen-muuttaminen-toimenpide [rakennuksen-muuttaminen-doc application]
-  (let [toimenpide (:data rakennuksen-muuttaminen-doc)]
-    {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
-                                      {:perusparannusKytkin (true? (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin))}
-                                      {:muutostyonLaji (fix-typo-in-kayttotarkotuksen-muutos (-> rakennuksen-muuttaminen-doc :data :muutostyolaji))})
-                  :rakennustieto (get-rakennus-data toimenpide application rakennuksen-muuttaminen-doc)}
-     :created (:created rakennuksen-muuttaminen-doc)}))
+  {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
+                                    {:perusparannusKytkin (true? (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin))}
+                                    {:muutostyonLaji (fix-typo-in-kayttotarkotuksen-muutos (-> rakennuksen-muuttaminen-doc :data :muutostyolaji))})
+                :rakennustieto (get-rakennus-data application rakennuksen-muuttaminen-doc)}
+   :created (:created rakennuksen-muuttaminen-doc)})
 
 (defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc application]
-  (let [toimenpide (:data laajentaminen-doc)]
-    {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
-                                   {:perusparannusKytkin (true? (get-in laajentaminen-doc [:data :laajennuksen-tiedot :perusparannuskytkin]))}
-                                   {:laajennuksentiedot (-> (get-in toimenpide [:laajennuksen-tiedot :mitat])
-                                                            (select-keys [:tilavuus :kerrosala :kokonaisala :rakennusoikeudellinenKerrosala :huoneistoala])
-                                                            (update :huoneistoala #(map select-keys (vals %) (repeat [:pintaAla :kayttotarkoitusKoodi]))))})
-                  :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
-     :created (:created laajentaminen-doc)}))
+  {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
+                                 {:perusparannusKytkin (true? (get-in laajentaminen-doc [:data :laajennuksen-tiedot :perusparannuskytkin]))}
+                                 {:laajennuksentiedot (-> (get-in laajentaminen-doc [:data :laajennuksen-tiedot :mitat])
+                                                          (select-keys [:tilavuus :kerrosala :kokonaisala :rakennusoikeudellinenKerrosala :huoneistoala])
+                                                          (update :huoneistoala #(map select-keys (vals %) (repeat [:pintaAla :kayttotarkoitusKoodi]))))})
+                :rakennustieto (get-rakennus-data application laajentaminen-doc)}
+   :created (:created laajentaminen-doc)})
 
-(defn- get-purku-toimenpide [purku-doc application]
-  (let [toimenpide (:data purku-doc)]
-    {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
-                                   {:purkamisenSyy (-> toimenpide :poistumanSyy)}
-                                   {:poistumaPvm (util/to-xml-date-from-string (-> toimenpide :poistumanAjankohta))})
-                  :rakennustieto (update-in
-                                   (get-rakennus-data toimenpide application purku-doc)
-                                   [:Rakennus :rakennuksenTiedot]
-                                   (fn [m]
-                                     (-> m
-                                       ; Cleanup top level keys that will bi nil anyway.
-                                       ; Recursive strip-nils would be too much.
-                                       (dissoc :verkostoliittymat)
-                                       (dissoc :energialuokka )
-                                       (dissoc :energiatehokkuusluku)
-                                       (dissoc :energiatehokkuusluvunYksikko)
-                                       (dissoc :paloluokka)
-                                       (dissoc :lammitystapa)
-                                       (dissoc :varusteet)
-                                       (dissoc :liitettyJatevesijarjestelmaanKytkin))))}
-     :created (:created purku-doc)}))
+(defn- get-purku-toimenpide [{data :data :as purku-doc} application]
+  {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
+                                 {:purkamisenSyy (:poistumanSyy data)}
+                                 {:poistumaPvm (util/to-xml-date-from-string (:poistumanAjankohta data))})
+                :rakennustieto (update-in
+                                 (get-rakennus-data application purku-doc)
+                                 [:Rakennus :rakennuksenTiedot]
+                                 (fn [m]
+                                   (-> m
+                                     ; Cleanup top level keys that will bi nil anyway.
+                                     ; Recursive strip-nils would be too much.
+                                     (dissoc :verkostoliittymat)
+                                     (dissoc :energialuokka )
+                                     (dissoc :energiatehokkuusluku)
+                                     (dissoc :energiatehokkuusluvunYksikko)
+                                     (dissoc :paloluokka)
+                                     (dissoc :lammitystapa)
+                                     (dissoc :varusteet)
+                                     (dissoc :liitettyJatevesijarjestelmaanKytkin))))}
+   :created (:created purku-doc)})
 
 (defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]
   (let [toimenpide (:data kaupunkikuvatoimenpide-doc)]
