@@ -1,13 +1,14 @@
 (ns lupapalvelu.pdf.libreoffice-conversion-client-test
-  (:require [lupapalvelu.pdf.libreoffice-conversion-client :as client]
-            [lupapalvelu.pdf.pdf-test-util :as util]
-            [midje.sweet :refer :all]
-            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
-            [clojure.java.io :as io])
+    (:require [lupapalvelu.pdf.libreoffice-conversion-client :as client]
+      [lupapalvelu.pdf.pdf-test-util :as util]
+      [midje.sweet :refer :all]
+      [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+      [clojure.java.io :as io] [clojure.java.io :as io])
   (:import (java.io File)))
 
 
-(def file-uri (str (.toURI (io/resource "resources/sample-paatosote.rtf"))))
+;;TODO: move file from test package to here
+;(def file-uri (str (.toURI (io/resource "resources/sample-paatosote.rtf"))))
 
 ;;TODO: move this in interration test and run multiple simoultanious requests in pararaller threads
 #_(facts "Test localhost pdfa-conversion service"

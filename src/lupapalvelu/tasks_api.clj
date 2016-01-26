@@ -4,6 +4,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.env :as env]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
@@ -11,6 +12,8 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
@@ -56,6 +59,7 @@
        $set {:modified created}})
     (ok :taskId (:id task))))
 
+;;TODO: remove task PDF attachment if it exists [and if you can figure out how to identify it]
 (defcommand delete-task
   {:parameters [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
@@ -73,8 +77,10 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states      valid-states}
-  [command]
+  [{:keys [application user lang] :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
+     (when (and (env/feature? :tasks-pdf-export) (= (get-in (get-task (:tasks application) taskId) [:schema-info :name] "task-katselmus")))
+       (child-to-attachment/create-attachment-from-children user application :tasks taskId lang))
   (set-state command taskId :ok))
 
 (defcommand reject-task
