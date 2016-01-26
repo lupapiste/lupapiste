@@ -52,7 +52,8 @@
    :user-roles          #{:applicant :authority}
    :parameters          [:id :email :role]
    :optional-parameters [:text]
-   :pre-checks          [guest/no-duplicate-guests]
+   :pre-checks          [guest/no-duplicate-guests
+                         guest/known-guest-authority]
    :input-validators    [(partial action/non-blank-parameters [:email])
                          action/email-validator
                          guest/valid-guest-role]

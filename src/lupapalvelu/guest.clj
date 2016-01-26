@@ -1,6 +1,7 @@
 (ns lupapalvelu.guest
   (:require [monger.operators :refer :all]
             [sade.core :refer [fail ok]]
+            [sade.strings :as ss]
             [lupapalvelu.user :as usr]  ;; usr works better with code completion.
             [lupapalvelu.organization :as org]
             [lupapalvelu.authorization :as auth]
@@ -26,7 +27,7 @@
            :hasAccess already-has-access)))
 
 (defn organization-guest-authorities
-  "Guest auhtorities for the given organisation."
+  "Guest authorities for the given organisation."
   ([org-id]
    (->> org-id
         org/get-organization
@@ -61,6 +62,15 @@
      (when (auth/user-authz? auth/all-authz-roles application guest)
        (fail :error.already-has-access)))))
 
+(defn known-guest-authority
+  "Pre check to make sure that guest authority is defined for the
+  organization."
+  [{{:keys [email role]} :data} {:keys [organization]}]
+  (when (and (= role "guestAuthority")
+             (not-any? #(= email (:email %))
+                       (organization-guest-authorities organization)))
+    (fail :error.not-guest-authority)))
+
 (defn valid-guest-role [{{role :role} :data}]
   (when-not (#{:guest :guestAuthority} (keyword role))
     (fail :error.illegal-role :parameters role)))
@@ -80,12 +90,13 @@
             (auth/has-auth? application (:id existing-user)))
       (fail :error.already-has-access)
       (let [guest (usr/get-or-create-user-by-email email user)
-            auth (usr/user-in-role guest (keyword role))]
-        (action/update-application command
-                                   {$push {:auth     (assoc auth :inviter (:id user))}
-                                    $set  {:modified timestamp}})
-        (notifications/notify! :invite (assoc command :recipients [guest]))
-        (ok)))))
+            auth  (usr/user-in-role guest (keyword role))
+            err   (action/update-application command
+                                             {$push {:auth     (assoc auth :inviter (:id user))}
+                                              $set  {:modified timestamp}})]
+        (when-not err
+          (notifications/notify! :invite (assoc command :recipients [guest])))
+        (or err (ok))))))
 
 (defn- guest-authority-role-map
   "email role map"
@@ -95,7 +106,7 @@
           (organization-guest-authorities org-id)))
 
 (defn- usercatname [{:keys [firstName lastName]}]
-  (str firstName " " lastName))
+  (ss/trim (str firstName " " lastName)))
 
 (defn- auth-info [ga-role-map {:keys [id role unsubscribed username inviter] :as auth}]
   (let [role (keyword role)
@@ -157,11 +168,11 @@
         writer?    (auth/user-authz? #{:owner :writer} application user)
         guest?     (-> (username-auth application username) :role (= "guest"))
         own?       (= (:username user) username)]
-    (println "authority?" authority? "writer?" writer? "guest?" guest? "own?" own?)
     (if (or authority? (and writer? guest?) own?)
-      (action/update-application command
-                                 {:auth {$elemMatch {:username username}}}
-                                 {$set {:auth.$.unsubscribed unsubscribe}})
+      (do (action/update-application command
+                                  {:auth {$elemMatch {:username username}}}
+                                  {$set {:auth.$.unsubscribed unsubscribe}})
+          (ok))
       (fail :error.unauthorized))))
 
 (defn delete-guest-application
@@ -170,7 +181,8 @@
     application :application
     :as command}]
   (action/update-application command
-                             {$pull {:auth {:username username}}}))
+                             {$pull {:auth {:username username}}})
+  (ok))
 
 
 (defn guest-authorities-application-organization
