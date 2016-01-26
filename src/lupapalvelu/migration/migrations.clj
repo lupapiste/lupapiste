@@ -1546,26 +1546,24 @@
          attachment))
 
 (defmigration add-required-fields-into-attachments
-  {:apply-when (pos? (mongo/count :applications {$and [{:attachments.id {$exists true}}                                 ;; tot: 2058
-                                                       {$or [{:attachments.locked               {$exists false}}        ;; 13
-                                                             {:attachments.applicationState     {$exists false}}        ;; 2
-                                                             {:attachments.target               {$exists false}}        ;; 11
-                                                             {:attachments.requestedByAuthority {$exists false}}        ;; 1566
-                                                             {:attachments.notNeeded            {$exists false}}        ;; 1564
-                                                             {:attachments.op                   {$exists false}}        ;; 13
-                                                             {:attachments.signatures           {$exists false}}        ;; 489
-                                                             {:attachments.auth                 {$exists false}}]}]}))} ;; 489
+  {:apply-when (pos? (mongo/count :applications {$or [{:attachments {$elemMatch {:locked               {$exists false}}}}
+                                                      {:attachments {$elemMatch {:applicationState     {$exists false}}}}
+                                                      {:attachments {$elemMatch {:target               {$exists false}}}}
+                                                      {:attachments {$elemMatch {:requestedByAuthority {$exists false}}}}
+                                                      {:attachments {$elemMatch {:notNeeded            {$exists false}}}}
+                                                      {:attachments {$elemMatch {:op                   {$exists false}}}}
+                                                      {:attachments {$elemMatch {:signatures           {$exists false}}}}
+                                                      {:attachments {$elemMatch {:auth                 {$exists false}}}}]}))}
   (update-applications-array :attachments 
                              merge-required-fields-into-attachment
-                             {$and [{:attachments.id {$exists true}}
-                                    {$or [{:attachments.locked               {$exists false}}
-                                          {:attachments.applicationState     {$exists false}}
-                                          {:attachments.target               {$exists false}}
-                                          {:attachments.requestedByAuthority {$exists false}}
-                                          {:attachments.notNeeded            {$exists false}}
-                                          {:attachments.op                   {$exists false}}
-                                          {:attachments.signatures           {$exists false}}
-                                          {:attachments.auth                 {$exists false}}]}]}))
+                             {$or [{:attachments {$elemMatch {:locked               {$exists false}}}}
+                                   {:attachments {$elemMatch {:applicationState     {$exists false}}}}
+                                   {:attachments {$elemMatch {:target               {$exists false}}}}
+                                   {:attachments {$elemMatch {:requestedByAuthority {$exists false}}}}
+                                   {:attachments {$elemMatch {:notNeeded            {$exists false}}}}
+                                   {:attachments {$elemMatch {:op                   {$exists false}}}}
+                                   {:attachments {$elemMatch {:signatures           {$exists false}}}}
+                                   {:attachments {$elemMatch {:auth                 {$exists false}}}}]}))
 
 (defn applicationState-as-camelCase [attachment]
   (if (= (:applicationState attachment) "complement-needed")
