@@ -1625,6 +1625,18 @@
                                                                 :target.type "verdict"}}
                                            :verdicts {$size 1}}))
 
+(defn remove-attachment-op-operation-type [attachment]
+  (update attachment :op dissoc :operation-type))
+
+(defmigration remove-operation-type-from-attachment-op
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {:attachments {$elemMatch {:op.operation-type {$exists true}}}})
+                        (mongo/count :submitted-applications
+                                     {:attachments {$elemMatch {:op.operation-type {$exists true}}}})))}
+  (update-applications-array :attachments
+                             remove-attachment-op-operation-type
+                             {:attachments {$elemMatch {:op.operation-type {$exists true}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

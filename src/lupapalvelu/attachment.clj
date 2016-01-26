@@ -112,10 +112,11 @@
                 :type                      sc/Str
                 (sc/optional-key :urlHash) sc/Str})
 
-(def Operation {:id      sc/Str
-                (sc/optional-key :name)    sc/Str
-                (sc/optional-key :description)    (sc/maybe sc/Str)
-                (sc/optional-key :created) ssc/Timestamp})
+(def Operation {:id                            sc/Str
+                (sc/optional-key :optional)    [sc/Str] ;; only empty arrays @ talos
+                (sc/optional-key :name)        sc/Str
+                (sc/optional-key :description) (sc/maybe sc/Str)
+                (sc/optional-key :created)     ssc/Timestamp})
 
 (def VersionNumber {:minor     sc/Int
                     :major     sc/Int})
