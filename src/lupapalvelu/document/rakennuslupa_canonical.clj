@@ -42,9 +42,12 @@
   (let [ops (cons primary secondaries)]
     (->> ops (filter #(= op-id (:id %))) first :description)))
 
-(defn get-rakennustunnus [toimenpide application {{op-id :id} :op}]
-  (let [defaults {:jarjestysnumero nil :kiinttun (:propertyId application)}
-        {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} toimenpide]
+(defn get-rakennustunnus [unwrapped-doc-data application {{op-id :id} :op}]
+  (let [defaults {:jarjestysnumero nil
+                  :kiinttun (:propertyId application)
+                  :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                  :rakennuksenSelite (operation-description application op-id)}
+        {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data]
     (cond
       manuaalinen_rakennusnro (assoc defaults :rakennusnro manuaalinen_rakennusnro)
       rakennusnro             (util/assoc-when defaults
