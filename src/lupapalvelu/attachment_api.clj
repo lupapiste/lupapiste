@@ -328,7 +328,10 @@
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
-                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))]
+                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))
+                      (fn [{{attachment-id :attachmentId id :id} :data}]
+                        (when-not (or (ss/blank? attachment-id) (pos? (mongo/count :applications {:_id id :attachments.id attachment-id})))
+                          (fail :error.attachment.id)))]
    :states     (conj (states/all-states-but states/terminal-states) :answered)
    :notified   true
    :on-success [(notify :new-comment)
