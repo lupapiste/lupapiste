@@ -14,12 +14,13 @@
   (first (filter #(or (nil? id) (= id (:id %))) (type application))))
 
 (defn- build-attachment [user application type id lang file]
-  {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts} type)]}
+  {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts :tasks} type)]}
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
         type-name (case type
                     :statements (i18n/localize (name lang) "statement.lausunto")
                     :neighbors (i18n/localize (name lang) "application.MM.neighbors")
-                    :verdicts (i18n/localize (name lang) "application.verdict.title"))
+                    :verdicts (i18n/localize (name lang) "application.verdict.title")
+                    :tasks (i18n/localize (name lang) "task-katselmus.rakennus.tila._group_label"))
         child (get-child application type id)]
     (debug "building attachemnt form child: " child )
     {:application application
@@ -30,11 +31,13 @@
      :attachment-type (case type
                         :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
                         :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
+                        :tasks {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
                         {:type-group "muut" :type-id "muu"})
      :op nil
      :contents (case type
                  :statements (get-in child [:person :text])
                  :neighbors (get-in child [:owner :name])
+                 :tasks (i18n/localize (name lang) (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value])))
                  type-name)
      :locked true
      :read-only (or (= :neighbors type) (= :statements type))

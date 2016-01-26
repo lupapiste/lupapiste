@@ -381,9 +381,9 @@
     (:body (util/upload-area sonja)) => "unauthorized")
 
   (fact "text file is not ok (zip required)"
-    (->
-      (util/upload-area sipoo "dev-resources/test-attachment.txt")
-      :body) => "error.illegal-shapefile")
+        (-> (decode-response (util/upload-area sipoo "dev-resources/test-attachment.txt"))
+            :body
+            :text) => "error.illegal-shapefile")
 
   (let [resp (util/upload-area sipoo)
         body (:body (decode-response resp))]

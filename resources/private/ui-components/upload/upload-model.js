@@ -29,13 +29,14 @@ LUPAPISTE.UploadModel = function(params) {
         request.setRequestHeader("x-anti-forgery-token", $.cookie("anti-csrf-token"));
       },
       success: function(res) {
-        self.successMessage("upload.success");
-        if (_.isFunction(params.onSuccess)) {
-          params.onSuccess(res);
+        if (res.ok) {
+          self.successMessage("upload.success");
+          if (_.isFunction(params.onSuccess)) {
+            params.onSuccess(res);
+          }
+        } else {
+          self.errorMessage(res.text || loc("error.upload-failed"));
         }
-      },
-      error: function(res) {
-        self.errorMessage(res.responseText || "error.upload-failed");
       },
       complete: function() {
         self.pending(false);

@@ -86,7 +86,7 @@ var repository = (function() {
     LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
   }
 
-  function doLoad(id, pending, callback) {
+  function doLoad(id, pending, callback, isLightLoad) {
     currentQuery = ajax
       .query("application", {id: id})
       .pending(pending || _.noop)
@@ -159,7 +159,7 @@ var repository = (function() {
           var sortedAttachmentTypes = attachmentUtils.sortAttachmentTypes(application.allowedAttachmentTypes);
           application.allowedAttachmentTypes = sortedAttachmentTypes;
 
-          hub.send("application-loaded", {applicationDetails: loading});
+          hub.send("application-loaded", {applicationDetails: loading, lightLoad: isLightLoad});
           if (_.isFunction(callback)) {
             callback(application);
           }
@@ -170,7 +170,7 @@ var repository = (function() {
     });
   }
 
-  function load(id, pending, callback) {
+  function load(id, pending, callback, lightLoad) {
     if (window.location.hash.indexOf(id) === -1) {
       // Application is not visible, do not load
       return;
@@ -180,7 +180,7 @@ var repository = (function() {
       currentQuery.abort();
     }
     currentlyLoadingId = id;
-    doLoad(id, pending, callback);
+    doLoad(id, pending, callback, lightLoad);
   }
 
   function loaded(pages, f) {

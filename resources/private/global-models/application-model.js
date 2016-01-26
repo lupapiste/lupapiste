@@ -245,6 +245,10 @@ LUPAPISTE.ApplicationModel = function() {
     repository.load(self.id());
   };
 
+  self.lightReload = function() {
+    repository.load(self.id(), undefined, undefined, true);
+  };
+
   self.roles = ko.computed(function() {
     var withRoles = function(r, i) {
       if (i.id() === "" && i.invite) {
