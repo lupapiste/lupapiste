@@ -1576,6 +1576,55 @@
   (update-applications-array :attachments
                              applicationState-as-camelCase
                              {:attachments.applicationState "complement-needed"}))
+
+(defn set-target-timestamps-as-nil [{target :target :as attachment}]
+  (if (number? target)
+    (assoc attachment :target nil)
+    attachment))
+
+(defmigration cleanup-attachment-target-with-timestamp-as-value
+  {:apply-when (pos? (+ (mongo/count :applications {:attachments {$elemMatch {:target {$type 18}}}})
+                        (mongo/count :submitted-applications {:attachments {$elemMatch {:target {$type 18}}}})))}
+  (update-applications-array :attachments 
+                             set-target-timestamps-as-nil
+                             {:attachments {$elemMatch {:target {$type 18}}}}))
+
+(defn set-target-with-nil-valued-map-as-nil [{target :target :as attachment}]
+  (if (every? nil? (vals target))
+    (assoc attachment :target nil)
+    attachment))
+
+(defmigration cleanup-attachment-target-nil-valued-maps
+  (update-applications-array :attachments 
+                             set-target-with-nil-valued-map-as-nil
+                             {:attachments {$elemMatch {:target.type {$type 10}}}}))
+
+(defn set-verdict-id-for-nil-valued-verdict-targets [verdict-id {{target-id :id target-type :type} :target :as attachment}]
+  (if (and (nil? target-id) (= "verdict" target-type))
+    (assoc-in attachment [:target :id] verdict-id)
+    attachment))
+
+(defn update-verdict-id-in-attachment-target [query]
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]
+          {attachments :attachments verdicts :verdicts app-id :id :as a} (mongo/select collection query {:verdicts 1 :attachments 1})]
+      (mongo/update-n collection
+                      {:_id app-id} 
+                      {$set {:attachments (map (partial set-verdict-id-for-nil-valued-verdict-targets (:id (first verdicts))) attachments)}}))))
+
+(defmigration update-attachment-target-verdict-id-when-nil
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {:attachments {$elemMatch {:target.id   {$type 10}
+                                                                :target.type "verdict"}}
+                                      :verdicts {$size 1}})
+                        (mongo/count :submitted-applications 
+                                     {:attachments {$elemMatch {:target.id   {$type 10}
+                                                                :target.type "verdict"}}
+                                      :verdicts {$size 1}})))}
+  (update-verdict-id-in-attachment-target {:attachments {$elemMatch {:target.id   {$type 10}
+                                                                :target.type "verdict"}}
+                                           :verdicts {$size 1}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
