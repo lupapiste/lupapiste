@@ -39,8 +39,7 @@
     {:Omistaja osapuoli}))
 
 (defn- operation-description [{primary :primaryOperation secondaries :secondaryOperations} op-id]
-  (let [ops (cons primary secondaries)]
-    (->> ops (filter #(= op-id (:id %))) first :description)))
+  (:description (util/find-by-id op-id (cons primary secondaries)) ))
 
 (defn get-rakennustunnus [unwrapped-doc-data application {{op-id :id} :op}]
   (let [{:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
