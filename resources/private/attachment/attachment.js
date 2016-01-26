@@ -34,10 +34,10 @@ var attachment = (function() {
     ajax
       .command("delete-attachment-version", {id: applicationId, attachmentId: attachmentId, fileId: fileId})
       .success(function() {
-        repository.load(applicationId);
+        repository.load(applicationId, undefined, undefined, true);
       })
       .error(function() {
-        repository.load(applicationId);
+        repository.load(applicationId, undefined, undefined, true);
       })
       .call();
       hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVertion"});
@@ -137,7 +137,7 @@ var attachment = (function() {
         pageutil.openPage("attachment", applicationId + "/" + previousId);
         hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
         if (model.dirty) {
-          repository.load(model.application.id());
+          repository.load(model.application.id(), undefined, undefined, true);
         }
       }
     },
@@ -148,7 +148,7 @@ var attachment = (function() {
         pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
         if (model.dirty) {
-          repository.load(model.application.id());
+          repository.load(model.application.id(), undefined, undefined, true);
         }
       }
     },
@@ -206,7 +206,7 @@ var attachment = (function() {
     goBackToApplication: function() {
       model.application.open("attachments");
       if (model.dirty) {
-        repository.load(model.application.id());
+        repository.load(model.application.id(), undefined, undefined, true);
       }
     },
 
@@ -296,11 +296,11 @@ var attachment = (function() {
              attachmentType:  attachmentType})
           .success(function() {
             loader$.hide();
-            repository.load(applicationId);
+            repository.load(applicationId, undefined, undefined, true);
           })
           .error(function(e) {
             loader$.hide();
-            repository.load(applicationId);
+            repository.load(applicationId, undefined, undefined, true);
             error(e.text);
           })
           .call();
@@ -333,12 +333,12 @@ var attachment = (function() {
       })
       .success(function() {
         hub.send("indicator-icon", {style: "positive"});
-        repository.load(applicationId);
+        repository.load(applicationId, undefined, undefined, true);
       })
       .error(function(e) {
         error(e.text);
         notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
-        repository.load(applicationId);
+        repository.load(applicationId, undefined, undefined, true);
       })
       .call();
     }));
@@ -501,7 +501,7 @@ var attachment = (function() {
     attachmentId = pageutil.lastSubPage();
 
     if (applicationModel._js.id !== applicationId || model.dirty) {
-      repository.load(applicationId);
+      repository.load(applicationId, undefined, undefined, true);
     } else {
       showAttachment();
     }
@@ -540,7 +540,7 @@ var attachment = (function() {
 
   function uploadDone() {
     if (uploadingApplicationId) {
-      repository.load(uploadingApplicationId);
+      repository.load(uploadingApplicationId, undefined, undefined, true);
       LUPAPISTE.ModalDialog.close();
       uploadingApplicationId = null;
     }
