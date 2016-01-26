@@ -102,67 +102,66 @@
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
 
-(def AttachmentUser (let [SummaryUser (-> user/SummaryUser
-                                          (assoc :role (sc/enum "stamper" "uploader")))]
-                      (sc/if :id
-                        SummaryUser
-                        (select-keys SummaryUser [:firstName :lastName :role]))))
+(def AttachmentAuthUser (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
+                          (sc/if :id
+                            SummaryAuthUser
+                            (select-keys SummaryAuthUser [:firstName :lastName :role]))))
 
-(def Target    {(sc/optional-key :id)      sc/Str
-                :type                      sc/Str
-                (sc/optional-key :urlHash) sc/Str})
+(def VersionNumber {:minor                             sc/Int
+                    :major                             sc/Int})
 
-(def Operation {:id                            sc/Str
-                (sc/optional-key :optional)    [sc/Str] ;; only empty arrays @ talos
-                (sc/optional-key :name)        sc/Str
-                (sc/optional-key :description) (sc/maybe sc/Str)
-                (sc/optional-key :created)     ssc/Timestamp})
+(def Target     {(sc/optional-key :id)                 sc/Str
+                 :type                                 sc/Str
+                 (sc/optional-key :urlHash)            sc/Str})
 
-(def VersionNumber {:minor     sc/Int
-                    :major     sc/Int})
+(def Operation  {:id                                   sc/Str
+                 (sc/optional-key :optional)           [sc/Str] ;; only empty arrays @ talos
+                 (sc/optional-key :name)               sc/Str
+                 (sc/optional-key :description)        (sc/maybe sc/Str)
+                 (sc/optional-key :created)            ssc/Timestamp})
 
-(def Signature {:user    user/SummaryUser
-                :created ssc/Timestamp
-                :version VersionNumber})
+(def Signature  {:user                                 user/SummaryUser
+                 :created                              ssc/Timestamp
+                 :version                              VersionNumber})
 
-(def Version   {:version             VersionNumber
-                :fileId              sc/Str 
-                :created             ssc/Timestamp
-                :accepted            (sc/maybe ssc/Timestamp) ;; Always nil !!!
-                :user                (sc/if :id
-                                       user/SummaryUser 
-                                       (select-keys user/User [:firstName :lastName]))
-                :filename            sc/Str
-                :contentType         sc/Str
-                :size                (sc/maybe sc/Int)
-                (sc/optional-key :stamped)             sc/Bool
-                (sc/optional-key :archivable)          (sc/maybe sc/Bool) 
-                (sc/optional-key :archivabilityError)  (sc/maybe (apply sc/enum (map name archivability-errors))) 
-                (sc/optional-key :missing-fonts)       (sc/maybe [sc/Str])})
+(def Version    {:version                              VersionNumber
+                 :fileId                               sc/Str 
+                 :created                              ssc/Timestamp
+                 :accepted                             (sc/maybe ssc/Timestamp) ;; Always nil !!!
+                 :user                                 (sc/if :id
+                                                         user/SummaryUser 
+                                                         (select-keys user/User [:firstName :lastName]))
+                 :filename                             sc/Str
+                 :contentType                          sc/Str
+                 :size                                 (sc/maybe sc/Int)
+                 (sc/optional-key :stamped)            sc/Bool
+                 (sc/optional-key :archivable)         (sc/maybe sc/Bool) 
+                 (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum (map name archivability-errors))) 
+                 (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
 
-(def Attachment {:id                                     sc/Str
-                 :type                                   {:type-id    (apply sc/enum (map name all-attachment-type-ids))
-                                                          :type-group sc/Str}
-                 :modified                               ssc/Timestamp
-                 (sc/optional-key :sent)                 ssc/Timestamp
-                 :locked                                 sc/Bool
-                 (sc/optional-key :readOnly)             sc/Bool
-                 :applicationState                       (apply sc/enum (map name states/all-states))
-                 :state                                  (apply sc/enum (map name attachment-states))
-                 :target                                 (sc/maybe Target)
-                 :required                               sc/Bool
-                 :requestedByAuthority                   sc/Bool
-                 :notNeeded                              sc/Bool
-                 :forPrinting                            sc/Bool
-                 :op                                     (sc/maybe Operation)
-                 :signatures                             [Signature]
-                 :versions                               [Version]
-                 (sc/optional-key :latestVersion)        (sc/maybe Version)
-                 (sc/optional-key :contents)             (sc/maybe sc/Str)
-                 (sc/optional-key :scale)                sc/Str
-                 (sc/optional-key :size)                 sc/Str
-                 :auth                                   [AttachmentUser]
-                 (sc/optional-key :metadata)             {sc/Any sc/Any}})
+(def Attachment {:id                                   sc/Str
+                 :type                                 {:type-id    (apply sc/enum (map name all-attachment-type-ids))
+                                                        :type-group sc/Str}
+                 :modified                             ssc/Timestamp
+                 (sc/optional-key :sent)               ssc/Timestamp
+                 :locked                               sc/Bool
+                 (sc/optional-key :readOnly)           sc/Bool
+                 :applicationState                     (apply sc/enum (map name states/all-states))
+                 :state                                (apply sc/enum (map name attachment-states))
+                 :target                               (sc/maybe Target)
+                 :required                             sc/Bool
+                 :requestedByAuthority                 sc/Bool
+                 :notNeeded                            sc/Bool
+                 :forPrinting                          sc/Bool
+                 :op                                   (sc/maybe Operation)
+                 :signatures                           [Signature]
+                 :versions                             [Version]
+                 (sc/optional-key :latestVersion)      (sc/maybe Version)
+                 (sc/optional-key :contents)           (sc/maybe sc/Str)
+                 (sc/optional-key :scale)              sc/Str
+                 (sc/optional-key :size)               sc/Str
+                 :auth                                 [AttachmentAuthUser]
+                 (sc/optional-key :metadata)           {sc/Any sc/Any}})
 
 ;; Helper for reporting purposes
 (defn localised-attachments-by-permit-type [permit-type]
