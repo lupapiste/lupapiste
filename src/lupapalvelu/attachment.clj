@@ -120,8 +120,11 @@
                     :major                             sc/Int})
 
 (def Target     {(sc/optional-key :id)                 sc/Str
-                 :type                                 sc/Str
+                 :type                                 sc/Keyword
                  (sc/optional-key :urlHash)            sc/Str})
+
+(def Source     {:id                                   sc/Str
+                 :type                                 sc/Str})
 
 (def Operation  {:id                                   sc/Str
                  (sc/optional-key :optional)           [sc/Str] ;; only empty arrays @ talos
@@ -144,7 +147,7 @@
                  :size                                 (sc/maybe sc/Int)
                  (sc/optional-key :stamped)            sc/Bool
                  (sc/optional-key :archivable)         (sc/maybe sc/Bool) 
-                 (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum (map name archivability-errors))) 
+                 (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors)) 
                  (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
 
 (def Type       {:type-id                              (apply sc/enum all-attachment-type-ids)
@@ -156,9 +159,10 @@
                  (sc/optional-key :sent)               ssc/Timestamp
                  :locked                               sc/Bool
                  (sc/optional-key :readOnly)           sc/Bool
-                 :applicationState                     (apply sc/enum (map name states/all-states))
-                 :state                                (apply sc/enum (map name attachment-states))
+                 :applicationState                     (apply sc/enum states/all-states)
+                 :state                                (apply sc/enum attachment-states)
                  :target                               (sc/maybe Target)
+                 (sc/optional-key :source)             Source
                  :required                             sc/Bool
                  :requestedByAuthority                 sc/Bool
                  :notNeeded                            sc/Bool
@@ -168,8 +172,8 @@
                  :versions                             [Version]
                  (sc/optional-key :latestVersion)      (sc/maybe Version)
                  (sc/optional-key :contents)           (sc/maybe sc/Str)
-                 (sc/optional-key :scale)              sc/Str
-                 (sc/optional-key :size)               sc/Str
+                 (sc/optional-key :scale)              (sc/enum attachment-scales)
+                 (sc/optional-key :size)               (sc/enum attachment-sizes)
                  :auth                                 [AttachmentAuthUser]
                  (sc/optional-key :metadata)           {sc/Any sc/Any}})
 
