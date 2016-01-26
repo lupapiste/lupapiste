@@ -4,6 +4,7 @@
             [clojure.data.xml :refer :all]
             [clojure.java.io :refer :all]
             [sade.xml :as xml]
+            [sade.strings :as ss]
             [sade.common-reader :as cr]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
@@ -35,7 +36,8 @@
 (fact "2.1.8: :tag is set" (has-tag rakennuslupa_to_krysp_218) => true)
 (fact "2.2.0: :tag is set" (has-tag rakennuslupa_to_krysp_220) => true)
 
-(defn- do-test [application & {:keys [validate-tyonjohtaja-type validate-pysyva-tunnus? finnish?] :or {validate-tyonjohtaja-type nil validate-pysyva-tunnus? false finnish? false}}]
+(defn- do-test [application & {:keys [validate-tyonjohtaja-type validate-pysyva-tunnus? finnish? validate-operations?]
+                               :or {validate-tyonjohtaja-type nil validate-pysyva-tunnus? false finnish? false validate-operations? false}}]
   (facts "Rakennusvalvonta KRYSP checks"
     (let [canonical (application-to-canonical application "fi")
           xml_212 (rakennuslupa-element-to-xml canonical "2.1.2")
@@ -69,6 +71,26 @@
             tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
+
+        (when validate-operations?
+          (fact "Toimenpiteet"
+
+            (let [app-ops (cons (:primaryOperation application) (:secondaryOperations application))
+                  ; maisematyot sisaltyvat hankkeen kuvaukseen
+                  operations (remove #(= "puun-kaataminen" (:name %)) app-ops)
+                  expected (count operations)
+                  xml-operations (xml/select lp-xml_220 [:toimenpidetieto :Toimenpide])]
+
+              (fact "Count" (count xml-operations) => expected)
+
+              (fact "Got buildings"
+                (count (xml/select lp-xml_220 [:toimenpidetieto :Toimenpide :Rakennus])) => pos?)
+
+              (doseq [op xml-operations
+                      :let [rakennus (xml/select1 op [:Rakennus])]
+                      :when rakennus]
+                (fact "Building ID includes operation ID"
+                  (xml/get-text rakennus [:rakennustunnus :MuuTunnus :tunnus]) =not=> ss/blank?)))))
 
         (fact "hakija and maksaja parties exist"
           (let [osapuoli-codes (->> (xml/select lp-xml_220 [:osapuolettieto :Osapuoli])
@@ -147,7 +169,7 @@
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
   (fact "Rakennuslupa application -> canonical -> xml"
-    (do-test application-rakennuslupa :validate-tyonjohtaja-type :v1 :validate-pysyva-tunnus? true))
+    (do-test application-rakennuslupa :validate-tyonjohtaja-type :v1 :validate-pysyva-tunnus? true :validate-operations? true))
 
   (fact "Ty\u00f6njohtaja application -> canonical -> xml"
     (do-test application-tyonjohtajan-nimeaminen :validate-tyonjohtaja-type :v2))
