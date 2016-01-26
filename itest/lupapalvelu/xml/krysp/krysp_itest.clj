@@ -188,107 +188,108 @@
                   (additional-validator xml))))
 
 (defn- do-test [operation-name]
-       (facts "Valid KRYSP from generated application"
-              (let [lupa-name-key (ya-operation-type-to-schema-name-key (keyword operation-name))
-                    application-id (create-app-id pena :propertyId "75341600550007" :operation operation-name :address "Ryspitie 289")
-                    _ (when (= "kerrostalo-rivitalo" operation-name) ;; "R" permit
-                            (command pena :add-operation :id application-id :operation "jakaminen-tai-yhdistaminen")
-                            (command pena :add-operation :id application-id :operation "laajentaminen")
-                            (command pena :add-operation :id application-id :operation "purkaminen")
-                            (command pena :add-operation :id application-id :operation "aita")
-                            (command pena :add-operation :id application-id :operation "puun-kaataminen"))
-                    application (query-application pena application-id)
-                    _ (add-drawings application)
-                    application (query-application pena application-id)
-                    organization-id (str (:municipality application) "-" (case (:permitType application)
-                                                                               "P" "R"
-                                                                               "YI" "R"
-                                                                               "YL" "R"
-                                                                               "MAL" "R"
-                                                                               "VVVL" "R"
-                                                                               (:permitType application)))
+  (facts "Valid KRYSP from generated application"
+    (let [lupa-name-key (ya-operation-type-to-schema-name-key (keyword operation-name))
+          application-id (create-app-id pena :propertyId "75341600550007" :operation operation-name :address "Ryspitie 289")
+          _ (when (= "kerrostalo-rivitalo" operation-name) ;; "R" permit
+              (command pena :add-operation :id application-id :operation "jakaminen-tai-yhdistaminen")
+              (command pena :add-operation :id application-id :operation "laajentaminen")
+              (command pena :add-operation :id application-id :operation "purkaminen")
+              (command pena :add-operation :id application-id :operation "aita")
+              (command pena :add-operation :id application-id :operation "puun-kaataminen"))
+          application (query-application pena application-id)
+          _ (add-drawings application)
+          application (query-application pena application-id)
+          organization-id (str (:municipality application) "-" (case (:permitType application)
+                                                                 "P" "R"
+                                                                 "YI" "R"
+                                                                 "YL" "R"
+                                                                 "MAL" "R"
+                                                                 "VVVL" "R"
+                                                                 (:permitType application)))
 
-                    organization (organization-from-minimal-by-id organization-id)
-                    permit-type (keyword (permit/permit-type application)) ;; throws assertion error if permit type is not valid
-                    krysp-version (get-in organization [:krysp permit-type :version])]
+          organization (organization-from-minimal-by-id organization-id)
+          permit-type (keyword (permit/permit-type application)) ;; throws assertion error if permit type is not valid
+          krysp-version (get-in organization [:krysp permit-type :version])]
 
-                   (generate-documents application pena)
-                   (generate-attachment application pena "pena")
-                   (generate-link-permit application pena)
+      (generate-documents application pena)
+      (generate-attachment application pena "pena")
+      (generate-link-permit application pena)
 
-                   (command pena :submit-application :id application-id) => ok?
+      (command pena :submit-application :id application-id) => ok?
 
-                   (let [updated-application (generate-statement application-id sonja)]
+      (let [updated-application (generate-statement application-id sonja)]
 
-                        (fact "updated-application exists" updated-application => truthy)
+        (fact "updated-application exists" updated-application => truthy)
 
-                        (let [canonical-fn (case permit-type
-                                                 :R rakennuslupa_canonical/application-to-canonical
-                                                 :YA yleiset-alueet-canonical/application-to-canonical
-                                                 :P poikkeamis-canonical/poikkeus-application-to-canonical
-                                                 :YI ympilm-canonical/meluilmoitus-canonical
-                                                 :YL ymparistolupa-canonical/ymparistolupa-canonical
-                                                 :MAL maa-aines-canonical/maa-aines-canonical
-                                                 :VVVL vesihuolto-canonical/vapautus-canonical)
-                              canonical (canonical-fn updated-application "fi")
-                              mapping (case permit-type
-                                            :R (get-rakennuslupa-mapping krysp-version)
-                                            :YA (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)
-                                            :P poikkeamis_to_krysp_221
-                                            :YI ilmoitus_to_krysp_221
-                                            :YL ymparistolupa_to_krysp_221
-                                            :MAL maa-aines_to_krysp_221
-                                            :VVVL vesihuolto-to-krysp_221)
-                              xml (element-to-xml canonical mapping)]
-                             (fact "xml exists" xml => truthy)))
+        (let [canonical-fn (case permit-type
+                             :R rakennuslupa_canonical/application-to-canonical
+                             :YA yleiset-alueet-canonical/application-to-canonical
+                             :P poikkeamis-canonical/poikkeus-application-to-canonical
+                             :YI ympilm-canonical/meluilmoitus-canonical
+                             :YL ymparistolupa-canonical/ymparistolupa-canonical
+                             :MAL maa-aines-canonical/maa-aines-canonical
+                             :VVVL vesihuolto-canonical/vapautus-canonical)
+              canonical (canonical-fn updated-application "fi")
+              mapping (case permit-type
+                        :R (get-rakennuslupa-mapping krysp-version)
+                        :YA (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)
+                        :P poikkeamis_to_krysp_221
+                        :YI ilmoitus_to_krysp_221
+                        :YL ymparistolupa_to_krysp_221
+                        :MAL maa-aines_to_krysp_221
+                        :VVVL vesihuolto-to-krysp_221)
+              xml (element-to-xml canonical mapping)]
+          (fact "xml exists" xml => truthy)))
 
-                   (fact "Application is not assigned"
-                         (get-in (query-application sonja application-id) [:authority :id]) => nil)
+      (fact "Application is not assigned"
+        (get-in (query-application sonja application-id) [:authority :id]) => nil)
 
-                   (fact "Approve application"
-                         (let [resp (command sonja :approve-application :id application-id :lang "fi")]
-                              resp => ok?
-                              (:integrationAvailable resp) => true))
+      (fact "Approve application"
+        (let [resp (command sonja :approve-application :id application-id :lang "fi")]
+          resp => ok?
+          (:integrationAvailable resp) => true))
 
-                   (let [generated-attachment-count 3       ; see generate-attachment, generate-statement+1
-                         approved-application (query-application pena application-id)
-                         email (last-email)
-                         expected-attachment-count (case permit-type
-                                                         :R (+ generated-attachment-count 2) ; 2 auto-generated PDFs
-                                                         generated-attachment-count)
-                         expected-sent-attachment-count (case permit-type
-                                                              :R (- expected-attachment-count 2) ; 2 auto-generated PDFs
-                                                              expected-attachment-count)]
-                        (fact "application is sent" (:state approved-application) => "sent")
-                        (final-xml-validation approved-application expected-attachment-count expected-sent-attachment-count)
+      (let [generated-attachment-count 3       ; see generate-attachment, generate-statement+1
+            approved-application (query-application pena application-id)
+            email (last-email)
+            expected-attachment-count (case permit-type
+                                        :R (+ generated-attachment-count 2) ; 2 auto-generated PDFs
+                                        generated-attachment-count)
+            expected-sent-attachment-count (case permit-type
+                                             :R (- expected-attachment-count 2) ; 2 auto-generated PDFs
+                                             expected-attachment-count)]
+        (fact "application is sent" (:state approved-application) => "sent")
+        (final-xml-validation approved-application expected-attachment-count expected-sent-attachment-count)
 
-                        (:to email) => (contains (email-for-key pena))
-                        (:subject email) => "Lupapiste: Ryspitie 289 - hakemuksen tila muuttunut"
-                        (get-in email [:body :plain]) => (contains "K\u00e4sittelyss\u00e4")
-                        email => (partial contains-application-link? application-id "applicant"))
+        (:to email) => (contains (email-for-key pena))
+        (:subject email) => "Lupapiste: Ryspitie 289 - hakemuksen tila muuttunut"
+        (get-in email [:body :plain]) => (contains "K\u00e4sittelyss\u00e4")
+        email => (partial contains-application-link? application-id "applicant"))
 
-                   (command sonja :request-for-complement :id application-id) => ok?
+      (command sonja :request-for-complement :id application-id) => ok?
 
-                   (let [application (query-application pena application-id)
-                         email (last-email)]
-                        (:state application) => "complementNeeded"
-                        (-> application :history last :state) => "complementNeeded"
-                        (:to email) => (contains (email-for-key pena))
-                        (:subject email) => "Lupapiste: Ryspitie 289 - hakemuksen tila muuttunut"
-                        (get-in email [:body :plain]) => (contains "T\u00e4ydennett\u00e4v\u00e4n\u00e4")
-                        email => (partial contains-application-link? application-id "applicant")))))
+      (let [application (query-application pena application-id)
+            email (last-email)]
+        (:state application) => "complementNeeded"
+        (-> application :history last :state) => "complementNeeded"
+        (:to email) => (contains (email-for-key pena))
+        (:subject email) => "Lupapiste: Ryspitie 289 - hakemuksen tila muuttunut"
+        (get-in email [:body :plain]) => (contains "T\u00e4ydennett\u00e4v\u00e4n\u00e4")
+        email => (partial contains-application-link? application-id "applicant")))))
 
-(facts "All krysp itests"
-       (dorun (map do-test ["kerrostalo-rivitalo"
-                            "ya-sijoituslupa-ilmajohtojen-sijoittaminen"
-                            "ya-kayttolupa-mainostus-ja-viitoitus"
-                            "poikkeamis"
-                            "aloitusoikeus"
-                            "meluilmoitus"
-                            "yl-uusi-toiminta"
-                            "maa-aineslupa"
-                            "vvvl-vesijohdosta"
-                            ])))
+(facts
+  (doseq [op ["kerrostalo-rivitalo"
+              "ya-sijoituslupa-ilmajohtojen-sijoittaminen"
+              "ya-kayttolupa-mainostus-ja-viitoitus"
+              "poikkeamis"
+              "aloitusoikeus"
+              "meluilmoitus"
+              "yl-uusi-toiminta"
+              "maa-aineslupa"
+              "vvvl-vesijohdosta"]]
+
+    (fact {:midje/description op} (do-test op))))
 
 (fact* "Attachments are transferred to the backing system when verdict has been given."
        (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Paatoskuja 10")
@@ -345,50 +346,50 @@
 
 (fact* "Fully populated katselmus is transferred to the backing system"
 
-       (fact "Meta test: KRYSP configs have different versions"
-             (let [sipoo-r (organization-from-minimal-by-id "753-R")
-                   jp-r (organization-from-minimal-by-id "186-R")]
-                  sipoo-r => truthy
-                  jp-r => truthy
-                  (get-in sipoo-r [:krysp :R :version]) => "2.1.6"
-                  (get-in jp-r [:krysp :R :version]) => "2.1.3"))
+  (fact "Meta test: KRYSP configs have different versions"
+    (let [sipoo-r (organization-from-minimal-by-id "753-R")
+          jp-r (organization-from-minimal-by-id "186-R")]
+      sipoo-r => truthy
+      jp-r => truthy
+      (get-in sipoo-r [:krysp :R :version]) => "2.1.6"
+      (get-in jp-r [:krysp :R :version]) => "2.1.3"))
 
-       (doseq [[apikey assignee property-id] [[sonja sonja-id sipoo-property-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id]]]
-              (let [application (create-and-submit-application apikey :propertyId property-id :address "Katselmuskatu 17")
-                    application-id (:id application)
-                    _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
-                    task-name "do the shopping"
-                    task-id (:taskId (command apikey :create-task :id application-id :taskName task-name :schemaName "task-katselmus")) => truthy
-                    application (query-application apikey application-id)]
+  (doseq [[apikey assignee property-id] [[sonja sonja-id sipoo-property-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id]]]
+    (let [application (create-and-submit-application apikey :propertyId property-id :address "Katselmuskatu 17")
+          application-id (:id application)
+          _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
+          task-name "do the shopping"
+          task-id (:taskId (command apikey :create-task :id application-id :taskName task-name :schemaName "task-katselmus")) => truthy
+          application (query-application apikey application-id)]
 
-                   (populate-task application task-id apikey) => ok?
+      (populate-task application task-id apikey) => ok?
 
-                   (upload-attachment-to-target apikey application-id nil true task-id "task")
-                   (upload-attachment-to-target apikey application-id nil true task-id "task" "muut.katselmuksen_tai_tarkastuksen_poytakirja")
+      (upload-attachment-to-target apikey application-id nil true task-id "task")
+      (upload-attachment-to-target apikey application-id nil true task-id "task" "muut.katselmuksen_tai_tarkastuksen_poytakirja")
 
-                   (doseq [attachment (:attachments (query-application apikey application-id))]
-                          (fact "sent timestamp not set"
-                                (:sent attachment) => nil))
+      (doseq [attachment (:attachments (query-application apikey application-id))]
+        (fact "sent timestamp not set"
+          (:sent attachment) => nil))
 
-                   (command apikey :approve-task :id application-id :taskId task-id) => ok?
-                   (command apikey :send-task :id application-id :taskId task-id :lang "fi") => ok?
+      (command apikey :approve-task :id application-id :taskId task-id) => ok?
+      (command apikey :send-task :id application-id :taskId task-id :lang "fi") => ok?
 
-                   (let [application (query-application apikey application-id)]
-                        (final-xml-validation
-                          application
-                          1                                 ; Uploaded 2 regular attachments and
-                          2                                 ; the other should be katselmuspoytakirja
-                          (fn [xml]
-                              (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
-                                    poytakirja-edn (-> katselmus (xml/select1 [:katselmuspoytakirja]) xml/xml->edn :katselmuspoytakirja)]
+      (let [application (query-application apikey application-id)]
+        (final-xml-validation
+          application
+          1                                 ; Uploaded 2 regular attachments and
+          2                                 ; the other should be katselmuspoytakirja
+          (fn [xml]
+            (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
+                  poytakirja-edn (-> katselmus (xml/select1 [:katselmuspoytakirja]) xml/xml->edn :katselmuspoytakirja)]
 
-                                   (validate-attachment poytakirja-edn "katselmuksen_tai_tarkastuksen_poytakirja" application)
-                                   (fact "task name is transferred for muu katselmus type"
-                                         (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
+              (validate-attachment poytakirja-edn "katselmuksen_tai_tarkastuksen_poytakirja" application)
+              (fact "task name is transferred for muu katselmus type"
+                (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
 
-                        (doseq [attachment (filter :latestVersion (:attachments application))]
-                               (fact "sent timestamp is set"
-                                     (:sent attachment) => number?))))))
+        (doseq [attachment (filter :target (:attachments application))]
+          (fact "sent timestamp is set"
+            (:sent attachment) => number?))))))
 
 ;;
 ;; TODO: Fix this
