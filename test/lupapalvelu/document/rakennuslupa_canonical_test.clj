@@ -308,6 +308,7 @@
    :schema-info {:name "uusiRakennus"
                  :version 1
                  :op {:name "kerrostalo-rivitalo"
+                      :description "kerrostalo-rivitalo-kuvaus"
                       :id "kerrostalo-rivitalo-id"}}
    :data common-rakennus})
 
@@ -875,10 +876,9 @@
 
     (fact "rakennustunnus"
       (:rakennustunnus tiedot) => {:jarjestysnumero nil,
-                                   :kiinttun "21111111111111"}
-      )
-
-    ))
+                                   :kiinttun "21111111111111"
+                                   :muuTunnustieto {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
+                                   :rakennuksenSelite "kerrostalo-rivitalo-kuvaus"})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
