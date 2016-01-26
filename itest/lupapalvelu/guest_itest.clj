@@ -8,10 +8,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.guest :as guest]))
 
-;;(def local-db-name (str "test_guest_itest_" (sade/now)))
-(def local-db-name (str "test_guest_itest"))
+(def local-db-name (str "test_guest_itest_" (sade/now)))
 
-(println "Local db:" local-db-name)
 (mongo/connect!)
 (mongo/with-db local-db-name
   (fixture/apply-fixture "minimal")
