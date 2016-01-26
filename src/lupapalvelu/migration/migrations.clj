@@ -1637,6 +1637,31 @@
                              remove-attachment-op-operation-type
                              {:attachments {$elemMatch {:op.operation-type {$exists true}}}}))
 
+(defn remove-attachment-versions-accepted [attachment]
+  (update attachment :versions (partial map #(dissoc % :accepted))))
+
+(defn remove-attachment-latestVersion-accepted [{latest-version :latestVersion :as attachment}]
+  (if latest-version
+    (update attachment :latestVersion dissoc :accepted)
+    attachment))
+
+(defn remove-accepted-field-from-attachment-versions-and-latest-version [attachment]
+  (-> attachment
+      remove-attachment-versions-accepted
+      remove-attachment-latestVersion-accepted))
+
+(defmigration remove-accepted-from-attachment-versions
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {$or [{:attachments.versions.accepted {$exists true}}
+                                           {:attachments.latestVersion.accepted {$exists true}}]})
+                        (mongo/count :submitted-applications
+                                     {$or [{:attachments.versions.accepted {$exists true}}
+                                           {:attachments.latestVersion.accepted {$exists true}}]})))}
+  (update-applications-array :attachments
+                             remove-accepted-field-from-attachment-versions-and-latest-version
+                             {$or [{:attachments.versions.accepted {$exists true}}
+                                   {:attachments.latestVersion.accepted {$exists true}}]}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

@@ -127,7 +127,6 @@
 (def Version    {:version                              VersionNumber
                  :fileId                               sc/Str 
                  :created                              ssc/Timestamp
-                 :accepted                             (sc/maybe ssc/Timestamp) ;; Always nil !!!
                  :user                                 (sc/if :id
                                                          user/SummaryUser 
                                                          (select-keys user/User [:firstName :lastName]))
@@ -340,7 +339,6 @@
             version-model {:version  next-version
                            :fileId   file-id
                            :created  now
-                           :accepted nil
                            :user     user-summary
                            ; File name will be presented in ASCII when the file is downloaded.
                            ; Conversion could be done here as well, but we don't want to lose information.
