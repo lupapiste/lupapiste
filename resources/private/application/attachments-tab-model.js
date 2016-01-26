@@ -143,6 +143,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
                                                attachmentId: attachment.id,
                                                notNeeded: attachment.notNeeded()})
     .success(function() {
+      hub.send("indicator-icon", {style: "positive"});
       self.appModel.lightReload();
     })
     .error(self.appModel.lightReload)
