@@ -70,7 +70,7 @@ Pena invites Mikko as guest
   Guest row inviter  ${mikko}  Pena Panaani
   Wait for jQuery
   Open last email
-  Page Should Contain  ${mikko-message}
+  Wait Until  Page Should Contain  ${mikko-message}
   Go back
 
 Pena submits application
@@ -136,7 +136,7 @@ No more guest authorities defined
 Check Veikko's invitation email
   Wait for jQuery
   Open last email
-  Page Should Contain  ${veikko-message}
+  Wait Until  Page Should Contain  ${veikko-message}
   Go back
   [Teardown]  Logout
 
@@ -212,4 +212,24 @@ Sonja returns and deletes the last guest Veikko
   Guest row can delete  veikko
   Guest delete  veikko
   Wait test id hidden  application-guest-table
+  [Teardown]  Logout
+
+# -------------------------------------
+# Guest again
+# -------------------------------------
+
+Mikko logs in but cannot access application
+  Mikko logs in
+  Applications page should be open
+  Page Should Not Contain  ${appname}
+  [Teardown]  Logout
+
+# -------------------------------------
+# Guest authority again
+# -------------------------------------
+
+Veikko logs in but cannot access application
+  Veikko logs in
+  Authority applications page should be open
+  Page Should Not Contain  ${appname}
   [Teardown]  Logout

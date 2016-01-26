@@ -24,7 +24,7 @@
                 <td data-bind="text: name"></td>
                 <td data-bind="text: email"></td>
                 <td>
-                  <span data-bind="hidden: $parent.readOnly">
+                  <span data-bind="visible: $parent.canEdit()">
                     [<a href="#" data-bind="click: $parent.removeGuest,
                                             ltext: 'remove'"></a>]
                   </span>
@@ -35,7 +35,7 @@
           <button class="positive"
                   data-test-id="guest-authority-add",
                   data-bind="ltext: 'guest-authority.add',
-                             disabled: readOnly,
+                             enable: canEdit(),
                              click: addGuest"></button>
         </div>
         <div id="dialog-add-guest-authority" class="window autosized">

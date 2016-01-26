@@ -1,9 +1,14 @@
-(ns lupapalvelu.guest-authority-api
+(ns lupapalvelu.guest-api
+  "Guests and guest authorities are users that have been granted read
+  access for an individual application.
+  Guest authorities are defined for an organization by the authority
+  admin and authority can invite them (grant access) to application.
+  Guests are invited by the applicant (or similar role)."
   (:require [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.guest-authority :as guest]
+            [lupapalvelu.guest :as guest]
             [lupapalvelu.authorization :as auth]))
 
 (defquery resolve-guest-authority-candidate

@@ -1,4 +1,4 @@
-(ns lupapalvelu.guest-authority
+(ns lupapalvelu.guest
   (:require [monger.operators :refer :all]
             [sade.core :refer [fail ok]]
             [lupapalvelu.user :as usr]  ;; usr works better with code completion.

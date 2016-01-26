@@ -1,4 +1,4 @@
-LUPAPISTE.ApplicationGuestsModel = function( params ) {
+LUPAPISTE.ApplicationGuestsModel = function() {
   "use strict";
 
   var self = this;
@@ -90,7 +90,7 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
 
   // Initialization and reacting to updates outside of
   // the component.
-  hub.subscribe( "application-model-updated", function() {
+  var hubId = hub.subscribe( "application-model-updated", function() {
     if( self.isAuthority()) {
       fetchGuestAuthorities();
     }
@@ -179,4 +179,5 @@ LUPAPISTE.ApplicationGuestsModel = function( params ) {
     })
   };
 
+  self.dispose = _.partial( hub.unsubscribe, hubId);
 };

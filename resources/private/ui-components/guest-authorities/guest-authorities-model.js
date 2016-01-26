@@ -2,9 +2,10 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
   "use strict";
   var self = this;
   self.guests = ko.observableArray();
-  self.readOnly = ko.pureComputed( function() {
-    return false;
-  });
+
+self.canEdit = function() {
+    return lupapisteApp.models.globalAuthModel.ok( "update-user-organization" );
+  };
 
 
   function fetchGuestAuthorities() {
