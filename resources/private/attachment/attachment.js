@@ -405,6 +405,7 @@ var attachment = (function() {
   }
 
   function showAttachment() {
+    model.dirty = false;
     if (!applicationId || !attachmentId ||
         applicationId !== pageutil.subPage() ||
         attachmentId !== pageutil.lastSubPage()) {
@@ -453,7 +454,6 @@ var attachment = (function() {
     model.showTosMetadata(false);
 
     pageutil.hideAjaxWait();
-    model.dirty = false;
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
       model.init(true);
       if (!model.latestVersion()) {
