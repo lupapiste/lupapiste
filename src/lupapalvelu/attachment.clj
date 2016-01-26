@@ -92,13 +92,22 @@
 
 (def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
-(defn attachment-ids-from-tree [tree]
-  {:pre [(sequential? tree)]}
-  (flatten (map second (partition 2 tree))))
+(def operation-specific-attachment-types #{{:type-id :pohjapiirros      :type-group :paapiirustus}
+                                           {:type-id :leikkauspiirros   :type-group :paapiirustus}
+                                           {:type-id :julkisivupiirros  :type-group :paapiirustus}
+                                           {:type-id :yhdistelmapiirros :type-group :paapiirustus}})
 
 (def all-attachment-type-ids
-  (attachment-ids-from-tree
-    (apply concat (set (vals attachment-types-by-permit-type)))))
+  (->> (vals attachment-types-by-permit-type)
+       (apply concat)
+       (#(flatten (map second (partition 2 %))))
+       (set)))
+
+(def all-attachment-type-groups
+  (->> (vals attachment-types-by-permit-type)
+       (apply concat)
+       (#(map first (partition 2 %)))
+       (set)))
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
 
@@ -138,9 +147,11 @@
                  (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum (map name archivability-errors))) 
                  (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
 
+(def Type       {:type-id                              (apply sc/enum all-attachment-type-ids)
+                 :type-group                           (apply sc/enum all-attachment-type-groups)})
+
 (def Attachment {:id                                   sc/Str
-                 :type                                 {:type-id    (apply sc/enum (map name all-attachment-type-ids))
-                                                        :type-group sc/Str}
+                 :type                                 Type
                  :modified                             ssc/Timestamp
                  (sc/optional-key :sent)               ssc/Timestamp
                  :locked                               sc/Bool
@@ -249,7 +260,7 @@
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
            :notNeeded false
            :forPrinting false
-           :op op
+           :op (when (operation-specific-attachment-types attachment-type) op)
            :signatures []
            :versions []
            :contents contents}

@@ -2,8 +2,9 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
+            [schema.coerce :as coerce]
             [clojure.string :as s]
-            [clojure.set :refer [rename-keys]]
+            [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
@@ -204,10 +205,14 @@
 ;; Application creation
 ;;
 
-(defn make-attachments [created operation organization applicationState tos-function & {:keys [target]}]
-  (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-    (let [metadata (tos/metadata-for-document (:id organization) tos-function {:type-group type-group :type-id type-id})]
-      (attachment/make-attachment created target true false false applicationState operation {:type-group type-group :type-id type-id} metadata))))
+(defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
+  (let [existing-types (set (map (coerce/coercer attachment/Type coerce/json-coercion-matcher) existing-attachments-types))
+        types (->> (organization/get-organization-attachments-for-operation organization operation)
+                   (map (partial zipmap [:type-group :type-id]))
+                   (map (coerce/coercer attachment/Type coerce/json-coercion-matcher))
+                   (remove (difference existing-types attachment/operation-specific-attachment-types)))]
+    (->> (map (partial tos/metadata-for-document (:id organization) tos-function) types)
+         (map (partial attachment/make-attachment created target true false false applicationState operation) types))))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
