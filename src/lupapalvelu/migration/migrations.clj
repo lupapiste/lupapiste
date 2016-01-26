@@ -1471,15 +1471,68 @@
       (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :complementNeeded :started :closed :startedBy :closedBy :history :verdicts :permitType :primaryOperation :state])]
         (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
 
+(defn user-summary [{email :email id :id first-name :firstName last-name :lastName :as user}]
+  (user/summary
+   (if (and (= id "-") (= first-name "Lupapiste"))
+     (assoc user :username "eraajo@lupapiste.fi")
+     (or (and email (user/get-user-by-email email))
+         user))))
+
 (defn remove-unwanted-fields-from-attachment-auth [attachment]
-  (update attachment :auth (partial mapv user/summary)))
+  (update attachment :auth (partial mapv user-summary)))
 
 (defmigration cleanup-user-summary-from-attachment-auth
-  {:apply-when (pos? (+ (mongo/count :applications {:attachments.auth.email {$exists true}})
-                        (mongo/count :submitted-applications {:attachments.auth.email {$exists true}})))}
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
+                                                                                         :username {$exists false}}}}}}]})
+                        (mongo/count :submitted-applications 
+                                     {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
+                                                                                         :username {$exists false}}}}}}]})))}
   (update-applications-array :attachments 
                              remove-unwanted-fields-from-attachment-auth
-                             {:attachments.auth.email {$exists true}}))
+                             {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
+                                   {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
+                                                                                 :username {$exists false}}}}}}]}))
+
+(defn remove-unwanted-fields-from-attachment-versions-user [attachment]
+  (update attachment :versions (partial mapv (fn [v] (update v :user user-summary)))))
+
+(defmigration cleanup-user-summary-from-attachment-versions-user
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                             :user.username {$exists false}}}}}}]})
+                        (mongo/count :submitted-applications 
+                                     {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                             :user.username {$exists false}}}}}}]})))}
+  (update-applications-array :attachments 
+                             remove-unwanted-fields-from-attachment-versions-user
+                             {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                   {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                     :user.username {$exists false}}}}}}]}))
+
+(defn remove-unwanted-fields-from-attachment-latestVersion-user [attachment]
+  (if (:latestVersion attachment)
+    (update-in attachment [:latestVersion :user] user-summary)
+    attachment))
+
+(defmigration cleanup-user-summary-from-attachment-latestVersion-user
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {$or [{:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                                           {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
+                                                                      :latestVersion.user.username {$exists false}}}}]})
+                        (mongo/count :submitted-applications
+                                     {$or [{:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                                           {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
+                                                                      :latestVersion.user.username {$exists false}}}}]})))}
+  (update-applications-array :attachments 
+                             remove-unwanted-fields-from-attachment-latestVersion-user
+                             {$or [{:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                                   {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
+                                                              :latestVersion.user.username {$exists false}}}}]}))
 
 (defn merge-required-fields-into-attachment [attachment]
   (merge {:locked               false

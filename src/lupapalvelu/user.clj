@@ -198,6 +198,7 @@
 
 (defn batchrun-user [org-ids]
   {:id "-"
+   :username "eraajo@lupapiste.fi"
    :enabled true
    :lastName "Er\u00e4ajo"
    :firstName "Lupapiste"

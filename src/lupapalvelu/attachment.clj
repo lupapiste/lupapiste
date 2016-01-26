@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
+            [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.schemas :as ssc]
@@ -101,7 +102,11 @@
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
 
-(def AttachmentUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader")))
+(def AttachmentUser (let [SummaryUser (-> user/SummaryUser
+                                          (assoc :role (sc/enum "stamper" "uploader")))]
+                      (sc/if :id
+                        SummaryUser
+                        (select-keys SummaryUser [:firstName :lastName :role]))))
 
 (def Target    {(sc/optional-key :id)      sc/Str
                 :type                      sc/Str
@@ -123,7 +128,9 @@
                 :fileId              sc/Str 
                 :created             ssc/Timestamp
                 :accepted            (sc/maybe ssc/Timestamp) ;; Always nil !!!
-                :user                user/SummaryUser
+                :user                (sc/if :id
+                                       user/SummaryUser 
+                                       (select-keys user/User [:firstName :lastName]))
                 :filename            sc/Str
                 :contentType         sc/Str
                 :size                sc/Int
