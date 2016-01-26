@@ -43,19 +43,16 @@
     (->> ops (filter #(= op-id (:id %))) first :description)))
 
 (defn get-rakennustunnus [unwrapped-doc-data application {{op-id :id} :op}]
-  (let [defaults {:jarjestysnumero nil
-                  :kiinttun (:propertyId application)
-                  :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
-                  :rakennuksenSelite (operation-description application op-id)}
-        {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data]
-    (cond
-      manuaalinen_rakennusnro (assoc defaults :rakennusnro manuaalinen_rakennusnro)
-      rakennusnro             (util/assoc-when defaults
-                                               :rakennusnro rakennusnro
-                                               :valtakunnallinenNumero valtakunnallinenNumero
-                                               :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
-                                               :rakennuksenSelite (operation-description application op-id))
-      :default defaults)))
+  (let [{:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
+        defaults (util/assoc-when {:jarjestysnumero nil
+                                   :kiinttun (:propertyId application)
+                                   :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}}
+                   :rakennusnro rakennusnro
+                   :rakennuksenSelite (operation-description application op-id)
+                   :valtakunnallinenNumero valtakunnallinenNumero)]
+    (if manuaalinen_rakennusnro
+      (assoc defaults :rakennusnro manuaalinen_rakennusnro)
+      defaults)))
 
 (defn- get-rakennus [application {id :id created :created info :schema-info toimenpide :data :as doc}]
   (let [{:keys [kaytto mitat rakenne lammitys luokitus huoneistot]} toimenpide
