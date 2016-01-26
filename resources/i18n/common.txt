@@ -1942,7 +1942,7 @@
 "create.search-map" "sv" "Ange projektets adress eller fastighetsbeteckning"
 "createApplication.loc-info" "fi" "Määritä hankkeen sijainti valitsemalla paikka kartalta tai antamalla alla olevaan kenttään osoite tai kiinteistötunnus."
 "createApplication.loc-info" "sv" "Ange projektets placering genom att välja platsen på kartan eller genom att skriva in adressen eller fastighetsbeteckningen i nedanstående fält."
-"createApplication.new-applicaticdon" "fi" "Uusi hakemus"
+"createApplication.new-application" "fi" "Uusi hakemus"
 "createApplication.new-application" "sv" "Ny ansökan"
 "createApplication.project-address" "fi" "Osoite:"
 "createApplication.project-address" "sv" "Adress:"
