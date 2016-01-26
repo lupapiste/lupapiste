@@ -142,8 +142,10 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
     ajax.command("set-attachment-not-needed", {id: self.appModel.id(),
                                                attachmentId: attachment.id,
                                                notNeeded: attachment.notNeeded()})
-    .success(self.appModel.reload)
-    .error(self.appModel.reload)
+    .success(function() {
+      self.appModel.lightReload();
+    })
+    .error(self.appModel.lightReload)
     .processing(self.appModel.processing)
     .call();
     return true;
@@ -163,7 +165,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
   self.copyOwnAttachments = function() {
     var doSendAttachments = function() {
       ajax.command("copy-user-attachments-to-application", {id: self.appModel.id()})
-        .success(self.appModel.reload)
+        .success(self.appModel.lightReload)
         .processing(self.appModel.processing)
         .call();
       return false;
@@ -179,9 +181,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
     var attId = _.isFunction(a.id) ? a.id() : a.id;
     var doDelete = function() {
       ajax.command("delete-attachment", {id: self.appModel.id(), attachmentId: attId})
-        .success(function() {
-          self.appModel.reload();
-        })
+        .success(self.appModel.lightReload)
         .processing(self.appModel.processing)
         .call();
         hub.send("track-click", {category:"Application", label: "", event:"deleteSingleAttachment"});
