@@ -199,9 +199,7 @@
             (map (partial localize-attachment-section lang))
             vec)))
       {}
-     ["fi" "sv"]))
-
-  )
+     ["fi" "sv"])))
 
 (defn print-attachment-types-by-permit-type []
   (let [permit-types-with-names (into {}
@@ -264,7 +262,7 @@
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
            :notNeeded false
            :forPrinting false
-           :op (when (operation-specific-attachment-types attachment-type) op)
+           :op op
            :signatures []
            :versions []
            :contents contents}
