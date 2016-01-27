@@ -119,7 +119,7 @@
 (def VersionNumber {:minor                             sc/Int
                     :major                             sc/Int})
 
-(def Target     {(sc/optional-key :id)                 sc/Str
+(def Target     {:id                                   sc/Str
                  :type                                 sc/Keyword
                  (sc/optional-key :urlHash)            sc/Str})
 
