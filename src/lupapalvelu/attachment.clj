@@ -106,7 +106,7 @@
                      localized-attachment-name (i18n/localize lang lockey)]
                  (conj
                    result
-                   (ss/join "; " [(name attachment-name) localized-attachment-name]))))
+                   (ss/join \tab [(name attachment-name) localized-attachment-name]))))
              []
              attachment-names)])]
     (reduce
