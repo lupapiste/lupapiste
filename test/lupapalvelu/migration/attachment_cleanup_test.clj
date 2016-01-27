@@ -17,19 +17,26 @@
             [sade.schema-generators :as ssg]))
 
 ;; Define flawed schema for auth array.
-(def ExtendedSummaryUser (assoc SummaryUser
-                                :role (sc/enum "uploader" "stamper") 
-                                :email sc/Str
-                                :orgAuthz [{sc/Str sc/Str}]))
+(def ExtendedSummaryUser (sc/conditional
+                          :orgAuthz     (assoc SummaryUser
+                                               :role (sc/enum "uploader" "stamper")
+                                               :orgAuthz [{sc/Str sc/Str}])
+                          :username     (assoc SummaryUser
+                                               :role (sc/enum "uploader" "stamper"))
+                          :else         (sc/enum {:id        "-"
+                                                  :firstName "Lupapiste"
+                                                  :lastName  "Eraajo"
+                                                  :role      "uploader"})))
 
 ;; Use static attachment for performance reasons
 (def attachment (ssg/generate Attachment))
+(def attachment-coercer (ssc/json-coercer Attachment))
 
 (defspec update-auth-array 20 ;; num-tests has to be small enough. Too big value result in out of memory error!
   (prop/for-all [extended-auth (ssg/generator [ExtendedSummaryUser])]
                 (let [extended-attachment (assoc attachment :auth extended-auth)
                       cleaned-attachment  (remove-unwanted-fields-from-attachment-auth extended-attachment)]
-                  (and (nil? (sc/check Attachment cleaned-attachment))
+                  (and (nil? (sc/check Attachment (attachment-coercer cleaned-attachment)))
                        (= (dissoc cleaned-attachment :auth) (dissoc attachment :auth))
                        (= (count  extended-auth) (count (:auth cleaned-attachment)))))))
 
@@ -37,17 +44,17 @@
 (defspec complete-missing-attachment-fields 20 ;; num-tests has to be small enough. Too big value result in out of memory error!
   (prop/for-all [attachment     (ssg/generator Attachment)
                  missing-fields (ssg/generator [(apply sc/enum [:locked :applicationState :target :requestedByAuthority
-                                                                 :notNeeded :op :signatures :auth])])]
+                                                                :notNeeded :op :signatures :auth])])]
                 (let [failing-attachment   (apply dissoc attachment missing-fields)
                       completed-attachment (merge-required-fields-into-attachment failing-attachment)]
-                  (and (nil? (sc/check Attachment completed-attachment))))))
+                  (and (nil? (sc/check Attachment (attachment-coercer completed-attachment)))))))
 
 
 (defspec rename-applicationState-as-camelCase 20
   (prop/for-all [application-state (ssg/generator (sc/enum "draft" "complement-needed" "complementNeeded"))]
                 (let [failing-attachment   (assoc attachment :applicationState application-state)
                       completed-attachment (applicationState-as-camelCase failing-attachment)]
-                  (and (nil? (sc/check Attachment completed-attachment))
+                  (and (nil? (sc/check Attachment (attachment-coercer completed-attachment)))
                        (= (dissoc completed-attachment :applicationState) (dissoc attachment :applicationState))))))
 
 (def TimestampTarget (sc/if number? sc/Int Target))
@@ -85,5 +92,5 @@
                    (if (and (= "verdict" (:type target)) (nil? (:id target)))
                      (= (get-in completed-attachment [:target :id]) "verdictId")
                      (= target (:target completed-attachment)))
-                   (nil? (sc/check Attachment completed-attachment))))))
+                   (nil? (sc/check Attachment (attachment-coercer completed-attachment)))))))
 
