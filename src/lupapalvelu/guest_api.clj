@@ -24,12 +24,12 @@
   (ok :user (guest/resolve-guest-authority-candidate admin email)))
 
 (defcommand update-guest-authority-organization
-  {:parameters [email name role]
+  {:parameters [email name description]
    :input-validators [(partial action/non-blank-parameters [:email :name])]
    :user-roles #{:authorityAdmin}
    :description "Add or update organization's guest authority."}
   [{admin :user}]
-  (guest/update-guest-authority-organization admin email name role))
+  (guest/update-guest-authority-organization admin email name description))
 
 (defquery guest-authorities-organization
   {:user-roles #{:authorityAdmin}

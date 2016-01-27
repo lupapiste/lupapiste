@@ -12,15 +12,15 @@
           <table class="table">
             <thead>
               <tr>
-                <th data-bind="ltext: 'guest-authority.role'"></th>
+                <th data-bind="ltext: 'guest-authority.description'"></th>
                 <th data-bind="ltext: 'guest-authority.name'"></th>
                 <th data-bind="ltext: 'guest-authority.email'"></th>
                 <th data-bind="ltext: 'auth-admin.actions'"></th>
               </tr>
             </thead>
             <tbody data-bind="foreach: guests">
-              <tr data-bind="attr: {'data-test-guest-role': role}">
-                <td data-bind="text: role"></td>
+              <tr data-bind="attr: {'data-test-guest-description': description}">
+                <td data-bind="text: description"></td>
                 <td data-bind="text: name"></td>
                 <td data-bind="text: email"></td>
                 <td>
@@ -70,10 +70,10 @@
                                 enable: dialogData.namesEditable"
                      type="text"/>
 
-              <label data-bind="ltext: 'guest-authority.role'" class="form-label"></label>
+              <label data-bind="ltext: 'guest-authority.description'" class="form-label"></label>
               <input class="form-input"
-                     data-test-id="guest-dialog-role"
-                     data-bind="textInput: dialogData.role"
+                     data-test-id="guest-dialog-description"
+                     data-bind="textInput: dialogData.description"
                      type="text"/>
               <div class="form-error-message"
                    data-test-id="guest-dialog-error"

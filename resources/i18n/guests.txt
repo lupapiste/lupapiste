@@ -1,7 +1,7 @@
 "auth-admin.guest-authorities.help" "fi" "Käyttäjät, joille viranomainen voi antaa lukuoikeuden yksittäiselle hankkeelle. Nämä käyttäjät liitetään myös organisaation viranomaisiksi. Tarvittaessa luodaan uusi käyttäjä."
 "authorityrole.guestAuthority" "fi" "Hankekohtainen lukuoikeus (kutsuttava)"
 "guest-authorities.title" "fi" "Hankekohtainen lukuoikeus"
-"guest-authority.role" "fi" "Rooli"
+"guest-authority.description" "fi" "Rooli"
 "guest-authority.name" "fi" "Nimi"
 "guest-authority.email" "fi" "Sähköposti"
 "guest-authority.add" "fi" "Lisää lukuoikeus"

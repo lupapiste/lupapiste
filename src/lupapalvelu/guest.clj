@@ -35,7 +35,7 @@
 
 (defn update-guest-authority-organization
   "Namesake command implementation."
-  [admin email name role]
+  [admin email name description]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)
         guests (->> org-id
@@ -43,7 +43,7 @@
                     (remove #(= email (:email %)))
                     (concat [{:email email
                               :name name
-                              :role role}]))]
+                              :description description}]))]
     (org/update-organization org-id {$set {:guestAuthorities guests}})))
 
 (defn remove-guest-authority-organization
@@ -98,24 +98,24 @@
           (notifications/notify! :invite (assoc command :recipients [guest])))
         (or err (ok))))))
 
-(defn- guest-authority-role-map
-  "email role map"
+(defn- guest-authority-description-map
+  "email description map"
   [org-id]
-  (reduce (fn [acc {:keys [email role]}]
-            (assoc acc email role)) {}
+  (reduce (fn [acc {:keys [email description]}]
+            (assoc acc email description)) {}
           (organization-guest-authorities org-id)))
 
 (defn- usercatname [{:keys [firstName lastName]}]
   (ss/trim (str firstName " " lastName)))
 
-(defn- auth-info [ga-role-map {:keys [id role unsubscribed username inviter] :as auth}]
+(defn- auth-info [ga-description-map {:keys [id role unsubscribed username inviter] :as auth}]
   (let [role (keyword role)
         {:keys [email] :as user} (usr/get-user-by-id id)
         inviter (usr/get-user-by-id inviter)]
-    ;; We only add the role information if the guest has been added by
+    ;; We only add the description information if the guest has been added by
     ;; authority.
-    {:authorityRole (when (= role :guestAuthority)
-                      (get ga-role-map email))
+    {:description (when (= role :guestAuthority)
+                      (get ga-description-map email))
      :name (usercatname user)
      :username username
      :email email
@@ -129,8 +129,8 @@
 (defn application-guests
   "Namesake query implementation."
   [{:keys [application user]}]
-  (let [ga-roles (guest-authority-role-map (:organization application))]
-    (map (partial auth-info ga-roles) (application-guest-auths application))))
+  (let [ga-descriptions (guest-authority-description-map (:organization application))]
+    (map (partial auth-info ga-descriptions) (application-guest-auths application))))
 
 (defn- username-auth-role
   "Given username's role in the application auth, if any"

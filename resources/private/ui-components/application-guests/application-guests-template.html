@@ -10,7 +10,7 @@
             <thead>
               <th data-bind="ltext: 'application-guests.user'"></th>
               <th data-bind="ltext: 'application-guests.inviter'"></th>
-              <th data-bind="ltext: 'guest-authority.role'"></th>
+              <th data-bind="ltext: 'guest-authority.description'"></th>
               <!-- ko if: show.subscribeColumn -->
               <th data-bind="ltext: 'application-guests.notifications'"></th>
               <!-- /ko -->
@@ -24,8 +24,8 @@
                     data-test-id="guest-name"></td>
                 <td data-bind="text: inviter"
                     data-test-id="guest-inviter"></td>
-                <td data-bind="text: authorityRole"
-                    data-test-id="guest-role"></td>
+                <td data-bind="text: description"
+                    data-test-id="guest-description"></td>
                 <!-- ko if: $parent.show.subscribeColumn -->
                 <td data-test-id="guest-subscribe">
                   <a data-bind="visible: $parent.canSubscribe( $data ),
@@ -63,13 +63,13 @@
               </label>
               <table class="mandatory" data-test-id="application-guest-authorities">
                 <tbody data-bind="foreach: $parent.guestAuthorities">
-                  <tr data-bind="attr: {'data-test-id': role}">
+                  <tr data-bind="attr: {'data-test-id': description}">
                     <td><input type="radio" name="guest-authorities"
                                data-bind="attr: {value: email},
                                           checked: $parents[1].email"/></td>
                     <td class="full" data-bind="text: name"></td>
                     <td class="full" data-bind="text: email"></td>
-                    <td class="full" data-bind="text: role"></td>
+                    <td class="full" data-bind="text: description"></td>
                   </tr>
                 </tbody>
               </table>

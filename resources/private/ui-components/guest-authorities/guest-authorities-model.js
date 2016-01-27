@@ -26,7 +26,7 @@ self.canEdit = function() {
     dd.email     = ko.observable();
     dd.firstName = ko.observable();
     dd.lastName  = ko.observable();
-    dd.role      = ko.observable();
+    dd.description      = ko.observable();
     dd.waitingEmail = ko.observable();
     dd.waitingOk = ko.observable();
     dd.error     = ko.observable();
@@ -36,7 +36,7 @@ self.canEdit = function() {
       dd.email( "" );
       dd.firstName( "" );
       dd.lastName( "" );
-      dd.role( "" );
+      dd.description( "" );
       dd.waitingEmail( false );
       dd.waitingOk( false );
       dd.error( null );
@@ -94,7 +94,7 @@ self.canEdit = function() {
         ajax.command( "update-guest-authority-organization",
                       {email: dd.email(),
                        name: dd.firstName() + " " + dd.lastName(),
-                       role: dd.role()})
+                       description: dd.description()})
      .pending( dd.waitingOk )
         .success( function() {
           fetchGuestAuthorities();
