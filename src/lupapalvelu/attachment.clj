@@ -172,8 +172,8 @@
                  :versions                             [Version]
                  (sc/optional-key :latestVersion)      (sc/maybe Version)
                  (sc/optional-key :contents)           (sc/maybe sc/Str)
-                 (sc/optional-key :scale)              (sc/enum attachment-scales)
-                 (sc/optional-key :size)               (sc/enum attachment-sizes)
+                 (sc/optional-key :scale)              (apply sc/enum attachment-scales)
+                 (sc/optional-key :size)               (apply sc/enum attachment-sizes)
                  :auth                                 [AttachmentAuthUser]
                  (sc/optional-key :metadata)           {sc/Any sc/Any}})
 
