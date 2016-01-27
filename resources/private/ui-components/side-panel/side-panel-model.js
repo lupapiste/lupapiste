@@ -25,7 +25,8 @@ LUPAPISTE.SidePanelModel = function(params) {
   });
 
   self.unseenComments = ko.pureComputed(function() {
-    return util.getIn(self, ["application", "unseenComments"]);
+    var unseenComments = util.getIn(self, ["application", "unseenComments"]);
+    return unseenComments > 99 ? "..." : unseenComments;
   });
 
   self.permitType = ko.pureComputed(function() {
