@@ -43,6 +43,10 @@
   (when (-> (attachment/get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
+(defn- attachment-id-is-present-in-application-or-not-set [{{:keys [attachmentId]} :data} {:keys [attachments]}]
+  (when-not (or (ss/blank? attachmentId) (some #(= (:id %) attachmentId) attachments))
+    (fail :error.attachment.id)))
+
 (defn- if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
   (when (and
           (not (user/authority? user))
@@ -273,7 +277,8 @@
    (partial if-not-authority-state-must-not-be #{:sent})
    attachment-editable-by-application-state?
    validate-attachment-type
-   a/validate-authority-in-drafts])
+   a/validate-authority-in-drafts
+   attachment-id-is-present-in-application-or-not-set])
 
 (def- base-upload-options
   {:comment-text nil
@@ -328,10 +333,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
-                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))
-                      (fn [{{attachment-id :attachmentId id :id} :data}]
-                        (when-not (or (ss/blank? attachment-id) (pos? (mongo/count :applications {:_id id :attachments.id attachment-id})))
-                          (fail :error.attachment.id)))]
+                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))]
    :states     (conj (states/all-states-but states/terminal-states) :answered)
    :notified   true
    :on-success [(notify :new-comment)
