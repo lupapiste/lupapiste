@@ -1,6 +1,16 @@
 ;(function($) {
   "use strict";
 
+  ko.utils.domNodeDisposal.cleanExternalData = function () {
+    // Do nothing. Now any jQuery data associated with elements will
+    // not be cleaned up when the elements are removed from the DOM.
+    // If jQuery events are bind, make sure to clean jQuery data in component disposal.
+    // See:
+    //   http://knockoutjs.com/documentation/custom-bindings-disposal.html#overriding-the-clean-up-of-external-data
+    //   https://github.com/knockout/knockout/blob/8decc433942d7413b47768e0f45c304e8f15aa09/src/utils.domNodeDisposal.js#L88
+    //   https://github.com/jquery/jquery/blob/1.12-stable/src/manipulation.js#L350
+  };
+
   //
   // initialize Knockout validation
   //
