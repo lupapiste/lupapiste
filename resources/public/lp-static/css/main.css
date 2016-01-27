@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1453876722956');
+@import url('main-blessed1.css?z=1453893335354');
 
 /* line 53, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment:after {
@@ -5266,9 +5266,9 @@ table.admin-settings td.value .save-indicator {
 #side-panel .buttons .btn-conversation, #side-panel .buttons .btn-notice {
   box-shadow: 1px 1px 3px #363636;
   padding: 1em;
-  margin-bottom: 12px;
   display: block;
   font-weight: bold;
+  margin: 0 0 12px 0;
 }
 /* line 44, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .buttons .btn-conversation .unseen-comments, #side-panel .buttons .btn-notice .unseen-comments {
