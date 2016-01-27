@@ -11,6 +11,11 @@ var docgen = (function () {
     function selectWithOtherChanged() { updateOther($(this)); }
 
     var isDisabled = options && options.disabled;
+
+    _.each($(".sticky", containerSelector), function(elem) {
+        window.Stickyfill.remove(elem);
+    });
+
     var docgenDiv = $(containerSelector).empty();
 
     _.each(documents, function (doc) {
