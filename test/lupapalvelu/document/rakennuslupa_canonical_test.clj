@@ -308,6 +308,7 @@
    :schema-info {:name "uusiRakennus"
                  :version 1
                  :op {:name "kerrostalo-rivitalo"
+                      :description "kerrostalo-rivitalo-kuvaus"
                       :id "kerrostalo-rivitalo-id"}}
    :data common-rakennus})
 
@@ -342,10 +343,10 @@
                                   :mitat {:tilavuus {:value "1500"}
                                           :kerrosala {:value "180"}
                                           :rakennusoikeudellinenKerrosala {:value "160"}
-                                          :kokonaisala {:value "150"}
+                                          :kokonaisala {:value "-10"}
                                           :huoneistoala {:0 {:pintaAla {:value "150"}
                                                              :kayttotarkoitusKoodi {:value "asuntotilaa(ei vapaa-ajan asunnoista)"}}
-                                                         :1 {:pintaAla {:value "10"}
+                                                         :1 {:pintaAla {:value "-10"}
                                                              :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}})})
 
 (def- purku {:id "purku"
@@ -841,35 +842,43 @@
 (testable-privates lupapalvelu.document.rakennuslupa-canonical get-rakennus)
 
 (facts "When muu-lammonlahde is empty, lammonlahde is used"
-  (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
-                                                :lammonlahde  {:value "turve"}
-                                                :muu-lammonlahde {:value nil}}})
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+  (let [doc (tools/unwrapped {:data {:lammitys {:lammitystapa {:value nil}
+                                               :lammonlahde  {:value "turve"}
+                                               :muu-lammonlahde {:value nil}}}})
+        rakennus (get-rakennus application-rakennuslupa doc)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
 (fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is inluded"
-  (let [toimenpide (tools/unwrapped {:luokitus {:energiatehokkuusluku {:value "124"}
-                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}})
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+  (let [doc (tools/unwrapped {:data {:luokitus {:energiatehokkuusluku {:value "124"}
+                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
+        rakennus (get-rakennus application-rakennuslupa doc)]
     (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => "kWh/m2"))
 
 (fact "LPK-427: When energiatehokkuusluku is not set, energiatehokkuusluvunYksikko is excluded"
-  (let [toimenpide (tools/unwrapped {:luokitus {:energiatehokkuusluku {:value ""}
-                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}})
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+  (let [doc (tools/unwrapped {:data {:luokitus {:energiatehokkuusluku {:value ""}
+                                               :energiatehokkuusluvunYksikko {:value "kWh/m2"}}}})
+        rakennus (get-rakennus application-rakennuslupa doc)]
     (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => nil))
 
 (facts "When muu-lammonlahde is specified, it is used"
-  (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
-                                                :lammonlahde  {:value "other"}
-                                                :muu-lammonlahde {:value "fuusioenergialla"}}})
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} (tools/unwrapped application-rakennuslupa))]
+  (let [doc (tools/unwrapped {:data {:lammitys {:lammitystapa {:value nil}
+                                               :lammonlahde  {:value "other"}
+                                               :muu-lammonlahde {:value "fuusioenergialla"}}}})
+        rakennus (get-rakennus application-rakennuslupa doc)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (facts "rakennuksenTiedot"
-  (let [toimenpide {:varusteet {:liitettyJatevesijarjestelmaanKytkin true}}
-        rakennus (get-rakennus toimenpide {:id "123" :created nil} (tools/unwrapped application-rakennuslupa))]
-    (fact (-> rakennus :rakennuksenTiedot :liitettyJatevesijarjestelmaanKytkin) => true)))
+  (let [doc (tools/unwrapped (assoc-in uusi-rakennus [:data :varusteet :liitettyJatevesijarjestelmaanKytkin :value] true))
+        {tiedot :rakennuksenTiedot} (get-rakennus application-rakennuslupa doc)]
+
+    (fact "liitettyJatevesijarjestelmaanKytkin"
+      (:liitettyJatevesijarjestelmaanKytkin tiedot) => true)
+
+    (fact "rakennustunnus"
+      (:rakennustunnus tiedot) => {:jarjestysnumero nil,
+                                   :kiinttun "21111111111111"
+                                   :muuTunnustieto {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
+                                   :rakennuksenSelite "kerrostalo-rivitalo-kuvaus"})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
@@ -1030,10 +1039,20 @@
     (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 3)
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
-    (fact "Laajennuksen pintaalat" (-> laajennus-t (get-in [:laajennus :laajennuksentiedot :huoneistoala]) count) => 2)
-    (fact "Laajennuksen pintaala keys" (-> laajennus-t (get-in [:laajennus :laajennuksentiedot :huoneistoala]) first keys) => (just #{:kayttotarkoitusKoodi :pintaAla}))
+
+    (fact "Laajennuksen pinta-alat"
+      (let [huoneistoalat (get-in laajennus-t [:laajennus :laajennuksentiedot :huoneistoala])]
+        (fact "x 2" (count huoneistoalat) => 2)
+        (fact "Laajennuksen pintaala keys" (keys (first huoneistoalat)) => (just #{:kayttotarkoitusKoodi :pintaAla}))
+
+        (fact "positive and negative numbers"
+          (-> huoneistoalat first :pintaAla) => "150"
+          (-> huoneistoalat second :pintaAla) => "-10")))
+
     (fact "Laajennuksen kerrosala" (get-in laajennus-t [:laajennus :laajennuksentiedot :kerrosala]) => "180")
+    (fact "Laajennuksen kokonaisala" (get-in laajennus-t [:laajennus :laajennuksentiedot :kokonaisala]) => "-10")
     (fact "Laajennuksen rakennusoikeudellinenKerrosala" (get-in laajennus-t [:laajennus :laajennuksentiedot :rakennusoikeudellinenKerrosala]) => "160")
+
     (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
     (fact "Purku: syy" (-> purku-t :purkaminen :purkamisenSyy) => "tuhoutunut")

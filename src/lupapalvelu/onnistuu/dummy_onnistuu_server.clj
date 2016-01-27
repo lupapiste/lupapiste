@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
+            [noir.request :as request]
             [cheshire.core :as json]
             [hiccup.core :refer [html]]
             [hiccup.page :refer [html5]]
@@ -57,7 +58,8 @@
          [:div.action [:a {:href (str "/dev/dummy-onnistuu/action/" s "/" stamp) :data-test-id (str "onnistuu-dummy-" s)} s]])])))
 
 (defpage [:post "/dev/dummy-onnistuu"] {:keys [data iv return_failure customer]}
-  (let [crypto-iv   (-> iv (c/str->bytes) (c/base64-decode))
+  (let [headers     (-> request/*request* :headers (select-keys ["cookie"]))
+        crypto-iv   (-> iv (c/str->bytes) (c/base64-decode))
         crypto-key  (-> (env/get-config) :onnistuu :crypto-key (c/str->bytes) (c/base64-decode))
         process     (->> data
                          (c/str->bytes)
@@ -71,14 +73,12 @@
         document    ^String (process "document")
         ; Only localhost:8000 works as a target in every environment
         url         (str "http://localhost:8000" (subs document (.indexOf document "/" 8)))
-        doc-status  (http/get url {:throw-exceptions false})]
-    #_(if (not= 200 doc-status)
-       (process-page process (str "can't fetch document:" doc-status))
-       (do
-         (swap! processes assoc (get process "stamp") process)
-         (process-page process "ready")))
-    (swap! processes assoc (get process "stamp") process)
-    (process-page process "ready")))
+        doc-resp    (http/get url {:headers headers, :throw-exceptions false})]
+    (if (not= 200 (:status doc-resp))
+     (process-page process (str "can't fetch document: " url \space (select-keys doc-resp [:status :body])))
+     (do
+       (swap! processes assoc (get process "stamp") process)
+       (process-page process "ready")))))
 
 (defn respond-success [{:strs [stamp uuid return_success] :as process} company-name]
   (let [crypto-key (-> (env/get-config) :onnistuu :crypto-key (c/str->bytes) (c/base64-decode))

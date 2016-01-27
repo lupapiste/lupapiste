@@ -435,4 +435,4 @@
     (update-organization org-id {$set {:areas ensured-areas
                                        :areas-wgs84 ensured-areas-wgs84}})
     (.dispose data-store)
-    ensured-areas-wgs84))
+    ensured-areas))

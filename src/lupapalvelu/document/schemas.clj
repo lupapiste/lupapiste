@@ -1069,12 +1069,12 @@
                      :body [{:name "perusparannuskytkin" :type :checkbox}
                             {:name "mitat"
                              :type :group
-                             :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                                    {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                    {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                    {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                             :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min -9999999 :max 9999999}
+                                    {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min -9999999 :max 9999999}
+                                    {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit "m2" :subtype :number :min -9999999 :max 9999999}
+                                    {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min -9999999 :max 9999999}
                                     {:name "huoneistoala" :type :group :repeating true :removable true
-                                     :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                     :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min -9999999 :max 9999999}
                                             {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname
                                              :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
                                                     {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}

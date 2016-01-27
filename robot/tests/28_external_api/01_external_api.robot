@@ -6,7 +6,7 @@ Suite Teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Variables ***
-@{PERMIT_PROPERTIES}   id  location  address  municipality  applicant  type  authority  operation
+@{PERMIT_PROPERTIES}   id  location  address  municipality  applicant  type  authority  operation  permitType
 
 *** Test Cases ***
 

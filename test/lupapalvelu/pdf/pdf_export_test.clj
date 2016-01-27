@@ -1,4 +1,4 @@
-(ns lupapalvelu.pdf-export-test
+(ns lupapalvelu.pdf.pdf-export-test
   (:require [clojure.string :as str]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.domain :as domain]
@@ -63,7 +63,18 @@
              :vetuma {:firstName "TESTAA" :lastName "PORTAALIA"}
              :created 1444902294666}]})
 
-
+(defn- dummy-task [id name]
+  {:id          id
+   :schema-info {:name       "task-katselmus",
+                 :type       "task"
+                 :order      1
+                 :i18nprefix "task-katselmus.katselmuksenLaji"
+                 :version    1}
+   :data        {:katselmuksenLaji {:value name}}
+   :rakennus {"0" {:kayttoonottava {:value false} :rakennusnro {:value "rak0"}}
+              "1" {:kayttoonottava {:value false} :rakennusnro {:value "rak1"}}
+              "2" {:kayttoonottava {:value true} :rakennusnro {:value "rak2"}}
+   }})
 
 (facts "Generate PDF file from application with all documents"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
@@ -146,4 +157,28 @@
                       (fact "Pdf data state" (nth rows 26) => expected-state)
                       (fact "Pdf data message" (nth rows 28) => "SigloXX")
                       (fact "Pdf data signature" (nth rows 30) => "TESTAA PORTAALIA, 15.10.2015"))
+                    (.delete file))))))
+
+(facts "Generate PDF from application stasks - signed"
+       (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
+             dummy-docs (map test-util/dummy-doc schema-names)
+             dummy-tasks [(dummy-task "2" "muu katselmus")
+                          (dummy-task "1" "muu katselmus")]
+             application (merge domain/application-skeleton {:id "LP-1"
+                                                             :address "Korpikuusen kannon alla 1 "
+                                                             :documents dummy-docs
+                                                             :tasks dummy-tasks
+                                                             :municipality "444"
+                                                             :state "draft"})]
+         (doseq [lang i18n/languages]
+           (facts {:midje/description (name lang)}
+                  (let [file (File/createTempFile (str "export-test-tasks-" (name lang) "-") ".pdf")
+                        fis (FileOutputStream. file)]
+                    (pdf-export/generate-pdf-with-child application :tasks "2" lang fis)
+                    (fact "File exists " (.exists file))
+                    (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
+                          rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
+                      (fact "PDF data rows " (count rows) => 93)
+                      (fact "Pdf data type " (nth rows 22) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus"))
+                       )
                     (.delete file))))))

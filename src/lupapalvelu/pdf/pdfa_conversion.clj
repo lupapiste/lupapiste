@@ -79,7 +79,7 @@
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
                   :output-file (File. output-file)}
-      (= exit 5) (do (warn "pdf2pdf conversion was not lossless")
+      (= exit 5) (do (warn "PDF/A conversion was not lossless")
                      (warn log-lines)
                      {:pdfa? true
                       :output-file (File. output-file)})
@@ -88,10 +88,11 @@
                         (if-let [fonts (parse-missing-fonts-from-log-lines error-lines)]
                           {:pdfa? false
                            :missing-fonts fonts}
-                          (do (error error-lines)
+                          (do (warn "PDF/A conversion failed probably because of missing fonts")
+                              (warn error-lines)
                               {:pdfa? false})))
-      :else (do (error "pdf2pdf error:" err "exit status:" exit)
-                (error (parse-errors-from-log-lines log-lines))
+      :else (do (warn "pdf2pdf error:" err "exit status:" exit)
+                (warn (parse-errors-from-log-lines log-lines))
                 {:pdfa? false}))))
 
 (defn- get-pdf-page-count [input-file]
@@ -109,20 +110,20 @@
   "Takes PDF File and returns a File that is PDF/A"
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
     (try
-      (debug "Trying to convert PDF to PDF/A")
+      (info "Trying to convert PDF to PDF/A")
       (let [temp-file-path (.getCanonicalPath pdf-file)
             page-count (get-pdf-page-count temp-file-path)
             pdf-a-file-path (or target-file-path (str temp-file-path "-pdfa.pdf"))
             conversion-result (run-pdf-to-pdf-a-conversion temp-file-path pdf-a-file-path)]
         (store-converted-page-count conversion-result page-count)
         (if (:pdfa? conversion-result)
-          (debug "Converted to " pdf-a-file-path)
-          (debug "Could not convert the file"))
+          (info "Converted to PDF/A " pdf-a-file-path)
+          (info "Could not convert the file to PDF/A"))
         conversion-result)
       (catch Exception e
         (error "Error in PDF/A conversion, using original" e)
         {:pdfa? false}))
-    (do (info "Cannot find pdf2pdf executable or license key for PDF/A conversion, using original")
+    (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, using original")
         {:pdfa? false})))
 
 (defn pdf-a-required? [organization-id]

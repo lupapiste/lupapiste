@@ -34,7 +34,7 @@ Fill in info
   Input text by test id  register-company-address1    Katukatu 2
   Input text by test id  register-company-zip         00002
   Input text by test id  register-company-po          Kunta
-  Input text by test id  register-company-ovt         0037123456710007
+  Input text by test id  register-company-ovt         003701091602900C
   Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-submit
 

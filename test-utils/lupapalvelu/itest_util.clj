@@ -551,14 +551,15 @@
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
                                {:headers {"authorization" (str "apikey=" apikey)}
-                                :multipart [{:name "applicationId"  :content application-id}
-                                            {:name "text"           :content text}
-                                            {:name "Content/type"   :content "text/plain"}
-                                            {:name "attachmentType" :content (str
-                                                                               (:type-group attachment-type) "."
-                                                                               (:type-id attachment-type))}
-                                            {:name "attachmentId"   :content attachment-id}
-                                            {:name "upload"         :content uploadfile}]})]
+                                :multipart (remove nil?
+                                             [{:name "applicationId"  :content application-id}
+                                              {:name "text"           :content text}
+                                              {:name "Content/type"   :content "text/plain"}
+                                              {:name "attachmentType" :content (str
+                                                                                 (:type-group attachment-type) "."
+                                                                                 (:type-id attachment-type))}
+                                              (when attachment-id {:name "attachmentId"   :content attachment-id})
+                                              {:name "upload"         :content uploadfile}])})]
     (if expect-to-succeed
       (facts "Upload succesfully"
              (fact "Status code" (:status resp) => 302)
@@ -575,20 +576,19 @@
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
-                       :multipart (filter identity
+                       :multipart (remove nil?
                                     [{:name "applicationId"  :content application-id}
                                      {:name "Content/type"   :content "text/plain"}
                                      {:name "attachmentType" :content (or attachment-type "muut.muu")}
                                      (when attachment-id {:name "attachmentId"   :content attachment-id})
                                      {:name "upload"         :content uploadfile}
                                      {:name "targetId"       :content target-id}
-                                     {:name "targetType"     :content target-type}])}
-                      )]
+                                     {:name "targetType"     :content target-type}])})]
     (if expect-to-succeed
-      (facts "Statement upload succesfully"
+      (facts "upload to target succesfully"
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
-      (facts "Statement upload should fail"
+      (facts "upload to target should fail"
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.115.html") => 0)))))
 
@@ -602,15 +602,14 @@
 ;;       the :operations-attachments must be set correctly for organization (in minimal.clj)
 ;;       and also the :attachments for operation (in operations.clj).
 (defn generate-attachment [{id :id :as application} apikey password]
-  (when-let [first-attachment (or
-                                (get-in application [:attachments 0])
-                                (case (-> application :primaryOperation :name)
-                                  "aloitusoikeus" {:type {:type-group "paapiirustus"
-                                                          :type-id "asemapiirros"}
-                                                   :id id}
-                                  nil))]
-    (upload-attachment apikey id first-attachment true)
-    (sign-attachment apikey id (:id first-attachment) password)))
+  (let [aloitusoikeus? (= (-> application :primaryOperation :name) "aloitusoikeus")]
+    (when-let [first-attachment (or
+                                  (get-in application [:attachments 0])
+                                  (if aloitusoikeus?
+                                    {:type {:type-group "paapiirustus", :type-id "asemapiirros"}}))]
+      (upload-attachment apikey id first-attachment true)
+      (when-not aloitusoikeus?
+        (sign-attachment apikey id (:id first-attachment) password)))))
 
 ;; statements
 

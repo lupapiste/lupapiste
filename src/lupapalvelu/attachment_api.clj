@@ -43,6 +43,10 @@
   (when (-> (attachment/get-attachment-info application attachmentId) :locked true?)
     (fail :error.attachment-is-locked)))
 
+(defn- attachment-id-is-present-in-application-or-not-set [{{:keys [attachmentId]} :data} {:keys [attachments]}]
+  (when-not (or (ss/blank? attachmentId) (some #(= (:id %) attachmentId) attachments))
+    (fail :error.attachment.id)))
+
 (defn- if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
   (when (and (not (user/authority? user))
              (state-set (keyword state)))
@@ -272,7 +276,8 @@
    (partial if-not-authority-state-must-not-be #{:sent})
    attachment-editable-by-application-state?
    validate-attachment-type
-   a/validate-authority-in-drafts])
+   a/validate-authority-in-drafts
+   attachment-id-is-present-in-application-or-not-set])
 
 (def- base-upload-options
   {:comment-text nil

@@ -212,8 +212,8 @@
                 (loc "statement.title") (if (ss/blank? status) (loc "application.export.empty") (str status))
                 (loc "statement.statement.text") (if (ss/blank? text) (loc "application.export.empty") (str text))
                 (loc "add-statement-giver-maaraaika") (str "" (or (util/to-local-date dueDate) "-"))]
-        reply  (#(conj % (loc "statement.reply.text") (if (:nothing-to-add reply) (loc "statement.nothing-to-add.label") (:text reply))))
-        true   (apply array-map)))
+               reply (#(conj % (loc "statement.reply.text") (if (:nothing-to-add reply) (loc "statement.nothing-to-add.label") (:text reply))))
+               true (apply array-map)))
     statements))
 
 (defn collect-neighbour-fields [neighbours]
@@ -238,13 +238,57 @@
                                                  (or (util/to-local-date (:created final-status)) "-")))))
     neighbours))
 
+(defn collect-rakennus [rakennus]
+  (debug " rakennus data: " rakennus)
+  (map
+    (fn [[k v]]
+      (array-map
+        (loc "task-katselmus.rakennus.rakennusnumero") (get-in v [:rakennusnro :value])
+        (loc "task-katselmus.rakennus.kiinteistotunnus") (get-in v [:kiinttun :value])
+        (loc "task-katselmus.rakennus.jarjestysnumero") (get-in v [:jarjestysnumero :value])
+        (loc "task-katselmus.rakennus.valtakunnallinenNumero") (get-in v [:valtakunnallinenNumero :value])
+        (loc "task-katselmus.rakennus.kunnanSisainenPysyvaRakennusnumero") (get-in v [:kunnanSisainenPysyvaRakennusnumero :value])
+        (loc "task-katselmus.rakennus.tila.kayttoonottava") (if (get-in v [:kayttoonottava :value]) (loc "yes") (loc "no"))
+        (loc "task-katselmus.rakennus.tila.tila._group_label") (get-in v [:tila :value]))) rakennus))
+
+(defn collect-task-fields [tasks]
+  (map
+    (fn [{:keys [duedate taskname closed created state schema-info source assignee data rakennus]}]
+      (let [i18n-prefix (:i18nprefix schema-info)
+            katselmuksenLaji (get-in data [:katselmuksenLaji :value])
+            vaadittuLupaehtona (get-in data [:vaadittuLupaehtona :value])
+            pitoPvm (get-in data [:katselmus :pitoPvm :value])
+            pitaja (get-in data [:katselmus :pitaja :value])
+            huomautus-kuvaus (get-in data [:katselmus :huomautukset :kuvaus :value])
+            huomautus-maaraAika (get-in data [:katselmus :huomautukset :maaraAika :value])
+            huomautus-toteaja (get-in data [:katselmus :huomautukset :toteaja :value])
+            huomautus-toteasHetki (get-in data [:katselmus :huomautukset :toteamisHetki :value])
+            lasnaolijat (get-in data [:katselmus :lasnaolijat :value])
+            poikkeamat (get-in data [:katselmus :poikkeamat :value])
+            tila (get-in data [:katselmus :tila :value])]
+        (array-map
+          (loc "task-katselmus.katselmuksenLaji._group_label") (if (ss/blank? katselmuksenLaji) "-" (loc (str i18n-prefix "." katselmuksenLaji)))
+          (loc "vaadittuLupaehtona") (if vaadittuLupaehtona (loc "yes") (loc "no"))
+          (loc "task-katselmus.katselmus.pitoPvm") (if (ss/blank? pitoPvm) (loc "application.export.empty") pitoPvm)
+          (loc "task-katselmus.katselmus.pitaja") pitaja
+          (loc "task-katselmus.katselmus.huomautukset.kuvaus") huomautus-kuvaus
+          (loc "task-katselmus.katselmus.huomautukset.maaraAika.export") (if (ss/blank? huomautus-maaraAika) (loc "application.export.empty") huomautus-maaraAika)
+          (loc "task-katselmus.katselmus.huomautukset.toteaja.export") huomautus-toteaja
+          (loc "task-katselmus.katselmus.huomautukset.toteamisHetki.export") huomautus-toteasHetki
+          (loc "task-katselmus.katselmus.lasnaolijat") lasnaolijat
+          (loc "task-katselmus.katselmus.poikkeamat") poikkeamat
+          (loc "task-katselmus.katselmus.tila._group_label") tila
+          (loc "osapuoli.patevyys.Liiteet") "0"
+          :rakennus (collect-rakennus rakennus))))
+    tasks))
+
 (defn- collect-export-data
   "Create a map containing combined schema and data for pdf export"
   [app title show-address?]
-  {:title title
-   :address (:address app)
+  {:title         title
+   :address       (:address app)
    :common-fields (collect-common-fields app)
-   :documents (collect-documents app)})
+   :documents     (collect-documents app)})
 
 
 ; ----------------------- generating PDF
@@ -401,13 +445,13 @@
    ])
 
 (defn pdf-metadata []
-  {:title "Lupapiste.fi"
-   :size          "a4"
-   :footer {:text (ss/join " - " [(loc "application.export.name")
-                                  (tf/unparse (tf/formatter-local "dd.MM.yyyy HH:mm") (tl/local-now))
-                                  (loc "application.export.page")])
+  {:title  "Lupapiste.fi"
+   :size   "a4"
+   :footer {:text  (ss/join " - " [(loc "application.export.name")
+                                   (tf/unparse (tf/formatter-local "dd.MM.yyyy HH:mm") (tl/local-now))
+                                   (loc "application.export.page")])
             :align :right}
-   :pages true})
+   :pages  true})
 
 
 (defn- gen-pdf-data [{subtype :permitSubtype :as app} out]
@@ -441,23 +485,42 @@
 (defn- render-fields-plain [stm]
   `[~@(render-fields stm) [:spacer]])
 
+(defn- render-tasks [fields]
+  (let [title (loc "application.building")
+        empty (loc "hankkeen-kuvaus.hankkeenVaativuus.ei tiedossa")
+        buildings (:rakennus fields)]
+    `[~@(render-fields (take 12 fields))
+      [:pagebreak]
+      ~@(document-section-header (loc "application.building"))
+      [:pdf-table {:border false :bounding-box [1 1] :cell-border false} [1]
+       ~@(map (fn [rak] `[[:pdf-cell
+                           [:pdf-table {:border false :bounding-box [1 1] :cell-border false} [1]
+                            [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} ~title]]]
+                            [[:pdf-cell {:border false}
+                              ~@(render-fields rak)]]]]]) buildings)
+       [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} ~(if (empty? buildings) empty "")]]]
+       ]]))
+
 (defn- child-renderer [type]
   (cond
     (= type :documents) render-single-document
+    (= type :tasks) render-tasks
     :else render-fields-plain))
 
 (defn- generate-pdf-data-with-child [{subtype :permitSubtype :as app} child-type id lang]
   (with-lang lang (let [title (cond
                                 (= child-type :statements) (loc "application.statement.status")
-                                (= child-type :neighbors)  (loc "application.MM.neighbors")
-                                (= child-type :verdicts)   (loc "application.verdict.title")
-                                (ss/blank? (str subtype))  (loc "application.export.title")
-                                :else                      (loc "permitSubtype" subtype))
+                                (= child-type :neighbors) (loc "application.MM.neighbors")
+                                (= child-type :verdicts) (loc "application.verdict.title")
+                                (= child-type :tasks) (loc "task-katselmus.rakennus.tila._group_label")
+                                (ss/blank? (str subtype)) (loc "application.export.title")
+                                :else (loc "permitSubtype" subtype))
                         app-data (collect-export-data app title false)
                         child (filter #(= id (:id %)) (child-type app))
                         child-data (cond
                                      (= child-type :statements) (collect-statement-fields child)
                                      (= child-type :neighbors) (collect-neighbour-fields child)
+                                     (= child-type :tasks) (collect-task-fields child)
                                      (= child-type :verdicts) nil
                                      :else (collect-documents app))]
                     ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper
@@ -465,6 +528,8 @@
                     ; E.g. if (defn x [] [3 4]) then:
                     ; [1 2 (x)] -> [1 2 [3 4]]
                     ; `[1 2 ~@(x)] -> [1 2 3 4]
+                    ;(debug "child: " (with-out-str (clojure.pprint/pprint child)))
+                    ;(debug "child-data: " (with-out-str  (clojure.pprint/pprint child-data)))
                     `[~(pdf-metadata)
                       ~@(common-header app-data)
                       ~@(common-fields (:common-fields app-data))

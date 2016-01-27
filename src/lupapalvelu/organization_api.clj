@@ -515,10 +515,15 @@
              (resp/content-type "application/json")
              (resp/status 200)))
       (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
-        (resp/status 400 text))
+        (error "Failed to parse shapefile" text)
+        (->> {:ok false :text text}
+             (resp/json)
+             (resp/status 200)))
       (catch Throwable t
         (error "Failed to parse shapefile" t)
-        (resp/status 400 :error.shapefile-parsing-failed))
+        (->> {:ok false :text (.getMessage t)}
+             (resp/json)
+             (resp/status 200)))
       (finally
         (when tmpdir
           (fs/delete-dir tmpdir))))))

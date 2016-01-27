@@ -28,7 +28,8 @@
   (fact "invalid y"
     (finnish-ovt? "003723415294")  => falsey)
   (facts "Alphabetic suffix"
-    (fact (finnish-ovt? "003718523029101CZ") => truthy)))
+    (fact "003701091602900C" (finnish-ovt? "003701091602900C") => truthy)
+    (fact "003718523029101CZ" (finnish-ovt? "003718523029101CZ") => truthy)))
 
 (facts "rakennustunnus?"
   (fact (rakennustunnus? nil) => falsey)
