@@ -206,7 +206,7 @@
 ;;
 
 (defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
-  (let [existing-types ((ssc/json-coercer #{attachment/Type}) existing-attachments-types)
+  (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer attachment/Type)) set)
         types (->> (organization/get-organization-attachments-for-operation organization operation)
                    (remove (difference existing-types attachment/operation-specific-attachment-types)))]
     (->> (map (partial tos/metadata-for-document (:id organization) tos-function) types)
