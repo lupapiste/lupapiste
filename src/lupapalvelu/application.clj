@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
-            [schema.coerce :as coerce]
             [clojure.string :as s]
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
@@ -29,6 +28,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.coordinate :as coord]
+            [sade.schemas :as ssc]
             [swiss.arrows :refer [-<>>]]))
 
 
@@ -206,10 +206,8 @@
 ;;
 
 (defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
-  (let [existing-types (set (map (coerce/coercer attachment/Type coerce/json-coercion-matcher) existing-attachments-types))
+  (let [existing-types ((ssc/json-coercer #{attachment/Type}) existing-attachments-types)
         types (->> (organization/get-organization-attachments-for-operation organization operation)
-                   (map (partial zipmap [:type-group :type-id]))
-                   (map (coerce/coercer attachment/Type coerce/json-coercion-matcher))
                    (remove (difference existing-types attachment/operation-specific-attachment-types)))]
     (->> (map (partial tos/metadata-for-document (:id organization) tos-function) types)
          (map (partial attachment/make-attachment created target true false false applicationState operation) types))))

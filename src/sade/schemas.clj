@@ -1,7 +1,8 @@
 (ns sade.schemas
   (:require [sade.util :as util]
             [sade.validators :as validators]
-            [schema.core :as sc]))
+            [schema.core :as sc]
+            [schema.coerce :as coerce]))
 
 ;;
 ;; Util
@@ -27,6 +28,13 @@
 
 (defn fixed-length-constraint [len]
   (fn [v] (= (count v) len)))
+
+;;
+;; Coercion
+;;
+
+(defn json-coercer [schema]
+  (coerce/coercer schema coerce/json-coercion-matcher))
 
 ;;
 ;; Schemas

@@ -89,8 +89,10 @@
   {:pre [(not (s/blank? id))]}
   (mongo/update-by-id :organizations id changes))
 
-(defn get-organization-attachments-for-operation [organization operation]
-  (-> organization :operations-attachments ((-> operation :name keyword))))
+(defn get-organization-attachments-for-operation [organization {operation-name :name}]
+  (->> (get-in organization [:operations-attachments (keyword operation-name)])
+       (map (fn [[type-group type-id]] {:type-group (keyword type-group) 
+                                        :type-id    (keyword type-id)}))))
 
 (defn allowed-ip? [ip organization-id]
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
