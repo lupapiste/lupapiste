@@ -4,10 +4,10 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
-  self.sidePanelService = lupapisteApp.services.sidePanelService;
-
-  self.application = self.sidePanelService.application;
-  self.authorization = self.sidePanelService.authorization;
+  self.sidePanelService = util.getIn(lupapisteApp, ["services", "sidePanelService"], {});
+  self.application      = self.sidePanelService.application;
+  self.authorization    = self.sidePanelService.authorization;
+  self.currentPage      = self.sidePanelService.currentPage;
 
   self.enableSidePanel = ko.observable(false);
   self.showSidePanel = ko.observable(false);
@@ -17,8 +17,6 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.showNoticePanel = ko.observable(false);
 
   self.showHelp = ko.observable(false);
-
-  self.currentPage = self.sidePanelService ? self.sidePanelService.currentPage : ko.observable();
 
   self.sidePanelOpen = ko.pureComputed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
@@ -59,8 +57,8 @@ LUPAPISTE.SidePanelModel = function(params) {
   var pages = ["applications", "application", "attachment", "statement", "neighbors", "verdict"];
 
   self.disposedComputed(function() {
-    self.showSidePanel(_.contains(_.without(pages, "applications"), self.currentPage()));
-    self.enableSidePanel(self.application && _.contains(pages, self.currentPage()));
+    self.showSidePanel(_.contains(_.without(pages, "applications"), ko.unwrap(self.currentPage)));
+    self.enableSidePanel(self.application && _.contains(pages, ko.unwrap(self.currentPage)));
   });
 
   self.addEventListener("side-panel", "show-conversation", function() {
