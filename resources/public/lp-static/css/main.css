@@ -1,5 +1,18 @@
-@import url('main-blessed1.css?z=1453456703865');
+@import url('main-blessed1.css?z=1453876722956');
 
+/* line 53, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment:after {
+  position: absolute;
+  content: " ";
+  display: block;
+  bottom: -23px;
+  left: 24px;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 24px solid #d8f0fa;
+}
 /* line 65, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment .attachment-details a, .comment .new-attachment-version-details a {
   color: #595959;
@@ -869,18 +882,18 @@
   min-height: 40px;
   border: 1px solid #bbbbbb;
   min-height: 40px;
+  background-color: #fff;
 }
 /* line 20, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper.active {
   border-color: #f7ac2e;
 }
-/* line 28, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 29, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection {
   width: 100%;
   height: 100%;
   display: inline-block;
   box-sizing: border-box;
-  background-color: #fff;
 }
 /* line 34, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags {
@@ -918,12 +931,17 @@
   margin: 0 6px;
 }
 /* line 65, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection-wrapper.disabled {
+  border-color: #dddddd;
+  background-color: #f6f6f6;
+}
+/* line 70, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.caption, .autocomplete-component .autocomplete-selection-wrapper span.selection-text {
   cursor: default;
   line-height: 38px;
   padding-left: 6px;
 }
-/* line 70, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 75, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
   position: absolute;
   bottom: 8px;
@@ -932,17 +950,17 @@
   color: #f39129;
   margin: 0;
 }
-/* line 77, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 82, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
   color: #fbc732;
 }
-/* line 83, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 88, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
   width: inherit;
   position: absolute;
   z-index: 1;
 }
-/* line 87, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 92, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
   width: 100%;
   height: 40px;
@@ -950,7 +968,7 @@
   display: block;
   box-sizing: border-box;
 }
-/* line 94, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 99, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   position: absolute;
   top: 38px;
@@ -966,23 +984,23 @@
   background-color: #fff;
   color: black;
 }
-/* line 110, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 115, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result.autocomplete-result-grouped li.autocomplete-result-item {
   padding: 0 12px;
 }
-/* line 115, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 120, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li {
   height: 40px;
   line-height: 40px;
 }
-/* line 120, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 125, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 0 6px;
 }
-/* line 126, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 131, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
   position: relative;
@@ -990,16 +1008,16 @@
   overflow: hidden;
   padding-right: 6px;
 }
-/* line 133, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 138, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #f7ac2e;
   color: #fff;
 }
-/* line 136, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 141, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #fbc732;
 }
-/* line 140, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 145, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
   font-weight: 700;
   padding-left: 6px;
