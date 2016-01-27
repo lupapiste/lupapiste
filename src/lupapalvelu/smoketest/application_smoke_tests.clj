@@ -55,7 +55,7 @@
 
 ;; Latest attachment version and latestVersion match
 (defn validate-latest-version [{id :id versions :versions latestVersion :latestVersion}]
-  (when (or (empty? versions) (= latestVersion (last versions)))
+  (when-not (or (empty? versions) (= latestVersion (last versions)))
     {:attachment-id id :error "latest version does not match last element of versions array"}))
 
 (def coerce-attachment (ssc/json-coercer att/Attachment))
@@ -71,13 +71,12 @@
        seq))
 
 (defmonster attachment-validation
-  (if-let [results (->> @applications
-                        (take 1000)
-                        (map (fn [{attachments :attachments id :id}]
-                                (some->> (validate-attachments attachments)
-                                         (assoc {:application-id id} :result))))
-                        (remove nil?)
-                        seq)]
+  (if-let [results (time (->> @applications
+                              (pmap (fn [{attachments :attachments id :id}]
+                                      (some->> (validate-attachments attachments)
+                                               (assoc {:application-id id} :result))))
+                              (remove nil?)
+                              seq))]
     {:ok false :results results}
     {:ok true}))
 
