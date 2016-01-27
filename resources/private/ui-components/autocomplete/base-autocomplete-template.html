@@ -4,7 +4,8 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="base-autocomplete-template">
       <div class="autocomplete-component" data-bind="css: {'has-tags': tags}">
-        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}, css: {active: inputSelected()}">
+        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput},
+                                                               css: {active: inputSelected(), disabled: disable}">
           <span class="autocomplete-selection" data-bind="css: {toggled: inputSelected()}">
             <!-- ko if: showSingleSelection -->
             <span class="caption" data-bind="visible: selectionText, text: selectionText"></span>

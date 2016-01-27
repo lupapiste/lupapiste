@@ -3,8 +3,8 @@ LUPAPISTE.AutocompleteApplicationTagsModel = function(params) {
   var self = this;
 
   self.lPlaceholder = params.lPlaceholder;
-
   self.selected = params.selectedValues;
+  self.disable = params.disable || false;
 
   self.query = ko.observable("");
 
@@ -21,5 +21,4 @@ LUPAPISTE.AutocompleteApplicationTagsModel = function(params) {
       .sortBy("label")
       .value();
   });
-
 };
