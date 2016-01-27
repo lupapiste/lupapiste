@@ -2,6 +2,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
 
   var service = lupapisteApp.services.documentDataService;
@@ -66,7 +68,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   };
   self.value.subscribe(_.debounce(save, 500));
 
-  hub.subscribe("document::validation-result", function(results) {
+  self.addEventListener("document", "validation-result", function(results) {
     var res = _.find(results, function(res) {
       return _.isEqual(res.path, self.path);
     });
