@@ -3,9 +3,11 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.application :as a]
+            [lupapalvelu.application :as app]
             [lupapalvelu.server] ; ensure all namespaces are loaded
-            ))
+            [lupapalvelu.attachment :as att]
+            [sade.schemas :as ssc]
+            [schema.core :as sc]))
 
 (def application-keys [:infoRequest
                        :operations :secondaryOperations :primaryOperation
@@ -18,7 +20,7 @@
 
 (defn- resolve-operations [application]
   ; Support the old and the new application schema
-  (or (:operations application) (a/get-operations application)))
+  (or (:operations application) (app/get-operations application)))
 
 (defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
   (if (and (:name schema-info) (:version schema-info))
@@ -52,23 +54,30 @@
   (documents-are-valid @submitted-applications "illegal-hetu"))
 
 ;; Latest attachment version and latestVersion match
-(defn valid-latest-versions? [{versions :versions latestVersion :latestVersion}]
-  (or (empty? versions) (= latestVersion (last versions))))
+(defn validate-latest-version [{id :id versions :versions latestVersion :latestVersion}]
+  (when (or (empty? versions) (= latestVersion (last versions)))
+    {:attachment-id id :error "latest version does not match last element of versions array"}))
 
-;; Every attachment version is a map
-(defn valid-attachment-versions? [{versions :versions}]
-  (every? map? versions))                               ; TODO attachment schema
+(def coerce-attachment (ssc/json-coercer att/Attachment))
+
+(defn validate-attachment-against-schema [{id :id :as attachment}]
+  (when-let [err (->> attachment coerce-attachment (sc/check att/Attachment))]
+    {:attachment-id id :error "Not valid attachment" :schema-error err}))
 
 (defn validate-attachments [attachments]
-  (when-let [invalids (seq (remove #(and (valid-attachment-versions? %) (valid-latest-versions? %)) attachments))]
-    (map :id invalids)))
+  (->> attachments
+       (mapcat (juxt validate-attachment-against-schema validate-latest-version))
+       (remove nil?)
+       seq))
 
-(defmonster attachment-versions-valid
-  (if-let [results (seq (remove nil? (map
-                                       (fn [{attachments :attachments id :id}]
-                                         (when-let [invalid-attachments (validate-attachments attachments)]
-                                           {:applicationId id :attachmentIds invalid-attachments}))
-                                       @applications)))]
+(defmonster attachment-validation
+  (if-let [results (->> @applications
+                        (take 1000)
+                        (map (fn [{attachments :attachments id :id}]
+                                (some->> (validate-attachments attachments)
+                                         (assoc {:application-id id} :result))))
+                        (remove nil?)
+                        seq)]
     {:ok false :results results}
     {:ok true}))
 
