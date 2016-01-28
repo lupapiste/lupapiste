@@ -6,8 +6,8 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             [lupapalvelu.attachment :as att]
-            [sade.schemas :as ssc]
-            [schema.core :as sc]))
+            [sade.schemas :as ssc])
+  (:import [schema.utils.ErrorContainer]))
 
 (def application-keys [:infoRequest
                        :operations :secondaryOperations :primaryOperation
@@ -61,9 +61,8 @@
 (def coerce-attachment (ssc/json-coercer att/Attachment))
 
 (defn validate-attachment-against-schema [{id :id :as attachment}]
-  (let [coercion-result (coerce-attachment attachment)
-        error           (sc/check att/Attachment coercion-result)]
-    (when error
+  (let [coercion-result (coerce-attachment attachment)]
+    (when (instance? schema.utils.ErrorContainer coercion-result)
       {:attachment-id id :error "Not valid attachment" :coercion-result coercion-result})))
 
 (defn validate-attachments [attachments]
