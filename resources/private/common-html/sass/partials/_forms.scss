@@ -1122,6 +1122,11 @@ $max-columns: 12;
     vertical-align: middle;
   }
 
+  .select-arrow.disabled {
+    background-color: $input-disabled-background-color;
+    color: $input-select-disabled-icon;
+  }
+
   input[type=text]:disabled, textarea:disabled, select:disabled, .checkbox-wrapper.disabled {
     border-color: $input-disabled-border-color;
     background-color: $input-disabled-background-color;
