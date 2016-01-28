@@ -5,46 +5,6 @@ Resource        ../../common_resource.robot
 
 *** Keywords ***
 
-Wait test id visible
-  [Arguments]  ${id}
-  Wait Until Element Is Visible  jquery=[data-test-id=${id}]
-
-Wait test id hidden
-  [Arguments]  ${id}
-  Wait Until Element Is Not Visible  jquery=[data-test-id=${id}]
-
-Test id empty
-  [Arguments]  ${id}
-  Wait test id visible  ${id}
-  Textfield Value Should Be  jquery=[data-test-id=${id}]  ${EMPTY}
-
-Test id disabled
-  [Arguments]  ${id}
-  Element should be disabled  jquery=[data-test-id=${id}]
-
-Fill test id
-  [Arguments]  ${id}  ${text}
-  Wait test id visible  ${id}
-  Element Should Be Enabled  jquery=[data-test-id=${id}]
-  Input text by test id  ${id}  ${text}
-
-# -------------------------------
-# Selector arguments for scroll keywords are jQuery selector without jquery= part.
-# -------------------------------
-
-Scroll to
-  [Arguments]  ${selector}
-  Execute Javascript  window.scrollTo( 0, 400 );$("body").scrollTop( jQuery("${selector}").offset().top)
-
-Scroll to test id
-  [Arguments]  ${id}
-  Scroll to  [data-test-id=${id}]
-
-Scroll and click
-  [Arguments]  ${selector}
-  Scroll to  ${selector}
-  Click Element  jquery=${selector}
-
 # --------------------------------
 # Authority admin view
 # --------------------------------

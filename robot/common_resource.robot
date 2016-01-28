@@ -381,7 +381,7 @@ Input text with jQuery
   Wait until page contains element  jquery=${selector}
   Wait until  Element should be visible  jquery=${selector}
   Wait until  Element should be enabled  jquery=${selector}
-  Execute Javascript  $('${selector}')[0].parentNode.scrollIntoView();
+  Execute Javascript  $('${selector}')[0].scrollIntoView(false);
   Execute Javascript  $('${selector}').focus().val("${value}").change();
   Run Keyword Unless  ${leaveFocus}  Execute Javascript  $('${selector}').blur();
 
@@ -1115,3 +1115,46 @@ Mock proxy error
 
 Clear mocks
   Execute Javascript  $.mockjaxClear();
+
+# -------------------------------
+# Selector arguments for scroll keywords are jQuery selector without jquery= part.
+# -------------------------------
+
+Scroll to
+  [Arguments]  ${selector}
+  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
+
+Scroll to test id
+  [Arguments]  ${id}
+  Scroll to  [data-test-id=${id}]
+
+Scroll and click
+  [Arguments]  ${selector}
+  Scroll to  ${selector}
+  Click Element  jquery=${selector}
+
+Wait test id visible
+  [Arguments]  ${id}
+  Scroll to test id  ${id}
+  Wait Until Element Is Visible  jquery=[data-test-id=${id}]
+
+Wait test id hidden
+  [Arguments]  ${id}
+  Scroll to test id  ${id}
+  Wait Until Element Is Not Visible  jquery=[data-test-id=${id}]
+
+Test id empty
+  [Arguments]  ${id}
+  Wait test id visible  ${id}
+  Textfield Value Should Be  jquery=[data-test-id=${id}]  ${EMPTY}
+
+Test id disabled
+  [Arguments]  ${id}
+  Scroll to test id  ${id}
+  Element should be disabled  jquery=[data-test-id=${id}]
+
+Fill test id
+  [Arguments]  ${id}  ${text}
+  Wait test id visible  ${id}
+  Element Should Be Enabled  jquery=[data-test-id=${id}]
+  Input text by test id  ${id}  ${text}
