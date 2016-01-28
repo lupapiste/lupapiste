@@ -1,5 +1,9 @@
-@import url('main-blessed1.css?z=1453893335354');
+@import url('main-blessed1.css?z=1453978462781');
 
+/* line 49, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .comment-party span {
+  margin-right: 6px;
+}
 /* line 53, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment:after {
   position: absolute;
@@ -5292,11 +5296,10 @@ table.admin-settings td.value .save-indicator {
   background: rgba(79, 79, 79, 0.9);
   background: #4f4f4f \9;
   /* IE 8 and below */
-  border: 1px solid #363636;
   padding: 6px;
   width: 500px;
 }
-/* line 70, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 69, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -5306,17 +5309,17 @@ table.admin-settings td.value .save-indicator {
   user-select: none;
   cursor: default;
 }
-/* line 73, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 72, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header h1 {
   line-height: 30px;
   overflow: auto;
   clear: both;
 }
-/* line 78, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 77, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .title {
   float: left;
 }
-/* line 81, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 80, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .close-btn {
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
@@ -5328,156 +5331,156 @@ table.admin-settings td.value .save-indicator {
   top: 6px;
   right: 6px;
 }
-/* line 91, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 90, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .help {
   margin-left: 12px;
   float: left;
 }
-/* line 94, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 93, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .help:after {
   border-bottom-color: #757575;
 }
-/* line 98, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 97, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .icon.help.expanded {
   margin-bottom: 22px;
 }
-/* line 103, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 102, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content {
   overflow: auto;
   height: 100%;
 }
-/* line 107, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 106, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content .form-input.textarea {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 114, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 113, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-table {
   overflow: auto;
   height: 100%;
   width: 100%;
   display: table;
 }
-/* line 120, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 119, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-table .form-input.textarea {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 125, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 124, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-table .content-row {
   display: table-row;
 }
-/* line 129, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 128, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-table .content-cell {
   display: table-cell;
   padding-bottom: 6px;
   position: relative;
 }
-/* line 136, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 135, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content.expanded, #side-panel .content-table.expanded {
   top: 200px;
 }
-/* line 140, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 139, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .panel-info {
   background: #757575;
   padding: 6px;
   clear: both;
 }
-/* line 146, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 145, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel h1 {
   color: #fff;
 }
-/* line 150, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 149, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .comment {
   color: #595959;
 }
-/* line 154, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 153, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-template {
   height: 100%;
 }
-/* line 158, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 157, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel {
   height: 100%;
 }
-/* line 161, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 160, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-component {
   height: 100%;
 }
-/* line 165, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 164, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-urgency {
   width: 215px;
   position: relative;
 }
-/* line 170, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 169, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-tags {
   z-index: 1;
   position: relative;
 }
-/* line 175, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 174, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.urgent {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 180, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 179, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.hold {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 185, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 184, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel label {
   vertical-align: bottom;
 }
-/* line 189, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 188, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid {
   display: table;
   height: 100%;
 }
-/* line 192, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 191, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row {
   display: table-row;
   margin-bottom: 6px;
 }
-/* line 195, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 194, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row .col-1 {
   display: table-cell;
   margin-bottom: 20px;
 }
-/* line 198, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 197, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row .col-1 label {
   color: #fff;
 }
-/* line 203, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 202, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper {
   height: 100%;
 }
-/* line 205, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 204, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col--vertical {
   height: 100%;
   padding-bottom: 60px;
 }
-/* line 209, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 208, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 {
   height: 100%;
 }
-/* line 211, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 210, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 textarea {
   height: 100%;
   height: 300px\9;
   box-sizing: border-box;
 }
 
-/* line 222, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 221, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
   bottom: 0;
 }
 
-/* line 227, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 226, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel {
   height: 100%;
   padding-bottom: 46px;
 }
-/* line 229, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 228, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -5485,46 +5488,46 @@ table.admin-settings td.value .save-indicator {
   -o-transition: box-shadow 250ms ease;
   transition: box-shadow 250ms ease;
 }
-/* line 238, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 237, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .header h1 {
   margin-bottom: 0;
 }
-/* line 243, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 242, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
-/* line 248, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 247, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel label {
   color: #fff;
 }
 
-/* line 254, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 253, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .message-buttons button {
   margin-bottom: 6px;
 }
 
 @media all and (max-width: 991px) {
-  /* line 261, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 260, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 400px;
   }
-  /* line 264, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 263, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .btn-title {
     display: none;
   }
 
-  /* line 269, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 268, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel {
     right: -400px;
   }
 
-  /* line 274, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 273, ../../../private/common-html/sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }
 
-  /* line 278, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 277, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons {
     display: table;
   }
@@ -5538,7 +5541,7 @@ table.admin-settings td.value .save-indicator {
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
-  /* line 280, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 279, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons button {
     margin-bottom: 6px;
   }
