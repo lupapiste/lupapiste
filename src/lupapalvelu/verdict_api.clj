@@ -64,7 +64,7 @@
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
-   :tab            "/verdict"})
+   :tab            "verdict"})
 
 (def give-verdict-states (clojure.set/union #{:submitted :complementNeeded :sent} states/verdict-given-states))
 

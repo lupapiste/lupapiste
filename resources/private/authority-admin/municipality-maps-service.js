@@ -211,12 +211,12 @@ LUPAPISTE.MunicipalityMapsService = function() {
 
   // Channel is a very simple abstraction on top
   // of the hub.
-  var hubId = _.uniqueId( "municipality-maps-");
+  var hubFilter = _.uniqueId( "municipality-maps-");
 
   function channel( sender ) {
     return {
       send: function( msg ) {
-        hub.send( hubId, {
+        hub.send( hubFilter, {
           sender: sender,
           message: msg} );
         }
@@ -283,7 +283,9 @@ LUPAPISTE.MunicipalityMapsService = function() {
   };
 
 
-  hub.subscribe( hubId, function( data ) {
+  var hubId = hub.subscribe( hubFilter, function( data ) {
     messageFuns[data.sender]( data.message);
   });
+
+  self.dispose = _.partial( hub.unsubscribe, hubId );
 };

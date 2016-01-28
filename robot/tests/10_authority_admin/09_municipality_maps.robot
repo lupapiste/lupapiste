@@ -5,30 +5,36 @@ Suite Setup     Sipoo logs in
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 
+** Variables ***
+
+# Bitte, see http://ows.terrestris.de/dienste.html for details
+${url}     http://ows.terrestris.de/osm/service
+${layer1}  OSM-WMS
+${layer2}  OSM-Overlay-WMS
+${layer3}  TOPO-WMS
+${layer4}  TOPO-OSM-WMS
+
 *** Test Cases ***
 
 Open integrations tab
   Go to page  backends
 
-Setup
-  # Bitte, see http://ows.terrestris.de/dienste.html for details
-  Set Suite Variable  ${url}  http://ows.terrestris.de/osm/service
-  Set Suite Variable  ${layer1}  OSM-WMS
-  Set Suite Variable  ${layer2}  OSM-Overlay-WMS
-  Set Suite Variable  ${layer3}  TOPO-WMS
-  Set Suite Variable  ${layer4}  TOPO-OSM-WMS
-
 Admin inputs bad server address
   No error
   No layers
+  Scroll to test id  server-details-send
   Input text with jQuery  [data-test-id=server-details-url]  foobar
-  Click button  jquery=[data-test-id=server-details-send]
+
+  Scroll and click  [data-test-id=server-details-send]
+  # Error popup
+  Confirm  dynamic-ok-confirm-dialog
   Yes error
   No layers
 
 Admin inputs good server address
+  Scroll to test id  server-details-send
   Input text with jQuery  [data-test-id=server-details-url]  ${url}
-  Click button  jquery=[data-test-id=server-details-send]
+  Scroll and click  [data-test-id=server-details-send]
   No error
   Yes layers
 
@@ -78,7 +84,7 @@ Select layer
   Select from list by value  jquery=select[data-test-id=layer${index}-select]  ${value}
 
 Add layer
-  Click button  jquery=[data-test-id=layers-add]
+  Scroll and click  [data-test-id=layers-add]
 
 Name layer
   [Arguments]  ${index}  ${name}
@@ -86,6 +92,7 @@ Name layer
 
 Remove layer
   [Arguments]  ${index}
+  Scroll to  [data-test-id=layer${index}-remove]
   Click link  jquery=[data-test-id=layer${index}-remove]
 
 Check layer value
