@@ -15,8 +15,8 @@
   (let [schema-key (apply vector name params)]
     `(defn ~name ~params
        (locking dynamically-created-schemas
-         (get @dynamically-created-schemas ~schema-key
-              ((swap! dynamically-created-schemas assoc ~schema-key ~form) ~schema-key))))))
+         (or (@dynamically-created-schemas ~schema-key)
+             ((swap! dynamically-created-schemas assoc ~schema-key ~form) ~schema-key))))))
 
 ;; Predicate / constraint
 
