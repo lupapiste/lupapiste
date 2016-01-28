@@ -71,16 +71,20 @@
 ;; Dynamic schema constructors
 
 (defdynamicschema fixed-length-string [len]
-  (sc/constrained sc/Str (fixed-length-constraint len)))
+  (sc/constrained sc/Str (fixed-length-constraint len)
+                  (str "Not valid string with fixed length of " len)))
 
 (defdynamicschema min-length-string [min-len]
-  (sc/constrained sc/Str (min-length-constraint min-len)))
+  (sc/constrained sc/Str (min-length-constraint min-len)
+                  (str "Not valid string with minimum length of " min-len)))
 
 (defdynamicschema max-length-string [max-len]
-  (sc/constrained sc/Str (max-length-constraint max-len)))
+  (sc/constrained sc/Str (max-length-constraint max-len)
+                  (str "Not valid string with maximum length of " max-len)))
 
 (defdynamicschema min-max-length-string [min-len max-len]
-  (sc/constrained sc/Str (every-pred (min-length-constraint min-len) (max-length-constraint max-len))))
+  (sc/constrained sc/Str (every-pred (min-length-constraint min-len) (max-length-constraint max-len))
+                  (str "Not valid string with length of [" min-len "-" max-len "]")))
 
 (defdynamicschema min-length-hex-string [min-len]
   (sc/constrained sc/Str (every-pred (min-length-constraint min-len) (partial validators/matches? #"[0-9a-f]*"))
