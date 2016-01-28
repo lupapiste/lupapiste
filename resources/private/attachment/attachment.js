@@ -71,7 +71,7 @@ var attachment = (function() {
     subscriptions:                [],
     showAttachmentVersionHistory: ko.observable(),
     showHelp:                     ko.observable(false),
-    init:                         ko.observable(false),
+    initialized:                  ko.observable(false),
     groupAttachments:             ko.observableArray(),
     groupIndex:                   ko.observable(),
     changeTypeDialogModel:        undefined,
@@ -213,7 +213,7 @@ var attachment = (function() {
       ajax.command("reject-attachment", { id: id, attachmentId: model.id()})
         .success(function() {
           model.state("requires_user_action");
-          model.dirty = true;
+          repository.load(applicationId, undefined, undefined, true);
         })
         .call();
         hub.send("track-click", {category:"Attachments", label: "", event:"rejectAttachment"});
@@ -225,7 +225,7 @@ var attachment = (function() {
       ajax.command("approve-attachment", { id: id, attachmentId: model.id()})
         .success(function() {
           model.state("ok");
-          model.dirty = true;
+          repository.load(applicationId, undefined, undefined, true);
         })
         .call();
         hub.send("track-click", {category:"Attachments", label: "", event:"approveAttachment"});
@@ -234,8 +234,8 @@ var attachment = (function() {
 
     isNotOk: function() { return !model.stateIs("ok");},
     doesNotRequireUserAction: function() { return !model.stateIs("requires_user_action");},
-    isApprovable: function() { return authorizationModel.ok("approve-attachment"); },
-    isRejectable: function() { return authorizationModel.ok("reject-attachment"); }
+    isApprovable: function() { return authorizationModel.ok("approve-attachment") && model.initialized(); },
+    isRejectable: function() { return authorizationModel.ok("reject-attachment") && model.initialized(); }
   };
 
   model.changeTypeDialogModel = new ChangeTypeDialogModel();
@@ -455,7 +455,7 @@ var attachment = (function() {
 
     pageutil.hideAjaxWait();
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
-      model.init(true);
+      model.initialized(true);
       if (!model.latestVersion()) {
         setTimeout(function() {
           model.showHelp(true);
@@ -489,7 +489,7 @@ var attachment = (function() {
 
   hub.onPageLoad("attachment", function() {
     pageutil.showAjaxWait();
-    model.init(false);
+    model.initialized(false);
     model.showHelp(false);
     applicationId = pageutil.subPage();
     attachmentId = pageutil.lastSubPage();
