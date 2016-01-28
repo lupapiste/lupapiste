@@ -478,7 +478,7 @@
 (defn pre-process-attachment [{:keys [attachment-type filename content]}]
   (if (and libreoffice-client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
     {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
-     :content  (libreoffice-client/convert-to-pdfa filename content)}
+     :content  (:body (libreoffice-client/convert-to-pdfa filename content))}
     {:filename filename :content content}))
 
 (defn attach-file!
