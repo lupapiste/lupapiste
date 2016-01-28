@@ -90,6 +90,16 @@
 
 (register-generator ssc/ObjectIdStr object-id)
 
+(def ipv4-address (gen/fmap (partial clojure.string/join ".")
+                            (gen/vector (gen/elements (range 256)) 4)))
+
+(def ipv6-address (gen/fmap (partial clojure.string/join ":")
+                            (gen/vector (gen/fmap clojure.string/join (gen/vector single-hex 1 4)) 8)))
+
+(def ip-address (gen/one-of [ipv4-address ipv6-address]))
+
+(register-generator ssc/IpAddress ip-address)
+
 ;; Dynamic schema generator constructors
 
 (defn fixed-length-string [len]

@@ -60,6 +60,9 @@
 (sc/defschema ObjectIdStr
   (sc/pred (partial validators/matches? #"^[0-9a-f]{24}$") "ObjectId hex string"))
 
+(sc/defschema IpAddress
+  (sc/pred validators/ip-address? "Not valid IP address"))
+
 ;; Dynamic schema constructors
 
 (defdynamicschema fixed-length-string [len]

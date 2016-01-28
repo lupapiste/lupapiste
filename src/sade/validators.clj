@@ -90,3 +90,9 @@
 (def maara-alatunnus-pattern #"^M?([0-9]{1,4})$")
 
 (def kiinteistotunnus? (partial matches? #"^[0-9]{14}$"))
+
+(def ipv4-address? (partial matches? #"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$"))
+
+(def ipv6-address-long-form? (partial matches? #"([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}"))
+
+(def ip-address? (some-fn ipv4-address? ipv6-address-long-form?))
