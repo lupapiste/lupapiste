@@ -11,10 +11,11 @@
             [ring.util.codec :as codec]
             [lupapalvelu.action :as action]
             [monger.operators :refer :all]
-            [taoensso.timbre :refer [info error warn]])
-  (:import (java.text SimpleDateFormat)
-           (java.util Date)
-           (java.util.concurrent ThreadFactory Executors)
+            [taoensso.timbre :refer [info error warn]]
+            [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [clj-time.format :as f])
+  (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
 (defn thread-factory []
@@ -89,8 +90,7 @@
          (map :name))))
 
 (defn- ->iso-8601-date [date]
-  (let [format (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ssXXX")]
-    (.format format date)))
+  (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
 
 (defn- get-verdict-date [{:keys [verdicts]} type]
   (let [ts (->> verdicts
@@ -101,7 +101,7 @@
                 (remove nil?)
                 (first))]
     (when ts
-      (->iso-8601-date (Date. ^Long ts)))))
+      (->iso-8601-date (c/from-long ts)))))
 
 (defn- get-from-verdict-minutes [{:keys [verdicts]} key]
   (->> verdicts
@@ -126,37 +126,58 @@
 (defn- make-attachment-type [{{:keys [type-group type-id]} :type}]
   (str type-group "." type-id))
 
-(defn- generate-archive-metadata [application user & [attachment]]
-  (cond-> {:type                (if attachment (make-attachment-type attachment) :application)
-           :applicationId       (:id application)
-           :buildingIds         (remove nil? (map :buildingId (:buildings application)))
-           :nationalBuildingIds (remove nil? (map :nationalId (:buildings application)))
-           :propertyId          (:propertyId application)
-           :applicant           (:applicant application)
-           :operations          (if (:op attachment)
-                                  (find-op application (get-in attachment [:op :id]))
-                                  (concat [(get-in application [:primaryOperation :name])] (map :name (:secondaryOperations application))))
-           :tosFunction         (first (filter #(= (:tosFunction application) (:code %)) (tiedonohjaus/available-tos-functions (:organization application))))
-           :address             (:address application)
-           :organization        (:organization application)
-           :municipality        (:municipality application)
-           :location            (:location application)
-           :kuntalupatunnukset  (map :kuntalupatunnus (:verdicts application))
-           :lupapvm             (get-verdict-date application :lainvoimainen)
-           :paatospvm           (get-verdict-date application :anto)
-           :paatoksentekija     (get-from-verdict-minutes application :paatoksentekija)
-           :tiedostonimi        (get-in attachment [:latestVersion :filename] (str (:id application) ".pdf"))
-           :kasittelija         (select-keys (:authority application) [:username :firstName :lastName])
-           :arkistoija          (select-keys user [:username :firstName :lastName])
-           :kayttotarkoitukset  (if (:op attachment)
-                                  (get-usages application (get-in attachment [:op :id]))
-                                  (get-usages application nil))
-           :kieli               "fi"
-           :versio              (if attachment (make-version-number attachment) "1.0")}
-          (:contents attachment) (conj {:contents (:contents attachment)})
-          (:size attachment)     (conj {:size (:size attachment)})
-          (:scale attachment)    (conj {:scale (:scale attachment)})
-          true                   (merge (or (:metadata attachment) (:metadata application)))))
+(defn- iso-8601-end-date [start-ts years]
+  (let [start-date (c/from-long start-ts)]
+    (->> (t/plus start-date (t/years years))
+         (->iso-8601-date))))
+
+(defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} application]
+  (when (= "m\u00E4\u00E4r\u00E4ajan" arkistointi)
+    (iso-8601-end-date (get-verdict-date application :lainvoimainen) pituus)))
+
+(defn- secrecy-end-date [{:keys [salassapitoaika julkisuusluokka]} application]
+  (when (and (#{"osittain-salassapidettava" "salainen"} julkisuusluokka) salassapitoaika)
+    (iso-8601-end-date (get-verdict-date application :lainvoimainen) salassapitoaika)))
+
+(defn- generate-archive-metadata
+  [{:keys [id propertyId applicant address organization municipality location location-wgs84] :as application}
+   user
+   & [attachment]]
+  (let [s2-metadata (or (:metadata attachment) (:metadata application))
+        base-metadata {:type                  (if attachment (make-attachment-type attachment) :application)
+                       :applicationId         id
+                       :buildingIds           (remove nil? (map :buildingId (:buildings application)))
+                       :nationalBuildingIds   (remove nil? (map :nationalId (:buildings application)))
+                       :propertyId            propertyId
+                       :applicant             applicant
+                       :operations            (if (:op attachment)
+                                                (find-op application (get-in attachment [:op :id]))
+                                                (concat [(get-in application [:primaryOperation :name])] (map :name (:secondaryOperations application))))
+                       :tosFunction           (first (filter #(= (:tosFunction application) (:code %)) (tiedonohjaus/available-tos-functions (:organization application))))
+                       :address               address
+                       :organization          organization
+                       :municipality          municipality
+                       :location-etrs-tm35fin location
+                       :location-wgs84        location-wgs84
+                       :kuntalupatunnukset    (map :kuntalupatunnus (:verdicts application))
+                       :lupapvm               (get-verdict-date application :lainvoimainen)
+                       :paatospvm             (get-verdict-date application :anto)
+                       :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
+                       :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
+                       :kasittelija           (select-keys (:authority application) [:username :firstName :lastName])
+                       :arkistoija            (select-keys user [:username :firstName :lastName])
+                       :kayttotarkoitukset    (if (:op attachment)
+                                                (get-usages application (get-in attachment [:op :id]))
+                                                (get-usages application nil))
+                       :kieli                 "fi"
+                       :versio                (if attachment (make-version-number attachment) "1.0")}]
+    (cond-> base-metadata
+            (:contents attachment) (conj {:contents (:contents attachment)})
+            (:size attachment) (conj {:size (:size attachment)})
+            (:scale attachment) (conj {:scale (:scale attachment)})
+            (retention-end-date s2-metadata application) (conj {:retention-period-end (retention-end-date s2-metadata application)})
+            (secrecy-end-date s2-metadata application) (conj {:security-period-end (secrecy-end-date s2-metadata application)})
+            true (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids archive-application?]
   (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]

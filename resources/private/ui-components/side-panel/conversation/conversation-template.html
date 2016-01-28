@@ -13,7 +13,8 @@
                                                  id: 'application-new-comment-text',
                                                  maxlength: 4000,
                                                  lLabel: 'application.conversationPrompt',
-                                                 lPlaceholder: 'comment.placeholder'}},
+                                                 lPlaceholder: 'comment.placeholder',
+                                                 disable: !authorization.ok('add-comment')}},
                             hasFocus: textSelected,
                             css: {'highlight-conversation': highlightConversation}
                             visible: authorization.ok('add-comment')"></div>

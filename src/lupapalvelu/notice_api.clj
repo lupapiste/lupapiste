@@ -38,3 +38,8 @@
     (if (every? (set org-tag-ids) tags)
       (update-application command {$set {:tags tags}})
       (fail :error.unknown-tags))))
+
+(defquery authority-notice
+  {:user-roles #{:authority}
+   :user-authz-roles #{:statementGiver}}
+  (ok))

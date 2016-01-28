@@ -4,16 +4,17 @@
   <section class="page container">
     <script type="text/html" id="authority-notice-template">
       <div class="form-grid form-grid--columns-1 form-grid--no-border">
-        <div class="row application-tags" data-bind="if: authorization.ok('add-application-tags')">
+        <div class="row application-tags">
           <div class="col-1">
             <label data-bind="ltext: 'application.tags'"></label>
             <div data-test-id="autocomplete-application-tags-component"
                  data-bind="component: {name: 'autocomplete-application-tags',
                                         params: {tags: true,
-                                                 selectedValues: tags}}"></div>
+                                                 selectedValues: tags,
+                                                 disable: !authorization.ok('add-application-tags')}}"></div>
           </div>
         </div>
-        <div class="row" data-bind="if: authorization.ok('change-urgency')">
+        <div class="row">
           <div class="col-1"
             data-bind="component: {name: 'select-field',
                                    params: {value: urgency,
@@ -22,7 +23,8 @@
                                                            return loc(['notice', 'urgency', item]);
                                                          },
                                             lLabel: 'notice.urgency',
-                                            id: 'application-authority-urgency'}}">
+                                            id: 'application-authority-urgency',
+                                            disable: !authorization.ok('change-urgency')}}">
           </div>
         </div>
         <div class="row textarea-wrapper">
@@ -32,7 +34,8 @@
                                                id: 'application-authority-notice',
                                                maxlength: 4000,
                                                label: noticeLabel,
-                                               lPlaceholder: 'comment.placeholder'}}">
+                                               lPlaceholder: 'comment.placeholder',
+                                               disable: !authorization.ok('add-authority-notice')}}">
           </div>
         </div>
       </div>

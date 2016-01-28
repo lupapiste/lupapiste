@@ -23,7 +23,7 @@
             <button id="open-notice-side-panel"
                     class="primary vertical caps btn-notice"
                     data-bind="click: toggleNoticePanel,
-                               visible: authorization.ok('add-authority-notice'),
+                               visible: authorization.ok('authority-notice'),
                                css: {active: showNoticePanel}">
                 <i class="lupicon-document-list"></i>
                 <span class="btn-title" data-bind="lspaced: 'notice.title'"></span>
@@ -49,7 +49,7 @@
                                                          mainConversation: sidePanelService.mainConversation}}"></div>
                   </div>
               </div>
-              <!-- ko if: authorization.ok('add-authority-notice')-->
+              <!-- ko if: authorization.ok('authority-notice')-->
               <div id="notice-panel" data-bind="visible: showNoticePanel">
                   <div class="header">
                       <h1 data-bind="ltext: 'notice.title'"></h1>

@@ -37,9 +37,9 @@
     .btn-conversation, .btn-notice {
       box-shadow: 1px 1px 3px darken($lp-dark-grey, 10%);
       padding: 1em;
-      margin-bottom: $marginM;
       display: block;
       font-weight: bold;
+      margin: 0 0 $marginM 0;
 
       .unseen-comments {
         @include spite-bg;

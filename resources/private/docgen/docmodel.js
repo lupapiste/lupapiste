@@ -1128,6 +1128,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .attr("params", paramsStr(params))
       .addClass(classes)
       .applyBindings(params);
+
+    $(element).on("remove", function(event) {
+      ko.cleanNode(event.target);
+    });
     return element;
   }
 
