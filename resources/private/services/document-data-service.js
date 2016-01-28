@@ -165,7 +165,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   function pushToRepeating(repeatingModel, rawModel) {
     var ind = _.parseInt( _(repeatingModel.model()).map("index").max() ) + 1 || 0;
     var path = repeatingModel.path;
-    return repeatingModel.model.push(createRepeatingUnitDataModel(repeatingModel.schema, rawModel, {}, path, ind));
+    return repeatingModel.model.push(createRepeatingUnitDataModel(repeatingModel.schema, rawModel, path, ind));
   }
 
   //
