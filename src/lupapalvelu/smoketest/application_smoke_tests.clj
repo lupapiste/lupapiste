@@ -61,8 +61,10 @@
 (def coerce-attachment (ssc/json-coercer att/Attachment))
 
 (defn validate-attachment-against-schema [{id :id :as attachment}]
-  (when-let [err (->> attachment coerce-attachment (sc/check att/Attachment))]
-    {:attachment-id id :error "Not valid attachment" :schema-error err}))
+  (let [coercion-result (coerce-attachment attachment)
+        error           (sc/check att/Attachment coercion-result)]
+    (when error
+      {:attachment-id id :error "Not valid attachment" :coercion-result coercion-result})))
 
 (defn validate-attachments [attachments]
   (->> attachments
@@ -71,12 +73,12 @@
        seq))
 
 (defmonster attachment-validation
-  (if-let [results (time (->> @applications
-                              (pmap (fn [{attachments :attachments id :id}]
-                                      (some->> (validate-attachments attachments)
-                                               (assoc {:application-id id} :result))))
-                              (remove nil?)
-                              seq))]
+  (if-let [results (->> @applications
+                        (pmap (fn [{attachments :attachments id :id}]
+                                (some->> (validate-attachments attachments)
+                                         (assoc {:application-id id} :result))))
+                        (remove nil?)
+                        seq)]
     {:ok false :results results}
     {:ok true}))
 
