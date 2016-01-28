@@ -1475,8 +1475,7 @@
   (user/summary
    (if (and (= id "-") (= first-name "Lupapiste"))
      (assoc user :username "eraajo@lupapiste.fi")
-     (or (and email (user/get-user-by-email email))
-         user))))
+     user)))
 
 (defn remove-unwanted-fields-from-attachment-auth [attachment]
   (update attachment :auth (partial mapv user-summary)))
