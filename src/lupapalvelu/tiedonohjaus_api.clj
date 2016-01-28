@@ -60,7 +60,8 @@
   {s/Str "text"
    tms/NonEmptyStr "text"
    tms/Vuodet "number"
-   s/Bool "checkbox"})
+   s/Bool "checkbox"
+   s/Inst "date"})
 
 (def editable-metadata-fields
   (->> (remove #(= tms/Tila %) tms/asiakirja-metadata-fields)
