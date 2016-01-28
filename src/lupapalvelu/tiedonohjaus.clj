@@ -134,16 +134,6 @@
         (assoc :modified now))
     doc))
 
-(defn change-app-and-attachments-metadata-state! [{:keys [created application] :as command} from-state to-state]
-  (when (seq (:metadata application))
-    (let [{{new-tila :tila} :metadata} (change-document-metadata-state application from-state to-state created)
-          updated-attachments (map #(change-document-metadata-state % from-state to-state created) (:attachments application))]
-      (action/update-application
-        command
-        {$set {:modified created
-               :metadata.tila new-tila
-               :attachments updated-attachments}}))))
-
 (defn change-attachment-metadata-state! [application now attachment-id from-state to-state]
   (let [attachment (first (filter #(= (:id %) attachment-id) (:attachments application)))]
     (when (seq (:metadata attachment))
@@ -153,3 +143,13 @@
           {:attachments.id attachment-id}
           {$set {:modified now
                  :attachments.$.metadata.tila new-tila}})))))
+
+(defn change-app-and-attachments-metadata-state! [{:keys [created application] :as command} from-state to-state]
+  (when (seq (:metadata application))
+    (let [{{new-tila :tila} :metadata} (change-document-metadata-state application from-state to-state created)]
+      (action/update-application
+        command
+        {$set {:modified created
+               :metadata.tila new-tila}})
+      (doseq [{:keys [id]} (:attachments application)]
+        (change-attachment-metadata-state! application created id from-state to-state)))))
