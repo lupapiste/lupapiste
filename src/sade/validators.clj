@@ -90,3 +90,5 @@
 (def maara-alatunnus-pattern #"^M?([0-9]{1,4})$")
 
 (def kiinteistotunnus? (partial matches? #"^[0-9]{14}$"))
+
+(def hex-string? (partial matches? #"^[0-9a-f]*$"))
