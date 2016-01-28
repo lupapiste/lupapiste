@@ -1123,11 +1123,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function createComponent(name, params, classes) {
     // createElement works with IE8
     var element = document.createElement(name);
+    ko.options.deferUpdates = true; // http://knockoutjs.com/documentation/deferred-updates.html
 
     $(element)
       .attr("params", paramsStr(params))
       .addClass(classes)
       .applyBindings(params);
+
+    ko.options.deferUpdates = false;
 
     $(element).on("remove", function(event) {
       ko.cleanNode(event.target);
