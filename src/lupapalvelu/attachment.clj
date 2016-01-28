@@ -119,14 +119,14 @@
 (def VersionNumber {:minor                             sc/Int
                     :major                             sc/Int})
 
-(def Target     {:id                                   sc/Str
+(def Target     {:id                                   ssc/ObjectIdStr
                  :type                                 sc/Keyword
                  (sc/optional-key :urlHash)            sc/Str})
 
-(def Source     {:id                                   sc/Str
+(def Source     {:id                                   ssc/ObjectIdStr
                  :type                                 sc/Str})
 
-(def Operation  {:id                                   sc/Str
+(def Operation  {:id                                   ssc/ObjectIdStr
                  (sc/optional-key :optional)           [sc/Str] ;; only empty arrays @ talos
                  (sc/optional-key :name)               sc/Str
                  (sc/optional-key :description)        (sc/maybe sc/Str)
