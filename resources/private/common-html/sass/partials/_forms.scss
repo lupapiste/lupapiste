@@ -1123,7 +1123,8 @@ $max-columns: 12;
   }
 
   .select-arrow.disabled {
-    background-color: #input-disabled-background-color;
+    background-color: $input-disabled-background-color;
+    color: $input-select-disabled-icon;
   }
 
   input[type=text]:disabled, textarea:disabled, select:disabled, .checkbox-wrapper.disabled {

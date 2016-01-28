@@ -219,8 +219,10 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
   };
 
   self.removeTag = function(tag) {
-    self.selectedOptions.remove(tag);
-    self.inputSelected(false);
+    if (!self.disable) {
+      self.selectedOptions.remove(tag);
+      self.inputSelected(false);
+    }
   };
 
   self.clearQuery = function() {
