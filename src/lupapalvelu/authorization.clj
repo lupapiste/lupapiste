@@ -27,14 +27,14 @@
 ;; Auth utils
 ;;
 
-
-
 (defn get-auths-by-roles
   "Returns sequence of all auth-entries in an application with the
   given roles. Each role can be keyword or string."
   [{auth :auth} roles]
   (let [role-set (->> roles (map name) set)]
-    (filter #(contains? role-set (:role %)) auth)))
+    ;; Roles in auths can also be keywords or strings.
+    ;; (name nil) causes NPE so default value is needed.
+    (filter #(contains? role-set (name (get % :role ""))) auth)))
 
 (defn get-auths-by-role
   [application role]
