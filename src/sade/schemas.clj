@@ -82,3 +82,6 @@
 (defdynamicschema min-max-length-string [min-len max-len]
   (sc/constrained sc/Str (every-pred (min-length-constraint min-len) (max-length-constraint max-len))))
 
+(defdynamicschema min-length-hex-string [min-len]
+  (sc/constrained sc/Str (every-pred (min-length-constraint min-len) (partial validators/matches? #"[0-9a-f]*"))
+                  (str "Not valid hex-string with minimum length of " min-len)))
