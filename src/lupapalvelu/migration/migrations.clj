@@ -1588,7 +1588,7 @@
                              {:attachments {$elemMatch {:target {$type 18}}}}))
 
 (defn set-target-with-nil-valued-map-as-nil [{target :target :as attachment}]
-  (if (or (every? nil? (vals target) (every? (partial = "undefined") (vals target))))
+  (if (or (every? nil? (vals target)) (every? (partial = "undefined") (vals target)))
     (assoc attachment :target nil)
     attachment))
 
