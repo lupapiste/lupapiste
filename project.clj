@@ -60,7 +60,7 @@
                  [org.geotools/gt-epsg-wkt "12.4"]
                  [org.clojure/data.json "0.2.6"]
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
-                 [lupapiste/oskari "0.9.55"]
+                 [lupapiste/oskari "0.9.56"]
                  [lupapiste/commons "0.6.2"]
                  [pdfa-core "0.0.3"]
                  [clj-rss "0.2.3"]]
