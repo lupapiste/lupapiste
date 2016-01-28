@@ -277,6 +277,7 @@ application-bulletins-model.js
 ```javascript
 LUPAPISTE.ApplicationBulletinsModel = function(params) {
   // ...
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
   self.bulletins = params.bulletinService.bulletins;
   // ...
 };
@@ -294,6 +295,7 @@ application-bulletins-list-model.js
 ```javascript
 LUPAPISTE.ApplicationBulletinsListModel = function(params) {
   // ...
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
   self.bulletins = params.bulletins;
   // ...
 };
@@ -334,7 +336,13 @@ Arkkitehtuuriin liittyvät konventiot:
 * **Komponentin lähettämä signaali kuvaa käyttäjän pyytämää toimintoa, eikä esimerkiksi sitä miten komponentin mielestä tilaa tulisi muuttaa**
   * Komponentilla ei pitäisi sinänsä koskaan olla tietoa siitä, miten applikaation tila on järjestetty ja mitä käsitteitä tallennettuun tilaan liittyy. Komponentti tietää ainoastaan toiminnoista, joita se itse tarjoaa käyttäjälle itse määrittelemässään käyttöliittymässä.
   * Esimerkiksi, käyttäjän vaihtaessa hakemuslistan rivien järjestystä, oikea signaali service-kerrokselle olisi `"applicationListSortChanged"` ja parametreiksi uusi, pyydetty järjestys (esim. `{sortBy: "date", direction: "asc"}`). Esimerkki vääränlaisesta signaalista olisi `"fetchApplicationsOrderedBy"`, koska tämä ei kuvaa käyttäjän toimintaa vaan haluttua lopputulosta.
+* **Komponentin tulee siivota tekemänsä subscriptionit hubiin sekä ns. long-living observable-objekteihin viittaavat computed-objektit**
+  * Mikäli laajennetaan komponenttien ns. base-luokkaa `"ComponentBaseModel"` voidaan käyttää hub-viittauksiin sekä computedien luomiseen valmiita funktioita, jotka huolehtivat näiden siivoamisen komponentin elikaaren päässä. Long-living observable voi olla esimerkiksi globaali applikaatio-model, jonka jotain arvoa seurataan komponentin rungossa.
+  ```javascript
+  self.addEventListener("fileuploadService", "fileRemoved", function(event) {...});
 
+  self.disposedComputed(function() {...});
+  ```
 ## Ilmoitus toimintojen onnistumisesta tai epäonnistumisesta
 
 Toiminnon lopuksi voi näyttää käyttäjälle vihreässä tai punaisessa palkissa
@@ -365,6 +373,14 @@ ajax.command("some-command")
   .call();
 ```
 
+Lomakkeen kentiin tapahtuvien automaattitallennusten jälkeen voidaan näyttää käyttäjälle huomaamattomampi ilmoitus ruudun alaosassa
+```javascript
+hub.send("indicator-icon", {style: "positive"});
+
+hub.send("indicator-icon", {style: "negative"});
+```
+
+
 ## Globaalit objektit
 - Ajax
 - Hub
@@ -378,11 +394,11 @@ ajax.command("some-command")
   - config
 - Docgen, viittaus skeemojen määrittelyyn
 
-## Compass + SASS
+## Compass + SASS + Bless
 
 CSS-tyylit kirjoitetaan Sass-tiedostoihin `resources/private/common-html/sass` kansiossa. Sass-tiedostot käännetään compass gemillä (kirjoitushetkellä versio 1.0.3). Compassin voi asettaa kuuntelemaan muutoksia `compass.sh` scriptillä projektin juuresta. Vaihtoehtoisesti Sass-tiedostot voi kääntää käsin `compass compile resources/private/common-html`.
 
-Compassin konfigurointi on tiedostossa `resources/private/common-html/config.rb`, sisältää mm. CSS splitterin, joka jakaa **main.css** tiedoston pienempiin osiin (IE9 css rule limit). CSS tiedostot generoidaan `resources/public/lp-static/css/` kansioon.
+Compassin konfigurointi on tiedostossa `resources/private/common-html/config.rb`, sisältää mm. Bless-kutsun, joka jakaa **main.css** tiedoston pienempiin osiin (IE9 css rule limit). CSS tiedostot generoidaan `resources/public/lp-static/css/` kansioon.
 
 Oletuksena CSS-tiedostot minimoidaan, tätä voidaan säätää compassin _environment_ tai _output-style_ konfiguroinnilla (config.rb). Esimerkiksi käsin generoitu ei-minifioitu CSS: saa aikaiseksi seuraavalla komennolla (development-mode): `compass compile -e development resources/private/common-html`
 

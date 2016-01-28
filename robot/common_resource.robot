@@ -334,6 +334,9 @@ Arto logs in
 Veikko logs in
   Authority logs in  veikko  veikko  Veikko Viranomainen
 
+Luukas logs in
+  Authority logs in  luukas  luukas  Luukas Lukija
+
 Velho logs in
   Authority logs in  velho  velho  Velho Viranomainen
 
@@ -384,7 +387,7 @@ Input text with jQuery
 
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
-  Input text with jQuery  input[data-test-id="${id}"]  ${value}  ${leaveFocus}
+  Input text with jQuery  [data-test-id="${id}"]  ${value}  ${leaveFocus}
 
 Select From List by test id
   [Arguments]  ${id}  ${value}

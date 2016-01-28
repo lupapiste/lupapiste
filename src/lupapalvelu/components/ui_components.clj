@@ -335,34 +335,34 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant-app {:depends [:ui-components]
+   :applicant-app {:depends []
                    :js ["applicant.js"]}
 
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
-                             :company :analytics :register-company :footer]}
+                             :company :analytics :register-company :footer :ui-components]}
 
-   :authority-app {:depends [:ui-components] :js ["authority.js"]}
-   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :application
+   :authority-app {:depends [] :js ["authority.js"]}
+   :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
-                             :company :stamp :integration-error :analytics :metadata-editor :footer]}
+                             :company :stamp :integration-error :analytics :metadata-editor :footer :ui-components]}
 
-   :oir-app {:depends [:ui-components] :js ["oir.js"]}
+   :oir-app {:depends [] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :analytics :header :footer]
+                       :docgen :debug :analytics :header :footer :ui-components]
              :css ["oir.css"]}
 
-   :authority-admin-app {:depends [:ui-components]
+   :authority-admin-app {:depends []
                          :js ["authority-admin-app.js"]}
-   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
+   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer :ui-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"]}
 
-   :admin-app {:depends [:ui-components]
+   :admin-app {:depends []
                :js ["admin.js"]}
-   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer]
+   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer :ui-components]
                :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"
                     "create-scope-model.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -372,19 +372,19 @@
 
    :wordpress {:depends [:login :password-reset]}
 
-   :welcome-app {:depends [:ui-components]
+   :welcome-app {:depends []
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer :global-models]
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer :global-models :ui-components]
              :js ["company-user.js"]
 
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
-   :neighbor-app {:depends [:ui-components]
+   :neighbor-app {:depends []
                   :js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 

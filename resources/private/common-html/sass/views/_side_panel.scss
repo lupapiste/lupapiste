@@ -62,7 +62,6 @@
     height: 100%;
     background:  fade-out($lp-dark-grey, 0.1);
     background: $lp-dark-grey \9; /* IE 8 and below */
-    border: 1px solid darken($lp-dark-grey, 10%);
     padding: $marginS;
     width: 500px;
   }

@@ -20,6 +20,20 @@
     &.active {
       border-color: $orange;
     }
+    &.disabled {
+      border-color: $input-disabled-border-color;
+      background-color: $input-disabled-background-color;
+      i.tag-chevron {
+        color: $input-select-disabled-icon;
+      }
+      li.tag {
+        color: $input-select-disabled-icon !important;
+        cursor: default !important;
+        i.tag-remove {
+          cursor: default !important;
+        }
+      }
+    }
     position: relative;
     width: inherit;
     min-height: $grid-input-height;
@@ -54,17 +68,12 @@
               margin-right: $marginS;
             }
             .tag-remove {
-              color: $primary;
               line-height: $grid-input-height - 4;
               margin: 0 $marginS;
             }
           }
         }
       }
-    }
-    span.autocomplete-selection-wrapper.disabled {
-      border-color: $input-disabled-border-color;
-      background-color: $input-disabled-background-color;
     }
 
     span.caption, span.selection-text {

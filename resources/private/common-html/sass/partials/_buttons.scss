@@ -371,7 +371,7 @@ a.link-btn-julkipano {
 
 .spin {
   @include rotate( spin );
-  display: none;
+  vertical-align: middle;
 }
 
 i.wait {
@@ -528,4 +528,8 @@ button {
   &:hover, &:active {
     border-color: $gray187;
   }
+}
+
+.left-buttons > button {
+  margin-right: $btn-spacer;
 }

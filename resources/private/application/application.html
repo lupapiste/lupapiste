@@ -463,7 +463,8 @@
                                     <h2 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h2>
                                     <div data-bind="with: $root.application" class="parties-list">
                                         <ul data-bind="foreach: roles">
-                                            <li class="party">
+                                            <li class="party" data-bind="visible: !roles[0].startsWith( 'guest' ),
+                                                                         if: !roles[0].startsWith( 'guest' )">
                                                 <span class="person">
                                                     <span data-bind="fullName: $data"></span>
                                                     (<span data-bind="text: username"></span>)
@@ -506,6 +507,11 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div data-bind="component: 'application-guests'">
+
+                        </div>
+
                         <p data-bind="lhtml: 'required.field.desc'"></p>
 
                         <!-- docgen generated content: -->

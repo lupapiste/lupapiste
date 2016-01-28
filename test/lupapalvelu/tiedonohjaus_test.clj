@@ -70,19 +70,26 @@
         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})))
 
   (fact "application and attachment state (tila) is changed correctly"
-    (let [command {:created     12345678
-                   :data        {:id 1000}
-                   :application {:id           1000
-                                 :organization "753-R"
-                                 :metadata     {:tila "luonnos"}
-                                 :attachments  [{:id 1 :metadata {:tila "luonnos"}}
-                                                {:id 2 :metadata {:tila "luonnos"}}]}}]
+    (let [data-and-app {:data        {:id 1000}
+                        :application {:id           1000
+                                      :organization "753-R"
+                                      :metadata     {:tila "luonnos"}
+                                      :attachments  [{:id 1 :metadata {:tila "luonnos"}}
+                                                     {:id 2 :metadata {:tila "luonnos"}}]}}
+          command (merge data-and-app {:created 12345678})]
       (change-app-and-attachments-metadata-state! command :luonnos :valmis) => nil
       (provided
         (action/update-application command {$set {:modified      12345678
-                                                  :metadata.tila :valmis
-                                                  :attachments   [{:id 1 :metadata {:tila :valmis} :modified 12345678}
-                                                                  {:id 2 :metadata {:tila :valmis} :modified 12345678}]}}) => nil)))
+                                                  :metadata.tila :valmis}}) => nil
+        (action/update-application data-and-app
+                                   {:attachments.id 1}
+                                   {$set {:modified                    12345678
+                                          :attachments.$.metadata.tila :valmis}}) => nil
+        (action/update-application data-and-app
+                                   {:attachments.id 2}
+                                   {$set {:modified                    12345678
+                                          :attachments.$.metadata.tila :valmis}}) => nil)))
+
   (fact "attachment state (tila) is changed correctly"
     (let [application {:id           1000
                        :organization "753-R"

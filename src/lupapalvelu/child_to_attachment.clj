@@ -46,7 +46,8 @@
      :required false
      :archivable is-pdf-a?
      :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
-     :missing-fonts []}))
+     :missing-fonts []
+     :copy-of {:type type :id id}}))
 
 (defn generate-attachment-from-children [user app child-type id lang]
   "Builds attachment and return attachment data as map"
