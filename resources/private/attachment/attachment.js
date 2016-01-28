@@ -213,7 +213,7 @@ var attachment = (function() {
       ajax.command("reject-attachment", { id: id, attachmentId: model.id()})
         .success(function() {
           model.state("requires_user_action");
-          model.dirty = true;
+          repository.load(applicationId, undefined, undefined, true);
         })
         .call();
         hub.send("track-click", {category:"Attachments", label: "", event:"rejectAttachment"});
@@ -225,7 +225,7 @@ var attachment = (function() {
       ajax.command("approve-attachment", { id: id, attachmentId: model.id()})
         .success(function() {
           model.state("ok");
-          model.dirty = true;
+          repository.load(applicationId, undefined, undefined, true);
         })
         .call();
         hub.send("track-click", {category:"Attachments", label: "", event:"approveAttachment"});
