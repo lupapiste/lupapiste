@@ -1588,14 +1588,15 @@
                              {:attachments {$elemMatch {:target {$type 18}}}}))
 
 (defn set-target-with-nil-valued-map-as-nil [{target :target :as attachment}]
-  (if (every? nil? (vals target))
+  (if (or (every? nil? (vals target) (every? (partial = "undefined") (vals target))))
     (assoc attachment :target nil)
     attachment))
 
 (defmigration cleanup-attachment-target-nil-valued-maps
   (update-applications-array :attachments 
                              set-target-with-nil-valued-map-as-nil
-                             {:attachments {$elemMatch {:target.type {$type 10}}}}))
+                             {$or [{:attachments {$elemMatch {:target.type {$type 10}}}}
+                                   {:attachments {$elemMatch {:target.type "undefined"}}}]}))
 
 (defn set-verdict-id-for-nil-valued-verdict-targets [verdict-id {{target-id :id target-type :type} :target :as attachment}]
   (if (and (nil? target-id) (= "verdict" target-type))
