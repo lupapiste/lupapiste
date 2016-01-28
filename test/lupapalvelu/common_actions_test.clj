@@ -55,8 +55,10 @@
           result => nil?
           result => unauthorized?)))))
 
+
 (facts "Actions with id and state 'draft' are not allowed for authority"
-  (let [allowed-actions #{:decline-invitation}] ; Authority can always decline his/hers invitation
+       (let [allowed-actions #{:invite-guest :delete-guest-application
+                              :toggle-guest-subscription :application-guests :decline-invitation}]
     (doseq [[action data] (get-actions)
             :when (and
                     (= :command (keyword (:type data)))
@@ -74,12 +76,13 @@
 (facts "Allowed actions for reader authority"
   (let [user {:id "user123" :orgAuthz {:999-R #{:reader}} :role "authority"}
         application {:organization "999-R" :auth [] :id "123" :permitType "YA"}
-        allowed-actions #{; queries
-                          :application :validate-doc :fetch-validation-errors :document
-                          :get-organization-tags :get-organization-areas :get-possible-statement-statuses
-                          :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
-                          ; raw
-                          :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export}]
+        allowed-actions  #{; queries
+                           :application :validate-doc :fetch-validation-errors :document
+                           :get-organization-tags :get-organization-areas :get-possible-statement-statuses
+                           :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
+                                        ; raw
+                           :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
+                           :application-guests}]
     (doseq [command (ca/foreach-action {} user {} application)
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]

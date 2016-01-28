@@ -27,17 +27,18 @@
 ;; Auth utils
 ;;
 
-(defn get-auths-by-role
-  "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
-  [{auth :auth} role]
-  (filter #(= (name (get % :role "")) (name role)) auth))
+
 
 (defn get-auths-by-roles
-  "Like auths-by-role but the the roles are given as a sequence. Each
-  item can be keyword or string"
+  "Returns sequence of all auth-entries in an application with the
+  given roles. Each role can be keyword or string."
   [{auth :auth} roles]
   (let [role-set (->> roles (map name) set)]
     (filter #(contains? role-set (:role %)) auth)))
+
+(defn get-auths-by-role
+  [application role]
+  (get-auths-by-roles application [role]))
 
 (defn get-auths [{auth :auth} user-id]
   (filter #(= (:id %) user-id) auth))

@@ -23,7 +23,7 @@ Add Veikko as guest authority Saunamajuri to Sipoo
   Add existing authority  ${veikko}  Veikko  Viranomainen  Talonvahti
   User table row contains  ${veikko}  Muutosoikeus
 
-Change Veikko's guest authority role
+Change Veikko's guest authority description
   Add existing authority  ${veikko}  Veikko  Viranomainen  Saunamajuri
 
 Add new user Richard Guest
@@ -51,7 +51,7 @@ Pena creates an application
 
 No guests yet
   Open tab  parties
-  Wait test id hidden  application-guest-table
+  Wait test id visible  application-guest-add
 
 Add bubble sanity check
   Bad guest email and cancel check
@@ -68,7 +68,6 @@ Pena invites Mikko as guest
   Invite application guest  ${mikko}  ${mikko-message}
   Guest table contains  ${mikko-name}
   Guest row inviter  ${mikko}  Pena Panaani
-  Wait for jQuery
   Open last email
   Wait Until  Page Should Contain  ${mikko-message}
   Go back
@@ -134,10 +133,9 @@ No more guest authorities defined
   No more guest authorities
 
 Check Veikko's invitation email
-  Wait for jQuery
   Open last email
   Wait Until  Page Should Contain  ${veikko-message}
-  Go back
+  Go to  ${LOGOUT URL}
   [Teardown]  Logout
 
 
@@ -157,7 +155,7 @@ Veikko logs in and can see the application
   Guest row name  veikko  ${veikko-name}
   Guest row inviter  veikko  Sonja Sibbo
   Guest row unsubscribed  veikko
-  Guest row role  veikko  Saunamajuri
+  Guest row description  veikko  Saunamajuri
   No delete column
 
 Veikko subscribes and unsubscribes to notifications
@@ -180,7 +178,7 @@ Luukas logs in and can see the application
   Wait test id hidden  application-guest-add
   Guest row name  veikko  ${veikko-name}
   Guest row inviter  veikko  Sonja Sibbo
-  Guest row role  veikko  Saunamajuri
+  Guest row description  veikko  Saunamajuri
   Guest row name  ${mikko}  ${mikko-name}
   No subscribe column
   No delete column
