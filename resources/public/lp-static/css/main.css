@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1453981932730');
+@import url('main-blessed1.css?z=1453990924128');
 
 /* line 49, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment .comment-party span {
@@ -4530,6 +4530,31 @@ td.comment-text {
 /* line 273, ../../../private/common-html/sass/views/_attachment.scss */
 .modal-body p {
   max-width: 600px;
+}
+
+/* line 277, ../../../private/common-html/sass/views/_attachment.scss */
+.drop-zone {
+  display: table-cell;
+  vertical-align: middle;
+  color: #fff;
+  width: 320px;
+  height: 240px;
+  text-align: center;
+  background-color: #2ca92c;
+}
+/* line 285, ../../../private/common-html/sass/views/_attachment.scss */
+.drop-zone h1 {
+  float: none;
+  display: block;
+  color: #fff;
+}
+/* line 290, ../../../private/common-html/sass/views/_attachment.scss */
+.drop-zone.active {
+  background-color: #46b02d;
+}
+/* line 293, ../../../private/common-html/sass/views/_attachment.scss */
+.drop-zone i {
+  font-size: 50px;
 }
 
 /* line 3, ../../../private/common-html/sass/views/_statement.scss */
