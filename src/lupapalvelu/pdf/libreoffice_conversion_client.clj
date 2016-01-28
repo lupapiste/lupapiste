@@ -1,16 +1,17 @@
 (ns lupapalvelu.pdf.libreoffice-conversion-client
   (:require [clj-http.client :as http]
             [lupapalvelu.mime :as mime]
+            [sade.core :refer [def-]]
+            [sade.strings :as ss]
             [sade.env :as env]))
 
 
-(defn get-url []
-  (env/value :libreoffice :url))
+(def- url (str "http://" (env/value :libreoffice :host) ":" (or (env/value :libreoffice :port) 8001)))
 
-(def enabled? (not (clojure.string/blank? (env/value :libreoffice :url))))
+(def enabled? (not (ss/blank? (env/value :libreoffice :host))))
 
 (defn convert-to-pdfa [filename content]
-  (http/post (get-url)
+  (http/post url
              {:debug     true
               :as :stream
               :multipart [{:name filename
