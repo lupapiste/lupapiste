@@ -10,7 +10,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   // Document
 
   self.findDocumentById = function(id) {
-    return _.find(self.model(), function(doc) {
+    return _.find(self.model.peek(), function(doc) {
       return doc.id === id;
     });
   };
