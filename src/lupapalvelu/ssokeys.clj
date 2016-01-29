@@ -5,7 +5,7 @@
             [sade.env :as env]
             [sade.crypt :as crypt]
             [sade.schemas :as ssc]
-            [sade.string :as ss]
+            [sade.strings :as ss]
             [sade.validators :as v]))
 
 (sc/defschema SsoKey
@@ -15,6 +15,8 @@
    :crypto-iv                 sc/Str
    (sc/optional-key :comment) sc/Str})
 
+(sc/defschema RawKey (ssc/min-length-string 6))
+
 (defn validate-ip [ip]
   (when-not (v/ip-address? ip) (fail :error.illegal-ip-address)))
 
@@ -22,7 +24,7 @@
   (when-not (sc/check ssc/ObjectIdStr id) (fail :error.invalid-id)))
 
 (defn validate-key [key]
-  (when-not (sc/check (ssc/min-length-string 6) key) (fail :error.illegal-key)))
+  (when-not (sc/check RawKey key) (fail :error.illegal-key)))
 
 (defn- encode-key [secret-key]
   (let [crypto-iv   (crypt/make-iv-128)
