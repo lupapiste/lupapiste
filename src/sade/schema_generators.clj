@@ -38,7 +38,7 @@
 
 ;; Custom static schema generators
 
-(def single-hex (gen/elements (concat (map str (range 10)) (map (comp str char) (range (int \a) (inc (int \f)))))))
+(def single-hex (gen/elements "0123456789abcdef"))
 
 (def single-number-int (gen/elements (range 10)))
 
@@ -115,4 +115,11 @@
             (gen/vector gen/char min-len max-len)))
 
 (register-generator ssc/min-max-length-string min-max-length-string)
+
+(defn min-length-hex-string [min-len]
+  (gen/bind (gen/fmap #(+ min-len %) gen/pos-int)
+            #(gen/fmap clojure.string/join
+                      (gen/vector single-hex %))))
+
+(register-generator ssc/min-length-hex-string min-length-hex-string)
 

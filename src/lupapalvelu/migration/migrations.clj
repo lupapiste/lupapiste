@@ -1471,6 +1471,196 @@
       (let [applications (mongo/select collection {:state {$ne "draft"}, :infoRequest false} [:opened :sent :submitted :canceled :complementNeeded :started :closed :startedBy :closedBy :history :verdicts :permitType :primaryOperation :state])]
         (count (map #(mongo/update-by-id collection (:id %) (populate-application-history %)) applications))))))
 
+(defn user-summary [{email :email id :id first-name :firstName last-name :lastName :as user}]
+  (user/summary
+   (if (and (= id "-") (= first-name "Lupapiste"))
+     (assoc user :username "eraajo@lupapiste.fi")
+     user)))
+
+(defn remove-unwanted-fields-from-attachment-auth [attachment]
+  (update attachment :auth (partial mapv user-summary)))
+
+(defmigration cleanup-attachment-auth-user-summary
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
+                                                                                         :username {$exists false}}}}}}]})
+                        (mongo/count :submitted-applications 
+                                     {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
+                                                                                         :username {$exists false}}}}}}]})))}
+  (update-applications-array :attachments 
+                             remove-unwanted-fields-from-attachment-auth
+                             {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
+                                   {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
+                                                                                 :username {$exists false}}}}}}]}))
+
+(defn remove-unwanted-fields-from-attachment-versions-user [attachment]
+  (update attachment :versions (partial mapv (fn [v] (update v :user user-summary)))))
+
+(defn remove-unwanted-fields-from-attachment-latestVersion-user [attachment]
+  (if (:latestVersion attachment)
+    (update-in attachment [:latestVersion :user] user-summary)
+    attachment))
+
+(defn remove-unwanted-fields-from-attachment-versions-user-and-latestVersion-user [attachment]
+  (-> attachment
+      remove-unwanted-fields-from-attachment-versions-user 
+      remove-unwanted-fields-from-attachment-latestVersion-user))
+
+(defmigration cleanup-attachment-versions-user-summary
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                             :user.username {$exists false}}}}}}
+                                           {:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                                           {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
+                                                                      :latestVersion.user.username {$exists false}}}}]})
+                        (mongo/count :submitted-applications 
+                                     {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                           {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                             :user.username {$exists false}}}}}}
+                                           {:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                                           {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
+                                                                      :latestVersion.user.username {$exists false}}}}]})))}
+  (update-applications-array :attachments 
+                             remove-unwanted-fields-from-attachment-versions-user-and-latestVersion-user
+                             {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
+                                   {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
+                                                                                     :user.username {$exists false}}}}}}
+                                   {:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
+                                   {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
+                                                              :latestVersion.user.username {$exists false}}}}]}))
+
+(defn merge-required-fields-into-attachment [attachment]
+  (merge {:locked               false
+          :applicationState     "draft"
+          :target               nil
+          :requestedByAuthority false
+          :notNeeded            false
+          :op                   nil
+          :signatures           []
+          :auth                 []}
+         attachment))
+
+(defmigration add-required-fields-into-attachments
+  {:apply-when (pos? (mongo/count :applications {$or [{:attachments {$elemMatch {:locked               {$exists false}}}}
+                                                      {:attachments {$elemMatch {:applicationState     {$exists false}}}}
+                                                      {:attachments {$elemMatch {:target               {$exists false}}}}
+                                                      {:attachments {$elemMatch {:requestedByAuthority {$exists false}}}}
+                                                      {:attachments {$elemMatch {:notNeeded            {$exists false}}}}
+                                                      {:attachments {$elemMatch {:op                   {$exists false}}}}
+                                                      {:attachments {$elemMatch {:signatures           {$exists false}}}}
+                                                      {:attachments {$elemMatch {:auth                 {$exists false}}}}]}))}
+  (update-applications-array :attachments 
+                             merge-required-fields-into-attachment
+                             {$or [{:attachments {$elemMatch {:locked               {$exists false}}}}
+                                   {:attachments {$elemMatch {:applicationState     {$exists false}}}}
+                                   {:attachments {$elemMatch {:target               {$exists false}}}}
+                                   {:attachments {$elemMatch {:requestedByAuthority {$exists false}}}}
+                                   {:attachments {$elemMatch {:notNeeded            {$exists false}}}}
+                                   {:attachments {$elemMatch {:op                   {$exists false}}}}
+                                   {:attachments {$elemMatch {:signatures           {$exists false}}}}
+                                   {:attachments {$elemMatch {:auth                 {$exists false}}}}]}))
+
+(defn applicationState-as-camelCase [attachment]
+  (if (= (:applicationState attachment) "complement-needed")
+    (assoc attachment :applicationState "complementNeeded")
+    attachment))
+
+(defmigration attachment-applicationState-as-camelCase
+  {:apply-when (pos? (+ (mongo/count :applications {:attachments.applicationState "complement-needed"})
+                        (mongo/count :submitted-applications {:attachments.applicationState "complement-needed"})))}
+  (update-applications-array :attachments
+                             applicationState-as-camelCase
+                             {:attachments.applicationState "complement-needed"}))
+
+(defn set-target-timestamps-as-nil [{target :target :as attachment}]
+  (if (number? target)
+    (assoc attachment :target nil)
+    attachment))
+
+(defmigration cleanup-attachment-target-with-timestamp-as-value
+  {:apply-when (pos? (+ (mongo/count :applications {:attachments {$elemMatch {:target {$type 18}}}})
+                        (mongo/count :submitted-applications {:attachments {$elemMatch {:target {$type 18}}}})))}
+  (update-applications-array :attachments 
+                             set-target-timestamps-as-nil
+                             {:attachments {$elemMatch {:target {$type 18}}}}))
+
+(defn set-target-with-nil-valued-map-as-nil [{target :target :as attachment}]
+  (if (or (every? nil? (vals target)) (every? (partial = "undefined") (vals target)))
+    (assoc attachment :target nil)
+    attachment))
+
+(defmigration cleanup-attachment-target-nil-valued-maps
+  (update-applications-array :attachments 
+                             set-target-with-nil-valued-map-as-nil
+                             {$or [{:attachments {$elemMatch {:target.type {$type 10}}}}
+                                   {:attachments {$elemMatch {:target.type "undefined"}}}]}))
+
+(defn set-verdict-id-for-nil-valued-verdict-targets [verdict-id {{target-id :id target-type :type} :target :as attachment}]
+  (if (and (nil? target-id) (= "verdict" target-type))
+    (assoc-in attachment [:target :id] verdict-id)
+    attachment))
+
+(defn update-verdict-id-in-attachment-target [query]
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]
+          {attachments :attachments verdicts :verdicts app-id :id :as a} (mongo/select collection query {:verdicts 1 :attachments 1})]
+      (mongo/update-n collection
+                      {:_id app-id} 
+                      {$set {:attachments (map (partial set-verdict-id-for-nil-valued-verdict-targets (:id (first verdicts))) attachments)}}))))
+
+(defmigration update-attachment-target-verdict-id-when-nil
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {:attachments {$elemMatch {:target.id   {$type 10}
+                                                                :target.type "verdict"}}
+                                      :verdicts {$size 1}})
+                        (mongo/count :submitted-applications 
+                                     {:attachments {$elemMatch {:target.id   {$type 10}
+                                                                :target.type "verdict"}}
+                                      :verdicts {$size 1}})))}
+  (update-verdict-id-in-attachment-target {:attachments {$elemMatch {:target.id   {$type 10}
+                                                                :target.type "verdict"}}
+                                           :verdicts {$size 1}}))
+
+(defn remove-attachment-op-operation-type [attachment]
+  (update attachment :op dissoc :operation-type))
+
+(defmigration remove-operation-type-from-attachment-op
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {:attachments {$elemMatch {:op.operation-type {$exists true}}}})
+                        (mongo/count :submitted-applications
+                                     {:attachments {$elemMatch {:op.operation-type {$exists true}}}})))}
+  (update-applications-array :attachments
+                             remove-attachment-op-operation-type
+                             {:attachments {$elemMatch {:op.operation-type {$exists true}}}}))
+
+(defn remove-attachment-versions-accepted [attachment]
+  (update attachment :versions (partial map #(dissoc % :accepted))))
+
+(defn remove-attachment-latestVersion-accepted [{latest-version :latestVersion :as attachment}]
+  (if latest-version
+    (update attachment :latestVersion dissoc :accepted)
+    attachment))
+
+(defn remove-accepted-field-from-attachment-versions-and-latest-version [attachment]
+  (-> attachment
+      remove-attachment-versions-accepted
+      remove-attachment-latestVersion-accepted))
+
+(defmigration remove-accepted-from-attachment-versions
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {$or [{:attachments.versions.accepted {$exists true}}
+                                           {:attachments.latestVersion.accepted {$exists true}}]})
+                        (mongo/count :submitted-applications
+                                     {$or [{:attachments.versions.accepted {$exists true}}
+                                           {:attachments.latestVersion.accepted {$exists true}}]})))}
+  (update-applications-array :attachments
+                             remove-accepted-field-from-attachment-versions-and-latest-version
+                             {$or [{:attachments.versions.accepted {$exists true}}
+                                   {:attachments.latestVersion.accepted {$exists true}}]}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

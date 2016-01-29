@@ -3,7 +3,7 @@
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
-            [clojure.set :refer [rename-keys]]
+            [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
@@ -28,6 +28,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.coordinate :as coord]
+            [sade.schemas :as ssc]
             [swiss.arrows :refer [-<>>]]))
 
 
@@ -204,10 +205,13 @@
 ;; Application creation
 ;;
 
-(defn make-attachments [created operation organization applicationState tos-function & {:keys [target]}]
-  (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-    (let [metadata (tos/metadata-for-document (:id organization) tos-function {:type-group type-group :type-id type-id})]
-      (attachment/make-attachment created target true false false applicationState operation {:type-group type-group :type-id type-id} metadata))))
+(defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
+  (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer attachment/Type)) set)
+        types          (->> (organization/get-organization-attachments-for-operation organization operation)
+                            (remove (difference existing-types attachment/operation-specific-attachment-types)))
+        ops            (map #(when (attachment/operation-specific-attachment-types %) operation) types)
+        metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
+    (map (partial attachment/make-attachment created target true false false applicationState) ops types metadatas)))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys

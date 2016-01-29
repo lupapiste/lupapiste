@@ -519,6 +519,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
+
    :laajentaminen               {:schema "rakennuksen-laajentaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -575,6 +576,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
+
    :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen-ei-huoneistoja"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -665,6 +667,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
+
    :auto-katos                  {:schema "kaupunkikuvatoimenpide"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -721,6 +724,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
+
    :purkaminen                  {:schema "purkaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -730,6 +734,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
+
    :kaivuu                      {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -802,6 +807,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
+
    :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -826,6 +832,7 @@
                                  :max-incoming-link-permits 0
                                  :allowed-link-permit-types #{permit/R permit/P}
                                  :asianhallinta false}
+
    :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -834,6 +841,7 @@
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :asianhallinta false}
+
    :jatkoaika                   {:schema "hankkeen-kuvaus-minimum"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
