@@ -85,12 +85,13 @@
 (def NilVerdictIdTarget (sc/if :id Target {:type (sc/enum "verdict") :id Nil}))
 
 (defspec update-attachment-target-verdict-id 20
-  (prop/for-all [target (ssg/generator NilVerdictIdTarget)]
+  (prop/for-all [target (ssg/generator NilVerdictIdTarget)
+                 verdict-id ssg/object-id]
                 (let [failing-attachment   (assoc attachment :target target)
-                      completed-attachment (set-verdict-id-for-nil-valued-verdict-targets "verdictId" failing-attachment)]
+                      completed-attachment (set-verdict-id-for-nil-valued-verdict-targets verdict-id failing-attachment)]
                   (and
                    (if (and (= "verdict" (:type target)) (nil? (:id target)))
-                     (= (get-in completed-attachment [:target :id]) "verdictId")
+                     (= (get-in completed-attachment [:target :id]) verdict-id)
                      (= target (:target completed-attachment)))
                    (nil? (sc/check Attachment (attachment-coercer completed-attachment)))))))
 
