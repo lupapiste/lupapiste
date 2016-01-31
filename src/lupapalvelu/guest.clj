@@ -181,7 +181,8 @@
     application :application
     :as command}]
   (action/update-application command
-                             {$pull {:auth {:username username}}})
+                             {$pull {:auth {:username username
+                                            :role #"guest(Authority)?"}}})
   (ok))
 
 

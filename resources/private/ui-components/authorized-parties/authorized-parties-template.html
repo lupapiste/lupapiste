@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container">
+      <script type="text/x-jquery-tmpl" id="authorized-parties-template">
+        <div class="authorized-parties">
+          <div  class="parties-list">
+            <table class="auth-table">
+              <thead>
+                <th data-bind="ltext: 'application.authorizedParties'"></th>
+                <th data-bind="ltext: 'guest-authority.description'"></th>
+                <th data-bind="ltext: 'authorized.invite'"></th>
+                <th data-bind="ltext: 'application-guests.notifications'"></th>
+                <th data-bind="ltext: 'application.remove-auth'"></th>
+              </thead>
+              <tbody data-bind="foreach: authorizedParties">
+                <td data-bind="text: $parent.nameInformation( $data )"></td>
+                <td data-bind="text: $parent.roleInformation( $data )"> </td>
+                <td>
+                  <span data-bind="if: $data.invite">
+                    <span class="user-invite" data-bind="ltext: 'invited'"></span>
+                  </span>
+                  <span data-bind="if: !$data.invite">
+                    <span data-bind="visible: $parent.isNotOwner($data), ltext: 'accepted'"></span>
+                    <!-- ko if: $data.inviteAccepted -->
+                    <span data-test-id="invite-accepted-span"
+                          data-bind="dateTimeString: $data.inviteAccepted"></span>
+                    <!-- /ko -->
+                  </span>
+                </td>
+                <td data-bind="if: $parent.showSubscriptionStatus($data)">
+                  <a class="invite-action" href="#"
+                     data-test-id="subscribeNotifications"
+                     data-bind="visible: $parent.showSubscribe( $data ),
+                                click: $root.application.subscribeNotifications,
+                                ltext: 'subscribeNotifications'"></a>
+                  <a class="invite-action" href="#"
+                     data-test-id="unsubscribeNotifications"
+                     data-bind="visible: $parent.showUnsubscribe( $data ),
+                                click: $root.application.unsubscribeNotifications,
+                                ltext: 'unsubscribeNotifications'"></a>
+                </td>
+                <td data-bind="if: $parent.showRemove( $data )">
+                  <i class="primary lupicon-remove"
+                     data-bind="click: $root.application.removeAuth"></i>
+                </td>
+              </tbody>
+            </table>
+
+            <button class="positive"
+                    data-test-id="application-invite-person"
+                    data-bind="visible: $root.authorization.ok('invite-with-role'),
+                               enabled: $root.authorization.ok('invite-with-role')"
+                    onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'personSelector.invite'"></span>
+            </button>
+
+            <span data-bind="component: {name: 'company-invite'}"></span>
+
+          </div>
+        </div>
+      </script>
+    </section>
+  </body>
+</html>

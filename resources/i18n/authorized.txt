@@ -1,0 +1,1 @@
+"authorized.invite" "fi" "Käyttäjäkutsu"
