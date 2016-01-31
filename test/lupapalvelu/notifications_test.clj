@@ -15,7 +15,12 @@
 (fact "create application link"
   (fact "..for application"
     (get-application-link {:id 1} "" "fi" {:role "applicant"})
-      => (str (sade.env/value :host) "/app/fi/applicant#!/application/1"))
+      => (str (sade.env/value :host) "/app/fi/applicant#!/application/1")
+    (get-application-link {:id 1} "/tab" "fi" {:role "applicant"})
+      => (str (sade.env/value :host) "/app/fi/applicant#!/application/1/tab")
+    (get-application-link {:id 1} "tab" "fi" {:role "applicant"})
+      => (str (sade.env/value :host) "/app/fi/applicant#!/application/1/tab"))
+
   (fact "..for inforequest"
     (get-application-link {:id 1 :infoRequest true} "/comment" "fi" {:role "authority"})
       => (str (sade.env/value :host) "/app/fi/authority#!/inforequest/1/comment")))

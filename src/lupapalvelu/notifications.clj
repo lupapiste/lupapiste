@@ -16,7 +16,7 @@
 ;;
 
 (defn get-application-link [{:keys [infoRequest id]} tab lang {role :role :or {role "applicant"}}]
-  (let [suffix (if (and tab (not (ss/starts-with tab "/"))) (str "/" tab) tab)
+  (let [suffix (if (and (not (ss/blank? tab)) (not (ss/starts-with tab "/"))) (str "/" tab) tab)
         permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]
     (str (env/value :host) "/app/" lang "/" (u/applicationpage-for role) "#!" full-path)))
