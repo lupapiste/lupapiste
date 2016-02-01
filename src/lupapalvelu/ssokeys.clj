@@ -19,7 +19,7 @@
 (sc/defschema UnencryptedKey (ssc/min-length-string 1))
 
 (defn validate-ip [ip]
-  (when-not ((some-fn ss/blank? v/ip-address?) ip) (fail :error.illegal-ip-address)))
+  (when-not (v/ip-address? ip) (fail :error.illegal-ip-address)))
 
 (defn validate-id [id]
   (when-not (nil? (sc/check ssc/ObjectIdStr id)) (fail :error.invalid-id)))
@@ -36,8 +36,8 @@
 (defn update-sso-key [sso-key ip secret-key comment]
   (->> {:ip ip 
         :comment comment}
-       (filter (comp ss/blank? val))
-       (merge sso-key (when secret-key (encode-key secret-key)))
+       (remove (comp ss/blank? val))
+       (merge sso-key (when-not (ss/blank? secret-key) (encode-key secret-key)))
        (sc/validate SsoKey)))
 
 (defn create-sso-key [ip secret-key comment]
@@ -47,7 +47,7 @@
 
 (defn update-to-db [{id :id :as sso-key}]
   (try
-    (mongo/update-by-id :ssoKeys id sso-key :upsert true)
+    (mongo/update-by-id :ssoKeys id (mongo/with-_id sso-key) :upsert true)
     (catch DuplicateKeyException e (fail! :error.ip-already-in-use)))
   id)
 
@@ -55,8 +55,8 @@
   (mongo/remove :ssoKeys id))
 
 (defn get-sso-key-by-id [id]
-  (or (mongo/select-one :ssoKeys {:id id})
+  (or (mongo/select-one :ssoKeys {:_id id})
       (fail! :error.unknown-id)))
 
 (defn get-all-sso-keys []
-  (mongo/select :ssoKeys {} {:id 1 :ip 1 :comment 1}))
+  (mongo/select :ssoKeys {} {:_id 1 :ip 1 :comment 1}))
