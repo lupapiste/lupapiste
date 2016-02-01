@@ -4,7 +4,8 @@
             [monger.operators :refer :all]
             [sade.env :as env]
             [lupapalvelu.tiedonohjaus :refer :all]
-            [lupapalvelu.action :as action]))
+            [lupapalvelu.action :as action]
+            [lupapalvelu.domain :as domain]))
 
 (facts "about tiedonohjaus utils"
   (fact "case file report data is generated from application"
@@ -70,40 +71,136 @@
         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})))
 
   (fact "application and attachment state (tila) is changed correctly"
-    (let [data-and-app {:data        {:id 1000}
-                        :application {:id           1000
-                                      :organization "753-R"
-                                      :metadata     {:tila "luonnos"}
-                                      :attachments  [{:id 1 :metadata {:tila "luonnos"}}
-                                                     {:id 2 :metadata {:tila "luonnos"}}]}}
-          command (merge data-and-app {:created 12345678})]
-      (change-app-and-attachments-metadata-state! command :luonnos :valmis) => nil
+    (let [metadata {:tila :luonnos
+                    :salassapitoaika 5
+                    :nakyvyys :julkinen
+                    :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                   :pituus 10
+                                   :perustelu "foo"}
+                    :myyntipalvelu false
+                    :suojaustaso :ei-luokiteltu
+                    :kayttajaryhma :viranomaisryhma
+                    :kieli :fi
+                    :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                    :salassapitoperuste "peruste"
+                    :henkilotiedot :sisaltaa
+                    :julkisuusluokka :salainen
+                    :kayttajaryhmakuvaus :muokkausoikeus}
+          application {:id           1000
+                       :organization "753-R"
+                       :metadata     metadata
+                       :attachments  [{:id 1 :metadata metadata}
+                                      {:id 2 :metadata metadata}]
+                       :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
+          command (action/application->command application)]
+      (mark-app-and-attachments-final! 1000 12345678) => nil
       (provided
+        (domain/get-application-no-access-checking 1000) => application
+
         (action/update-application command {$set {:modified      12345678
-                                                  :metadata.tila :valmis}}) => nil
-        (action/update-application data-and-app
+                                                  :metadata {:tila :valmis
+                                                             :salassapitoaika 5
+                                                             :nakyvyys :julkinen
+                                                             :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                            :pituus 10
+                                                                            :perustelu "foo"
+                                                                            :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                             :myyntipalvelu false
+                                                             :suojaustaso :ei-luokiteltu
+                                                             :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                                             :kayttajaryhma :viranomaisryhma
+                                                             :kieli :fi
+                                                             :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                                             :salassapitoperuste "peruste"
+                                                             :henkilotiedot :sisaltaa
+                                                             :julkisuusluokka :salainen
+                                                             :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil
+        (action/update-application command
                                    {:attachments.id 1}
                                    {$set {:modified                    12345678
-                                          :attachments.$.metadata.tila :valmis}}) => nil
-        (action/update-application data-and-app
+                                          :attachments.$.metadata {:tila :valmis
+                                                                   :salassapitoaika 5
+                                                                   :nakyvyys :julkinen
+                                                                   :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                  :pituus 10
+                                                                                  :perustelu "foo"
+                                                                                  :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                   :myyntipalvelu false
+                                                                   :suojaustaso :ei-luokiteltu
+                                                                   :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                                                   :kayttajaryhma :viranomaisryhma
+                                                                   :kieli :fi
+                                                                   :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                                                   :salassapitoperuste "peruste"
+                                                                   :henkilotiedot :sisaltaa
+                                                                   :julkisuusluokka :salainen
+                                                                   :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil
+        (action/update-application command
                                    {:attachments.id 2}
                                    {$set {:modified                    12345678
-                                          :attachments.$.metadata.tila :valmis}}) => nil)))
+                                          :attachments.$.metadata {:tila :valmis
+                                                                   :salassapitoaika 5
+                                                                   :nakyvyys :julkinen
+                                                                   :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                  :pituus 10
+                                                                                  :perustelu "foo"
+                                                                                  :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                   :myyntipalvelu false
+                                                                   :suojaustaso :ei-luokiteltu
+                                                                   :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                                                   :kayttajaryhma :viranomaisryhma
+                                                                   :kieli :fi
+                                                                   :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                                                   :salassapitoperuste "peruste"
+                                                                   :henkilotiedot :sisaltaa
+                                                                   :julkisuusluokka :salainen
+                                                                   :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil)))
 
   (fact "attachment state (tila) is changed correctly"
     (let [application {:id           1000
                        :organization "753-R"
                        :metadata     {:tila "luonnos"}
+                       :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
                        :attachments  [{:id 1 :metadata {:tila "luonnos"}}
-                                      {:id 2 :metadata {:tila "luonnos"}}]}
+                                      {:id 2 :metadata {:tila :luonnos
+                                                        :salassapitoaika 5
+                                                        :nakyvyys :julkinen
+                                                        :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                       :pituus 10
+                                                                       :perustelu "foo"}
+                                                        :myyntipalvelu false
+                                                        :suojaustaso :ei-luokiteltu
+                                                        :kayttajaryhma :viranomaisryhma
+                                                        :kieli :fi
+                                                        :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                                        :salassapitoperuste "peruste"
+                                                        :henkilotiedot :sisaltaa
+                                                        :julkisuusluokka :salainen
+                                                        :kayttajaryhmakuvaus :muokkausoikeus}}]}
           now 12345678
           attachment-id 2]
-      (change-attachment-metadata-state! application now attachment-id :luonnos :valmis) => nil
+      (mark-attachment-final! application now attachment-id) => nil
       (provided
         (action/update-application (action/application->command application)
                                    {:attachments.id attachment-id}
-                                   {$set {:modified                    now
-                                          :attachments.$.metadata.tila :valmis}}) => nil)))
+                                   {$set {:modified               now
+                                          :attachments.$.metadata {:tila :valmis
+                                                                   :salassapitoaika 5
+                                                                   :nakyvyys :julkinen
+                                                                   :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                  :pituus 10
+                                                                                  :perustelu "foo"
+                                                                                  :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                   :myyntipalvelu false
+                                                                   :suojaustaso :ei-luokiteltu
+                                                                   :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                                                   :kayttajaryhma :viranomaisryhma
+                                                                   :kieli :fi
+                                                                   :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                                                   :salassapitoperuste "peruste"
+                                                                   :henkilotiedot :sisaltaa
+                                                                   :julkisuusluokka :salainen
+                                                                   :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil)))
 
   (fact "document metadata is updated correctly"
     (let [application {:id           1000
