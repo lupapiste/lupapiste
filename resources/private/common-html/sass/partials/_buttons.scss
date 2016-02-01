@@ -453,6 +453,11 @@ i.toggle {
   @include stacked;
 }
 
+.stacked--inline {
+  @include stacked;
+  display: inline-table;
+}
+
 // Only inner margins
 .inner-margins {
   .btn, button, div, a {

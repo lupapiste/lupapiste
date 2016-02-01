@@ -42,13 +42,17 @@
               </tr>
             </tbody>
           </table>
-          <button class="positive"
-                  data-test-id="application-guest-add"
-                  data-bind="click: toggleBubble,
-                             visible: canDelete()">
-            <i class="lupicon-circle-plus"></i>
-            <span data-bind="ltext: 'guest-authority.add'"></span>
-          </button>
+          <div class="stacked">
+            <button class="positive"
+                    data-test-id="application-guest-add"
+                    data-bind="click: toggleBubble,
+                               visible: canDelete()">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'guest-authority.add'"></span>
+            </button>
+            <div class="guest-arrow"
+                 data-bind="visible: bubbleVisible"></div>
+          </div>
           <bubble-dialog params="visible: bubbleVisible,
                                  buttonIcon: 'lupicon-circle-arrow-right',
                                  buttonText: 'application-guests.send',

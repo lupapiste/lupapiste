@@ -4628,56 +4628,72 @@ i.toggle {
   overflow-y: hidden;
 }
 
-/* line 458, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 456, ../../../private/common-html/sass/partials/_buttons.scss */
+.stacked--inline {
+  display: table;
+  display: inline-table;
+}
+/* line 442, ../../../private/common-html/sass/partials/_buttons.scss */
+.stacked--inline .btn, .stacked--inline .like-btn, .stacked--inline a.link-btn, .stacked--inline a.link-btn-julkipano, .stacked--inline .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked--inline .paginate_disabled_previous, .stacked--inline .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked--inline .paginate_disabled_next, .stacked--inline button {
+  width: 100%;
+  display: block;
+  margin: 0;
+}
+/* line 447, ../../../private/common-html/sass/partials/_buttons.scss */
+.stacked--inline div {
+  overflow-y: hidden;
+}
+
+/* line 463, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins .btn, .inner-margins .like-btn, .inner-margins a.link-btn, .inner-margins a.link-btn-julkipano, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins div, .inner-margins a {
   margin-left: 12px;
 }
-/* line 461, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 466, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins :first-child {
   margin-left: 0;
 }
 
-/* line 467, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 472, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked .btn, .inner-margins.stacked .like-btn, .inner-margins.stacked a.link-btn, .inner-margins.stacked a.link-btn-julkipano, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked div, .inner-margins.stacked a {
   margin-left: 0;
   margin-top: 12px;
 }
-/* line 471, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 476, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked :first-child {
   margin-top: 0;
 }
 
-/* line 477, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 482, ../../../private/common-html/sass/partials/_buttons.scss */
 .margins-s {
   margin: 6px 6px 6px 6px;
 }
 
-/* line 483, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 488, ../../../private/common-html/sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 487, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 492, ../../../private/common-html/sass/partials/_buttons.scss */
 #partiesDocgen button {
   margin-bottom: 6px;
 }
 
-/* line 491, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 496, ../../../private/common-html/sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
 }
 
-/* line 497, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 502, ../../../private/common-html/sass/partials/_buttons.scss */
 button:focus {
   outline: 0;
 }
 
-/* line 502, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 507, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button {
   position: relative;
 }
-/* line 504, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 509, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
@@ -4687,30 +4703,30 @@ button:focus {
   overflow: hidden;
   z-index: 1;
 }
-/* line 512, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 517, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 515, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 520, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
 }
-/* line 518, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 523, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
-/* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 531, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 528, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 533, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
 
-/* line 533, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 538, ../../../private/common-html/sass/partials/_buttons.scss */
 .left-buttons > button {
   margin-right: 12px;
 }
@@ -7954,65 +7970,4 @@ table.attachments-template-table td.attachment-version-info {
 .scroll-95em {
   max-height: 95em;
   overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-96em {
-  max-height: 96em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-97em {
-  max-height: 97em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-98em {
-  max-height: 98em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-99em {
-  max-height: 99em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-100em {
-  max-height: 100em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-101em {
-  max-height: 101em;
-  overflow-y: auto;
-}
-
-/* line 194, ../../../private/common-html/sass/partials/_tables.scss */
-.header-table {
-  margin: 0;
-}
-/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
-.header-table table {
-  margin: 0;
-}
-
-/* line 201, ../../../private/common-html/sass/partials/_tables.scss */
-.header-table > tbody > tr > td {
-  padding: 0;
-}
-
-/* line 205, ../../../private/common-html/sass/partials/_tables.scss */
-.header-table > tfoot > tr:hover {
-  background-color: transparent;
-}
-
-/* line 209, ../../../private/common-html/sass/partials/_tables.scss */
-td.positive {
-  background-color: #2ca92c;
-  color: white;
 }

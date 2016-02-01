@@ -2,39 +2,12 @@
 .bubble-dialog {
   $border-color: $grid-border-color;
   $bg-color: white;
-  /* $nubbin: 20px; */
   $pad: 20px;
 
-  /* margin-top: 1.5 * $nubbin; */
   padding: $pad $pad $pad $pad;
   position: relative;
   background: $bg-color;
   border: 1px solid $border-color;
-
-  /* &:after, */
-  /* &:before { */
-  /*   bottom: 100%; */
-  /*   left: 60px; */
-  /*   border: solid transparent; */
-  /*   content: " "; */
-  /*   height: 0; */
-  /*   width: 0; */
-  /*   position: absolute; */
-  /*   pointer-events: none; */
-  /* } */
-
-  /* &:after { */
-  /*   border-color: transparentize( $bg-color, 1); */
-  /*   border-bottom-color: $bg-color; */
-  /*   border-width: $nubbin; */
-  /*   margin-left: -$nubbin; */
-  /* } */
-  /* &:before { */
-  /*   border-color: transparentize( $border-color, 1); */
-  /*   border-bottom-color: $border-color; */
-  /*   border-width: $nubbin + 1px; */
-  /*   margin-left: -$nubbin - 1px; */
-  /* } */
 
   .left-buttons {
     margin-top: $pad;
@@ -81,7 +54,7 @@
   }
 }
 
-@include bubble-arrow( bubble-dialog-arrow, $grid-border-color, white);
+@include bubble-arrow( guest-arrow, $grid-border-color, white, stacked, 20px);
 
 .auth-table {
   tr {
