@@ -137,6 +137,20 @@
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Tampere"))))
 
+(fact "address-by-point-proxy - municipality is retured even if no address found"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
+  (let [x 296734.231 ; Island in Raasepori
+        y 6647154.2190031
+        request {:params {:x x :y y}}
+        response (address-by-point-proxy request)]
+    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
+    (let [body (json/decode (:body response) true)]
+      (fact "empty street data"
+        (:street body) => ""
+        (:number body) => "")
+      (fact "Municipality code" (:municipality body) => "710")
+      (fact "Municipality name" (:fi (:name body)) => "Raasepori"))))
+
 (facts "address-by-point - street number null"
   (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (let [x 403827.289
