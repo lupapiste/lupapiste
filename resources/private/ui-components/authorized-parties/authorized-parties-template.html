@@ -31,12 +31,12 @@
                 <td data-bind="if: $parent.showSubscriptionStatus($data)">
                   <a class="invite-action" href="#"
                      data-test-id="subscribeNotifications"
-                     data-bind="visible: $parent.showSubscribe( $data ),
+                     data-bind="visible: !$parent.subscriptionOn( $data ),
                                 click: $root.application.subscribeNotifications,
                                 ltext: 'subscribeNotifications'"></a>
                   <a class="invite-action" href="#"
                      data-test-id="unsubscribeNotifications"
-                     data-bind="visible: $parent.showUnsubscribe( $data ),
+                     data-bind="visible: $parent.subscriptionOn( $data ),
                                 click: $root.application.unsubscribeNotifications,
                                 ltext: 'unsubscribeNotifications'"></a>
                 </td>

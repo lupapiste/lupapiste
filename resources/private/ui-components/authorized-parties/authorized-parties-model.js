@@ -40,12 +40,9 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return application().canSubscribe( role );
   };
 
-  self.showSubscribe = function( role ) {
-    return role.unsubscribed && role.unsubscribed();
-  };
-
-  self.showUnsubscribe = function( role ) {
-    return role.unsubscribed && !role.unsubscribed();
+  self.subscriptionOn = function( role ) {
+    var unsub = role.unsubscribed || _.noop;
+    return !unsub();
   };
 
   self.showInviteButton = function() {
