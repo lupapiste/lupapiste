@@ -5,7 +5,7 @@ LUPAPISTE.StatementReplyRequestModel = function(params) {
   self.tab = "reply-request";
 
   self.authModel = params.authModel;
-  
+
   self.applicationTitle = params.applicationTitle;
   self.data = params.data;
 
@@ -13,10 +13,11 @@ LUPAPISTE.StatementReplyRequestModel = function(params) {
 
   var commands = params.commands;
 
+  // FIXME computed + dispose
   self.data.subscribe(function() {
     self.text(util.getIn(self.data, ["reply", "saateText"]));
   });
- 
+
   self.enabled = ko.pureComputed(function() {
     return self.authModel.ok(commands["submit"]);
   });
@@ -25,8 +26,9 @@ LUPAPISTE.StatementReplyRequestModel = function(params) {
     return self.authModel.ok("request-for-statement-reply");
   });
 
+  // FIXME computed + dispose
   self.text.subscribe(function(value) {
-    if(value && util.getIn(self.data, ["reply", "saateText"]) !== value) { 
+    if(value && util.getIn(self.data, ["reply", "saateText"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["reply", "saateText"], value: value});
     }
   });

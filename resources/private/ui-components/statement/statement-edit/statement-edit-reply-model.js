@@ -11,9 +11,10 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
 
   self.text = ko.observable();
   self.nothingToAdd = ko.observable();
-  
+
   var commands = params.commands;
 
+  // FIXME computed + dispose
   self.data.subscribe(function() {
     self.nothingToAdd(util.getIn(self.data, ["nothing-to-add"]));
     self.text(util.getIn(self.data, ["reply", "text"]));
@@ -35,8 +36,9 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
     return _.contains(["replied"], util.getIn(self.data, ["state"])) || self.authModel.ok(commands["submit"]);
   });
 
+  // FIXME computed + dispose
   self.text.subscribe(function(value) {
-    if(value && util.getIn(self.data, ["reply", "text"]) !== value) { 
+    if(value && util.getIn(self.data, ["reply", "text"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["reply", "text"], value: value});
     }
   });
@@ -45,12 +47,14 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
     return util.getIn(self.data, ["reply", "saateText"]) || "";
   });
 
+  // FIXME computed + dispose
   self.nothingToAdd.subscribe(function(value) {
     if(value && util.getIn(self.data, ["reply", "nothing-to-add"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["reply", "nothing-to-add"], value: value});
     }
   });
 
+  // FIXME computed + dispose
   submitAllowed.subscribe(function(value) {
     hub.send("statement::submitAllowed", {tab: self.tab, value: value});
   });
