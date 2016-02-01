@@ -1,32 +1,72 @@
-.help-arrow {
-  position: relative;
-  z-index: 100;
-}
-.help-arrow:after, .help-arrow:before {
-        bottom: 100%;
-        left: 50%;
-        border: solid transparent;
-        content: " ";
-        height: 0;
-        width: 0;
-        position: absolute;
-        pointer-events: none;
-        z-index: 100;
-        overflow-y: visible;
+/* .help-arrow { */
+/*   position: relative; */
+/*   z-index: 100; */
+/* } */
+/* .help-arrow:after, .help-arrow:before { */
+/*         bottom: 100%; */
+/*         left: 50%; */
+/*         border: solid transparent; */
+/*         content: " "; */
+/*         height: 0; */
+/*         width: 0; */
+/*         position: absolute; */
+/*         pointer-events: none; */
+/*         z-index: 100; */
+/*         overflow-y: visible; */
+/* } */
+
+/* .help-arrow:after { */
+/*   border-color: transparentize( $gray246, 1); */
+/*   border-bottom-color: $gray246; */
+/*   border-width: 14px; */
+/*   margin-left: -14px; */
+/* } */
+/* .help-arrow:before { */
+/*   border-color: transparentize( $orange, 1); */
+/*   border-bottom-color: $orange; */
+/*   border-width: 15px; */
+/*   margin-left: -15px; */
+/* } */
+
+@mixin bubble-arrow( $cls, $border, $bg ) {
+  .#{$cls} {
+    position: relative;
+    z-index: 100;
+  }
+  .#{$cls}:after, .#{$cls}:before {
+                        bottom: 100%;
+                        left: 50%;
+                        border: solid transparent;
+                        content: " ";
+                        height: 0;
+                        width: 0;
+                        position: absolute;
+                        pointer-events: none;
+                        z-index: 100;
+                        overflow-y: visible;
+                      }
+
+  .#{$cls}:after {
+    border-color: transparentize( $bg, 1);
+    border-bottom-color: $bg;
+    border-width: 14px;
+    margin-left: -14px;
+  }
+  .#{$cls}:before {
+    border-color: transparentize( $border, 1);
+    border-bottom-color: $border;
+    border-width: 15px;
+    margin-left: -15px;
+  }
+
+  .stacked .#{$cls} {
+  overflow-y: visible;
+  margin-top: 20px;
+  margin-bottom: -1px;
+  }
 }
 
-.help-arrow:after {
-  border-color: transparentize( $gray246, 1);
-  border-bottom-color: $gray246;
-  border-width: 14px;
-  margin-left: -14px;
-}
-.help-arrow:before {
-  border-color: transparentize( $orange, 1);
-  border-bottom-color: $orange;
-  border-width: 15px;
-  margin-left: -15px;
-}
+@include bubble-arrow( help-arrow, $orange, $gray246);
 
 .help-toggle {
   margin: {
@@ -47,12 +87,12 @@
   }
 }
 
-.stacked .help-arrow {
-  overflow-y: visible;
-  margin-top: 20px;
-  //margin-bottom: -20px;
-  margin-bottom: -1px;
-}
+
+/* .stacked .help-arrow { */
+/*   overflow-y: visible; */
+/*   margin-top: 20px; */
+/*   margin-bottom: -1px; */
+/* } */
 
 .stacked.help-toggle {
   overflow-y: visible;
