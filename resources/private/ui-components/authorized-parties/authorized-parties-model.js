@@ -64,9 +64,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
           .value();
   });
 
-  self.dispose = function() {
-    // Dependencies on global observables must be
-    // explicitly disposed.
-    self.authorizedParties.dispose();
-  };
+  // Dependencies on global observables must be
+  // explicitly disposed.
+  self.dispose = self.authorizedParties.dispose;
 };
