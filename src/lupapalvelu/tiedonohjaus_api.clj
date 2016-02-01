@@ -45,8 +45,8 @@
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
     (if code-valid?
-      (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode) (:attachments application))
-            {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode "hakemus")
+      (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode application) (:attachments application))
+            {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode application "hakemus")
             process-metadata (t/metadata-for-process orgId functionCode)]
         (action/update-application command
                                    {$set {:modified created
@@ -86,7 +86,7 @@
   (let [fields (if (= "caseFile" schema) tms/common-metadata-fields editable-metadata-fields)]
     (ok :schema (map metadata-schema-for-ui fields))))
 
-(defn- revert-unauthorized-modifications [roles old-metadata new-metadata]
+(defn- revert-unauthorized-modifications [new-metadata old-metadata roles]
   (let [disallowed-metadata (filter (fn [field] (when-let [role (:require-role field)]
                                                   (not (contains? roles role))))
                               editable-metadata-fields)
@@ -101,18 +101,19 @@
       (timbre/warn t)
       (fail! "error.invalid.metadata"))))
 
-(defn- update-document-metadata [document metadata user-roles]
+(defn- update-document-metadata [document metadata user-roles application]
   (let [old-metadata (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap (:metadata document))
-        metadata (->> (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap metadata)
-                      (revert-unauthorized-modifications user-roles old-metadata)
-                      (#(assoc % :tila (or (:tila old-metadata) :luonnos)))
-                      sanitize-metadata)]
+        metadata (-> (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap metadata)
+                     (revert-unauthorized-modifications old-metadata user-roles)
+                     (t/update-end-dates application)
+                     (assoc :tila (or (:tila old-metadata) :luonnos))
+                     sanitize-metadata)]
     (assoc document :metadata metadata)))
 
 (defn- update-application-child-metadata! [{:keys [application created user] :as command} type id metadata]
   (if-let [child (first (filter #(= (:id %) id) (type application)))]
     (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-          updated-child (update-document-metadata child metadata user-roles)
+          updated-child (update-document-metadata child metadata user-roles application)
           updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
       (action/update-application command {$set {:modified created type updated-children}})
       (ok))
@@ -120,9 +121,9 @@
 
 (defn- process-case-file-metadata [old-metadata new-metadata user-roles]
   (let [coerced-old-metadata (schema-utils/coerce-metadata-to-schema tms/MetaDataMap old-metadata)]
-    (->> (schema-utils/coerce-metadata-to-schema tms/MetaDataMap new-metadata)
-         (revert-unauthorized-modifications user-roles coerced-old-metadata)
-         sanitize-metadata)))
+    (-> (schema-utils/coerce-metadata-to-schema tms/MetaDataMap new-metadata)
+        (revert-unauthorized-modifications coerced-old-metadata user-roles)
+        sanitize-metadata)))
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
@@ -141,7 +142,7 @@
    :states states/all-but-draft-or-terminal}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-        {processed-metadata :metadata} (update-document-metadata application metadata user-roles)]
+        {processed-metadata :metadata} (update-document-metadata application metadata user-roles application)]
     (action/update-application command {$set {:modified created
                                               :metadata processed-metadata}})
     (ok)))

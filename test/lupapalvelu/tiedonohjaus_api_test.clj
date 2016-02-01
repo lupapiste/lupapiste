@@ -5,7 +5,9 @@
             [sade.env :as env]
             [lupapalvelu.tiedonohjaus-api :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.action :refer [execute]]))
+            [lupapalvelu.action :refer [execute]])
+  (:import (java.util Date)
+           (java.time LocalDate ZoneId)))
 
 (testable-privates lupapalvelu.tiedonohjaus-api store-function-code update-application-child-metadata!)
 
@@ -114,4 +116,82 @@
                                                                                 :henkilotiedot   :ei-sisalla
                                                                                 :sailytysaika    {:arkistointi :ikuisesti
                                                                                                   :perustelu   "foo"}
-                                                                                :kieli           :fi}}}) => nil))))
+                                                                                :kieli           :fi}}}) => nil)))
+
+  (fact "retention and security end dates are calculated when required and verdict has been given"
+    (let [metadata {"julkisuusluokka" "salainen"
+                    "henkilotiedot"   "sisaltaa"
+                    "sailytysaika"    {"arkistointi" "m\u00E4\u00E4r\u00E4ajan"
+                                       "pituus" 10
+                                       "perustelu"   "foo"}
+                    "myyntipalvelu"   false
+                    "nakyvyys"        "julkinen"
+                    "salassapitoaika" 5
+                    "suojaustaso"     "ei-luokiteltu"
+                    "kayttajaryhma"   "viranomaisryhma"
+                    "kayttajaryhmakuvaus" "muokkausoikeus"
+                    "kieli" "fi"
+                    "turvallisuusluokka" "ei-turvallisuusluokkaluokiteltu"
+                    "salassapitoperuste" "peruste"}
+          command {:application {:organization "753-R"
+                                 :attachments  [{:id 1 :metadata metadata}]
+                                 ;; Verdict date 2016-1-29
+                                 :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
+                   :created     1000
+                   :user        {:orgAuthz {:753-R #{:authority :archivist}}}}]
+      (update-application-child-metadata!
+        command
+        :attachments
+        1
+        metadata) => {:ok true}
+      (provided
+        (lupapalvelu.action/update-application command
+                                               {"$set" {:modified 1000, :attachments [{:id 1
+                                                                                       :metadata {:tila :luonnos
+                                                                                                  :salassapitoaika 5
+                                                                                                  :nakyvyys :julkinen
+                                                                                                  :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                                                 :pituus 10
+                                                                                                                 :perustelu "foo"
+                                                                                                                 :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                                                  :myyntipalvelu false
+                                                                                                  :suojaustaso :ei-luokiteltu
+                                                                                                  :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                                                                                  :kayttajaryhma :viranomaisryhma
+                                                                                                  :kieli :fi
+                                                                                                  :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                                                                                  :salassapitoperuste "peruste"
+                                                                                                  :henkilotiedot :sisaltaa
+                                                                                                  :julkisuusluokka :salainen
+                                                                                                  :kayttajaryhmakuvaus :muokkausoikeus}}]}}) => nil)))
+
+  (fact "retention and security end dates are not set when they are not required"
+    (let [metadata {"julkisuusluokka" "julkinen"
+                    "henkilotiedot"   "sisaltaa"
+                    "sailytysaika"    {"arkistointi" "ikuisesti"
+                                       "perustelu"   "foo"}
+                    "myyntipalvelu"   false
+                    "nakyvyys"        "julkinen"
+                    "kieli" "fi"}
+          command {:application {:organization "753-R"
+                                 :attachments  [{:id 1 :metadata metadata}]
+                                 ;; Verdict date 2016-1-29
+                                 :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
+                   :created     1000
+                   :user        {:orgAuthz {:753-R #{:authority :archivist}}}}]
+      (update-application-child-metadata!
+        command
+        :attachments
+        1
+        metadata) => {:ok true}
+      (provided
+        (lupapalvelu.action/update-application command
+                                               {"$set" {:modified 1000, :attachments [{:id 1
+                                                                                       :metadata {:julkisuusluokka :julkinen
+                                                                                                  :tila :luonnos
+                                                                                                  :nakyvyys :julkinen
+                                                                                                  :sailytysaika {:arkistointi :ikuisesti
+                                                                                                                 :perustelu "foo"}
+                                                                                                  :myyntipalvelu false
+                                                                                                  :kieli :fi
+                                                                                                  :henkilotiedot :sisaltaa}}]}}) => nil))))

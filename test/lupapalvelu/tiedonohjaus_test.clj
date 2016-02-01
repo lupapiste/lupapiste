@@ -103,4 +103,47 @@
         (action/update-application (action/application->command application)
                                    {:attachments.id attachment-id}
                                    {$set {:modified                    now
-                                          :attachments.$.metadata.tila :valmis}}) => nil))))
+                                          :attachments.$.metadata.tila :valmis}}) => nil)))
+
+  (fact "document metadata is updated correctly"
+    (let [application {:id           1000
+                       :organization "753-R"
+                       :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
+                       :metadata     {:tila "valmis"
+                                      :nakyvyys "julkinen"}}]
+      (document-with-updated-metadata application "753-R" "10" application "hakemus") => {:id           1000
+                                                                                          :organization "753-R"
+                                                                                          :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
+                                                                                          :metadata {:tila :valmis
+                                                                                                     :salassapitoaika 5
+                                                                                                     :nakyvyys :julkinen
+                                                                                                     :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                                                    :pituus 10
+                                                                                                                    :perustelu "foo"
+                                                                                                                    :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                                                     :myyntipalvelu false
+                                                                                                     :suojaustaso :ei-luokiteltu
+                                                                                                     :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                                                                                     :kayttajaryhma :viranomaisryhma
+                                                                                                     :kieli :fi
+                                                                                                     :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                                                                                     :salassapitoperuste "peruste"
+                                                                                                     :henkilotiedot :sisaltaa
+                                                                                                     :julkisuusluokka :salainen
+                                                                                                     :kayttajaryhmakuvaus :muokkausoikeus}}
+      (provided
+        (metadata-for-document "753-R" "10" "hakemus") => {:tila :luonnos
+                                                           :salassapitoaika 5
+                                                           :nakyvyys :julkinen
+                                                           :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                          :pituus 10
+                                                                          :perustelu "foo"}
+                                                           :myyntipalvelu false
+                                                           :suojaustaso :ei-luokiteltu
+                                                           :kayttajaryhma :viranomaisryhma
+                                                           :kieli :fi
+                                                           :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                                           :salassapitoperuste "peruste"
+                                                           :henkilotiedot :sisaltaa
+                                                           :julkisuusluokka :salainen
+                                                           :kayttajaryhmakuvaus :muokkausoikeus}))))

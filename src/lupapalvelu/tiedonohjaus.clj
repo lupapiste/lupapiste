@@ -4,7 +4,10 @@
             [clojure.core.memoize :as memo]
             [lupapalvelu.organization :as o]
             [lupapalvelu.action :as action]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [sade.util :as util]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -61,13 +64,42 @@
   (memo/ttl get-metadata-for-process-from-toj
             :ttl/threshold 10000))
 
-(defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function & [type]]
+(defn- paatospvm-plus-years [{:keys [verdicts]} years]
+  (when-let [paatos-ts (->> verdicts
+                       (map (fn [{:keys [paatokset]}]
+                              (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
+                       (flatten)
+                       (remove nil?)
+                       (sort)
+                       (last))]
+    (-> (c/from-long paatos-ts)
+        (t/plus (t/years years))
+        (.toDate))))
+
+(defn retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} application]
+  (when (= "m\u00E4\u00E4r\u00E4ajan" (name arkistointi))
+    (paatospvm-plus-years application pituus)))
+
+(defn security-end-date [{:keys [salassapitoaika julkisuusluokka]} application]
+  (when (and (#{:osittain-salassapidettava :salainen} (keyword julkisuusluokka)) salassapitoaika)
+    (paatospvm-plus-years application salassapitoaika)))
+
+(defn update-end-dates [metadata application]
+  (let [retention-end (retention-end-date metadata application)
+        security-end (security-end-date metadata application)]
+    (cond-> (-> (util/dissoc-in metadata [:sailytysaika :retention-period-end])
+                (dissoc :secrecy-period-end))
+            retention-end (assoc-in [:sailytysaika :retention-period-end] retention-end)
+            security-end (assoc :security-period-end security-end))))
+
+(defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function application & [type]]
   (let [document-type (or type (:type document))
         existing-tila (:tila metadata)
         existing-nakyvyys (:nakyvyys metadata)
         new-metadata (metadata-for-document organization tos-function document-type)
         processed-metadata (cond-> new-metadata
                                    existing-tila (assoc :tila (keyword existing-tila))
+                                   true (update-end-dates application)
                                    (and (not (:nakyvyys new-metadata)) existing-nakyvyys) (assoc :nakyvyys existing-nakyvyys))]
     (assoc document :metadata processed-metadata)))
 
