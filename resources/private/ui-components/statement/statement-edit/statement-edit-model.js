@@ -10,7 +10,7 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   self.applicationTitle = params.applicationTitle;
   self.data = params.data;
-  
+
   self.selectedStatus = ko.observable();
   self.text = ko.observable();
 
@@ -48,12 +48,14 @@ LUPAPISTE.StatementEditModel = function(params) {
     return self.tab === "statement" && isStatementGiver ? util.getIn(self.data, ["saateText"]) : "";
   });
 
+  // FIXME computed + dispose
   self.text.subscribe(function(value) {
-    if(util.getIn(self.data, ["text"]) !== value) { 
+    if(util.getIn(self.data, ["text"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["text"], value: self.text()});
     }
   });
 
+  // FIXME computed + dispose
   self.selectedStatus.subscribe(function(value) {
     if(util.getIn(self.data, ["status"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["status"], value: self.selectedStatus()});
@@ -62,6 +64,7 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   hub.send("statement::submitAllowed", {tab: self.tab, value: submitAllowed()})
 
+  // FIXME computed + dispose
   submitAllowed.subscribe(function(value) {
     hub.send("statement::submitAllowed", {tab: self.tab, value: value});
   });
