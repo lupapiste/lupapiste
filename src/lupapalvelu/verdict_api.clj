@@ -59,7 +59,7 @@
          (when updates
            (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
              (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
-             (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)))
+             (t/mark-app-and-attachments-final! (:id application) (:created command))))
          (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))))
 
 (notifications/defemail :application-verdict
@@ -151,7 +151,7 @@
                              (:mongo-updates doc-updates)
                              (application/state-transition-update next-state timestamp (:user command))
                              {$set {:verdicts.$.draft false}}))
-        (t/change-app-and-attachments-metadata-state! command :luonnos :valmis)
+        (t/mark-app-and-attachments-final! (:id application) timestamp)
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 

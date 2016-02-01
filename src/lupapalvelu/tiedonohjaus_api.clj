@@ -105,7 +105,7 @@
   (let [old-metadata (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap (:metadata document))
         metadata (-> (schema-utils/coerce-metadata-to-schema tms/AsiakirjaMetaDataMap metadata)
                      (revert-unauthorized-modifications old-metadata user-roles)
-                     (t/update-end-dates application)
+                     (t/update-end-dates (:verdicts application))
                      (assoc :tila (or (:tila old-metadata) :luonnos))
                      sanitize-metadata)]
     (assoc document :metadata metadata)))
