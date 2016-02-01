@@ -459,52 +459,7 @@
                                          }"></span>
                         <div class="application_section">
                             <div class="application_section_content content_expanded">
-                                <div>
-                                    <h2 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h2>
-                                    <div data-bind="with: $root.application" class="parties-list">
-                                        <ul data-bind="foreach: roles">
-                                            <li class="party" data-bind="visible: !roles[0].startsWith( 'guest' ),
-                                                                         if: !roles[0].startsWith( 'guest' )">
-                                                <span class="person">
-                                                    <span data-bind="fullName: $data"></span>
-                                                    (<span data-bind="text: username"></span>)
-                                                    <i><span data-bind="text: _.map(roles, _.compose(util.lowerCase, loc)).join(', ')"> </span></i>
-                                                </span>
-                                                <span class="invite-state">
-                                                    <span data-bind="if: $data.invite">
-                                                        <span class="user-invite" data-bind="ltext: 'invited'"></span>
-                                                    </span>
-                                                    <span data-bind="if: !$data.invite">
-                                                        <span data-bind="visible: $root.application.isNotOwner($data), ltext: 'accepted'"></span>
-                                                        <!-- ko if: $data.inviteAccepted -->
-                                                        <span data-test-id="invite-accepted-span" data-bind="dateTimeString: $data.inviteAccepted"></span>
-                                                        <!-- /ko -->
-                                                    </span>
-                                                </span>
-                                                <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data) && $root.authorization.ok('remove-auth')"></a>
-                                                <!-- ko if: $root.application.canSubscribe($data) -->
-                                                <a class="invite-action" href="#"
-                                                   data-test-id="subscribeNotifications"
-                                                   data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
-                                                <a class="invite-action" href="#"
-                                                   data-test-id="unsubscribeNotifications"
-                                                   data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
-                                                <!-- /ko -->
-                                            </li>
-                                        </ul>
-
-                                        <button class="positive"
-                                                data-test-id="application-invite-person"
-                                                data-bind="ltext: 'personSelector.invite',
-                                                           visible: $root.authorization.ok('invite-with-role'),
-                                                           enabled: $root.authorization.ok('invite-with-role')"
-                                                onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
-                                        </button>
-
-                                        <span data-bind="component: {name: 'company-invite'}"></span>
-
-                                    </div>
-                                </div>
+                                <div data-bind="component: {name: 'authorized-parties'}"></div>
                             </div>
                         </div>
 

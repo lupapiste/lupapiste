@@ -140,9 +140,7 @@
    :states states/all-application-states-but-draft-or-terminal}
   [{:keys [application user created lang] :as command}]
   (let [new-state {:state :mark-done :user user :created created}
-        response (update-application command {:neighbors {$elemMatch {:id neighborId}}} {$push {:neighbors.$.status new-state}})
-        updated-app (domain/get-application-no-access-checking (:id application))]
-    (child-to-attachment/create-attachment-from-children user updated-app :neighbors neighborId lang)
+        response (update-application command {:neighbors {$elemMatch {:id neighborId}}} {$push {:neighbors.$.status new-state}})]
     response))
 
 (defn- append-doc-schemas [{schema-info :schema-info :as document}]

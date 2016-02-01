@@ -5,6 +5,8 @@
             [sade.util :as util]
             [midje.sweet :refer :all]))
 
+(apply-remote-minimal)
+
 (defn- get-attachment-by-id [apikey application-id attachment-id]
   (get-attachment-info (query-application apikey application-id) attachment-id))
 
@@ -26,8 +28,10 @@
     (facts "by default 4 attachments exist"
       (let [application (query-application pena application-id)
             op-id (-> application :primaryOperation :id)]
-        (fact "the attachments are related to operation 'kerrostalo-rivitalo'"
-          (count (get-attachments-by-operation application op-id)) => 4)
+        (fact "counting all attachments"
+          (count (:attachments application)) => 4)
+        (fact "only pohjapiirros is related to operation 'kerrostalo-rivitalo'"
+          (map :type (get-attachments-by-operation application op-id)) => [{:type-group "paapiirustus" :type-id "pohjapiirros"}])
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
           (every? (fn [a]
                     (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy

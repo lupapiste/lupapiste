@@ -40,7 +40,7 @@
 ;; Validators
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
-  (when (-> (attachment/get-attachment-info application attachmentId) :locked (= true))
+  (when (-> (attachment/get-attachment-info application attachmentId) :locked true?)
     (fail :error.attachment-is-locked)))
 
 (defn- attachment-id-is-present-in-application-or-not-set [{{:keys [attachmentId]} :data} {:keys [attachments]}]
@@ -48,9 +48,8 @@
     (fail :error.attachment.id)))
 
 (defn- if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
-  (when (and
-          (not (user/authority? user))
-          (state-set (keyword state)))
+  (when (and (not (user/authority? user))
+             (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
 (defn- attachment-deletable [{{attachmentId :attachmentId} :data user :user} application]

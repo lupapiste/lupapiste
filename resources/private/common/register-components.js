@@ -104,7 +104,8 @@ jQuery(document).ready(function() {
     {name: "application-guests"},
     {name: "side-panel"},
     {name: "conversation"},
-    {name: "authority-notice"}
+    {name: "authority-notice"},
+    {name: "authorized-parties"}
 ];
 
   _.forEach(components, function(component) {

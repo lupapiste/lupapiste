@@ -107,82 +107,87 @@
                   (-> (statement-replyable {:data {:statementId (:id statement)}} (dummy-application statement))
                       :ok false?))))
 
+(def id-1 (ssg/generate ssc/ObjectIdStr))
+(def id-2 (ssg/generate ssc/ObjectIdStr))
+(def id-a (ssg/generate ssc/ObjectIdStr))
+(def id-b (ssg/generate ssc/ObjectIdStr))
+
 (facts "update-statement"
   (fact "update-draft"
     (-> (ssg/generate Statement)
-        (assoc :modify-id "mod1")
+        (assoc :modify-id id-a)
         (dissoc :modified)
-        (update-draft "some text" "puoltaa" "mod2" "mod1" "editor1"))
+        (update-draft "some text" "puoltaa" id-b id-a id-1))
     => (contains #{[:text "some text"] 
                    [:status "puoltaa"] 
-                   [:modify-id "mod2"]
-                   [:editor-id "editor1"]
+                   [:modify-id id-b]
+                   [:editor-id id-1]
                    [:state :draft]
                    [:modified anything]}))
 
   (fact "update-draft - wrong modify-id"
     (-> (ssg/generate Statement)
-        (assoc :modify-id "modx")
-        (update-draft "some text" "puoltaa" "mod2" "mod1" "editor1"))
+        (assoc :modify-id id-a)
+        (update-draft "some text" "puoltaa" id-b id-2 id-1))
     => (throws Exception))
 
   (fact "update-draft - updated statement is missing person should produce validation error"
     (-> (ssg/generate Statement)
         (dissoc :person)
-        (update-draft "some text" "puoltaa" "mod2" "mod1" "editor1"))
+        (update-draft "some text" "puoltaa" id-b id-a id-1))
     => (throws Exception))
 
   (fact "give-statement"
     (-> (ssg/generate Statement)
-        (assoc :modify-id "mod1")
+        (assoc :modify-id id-a)
         (dissoc :given)
-        (give-statement "some text" "puoltaa" "mod2" "mod1" "editor1"))
+        (give-statement "some text" "puoltaa" id-b id-a id-1))
     => (contains #{[:text "some text"] 
                    [:status "puoltaa"] 
-                   [:modify-id "mod2"] 
-                   [:editor-id "editor1"]
+                   [:modify-id id-b] 
+                   [:editor-id id-1]
                    [:state :given] 
                    [:given anything]}))
 
   (fact "update-reply-draft"
     (-> (ssg/generate Statement)
-        (assoc :modify-id "mod1" :editor-id "editor1" :state :announced :text "statement text")
+        (assoc :modify-id id-a :editor-id id-1 :state :announced :text "statement text")
         (assoc-in [:reply :saateText] "saate")
         (dissoc :modified)
-        (update-reply-draft "reply text" true "mod2" "mod1" "editor2"))
+        (update-reply-draft "reply text" true id-b id-a id-2))
     => (contains #{[:text "statement text"] 
-                   [:modify-id "mod2"]
-                   [:editor-id "editor1"]
+                   [:modify-id id-b]
+                   [:editor-id id-1]
                    [:state :replyable]
                    [:modified anything]
-                   [:reply {:editor-id "editor2"
+                   [:reply {:editor-id id-2
                             :nothing-to-add true
                             :text "reply text"
                             :saateText "saate"}]}))
 
   (fact "update-reply-draft - nil values"
     (-> (ssg/generate Statement)
-        (assoc :modify-id "mod1" :reply {:saateText "saate"})
-        (update-reply-draft nil nil "mod2" "mod1" "editor2"))
-    => (contains #{[:reply {:editor-id "editor2"
+        (assoc :modify-id id-a :reply {:saateText "saate"})
+        (update-reply-draft nil nil id-b id-a id-2))
+    => (contains #{[:reply {:editor-id id-2
                             :nothing-to-add false
                             :saateText "saate"}]}))
 
   (fact "reply-statement"
     (-> (ssg/generate Statement)
-        (assoc :modify-id "mod1" :state :announced)
+        (assoc :modify-id id-a :state :announced)
         (dissoc :reply)
-        (reply-statement "reply text" false "mod2" "mod1" "editor2"))
+        (reply-statement "reply text" false id-b id-a id-2))
     => (contains #{[:state :replied]
-                   [:reply {:editor-id "editor2"
+                   [:reply {:editor-id id-2
                             :nothing-to-add false
                             :text "reply text"}]}))
 
   (fact "request for reply"
     (-> (ssg/generate Statement)
-        (assoc :modify-id "mod1")
+        (assoc :modify-id id-a)
         (dissoc :reply)
-        (request-for-reply "covering note for reply" "editor1"))
-    => (contains #{[:reply {:editor-id "editor1"
+        (request-for-reply "covering note for reply" id-1))
+    => (contains #{[:reply {:editor-id id-1
                             :nothing-to-add false
                             :saateText "covering note for reply"}]})))
