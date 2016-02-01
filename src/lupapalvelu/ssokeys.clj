@@ -15,16 +15,16 @@
    :crypto-iv                 sc/Str
    (sc/optional-key :comment) sc/Str})
 
-(sc/defschema RawKey (ssc/min-length-string 6))
+(sc/defschema UnencryptedKey (ssc/min-length-string 1))
 
 (defn validate-ip [ip]
-  (when-not (v/ip-address? ip) (fail :error.illegal-ip-address)))
+  (when-not ((some-fn ss/blank? v/ip-address?) ip) (fail :error.illegal-ip-address)))
 
 (defn validate-id [id]
-  (when-not (sc/check ssc/ObjectIdStr id) (fail :error.invalid-id)))
+  (when-not (nil? (sc/check ssc/ObjectIdStr id)) (fail :error.invalid-id)))
 
 (defn validate-key [key]
-  (when-not (sc/check RawKey key) (fail :error.illegal-key)))
+  (when-not ((some-fn ss/blank? (comp nil? (sc/checker UnencryptedKey))) key) (fail :error.illegal-key)))
 
 (defn- encode-key [secret-key]
   (let [crypto-iv   (crypt/make-iv-128)
@@ -32,19 +32,17 @@
         crypto-iv-s (-> crypto-iv crypt/base64-encode crypt/bytes->str)]
     {:key crypted-key :crypto-iv crypto-iv-s}))
 
-(defn create-sso-key [ip secret-key comment]
-  (sc/validate SsoKey
-               (cond->   {:id       (mongo/create-id)
-                          :ip       ip}
-                 true    (merge (encode-key secret-key))
-                 comment (assoc :comment comment))))
+(defn update-sso-key [sso-key ip secret-key comment]
+  (->> {:ip ip 
+        :comment comment}
+       (filter (comp ss/blank? val))
+       (merge sso-key (when secret-key (encode-key secret-key)))
+       (sc/validate SsoKey)))
 
-(defn update-sso-key [sso-key ip comment]
-  (sc/validate SsoKey
-               (cond->   sso-key
-                 ip      (assoc :ip ip)
-                 comment (assoc :comment comment)
-                 (ss/blank? comment) (dissoc :comment))))
+(defn create-sso-key [ip secret-key comment]
+  {:pre [(not (ss/blank? ip)) 
+         (not (ss/blank? secret-key))]}
+  (update-sso-key {:id (mongo/create-id)} ip secret-key comment))
 
 (defn update-to-db [{id :id :as sso-key}]
   (mongo/update-by-id :ssoKeys id sso-key :upsert true)

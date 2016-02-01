@@ -1,14 +1,15 @@
 (ns lupapalvelu.ssokeys-api
   (:require [lupapalvelu.ssokeys :as sso]
-            [lupapalvelu.action :refer [defquery defcommand]]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters]]
             [sade.core :refer [ok]]))
 
 (defcommand add-single-sign-on-key
   {:description "Adds SSO ip and key."
    :parameters [ip key comment]
    :user-roles #{:admin}
-   :input-validators [#(sso/validate-ip  (get-in % [:data :ip]))
-                      #(sso/validate-key (get-in % [:data :key]))]}
+   :input-validators [(partial non-blank-parameters [:ip :key])
+                      (comp sso/validate-ip :ip :data)
+                      (comp sso/validate-key :key :data)]}
   [_]
   (->> (sso/create-sso-key ip key comment)
        (sso/update-to-db)
@@ -16,13 +17,14 @@
 
 (defcommand update-single-sign-on-key
   {:description "Updates SSO ip and comment."
-   :parameters [sso-id ip comment]
+   :parameters [sso-id ip key comment]
    :user-roles #{:admin}
-   :input-validators [#(sso/validate-ip (get-in % [:data :ip]))
-                      #(sso/validate-id (get-in % [:data :sso-id]))]}
+   :input-validators [(comp sso/validate-id :sso-id :data)
+                      (comp sso/validate-ip :ip :data)
+                      (comp sso/validate-key :key :data)]}
   [_]
   (-> (sso/get-sso-key-by-id sso-id)
-      (sso/update-sso-key ip comment)
+      (sso/update-sso-key ip key comment)
       (sso/update-to-db))
   (ok))
 
@@ -30,7 +32,7 @@
   {:description "Remove SSO ip."
    :parameters [sso-id]
    :user-roles #{:admin}
-   :input-validators [#(sso/validate-id (get-in % [:data :sso-id]))]}
+   :input-validators [(comp sso/validate-id :sso-id :data)]}
   [_]
   (-> (sso/get-sso-key-by-id sso-id) :id sso/remove-from-db sso-id)
   (ok))
