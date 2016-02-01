@@ -6,7 +6,8 @@
             [sade.crypt :as crypt]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [sade.validators :as v]))
+            [sade.validators :as v])
+  (:import  [com.mongodb DuplicateKeyException]))
 
 (sc/defschema SsoKey
   {:id                        ssc/ObjectIdStr
@@ -45,7 +46,9 @@
   (update-sso-key {:id (mongo/create-id)} ip secret-key comment))
 
 (defn update-to-db [{id :id :as sso-key}]
-  (mongo/update-by-id :ssoKeys id sso-key :upsert true)
+  (try
+    (mongo/update-by-id :ssoKeys id sso-key :upsert true)
+    (catch DuplicateKeyException e (fail! :error.ip-already-in-use)))
   id)
 
 (defn remove-from-db [id]
