@@ -90,10 +90,17 @@
       (catch Exception e
         (error e (str "Unable to resolve municipality by " x \/ y))))))
 
-(defn- respond-nls-address [lang features]
+(defn- respond-nls-address [features x y lang municipality-code]
   (if (seq features)
     (resp/json (wfs/feature-to-address-details (or lang "fi") (first features)))
-    (resp/status 503 "Service temporarily unavailable")))
+    ; Fallback: return only the municipality
+    (resp/json {:street ""
+                :number ""
+                :municipality municipality-code
+                :x (util/->double x)
+                :y (util/->double y)
+                :name {:fi (i18n/localize :fi :municipality municipality-code)
+                       :sv (i18n/localize :sv :municipality municipality-code)}})))
 
 (defn- distance [^double x1 ^double y1 ^double x2 ^double y2]
   {:pre [(and x1 x2 y1 y2)]}
@@ -117,8 +124,8 @@
           (do
             (future-cancel nls-address-query)
             (resp/json address-from-muni))
-          (respond-nls-address lang @nls-address-query))
-        (respond-nls-address lang @nls-address-query)))
+          (respond-nls-address @nls-address-query x y lang municipality))
+        (respond-nls-address @nls-address-query x y lang municipality)))
     (resp/status 400 "Bad Request")))
 
 (def wdk-type-pattern #"^POINT|^LINESTRING|^POLYGON")
