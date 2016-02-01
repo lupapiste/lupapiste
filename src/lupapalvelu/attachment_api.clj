@@ -439,7 +439,7 @@
                                             :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                             :stamped true :make-comment false :state :ok}))
       (io/delete-file file :silently)
-      (tiedonohjaus/change-attachment-metadata-state! application now attachment-id :luonnos :valmis))
+      (tiedonohjaus/mark-attachment-final! application now attachment-id))
     new-file-id))
 
 (defn- stamp-attachments!
