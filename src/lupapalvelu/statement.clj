@@ -24,8 +24,8 @@
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
 ;; Krysp Yhteiset 2.1.5+
 (def- statement-statuses-more-options
-  (vec (concat statement-statuses 
-               ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" 
+  (vec (concat statement-statuses
+               ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa"
                 "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
 (def StatementGiver {:userId                          ssc/ObjectIdStr
@@ -101,7 +101,7 @@
     (fail :error.statement-not-given)))
 
 (defn replies-enabled [command {permit-type :permitType :as application}]
-  (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type)
+  (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type) ; FIXME set in permit meta data
     (fail :error.organization-has-not-enabled-statement-replies)))
 
 (defn- update-statement [statement modify-id prev-modify-id & updates]

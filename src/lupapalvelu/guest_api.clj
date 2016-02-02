@@ -65,7 +65,7 @@
 (defquery application-guests
   {:description "List of application guests and guest authorities."
    :user-roles #{:applicant :authority}
-   :user-authz-roles auth/default-authz-reader-roles
+   :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles
    :parameters [:id]
    :states states/all-application-states}

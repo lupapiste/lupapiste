@@ -179,8 +179,9 @@
       }
       ajax.command(command)
         .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
-        .success(function() {
-          self.metadata(ko.mapping.fromJS(ko.mapping.toJS(self.editedMetadata)));
+        .success(function(data) {
+          self.metadata(ko.mapping.fromJS(data.metadata));
+          self.editedMetadata(constructEditableMetadata(data.metadata, self.schema(), roles));
           self.editable(false);
           if (_.isFunction(params.saveCallback)) {
             params.saveCallback();
