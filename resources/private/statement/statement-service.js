@@ -105,10 +105,12 @@ LUPAPISTE.StatementService = function(params) {
   };
 
   function updateDraft(statementId, tab) {
-    var params = getCommandParams(statementId, tab);
+    var params = getCommandParams(statementId, tab),
+        commandName = util.getIn(self.commands, [tab, "saveDraft"]);
+    if (!commandName) return;
     saving(true);
     ajax
-      .command(util.getIn(self.commands, [tab, "saveDraft"]), params)
+      .command(commandName, params)
       .success(function() {
         updateModifyId(statementId);
         hub.send("indicator-icon", {style: "positive"});
