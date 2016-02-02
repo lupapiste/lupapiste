@@ -22,7 +22,6 @@
                     :verdicts (i18n/localize (name lang) "application.verdict.title")
                     :tasks (i18n/localize (name lang) "task-katselmus.rakennus.tila._group_label"))
         child (get-child application type id)]
-    (debug "building attachemnt form child: " child )
     {:application application
      :filename (str type-name ".pdf")
      :size (.length file)
@@ -63,3 +62,8 @@
         file (:content child)]
     (attachment/attach-file! child)
     (io/delete-file file :silently)))
+
+(defn delete-child-attachment [app child-type id]
+  (let [attachment (filter #(= {:type (name child-type) :id id} (:copy-of %)) (:attachments app))
+        attachment-id (:id (first attachment))]
+    (attachment/delete-attachment app attachment-id)))

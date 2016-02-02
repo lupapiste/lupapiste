@@ -70,11 +70,11 @@
                  :order      1
                  :i18nprefix "task-katselmus.katselmuksenLaji"
                  :version    1}
-   :data        {:katselmuksenLaji {:value name}}
+   :data        {:katselmuksenLaji {:value name}
    :rakennus {"0" {:kayttoonottava {:value false} :rakennusnro {:value "rak0"}}
               "1" {:kayttoonottava {:value false} :rakennusnro {:value "rak1"}}
               "2" {:kayttoonottava {:value true} :rakennusnro {:value "rak2"}}
-   }})
+                                    }}})
 
 (facts "Generate PDF file from application with all documents"
        (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
