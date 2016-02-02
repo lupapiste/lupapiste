@@ -14,7 +14,7 @@
             <span data-bind="text: title"></span>
           </span>
           <span data-bind="with: data">
-            <!-- ko if: person -->
+            <!-- ko if: $data.person -->
             (<span data-bind="text: person.text"></span>)
             <!-- /ko -->
           </span>
