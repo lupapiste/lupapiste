@@ -105,7 +105,8 @@ jQuery(document).ready(function() {
     {name: "side-panel"},
     {name: "conversation"},
     {name: "authority-notice"},
-    {name: "authorized-parties"}
+    {name: "authorized-parties"},
+    {name: "person-invite"}
 ];
 
   _.forEach(components, function(component) {

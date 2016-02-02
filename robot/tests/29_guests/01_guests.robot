@@ -72,6 +72,9 @@ Pena invites Mikko as guest
   Wait Until  Page Should Contain  ${mikko-message}
   Go back
 
+Mikko cannot be invited again
+  Redundant invitation  ${mikko}
+
 Pena submits application
   Submit application
   [Teardown]  Logout

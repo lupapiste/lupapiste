@@ -7,26 +7,24 @@
           <bubble-dialog params="visible: bubbleVisible,
                                  buttonIcon: 'lupicon-circle-arrow-right',
                                  buttonText: 'application-guests.send',
-                                 buttonEnabled: sendEnabled,
+                                 okEnabled: sendEnabled,
                                  okFun: send,
+                                 initFun: init,
+                                 error: error,
                                  waiting: waiting">
             <p data-bind="ltext: 'invite.desc'"></p>
             <label data-bind="ltext: 'guest-authority.email',
                               attr: {'for': $parent.emailId}"
                    class="mandatory"></label>
             <input type="text" class="mandatory"
-                   data-test-id="application-guest-email"
+                   data-test-id="person-invite-email"
                    data-bind="textInput: $parent.email,
                               attr: {id: $parent.emailId}" />
             <label data-bind="ltext: 'application-guests.message',
                               attr: {'for': $parent.messageId }"></label>
             <textarea data-bind="value: $parent.message,
                                  attr: {id: $parent.messageId}"
-                      data-test-id="application-guest-message"></textarea>
-            <div class="error"
-                 data-test-id="person-invite-error"
-                 data-bind="visible: $parent.error,
-                            ltext: $parent.error"></div>
+                      data-test-id="person-invite-message"></textarea>
           </bubble-dialog>
         </div>
       </script>

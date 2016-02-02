@@ -2,6 +2,10 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   "use strict";
   var self = this;
 
+  // ---------------------------------------------------
+  // Authorized table
+  // ---------------------------------------------------
+
   function isGuest( s ) {
     return _.includes( ["guest", "guestAuthority"], s );
   }
@@ -67,4 +71,27 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   // Dependencies on global observables must be
   // explicitly disposed.
   self.dispose = self.authorizedParties.dispose;
+
+
+  // ---------------------------------------------------
+  // Invite person
+  // ---------------------------------------------------
+
+  self.personBubble = ko.observable( false );
+
+  self.togglePersonBubble = function() {
+    self.personBubble( !self.personBubble());
+  };
+
+// ---------------------------------------------------
+  // Invite company
+  // ---------------------------------------------------
+
+  self.companyBubble = ko.observable( false );
+
+  self.toggleCompanyBubble = function() {
+    self.companyBubble( !self.companyBubble());
+  };
+
+
 };

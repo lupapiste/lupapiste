@@ -5,12 +5,15 @@
       <script type="text/x-jquery-tmpl" id="bubble-dialog-template">
         <div class="bubble-dialog" data-bind="visible: bubbleVisible">
           <div data-bind="template: {nodes: $componentTemplateNodes}"></div>
-
+          <div class="error"
+               data-test-id="bubble-dialog-error"
+               data-bind="visible: error,
+                          ltext: error"></div>
           <div class="left-buttons">
             <button class="positive"
                     data-test-id="bubble-dialog-ok"
                     data-bind="click: ok,
-                               enable: buttonEnabled,
+                               enable: okEnabled,
                                css: {waiting: waiting}">
               <i data-bind="css: buttonIcon"></i>
               <i class="wait spin lupicon-refresh"></i>

@@ -207,5 +207,11 @@ Invite application guest authority
 No more guest authorities
   Wait test id visible  application-guest-add
   Scroll and click  [data-test-id=application-guest-add]
-  Wait test id visible  application-guest-error
+  Wait test id visible  bubble-dialog-error
+  Guest bubble cancel
+
+Redundant invitation
+  [Arguments]  ${email}
+  Invite application guest  ${email}  Welcome to application, again!?
+  Wait test id visible  bubble-dialog-error
   Guest bubble cancel

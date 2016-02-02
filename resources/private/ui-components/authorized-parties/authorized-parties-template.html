@@ -47,6 +47,33 @@
               </tbody>
             </table>
 
+            <div class="stacked--inline">
+              <button class="positive"
+                      data-test-id="application-invite-person"
+                      data-bind="visible: showInviteButton,
+                                 click: togglePersonBubble">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'personSelector.invite'"></span>
+              </button>
+              <div class="bubble-dialog-arrow"
+                   data-bind="visible: personBubble"></div>
+            </div>
+
+            <div class="stacked--inline">
+              <button class="positive"
+                      data-test-id="application-invite-company"
+                      data-bind="visible: showInviteButton,
+                                 click: toggleCompanyBubble">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'company-invite.invite'"></span>
+              </button>
+              <div class="bubble-dialog-arrow"
+                   data-bind="visible: companyBubble"></div>
+            </div>
+            <div data-bind="component: {name: 'person-invite',
+                                        params: {bubbleVisible: personBubble}}"></div>
+
+            <table></table>
             <button class="positive"
                     data-test-id="application-invite-person"
                     data-bind="visible: $root.authorization.ok('invite-with-role'),

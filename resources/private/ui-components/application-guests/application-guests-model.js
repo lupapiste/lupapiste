@@ -156,14 +156,12 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     return util.isValidEmailAddress( self.email());
   });
 
-  // Reset the dialog contents when it is closed.
-  ko.computed( function() {
-    if( !self.bubbleVisible()) {
-      self.email( "");
-      self.message( loc( "application-guests.message.default") );
-      self.guestError( null );
-    }
-  });
+  self.initBubble = function() {
+    self.waiting( false );
+    self.email( "");
+    self.message( loc( "application-guests.message.default") );
+    self.guestError( null );
+  };
 
   // Visibility flags
 

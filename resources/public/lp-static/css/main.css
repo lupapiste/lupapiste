@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1454339238831');
+@import url('main-blessed1.css?z=1454406880699');
 
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
@@ -1040,41 +1040,111 @@ ul.tabs {
   color: red;
 }
 
-/* .help-arrow { */
-/*   position: relative; */
-/*   z-index: 100; */
-/* } */
-/* .help-arrow:after, .help-arrow:before { */
-/*         bottom: 100%; */
-/*         left: 50%; */
-/*         border: solid transparent; */
-/*         content: " "; */
-/*         height: 0; */
-/*         width: 0; */
-/*         position: absolute; */
-/*         pointer-events: none; */
-/*         z-index: 100; */
-/*         overflow-y: visible; */
-/* } */
-/* .help-arrow:after { */
-/*   border-color: transparentize( $gray246, 1); */
-/*   border-bottom-color: $gray246; */
-/*   border-width: 14px; */
-/*   margin-left: -14px; */
-/* } */
-/* .help-arrow:before { */
-/*   border-color: transparentize( $orange, 1); */
-/*   border-bottom-color: $orange; */
-/*   border-width: 15px; */
-/*   margin-left: -15px; */
-/* } */
-/* line 32, ../../../private/common-html/sass/partials/_help.scss */
+/* line 50, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog {
+  padding: 20px 20px 20px 20px;
+  position: relative;
+  background: white;
+  border: 1px solid #dddddd;
+}
+/* line 60, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog .left-buttons {
+  margin-top: 20px;
+}
+/* line 64, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog label.mandatory:after {
+  content: " *";
+  color: #f7ac2e;
+}
+/* line 68, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog input[type=text], .bubble-dialog textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 4px;
+  display: block;
+}
+/* line 75, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog textarea {
+  min-height: 8em;
+}
+/* line 79, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog input.mandatory {
+  border-color: #f7ac2e;
+  margin-bottom: 20px;
+}
+/* line 84, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog .error {
+  margin-top: 20px;
+  border: 1px solid red;
+  color: red;
+  padding: 20px;
+}
+/* line 92, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table.mandatory tr {
+  background-color: initial;
+}
+/* line 94, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table.mandatory tr td {
+  border: 1px solid #f7ac2e;
+  background-color: none;
+}
+/* line 98, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table.mandatory tr td.full {
+  width: 33%;
+}
+
+/* line 9, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog-arrow {
+  position: relative;
+  z-index: 100;
+}
+
+/* line 14, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog-arrow:after,
+.bubble-dialog-arrow:before {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+  overflow-y: visible;
+}
+
+/* line 28, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog-arrow:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: white;
+  border-width: 19px;
+  margin-left: -19px;
+}
+
+/* line 34, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog-arrow:before {
+  border-color: rgba(221, 221, 221, 0);
+  border-bottom-color: #dddddd;
+  border-width: 20px;
+  margin-left: -20px;
+}
+
+/* line 42, ../../../private/common-html/sass/partials/_bubble.scss */
+.stacked .bubble-dialog-arrow,
+.stacked--inline .bubble-dialog-arrow {
+  overflow-y: visible;
+  margin-top: 25px;
+  margin-bottom: -1px;
+}
+
+/* line 9, ../../../private/common-html/sass/partials/_bubble.scss */
 .help-arrow {
   position: relative;
   z-index: 100;
 }
 
-/* line 37, ../../../private/common-html/sass/partials/_help.scss */
+/* line 14, ../../../private/common-html/sass/partials/_bubble.scss */
 .help-arrow:after,
 .help-arrow:before {
   bottom: 100%;
@@ -1089,7 +1159,7 @@ ul.tabs {
   overflow-y: visible;
 }
 
-/* line 51, ../../../private/common-html/sass/partials/_help.scss */
+/* line 28, ../../../private/common-html/sass/partials/_bubble.scss */
 .help-arrow:after {
   border-color: rgba(246, 246, 246, 0);
   border-bottom-color: #f6f6f6;
@@ -1097,7 +1167,7 @@ ul.tabs {
   margin-left: -14px;
 }
 
-/* line 57, ../../../private/common-html/sass/partials/_help.scss */
+/* line 34, ../../../private/common-html/sass/partials/_bubble.scss */
 .help-arrow:before {
   border-color: rgba(247, 172, 46, 0);
   border-bottom-color: #f7ac2e;
@@ -1105,42 +1175,38 @@ ul.tabs {
   margin-left: -15px;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_help.scss */
-.stacked .help-arrow {
+/* line 42, ../../../private/common-html/sass/partials/_bubble.scss */
+.stacked .help-arrow,
+.stacked--inline .help-arrow {
   overflow-y: visible;
   margin-top: 20px;
   margin-bottom: -1px;
 }
 
-/* line 75, ../../../private/common-html/sass/partials/_help.scss */
+/* line 4, ../../../private/common-html/sass/partials/_help.scss */
 .help-toggle {
   margin-left: 12px;
   display: inline-block;
   color: #f39129;
   text-align: center;
 }
-/* line 82, ../../../private/common-html/sass/partials/_help.scss */
+/* line 11, ../../../private/common-html/sass/partials/_help.scss */
 .help-toggle .lupicon-circle-question {
   margin-top: 5px;
   margin-bottom: 10px;
   cursor: pointer;
 }
-/* line 89, ../../../private/common-html/sass/partials/_help.scss */
+/* line 18, ../../../private/common-html/sass/partials/_help.scss */
 .help-toggle .lupicon-circle-question.expanded {
   color: #f7ac2e;
 }
 
-/* .stacked .help-arrow { */
-/*   overflow-y: visible; */
-/*   margin-top: 20px; */
-/*   margin-bottom: -1px; */
-/* } */
-/* line 101, ../../../private/common-html/sass/partials/_help.scss */
+/* line 23, ../../../private/common-html/sass/partials/_help.scss */
 .stacked.help-toggle {
   overflow-y: visible;
 }
 
-/* line 106, ../../../private/common-html/sass/partials/_help.scss */
+/* line 28, ../../../private/common-html/sass/partials/_help.scss */
 .help-text {
   display: none;
   position: relative;
@@ -1150,29 +1216,29 @@ ul.tabs {
   margin-bottom: 24px;
   border: 1px solid #f7ac2e;
 }
-/* line 115, ../../../private/common-html/sass/partials/_help.scss */
+/* line 37, ../../../private/common-html/sass/partials/_help.scss */
 .help-text p:last-child {
   margin-bottom: 0;
 }
 
-/* line 121, ../../../private/common-html/sass/partials/_help.scss */
+/* line 43, ../../../private/common-html/sass/partials/_help.scss */
 .tab-info {
   width: 80%;
 }
 
-/* line 128, ../../../private/common-html/sass/partials/_help.scss */
+/* line 50, ../../../private/common-html/sass/partials/_help.scss */
 .help-reset {
   clear: both;
   max-height: 6px;
 }
 
-/* line 133, ../../../private/common-html/sass/partials/_help.scss */
+/* line 55, ../../../private/common-html/sass/partials/_help.scss */
 .panel-info {
   width: 100%;
   text-align: justify;
 }
 
-/* line 138, ../../../private/common-html/sass/partials/_help.scss */
+/* line 60, ../../../private/common-html/sass/partials/_help.scss */
 .expanded-content {
   max-height: 0;
   overflow: hidden;
@@ -1180,18 +1246,18 @@ ul.tabs {
   -webkit-transition: max-height 400ms;
   /* Safari */
 }
-/* line 143, ../../../private/common-html/sass/partials/_help.scss */
+/* line 65, ../../../private/common-html/sass/partials/_help.scss */
 .expanded-content.expand {
   max-height: 1000px;
 }
 
-/* line 148, ../../../private/common-html/sass/partials/_help.scss */
+/* line 70, ../../../private/common-html/sass/partials/_help.scss */
 .page-info {
   width: 60%;
   margin: 12px 0;
 }
 
-/* line 154, ../../../private/common-html/sass/partials/_help.scss */
+/* line 76, ../../../private/common-html/sass/partials/_help.scss */
 .help-adjacent-title {
   margin-top: 0 !important;
   line-height: normal;
@@ -2953,113 +3019,16 @@ div.search i {
   float: right;
 }
 
-/* line 2, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog {
-  padding: 20px 20px 20px 20px;
-  position: relative;
-  background: white;
-  border: 1px solid #dddddd;
-}
-/* line 12, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog .left-buttons {
-  margin-top: 20px;
-}
-/* line 16, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog label.mandatory:after {
-  content: " *";
-  color: #f7ac2e;
-}
-/* line 20, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog input[type=text], .bubble-dialog textarea {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 4px;
-  display: block;
-}
-/* line 27, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog textarea {
-  min-height: 8em;
-}
-/* line 31, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog input.mandatory {
-  border-color: #f7ac2e;
-  margin-bottom: 20px;
-}
-/* line 36, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog .error {
-  margin-top: 20px;
-  border: 1px solid red;
-  color: red;
-  padding: 20px;
-}
-/* line 44, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog table.mandatory tr {
-  background-color: initial;
-}
-/* line 46, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog table.mandatory tr td {
-  border: 1px solid #f7ac2e;
-  background-color: none;
-}
-/* line 50, ../../../private/common-html/sass/partials/__guests.scss */
-.bubble-dialog table.mandatory tr td.full {
-  width: 33%;
-}
-
-/* line 32, ../../../private/common-html/sass/partials/_help.scss */
-.guest-arrow {
-  position: relative;
-  z-index: 100;
-}
-
-/* line 37, ../../../private/common-html/sass/partials/_help.scss */
-.guest-arrow:after,
-.guest-arrow:before {
-  bottom: 100%;
-  left: 50%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  z-index: 100;
-  overflow-y: visible;
-}
-
-/* line 51, ../../../private/common-html/sass/partials/_help.scss */
-.guest-arrow:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: white;
-  border-width: 19px;
-  margin-left: -19px;
-}
-
-/* line 57, ../../../private/common-html/sass/partials/_help.scss */
-.guest-arrow:before {
-  border-color: rgba(221, 221, 221, 0);
-  border-bottom-color: #dddddd;
-  border-width: 20px;
-  margin-left: -20px;
-}
-
-/* line 65, ../../../private/common-html/sass/partials/_help.scss */
-.stacked .guest-arrow {
-  overflow-y: visible;
-  margin-top: 25px;
-  margin-bottom: -1px;
-}
-
-/* line 60, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 6, ../../../private/common-html/sass/partials/__guests.scss */
 .auth-table tr {
   background-color: initial;
 }
-/* line 62, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 8, ../../../private/common-html/sass/partials/__guests.scss */
 .auth-table tr:active {
   background-color: initial;
 }
 
-/* line 68, ../../../private/common-html/sass/partials/__guests.scss */
+/* line 14, ../../../private/common-html/sass/partials/__guests.scss */
 .application-guests {
   margin-bottom: 20px;
 }
@@ -6539,50 +6508,50 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 /*
   Lupapalvelu CSS:
 */
-/* line 156, ../../../private/common-html/sass/main.scss */
+/* line 157, ../../../private/common-html/sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 162, ../../../private/common-html/sass/main.scss */
+/* line 163, ../../../private/common-html/sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 166, ../../../private/common-html/sass/main.scss */
+/* line 167, ../../../private/common-html/sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 170, ../../../private/common-html/sass/main.scss */
+/* line 171, ../../../private/common-html/sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 174, ../../../private/common-html/sass/main.scss */
+/* line 175, ../../../private/common-html/sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 178, ../../../private/common-html/sass/main.scss */
+/* line 179, ../../../private/common-html/sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 182, ../../../private/common-html/sass/main.scss */
+/* line 183, ../../../private/common-html/sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 187, ../../../private/common-html/sass/main.scss */
+/* line 188, ../../../private/common-html/sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 191, ../../../private/common-html/sass/main.scss */
+/* line 192, ../../../private/common-html/sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -6594,27 +6563,27 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   display: table-cell;
 }
 
-/* line 202, ../../../private/common-html/sass/main.scss */
+/* line 203, ../../../private/common-html/sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 210, ../../../private/common-html/sass/main.scss */
+/* line 211, ../../../private/common-html/sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 216, ../../../private/common-html/sass/main.scss */
+/* line 217, ../../../private/common-html/sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 221, ../../../private/common-html/sass/main.scss */
+/* line 222, ../../../private/common-html/sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -6628,47 +6597,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 234, ../../../private/common-html/sass/main.scss */
+/* line 235, ../../../private/common-html/sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 236, ../../../private/common-html/sass/main.scss */
+/* line 237, ../../../private/common-html/sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 242, ../../../private/common-html/sass/main.scss */
+/* line 243, ../../../private/common-html/sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 247, ../../../private/common-html/sass/main.scss */
+/* line 248, ../../../private/common-html/sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 249, ../../../private/common-html/sass/main.scss */
+/* line 250, ../../../private/common-html/sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 252, ../../../private/common-html/sass/main.scss */
+/* line 253, ../../../private/common-html/sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 253, ../../../private/common-html/sass/main.scss */
+/* line 254, ../../../private/common-html/sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 256, ../../../private/common-html/sass/main.scss */
+/* line 257, ../../../private/common-html/sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 258, ../../../private/common-html/sass/main.scss */
+/* line 259, ../../../private/common-html/sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 260, ../../../private/common-html/sass/main.scss */
+/* line 261, ../../../private/common-html/sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
