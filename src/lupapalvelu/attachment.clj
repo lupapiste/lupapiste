@@ -92,10 +92,14 @@
 
 (def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
-(def operation-specific-attachment-types #{{:type-id :pohjapiirros      :type-group :paapiirustus}
-                                           {:type-id :leikkauspiirros   :type-group :paapiirustus}
-                                           {:type-id :julkisivupiirros  :type-group :paapiirustus}
-                                           {:type-id :yhdistelmapiirros :type-group :paapiirustus}})
+(def operation-specific-attachment-types #{{:type-id :pohjapiirros       :type-group :paapiirustus}
+                                           {:type-id :leikkauspiirros    :type-group :paapiirustus}
+                                           {:type-id :julkisivupiirros   :type-group :paapiirustus}
+                                           {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
+                                           {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
+                                           {:type-id :energiatodistus    :type-group :muut}
+                                           {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
+                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}})
 
 (def all-attachment-type-ids
   (->> (vals attachment-types-by-permit-type)
