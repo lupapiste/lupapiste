@@ -78,7 +78,7 @@
         (.toDate))))
 
 (defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} verdicts]
-  (when (= "m\u00E4\u00E4r\u00E4ajan" (name arkistointi))
+  (when (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi))
     (paatospvm-plus-years verdicts pituus)))
 
 (defn- security-end-date [{:keys [salassapitoaika julkisuusluokka]} verdicts]
