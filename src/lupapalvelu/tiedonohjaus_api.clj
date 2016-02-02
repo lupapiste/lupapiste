@@ -116,7 +116,7 @@
           updated-child (update-document-metadata child metadata user-roles application)
           updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
       (action/update-application command {$set {:modified created type updated-children}})
-      (ok))
+      (ok {:metadata (:metadata updated-child)}))
     (fail "error.child.id")))
 
 (defn- process-case-file-metadata [old-metadata new-metadata user-roles]
@@ -145,7 +145,7 @@
         {processed-metadata :metadata} (update-document-metadata application metadata user-roles application)]
     (action/update-application command {$set {:modified created
                                               :metadata processed-metadata}})
-    (ok)))
+    (ok {:metadata processed-metadata})))
 
 (defcommand store-tos-metadata-for-process
   {:parameters [:id metadata]
@@ -158,7 +158,7 @@
         processed-metadata (process-case-file-metadata (:processMetadata application) metadata user-roles)]
     (action/update-application command {$set {:modified created
                                               :processMetadata processed-metadata}})
-    (ok)))
+    (ok {:metadata processed-metadata})))
 
 (defquery case-file-data
   {:parameters [:id]

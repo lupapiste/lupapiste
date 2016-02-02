@@ -51,7 +51,15 @@
                             "perustelu"   "foo"}
          "myyntipalvelu"   false
          "nakyvyys"        "julkinen"
-         "kieli"           "fi"}) => {:ok true}
+         "kieli"           "fi"}) => {:ok true
+                                      :metadata {:julkisuusluokka :julkinen
+                                                 :henkilotiedot   :ei-sisalla
+                                                 :sailytysaika    {:arkistointi :ikuisesti
+                                                                   :perustelu   "foo"}
+                                                 :myyntipalvelu   false
+                                                 :nakyvyys        :julkinen
+                                                 :tila            :luonnos
+                                                 :kieli           :fi}}
       (provided
         (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
                                                                                                              :henkilotiedot   :ei-sisalla
@@ -82,7 +90,16 @@
                             "perustelu"   "foo"}
          "myyntipalvelu"   false
          "nakyvyys"        "julkinen"
-         "kieli"           "fi"}) => {:ok true}
+         "kieli"           "fi"}) => {:ok true
+                                      :metadata {:julkisuusluokka :julkinen
+                                                 :henkilotiedot   :ei-sisalla
+                                                 :sailytysaika    {:arkistointi :ikuisesti
+                                                                   :perustelu   "foo"}
+                                                 :myyntipalvelu   false
+                                                 :nakyvyys        :julkinen
+                                                 :tila            :luonnos
+
+                                                 :kieli           :fi}}
       (provided
         (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
                                                                                                              :henkilotiedot   :ei-sisalla
@@ -109,7 +126,12 @@
                                                                "perustelu"   "foo"}
                                             "kieli"           "fi"}
                                  :id       "ABC123"}}]
-      (execute command) => {:ok true}
+      (execute command) => {:ok true
+                            :metadata {:julkisuusluokka :julkinen
+                                       :henkilotiedot   :ei-sisalla
+                                       :sailytysaika    {:arkistointi :ikuisesti
+                                                         :perustelu   "foo"}
+                                       :kieli           :fi}}
       (provided
         (lupapalvelu.action/update-application command {$set {:modified        1000
                                                               :processMetadata {:julkisuusluokka :julkinen
@@ -143,7 +165,24 @@
         command
         :attachments
         1
-        metadata) => {:ok true}
+        metadata) => {:ok true
+                      :metadata {:tila :luonnos
+                                 :salassapitoaika 5
+                                 :nakyvyys :julkinen
+                                 :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                :pituus 10
+                                                :perustelu "foo"
+                                                :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                 :myyntipalvelu false
+                                 :suojaustaso :ei-luokiteltu
+                                 :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                 :kayttajaryhma :viranomaisryhma
+                                 :kieli :fi
+                                 :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
+                                 :salassapitoperuste "peruste"
+                                 :henkilotiedot :sisaltaa
+                                 :julkisuusluokka :salainen
+                                 :kayttajaryhmakuvaus :muokkausoikeus}}
       (provided
         (lupapalvelu.action/update-application command
                                                {"$set" {:modified 1000, :attachments [{:id 1
@@ -183,7 +222,15 @@
         command
         :attachments
         1
-        metadata) => {:ok true}
+        metadata) => {:ok true
+                      :metadata {:julkisuusluokka :julkinen
+                                 :tila :luonnos
+                                 :nakyvyys :julkinen
+                                 :sailytysaika {:arkistointi :ikuisesti
+                                                :perustelu "foo"}
+                                 :myyntipalvelu false
+                                 :kieli :fi
+                                 :henkilotiedot :sisaltaa}}
       (provided
         (lupapalvelu.action/update-application command
                                                {"$set" {:modified 1000, :attachments [{:id 1
