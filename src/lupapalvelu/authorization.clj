@@ -9,9 +9,9 @@
 (def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl))
 
 (def default-authz-writer-roles #{:owner :writer :foreman})
-(def default-authz-reader-roles (conj default-authz-writer-roles :reader))
+(def default-authz-reader-roles (conj default-authz-writer-roles :reader :guest :guestAuthority))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
-(def all-authz-roles (conj all-authz-writer-roles :reader))
+(def all-authz-roles (conj all-authz-writer-roles :reader :guest :guestAuthority))
 
 (def default-org-authz-roles #{:authority :approver})
 (def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
@@ -27,10 +27,18 @@
 ;; Auth utils
 ;;
 
+(defn get-auths-by-roles
+  "Returns sequence of all auth-entries in an application with the
+  given roles. Each role can be keyword or string."
+  [{auth :auth} roles]
+  (let [role-set (->> roles (map name) set)]
+    ;; Roles in auths can also be keywords or strings.
+    ;; (name nil) causes NPE so default value is needed.
+    (filter #(contains? role-set (name (get % :role ""))) auth)))
+
 (defn get-auths-by-role
-  "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
-  [{auth :auth} role]
-  (filter #(= (name (get % :role "")) (name role)) auth))
+  [application role]
+  (get-auths-by-roles application [role]))
 
 (defn get-auths [{auth :auth} user-id]
   (filter #(= (:id %) user-id) auth))

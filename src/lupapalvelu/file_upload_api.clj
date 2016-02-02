@@ -11,11 +11,11 @@
 
 (defn- file-size-legal [{{files :files} :data}]
   (when-not (every? #(< % bulletin-file-upload-max-size) (map :size files))
-    (fail :error.bulletins.illegal-upload-size)))
+    (fail :error.file-upload.illegal-upload-size)))
 
 (defn- file-mime-type-accepted [{{files :files} :data}]
   (when-not (every? mime/allowed-file? (map :filename files))
-    (fail :error.illegal-file-type)))
+    (fail :error.file-upload.illegal-file-type)))
 
 (defraw upload-file
   {:user-roles #{:anonymous}

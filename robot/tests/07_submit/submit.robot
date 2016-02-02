@@ -47,9 +47,12 @@ Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as e
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Asuinkerrostalon tai rivitalon rakentaminen')]
-  Element should not be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
-  Xpath Should Match X Times  //table[@data-test-id='attachments-template-table']//input[@notneeded='true']  0
+  Wait Until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//td[contains(text(), 'Yleiset hankkeen liitteet')]
+  Xpath Should Match X Times  //table[@data-test-id='attachments-template-table']//td[contains(@class, 'attachment-not-needed')]//input  4
+  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-hakija-valtakirja']
+  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-asemapiirros']
+  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-muut-vaestonsuojasuunnitelma']
+  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-pohjapiirros']
 
 Mikko can not submit application because there are "missing required" items on the requiredFieldSummary tab
   Open tab  requiredFieldSummary

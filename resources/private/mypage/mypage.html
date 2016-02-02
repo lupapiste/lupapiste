@@ -138,8 +138,9 @@
                                                      disable: disable,
                                                      id: 'architect.fise',
                                                      lLabel: 'userinfo.architect.fise'}}"></div>
-
-                <div class="col-1"
+              </div>
+              <div class="row">
+                <div class="col-3"
                      data-bind="component: {name: 'select-field',
                                             params: {value: fiseKelpoisuus,
                                                      disable: disable,
@@ -201,10 +202,6 @@
                 <i class="wait spin lupicon-refresh"></i>
                 <span data-bind="ltext: 'save'"></span>
             </button>
-
-            <p class="context-error"
-               data-bind="visible: error() != null, ltext: error">
-            </p>
           </div>
 
         </form>
@@ -256,11 +253,6 @@
                       <i class="wait spin lupicon-refresh"></i>
                       <span data-bind="ltext: 'userinfo.changePassword'"></span>
                   </button>
-
-                  <p class="context-error"
-                     data-bind="visible: error() != null, ltext: error"
-                     class="context-error">
-                  </p>
                 </div>
               </div>
             </div>

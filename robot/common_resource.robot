@@ -225,14 +225,11 @@ Login
   Wait until  Element should be visible  login-username
   Input text  login-username  ${username}
   Input text  login-password  ${password}
-  # for IE8
   Wait and click  login-button
-  Run Keyword And Ignore Error  Confirm Action
 
 Login fails
   [Arguments]  ${username}  ${password}
   Login  ${username}  ${password}
-  Run Keyword And Ignore Error  Confirm Action
   User should not be logged in
 
 User should be logged in
@@ -337,6 +334,9 @@ Arto logs in
 Veikko logs in
   Authority logs in  veikko  veikko  Veikko Viranomainen
 
+Luukas logs in
+  Authority logs in  luukas  luukas  Luukas Lukija
+
 Velho logs in
   Authority logs in  velho  velho  Velho Viranomainen
 
@@ -381,18 +381,23 @@ Input text with jQuery
   Wait until page contains element  jquery=${selector}
   Wait until  Element should be visible  jquery=${selector}
   Wait until  Element should be enabled  jquery=${selector}
-  Execute Javascript  $('${selector}')[0].parentNode.scrollIntoView();
+  Execute Javascript  $('${selector}')[0].scrollIntoView(false);
   Execute Javascript  $('${selector}').focus().val("${value}").change();
   Run Keyword Unless  ${leaveFocus}  Execute Javascript  $('${selector}').blur();
 
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
-  Input text with jQuery  input[data-test-id="${id}"]  ${value}  ${leaveFocus}
+  Input text with jQuery  [data-test-id="${id}"]  ${value}  ${leaveFocus}
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Select From List by id
+  [Arguments]  ${id}  ${value}
+  Wait until page contains element  xpath=//select[@id="${id}"]
+  Select From List  xpath=//select[@id="${id}"]  ${value}
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
@@ -741,6 +746,12 @@ Deny yes no dialog
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
 
+Confirm ok dialog
+  Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+
 Confirm
   [Arguments]  ${modalId}
   Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
@@ -848,16 +859,12 @@ Input comment and mark answered
   [Arguments]  ${message}
   Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
-  Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
+  Confirm ok dialog
   Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'is-comment')]//span[text()='${message}']
 
 Mark answered
   Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
-  Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
+  Confirm notification dialog
 
 Comment count is
   [Arguments]  ${amount}
@@ -869,9 +876,14 @@ Comment count is
 # Invites
 #
 
+Is authorized party
+  # Party can be either email or username
+  [Arguments]  ${party}
+  Element Should Be Visible  xpath=//div[@class='parties-list']//table//td[contains(., '${party}')]
+
 Invite ${email} to application
   Open tab  parties
-  ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/ul/li[@class='party']
+  ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/table//tr[@class='party']
   Element should be visible  xpath=//button[@data-test-id='application-invite-person']
   Click by test id  application-invite-person
   Wait until  Element should be visible  invite-email
@@ -880,15 +892,16 @@ Invite ${email} to application
   Element should be enabled  xpath=//button[@data-test-id='application-invite-submit']
   Click by test id  application-invite-submit
   Wait Until  Element Should Not Be Visible  invite-email
-  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//li[@class='party'][${invites_count} + 1]
-  ${email_found}=  Run Keyword And Return Status  Element Should Be Visible  xpath=//div[@class='parties-list']//span[@class='person']/span[2][contains(., '${email}')]
+  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//tr[@class='party'][${invites_count} + 1]
+  ${email_found}=  Run Keyword And Return Status  Is authorized party  ${email}
   # If specified email was not found from auths, try to parse username from the email and test if username exists (case of pena)
   ${username}=  Fetch From Left  ${email}  @
-  Run Keyword Unless  ${email_found}  Element Should Be Visible  xpath=//div[@class='parties-list']//span[@class='person']/span[2][contains(., '${username}')]
+  Run Keyword Unless  ${email_found}  Is authorized party  ${username}
 
 Invite count is
   [Arguments]  ${amount}
   Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
+
 
 #
 # Tasks
@@ -1108,3 +1121,46 @@ Mock proxy error
 
 Clear mocks
   Execute Javascript  $.mockjaxClear();
+
+# -------------------------------
+# Selector arguments for scroll keywords are jQuery selector without jquery= part.
+# -------------------------------
+
+Scroll to
+  [Arguments]  ${selector}
+  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
+
+Scroll to test id
+  [Arguments]  ${id}
+  Scroll to  [data-test-id=${id}]
+
+Scroll and click
+  [Arguments]  ${selector}
+  Scroll to  ${selector}
+  Click Element  jquery=${selector}
+
+Wait test id visible
+  [Arguments]  ${id}
+  Scroll to test id  ${id}
+  Wait Until Element Is Visible  jquery=[data-test-id=${id}]
+
+Wait test id hidden
+  [Arguments]  ${id}
+  Scroll to test id  ${id}
+  Wait Until Element Is Not Visible  jquery=[data-test-id=${id}]
+
+Test id empty
+  [Arguments]  ${id}
+  Wait test id visible  ${id}
+  Textfield Value Should Be  jquery=[data-test-id=${id}]  ${EMPTY}
+
+Test id disabled
+  [Arguments]  ${id}
+  Scroll to test id  ${id}
+  Element should be disabled  jquery=[data-test-id=${id}]
+
+Fill test id
+  [Arguments]  ${id}  ${text}
+  Wait test id visible  ${id}
+  Element Should Be Enabled  jquery=[data-test-id=${id}]
+  Input text by test id  ${id}  ${text}

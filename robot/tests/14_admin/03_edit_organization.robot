@@ -28,8 +28,7 @@ Admin edits organization with id 753-R
   Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="open-inforequest-753-R"]/input
   Input text by test id  open-inforequest-email-753-R  root@localhost
   Click enabled by test id  save-753-R
-  Wait Until  Page should contain  Tiedot tallennettu
-  Confirm  dynamic-ok-confirm-dialog
+  Wait Until  Positive indicator should be visible
   Go back
 
 Organization 753-R has now inforequest and application enabled
@@ -46,8 +45,7 @@ Admin sets application disabled
   Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
   Unselect Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="application-enabled-753-R"]/input
   Click enabled by test id  save-753-R
-  Wait Until  Page should contain  Tiedot tallennettu
-  Confirm  dynamic-ok-confirm-dialog
+  Wait Until  Positive indicator should be visible
   Go back
 
 Organization 753-R has now inforequest enabled and application disabled

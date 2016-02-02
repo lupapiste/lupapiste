@@ -98,8 +98,15 @@ jQuery(document).ready(function() {
     {name: "statement-edit-reply"},
     {name: "statement-reply-request"},
     {name: "statement-control-buttons"},
-    {name: "statement-attachments"}
-  ];
+    {name: "statement-attachments"},
+    {name: "guest-authorities"},
+    {name: "bubble-dialog"},
+    {name: "application-guests"},
+    {name: "side-panel"},
+    {name: "conversation"},
+    {name: "authority-notice"},
+    {name: "authorized-parties"}
+];
 
   _.forEach(components, function(component) {
     ko.components.register(component.name, {

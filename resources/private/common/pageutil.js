@@ -85,7 +85,10 @@ var pageutil = (function($) {
 
   function openApplicationPage(application, suffix) {
     var kind =  ko.unwrap(application.infoRequest) ? "inforequest" : "application";
-    openPage(kind + "/" +  ko.unwrap(application.id), suffix);
+    var id = ko.unwrap(application.id);
+    if (id) {
+      openPage(kind + "/" +  id, suffix);
+    }
   }
 
   $(function() {

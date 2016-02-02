@@ -23,7 +23,15 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.label = (params.schema.label === false || params.schema.label === "false") ? null : self.i18npath.join(".");
 
   self.indicator = ko.observable().extend({notify: "always"});
-  self.result = self.model.validationResult.extend({notify: "always"});
+
+  self.result = ko.pureComputed(function() {
+    var myDoc = service.findDocumentById(self.documentId);
+    var validation = _.find(myDoc.validationResults(), function(validation) {
+      return _.isEqual(validation.path, self.path);
+    });
+    return validation && validation.result;
+  });
+
   self.errorMessage = ko.pureComputed(function() {
     var errType = self.result() && self.result()[0];
     var message = errType && errType !== "tip" && loc(["error", self.result()[1]]);
@@ -68,10 +76,4 @@ LUPAPISTE.DocgenInputModel = function(params) {
   };
   self.value.subscribe(_.debounce(save, 500));
 
-  self.addEventListener("document", "validation-result", function(results) {
-    var res = _.find(results, function(res) {
-      return _.isEqual(res.path, self.path);
-    });
-    self.result(res && res.result);
-  });
 };

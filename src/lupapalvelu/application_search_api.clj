@@ -66,8 +66,13 @@
   [{user :user data :data}]
   (let [user-query (domain/basic-application-query-for user)
         query (search/make-query user-query data user)
-        fields [:id :location :infoRequest :address :municipality :primaryOperation :secondaryOperations :drawings :permitType :indicators
-                :attachmentsRequiringAction :unseenComments :primaryOperation :applicant :submitted :modified :state :authority]
+        fields [:id :address :applicant :authority
+                :drawings :infoRequest :location
+                :modified :municipality
+                :primaryOperation :secondaryOperations
+                :permitType
+                :state
+                :submitted]
         apps (mongo/select :applications query (zipmap fields (repeat 1)))
         rows (map #(-> %
                      (domain/filter-application-content-for user)

@@ -232,12 +232,17 @@ var LUPAPISTE = LUPAPISTE || {};
       });
     };
 
+    var isAuthorizedToTosAndSearch = function() {
+      return lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled") &&
+        lupapisteApp.models.globalAuthModel.ok("store-tos-metadata-for-application");
+    };
+
     self.showArchiveMenuOptions = ko.observable(false);
     if (util.getIn(window, ["lupapisteApp", "models", "globalAuthModel"])) {
-      self.showArchiveMenuOptions(lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled"));
+      self.showArchiveMenuOptions(isAuthorizedToTosAndSearch());
     }
     hub.subscribe("global-auth-model-loaded", function() {
-      self.showArchiveMenuOptions(lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled"));
+      self.showArchiveMenuOptions(isAuthorizedToTosAndSearch());
     });
 
     /**

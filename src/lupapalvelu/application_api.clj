@@ -101,6 +101,7 @@
   {:parameters       [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (a/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
    :states           states/all-states
    :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]
@@ -362,13 +363,14 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       a/validate-authority-in-drafts]}
-  [{:keys [application created] :as command}]
+  [{{attachments :attachments organization :organization app-state :state tos-function :tosFunction :as application} :application created :created :as command}]
   (let [op (a/make-op operation created)
         new-docs (a/make-documents nil created op application)
-        organization (organization/get-organization (:organization application))]
+        organization (organization/get-organization organization)
+        new-attachments (a/make-attachments created op organization app-state tos-function :existing-attachments-types (set (map :type attachments)))]
     (update-application command {$push {:secondaryOperations  op
                                         :documents   {$each new-docs}
-                                        :attachments {$each (a/make-attachments created op organization (:state application) (:tosFunction application))}}
+                                        :attachments {$each new-attachments}}
                                  $set  {:modified created}})))
 
 (defcommand update-op-description

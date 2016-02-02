@@ -9,4 +9,5 @@ LUPAPISTE.MunicipalityMapsModel = function() {
   self.layersParams = params.layers;
   self.mapParams    = params.map;
 
+  self.dispose = service.dispose;
 };

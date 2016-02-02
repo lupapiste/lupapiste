@@ -19,6 +19,8 @@ LUPAPISTE.AutocompleteModel = function(params) {
   "use strict";
   var self = this;
 
+  self.disable = params.disable || false;
+
   self.queryString = ko.observable("");
 
   self.results = ko.pureComputed(function() {

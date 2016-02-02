@@ -20,6 +20,8 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
   // TODO rethink how we handle single selection in autocomplete component
   self.selectedOptions = params.selectedOptions || ko.observableArray(_.filter([ko.unwrap(params.selectedOption)]));
 
+  self.disable = params.disable || false;
+
   var pauseUpdatingOption = false;
 
   var subscriptions = [];
@@ -121,7 +123,9 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
 
   // view model functions
   self.selectInput = function() {
-    self.inputSelected(!self.inputSelected());
+    if (!ko.unwrap(self.disable)) {
+      self.inputSelected(!self.inputSelected());
+    }
   };
 
   self.retainFocus = function() {
@@ -215,8 +219,10 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
   };
 
   self.removeTag = function(tag) {
-    self.selectedOptions.remove(tag);
-    self.inputSelected(false);
+    if (!self.disable) {
+      self.selectedOptions.remove(tag);
+      self.inputSelected(false);
+    }
   };
 
   self.clearQuery = function() {

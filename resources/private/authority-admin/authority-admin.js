@@ -189,6 +189,7 @@
 
     self.copyFrom = function(data) {
       self.email(data.email);
+      self.email2( data.email);
       self.text(data.text);
       return self;
     };
@@ -424,9 +425,6 @@
       usersList = users.create($("#users .admin-users-table"), usersTableConfig);
     }
     statementGiversModel.load();
-  });
-
-  hub.onPageLoad("applications", function() {
   });
 
   hub.onPageLoad("backends", function() {

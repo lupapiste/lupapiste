@@ -79,18 +79,18 @@
             <label class="form-label" data-bind="ltext: 'add-statement-giver-maaraaika'" for="add-statement-giver-maaraaika"></label>
             <input type="text" class="form-input" data-bind="datepicker: maaraaika" id="add-statement-giver-maaraaika"></input>
 
-            <button data-bind="click: toggleInviteSection"
-                    class="neutral modal"
-                    data-test-id="cancel-add-statement-giver">
-                <i class="lupicon-remove"></i>
-                <span data-bind="ltext: 'cancel'"></span>
-            </button>
-
             <button data-bind="click: send, disable: disabled"
                     class="positive modal"
                     data-test-id="add-statement-giver">
               <i class="lupicon-circle-check"></i>
               <span data-bind="ltext: 'application.statement.add'"></span>
+            </button>
+
+            <button data-bind="click: toggleInviteSection"
+                    class="neutral modal"
+                    data-test-id="cancel-add-statement-giver">
+                <i class="lupicon-remove"></i>
+                <span data-bind="ltext: 'cancel'"></span>
             </button>
 
           <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>

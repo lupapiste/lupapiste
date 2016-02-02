@@ -44,7 +44,7 @@
                            valueAllowUnset: true,
                            disable: $parent.disableAll || $parent.disabledFields && _.contains($parent.disabledFields(), type)"></select>
       </div>
-      <div data-bind="if: $data.inputType" class="text-input-container">
+      <div data-bind="if: $data.inputType && !$data.calculated" class="text-input-container">
         <label data-bind="ltext: type"></label><br>
         <span data-bind="if: inputType === 'checkbox'">
           <input type="checkbox" class="form-input" data-bind="visible: $parent.editable, checked: $parent.values()[type],
@@ -61,6 +61,10 @@
           <span data-bind="visible: !$parent.editable(), text: $parent.values()[type]"></span>
         </span>
         <span data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></span>
+      </div>
+      <div data-bind="if: $data.calculated && $data.inputType === 'date' && $parent.values()[type]" class="text-input-container">
+        <label data-bind="ltext: type"></label><br>
+        <span data-bind="dateString: $parent.values()[type]"></span>
       </div>
       <!-- ko if: $data.subfields -->
       <div class="subtable">

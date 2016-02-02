@@ -14,7 +14,9 @@
             <span data-bind="text: title"></span>
           </span>
           <span data-bind="with: data">
+            <!-- ko if: $data.person -->
             (<span data-bind="text: person.text"></span>)
+            <!-- /ko -->
           </span>
         </h1>
       </div>
@@ -28,8 +30,8 @@
         <div data-bind="if: submitAuthorized">
           <label class="form-label" for="statement-reply-covering-note" data-bind="ltext: 'statement.' + tab + '.text'"></label>
           <textarea
-            data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')}, 
-                       textInput: text, 
+            data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')},
+                       textInput: text,
                        readonly: !enabled()"
             id="statement-reply-covering-note"
             rows="15">

@@ -27,7 +27,7 @@
           util.showSavedIndicator(res);
         })
         .error(function(res) {
-          model.clear().saved(false).error(res.text);
+          model.error(res.text).clear().saved(false);
           util.showSavedIndicator(res);
         })
         .complete(function() { clearTimeout(t); img.hide(); })
@@ -217,7 +217,6 @@
 
   function Password() {
     var self = this;
-    self.oldPassword = ko.observable("");
     self.newPassword = ko.observable("");
     self.newPassword2 = ko.observable("").extend({match: {params: self.newPassword, message: loc("mypage.noMatch")}});
     self.error = ko.observable(null);
@@ -225,7 +224,27 @@
     self.pending = ko.observable(false);
     self.processing = ko.observable(false);
 
+    // old pasword field will show error if change password request fails
+    self.oldPassword = ko.observable("").extend({
+      validation: {
+        validator: function (val, error) {
+          return !Boolean(error);
+        },
+        message: loc("mypage.old-password-does-not-match"),
+        params: self.error
+      }
+    });
+
+    // set error null when old password field is altered
+    ko.computed(function() {
+      self.oldPassword(); // just to trigger computed
+      self.error(null);
+    });
+
     self.clear = function() {
+      if (self.error()) {
+        return self;
+      }
       return self
         .oldPassword("")
         .newPassword("")

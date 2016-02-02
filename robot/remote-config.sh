@@ -1,5 +1,5 @@
 murmeli='murmeli.solita.fi'
-murmeliie='192.168.7.168'
+murmeliie='192.168.7.237'
 
 remote=$murmeli
 

@@ -3,6 +3,7 @@ LUPAPISTE.AutocompleteOrganizationsModel = function(params) {
   var self = this;
 
   self.lPlaceholder = params.lPlaceholder;
+  self.disable = params.disable || false;
 
   self.selected = lupapisteApp.services.organizationFilterService.selected;
 

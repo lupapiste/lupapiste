@@ -14,7 +14,8 @@ LUPAPISTE.Upload = {
   locked: ko.observable(),
   selectableOperations: ko.observableArray(),
   selectedOperationId: ko.observable(),
-  helpVisible: ko.observable(false)
+  helpVisible: ko.observable(false),
+  archiveEnabled: ko.observable(false)
 };
 
 LUPAPISTE.Upload.setModel = function(options) {
@@ -30,6 +31,7 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.targetType(options.target ? options.target.type : null);
   LUPAPISTE.Upload.targetId(options.target ? options.target.id : null);
   LUPAPISTE.Upload.locked(options.locked || false);
+  LUPAPISTE.Upload.archiveEnabled(options.archiveEnabled || false);
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {

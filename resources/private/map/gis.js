@@ -25,6 +25,8 @@ var gis = (function() {
   function Map(element, options) {
     var self = this;
     var allLayers;
+    var mapConfig = LUPAPISTE.config.maps;
+    var openNlsMap = mapConfig["open-nls-wmts"]; // if open NLS mapserver is used (testing & hacking)
 
     var controls = [new OpenLayers.Control.Zoom({zoomInText:"\ue63d", zoomOutText:"\ue63e"}),
                     new OpenLayers.Control.Navigation({ zoomWheelEnabled: options && options.zoomWheelEnabled })];
@@ -34,25 +36,30 @@ var gis = (function() {
       controls.push(new OpenLayers.Control.LupapisteEditingToolbar(self.manualDrawingLayer));
     }
 
+    var resolutions = [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1];
+    if ( !openNlsMap ) {
+      resolutions.push(0.5);
+    }
+
     self.map = new OpenLayers.Map(element, {
       theme: null,
       projection: new OpenLayers.Projection("EPSG:3067"),
       units: "m",
       maxExtent : new OpenLayers.Bounds(-548576.000000,6291456.000000,1548576.000000,8388608.000000),
-      resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+      resolutions : resolutions,
       controls: controls
     });
 
     // Layers
 
     // In production multiple servers, locally it's just localhost.
-    var mapServer = LUPAPISTE.config.maps["proxyserver-wmts"];
+    var mapServer = openNlsMap || mapConfig["proxyserver-wmts"]; // open or proxy wmts
     if (mapServer.indexOf(",") > -1) {
       mapServer = mapServer.split(",");
     }
     var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
 
-    var taustakartta = new OpenLayers.Layer.WMTS({
+    var taustakartta = new OpenLayers.Layer.WMTS({ // this is available in open NLS map
       name: "Taustakartta",
       url: withSuffix(mapServer, "/maasto"),
       isBaseLayer: false,
@@ -62,7 +69,7 @@ var gis = (function() {
       format: "image/png",
       style: "default",
       opacity: 1.0,
-      resolutions : [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
+      resolutions : resolutions,
       // maxExtent not defined here -> inherits from the config of the map
       projection: new OpenLayers.Projection("EPSG:3067")
     });
@@ -100,11 +107,14 @@ var gis = (function() {
 
     self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
 
-    if (!features.enabled("maps-disabled")) {
+    if (!features.enabled("maps-disabled") && !openNlsMap) {
       allLayers = [base, taustakartta, kiinteistorajat, kiinteistotunnukset, self.vectorLayer];
+    } else if (!features.enabled("maps-disabled") && openNlsMap) { // open NLS (MML) WMTS uses 'taustakartta'
+      allLayers = [base, taustakartta, self.vectorLayer];
     } else {
       allLayers = [base, self.vectorLayer];
     }
+
     if (options && options.drawingControls) {
       allLayers.push(self.manualDrawingLayer);
     }

@@ -4,7 +4,11 @@
             [clojure.core.memoize :as memo]
             [lupapalvelu.organization :as o]
             [lupapalvelu.action :as action]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [sade.util :as util]
+            [lupapalvelu.domain :as domain]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -61,13 +65,42 @@
   (memo/ttl get-metadata-for-process-from-toj
             :ttl/threshold 10000))
 
-(defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function & [type]]
+(defn- paatospvm-plus-years [verdicts years]
+  (when-let [paatos-ts (->> verdicts
+                       (map (fn [{:keys [paatokset]}]
+                              (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
+                       (flatten)
+                       (remove nil?)
+                       (sort)
+                       (last))]
+    (-> (c/from-long paatos-ts)
+        (t/plus (t/years years))
+        (.toDate))))
+
+(defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} verdicts]
+  (when (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi))
+    (paatospvm-plus-years verdicts pituus)))
+
+(defn- security-end-date [{:keys [salassapitoaika julkisuusluokka]} verdicts]
+  (when (and (#{:osittain-salassapidettava :salainen} (keyword julkisuusluokka)) salassapitoaika)
+    (paatospvm-plus-years verdicts salassapitoaika)))
+
+(defn update-end-dates [metadata verdicts]
+  (let [retention-end (retention-end-date metadata verdicts)
+        security-end (security-end-date metadata verdicts)]
+    (cond-> (-> (util/dissoc-in metadata [:sailytysaika :retention-period-end])
+                (dissoc :secrecy-period-end))
+            retention-end (assoc-in [:sailytysaika :retention-period-end] retention-end)
+            security-end (assoc :security-period-end security-end))))
+
+(defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function application & [type]]
   (let [document-type (or type (:type document))
         existing-tila (:tila metadata)
         existing-nakyvyys (:nakyvyys metadata)
         new-metadata (metadata-for-document organization tos-function document-type)
         processed-metadata (cond-> new-metadata
                                    existing-tila (assoc :tila (keyword existing-tila))
+                                   true (update-end-dates (:verdicts application))
                                    (and (not (:nakyvyys new-metadata)) existing-nakyvyys) (assoc :nakyvyys existing-nakyvyys))]
     (assoc document :metadata processed-metadata)))
 
@@ -88,10 +121,14 @@
   (memo/ttl get-tos-toimenpide-for-application-state-from-toj
     :ttl/threshold 10000))
 
+(defn- full-name [{:keys [lastName firstName]}]
+  (str lastName " " firstName))
+
 (defn- get-documents-from-application [application]
   [{:type :hakemus
     :category :document
-    :ts (:created application)}])
+    :ts (:created application)
+    :user (:applicant application)}])
 
 (defn- get-attachments-from-application [application]
   (reduce (fn [acc attachment]
@@ -101,7 +138,9 @@
                           {:type (:type attachment)
                            :category :attachment
                            :version (:version ver)
-                           :ts (:created ver)}))
+                           :ts (:created ver)
+                           :contents (:contents attachment)
+                           :user (full-name (:user ver))}))
                   (concat acc))
               acc))
     []
@@ -111,38 +150,42 @@
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
         all-docs (sort-by :ts (concat documents attachments))]
-    (map (fn [[{:keys [state ts]} next]]
+    (map (fn [[{:keys [state ts user]} next]]
            (let [api-response (toimenpide-for-state (:organization application) (:tosFunction application) state)
                  action-name (or (:name api-response) "Ei asetettu tiedonohjaussuunnitelmassa")]
              {:action action-name
               :start ts
+              :user (full-name user)
               :documents (filter (fn [{doc-ts :ts}]
                                    (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
                            all-docs)}))
       (partition 2 1 nil (:history application)))))
 
-(defn- change-document-metadata-state [{:keys [metadata] :as doc} from-state to-state now]
-  (if (= from-state (keyword (:tila metadata)))
-    (-> (assoc-in doc [:metadata :tila] to-state)
-        (assoc :modified now))
-    doc))
+(defn- document-metadata-final-state [metadata verdicts]
+  (-> (assoc metadata :tila :valmis)
+      (update-end-dates verdicts)))
 
-(defn change-app-and-attachments-metadata-state! [{:keys [created application] :as command} from-state to-state]
-  (when (seq (:metadata application))
-    (let [{{new-tila :tila} :metadata} (change-document-metadata-state application from-state to-state created)
-          updated-attachments (map #(change-document-metadata-state % from-state to-state created) (:attachments application))]
-      (action/update-application
-        command
-        {$set {:modified created
-               :metadata.tila new-tila
-               :attachments updated-attachments}}))))
+(defn mark-attachment-final! [{:keys [attachments verdicts] :as application} now attachment-or-id]
+  (let [{:keys [id metadata]} (if (map? attachment-or-id)
+                                attachment-or-id
+                                (first (filter #(= (:id %) attachment-or-id) attachments)))]
+    (when (seq metadata)
+      (let [new-metadata (document-metadata-final-state metadata verdicts)]
+        (when-not (= metadata new-metadata)
+          (action/update-application
+            (action/application->command application)
+            {:attachments.id id}
+            {$set {:modified now
+                   :attachments.$.metadata new-metadata}}))))))
 
-(defn change-attachment-metadata-state! [application now attachment-id from-state to-state]
-  (let [attachment (first (filter #(= (:id %) attachment-id) (:attachments application)))]
-    (when (seq (:metadata attachment))
-      (let [{{new-tila :tila} :metadata} (change-document-metadata-state attachment from-state to-state now)]
-        (action/update-application
-          (action/application->command application)
-          {:attachments.id attachment-id}
-          {$set {:modified now
-                 :attachments.$.metadata.tila new-tila}})))))
+(defn mark-app-and-attachments-final! [app-id modified-ts]
+  (let [{:keys [metadata attachments verdicts] :as application} (domain/get-application-no-access-checking app-id)]
+    (when (seq metadata)
+      (let [new-metadata (document-metadata-final-state metadata verdicts)]
+        (when-not (= metadata new-metadata)
+          (action/update-application
+            (action/application->command application)
+            {$set {:modified modified-ts
+                   :metadata new-metadata}}))
+        (doseq [attachment attachments]
+          (mark-attachment-final! application modified-ts attachment))))))

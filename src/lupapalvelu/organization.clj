@@ -54,7 +54,11 @@
    :name sc/Str})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
-(def authority-roles (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
+(def authority-roles
+  "Reader role has access to every application within org. guestAuthority can
+  only access those applications that have extended an explicit
+  invitation."
+  (concat [:authority :approver :commenter :reader :guestAuthority] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
   (if (:scope org)
@@ -89,8 +93,10 @@
   {:pre [(not (s/blank? id))]}
   (mongo/update-by-id :organizations id changes))
 
-(defn get-organization-attachments-for-operation [organization operation]
-  (-> organization :operations-attachments ((-> operation :name keyword))))
+(defn get-organization-attachments-for-operation [organization {operation-name :name}]
+  (->> (get-in organization [:operations-attachments (keyword operation-name)])
+       (map (fn [[type-group type-id]] {:type-group (keyword type-group) 
+                                        :type-id    (keyword type-id)}))))
 
 (defn allowed-ip? [ip organization-id]
   (pos? (mongo/count :organizations {:_id organization-id, $and [{:allowedAutologinIPs {$exists true}} {:allowedAutologinIPs ip}]})))
@@ -433,4 +439,4 @@
     (update-organization org-id {$set {:areas ensured-areas
                                        :areas-wgs84 ensured-areas-wgs84}})
     (.dispose data-store)
-    ensured-areas-wgs84))
+    ensured-areas))

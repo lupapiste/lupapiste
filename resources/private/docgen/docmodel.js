@@ -1123,11 +1123,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function createComponent(name, params, classes) {
     // createElement works with IE8
     var element = document.createElement(name);
+    ko.options.deferUpdates = true; // http://knockoutjs.com/documentation/deferred-updates.html
 
     $(element)
       .attr("params", paramsStr(params))
       .addClass(classes)
       .applyBindings(params);
+
+    ko.options.deferUpdates = false;
 
     $(element).on("remove", function(event) {
       ko.cleanNode(event.target);
@@ -1225,7 +1228,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     _.each(self.application.auth, function (user) {
       // LUPA-89: don't print fully empty names, LPK-1257 Do not add statement givers
-      if (user.firstName && user.lastName && user.role !== "statementGiver") {
+      // No guests or guest authorities
+      if( user.firstName && user.lastName
+                         && !_.includes( ["statementGiver", "guest", "guestAuthority"],
+                                         user.role)) {
         var option = document.createElement("option");
         var value = user.id;
         option.value = value;

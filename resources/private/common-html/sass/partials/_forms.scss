@@ -996,13 +996,14 @@ $max-columns: 12;
   width: 100%;
   border-top: 1px solid $grid-border-color;
   color: $gray51;
+  padding-left: $grid-margin;
+  padding-right: $grid-margin;
 
   &:last-child {
     border-bottom: none;
   }
 
   h2 {
-    padding-left: $grid-margin;
     margin: $marginM 0;
   }
 
@@ -1023,6 +1024,12 @@ $max-columns: 12;
   .checkbox-wrapper, .radio-wrapper {
     label {
       cursor: pointer;
+    }
+  }
+  .col--no-margin {
+    padding: 0 !important;
+    .checkbox-wrapper {
+      border: none;
     }
   }
 
@@ -1115,7 +1122,12 @@ $max-columns: 12;
     vertical-align: middle;
   }
 
-  input[type=text]:disabled, .checkbox-wrapper.disabled {
+  .select-arrow.disabled {
+    background-color: $input-disabled-background-color;
+    color: $input-select-disabled-icon;
+  }
+
+  input[type=text]:disabled, textarea:disabled, select:disabled, .checkbox-wrapper.disabled {
     border-color: $input-disabled-border-color;
     background-color: $input-disabled-background-color;
   }
@@ -1169,10 +1181,14 @@ $max-columns: 12;
   @for $i from 1 through $max-columns {
     .col-#{$i} {
       @include column($i);
+      &:first-child {
+        padding-left: 0;
+      }
     }
     .col-#{$i}.col--full > * {
       width: 100%;
     }
+
   }
 
   .row {
@@ -1271,6 +1287,8 @@ $max-columns: 12;
 
 .form-grid--no-border {
   border: none;
+  padding-left: 0;
+  padding-right: 0;
   @for $i from 1 through $max-columns {
     .col-#{$i} {
       &:first-child {

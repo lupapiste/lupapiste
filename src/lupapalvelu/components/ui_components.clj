@@ -62,7 +62,8 @@
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
-                 :supportedLangs        i18n/languages}]
+                 :supportedLangs        i18n/languages
+                 :urgencyStates         ["normal" "urgent" "pending"]}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -165,7 +166,8 @@
                    "publish-bulletin-service.js"
                    "application-filters-service.js"
                    "document-data-service.js"
-                   "fileupload-service.js"]}
+                   "fileupload-service.js"
+                   "side-panel-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -188,9 +190,7 @@
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:screenmessages :analytics]
-                   :js ["comment.js"]
-                   :html ["comments.html"]}
+   :authenticated {:depends [:screenmessages :analytics]}
 
    :invites      {:depends [:common-html]
                   :js ["invites-model.js" "invites.js"]}
@@ -232,7 +232,7 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
 
-   :attachment   {:depends [:common-html :repository :signing :side-panel]
+   :attachment   {:depends [:common-html :repository :signing]
                   :js ["attachment-multi-select.js"
                        "targeted-attachments-model.js"
                        "attachment.js"
@@ -251,7 +251,7 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
@@ -265,7 +265,7 @@
                   :html ["applications-list.html"]
                   :js ["applications-list.js"]}
 
-   :statement    {:depends [:common-html :repository :side-panel]
+   :statement    {:depends [:common-html :repository]
                   :js ["statement-service.js" "statement.js"]
                   :html ["statement.html"]}
 
@@ -273,7 +273,7 @@
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
-   :neighbors    {:depends [:common-html :repository :side-panel]
+   :neighbors    {:depends [:common-html :repository]
                   :js ["neighbors.js"]
                   :html ["neighbors.html"]}
 
@@ -313,12 +313,6 @@
 
    :admins       {:depends [:users]}
 
-   :notice       {:js ["notice.js"]
-                  :html ["notice.html"]}
-
-   :side-panel   {:js ["side-panel.js"]
-                  :html ["side-panel.html"]}
-
    :password-reset {:depends [:common-html]
                     :js ["password-reset.js"]
                     :html ["password-reset.html"]}
@@ -341,34 +335,34 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant-app {:depends [:ui-components]
+   :applicant-app {:depends []
                    :js ["applicant.js"]}
 
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
-                             :company :analytics :register-company :footer]}
+                             :company :analytics :register-company :footer :ui-components]}
 
-   :authority-app {:depends [:ui-components] :js ["authority.js"]}
-   :authority     {:depends [:ui-components :authority-app :common-html :external-api :authenticated :map :applications :notice :application
+   :authority-app {:depends [] :js ["authority.js"]}
+   :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
-                             :company :stamp :integration-error :analytics :metadata-editor :footer]}
+                             :company :stamp :integration-error :analytics :metadata-editor :footer :ui-components]}
 
-   :oir-app {:depends [:ui-components] :js ["oir.js"]}
+   :oir-app {:depends [] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics :header :footer]
+                       :docgen :debug :analytics :header :footer :ui-components]
              :css ["oir.css"]}
 
-   :authority-admin-app {:depends [:ui-components]
+   :authority-admin-app {:depends []
                          :js ["authority-admin-app.js"]}
-   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer]
+   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer :ui-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"]}
 
-   :admin-app {:depends [:ui-components]
+   :admin-app {:depends []
                :js ["admin.js"]}
-   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer]
+   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer :ui-components]
                :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"
                     "create-scope-model.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -378,19 +372,19 @@
 
    :wordpress {:depends [:login :password-reset]}
 
-   :welcome-app {:depends [:ui-components]
+   :welcome-app {:depends []
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer]
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer :global-models :ui-components]
              :js ["company-user.js"]
 
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
-   :neighbor-app {:depends [:ui-components]
+   :neighbor-app {:depends []
                   :js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics :footer :ui-components]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}
 
@@ -398,7 +392,6 @@
                :html ["header.html" "footer.html"
                       "bulletins.html" "bulletins-template.html"
                       "application-bulletin/application-bulletin-template.html"
-                      "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-template.html"
                       "application-bulletin/bulletin-comment/bulletin-comment-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-tab-template.html"
                       "application-bulletin/tabs/attachments/bulletin-attachments-table-template.html"
@@ -419,7 +412,6 @@
                     "application-bulletins-service.js"
                     "vetuma-service.js"
                     "application-bulletin/application-bulletin-model.js"
-                    "application-bulletin/begin-vetuma-auth-button/begin-vetuma-auth-button-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-model.js"
                     "application-bulletin/bulletin-comment/bulletin-comment-box/bulletin-comment-box-model.js"
                     "application-bulletin/tabs/attachments/bulletin-attachments-tab-model.js"

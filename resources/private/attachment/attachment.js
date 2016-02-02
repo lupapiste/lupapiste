@@ -112,7 +112,8 @@ var attachment = (function() {
         applicationId: applicationId,
         attachmentId: attachmentId,
         attachmentType: model.attachmentType(),
-        typeSelector: false
+        typeSelector: false,
+        archiveEnabled: authorizationModel.ok("permanent-archive-enabled")
       });
 
       model.previewDisabled(true);

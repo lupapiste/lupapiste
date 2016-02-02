@@ -58,7 +58,6 @@
     (trace (:uri request) "- X-Debug:" (get-in request [:headers "x-debug"]))
 
     (when (and ts hash
-            (env/feature? :louhipalvelin)
             (valid-hash? hash email ip ts (load-secret ip))
             (valid-timestamp? ts (now)))
       (let [user (user/get-user-by-email email)
