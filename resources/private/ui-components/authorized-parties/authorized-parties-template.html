@@ -73,19 +73,17 @@
                    data-bind="visible: companyBubble"></div>
             </div>
             <div data-bind="component: {name: 'person-invite',
-                                        params: {bubbleVisible: personBubble}}"></div>
-
-            <table></table>
-            <button class="positive"
-                    data-test-id="application-invite-person"
-                    data-bind="visible: $root.authorization.ok('invite-with-role'),
-                               enabled: $root.authorization.ok('invite-with-role')"
-                    onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'personSelector.invite'"></span>
-            </button>
-
-            <span data-bind="component: {name: 'company-invite'}"></span>
+                            params: {
+                            bubbleVisible: personBubble,
+                            error: error,
+                            waiting: waiting
+                            }}"></div>
+            <div data-bind="component: {name: 'company-invite-bubble',
+                            params: {
+                            bubbleVisible: companyBubble,
+                            error: error,
+                            waiting: waiting
+                            }}"></div>
 
           </div>
         </div>

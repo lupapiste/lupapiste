@@ -53,6 +53,9 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return hasAuth( "invite-with-role");
   };
 
+  self.error = ko.observable();
+  self.waiting = ko.observable();
+
   self.authorizedParties = ko.pureComputed( function() {
    return _( application().roles() )
           .reject( function( role ) {
@@ -65,9 +68,43 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
           .value();
   });
 
-  // Dependencies on global observables must be
-  // explicitly disposed.
-  self.dispose = self.authorizedParties.dispose;
+  function ajaxInvite( command, params ) {
+    ajax.command(command, params )
+    .pending( self.waiting )
+    .success( function() {
+      hub.send( "bubble-dialog", {id: "close all"});
+      // It would be better to implement a service for authorized parties,
+      // instead of repository.load
+      repository.load(application().id());
+    })
+    .error( function( res ) {
+      self.error( res.text );
+    })
+    .call();
+  }
+
+  var hubIds = [];
+
+  hubIds.push( hub.subscribe( "bubble-person-invite", function( params ) {
+    ajaxInvite( "invite-with-role",
+                _.defaults( params, {id: application().id(),
+                                     documentName: "",
+                                     documentId: "",
+                                     path: "",
+                                     role: "writer"} ));
+                              } ));
+
+  hubIds.push( hub.subscribe( "bubble-company-invite", function( params ) {
+    ajaxInvite( "company-invite",
+                _.defaults( params, {id: application().id()}));
+  }));
+
+  self.dispose = function() {
+    _.map( hubIds, hub.unsubscribe );
+    // Dependencies on global observables must be
+    // explicitly disposed.
+    self.authorizedParties.dispose();
+  };
 
 
   // ---------------------------------------------------
@@ -89,6 +126,4 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   self.toggleCompanyBubble = function() {
     self.companyBubble( !self.companyBubble());
   };
-
-
 };

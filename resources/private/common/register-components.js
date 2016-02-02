@@ -106,7 +106,8 @@ jQuery(document).ready(function() {
     {name: "conversation"},
     {name: "authority-notice"},
     {name: "authorized-parties"},
-    {name: "person-invite"}
+    {name: "person-invite"},
+    {name: "company-invite-bubble"}
 ];
 
   _.forEach(components, function(component) {
