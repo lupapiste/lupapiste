@@ -59,11 +59,16 @@
 (defn create-attachment-from-children [user app child-type id lang]
   "Generates attachment from child and saves it"
   (let [child (generate-attachment-from-children user app child-type id lang)
-        file (:content child)]
+        file (:content child)
+        attachment-id (get-child-attachment-id app child-type id)]
+    ;;TODO: (if (nil? attachment-id) a b)
     (attachment/attach-file! child)
     (io/delete-file file :silently)))
 
-(defn delete-child-attachment [app child-type id]
+(defn get-child-attachment-id [app child-type id]
   (let [attachment (filter #(= {:type (name child-type) :id id} (:copy-of %)) (:attachments app))
         attachment-id (:id (first attachment))]
-    (attachment/delete-attachment app attachment-id)))
+    attachment-id))
+
+(defn delete-child-attachment [app child-type id]
+    (attachment/delete-attachment app (get-child-attachment-id app child-type id)))
