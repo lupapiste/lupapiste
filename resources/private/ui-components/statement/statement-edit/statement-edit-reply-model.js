@@ -16,7 +16,7 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
 
   // FIXME computed + dispose
   var initSubscription = self.data.subscribe(function() {
-    self.nothingToAdd(util.getIn(self.data, ["nothing-to-add"]));
+    self.nothingToAdd(util.getIn(self.data, ["reply", "nothing-to-add"]));
     self.text(util.getIn(self.data, ["reply", "text"]));
     initSubscription.dispose();
   });
