@@ -65,8 +65,9 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states     valid-states}
-  [{created :created :as command}]
+  [{:keys [application created] :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
+  (child-to-attachment/delete-child-attachment application :tasks taskId)
   (update-application command
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
@@ -89,8 +90,9 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states      valid-states}
-  [command]
+  [{:keys [application] :as command}]
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
+  (child-to-attachment/delete-child-attachment application :tasks taskId)
   (set-state command taskId :requires_user_action))
 
 (defcommand send-task
