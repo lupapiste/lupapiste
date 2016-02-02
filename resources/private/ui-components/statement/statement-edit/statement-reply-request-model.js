@@ -14,8 +14,10 @@ LUPAPISTE.StatementReplyRequestModel = function(params) {
   var commands = params.commands;
 
   // FIXME computed + dispose
-  self.data.subscribe(function() {
+  var initSubscription = self.data.subscribe(function() {
     self.text(util.getIn(self.data, ["reply", "saateText"]));
+    hub.send("statement::submitAllowed", {tab: self.tab, value: true});
+    initSubscription.dispose();
   });
 
   self.enabled = ko.pureComputed(function() {
