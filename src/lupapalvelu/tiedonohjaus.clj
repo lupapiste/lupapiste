@@ -180,7 +180,7 @@
 
 (defn mark-app-and-attachments-final! [app-id modified-ts]
   (let [{:keys [metadata attachments verdicts] :as application} (domain/get-application-no-access-checking app-id)]
-    (when metadata
+    (when (seq metadata)
       (let [new-metadata (document-metadata-final-state metadata verdicts)]
         (when-not (= metadata new-metadata)
           (action/update-application
