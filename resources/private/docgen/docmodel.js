@@ -523,18 +523,23 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildString(subSchema, model, path, partOfChoice) {
     var myPath = path.join(".");
-    var span = makeEntrySpan(subSchema, myPath);
+    var validationResult = getValidationResult(model, subSchema.name);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     var supportedInputSubtypes = ["email", "time"];
     var inputType = _.contains(supportedInputSubtypes, subSchema.subtype) ? subSchema.subtype : "text";
 
-    var input = makeInput(inputType, myPath, model, subSchema);
+    var input = makeInput(inputType, myPath, model, subSchema, validationResult);
     setMaxLen(input, subSchema);
 
     listen(subSchema, myPath, input);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
+      span.appendChild(makeLabel(subSchema,
+                                 partOfChoice ? "string-choice" : "string",
+                                 myPath,
+                                 false,
+                                 validationResult));
     }
 
     if (subSchema.subtype === "maaraala-tunnus" ) {
@@ -583,6 +588,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     return span;
+  }
+
+  function getValidationResult(model, name) {
+    return util.getIn(model, [name, "validationResult"]);
   }
 
   function getModelValue(model, name) {
