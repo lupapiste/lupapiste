@@ -45,8 +45,8 @@ LUPAPISTE.StatementEditModel = function(params) {
   })
 
   self.coverNote = ko.pureComputed(function() {
-    var isStatementGiver = util.getIn(self.data, ["person", "userId"]) === lupapisteApp.models.currentUser.id();
-    return self.tab === "statement" && isStatementGiver ? util.getIn(self.data, ["saateText"]) : "";
+    var canViewCoverNote = util.getIn(self.data, ["person", "userId"]) === lupapisteApp.models.currentUser.id() || lupapisteApp.models.currentUser.isAuthority();
+    return self.tab === "statement" && canViewCoverNote ? util.getIn(self.data, ["saateText"]) : "";
   });
 
   // FIXME computed + dispose
