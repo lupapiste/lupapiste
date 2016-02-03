@@ -1,6 +1,6 @@
 murmeli='murmeli.solita.fi'
-murmeliie='192.168.7.237'
+
+port='4444'
+ieport='4445'
 
 remote=$murmeli
-
-remoteie=$murmeliie

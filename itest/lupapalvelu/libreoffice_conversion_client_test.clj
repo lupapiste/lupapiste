@@ -25,5 +25,3 @@
                      (nth rows 1) => "xxx"))
              (.delete file-out)))
          (debug "   skipping lupapalvelu.libreoffice-conversion-client-test - no libreoffice.url defined !")))
-
-

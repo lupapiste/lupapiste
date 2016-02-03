@@ -81,6 +81,7 @@
                                                                                :contents nil
                                                                                :signatures []
                                                                                :versions []
+                                                                               :auth []
                                                                                :notNeeded false
                                                                                :required true
                                                                                :requestedByAuthority true
@@ -97,6 +98,7 @@
                                                                                :contents nil
                                                                                :signatures []
                                                                                :versions []
+                                                                               :auth []
                                                                                :notNeeded false
                                                                                :required true
                                                                                :requestedByAuthority true
@@ -192,6 +194,7 @@
                                                                              :contents nil
                                                                              :signatures []
                                                                              :versions []
+                                                                             :auth []
                                                                              :notNeeded false
                                                                              :required true
                                                                              :requestedByAuthority true
@@ -209,6 +212,7 @@
                                                                              :contents nil
                                                                              :signatures []
                                                                              :versions []
+                                                                             :auth []
                                                                              :notNeeded false
                                                                              :required true
                                                                              :requestedByAuthority true

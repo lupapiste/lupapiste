@@ -13,4 +13,4 @@ fi
 
 source remote-config.sh
 
-pybot -d target --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:$server $target
+pybot -d target --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable SELENIUM:http://$remote:$port/wd/hub --variable SERVER:$server $target

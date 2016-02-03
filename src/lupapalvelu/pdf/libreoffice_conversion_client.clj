@@ -8,7 +8,7 @@
 
 (def- url (str "http://" (env/value :libreoffice :host) ":" (or (env/value :libreoffice :port) 8001)))
 
-(def enabled? (env/feature? :libreoffice))
+(def enabled? (and (env/feature? :libreoffice) (env/value :libreoffice :host)))
 
 (defn convert-to-pdfa [filename content]
   (http/post url
