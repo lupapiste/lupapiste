@@ -1,8 +1,10 @@
 (ns lupapalvelu.autologin
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [slingshot.slingshot :refer [throw+ try+]]
             [clojure.core.memoize :as memo]
             [pandect.core :as pandect]
             [monger.operators :refer :all]
+            [noir.response :as resp]
             [sade.core :refer :all]
             [sade.crypt :as crypt]
             [sade.env :as env]
@@ -65,7 +67,14 @@
 
         (trace "autologin (if allowed by organization)" (user/session-summary user))
 
-        (when (and (:enabled user)
-                   (seq organization-ids)
-                   (some (partial allowed-ip? ip) organization-ids))
-          (user/session-summary user))))))
+        (cond
+          (not (:enabled user)) (throw+ {:type ::autologin :text "User not enabled"})
+          (not (some (partial allowed-ip? ip) organization-ids)) (throw+ {:type ::autologin :text "Illegal IP address"})
+          :else (user/session-summary user))))))
+
+(defn catch-autologin-failure [handler]
+  (fn [request]
+    (try+
+      (handler request)
+      (catch [:type ::autologin] {text :text}
+        (resp/status 403 text)))))
