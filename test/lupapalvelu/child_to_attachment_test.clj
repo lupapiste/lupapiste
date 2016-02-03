@@ -85,7 +85,7 @@
              application (dummy-application "LP-1" :statements dummy-statements)]
          (doseq [lang i18n/languages]
            (let [file (File/createTempFile (str "child-test-statement-" (name lang) "-") ".pdf")
-                 att (build-attachment {} application :statements "2" lang file)]
+                 att (build-attachment {} application :statements "2" lang file nil)]
              (fact ":contents"
                    (:contents att) => "Paloviranomainen")
              (fact " :attachment-type"
@@ -101,8 +101,8 @@
              application (dummy-application "LP-1" :neighbors dummy-neighbours)]
          (doseq [lang i18n/languages]
            (let [file (File/createTempFile (str "child-test-neighbour-" (name lang) "-") ".pdf")
-                 att (build-attachment {} application :neighbors "2" lang file)
-                 att-other (build-attachment {} application :verdicts "2" lang file)]
+                 att (build-attachment {} application :neighbors "2" lang file nil)
+                 att-other (build-attachment {} application :verdicts "2" lang file nil)]
              (fact ":contents"
                    (:contents att) => "Matti Malli")
              (fact ":attachment-type"
@@ -120,8 +120,9 @@
              application (dummy-application "LP-1" :tasks dummy-tasks)]
          (doseq [lang i18n/languages]
            (let [file (File/createTempFile (str "child-test-task-" (name lang) "-") ".pdf")
-                 att (build-attachment {} application :tasks "2" lang file)
-                 att-other (build-attachment {} application :verdicts "2" lang file)]
+                 att (build-attachment {} application :tasks "2" lang file nil)
+                 att1 (build-attachment {} application :tasks "1" lang file "one")
+                 att-other (build-attachment {} application :verdicts "2" lang file nil)]
              (fact ":contents"
                    (:contents att) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus"))
              (fact ":attachment-type"
@@ -130,5 +131,11 @@
                    (:archivable att) => false)
              (fact ":read-only"
                    (:read-only att) => false)
+             (fact ":attachment-id is nil"
+                   (:attachment-id att) => nil)
+             (fact ":attachment-id exists"
+                   (:attachment-id att1) => "one")
+
              (fact ":read-only of attachment with other type than :neighbors or :statements"
                    (:read-only att-other) => false)))))
+
