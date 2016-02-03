@@ -416,7 +416,8 @@
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
-        old-file-id (get-in attachment [:latestVersion :fileId])]
+        old-file-id (get-in attachment [:latestVersion :fileId])
+        user-summary (user/summary user)]
 
     (when-not (= old-file-id file-id)
       (mongo/delete-file-by-id old-file-id))
@@ -426,11 +427,11 @@
       {:attachments {$elemMatch {:id attachment-id}}}
       {$set {:modified now
              :attachments.$.modified now
-             (str latest-version-path "user") user
+             (str latest-version-path "user") user-summary
              (str latest-version-path "fileId") file-id
              (str latest-version-path "size") size
              (str latest-version-path "created") now
-             :attachments.$.latestVersion.user user
+             :attachments.$.latestVersion.user user-summary
              :attachments.$.latestVersion.fileId file-id
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
