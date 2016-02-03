@@ -57,8 +57,6 @@
         ip (http/client-ip request)
         [ts hash] (parse-ts-hash password)]
 
-    (trace (:uri request) "- X-Debug:" (get-in request [:headers "x-debug"]))
-
     (when (and ts hash
             (valid-hash? hash email ip ts (load-secret ip))
             (valid-timestamp? ts (now)))
