@@ -496,8 +496,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildCheckbox(subSchema, model, path) {
     var myPath = path.join(".");
-    var span = makeEntrySpan(subSchema, myPath);
-    var input = makeInput("checkbox", myPath, model, subSchema);
+    var validationResult = getValidationResult(model, subSchema.name);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
+    var input = makeInput("checkbox", myPath, model, subSchema, validationResult);
     input.onmouseover = self.showHelp;
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
@@ -505,7 +506,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     if (subSchema.label) {
-      var label = makeLabel(subSchema, "checkbox", myPath);
+      var label = makeLabel(subSchema, "checkbox", myPath, false, validationResult);
       label.onmouseover = self.showHelp;
       label.onmouseout = self.hideHelp;
       span.appendChild(label);
