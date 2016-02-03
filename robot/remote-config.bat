@@ -1,6 +1,7 @@
 @set murmeli=murmeli.solita.fi
-@set murmeliie=192.168.7.237
+
+set port=4444
+set ieport=4445
 
 set remote=%murmeli%
 
-set remoteie=%murmeliie%
