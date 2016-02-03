@@ -348,7 +348,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return button;
   }
 
-  function makeLabel(schema, type, pathStr, groupLabel) {
+  function makeLabel(schema, type, pathStr, groupLabel, validationResult) {
     var label = document.createElement("label");
     var path = groupLabel ? pathStr + "._group_label" : pathStr;
 
@@ -360,6 +360,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var className = "form-label form-label-" + type;
     if (schema.labelclass) {
       className = className + " " + schema.labelclass;
+    }
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      className += " " + level;
     }
 
     label.id = pathStrToLabelID(pathStr);
@@ -379,7 +383,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function makeInput(type, pathStr, modelOrValue, subSchema) {
+  function makeInput(type, pathStr, modelOrValue, subSchema, validationResult) {
     var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
     var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
     var source = _.isObject(modelOrValue) ? getModelSource(modelOrValue, subSchema.name) : undefined;
@@ -399,6 +403,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     input.className = "form-input " + type + " " + (extraClass || "");
+
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      input.className += " " + level;
+    }
 
     if (readonly) {
       input.readOnly = true;
@@ -431,7 +440,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return input;
   }
 
-  function makeEntrySpan(subSchema, pathStr) {
+  function makeEntrySpan(subSchema, pathStr, validationResult) {
     var help = null;
     var helpLocKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + ".help");
     if (subSchema.i18nkey) {
@@ -459,6 +468,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var errorPanel = document.createElement("span");
     errorPanel.className = "errorPanel";
     errorPanel.id = pathStrToID(pathStr) + "-errorPanel";
+
+    if (validationResult && validationResult[0] !== "tip") {
+      var level = validationResult[0],
+          code = validationResult[1],
+          errorSpan = document.createElement("span");
+      errorSpan.className = level;
+      errorSpan.innerHTML = loc(["error", code]);
+      errorPanel.appendChild(errorSpan);
+    }
+
     span.appendChild(errorPanel);
 
     // Add span for help text
