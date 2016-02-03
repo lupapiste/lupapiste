@@ -46,6 +46,8 @@
 
 (register-generator ssc/BlankStr blank-string)
 
+(def not-blank-string (gen/such-that (comp not clojure.string/blank?) gen/string))
+
 (def email (gen/such-that (ssc/max-length-constraint 255)
                           (gen/fmap (fn [[name domain]] (str name "@" domain ".com"))
                                     (gen/tuple (gen/not-empty gen/string-alphanumeric)
