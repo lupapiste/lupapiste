@@ -10,8 +10,11 @@ LUPAPISTE.CompanyInviteBubbleModel = function( params ) {
   var companies = ko.observableArray();
   var entry = _.template( "<%= name %>, <%= address1 %> <%= po %>");
 
+  // Autocomplete search term
   self.query = ko.observable("");
   self.selected = ko.observable();
+
+  // Company list filterd by query
   self.companyOptions = ko.computed( function() {
     // Company is included in the results only if
     // every part of the query is found in the company label.
@@ -23,6 +26,7 @@ LUPAPISTE.CompanyInviteBubbleModel = function( params ) {
            .value();
   });
 
+  // Item in self.companies
   function companyEntry( company ) {
     return {
       name: company.name,
@@ -56,6 +60,6 @@ LUPAPISTE.CompanyInviteBubbleModel = function( params ) {
   });
 
   self.send = function() {
-    hub.send( "bubble-company-invite", {"company-id": self.selected().id});
+    hub.send( "bubble-company-invite", {invite: {"company-id": self.selected().id}});
   };
 };

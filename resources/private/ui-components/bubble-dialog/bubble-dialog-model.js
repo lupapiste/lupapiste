@@ -9,6 +9,11 @@
 // [waiting]: Observable that is true when bubble is waiting/pending.
 // [error]: Error message observable. The message is shown above
 //          the dialog buttons.
+// [prefix]: Prefix for button and error test ids.
+//           [prefix-]bubble-dialog-ok
+//           [prefix-]bubble-dialog-cancel
+//           [prefix-]bubble-dialog-error
+//           (default no prefix- part).
 LUPAPISTE.BubbleDialogModel = function( params ) {
   "use strict";
   var self = this;
@@ -26,6 +31,7 @@ LUPAPISTE.BubbleDialogModel = function( params ) {
   self.cancel = _.partial( self.bubbleVisible, false );
   self.waiting = params.waiting;
   self.error = params.error;
+  self.prefix = params.prefix ? params.prefix + "-" : "";
 
   // When a bubble is opened all the other bubbles are closed.
   var bubbleId = _.uniqueId(BUBBLE + "-");

@@ -95,15 +95,11 @@ Bad email address
 # --------------------------------
 
 Guest bubble ok
-  Element Should Be Enabled  jquery=.application-guests [data-test-id=bubble-dialog-ok]
-  #Scroll to test id  bubble-dialog-ok
-  Scroll and click  .application-guests [data-test-id=bubble-dialog-ok]
+  Scroll and click test id  guest-bubble-dialog-ok
 
 Guest bubble cancel
-  Wait test id visible  bubble-dialog-cancel
-  #Scroll to test id  bubble-dialog-cancel
-  Scroll and click  .application-guests [data-test-id=bubble-dialog-cancel]
-  Wait test id hidden  bubble-dialog-cancel
+  Scroll and click test id  guest-bubble-dialog-cancel
+  Wait test id hidden  guest-bubble-dialog-cancel
 
 Guest table contains
   [Arguments]  ${data}
@@ -165,13 +161,13 @@ No subscribe column
 
 Invite application guest start
   [Arguments]  ${email}  ${message}
-  Wait test id hidden  bubble-dialog-ok
+  Wait test id hidden  guest-bubble-dialog-ok
   Scroll to test id  application-guest-add
   Wait test id visible  application-guest-add
   Scroll and click  [data-test-id=application-guest-add]
   Test id empty  application-guest-email
   Textarea Value Should be  jquery=[data-test-id=application-guest-message]  Hei! Sinulle on annettu lukuoikeus hakemukselle Lupapisteessä.
-  Element Should Be Disabled  jquery=.application-guests [data-test-id=bubble-dialog-ok]
+  Element Should Be Disabled  jquery=.application-guests [data-test-id=guest-bubble-dialog-ok]
   Fill test id  application-guest-email  ${email}
   Fill test id  application-guest-message  ${message}
 
@@ -182,7 +178,7 @@ Invite application guest
 
 Bad guest email and cancel check
   Invite application guest start  bad.email  foo
-  Element Should Be Disabled  jquery=.application-guests [data-test-id=bubble-dialog-ok]
+  Element Should Be Disabled  jquery=.application-guests [data-test-id=guest-bubble-dialog-ok]
   Guest bubble cancel
 
   # Check that the bubble is properly initialized after cancel as well.
@@ -195,7 +191,7 @@ Invite application guest authority
   Scroll and click  [data-test-id=application-guest-add]
   Wait test id visible  application-guest-authorities
   Textarea Value Should be  jquery=[data-test-id=application-guest-message]  Hei! Sinulle on annettu lukuoikeus hakemukselle Lupapisteessä.
-  Element Should Be Disabled  jquery=.application-guests [data-test-id=bubble-dialog-ok]
+  Element Should Be Disabled  jquery=.application-guests [data-test-id=guest-bubble-dialog-ok]
   Fill test id  application-guest-message  ${message}
   Element Should Contain  jquery=table[data-test-id=application-guest-authorities] tr[data-test-id=${description}]  ${name}
   Element Should Contain  jquery=table[data-test-id=application-guest-authorities] tr[data-test-id=${description}]  ${email}
@@ -207,11 +203,11 @@ Invite application guest authority
 No more guest authorities
   Wait test id visible  application-guest-add
   Scroll and click  [data-test-id=application-guest-add]
-  Wait test id visible  bubble-dialog-error
+  Wait test id visible  guest-bubble-dialog-error
   Guest bubble cancel
 
 Redundant invitation
   [Arguments]  ${email}
   Invite application guest  ${email}  Welcome to application, again!?
-  Wait test id visible  bubble-dialog-error
+  Wait test id visible  guest-bubble-dialog-error
   Guest bubble cancel

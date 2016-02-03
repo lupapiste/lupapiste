@@ -1,3 +1,22 @@
+// Model for presenting authorized parties (valtuutetut) and inviting
+// new person and company parties.
+//
+// Note: currently this implementation is used only for "application
+// level" authorization. The docgen invitations are still used by the
+// old system (old style dialog and InviteModel). In the future both
+// approaches are converged towards this model.
+//
+// See also:
+//   PersonInviteModel: Person invitation model.
+//
+//   CompanyInviteBubbleModel: Company invitation model. The weird is
+//   due to the fact that CompanyInvite was already taken by the old
+//   (soon deprecated) implementation.
+//
+// Both invitation models send their values (dialog contents) via hub
+// to this model. The ajax calls are done here and information
+// (errors, waiting) are propagated to the invitation models via error
+// and waiting observables.
 LUPAPISTE.AuthorizedPartiesModel = function() {
   "use strict";
   var self = this;
@@ -24,6 +43,8 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return nameTemplate( ko.mapping.toJS( role ));
   };
 
+  // Combines every role of the auth into one string:
+  // Kirjoitusoikeus, Lausunnonantaja
   self.roleInformation = function( role ) {
     return _( role.roles )
            .reject( isGuest )
@@ -87,16 +108,17 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
 
   hubIds.push( hub.subscribe( "bubble-person-invite", function( params ) {
     ajaxInvite( "invite-with-role",
-                _.defaults( params, {id: application().id(),
-                                     documentName: "",
-                                     documentId: "",
-                                     path: "",
-                                     role: "writer"} ));
-                              } ));
+                _.defaults( params.invite,
+                            {id: application().id(),
+                             documentName: "",
+                             documentId: "",
+                             path: "",
+                             role: "writer"} ));
+  } ));
 
   hubIds.push( hub.subscribe( "bubble-company-invite", function( params ) {
     ajaxInvite( "company-invite",
-                _.defaults( params, {id: application().id()}));
+                _.defaults( params.invite, {id: application().id()}));
   }));
 
   self.dispose = function() {
