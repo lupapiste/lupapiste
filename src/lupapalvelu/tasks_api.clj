@@ -92,7 +92,6 @@
    :states      valid-states}
   [{:keys [application] :as command}]
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
-  (child-to-attachment/delete-child-attachment application :tasks taskId)
   (set-state command taskId :requires_user_action))
 
 (defcommand send-task
