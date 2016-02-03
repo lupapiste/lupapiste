@@ -20,6 +20,7 @@
             [lupapalvelu.perf-mon :as perf-mon]
             [lupapalvelu.control-api :refer [defcontrol] :as control]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.autologin :as autologin]
             [lupapalvelu.vetuma]
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
@@ -81,6 +82,7 @@
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/wrap-authentication)
   (server/add-middleware web/session-timeout)
+  (server/add-middleware autologin/catch-autologin-failure)
 
   (env/in-dev
     ; Security headers are set by Nginx in production

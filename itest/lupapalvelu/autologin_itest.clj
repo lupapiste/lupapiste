@@ -11,11 +11,13 @@
   (let [status (http-get (str (server-address) "/system/status") {:as :json})]
     (get-in status [:body :data :proxy-headers :data :x-real-ip] "127.0.0.1")))
 
+(defn- password-hash [email & timestamp]
+  (let [ts (or timestamp (now))]
+    (str ts "_" (pandect/sha256-hmac (str email my-public-ip ts) "LUPAPISTE"))))
+
 (fact "User query with autologin"
   (let [email (email-for "pekka")
-        ts (now)
-        hash (pandect/sha256-hmac (str email my-public-ip ts) "LUPAPISTE")
-        password (str ts "_" hash)
+        password (password-hash email)
         resp (http-get (str (server-address) "/api/query/user")
                        {:basic-auth [email password]
                         :cookies {"anti-csrf-token" {:value "my-token"}}
@@ -30,20 +32,35 @@
 
 (fact "Auto login to authority application front page"
  (let [email (email-for "pekka")
-       ts (now)
-       hash (pandect/sha256-hmac (str email my-public-ip ts) "LUPAPISTE")
-       password (str ts "_" hash)
+       password (password-hash email)
        url (str (server-address) "/app/fi/")
        resp (http-get url {:basic-auth [email password]})]
 
    (-> resp :trace-redirects last) => (str (server-address) "/app/fi/authority")))
 
-(fact "Sipoo does not have allowed IPs in fixture, autologin fails"
-  (let [email (email-for "sonja")
-       ts (now)
-       hash (pandect/sha256-hmac (str email my-public-ip ts) "LUPAPISTE")
-       password (str ts "_" hash)
+(fact "Invalid timestamp, autologin fails"
+ (let [email (email-for "pekka")
+       timestamp  (- (now) (* 1000 60 60 6))
+       password (password-hash email timestamp)
        url (str (server-address) "/app/fi/")
        resp (http-get url {:basic-auth [email password]})]
 
    (-> resp :trace-redirects last) => (str (server-address) "/app/fi/welcome")))
+
+(fact "Sipoo does not have allowed IPs in fixture, autologin fails"
+  (let [email (email-for "sonja")
+       password (password-hash email)
+       url (str (server-address) "/app/fi/")
+       {:keys [status body]} (http-get url {:basic-auth [email password] :throw-exceptions false})]
+
+   status => 403
+   body => "Illegal IP address"))
+
+(fact "Unknown user, autologin fails"
+  (let [email "whatever@example.com"
+       password (password-hash email)
+       url (str (server-address) "/app/fi/")
+       {:keys [status body]} (http-get url {:basic-auth [email password] :throw-exceptions false})]
+
+   status => 403
+   body => "User not enabled"))
