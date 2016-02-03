@@ -144,7 +144,11 @@
 
 (facts "to-xml-date"
   (fact "nil -> nil" (to-xml-date nil) => nil)
-  (fact "0 -> 1970"  (to-xml-date 0) => "1970-01-01"))
+  (fact "0 -> 1970"  (to-xml-date 0) => "1970-01-01")
+  (fact "UTC midnight"
+    (to-xml-date (.getTime #inst "2016-02-03T00:00:00Z")) => "2016-02-03")
+  (fact "Local midnight"
+    (to-xml-date (.getTime #inst "2016-02-03T00:00:00+02:00")) => "2016-02-03"))
 
 (facts "to-xml-datetime"
   (fact "nil -> nil" (to-xml-datetime nil) => nil)
