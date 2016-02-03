@@ -269,6 +269,7 @@
            :op op
            :signatures []
            :versions []
+           :auth []
            :contents contents}
           (seq metadata) (assoc :metadata metadata)))
 
