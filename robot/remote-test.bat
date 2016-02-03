@@ -6,4 +6,4 @@
 
 call remote-config.bat
 
-pybot -d target --variable BROWSER:firefox --variable SELENIUM:http://%remote%:4444/wd/hub --variable SERVER:%server% %target%
+pybot -d target --variable BROWSER:firefox --variable SELENIUM:http://%remote%:%port%/wd/hub --variable SERVER:%server% %target%
