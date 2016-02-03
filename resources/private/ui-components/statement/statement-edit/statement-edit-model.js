@@ -18,9 +18,10 @@ LUPAPISTE.StatementEditModel = function(params) {
     return util.getIn(self.data, ["id"]);
   });
 
-  self.data.subscribe(function() {
+  var initSubscription = self.data.subscribe(function() {
     self.selectedStatus(util.getIn(self.data, ["status"]));
     self.text(util.getIn(self.data, ["text"]));
+    initSubscription.dispose();
   });
 
   var commands = params.commands;

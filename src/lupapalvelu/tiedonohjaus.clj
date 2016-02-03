@@ -78,7 +78,7 @@
         (.toDate))))
 
 (defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} verdicts]
-  (when (= "m\u00E4\u00E4r\u00E4ajan" (name arkistointi))
+  (when (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi))
     (paatospvm-plus-years verdicts pituus)))
 
 (defn- security-end-date [{:keys [salassapitoaika julkisuusluokka]} verdicts]
@@ -180,7 +180,7 @@
 
 (defn mark-app-and-attachments-final! [app-id modified-ts]
   (let [{:keys [metadata attachments verdicts] :as application} (domain/get-application-no-access-checking app-id)]
-    (when metadata
+    (when (seq metadata)
       (let [new-metadata (document-metadata-final-state metadata verdicts)]
         (when-not (= metadata new-metadata)
           (action/update-application

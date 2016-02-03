@@ -15,9 +15,10 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   var commands = params.commands;
 
   // FIXME computed + dispose
-  self.data.subscribe(function() {
-    self.nothingToAdd(util.getIn(self.data, ["nothing-to-add"]));
+  var initSubscription = self.data.subscribe(function() {
+    self.nothingToAdd(util.getIn(self.data, ["reply", "nothing-to-add"]));
     self.text(util.getIn(self.data, ["reply", "text"]));
+    initSubscription.dispose();
   });
 
   var submitAllowed = ko.pureComputed(function() {
@@ -49,7 +50,7 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
 
   // FIXME computed + dispose
   self.nothingToAdd.subscribe(function(value) {
-    if(value && util.getIn(self.data, ["reply", "nothing-to-add"]) !== value) {
+    if(value != null && util.getIn(self.data, ["reply", "nothing-to-add"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["reply", "nothing-to-add"], value: value});
     }
   });

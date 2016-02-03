@@ -92,10 +92,14 @@
 
 (def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
-(def operation-specific-attachment-types #{{:type-id :pohjapiirros      :type-group :paapiirustus}
-                                           {:type-id :leikkauspiirros   :type-group :paapiirustus}
-                                           {:type-id :julkisivupiirros  :type-group :paapiirustus}
-                                           {:type-id :yhdistelmapiirros :type-group :paapiirustus}})
+(def operation-specific-attachment-types #{{:type-id :pohjapiirros       :type-group :paapiirustus}
+                                           {:type-id :leikkauspiirros    :type-group :paapiirustus}
+                                           {:type-id :julkisivupiirros   :type-group :paapiirustus}
+                                           {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
+                                           {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
+                                           {:type-id :energiatodistus    :type-group :muut}
+                                           {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
+                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}})
 
 (def all-attachment-type-ids
   (->> (vals attachment-types-by-permit-type)
@@ -265,6 +269,7 @@
            :op op
            :signatures []
            :versions []
+           :auth []
            :contents contents}
           (seq metadata) (assoc :metadata metadata)))
 
@@ -411,7 +416,8 @@
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
-        old-file-id (get-in attachment [:latestVersion :fileId])]
+        old-file-id (get-in attachment [:latestVersion :fileId])
+        user-summary (user/summary user)]
 
     (when-not (= old-file-id file-id)
       (mongo/delete-file-by-id old-file-id))
@@ -421,11 +427,11 @@
       {:attachments {$elemMatch {:id attachment-id}}}
       {$set {:modified now
              :attachments.$.modified now
-             (str latest-version-path "user") user
+             (str latest-version-path "user") user-summary
              (str latest-version-path "fileId") file-id
              (str latest-version-path "size") size
              (str latest-version-path "created") now
-             :attachments.$.latestVersion.user user
+             :attachments.$.latestVersion.user user-summary
              :attachments.$.latestVersion.fileId file-id
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))

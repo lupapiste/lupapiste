@@ -277,22 +277,18 @@
                                     <span data-bind="ltext: 'application.showInBackingSystem'"></span>
                                 </button>
                                 <!-- ko if: externalApi.enabled -->
-                                <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
-                                  <button class="function"
-                                          data-bind="click: externalApi.openApplication, visible: externalApi.enabled"
-                                          data-test-id="external-open-permit">
-                                      <i class="lupicon-circle-arrow-right"></i>
-                                      <span data-bind="ltext: 'application.showInBackingSystem'"></span>
-                                  </button>
-                                </div>
-                                <div data-bind="css: {'feature': features.enabled('louhipalvelin')}">
-                                  <button class="function"
-                                          data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
-                                          data-test-id="external-show-on-map">
-                                    <i class="lupicon-location"></i>
-                                    <span data-bind="text: 'Siirry kartalle'"></span>
-                                  </button>
-                                </div>
+                                <button class="function"
+                                        data-bind="click: externalApi.openApplication, visible: externalApi.enabled"
+                                        data-test-id="external-open-permit">
+                                    <i class="lupicon-circle-arrow-right"></i>
+                                    <span data-bind="ltext: 'application.showInBackingSystem'"></span>
+                                </button>
+                                <button class="function"
+                                        data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
+                                        data-test-id="external-show-on-map">
+                                  <i class="lupicon-location"></i>
+                                  <span data-bind="text: 'Siirry kartalle'"></span>
+                                </button>
                                 <!-- /ko -->
                                 <!-- Add property -->
                                 <button class="function"
@@ -463,9 +459,9 @@
                             </div>
                         </div>
 
-                        <div data-bind="component: 'application-guests'">
-
-                        </div>
+                        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "application" -->
+                        <div data-bind="component: 'application-guests'"></div>
+                        <!-- /ko -->
 
                         <p data-bind="lhtml: 'required.field.desc'"></p>
 
