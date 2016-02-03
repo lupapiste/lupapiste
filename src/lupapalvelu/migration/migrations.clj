@@ -1480,7 +1480,7 @@
 (defn remove-unwanted-fields-from-attachment-auth [attachment]
   (update attachment :auth (partial mapv user-summary)))
 
-(defmigration cleanup-attachment-auth-user-summary
+(defmigration cleanup-attachment-auth-user-summary-v2
   {:apply-when (pos? (+ (mongo/count :applications 
                                      {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
                                            {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
@@ -1508,7 +1508,7 @@
       remove-unwanted-fields-from-attachment-versions-user 
       remove-unwanted-fields-from-attachment-latestVersion-user))
 
-(defmigration cleanup-attachment-versions-user-summary
+(defmigration cleanup-attachment-versions-user-summary-v2
   {:apply-when (pos? (+ (mongo/count :applications 
                                      {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
                                            {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
@@ -1543,7 +1543,7 @@
           :auth                 []}
          attachment))
 
-(defmigration add-required-fields-into-attachments
+(defmigration add-required-fields-into-attachments-v2
   {:apply-when (pos? (mongo/count :applications {$or [{:attachments {$elemMatch {:locked               {$exists false}}}}
                                                       {:attachments {$elemMatch {:applicationState     {$exists false}}}}
                                                       {:attachments {$elemMatch {:target               {$exists false}}}}

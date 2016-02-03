@@ -134,6 +134,7 @@
         <!-- /ko -->
         <!-- ko if: !authenticated() -->
         <div class="container">
+          <p data-bind="lhtml: 'bulletins.vetuma.info'"></p>
           <div data-bind="component: { name: 'vetuma-init',
                                        params: vetumaParams }"></div>
         </div>
