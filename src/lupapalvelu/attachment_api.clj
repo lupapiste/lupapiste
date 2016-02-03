@@ -61,11 +61,12 @@
                                                         :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))))
 
 (defn- attachment-editable-by-application-state [{{attachmentId :attachmentId} :data user :user} {current-state :state :as application}]
-  (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
-    (when-not (or (not (states/post-verdict-states (keyword current-state)))
-                  (states/post-verdict-states (keyword create-state))
-                  (user/authority? user))
-      (fail :error.pre-verdict-attachment))))
+  (when attachmentId
+    (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
+      (when-not (or (not (states/post-verdict-states (keyword current-state)))
+                    (states/post-verdict-states (keyword create-state))
+                    (user/authority? user))
+        (fail :error.pre-verdict-attachment)))))
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
@@ -271,7 +272,7 @@
 ;; Upload
 ;;
 
-(def attachment-modification-precheks
+(def attachment-modification-prechecks
   [attachment-is-not-locked
    (partial if-not-authority-state-must-not-be #{:sent})
    attachment-editable-by-application-state
@@ -328,7 +329,7 @@
   {:parameters [id attachmentId attachmentType op filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
-   :pre-checks attachment-modification-precheks
+   :pre-checks attachment-modification-prechecks
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -369,7 +370,7 @@
    :user-authz-roles auth/all-authz-writer-roles
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
-   :pre-checks  attachment-modification-precheks
+   :pre-checks  attachment-modification-prechecks
    :states      (conj (states/all-states-but states/terminal-states) :answered)
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
   [{:keys [application user created]}]
