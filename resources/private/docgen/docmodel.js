@@ -728,13 +728,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildSelect(subSchema, model, path) {
     var myPath = path.join(".");
     var select = document.createElement("select");
+    var validationResult = getValidationResult(model, subSchema.name);
 
     $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
     var source = getModelSource(model, subSchema.name);
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
     var sizeClass = self.sizeClasses[subSchema.size] || "";
 
     select.onfocus = self.showHelp;
@@ -746,6 +747,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     select.name = myPath;
     select.className = "form-input combobox " + (sizeClass || "");
+
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      select.className += " " + level;
+    }
 
     select.id = pathStrToID(myPath);
 
@@ -828,7 +834,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     emitLater(select, subSchema);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath, true));
+      span.appendChild(makeLabel(subSchema, "select", myPath, true, validationResult));
     }
     span.appendChild(select);
     return span;
