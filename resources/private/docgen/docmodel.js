@@ -1726,7 +1726,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   self.showValidationResults = function(results) {
     // remove warning and error highlights
-    $(self.element).find("#document-" + self.docId).find("*").removeClass("warn").removeClass("error").removeClass("tip");
+    $(self.element).find("#document-" + self.docId).find("*").removeClass("warn").removeClass("error").removeClass("err").removeClass("tip");
     // clear validation errors
     $(self.element).find("#document-" + self.docId + " .errorPanel").html("").fadeOut();
     // apply new errors & highlights
