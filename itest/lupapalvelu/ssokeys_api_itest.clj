@@ -3,6 +3,7 @@
             [lupapalvelu.itest-util :refer :all]
             [sade.schema-generators :as ssg]
             [sade.schemas :as ssc]
+            [clojure.test.check.generators :as gen]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.ssokeys :as sso]
@@ -91,11 +92,11 @@
                         (assoc :key "")
                         (assoc :sso-id (:id sso-key)))]
         (local-command admin :update-single-sign-on-key params) => ok?
-        (mongo/by-id :ssoKeys sso-id) => {:id sso-id 
-                                          :key (:key sso-key)
-                                          :crypto-iv (:crypto-iv sso-key)
-                                          :ip (:ip params) 
-                                          :comment (:comment params)}))))
+        (mongo/by-id :ssoKeys (:id sso-key)) => {:id (:id sso-key) 
+                                                 :key (:key sso-key)
+                                                 :crypto-iv (:crypto-iv sso-key)
+                                                 :ip (:ip params) 
+                                                 :comment (:comment params)}))))
 
 (facts remove-single-sign-on-key
   (mongo/with-db test-db-name
