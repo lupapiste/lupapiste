@@ -61,7 +61,7 @@
                                                         :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))))
 
 (defn- attachment-editable-by-application-state [{{attachmentId :attachmentId} :data user :user} {current-state :state :as application}]
-  (when attachmentId
+  (when-not (ss/blank? attachmentId)
     (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
       (when-not (or (not (states/post-verdict-states (keyword current-state)))
                     (states/post-verdict-states (keyword create-state))
