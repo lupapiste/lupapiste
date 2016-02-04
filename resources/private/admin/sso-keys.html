@@ -19,9 +19,9 @@
             <tbody data-bind="foreach: $data.ssoKeys">
               <tr>
                 <td><input type="text" data-bind="value: $data.ip, attr: {'data-test-id': 'sso-ip-' + $data.id()}" class="form-input"></td>
-                <td><input type="password" placeholder="Ei näytetä" data-bind="value: $data.key, attr: {'data-test-id': 'sso-key-' + $data.id()}" class="form-input"></td>
+                <td><input type="password" placeholder="Ei n&auml;ytet&auml;" data-bind="value: $data.key, attr: {'data-test-id': 'sso-key-' + $data.id()}" class="form-input"></td>
                 <td><input type="text" data-bind="value: $data.comment, attr: {'data-test-id': 'sso-commment-' + $data.id()}" class="form-input" ></td>
-                <td><button class="btn positive" data-bind="click: $root.update">Päivitä</button></td>
+                <td><button class="btn positive" data-bind="click: $root.update">P&auml;ivit&auml;</button></td>
                 <td class="action-column">
                   <i class="lupicon-remove primary" data-bind="click: $root.remove, attr: {'data-test-id': 'sso-remove-' + $data.id()}"></i>
                 </td>
@@ -32,7 +32,7 @@
                 <td><input type="text" data-bind="value: $data.ip, attr: {'data-test-id': 'sso-ip-new'}" class="form-input"></td>
                 <td><input type="text" data-bind="value: $data.key, attr: {'data-test-id': 'sso-key-new'}" class="form-input"></td>
                 <td><input type="text" data-bind="value: $data.comment, attr: {'data-test-id': 'sso-commment-new'}" class="form-input" ></td>
-                <td><button class="btn positive" data-bind="click: $root.add">Lisää</button></td>
+                <td><button class="btn positive" data-bind="click: $root.add">Lis&auml;</button></td>
                 <td></td>
               </tr>
             </tbody>
