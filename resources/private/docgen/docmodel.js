@@ -622,8 +622,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildText(subSchema, model, path) {
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var input = document.createElement("textarea");
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     input.id = pathStrToID(myPath);
 
@@ -660,7 +661,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "text", myPath));
+      span.appendChild(makeLabel(subSchema, "text", myPath, false, validationResult));
     }
     span.appendChild(input);
     return span;
