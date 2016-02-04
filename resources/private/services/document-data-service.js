@@ -143,6 +143,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   }
 
   function createRepeatingDataModel(schema, rawModel, path) {
+    util.dissoc(rawModel, "validationResult");
     return {
       path: path,
       schema: schema,
