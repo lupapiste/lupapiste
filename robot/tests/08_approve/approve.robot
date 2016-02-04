@@ -120,6 +120,12 @@ Sonja sees that attachment has transferred indicator icon
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="transfered-muut.muu"]
 
+Building selector keeps its value
+  Open tab  info
+  Open accordions  info
+  Element should be visible  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']
+  List Selection Should Be  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']  199887766E
+
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complementNeeded
