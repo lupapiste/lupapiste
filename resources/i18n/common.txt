@@ -4941,4 +4941,6 @@
 "arkistoidaan" "fi" "Arkistoidaan"
 "arkistoidaan" "sv" "Arkiveras"
 "lisaaja" "fi" "Lisääjä"
-"lisaaja" "sv" "Lisääjä"
+"lisaaja" "sv" ""
+"attachment.archivability" "fi" "Tiedosto soveltuu pysyvään säilytykseen"
+"attachment.archivability" "sv" ""

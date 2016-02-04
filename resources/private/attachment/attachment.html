@@ -183,7 +183,7 @@
                   <div data-bind="if: $root.authorization.ok('permanent-archive-enabled') && latestVersion && isToBeArchived">
                     <div class="archive-valid" data-bind="with: latestVersion">
                       <div>
-                        <span data-bind="ltext: 'archive.valid-format'"></span>:
+                        <span data-bind="ltext: 'attachment.archivability'"></span>:
                         <span class="lupicon-circle-check positive" data-bind="visible: $data.archivable"></span>
                         <span class="lupicon-circle-attention negative" data-bind="visible: !$data.archivable, attr: {title: loc($data.archivabilityError)}"></span>
                       </div>
