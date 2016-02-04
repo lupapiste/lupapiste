@@ -902,6 +902,20 @@ Invite count is
   [Arguments]  ${amount}
   Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
 
+#
+# Authority admin
+#
+
+Create statement person
+  [Arguments]  ${email}  ${text}
+  Scroll to test id  create-statement-giver
+  Click enabled by test id  create-statement-giver
+  Wait until  Element should be visible  //label[@for='statement-giver-email']
+  Input text  statement-giver-email  ${email}
+  Input text  statement-giver-email2  ${email}
+  Input text  statement-giver-text  ${text}
+  Click enabled by test id  create-statement-giver-save
+
 
 #
 # Tasks
