@@ -936,6 +936,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildRadioGroup(subSchema, model, path) {
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var myModel;
     if (model[subSchema.name] && model[subSchema.name].value) {
       myModel = model[subSchema.name].value;
@@ -945,7 +946,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var partsDiv = document.createElement("div");
 
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
     span.className = span.className + " radioGroup";
     partsDiv.id = pathStrToID(myPath);
     partsDiv.className = subSchema.name + "-radioGroup";
