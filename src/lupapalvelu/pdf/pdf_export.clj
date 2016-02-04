@@ -490,6 +490,7 @@
   (let [title (loc "application.building")
         empty (loc "hankkeen-kuvaus.hankkeenVaativuus.ei tiedossa")
         buildings (:rakennus fields)]
+    (debug "tasks fields:" fields )
     `[~@(render-fields (take 12 fields))
       [:pagebreak]
       ~@(document-section-header (loc "application.building"))
