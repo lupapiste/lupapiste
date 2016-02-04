@@ -17,7 +17,6 @@ Mikko creates an application
 Mikko selects building
   Open tab  info
   Open accordions  info
-  Element should be visible  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']
   Wait Until  Select From List  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']  199887766E
   Confirm  dynamic-yes-no-confirm-dialog
 
