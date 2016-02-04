@@ -16,7 +16,7 @@
    :crypto-iv                 sc/Str
    (sc/optional-key :comment) sc/Str})
 
-(sc/defschema UnencryptedKey (ssc/min-length-string 1))
+(sc/defschema UnencryptedKey (ssc/min-length-string 20))
 
 (defn validate-ip [ip]
   (when-not (v/ip-address? ip) (fail :error.illegal-ip-address)))
