@@ -189,6 +189,7 @@
 
     self.copyFrom = function(data) {
       self.email(data.email);
+      self.email2( data.email);
       self.text(data.text);
       return self;
     };

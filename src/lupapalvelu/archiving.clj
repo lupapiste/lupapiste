@@ -111,6 +111,18 @@
        (remove nil?)
        (first)))
 
+(defn- get-paatospvm [{:keys [verdicts]}]
+  (let [ts (->> verdicts
+                (map (fn [{:keys [paatokset]}]
+                       (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
+                (flatten)
+                (remove nil?)
+                (sort)
+                (last))]
+    (println ts)
+    (when ts
+      (->iso-8601-date (c/from-long ts)))))
+
 (defn- get-usages [{:keys [documents]} op-id]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
         id-to-usage (into {} (map (fn [d] {(get-in d [:schema-info :op :id])
@@ -125,19 +137,6 @@
 
 (defn- make-attachment-type [{{:keys [type-group type-id]} :type}]
   (str type-group "." type-id))
-
-(defn- iso-8601-end-date [start-ts years]
-  (let [start-date (c/from-long start-ts)]
-    (->> (t/plus start-date (t/years years))
-         (->iso-8601-date))))
-
-(defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} application]
-  (when (= "m\u00E4\u00E4r\u00E4ajan" arkistointi)
-    (iso-8601-end-date (get-verdict-date application :lainvoimainen) pituus)))
-
-(defn- secrecy-end-date [{:keys [salassapitoaika julkisuusluokka]} application]
-  (when (and (#{"osittain-salassapidettava" "salainen"} julkisuusluokka) salassapitoaika)
-    (iso-8601-end-date (get-verdict-date application :lainvoimainen) salassapitoaika)))
 
 (defn- generate-archive-metadata
   [{:keys [id propertyId applicant address organization municipality location location-wgs84] :as application}
@@ -161,7 +160,7 @@
                        :location-wgs84        location-wgs84
                        :kuntalupatunnukset    (map :kuntalupatunnus (:verdicts application))
                        :lupapvm               (get-verdict-date application :lainvoimainen)
-                       :paatospvm             (get-verdict-date application :anto)
+                       :paatospvm             (get-paatospvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (:authority application) [:username :firstName :lastName])
@@ -175,8 +174,6 @@
             (:contents attachment) (conj {:contents (:contents attachment)})
             (:size attachment) (conj {:size (:size attachment)})
             (:scale attachment) (conj {:scale (:scale attachment)})
-            (retention-end-date s2-metadata application) (conj {:retention-period-end (retention-end-date s2-metadata application)})
-            (secrecy-end-date s2-metadata application) (conj {:security-period-end (secrecy-end-date s2-metadata application)})
             true (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids archive-application?]

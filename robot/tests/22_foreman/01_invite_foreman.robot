@@ -56,7 +56,7 @@ Pena sets Solita as hakija
   Open application  ${appname}  753-416-25-22
   Open tab  parties
   Open foreman accordions
-  Wait until  Click Element  xpath=//section[@data-doc-type="hakija-r"]//input[@value="yritys"]
+  Scroll and click  section[data-doc-type=hakija-r] input[value=yritys]
   Wait until  Select From List  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
 
@@ -75,14 +75,15 @@ Pena sees sent invitation on the original application
   Open foreman accordions
   Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
   # Also in auth array
-  Wait until  Element should be visible  xpath=//div[@class='parties-list']/ul//li/span[@class='person']/span[contains(., 'teppo@example.com')]
+  Wait until  Is authorized party  teppo@example.com
 
 Pena sees sent invitations on the foreman application
   Open application by id  ${foremanAppId}
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${foremanAppId}
   Open tab  parties
   Open foreman accordions
-  Wait until  Xpath Should Match X Times  //ul/li[@class="party"]  3
+  Wait until  Xpath Should Match X Times  //table//tr[@class="party"]  3
+  Go to  ${LOGOUT URL}
   [Teardown]  logout
 
 Foreman can see application

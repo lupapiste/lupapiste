@@ -3,7 +3,7 @@
             [schema.core :as sc]
             [sade.core :refer :all]
             [sade.util :as util]
-            [sade.schemas :as schemas]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.organization :as organization]
@@ -24,32 +24,32 @@
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
 ;; Krysp Yhteiset 2.1.5+
 (def- statement-statuses-more-options
-  (vec (concat statement-statuses 
-               ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" 
+  (vec (concat statement-statuses
+               ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa"
                 "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
-(def StatementGiver {:userId                          sc/Str
+(def StatementGiver {:userId                          ssc/ObjectIdStr
                      (sc/optional-key :id)            sc/Str
                      :text                            sc/Str
-                     :email                           schemas/Email
+                     :email                           ssc/Email
                      :name                            sc/Str})
 
-(def Reply          {:editor-id                       sc/Str
+(def Reply          {:editor-id                       ssc/ObjectIdStr
                      (sc/optional-key :saateText)     sc/Str
                      :nothing-to-add                  sc/Bool
                      (sc/optional-key :text)          sc/Str})
 
-(def Statement      {:id                              sc/Str
+(def Statement      {:id                              ssc/ObjectIdStr
                      :state                           (apply sc/enum statement-states)
                      (sc/optional-key :saateText)     sc/Str
                      (sc/optional-key :status)        (apply sc/enum statement-statuses-more-options)
                      (sc/optional-key :text)          sc/Str
-                     (sc/optional-key :dueDate)       schemas/Timestamp
-                     (sc/optional-key :requested)     schemas/Timestamp
-                     (sc/optional-key :given)         schemas/Timestamp
-                     (sc/optional-key :reminder-sent) schemas/Timestamp
-                     (sc/optional-key :modified)      schemas/Timestamp
-                     (sc/optional-key :duedate-reminder-sent)  schemas/Timestamp
+                     (sc/optional-key :dueDate)       ssc/Timestamp
+                     (sc/optional-key :requested)     ssc/Timestamp
+                     (sc/optional-key :given)         ssc/Timestamp
+                     (sc/optional-key :reminder-sent) ssc/Timestamp
+                     (sc/optional-key :modified)      ssc/Timestamp
+                     (sc/optional-key :duedate-reminder-sent)  ssc/Timestamp
                      (sc/optional-key :modify-id)     sc/Str
                      (sc/optional-key :editor-id)     sc/Str
                      (sc/optional-key :reply)         Reply
@@ -101,7 +101,7 @@
     (fail :error.statement-not-given)))
 
 (defn replies-enabled [command {permit-type :permitType :as application}]
-  (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type)
+  (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type) ; FIXME set in permit meta data
     (fail :error.organization-has-not-enabled-statement-replies)))
 
 (defn- update-statement [statement modify-id prev-modify-id & updates]

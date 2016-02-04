@@ -118,6 +118,8 @@
 
 (def summary-keys [:id :username :firstName :lastName :role])
 
+(def SummaryUser (select-keys User (mapcat (juxt identity sc/optional-key) summary-keys)))
+
 (defn summary
   "Returns common information about the user or nil"
   [user]
@@ -176,7 +178,9 @@
   (->> org-authz keys (map name) set))
 
 (defn organization-ids-by-roles
-  "Returns a set of organization IDs where user has given roles."
+  "Returns a set of organization IDs where user has given roles.
+  Note: the user must have gone through with-org-auth (the orgAuthz
+  must be keywords)."
   [{org-authz :orgAuthz :as user} roles]
   {:pre [(set? roles) (every? keyword? roles)]}
   (->> org-authz
@@ -196,6 +200,7 @@
 
 (defn batchrun-user [org-ids]
   {:id "-"
+   :username "eraajo@lupapiste.fi"
    :enabled true
    :lastName "Er\u00e4ajo"
    :firstName "Lupapiste"

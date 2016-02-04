@@ -2,7 +2,7 @@
 <html >
 <body>
   <section class="page container" id="attachment" data-bind="with: attachment">
-  <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'attachment' && init -->
+  <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'attachment' && initialized() -->
     <div>
       <div class="attachment-info">
         <div class="container">
@@ -180,10 +180,10 @@
                                        value: visibility,
                                        enable: $root.authorization.ok('set-attachment-visibility') && editable"/>
                   </div>
-                  <div data-bind="if: $root.authorization.ok('permanent-archive-enabled') && latestVersion">
+                  <div data-bind="if: $root.authorization.ok('permanent-archive-enabled') && latestVersion && isToBeArchived">
                     <div class="archive-valid" data-bind="with: latestVersion">
                       <div>
-                        <span data-bind="ltext: 'archive.valid-format'"></span>:
+                        <span data-bind="ltext: 'attachment.archivability'"></span>:
                         <span class="lupicon-circle-check positive" data-bind="visible: $data.archivable"></span>
                         <span class="lupicon-circle-attention negative" data-bind="visible: !$data.archivable, attr: {title: loc($data.archivabilityError)}"></span>
                       </div>

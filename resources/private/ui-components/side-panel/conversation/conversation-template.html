@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="conversation-template">
+    <script type="text/x-jquery-tmpl" id="conversation-template">
 
       <div>
         <form class="form-grid form-grid--columns-2 form-grid--no-border">
@@ -16,7 +16,7 @@
                                                  lPlaceholder: 'comment.placeholder',
                                                  disable: !authorization.ok('add-comment')}},
                             hasFocus: textSelected,
-                            css: {'highlight-conversation': highlightConversation}
+                            css: {'highlight-conversation': highlightConversation},
                             visible: authorization.ok('add-comment')"></div>
           </div>
 

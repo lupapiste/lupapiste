@@ -96,3 +96,6 @@
 (def ipv6-address-long-form? (partial matches? #"([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}"))
 
 (def ip-address? (some-fn ipv4-address? ipv6-address-long-form?))
+
+(def hex-string? (partial matches? #"^[0-9a-f]*$"))
+

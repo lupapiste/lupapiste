@@ -37,10 +37,10 @@
             [lupapalvelu.tiedonohjaus :as tiedonohjaus])
   (:import [java.io File]))
 
-;; Validators
+;; Validators and pre-checks
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
-  (when (-> (attachment/get-attachment-info application attachmentId) :locked (= true))
+  (when (-> (attachment/get-attachment-info application attachmentId) :locked true?)
     (fail :error.attachment-is-locked)))
 
 (defn- attachment-id-is-present-in-application-or-not-set [{{:keys [attachmentId]} :data} {:keys [attachments]}]
@@ -48,35 +48,35 @@
     (fail :error.attachment.id)))
 
 (defn- if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
-  (when (and
-          (not (user/authority? user))
-          (state-set (keyword state)))
+  (when (and (not (user/authority? user))
+             (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
 (defn- attachment-deletable [{{attachmentId :attachmentId} :data user :user} application]
   (let [{read-only :readOnly required :required} (attachment/get-attachment-info application attachmentId)]
-    (cond 
-      read-only (fail :error.unauthorized 
+    (cond
+      read-only (fail :error.unauthorized
                       :desc "Readonly attachments cannot be removed.")
       (and required (not (user/authority? user))) (fail :error.unauthorized
                                                         :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))))
 
-(defn- attachment-editable-by-application-state? [{{attachmentId :attachmentId} :data user :user} {current-state :state :as application}]
-  (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
-    (when-not (or (not (states/post-verdict-states (keyword current-state)))
-                  (states/post-verdict-states (keyword create-state))
-                  (user/authority? user))
-      (fail! :error.pre-verdict-attachment))))
+(defn- attachment-editable-by-application-state [{{attachmentId :attachmentId} :data user :user} {current-state :state :as application}]
+  (when-not (ss/blank? attachmentId)
+    (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
+      (when-not (or (not (states/post-verdict-states (keyword current-state)))
+                    (states/post-verdict-states (keyword create-state))
+                    (user/authority? user))
+        (fail :error.pre-verdict-attachment)))))
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
     (when (not-any? #{k} attachment/attachment-meta-types)
-      (fail! :error.illegal-meta-type :parameters k))))
+      (fail :error.illegal-meta-type :parameters k))))
 
 (defn- validate-operation [{{meta :meta} :data}]
   (let [op (:op meta)]
     (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
-      (fail! :error.missing-parameters :parameters missing))))
+      (fail :error.missing-parameters :parameters missing))))
 
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
@@ -88,7 +88,7 @@
     (when (and size (not (contains? (set attachment/attachment-sizes) (keyword size))))
       (fail :error.illegal-attachment-size :parameters size))))
 
-(defn allowed-attachment-type-for-application? [attachment-type application]
+(defn- allowed-attachment-type-for-application? [attachment-type application]
   {:pre [(map? attachment-type)]}
   (let [allowed-types (attachment/get-attachment-types-for-application application)]
     (attachment/allowed-attachment-types-contain? allowed-types attachment-type)))
@@ -116,7 +116,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state?]}
+   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state]}
   [{:keys [application user created] :as command}]
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
@@ -192,7 +192,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts attachment-deletable attachment-editable-by-application-state?]}
+   :pre-checks  [a/validate-authority-in-drafts attachment-deletable attachment-editable-by-application-state]}
   [{:keys [application user]}]
   (attachment/delete-attachment application attachmentId)
   (ok))
@@ -204,7 +204,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts attachment-editable-by-application-state?]}
+   :pre-checks  [a/validate-authority-in-drafts attachment-editable-by-application-state]}
   [{:keys [application user]}]
 
   (if (attachment/file-id-in-application? application attachmentId fileId)
@@ -272,10 +272,10 @@
 ;; Upload
 ;;
 
-(def attachment-modification-precheks
+(def attachment-modification-prechecks
   [attachment-is-not-locked
    (partial if-not-authority-state-must-not-be #{:sent})
-   attachment-editable-by-application-state?
+   attachment-editable-by-application-state
    validate-attachment-type
    a/validate-authority-in-drafts
    attachment-id-is-present-in-application-or-not-set])
@@ -329,7 +329,7 @@
   {:parameters [id attachmentId attachmentType op filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
-   :pre-checks attachment-modification-precheks
+   :pre-checks attachment-modification-prechecks
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -370,7 +370,7 @@
    :user-authz-roles auth/all-authz-writer-roles
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
-   :pre-checks  attachment-modification-precheks
+   :pre-checks  attachment-modification-prechecks
    :states      (conj (states/all-states-but states/terminal-states) :answered)
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
   [{:keys [application user created]}]
@@ -440,7 +440,7 @@
                                             :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                             :stamped true :make-comment false :state :ok}))
       (io/delete-file file :silently)
-      (tiedonohjaus/change-attachment-metadata-state! application now attachment-id :luonnos :valmis))
+      (tiedonohjaus/mark-attachment-final! application now attachment-id))
     new-file-id))
 
 (defn- stamp-attachments!
@@ -556,7 +556,7 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state?]}
+   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state]}
   [{:keys [application user created] :as command}]
   ; FIXME yhdella updatella!
   (doseq [[k v] meta]

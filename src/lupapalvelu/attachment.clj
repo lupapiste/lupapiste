@@ -1,7 +1,10 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
+            [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
+            [sade.schemas :as ssc]
             [sade.util :as util]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -73,6 +76,8 @@
    :B5
    :muu])
 
+(def attachment-states #{:ok :requires_user_action :requires_authority_action})
+
 (def- attachment-types-by-permit-type-unevaluated
   {:R 'attachment-types/Rakennusluvat
    :P 'attachment-types/Rakennusluvat
@@ -87,13 +92,94 @@
 
 (def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
-(defn attachment-ids-from-tree [tree]
-  {:pre [(sequential? tree)]}
-  (flatten (map second (partition 2 tree))))
+(def operation-specific-attachment-types #{{:type-id :pohjapiirros       :type-group :paapiirustus}
+                                           {:type-id :leikkauspiirros    :type-group :paapiirustus}
+                                           {:type-id :julkisivupiirros   :type-group :paapiirustus}
+                                           {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
+                                           {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
+                                           {:type-id :energiatodistus    :type-group :muut}
+                                           {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
+                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}})
 
 (def all-attachment-type-ids
-  (attachment-ids-from-tree
-    (apply concat (set (vals attachment-types-by-permit-type)))))
+  (->> (vals attachment-types-by-permit-type)
+       (apply concat)
+       (#(flatten (map second (partition 2 %))))
+       (set)))
+
+(def all-attachment-type-groups
+  (->> (vals attachment-types-by-permit-type)
+       (apply concat)
+       (#(map first (partition 2 %)))
+       (set)))
+
+(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
+
+(def AttachmentAuthUser (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
+                          (sc/if :id
+                            SummaryAuthUser
+                            (select-keys SummaryAuthUser [:firstName :lastName :role]))))
+
+(def VersionNumber {:minor                             sc/Int
+                    :major                             sc/Int})
+
+(def Target     {:id                                   ssc/ObjectIdStr
+                 :type                                 sc/Keyword
+                 (sc/optional-key :urlHash)            sc/Str})
+
+(def Source     {:id                                   ssc/ObjectIdStr
+                 :type                                 sc/Str})
+
+(def Operation  {:id                                   ssc/ObjectIdStr
+                 (sc/optional-key :optional)           [sc/Str] ;; only empty arrays @ talos
+                 (sc/optional-key :name)               sc/Str
+                 (sc/optional-key :description)        (sc/maybe sc/Str)
+                 (sc/optional-key :created)            ssc/Timestamp})
+
+(def Signature  {:user                                 user/SummaryUser
+                 :created                              ssc/Timestamp
+                 :version                              VersionNumber})
+
+(def Version    {:version                              VersionNumber
+                 :fileId                               sc/Str 
+                 :created                              ssc/Timestamp
+                 :user                                 (sc/if :id
+                                                         user/SummaryUser 
+                                                         (select-keys user/User [:firstName :lastName]))
+                 :filename                             sc/Str
+                 :contentType                          sc/Str
+                 :size                                 (sc/maybe sc/Int)
+                 (sc/optional-key :stamped)            sc/Bool
+                 (sc/optional-key :archivable)         (sc/maybe sc/Bool) 
+                 (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors)) 
+                 (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
+
+(def Type       {:type-id                              (apply sc/enum all-attachment-type-ids)
+                 :type-group                           (apply sc/enum all-attachment-type-groups)})
+
+(def Attachment {:id                                   sc/Str
+                 :type                                 Type
+                 :modified                             ssc/Timestamp
+                 (sc/optional-key :sent)               ssc/Timestamp
+                 :locked                               sc/Bool
+                 (sc/optional-key :readOnly)           sc/Bool
+                 :applicationState                     (apply sc/enum states/all-states)
+                 :state                                (apply sc/enum attachment-states)
+                 :target                               (sc/maybe Target)
+                 (sc/optional-key :source)             Source
+                 :required                             sc/Bool
+                 :requestedByAuthority                 sc/Bool
+                 :notNeeded                            sc/Bool
+                 :forPrinting                          sc/Bool
+                 :op                                   (sc/maybe Operation)
+                 :signatures                           [Signature]
+                 :versions                             [Version]
+                 (sc/optional-key :latestVersion)      (sc/maybe Version)
+                 (sc/optional-key :contents)           (sc/maybe sc/Str)
+                 (sc/optional-key :scale)              (apply sc/enum attachment-scales)
+                 (sc/optional-key :size)               (apply sc/enum attachment-sizes)
+                 :auth                                 [AttachmentAuthUser]
+                 (sc/optional-key :metadata)           {sc/Any sc/Any}})
 
 ;; Helper for reporting purposes
 (defn localised-attachments-by-permit-type [permit-type]
@@ -117,9 +203,7 @@
             (map (partial localize-attachment-section lang))
             vec)))
       {}
-     ["fi" "sv"]))
-
-  )
+     ["fi" "sv"])))
 
 (defn print-attachment-types-by-permit-type []
   (let [permit-types-with-names (into {}
@@ -185,6 +269,7 @@
            :op op
            :signatures []
            :versions []
+           :auth []
            :contents contents}
           (seq metadata) (assoc :metadata metadata)))
 
@@ -267,12 +352,12 @@
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
             next-version (next-attachment-version latest-version user)
+            user-summary (user/summary user)            
             user-role (if stamped :stamper :uploader)
             version-model {:version  next-version
                            :fileId   file-id
                            :created  now
-                           :accepted nil
-                           :user    (user/summary user)
+                           :user     user-summary
                            ; File name will be presented in ASCII when the file is downloaded.
                            ; Conversion could be done here as well, but we don't want to lose information.
                            :filename filename
@@ -302,7 +387,7 @@
                                     :attachments.$.state  state
                                     :attachments.$.latestVersion version-model}
                               $push {:attachments.$.versions version-model}
-                              $addToSet {:attachments.$.auth (user/user-in-role user user-role)}})
+                              $addToSet {:attachments.$.auth (user/user-in-role user-summary user-role)}})
                            true)]
         ; Check return value and try again with new version number
         (if (pos? result-count)
@@ -331,7 +416,8 @@
   (let [attachment (get-attachment-info application attachment-id)
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
-        old-file-id (get-in attachment [:latestVersion :fileId])]
+        old-file-id (get-in attachment [:latestVersion :fileId])
+        user-summary (user/summary user)]
 
     (when-not (= old-file-id file-id)
       (mongo/delete-file-by-id old-file-id))
@@ -341,11 +427,11 @@
       {:attachments {$elemMatch {:id attachment-id}}}
       {$set {:modified now
              :attachments.$.modified now
-             (str latest-version-path "user") user
+             (str latest-version-path "user") user-summary
              (str latest-version-path "fileId") file-id
              (str latest-version-path "size") size
              (str latest-version-path "created") now
-             :attachments.$.latestVersion.user user
+             :attachments.$.latestVersion.user user-summary
              :attachments.$.latestVersion.fileId file-id
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
@@ -478,7 +564,7 @@
 (defn pre-process-attachment [{:keys [attachment-type filename content]}]
   (if (and libreoffice-client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
     {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
-     :content  (libreoffice-client/convert-to-pdfa filename content)}
+     :content  (:body (libreoffice-client/convert-to-pdfa filename content))}
     {:filename filename :content content}))
 
 (defn attach-file!

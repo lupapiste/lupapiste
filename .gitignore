@@ -57,3 +57,7 @@ sessionkey
 keystore
 .tern-port
 user.properties
+/GPATH
+/GRTAGS
+/GTAGS
+/TAGS

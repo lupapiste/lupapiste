@@ -147,13 +147,13 @@
 
 (def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
 
-(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
+(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size "xl" :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
                            {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
                            {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
-(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro" :required true}
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :size "xl" :i18nkey "rakennusnro" :required true}
                                 {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}

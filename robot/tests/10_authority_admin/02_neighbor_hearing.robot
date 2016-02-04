@@ -25,4 +25,12 @@ Mikko asks municipality to hear neighbors
 Kirjaamo got email
   Open last email
   Wait Until  Page Should Contain  ${email}
-  [Teardown]  Go to login page
+
+Try to open application
+  Click link  xpath=//a
+
+Link is was for authority, need to continue to login
+  Wait Until  Click by test id  login
+  User logs in  mikko@example.com  mikko123  Mikko Intonen
+  Wait Until  Application address should be  Naapurikatu
+  [Teardown]  Logout

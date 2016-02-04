@@ -1,0 +1,95 @@
+
+.bubble-dialog {
+  $border-color: $grid-border-color;
+  $bg-color: white;
+  $nubbin: 20px;
+  $pad: 20px;
+
+  margin-top: 1.5 * $nubbin;
+  padding: $pad $pad $pad $pad;
+  position: relative;
+  background: $bg-color;
+  border: 1px solid $border-color;
+
+  &:after,
+  &:before {
+    bottom: 100%;
+    left: 60px;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &:after {
+    border-color: transparentize( $bg-color, 1);
+    border-bottom-color: $bg-color;
+    border-width: $nubbin;
+    margin-left: -$nubbin;
+  }
+  &:before {
+    border-color: transparentize( $border-color, 1);
+    border-bottom-color: $border-color;
+    border-width: $nubbin + 1px;
+    margin-left: -$nubbin - 1px;
+  }
+
+  .left-buttons {
+    margin-top: $pad;
+  }
+
+  label.mandatory:after {
+    content: " *";
+    color: $orange;
+  }
+  input[type=text], textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 4px;
+    display: block;
+  }
+
+  textarea {
+    min-height: 8em;
+  }
+
+  input.mandatory {
+    border-color: $orange;
+    margin-bottom: $pad;
+  }
+
+  .error {
+    margin-top: $pad;
+    border: 1px solid red;
+    color: red;
+    padding: $pad;
+  }
+
+  table.mandatory {
+    tr {
+      background-color: initial;
+      td {
+        border: 1px solid $orange;
+        background-color: none;
+      }
+      td.full {
+        width: 33%;
+      }
+    }
+  }
+}
+
+.auth-table {
+  tr {
+    background-color: initial;
+    &:active {
+      background-color: initial;
+    }
+  }
+}
+
+.application-guests {
+  margin-bottom: 20px;
+}

@@ -54,6 +54,10 @@ Sonja adds five statement givers to application
 
   Input text  xpath=//*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
   Invite read-only statement giver  0  01.06.2018
+  Open statement  0
+  Wait until  Element should be visible  statement-cover-note
+  Wait until  Element text should be  statement-cover-note  Tama on saateteksti.
+  Return from statement
 
   # Checkbox selection and maaraaika are cleared, the saate text stays filled with value.
   Wait Until  Checkbox Should Not Be Selected  statement-giver-checkbox-0

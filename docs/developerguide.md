@@ -394,11 +394,11 @@ hub.send("indicator-icon", {style: "negative"});
   - config
 - Docgen, viittaus skeemojen määrittelyyn
 
-## Compass + SASS
+## Compass + SASS + Bless
 
 CSS-tyylit kirjoitetaan Sass-tiedostoihin `resources/private/common-html/sass` kansiossa. Sass-tiedostot käännetään compass gemillä (kirjoitushetkellä versio 1.0.3). Compassin voi asettaa kuuntelemaan muutoksia `compass.sh` scriptillä projektin juuresta. Vaihtoehtoisesti Sass-tiedostot voi kääntää käsin `compass compile resources/private/common-html`.
 
-Compassin konfigurointi on tiedostossa `resources/private/common-html/config.rb`, sisältää mm. CSS splitterin, joka jakaa **main.css** tiedoston pienempiin osiin (IE9 css rule limit). CSS tiedostot generoidaan `resources/public/lp-static/css/` kansioon.
+Compassin konfigurointi on tiedostossa `resources/private/common-html/config.rb`, sisältää mm. Bless-kutsun, joka jakaa **main.css** tiedoston pienempiin osiin (IE9 css rule limit). CSS tiedostot generoidaan `resources/public/lp-static/css/` kansioon.
 
 Oletuksena CSS-tiedostot minimoidaan, tätä voidaan säätää compassin _environment_ tai _output-style_ konfiguroinnilla (config.rb). Esimerkiksi käsin generoitu ei-minifioitu CSS: saa aikaiseksi seuraavalla komennolla (development-mode): `compass compile -e development resources/private/common-html`
 

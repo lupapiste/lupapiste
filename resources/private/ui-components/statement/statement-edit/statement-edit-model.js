@@ -10,7 +10,7 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   self.applicationTitle = params.applicationTitle;
   self.data = params.data;
-  
+
   self.selectedStatus = ko.observable();
   self.text = ko.observable();
 
@@ -18,9 +18,10 @@ LUPAPISTE.StatementEditModel = function(params) {
     return util.getIn(self.data, ["id"]);
   });
 
-  self.data.subscribe(function() {
+  var initSubscription = self.data.subscribe(function() {
     self.selectedStatus(util.getIn(self.data, ["status"]));
     self.text(util.getIn(self.data, ["text"]));
+    initSubscription.dispose();
   });
 
   var commands = params.commands;
@@ -44,16 +45,18 @@ LUPAPISTE.StatementEditModel = function(params) {
   })
 
   self.coverNote = ko.pureComputed(function() {
-    var isStatementGiver = util.getIn(self.data, ["person", "userId"]) === lupapisteApp.models.currentUser.id();
-    return self.tab === "statement" && isStatementGiver ? util.getIn(self.data, ["saateText"]) : "";
+    var canViewCoverNote = util.getIn(self.data, ["person", "userId"]) === lupapisteApp.models.currentUser.id() || lupapisteApp.models.currentUser.isAuthority();
+    return self.tab === "statement" && canViewCoverNote ? util.getIn(self.data, ["saateText"]) : "";
   });
 
+  // FIXME computed + dispose
   self.text.subscribe(function(value) {
-    if(util.getIn(self.data, ["text"]) !== value) { 
+    if(util.getIn(self.data, ["text"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["text"], value: self.text()});
     }
   });
 
+  // FIXME computed + dispose
   self.selectedStatus.subscribe(function(value) {
     if(util.getIn(self.data, ["status"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["status"], value: self.selectedStatus()});
@@ -62,6 +65,7 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   hub.send("statement::submitAllowed", {tab: self.tab, value: submitAllowed()})
 
+  // FIXME computed + dispose
   submitAllowed.subscribe(function(value) {
     hub.send("statement::submitAllowed", {tab: self.tab, value: value});
   });

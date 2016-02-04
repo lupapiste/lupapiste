@@ -81,6 +81,7 @@
                                                                                :contents nil
                                                                                :signatures []
                                                                                :versions []
+                                                                               :auth []
                                                                                :notNeeded false
                                                                                :required true
                                                                                :requestedByAuthority true
@@ -97,6 +98,7 @@
                                                                                :contents nil
                                                                                :signatures []
                                                                                :versions []
+                                                                               :auth []
                                                                                :notNeeded false
                                                                                :required true
                                                                                :requestedByAuthority true
@@ -163,7 +165,7 @@
                                       (map (fn [[g ts]] (map (fn [t] [g t]) ts)))
                                       (apply concat))]
     (fact "Meta: collected all types"
-      (count attachment-group-type-paths) => (count all-attachment-type-ids))
+      (set (map second attachment-group-type-paths)) => all-attachment-type-ids)
 
     (doseq [lang ["fi" "sv"]
             path attachment-group-type-paths
@@ -192,6 +194,7 @@
                                                                              :contents nil
                                                                              :signatures []
                                                                              :versions []
+                                                                             :auth []
                                                                              :notNeeded false
                                                                              :required true
                                                                              :requestedByAuthority true
@@ -209,6 +212,7 @@
                                                                              :contents nil
                                                                              :signatures []
                                                                              :versions []
+                                                                             :auth []
                                                                              :notNeeded false
                                                                              :required true
                                                                              :requestedByAuthority true

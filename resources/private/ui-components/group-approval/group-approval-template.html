@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="group-approval-template">
       <div class="group-buttons"
-           data-bind="visible: hasContents">
+           data-bind="if: hasContents">
         <span class="form-approval-status is-status"
               data-bind="css: {rejected: isRejected,
                                approved: isApproved},

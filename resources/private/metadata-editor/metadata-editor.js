@@ -7,6 +7,9 @@
       if (v.dependencies) {
         _.forEach(v.dependencies, function (depArray) {
           _.forEach(depArray, function (depVal) {
+            if (!depVal["calculated"]) {
+
+            }
             newMap[depVal.type] = ko.observable(actualMetadata && actualMetadata[depVal.type] !== undefined ? actualMetadata[depVal.type] : null);
           });
         });
@@ -39,10 +42,11 @@
     return newMap;
   };
 
-  var coerceValuesToSchemaType = function(metadata, inputTypeMap) {
-    return _.mapValues(metadata, function(v, k) {
+  var coerceValuesToSchemaType = function(metadata, inputTypeMap, uneditableFieldMap) {
+    var uneditableFields = _.keys(_.pick(uneditableFieldMap, _.isNumber));
+    return _.mapValues(_.omit(metadata, uneditableFields), function(v, k) {
       if (_.isObject(v)) {
-        return coerceValuesToSchemaType(v, inputTypeMap[k]);
+        return coerceValuesToSchemaType(v, inputTypeMap[k], uneditableFieldMap[k]);
       } else if(inputTypeMap[k] === "number") {
         return parseInt(v, 10);
       } else {
@@ -70,7 +74,7 @@
     _.forEach(schema, function(v) {
       if (v.dependencies && v.dependencies[metadata[v.type]]) {
         _.forEach(v.dependencies[metadata[v.type]], function(depVal) {
-          if (!isValid(metadata[depVal.type], depVal.inputType)) {
+          if (!depVal.calculated && !isValid(metadata[depVal.type], depVal.inputType)) {
             errors.push(depVal.type);
           }
         });
@@ -94,6 +98,27 @@
     return naughtyFields;
   };
 
+  var getUneditableFields = function(schema) {
+    var uneditableFields = {};
+    _.forEach(schema, function(v) {
+      if (v.dependencies) {
+        _.forEach(v.dependencies, function(depArray) {
+          _.forEach(depArray, function(depVal) {
+            if (depVal.calculated) {
+              uneditableFields[depVal.type] = 1;
+            }
+          });
+        });
+      }
+      if (v.subfields) {
+        uneditableFields[v.type] = getUneditableFields(v.subfields);
+      } else if (v.calculated) {
+        uneditableFields[v.type] = 1;
+      }
+    });
+    return uneditableFields;
+  };
+
   var model = function(params) {
     var self = this;
     self.attachmentId = params.attachmentId ? params.attachmentId : ko.observable(null);
@@ -104,6 +129,7 @@
     self.schema = ko.observableArray();
     self.inputTypeMap = {};
     self.disabledFields = ko.observableArray();
+    var uneditableFields;
 
     var orgAuthz = ko.unwrap(lupapisteApp.models.currentUser.orgAuthz);
     var organization = ko.unwrap(params.application.organization);
@@ -127,6 +153,7 @@
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);
         self.schema(data.schema);
         self.disabledFields(getForbiddenFields(data.schema, roles));
+        uneditableFields = getUneditableFields(self.schema());
       })
       .call();
 
@@ -139,8 +166,9 @@
       self.editable(false);
     };
 
+
     self.save = function() {
-      var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap);
+      var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap, uneditableFields);
       var command;
       if (params.caseFile) {
         command = "store-tos-metadata-for-process";
@@ -151,8 +179,9 @@
       }
       ajax.command(command)
         .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
-        .success(function() {
-          self.metadata(ko.mapping.fromJS(ko.mapping.toJS(self.editedMetadata)));
+        .success(function(data) {
+          self.metadata(ko.mapping.fromJS(data.metadata));
+          self.editedMetadata(constructEditableMetadata(data.metadata, self.schema(), roles));
           self.editable(false);
           if (_.isFunction(params.saveCallback)) {
             params.saveCallback();
