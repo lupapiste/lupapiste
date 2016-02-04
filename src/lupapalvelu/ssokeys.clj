@@ -36,8 +36,9 @@
 (defn update-sso-key [sso-key ip secret-key comment]
   (->> {:ip ip 
         :comment comment}
-       (remove (comp ss/blank? val))
        (merge sso-key (when-not (ss/blank? secret-key) (encode-key secret-key)))
+       (remove (comp ss/blank? val))
+       (into {})
        (sc/validate SsoKey)))
 
 (defn create-sso-key [ip secret-key comment]
