@@ -459,9 +459,9 @@
                             </div>
                         </div>
 
-                        <div data-bind="component: 'application-guests'">
-
-                        </div>
+                        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "application" -->
+                        <div data-bind="component: 'application-guests'"></div>
+                        <!-- /ko -->
 
                         <p data-bind="lhtml: 'required.field.desc'"></p>
 
