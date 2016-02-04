@@ -979,6 +979,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     select.name = myPath;
     select.className = "form-input combobox long";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      select.className += " " + level;
+    }
 
     $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
@@ -1078,7 +1082,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .call();
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath));
+      span.appendChild(makeLabel(subSchema, "select", myPath, false, validationResult));
     }
     span.appendChild(select);
     return span;
