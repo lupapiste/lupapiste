@@ -41,7 +41,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   };
 
-  self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
+  self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long", "xl": "form-input really-long"};
 
   // Context help
   self.addFocus = function (e) {
@@ -969,11 +969,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildBuildingSelector(subSchema, model, path) {
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var select = document.createElement("select");
     var selectedOption = getModelValue(model, subSchema.name);
     var option = document.createElement("option");
-    var span = makeEntrySpan(subSchema, myPath);
-    span.className = "form-entry really-long";
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     select.id = pathStrToID(myPath);
 
