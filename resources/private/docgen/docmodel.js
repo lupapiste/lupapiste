@@ -639,6 +639,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     setMaxLen(input, subSchema);
 
     input.className = "form-input textarea";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      input.className += " " + level;
+    }
+
     var value = getModelValue(model, subSchema.name);
     input.value = value;
 
