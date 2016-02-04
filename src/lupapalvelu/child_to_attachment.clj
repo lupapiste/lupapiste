@@ -13,7 +13,7 @@
 (defn- get-child [application type id]
   (first (filter #(or (nil? id) (= id (:id %))) (type application))))
 
-(defn- build-attachment [user application type id lang file]
+(defn- build-attachment [user application type id lang file attachment-id]
   {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts :tasks} type)]}
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
         type-name (case type
@@ -22,12 +22,11 @@
                     :verdicts (i18n/localize (name lang) "application.verdict.title")
                     :tasks (i18n/localize (name lang) "task-katselmus.rakennus.tila._group_label"))
         child (get-child application type id)]
-    (debug "building attachemnt form child: " child )
     {:application application
      :filename (str type-name ".pdf")
      :size (.length file)
      :content file
-     :attachment-id nil
+     :attachment-id attachment-id
      :attachment-type (case type
                         :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
                         :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
@@ -49,13 +48,19 @@
      :missing-fonts []
      :copy-of {:type type :id id}}))
 
+(defn get-child-attachment-id [app child-type id]
+  (let [attachment (filter #(= {:type (name child-type) :id id} (:copy-of %)) (:attachments app))
+        attachment-id (:id (first attachment))]
+    attachment-id))
+
 (defn generate-attachment-from-children [user app child-type id lang]
   "Builds attachment and return attachment data as map"
   (trace "   generate-attachment-from-children lang=" (name lang) ", type=" (name child-type) ", id=" id ",org: " (:organization app) ", child: " (get-child app child-type id))
   (let [pdf-file (File/createTempFile (str "pdf-export-" (name lang) "-" (name child-type) "-") ".pdf")
-        fis (FileOutputStream. pdf-file)]
+        fis (FileOutputStream. pdf-file)
+        attachment-id (get-child-attachment-id app child-type id)]
     (pdf-export/generate-pdf-with-child app child-type id lang fis)
-    (build-attachment user app child-type id lang pdf-file)))
+    (build-attachment user app child-type id lang pdf-file attachment-id)))
 
 (defn create-attachment-from-children [user app child-type id lang]
   "Generates attachment from child and saves it"
@@ -63,3 +68,6 @@
         file (:content child)]
     (attachment/attach-file! child)
     (io/delete-file file :silently)))
+
+(defn delete-child-attachment [app child-type id]
+    (attachment/delete-attachment app (get-child-attachment-id app child-type id)))
