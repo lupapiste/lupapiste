@@ -440,6 +440,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return input;
   }
 
+  function makeErrorPanel(pathStr, validationResult) {
+    var errorPanel = document.createElement("span");
+    errorPanel.className = "errorPanel";
+    errorPanel.id = pathStrToID(pathStr) + "-errorPanel";
+
+    if (validationResult && validationResult[0] !== "tip") {
+      var level = validationResult[0],
+          code = validationResult[1],
+          errorSpan = document.createElement("span");
+      errorSpan.className = level;
+      errorSpan.innerHTML = loc(["error", code]);
+      errorPanel.appendChild(errorSpan);
+    }
+    return errorPanel;
+  }
+
   function makeEntrySpan(subSchema, pathStr, validationResult) {
     var help = null;
     var helpLocKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + ".help");
@@ -465,18 +481,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     // durable field error panels
-    var errorPanel = document.createElement("span");
-    errorPanel.className = "errorPanel";
-    errorPanel.id = pathStrToID(pathStr) + "-errorPanel";
-
-    if (validationResult && validationResult[0] !== "tip") {
-      var level = validationResult[0],
-          code = validationResult[1],
-          errorSpan = document.createElement("span");
-      errorSpan.className = level;
-      errorSpan.innerHTML = loc(["error", code]);
-      errorPanel.appendChild(errorSpan);
-    }
+    var errorPanel = makeErrorPanel(pathStr, validationResult);
 
     span.appendChild(errorPanel);
 
