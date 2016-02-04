@@ -1247,7 +1247,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildPersonSelector(subSchema, model, path) {
     var myPath = path.join(".");
-    var span = makeEntrySpan(subSchema, myPath);
+    var validationResult = getValidationResult(model, subSchema.name);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
     span.className = span.className + " personSelector";
     var myNs = path.slice(0, path.length - 1).join(".");
     var select = document.createElement("select");
@@ -1256,6 +1257,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.id = pathStrToID(myPath);
     select.name = myPath;
     select.className = "form-input combobox";
+    var validationLevel = validationResult && validationResult[0];
+    if (validationLevel) {
+      select.className += " " + validationLevel;
+    }
+
     if (authorizationModel.ok("set-user-to-document")) {
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -1310,6 +1316,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var label = document.createElement("label");
     var locKey = ("person-selector");
     label.className = "form-label form-label-select";
+    if (validationLevel) {
+      label.className += " " + validationLevel;
+    }
     label.innerHTML = loc(locKey);
     span.appendChild(label);
     span.appendChild(select);
