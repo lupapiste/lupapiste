@@ -12,7 +12,17 @@
     self.permitTypes = ko.observableArray([]);
     self.municipalities = ko.observableArray([]);
 
+    self.allowedAutologinIps = ko.observableArray();
+    self.ssoKeys = ko.observableArray();
+
+    function updateSsoKeys() {
+      _.forEach(self.ssoKeys(), function(ssoKey) {
+        ssoKey.selected(_.includes(self.allowedAutologinIps(), ssoKey.ip()));
+      });
+    }
+
     self.open = function(orgId) {
+      self.allowedAutologinIps
 
       ajax
         .query("organization-by-id", {organizationId: orgId})
@@ -22,6 +32,14 @@
           isLoading = true;
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           isLoading = false;
+        })
+        .call()
+
+      ajax
+        .query("allowed-autologin-ips-for-organization", {"org-id": orgId})
+        .success(function(d) {
+          self.allowedAutologinIps(d.ips);
+          updateSsoKeys();
         })
         .call();
 
@@ -97,6 +115,16 @@
       .query("municipalities")
       .success(function(d) {
         self.municipalities(d.municipalities);
+      })
+      .call();      
+
+    ajax
+      .query("get-single-sign-on-keys")
+      .success(function(d) {
+        self.ssoKeys(_.map(d.ssoKeys, function(ssoKey) {
+          return ko.mapping.fromJS(_.assign(ssoKey, {selected: false}));
+        }));
+        updateSsoKeys();
       })
       .call();
   }

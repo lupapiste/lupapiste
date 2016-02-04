@@ -84,7 +84,8 @@
         (map with-scope-defaults))))
 
 (defn get-autologin-ips-for-organization [org-id]
-  (mongo/by-id :organizations org-id [:allowedAutologinIPs]))
+  (-> (mongo/by-id :organizations org-id [:allowedAutologinIPs])
+      :allowedAutologinIPs))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
