@@ -1719,8 +1719,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
         callback(updateCommand, status, e.results);
       })
-      .error(function (e) { error(e); callback(updateCommand, "err"); })
-      .fail(function (e) { error(e); callback(updateCommand, "err"); })
+      .error(function (e) { error(e); callback(updateCommand, "err", e.results); })
+      .fail(function (e) { error(e); callback(updateCommand, "err", e.results); })
       .call();
   }
 
