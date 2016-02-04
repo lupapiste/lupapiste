@@ -871,17 +871,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
-    var opts = {};
     if (subSchema.approvable) {
-      opts.approval = {};
-    }
-    opts.remove = resolveRemoveOptions( subSchema, path);
     $(div).append(createComponent( "group-approval",
                                    {docModel: self,
                                     subSchema: subSchema,
                                     model: myModel,
                                     path: path,
-                                    remove: opts.remove }));
+        remove: resolveRemoveOptions( subSchema, path) }));
+    }
 
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);

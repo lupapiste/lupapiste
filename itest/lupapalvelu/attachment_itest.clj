@@ -225,6 +225,23 @@
             (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?))
           ))))
 
+(facts* "Post-verdict attachments"
+  (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
+        application (query-application pena application-id)
+        _ (upload-attachment-to-all-placeholders pena application)
+        _ (command pena :submit-application :id application-id)
+        _ (command sonja :check-for-verdict :id application-id) => ok?
+        application (query-application pena application-id)
+        attachment1 (-> application :attachments first)]
+    (:state application) => "verdictGiven"
+    (count (:attachments application)) => 5
+    (fact "Uploading versions to pre-verdict attachment is not possible"
+      (upload-attachment pena application-id attachment1 false :filename "dev-resources/test-pdf.pdf"))
+    (fact "Uploading new post-verdict attachment is possible"
+      (upload-attachment pena application-id {:id "" :type {:type-group "muut" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
+
+    (count (:attachments (query-application pena application-id))) => 6))
+
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
         application (query-application pena application-id)]
