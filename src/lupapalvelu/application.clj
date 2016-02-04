@@ -155,11 +155,17 @@
             whitelisted-paths)))
 
 ; Process
+
+(defn- validate [application document]
+  (let [all-results   (model/validate application document)
+        create-result (fn [document result]
+                        (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
+    (assoc (reduce create-result document all-results) :validationErrors all-results)))
+
 (defn- process-documents-and-tasks [user {authority :authority :as application}]
-  (let [validate        (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
-        mask-person-ids (person-id-masker-for-user user application)
+  (let [mask-person-ids (person-id-masker-for-user user application)
         disabled-flag   (partial enrich-single-doc-disabled-flag user)
-        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids validate)]
+        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids (partial validate application))]
     (-> application
       (update :documents (partial map mapper))
       (update :tasks (partial map mapper)))))
