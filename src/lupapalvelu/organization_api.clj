@@ -198,6 +198,13 @@
   [_]
   (ok :organizations (o/get-organizations)))
 
+(defquery allowed-autologin-ips-for-organization
+  {:parameters [org-id]
+   :input-validators [(partial non-blank-parameters [:org-id])]
+   :user-roles #{:admin}}
+  [_]
+  (ok :ips (o/get-autologin-ips-for-organization org-id)))
+
 (defquery organization-by-id
   {:parameters [organizationId]
    :input-validators [(partial non-blank-parameters [:organizationId])]

@@ -83,6 +83,9 @@
         (map remove-sensitive-data)
         (map with-scope-defaults))))
 
+(defn get-autologin-ips-for-organization [org-id]
+  (mongo/by-id :organizations org-id [:allowedAutologinIPs]))
+
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
   (->> (mongo/by-id :organizations id)
