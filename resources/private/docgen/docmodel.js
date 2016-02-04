@@ -1090,17 +1090,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildNewBuildingSelector(subSchema, model, path) {
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var select = document.createElement("select");
     var selectedOption = getModelValue(model, subSchema.name);
     var emptyOption = document.createElement("option");
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
     var unknownOption = document.createElement("option");
-    span.className = "form-entry really-long";
 
     select.id = pathStrToID(myPath);
 
     select.name = myPath;
     select.className = "form-input combobox long";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      select.className += " " + level;
+    }
 
     $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
@@ -1166,7 +1170,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     select.appendChild(unknownOption);
 
-    span.appendChild(makeLabel(subSchema, "select", myPath));
+    span.appendChild(makeLabel(subSchema, "select", myPath, false, validationResult));
     span.appendChild(select);
     return span;
   }
