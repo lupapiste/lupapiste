@@ -9,23 +9,10 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen]
+            [lupapalvelu.test-util :refer [assert-assertion-error assert-validation-error]]
             [lupapalvelu.ssokeys :refer :all]))
 
 (testable-privates lupapalvelu.ssokeys encode-key)
-
-(defmacro assert-validation-error [schema-path & body]
-  `(try ~@body        
-        (is false "Did not throw validation error!")
-        (catch clojure.lang.ExceptionInfo e# 
-          (is (get-in (.getData e#) [:error ~@schema-path])
-              (str "No validation error with schema path " ~schema-path "!")))))
-
-(defmacro assert-assertion-error [param-name & body]
-  `(try ~@body
-        (is false "Did not throw assertion error!")
-        (catch java.lang.AssertionError e# 
-          (is (->> (.getMessage e#) (re-matches (re-pattern (str ".*" (name ~param-name) ".*"))))
-              (str "Cannot find param name \"" (name ~param-name) "\" in error message!")))))
 
 (defspec encode-secret-key
   (prop/for-all [secret-key gen/string]
