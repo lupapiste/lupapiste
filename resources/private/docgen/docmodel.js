@@ -675,20 +675,26 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildDate(subSchema, model, path) {
     var lang = loc.getCurrentLanguage();
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var value = getModelValue(model, subSchema.name);
 
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "date", myPath));
+      span.appendChild(makeLabel(subSchema, "date", myPath, false, validationResult));
     }
 
+    var className = "form-input text form-date";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      className += " " + level;
+    }
     // date
     var input = $("<input>", {
       id: pathStrToID(myPath),
       name: self.docId + "." + myPath,
       type: "text",
-      "class": "form-input text form-date",
+      "class": className,
       value: value
     });
 
