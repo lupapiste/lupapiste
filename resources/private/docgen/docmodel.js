@@ -1188,7 +1188,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     $(element)
       .attr("params", paramsStr(params))
-      .addClass(classes)
+      .addClass(classes ? classes + " docgen-component" : "docgen-component")
       .applyBindings(params);
 
     ko.options.deferUpdates = false;
@@ -1729,12 +1729,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     $(self.element)
       .find("#document-" + self.docId)
       .find("*")
+      .not(".docgen-component *") // components handle their validation
       .removeClass("warn")
       .removeClass("error")
       .removeClass("err")
       .removeClass("tip");
     // clear validation errors
-    $(self.element).find("#document-" + self.docId + " .errorPanel").html("").fadeOut();
+    $(self.element).find("#document-" + self.docId + " .errorPanel").not(".docgen-component *").html("").fadeOut();
 
     // apply new errors & highlights
     if (results && results.length > 0) {
