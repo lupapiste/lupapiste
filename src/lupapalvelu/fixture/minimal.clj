@@ -494,6 +494,9 @@
     :firstName "Kaino"
     :lastName "Solita"
     :email "kaino@solita.fi"
+    :street "Sensorintie 7"
+    :zip "12345"
+    :city "Forssa"
     :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."
               :apikey "502cb9e58426c613c8b85abe"}
     :role "applicant"

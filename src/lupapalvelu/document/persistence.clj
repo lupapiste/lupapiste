@@ -281,7 +281,8 @@
     (let [path-arr (if-not (ss/blank? path) (s/split path #"\.") [])
           schema (schemas/get-schema (:schema-info document))
           subject (company/find-company-by-id company-id)
-          company (tools/unwrapped (model/->yritys (merge subject user) :with-empty-defaults true))
+          ;; Company contact person fields are filled with the current user's data.
+          company (tools/unwrapped (model/->yritys (merge subject (dissoc user :zip)) :with-empty-defaults true))
           model (if (seq path-arr)
                   (assoc-in {} (map keyword path-arr) company)
                   company)
