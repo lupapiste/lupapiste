@@ -25,7 +25,7 @@
   (when-not (nil? (sc/check ssc/ObjectIdStr id)) (fail :error.invalid-id)))
 
 (defn validate-key [key]
-  (when-not ((some-fn ss/blank? (comp nil? (sc/checker UnencryptedKey))) key) (fail :error.illegal-key)))
+  (when-not ((some-fn ss/blank? (comp nil? (sc/checker UnencryptedKey))) key) (fail :error.invalid-key)))
 
 (defn- encode-key [secret-key]
   (let [crypto-iv   (crypt/make-iv-128)
