@@ -879,19 +879,23 @@ Comment count is
 Is authorized party
   # Party can be either email or username
   [Arguments]  ${party}
-  Element Should Be Visible  xpath=//div[@class='parties-list']//table//td[contains(., '${party}')]
+  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//table//td[contains(., '${party}')]
+
+Fill application person invite bubble
+  [Arguments]  ${email}  ${message}
+  Element should be visible  xpath=//button[@data-test-id='application-invite-person']
+  Click by test id  application-invite-person
+  Test id disabled  person-invite-bubble-dialog-ok
+  Fill test id  person-invite-email  ${email}
+  Fill test id  person-invite-message  Tervetuloa muokkaamaan hakemusta
+  Test id enabled  person-invite-bubble-dialog-ok
 
 Invite ${email} to application
   Open tab  parties
   ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/table//tr[@class='party']
-  Element should be visible  xpath=//button[@data-test-id='application-invite-person']
-  Click by test id  application-invite-person
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-email  ${email}
-  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
-  Element should be enabled  xpath=//button[@data-test-id='application-invite-submit']
-  Click by test id  application-invite-submit
-  Wait Until  Element Should Not Be Visible  invite-email
+  Fill application persion invite bubble  ${email}  Tervetuloa muokkaamaan hakemusta
+  Scroll and click  person-invite-bubble-dialog-ok
+  Wait test id hidden  person-invite-bubble-dialog-ok
   Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//tr[@class='party'][${invites_count} + 1]
   ${email_found}=  Run Keyword And Return Status  Is authorized party  ${email}
   # If specified email was not found from auths, try to parse username from the email and test if username exists (case of pena)
@@ -916,6 +920,15 @@ Create statement person
   Input text  statement-giver-text  ${text}
   Click enabled by test id  create-statement-giver-save
 
+
+Invite company to application
+  [Arguments]  ${company}
+  Open tab  parties
+  Scroll and click test id  application-invite-company
+  Wait test id visible  company-invite-bubble-dialog-ok
+  Select From Autocomplete  div[@data-test-id="company-invite-companies"]  ${company}
+  Scroll and click test id  company-invite-bubble-dialog-ok
+  Is authorized party  ${company}
 
 #
 # Tasks
@@ -1151,7 +1164,12 @@ Scroll to test id
 Scroll and click
   [Arguments]  ${selector}
   Scroll to  ${selector}
+  Element should be enabled  jquery=${selector}
   Click Element  jquery=${selector}
+
+Scroll and click test id
+  [Arguments]  ${id}
+  Scroll and click  [data-test-id=${id}]
 
 Wait test id visible
   [Arguments]  ${id}
@@ -1173,8 +1191,14 @@ Test id disabled
   Scroll to test id  ${id}
   Element should be disabled  jquery=[data-test-id=${id}]
 
+Test id enabled
+  [Arguments]  ${id}
+  Scroll to test id  ${id}
+  Element should be enabled  jquery=[data-test-id=${id}]
+
 Fill test id
   [Arguments]  ${id}  ${text}
   Wait test id visible  ${id}
   Element Should Be Enabled  jquery=[data-test-id=${id}]
   Input text by test id  ${id}  ${text}
+
