@@ -73,10 +73,18 @@
 
 (schemas/defschemas
   task-schemas-version
-  [{:info {:name "task-katselmus" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
+  [{:info {:name "task-katselmus"
+           :type :task
+           :order 1
+           :section-help "authority-fills"
+           :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
     :body task-katselmus-body}
 
-   {:info {:name "task-katselmus-ya" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
+   {:info {:name "task-katselmus-ya"
+           :type :task
+           :order 1
+           :section-help "authority-fills"
+           :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
     :body task-katselmus-body-ya}
 
    {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}

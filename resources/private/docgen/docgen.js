@@ -25,10 +25,6 @@ var docgen = (function () {
 
       docgenDiv.append(docModel.element);
 
-      if (doc.validationErrors) {
-        docModel.showValidationResults(doc.validationErrors);
-      }
-
       if (schema.info.repeating && !schema.info["no-repeat-button"] && !isDisabled && authorizationModel.ok("create-doc")) {
         var icon = $("<i>", {"class": "lupicon-circle-plus"});
         var span = $("<span>").text( loc(schema.info.name + "._append_label"));

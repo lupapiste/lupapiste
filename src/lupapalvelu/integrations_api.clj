@@ -223,10 +223,10 @@
 ;; Building info
 ;;
 
-(defcommand get-building-info-from-wfs
+(defquery get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     krysp-enrichment-states
+   :states     states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]

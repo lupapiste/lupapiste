@@ -76,11 +76,3 @@ Create user
   Wait Until  Page Should Contain  ${email}
   Element Should Contain  //div[@class="users-table"]//table/tbody/tr[@data-user-email="${email}"]/td[3]  ${role}
 
-Create statement person
-  [Arguments]  ${email}  ${text}
-  Click enabled by test id  create-statement-giver
-  Wait until  Element should be visible  //label[@for='statement-giver-email']
-  Input text  statement-giver-email  ${email}
-  Input text  statement-giver-email2  ${email}
-  Input text  statement-giver-text  ${text}
-  Click enabled by test id  create-statement-giver-save
