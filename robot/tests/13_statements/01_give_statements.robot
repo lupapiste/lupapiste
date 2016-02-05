@@ -24,7 +24,7 @@ Authorities from different municipality can be added as statement giver
 
 Authority can be a statement giver multiple times
   Create statement giver  sonja.sibbo@sipoo.fi  Rakennuslausunto
-  Create statement giver  sonja.sibbo@sipoo.fi  Erityslausunto
+  Create statement giver  sonja.sibbo@sipoo.fi  Erityislausunto
   Logout
 
 New applications does not have statements
@@ -105,9 +105,11 @@ Sonja types in draft
 
 Sonja can give statement to own request
   Open statement  4
+  Wait until  Element text should be  xpath=//div[@data-test-id='header-statement-edit']//span[@data-bind='text: person.text']  ERITYISLAUSUNTO
   Input text  statement-text  salibandy on the rocks.
-  Wait until  Select From List By Value  statement-type-select  puoltaa
+  Select From List By Value  statement-type-select  puoltaa
   Wait and click  statement-submit
+  Wait Until  Element should be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']
 
 Comment is added
   Open statement  4
