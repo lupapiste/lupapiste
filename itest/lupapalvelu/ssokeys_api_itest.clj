@@ -6,8 +6,12 @@
             [clojure.test.check.generators :as gen]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture.core :refer [apply-fixture]]
             [lupapalvelu.ssokeys :as sso]
             [lupapalvelu.ssokeys-api :as sso-api]))
+
+(mongo/connect!)
+(mongo/with-db test-db-name (apply-fixture "minimal"))
 
 (apply-remote-minimal)
 

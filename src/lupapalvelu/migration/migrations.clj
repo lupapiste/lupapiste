@@ -1661,6 +1661,36 @@
                              {$or [{:attachments.versions.accepted {$exists true}}
                                    {:attachments.latestVersion.accepted {$exists true}}]}))
 
+(defn pull-auth-update [{:keys [id role]}]
+  {$pull {:auth {:role role :id id}}})
+
+(defn remove-owners-double-auth-updates [auths]
+  (let [{owner-id :id :as owner-auth} (some
+                                        #(when (= (:role %) "owner") %)
+                                        auths)]
+    (when-let [removable-auths (seq
+                                 (filter
+                                   #(and
+                                     (= (:id %) owner-id)
+                                     (or (= (:role %) "writer") (= (:role %) "reader")))
+                                   auths))]
+      (map pull-auth-update removable-auths))))
+
+(defmigration double-auths-in-foreman-applications ; LPK-1331
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                application (mongo/select collection
+                                          {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
+                                           :auth.2 {$exists true} ; >= 3 auths
+                                           :created {$gt 1444780800000}} ; since version 1.108 14.10.2015
+                                          [:auth])]
+            (if-let [updates (remove-owners-double-auth-updates (:auth application))]
+              (do
+                (doseq [update-clause updates]
+                  (mongo/update-by-id collection (:id application) update-clause))
+                1) ; one application updated
+              0))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
