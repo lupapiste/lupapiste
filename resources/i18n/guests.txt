@@ -20,7 +20,7 @@
 "application-guests.subscribe" "sv" "Beställ anmälningar"
 "application-guests.unsubscribe" "fi" "Peruuta ilmoitukset"
 "application-guests.unsubscribe" "sv" "Återta anmälningar"
-"application-guests.user" "fi" "Lukuoikeuden käyttäjä"
+"application-guests.user" "fi" "Lukuoikeus-käyttäjä"
 "application-guests.user" "sv" "Läsrättsanvändare"
 "auth-admin.guest-authorities.help" "fi" "Käyttäjät, joille viranomainen voi antaa lukuoikeuden yksittäiselle hankkeelle. Nämä käyttäjät liitetään myös organisaation viranomaisiksi. Tarvittaessa luodaan uusi käyttäjä."
 "auth-admin.guest-authorities.help" "sv" "Användare för vilka myndigheten kan ge läsrätt för enskilda projekt. Dessa användare sätts även till som organisationens myndigheter. Vid behov skapas en ny användare."
