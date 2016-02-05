@@ -361,7 +361,7 @@
 
 (defn valid-ip-addresses [ips]
   (when-let [error (sc/check [ssc/IpAddress] ips)]
-    (fail :error.invalid-ip :desc error)))
+    (fail :error.invalid-ip :desc (str error))))
 
 (defn-
   ^org.geotools.data.simple.SimpleFeatureCollection
