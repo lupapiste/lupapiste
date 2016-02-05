@@ -104,8 +104,8 @@
         app-with-two-apartments    (query-application pena application-id)
         two-apartments             (data-of app-with-two-apartments)]
     resp => ok?
-    (fact (-> three-apartments :huoneistot keys count) => 3)
-    (fact (-> two-apartments :huoneistot keys count) => 2)))
+    (fact (-> three-apartments :huoneistot keys) => (just #{:2 :1 :0}))
+    (fact (-> two-apartments :huoneistot keys) => (just #{:2 :1 :validationResult}))))
 
 
 (facts "facts about party-document-names query"
