@@ -303,6 +303,7 @@
                                  :attachment-id new-id
                                  :content output-file
                                  :filename new-filename
+                                 :make-comment false
                                  :archivable true
                                  :archivabilityError nil)]
       (if (attachment/attach-file! pdfa-attachment-data)

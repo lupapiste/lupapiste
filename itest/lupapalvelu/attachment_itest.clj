@@ -3,7 +3,8 @@
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [sade.util :as util]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [sade.env :as env]))
 
 (apply-remote-minimal)
 
@@ -465,3 +466,23 @@
       (fact "Pena can change visibility, as he is authed"
         (command pena :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "julkinen") => ok?)
       )))
+
+(facts "Uploading PDF should not create duplicate comments"
+  (let [application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+        application-id (:id application)
+        _ (upload-attachment pena application-id {:type {:type-group "osapuolet" :type-id "cv"}} true :filename "dev-resources/test-pdf.pdf")
+        {attachments :attachments comments :comments} (query-application pena application-id)
+        pdf-attachment (first attachments)]
+    (fact "is PDF"
+      (-> pdf-attachment :latestVersion :contentType) => "application/pdf")
+
+    (when (string? (env/value :pdf2pdf :license-key)) ; test PDF/A when pdf2pdf converter is enabled
+      (facts "PDF/A conversion"
+        (fact "Original version and PDF/A version exists"
+          (count (:versions pdf-attachment)) => 2)
+        (fact "Is archivable"
+          (-> pdf-attachment :latestVersion :archivable) => true)))
+
+    (fact "After upload comments count is + 1"
+      (count (:comments application)) => 0 ; before upload
+      (count comments) => 1)))
