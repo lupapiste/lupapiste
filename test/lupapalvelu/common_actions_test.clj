@@ -5,7 +5,9 @@
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.actions-api :as ca]))
+            [lupapalvelu.actions-api :as ca]
+            ;; ensure all actions are registered by requiring server ns
+            [lupapalvelu.server]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 
@@ -43,7 +45,8 @@
                           :preview-attachment
                           :document
                           :mark-seen
-                          :authority-notice}
+                          :authority-notice
+                          :application-guests}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)
