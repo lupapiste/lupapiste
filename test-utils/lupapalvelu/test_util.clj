@@ -2,8 +2,11 @@
   (:require [midje.sweet :refer :all]
             [clj-time.core :as t]
             [clj-time.format :as tf]
+            [clojure.test :refer [is]]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.tools :as tools])
+  (:import [clojure.lang ExceptionInfo]
+           [java.lang AssertionError]))
 
 (defn xml-datetime-is-roughly? [^String date1 ^String date2 & interval]
   "Check if two xml datetimes are roughly the same. Default interval 60 000ms (1 min)."
@@ -20,3 +23,23 @@
         data   (tools/create-document-data schema (partial tools/dummy-values nil))]
     {:schema-info (:info schema)
      :data        data}))
+
+(defmacro assert-validation-error 
+  "Catches schema validation error and checks that validation is failed in right place."
+  [schema-path & body]
+  `(try ~@body        
+        (is false "Did not throw validation error!")
+        (catch ExceptionInfo e# 
+          (is (get-in (.getData e#) [:error ~@schema-path])
+              (str "No validation error with schema path " ~schema-path "!")))))
+
+(defmacro assert-assertion-error 
+  "Catches assertion error and check that there is right parameter name in error message.
+  Convenient to use in test-check test to check that pre-check is triggered."
+  [param-name & body]
+  `(try ~@body
+        (is false "Did not throw assertion error!")
+        (catch AssertionError e# 
+          (is (->> (.getMessage e#) (re-matches (re-pattern (str ".*" (name ~param-name) ".*"))))
+              (str "Cannot find param name \"" (name ~param-name) "\" in error message!")))))
+
