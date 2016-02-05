@@ -24,7 +24,8 @@ LUPAPISTE.PersonInviteModel = function( params ) {
   };
 
   self.send = function() {
-    hub.send( "bubble-person-invite", {invite: {email: self.email(),
-                                                text: self.message()}});
+    hub.send( "authorized::bubble-person-invite",
+              {invite: {email: self.email(),
+                        text: self.message()}});
   };
 };

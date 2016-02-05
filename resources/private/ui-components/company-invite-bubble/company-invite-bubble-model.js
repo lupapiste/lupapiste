@@ -60,6 +60,7 @@ LUPAPISTE.CompanyInviteBubbleModel = function( params ) {
   });
 
   self.send = function() {
-    hub.send( "bubble-company-invite", {invite: {"company-id": self.selected().id}});
+    hub.send( "authorized::bubble-company-invite",
+              {invite: {"company-id": self.selected().id}});
   };
 };

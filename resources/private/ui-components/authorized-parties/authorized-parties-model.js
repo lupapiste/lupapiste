@@ -21,6 +21,8 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
   // ---------------------------------------------------
   // Authorized table
   // ---------------------------------------------------
@@ -77,7 +79,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
   self.error = ko.observable();
   self.waiting = ko.observable();
 
-  self.authorizedParties = ko.pureComputed( function() {
+  self.authorizedParties = self.disposedComputed( function() {
    return _( application().roles() )
           .reject( function( role ) {
             // Guests are filtered only if the party does
@@ -104,30 +106,25 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     .call();
   }
 
-  var hubIds = [];
+   self.addEventListener( "authorized",
+                          "bubble-person-invite",
+                          function( params ) {
+                            ajaxInvite( "invite-with-role",
+                                        _.defaults( params.invite,
+                                                    {id: application().id(),
+                                                     documentName: "",
+                                                     documentId: "",
+                                                     path: "",
+                                                     role: "writer"} ));
+                          } );
 
-  hubIds.push( hub.subscribe( "bubble-person-invite", function( params ) {
-    ajaxInvite( "invite-with-role",
-                _.defaults( params.invite,
-                            {id: application().id(),
-                             documentName: "",
-                             documentId: "",
-                             path: "",
-                             role: "writer"} ));
-  } ));
-
-  hubIds.push( hub.subscribe( "bubble-company-invite", function( params ) {
-    ajaxInvite( "company-invite",
-                _.defaults( params.invite, {id: application().id()}));
-  }));
-
-  self.dispose = function() {
-    _.map( hubIds, hub.unsubscribe );
-    // Dependencies on global observables must be
-    // explicitly disposed.
-    self.authorizedParties.dispose();
-  };
-
+  self.addEventListener( "authorized",
+                         "bubble-company-invite",
+                         function( params ) {
+                           ajaxInvite( "company-invite",
+                                       _.defaults( params.invite,
+                                                   {id: application().id()}));
+  });
 
   // ---------------------------------------------------
   // Invite person

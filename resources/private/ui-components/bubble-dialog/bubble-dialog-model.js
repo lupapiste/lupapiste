@@ -18,7 +18,10 @@ LUPAPISTE.BubbleDialogModel = function( params ) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
   var BUBBLE = "bubble-dialog";
+
   self.bubbleVisible = params.visible;
   self.buttonIcon = params.buttonIcon || "";
   self.buttonText = params.buttonText || "ok";
@@ -35,21 +38,17 @@ LUPAPISTE.BubbleDialogModel = function( params ) {
 
   // When a bubble is opened all the other bubbles are closed.
   var bubbleId = _.uniqueId(BUBBLE + "-");
-  var hubId = hub.subscribe( BUBBLE,
-                             function( data ) {
-                               if( data && data.id !== bubbleId ) {
-                                 self.bubbleVisible( false );
-                               }
-                             });
+  self.addEventListener( BUBBLE, BUBBLE,
+                         function( data ) {
+                           if( data && data.id !== bubbleId ) {
+                             self.bubbleVisible( false );
+                           }
+                         });
 
   ko.computed( function() {
     if( self.bubbleVisible()) {
-      hub.send( BUBBLE, {id: bubbleId});
+      self.sendEvent( BUBBLE, BUBBLE, {id: bubbleId});
       initFun();
     }
   });
-
-  self.dispose = function() {
-    hub.unsubscribe( hubId );
-  };
 };
