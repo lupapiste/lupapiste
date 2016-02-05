@@ -12,54 +12,63 @@
 (let [test-app-R  {:municipality 753 :permitType "R"}
       test-app-P  {:municipality 753 :permitType "P"}
       test-app-YA {:municipality 753 :permitType "YA"}
-      test-app-YM {:municipality 753 :permitType "YM"}]
+      test-app-YM {:municipality 753 :permitType "YM"}
+      statuses-small ["puoltaa" "ei-puolla" "ehdoilla"]
+      statuses-large ["puoltaa" "ei-puolla" "ehdoilla"
+                      "ei-huomautettavaa" "ehdollinen" "puollettu"
+                      "ei-puollettu" "ei-lausuntoa" "lausunto"
+                      "kielteinen" "palautettu" "poydalle"]]
 
   ;; permit type R
 
   (fact "get-possible-statement-statuses, permit type R, krysp yhteiset version 2.1.3"
-   (possible-statement-statuses test-app-R) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
+        (possible-statement-statuses test-app-R) => (just statuses-small :in-any-order)
    (provided
-     (organization/resolve-organization anything anything) => {:krysp {:R {:version "2.1.5"}}}))
+    (organization/resolve-organization anything anything) => {:krysp {:R {:version "2.1.5" :url "krysp-url"}}}))
 
   (fact "get-possible-statement-statuses, permit type R, krysp yhteiset version 2.1.5"
-    (possible-statement-statuses test-app-R) => (just ["puoltaa" "ei-puolla" "ehdoilla"
-                                                       "ei-huomautettavaa" "ehdollinen" "puollettu"
-                                                       "ei-puollettu" "ei-lausuntoa" "lausunto"
-                                                       "kielteinen" "palautettu" "poydalle"] :in-any-order)
+        (possible-statement-statuses test-app-R) => (just statuses-large :in-any-order)
     (provided
-      (organization/resolve-organization anything anything) => {:krysp {:R {:version "2.1.6"}}}))
+      (organization/resolve-organization anything anything) => {:krysp {:R {:version "2.1.6" :url "krysp-url"}}}))
 
   ;; permit type P
 
-  (fact "get-possible-statement-statuses, permit type R, krysp yhteiset version 2.1.3"
-   (possible-statement-statuses test-app-P) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
+  (fact "get-possible-statement-statuses, permit type P, krysp yhteiset version 2.1.3"
+        (possible-statement-statuses test-app-P) => (just statuses-small :in-any-order)
    (provided
-     (organization/resolve-organization anything anything) => {:krysp {:P {:version "2.1.5"}}}))
+     (organization/resolve-organization anything anything) => {:krysp {:P {:version "2.1.5" :url "krysp-url"}}}))
 
-  (fact "get-possible-statement-statuses, permit type R, krysp yhteiset version 2.1.5"
-    (possible-statement-statuses test-app-P) => (just ["puoltaa" "ei-puolla" "ehdoilla"
-                                                       "ei-huomautettavaa" "ehdollinen" "puollettu"
-                                                       "ei-puollettu" "ei-lausuntoa" "lausunto"
-                                                       "kielteinen" "palautettu" "poydalle"] :in-any-order)
+    (fact "get-possible-statement-statuses, permit type P, krysp yhteiset version 2.1.5"
+        (possible-statement-statuses test-app-P) => (just statuses-large :in-any-order)
     (provided
-      (organization/resolve-organization anything anything) => {:krysp {:P {:version "2.2.0"}}}))
+     (organization/resolve-organization anything anything) => {:krysp {:P {:version "2.2.0" :url "krysp-url"}}}))
+
+    (fact "get-possible-statement-statuses, permit type P, no KRYSP version nor url"
+          (possible-statement-statuses test-app-P) => (just statuses-large :in-any-order)
+          (provided
+           (organization/resolve-organization anything anything) => {}))
+
+    (fact "get-possible-statement-statuses, permit type P, krysp yhteiset version 2.1.3 no url"
+          (possible-statement-statuses test-app-P) => (just statuses-large :in-any-order)
+          (provided
+           (organization/resolve-organization anything anything) => {:krysp {:P {:version "2.1.5"}}}))
 
   ;; permit type YA
 
   (fact "get-possible-statement-statuses, permit type R, krysp yhteiset version 2.1.3"
-   (possible-statement-statuses test-app-YA) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
+        (possible-statement-statuses test-app-YA) => (just statuses-small :in-any-order)
    (provided
-     (organization/resolve-organization anything anything) => {:krysp {:YA {:version "2.1.3"}}}))
+     (organization/resolve-organization anything anything) => {:krysp {:YA {:version "2.1.3" :url "krysp-url"}}}))
 
   (fact "get-possible-statement-statuses, permit type R, krysp yhteiset version 2.1.5"
-    (possible-statement-statuses test-app-YA) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
+        (possible-statement-statuses test-app-YA) => (just statuses-small :in-any-order)
     (provided
-      (organization/resolve-organization anything anything) => {:krysp {:YA {:version "2.2.0"}}}))
+      (organization/resolve-organization anything anything) => {:krysp {:YA {:version "2.2.0" :url "krysp-url"}}}))
 
   ;; permit type YM
 
   (fact "get-possible-statement-statuses, permit type YM, no krysp versions defined"
-    (possible-statement-statuses test-app-YM) => (just ["puoltaa" "ei-puolla" "ehdoilla"] :in-any-order)
+        (possible-statement-statuses test-app-YM) => (just statuses-small :in-any-order)
     (provided
       (organization/resolve-organization anything anything) => {})))
 

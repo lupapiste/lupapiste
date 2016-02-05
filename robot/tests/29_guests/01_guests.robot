@@ -35,6 +35,14 @@ Deleting user from guest authority table still keeps him/her in the organization
 Luukas cannot be guest authority
   Add bad authority  luukas.lukija@sipoo.fi  Luukas  Lukija  -
 
+Create new statement giver and add it as guest authority
+  Create statement person  statement@giver.net  Statue
+  Wait test id visible  guest-authority-add
+  Add new statement giver as authority  statement@giver.net  Statement  Giver  Geiwoba
+
+Delete new statement giver from authority table
+  Delete new statement giver guest authority  statement@giver.net  Geiwoba
+
 Bad authority email
   Bad email address  foobar
   [Teardown]  Logout

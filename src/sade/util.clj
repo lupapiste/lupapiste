@@ -231,18 +231,19 @@
 (defn- local-date-time [^Long timestamp]
   (LocalDateTime. timestamp))
 
-(defn to-local-date [^Long timestamp]
+(defn- format-timestamp-local-tz [^Long timestamp ^String fmt]
   (when timestamp
     (let [dt (local-date-time timestamp)]
-      (timeformat/unparse-local (timeformat/formatter "dd.MM.YYYY") dt))))
+      (timeformat/unparse-local (timeformat/formatter fmt) dt))))
+
+(defn to-local-date [^Long timestamp]
+  (format-timestamp-local-tz timestamp "dd.MM.YYYY"))
 
 (defn to-local-datetime [^Long timestamp]
-  (when timestamp
-    (let [dt (local-date-time timestamp)]
-      (timeformat/unparse-local (timeformat/formatter "dd.MM.yyyy HH:mm") dt))))
+  (format-timestamp-local-tz timestamp "dd.MM.yyyy HH:mm"))
 
 (defn to-xml-date [^Long timestamp]
-  (format-utc-timestamp timestamp "YYYY-MM-dd"))
+  (format-timestamp-local-tz timestamp "YYYY-MM-dd"))
 
 (defn to-xml-datetime [^Long timestamp]
   (format-utc-timestamp timestamp "YYYY-MM-dd'T'HH:mm:ss"))

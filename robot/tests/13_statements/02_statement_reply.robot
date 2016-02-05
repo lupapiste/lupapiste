@@ -120,7 +120,7 @@ Olli requests reply for another statement
 Olli goes back to statement and sees reply as draft
   Open statement  2
   Wait until  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-statement']
-  Element should not be visible  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
+  Wait until  Element should not be visible  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply']
   Wait until element contains  statement-reply-draft-is-not-visible-info  Vastine tulee
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-statement']

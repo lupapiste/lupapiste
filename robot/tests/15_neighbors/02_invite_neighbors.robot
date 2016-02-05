@@ -52,6 +52,7 @@ Sonja corrects the email address of neighbor c
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-c@example.com']//a[@data-test-id='manage-neighbors-remove']
 
 Sonja adds owners - luonnollinen henkilo
+  Scroll to  div#neighbors-map
   Mock proxy  property-info-by-wkt  [{"kiinttunnus": "75341600380013"}]
   Mock datatables  owners  '{"ok":true,"owners":[{"propertyId": "75341600380013","postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}'
   Start drawing a point
@@ -140,6 +141,9 @@ Mikko sees neighbors and their status
   Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']
   Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-b@example.com']//span[@data-test-id='neighbors-row-status-open']
   Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-c@example.com']//span[@data-test-id='neighbors-row-status-open']
+
+There is an option for asking municipality to hear all neighbours
+  Element should be visible  xpath=//div[@id="application-statement-tab"]//div[@data-test-id="municipality-hears-neighbours"]//label
 
 Mikko can't mark neighbors as done, but can send an email invitation
   Element should not be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-b@example.com']//a[@data-test-id='neighbor-row-mark-done']

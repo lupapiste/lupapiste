@@ -3,7 +3,8 @@
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [sade.util :as util]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [sade.env :as env]))
 
 (apply-remote-minimal)
 
@@ -224,6 +225,23 @@
             (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
             (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?))
           ))))
+
+(facts* "Post-verdict attachments"
+  (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
+        application (query-application pena application-id)
+        _ (upload-attachment-to-all-placeholders pena application)
+        _ (command pena :submit-application :id application-id)
+        _ (command sonja :check-for-verdict :id application-id) => ok?
+        application (query-application pena application-id)
+        attachment1 (-> application :attachments first)]
+    (:state application) => "verdictGiven"
+    (count (:attachments application)) => 5
+    (fact "Uploading versions to pre-verdict attachment is not possible"
+      (upload-attachment pena application-id attachment1 false :filename "dev-resources/test-pdf.pdf"))
+    (fact "Uploading new post-verdict attachment is possible"
+      (upload-attachment pena application-id {:id "" :type {:type-group "muut" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
+
+    (count (:attachments (query-application pena application-id))) => 6))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
@@ -448,3 +466,23 @@
       (fact "Pena can change visibility, as he is authed"
         (command pena :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "julkinen") => ok?)
       )))
+
+(facts "Uploading PDF should not create duplicate comments"
+  (let [application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+        application-id (:id application)
+        _ (upload-attachment pena application-id {:type {:type-group "osapuolet" :type-id "cv"}} true :filename "dev-resources/test-pdf.pdf")
+        {attachments :attachments comments :comments} (query-application pena application-id)
+        pdf-attachment (first attachments)]
+    (fact "is PDF"
+      (-> pdf-attachment :latestVersion :contentType) => "application/pdf")
+
+    (when (string? (env/value :pdf2pdf :license-key)) ; test PDF/A when pdf2pdf converter is enabled
+      (facts "PDF/A conversion"
+        (fact "Original version and PDF/A version exists"
+          (count (:versions pdf-attachment)) => 2)
+        (fact "Is archivable"
+          (-> pdf-attachment :latestVersion :archivable) => true)))
+
+    (fact "After upload comments count is + 1"
+      (count (:comments application)) => 0 ; before upload
+      (count comments) => 1)))

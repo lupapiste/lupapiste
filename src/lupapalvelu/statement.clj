@@ -22,7 +22,7 @@
 (def pre-repliable-states (clojure.set/difference statement-states post-repliable-states))
 
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
-;; Krysp Yhteiset 2.1.5+
+;; Krysp Yhteiset 2.1.5+ and if no organization backend system.
 (def- statement-statuses-more-options
   (vec (concat statement-statuses
                ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa"
@@ -147,8 +147,11 @@
   (let [{permit-type :permitType municipality :municipality} application
         extra-statement-statuses-allowed? (permit/get-metadata permit-type :extra-statement-selection-values)
         organization (organization/resolve-organization municipality permit-type)
-        version (get-in organization [:krysp (keyword permit-type) :version])
+        {:keys [version url]} (get-in organization [:krysp (keyword permit-type)])
         yht-version (if version (mapping-common/get-yht-version permit-type version) "0.0.0")]
-    (if (and extra-statement-statuses-allowed? (util/version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5}))
+    ;; Even without url the KRYSP version might exist.
+    (if (and extra-statement-statuses-allowed?
+             (or (util/version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5})
+                 (ss/blank? url)))
       (set statement-statuses-more-options)
       (set statement-statuses))))

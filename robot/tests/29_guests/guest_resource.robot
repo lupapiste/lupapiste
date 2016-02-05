@@ -69,6 +69,30 @@ Add new authority
   Fill test id  guest-dialog-lastname  ${lastname}
   Add guest authority finish  ${email}  ${firstname}  ${lastname}  ${description}
 
+Add new statement giver as authority
+  [Arguments]  ${email}  ${firstname}  ${lastname}  ${description}
+  Add guest authority start  ${email}
+  Wait Until  Textfield Should Contain  jquery=[data-test-id=guest-dialog-lastname]  ${email}
+  Test id disabled  guest-dialog-ok
+  Fill test id  guest-dialog-firstname  ${firstname}
+  Fill test id  guest-dialog-lastname  ${lastname}
+  Fill test id  guest-dialog-description  ${description}
+  Scroll And Click  [data-test-id=guest-dialog-ok]
+  # New names are not visible in the user table
+  User table row contains  ${email}  Hankekohtainen lukuoikeus
+
+  Xpath Should Match X Times  //section[@id='users']//tr[@data-user-email='${email}']  1
+  Guest authority table row contains  ${description}  ${description}
+  Guest authority table row contains  ${description}  ${firstname} ${lastname}
+  Guest authority table row contains  ${description}  ${email}
+
+Delete new statement giver guest authority
+  [Arguments]  ${email}  ${description}
+  Click Link  jquery=tr[data-test-guest-description=${description}] a
+  User table row contains  ${email}  Hankekohtainen lukuoikeus
+
+  Wait Until Page Does Not Contain Element  jquery=tr[data-test-guest-description=${description}]
+
 Add bad authority
   [Arguments]  ${email}  ${firstname}  ${lastname}  ${description}
   Add existing user as authority  ${email}  ${firstname}  ${lastname}  ${description}
