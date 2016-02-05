@@ -17,7 +17,7 @@
 
     function updateSsoKeys() {
       _.forEach(self.ssoKeys(), function(ssoKey) {
-        ssoKey.selected(_.includes(self.allowedAutologinIps(), ssoKey.ip()));
+        ssoKey.selected(_.includes(self.allowedAutologinIps(), ssoKey.ip));
       });
     }
 
@@ -92,6 +92,13 @@
       }
     };
 
+    self.saveAutologinIps = function(organizationId) {
+      var ips = _(self.ssoKeys()).filter(function(ssoKey) {return ssoKey.selected();}).map("ip").value();
+      ajax
+        .command("update-allowed-autologin-ips", {"org-id": self.organization().id(), ips: ips})
+        .call();
+    }
+
     self.permanentArchiveEnabled.subscribe(function(value) {
       if (isLoading) {
         return;
@@ -122,7 +129,7 @@
       .query("get-single-sign-on-keys")
       .success(function(d) {
         self.ssoKeys(_.map(d.ssoKeys, function(ssoKey) {
-          return ko.mapping.fromJS(_.assign(ssoKey, {selected: false}));
+          return _.assign(ssoKey, {selected: ko.observable(false)});
         }));
         updateSsoKeys();
       })

@@ -71,10 +71,11 @@
               </thead>
               <tbody data-bind="foreach: $data.ssoKeys">
                 <tr>
-                  <td><input type="checkbox" data-bind="checked: $data.selected, attr: {'data-test-id': 'org-sso-selected-' + $data.id()}" class="form-input"></td>
-                  <td><span data-bind="text: $data.ip, attr: {'data-test-id': 'org-sso-ip-' + $data.id()}" class="form-input"></td>
-                  <td><span data-bind="text: $data.comment, attr: {'data-test-id': 'org-sso-comment-' + $data.id()}" class="form-input"></td>
+                  <td><input type="checkbox" data-bind="checked: $data.selected, attr: {'data-test-id': 'org-sso-selected-' + $data.id}" class="form-input"></td>
+                  <td><span data-bind="text: $data.ip, attr: {'data-test-id': 'org-sso-ip-' + $data.id}" class="form-input"></td>
+                  <td><span data-bind="text: $data.comment, attr: {'data-test-id': 'org-sso-comment-' + $data.id}" class="form-input"></td>
                 </tr>
+                <button data-bind="click: saveAutologinIps" class="btn positive">Tallenna</button>
               </tbody>
             </table>
           </div>
