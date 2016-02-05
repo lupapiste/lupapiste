@@ -43,7 +43,8 @@
                           :preview-attachment
                           :document
                           :mark-seen
-                          :authority-notice}
+                          :authority-notice
+                          :application-guests}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)
