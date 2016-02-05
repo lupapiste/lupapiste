@@ -9,6 +9,8 @@
             [lupapalvelu.ssokeys :as sso]
             [lupapalvelu.ssokeys-api :as sso-api]))
 
+(mongo/connect!)
+
 (apply-remote-minimal)
 
 (def ensure-unique-ip-generator!
