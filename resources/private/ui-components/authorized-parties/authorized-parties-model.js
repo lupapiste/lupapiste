@@ -72,9 +72,9 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return !unsub();
   };
 
-  self.showInviteButton = function() {
+  self.showInviteButton = self.disposedComputed( function() {
     return hasAuth( "invite-with-role");
-  };
+  });
 
   self.error = ko.observable();
   self.waiting = ko.observable();

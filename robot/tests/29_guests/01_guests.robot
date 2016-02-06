@@ -100,6 +100,8 @@ Mikko logs in and can see the application
   Open tab  parties
   Wait test id visible  application-guest-table
   Wait test id hidden  application-guest-add
+  Wait test id hidden  application-invite-person
+  Wait test id hidden  application-invite-company
   Guest row name  ${mikko}  ${mikko-name}
   Guest row inviter  ${mikko}  Pena Panaani
   Guest row subscribed  ${mikko}
@@ -163,6 +165,8 @@ Veikko logs in and can see the application
   Open tab  parties
   Wait test id visible  application-guest-table
   Wait test id hidden  application-guest-add
+  Wait test id hidden  application-invite-person
+  Wait test id hidden  application-invite-company
   Guest row name  veikko  ${veikko-name}
   Guest row inviter  veikko  Sonja Sibbo
   Guest row unsubscribed  veikko
@@ -187,6 +191,8 @@ Luukas logs in and can see the application
   Open tab  parties
   Wait test id visible  application-guest-table
   Wait test id hidden  application-guest-add
+  Wait test id hidden  application-invite-person
+  Wait test id hidden  application-invite-company
   Guest row name  veikko  ${veikko-name}
   Guest row inviter  veikko  Sonja Sibbo
   Guest row description  veikko  Saunamajuri
