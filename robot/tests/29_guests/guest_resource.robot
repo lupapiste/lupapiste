@@ -29,9 +29,10 @@ Add existing user as authority
   Test id disabled  guest-dialog-firstname
   Test id disabled  guest-dialog-lastname
 
-User table row contains
-  [Arguments]  ${email}  ${data}
-  Wait Until  Element Should Contain  xpath=//section[@id='users']//tr[@data-user-email='${email}']  ${data}
+# Guest authorities are not added to the organization users table.
+User table does not contain
+  [Arguments]  ${email}
+  Wait Until  Element Should Not Contain  jquery=section#users div.admin-users-table  ${email}
 
 Guest authority table row contains
   [Arguments]  ${description}  ${data}
@@ -39,12 +40,8 @@ Guest authority table row contains
 
 Guest authority added
   [Arguments]  ${email}  ${firstname}  ${lastname}  ${description}
-  # In org user table
-  # It seems to be impossible create a jquery selector or an attribute that contains @
-  User table row contains  ${email}  ${lastname} ${firstname}
-  User table row contains  ${email}  Hankekohtainen lukuoikeus
+  User table does not contain  ${email}
 
-  Xpath Should Match X Times  //section[@id='users']//tr[@data-user-email='${email}']  1
   Guest authority table row contains  ${description}  ${description}
   Guest authority table row contains  ${description}  ${firstname} ${lastname}
   Guest authority table row contains  ${description}  ${email}
@@ -79,9 +76,8 @@ Add new statement giver as authority
   Fill test id  guest-dialog-description  ${description}
   Scroll And Click  [data-test-id=guest-dialog-ok]
   # New names are not visible in the user table
-  User table row contains  ${email}  Hankekohtainen lukuoikeus
+  User table does not contain  ${email}
 
-  Xpath Should Match X Times  //section[@id='users']//tr[@data-user-email='${email}']  1
   Guest authority table row contains  ${description}  ${description}
   Guest authority table row contains  ${description}  ${firstname} ${lastname}
   Guest authority table row contains  ${description}  ${email}
@@ -89,7 +85,7 @@ Add new statement giver as authority
 Delete new statement giver guest authority
   [Arguments]  ${email}  ${description}
   Click Link  jquery=tr[data-test-guest-description=${description}] a
-  User table row contains  ${email}  Hankekohtainen lukuoikeus
+  User table does not contain  ${email}
 
   Wait Until Page Does Not Contain Element  jquery=tr[data-test-guest-description=${description}]
 
@@ -103,8 +99,8 @@ Add bad authority
 Delete guest authority
   [Arguments]  ${email}  ${firstname}  ${lastname}  ${description}
   Click Link  jquery=tr[data-test-guest-description=${description}] a
-  User table row contains  ${email}  ${lastname} ${firstname}
-  User table row contains  ${email}  Hankekohtainen lukuoikeus
+  User table does not contain  ${email}
+  User table does not contain  ${email}
 
   Wait Until Page Does Not Contain Element  jquery=tr[data-test-guest-description=${description}]
 
