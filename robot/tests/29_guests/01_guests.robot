@@ -21,7 +21,7 @@ Add Veikko as guest authority Saunamajuri to Sipoo
   Set Suite Variable  ${veikko-name}  Veikko Viranomainen (veikko)
   Wait Until   Element should contain  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']  Sibbo Ronja
   Add existing authority  ${veikko}  Veikko  Viranomainen  Talonvahti
-  User table row contains  ${veikko}  Muutosoikeus
+  User table does not contain  ${veikko}
 
 Change Veikko's guest authority description
   Add existing authority  ${veikko}  Veikko  Viranomainen  Saunamajuri
