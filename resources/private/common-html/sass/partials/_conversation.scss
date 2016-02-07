@@ -241,7 +241,6 @@
   }
   .deleted {
     text-decoration: line-through;
-    //font-style: italic;
   }
 }
 
@@ -257,9 +256,13 @@
   }
 }
 
-.comment-bubble > span,
-.comment-bubble-authority > span {
+.comment-bubble > .content > span,
+.comment-bubble-authority > .content > span {
   white-space: pre-wrap;
+}
+
+.comment-bubble.attachment > .content > span {
+  white-space: normal !important;
 }
 
 
