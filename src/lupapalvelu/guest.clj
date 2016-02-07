@@ -7,7 +7,8 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.action :as action]))
+            [lupapalvelu.action :as action]
+            [lupapalvelu.mongo :as mongo]))
 
 (defn resolve-guest-authority-candidate
   "Namesake query implementation."
@@ -50,8 +51,18 @@
   "Namesake command implementation."
   [admin email]
   (let [email (usr/canonize-email email)
-        org-id (usr/authority-admins-organization-id admin)]
-    (org/update-organization org-id {$pull {:guestAuthorities {:email email}}})))
+        {guest-id :id} (usr/get-user-by-email email)
+        org-id (usr/authority-admins-organization-id admin)
+        match {:id guest-id :role :guestAuthority}]
+    ;; Remove guestAuthority from organization
+    (org/update-organization org-id {$pull {:guestAuthorities {:email email}}})
+    ;; Remove guestAuthority from every application within organization
+    ;; Optimization: if the user does not have id, she has not been
+    ;; actually created yet.
+    (when guest-id
+      (mongo/update-by-query :applications
+                             {:organization org-id :auth {$elemMatch match}}
+                             {$pull {:auth match}}))))
 
 (defn no-duplicate-guests
   "Pre check for avoiding duplicate guests or unnecessary access.
