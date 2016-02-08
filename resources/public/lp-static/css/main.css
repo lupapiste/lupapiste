@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1454836168740');
+@import url('main-blessed1.css?z=1454922994342');
 
 
 /* line 213, ../../../private/common-html/sass/partials/_tables.scss */
@@ -591,17 +591,18 @@ ul.tabs {
 }
 
 /* line 264, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble.attachment > .content > span {
+.comment-bubble.attachment > .content > span,
+.comment-bubble-authority.attachment > .content > span {
   white-space: normal !important;
 }
 
-/* line 271, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 272, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.attachment .header,
 .comment-bubble-authority.attachment .header {
   border-bottom-color: #f7ac2e;
 }
 
-/* line 278, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 279, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.for-me .header,
 .comment-bubble-authority.for-me .header {
   border-bottom-color: #46b02d;
