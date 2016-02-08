@@ -38,6 +38,41 @@ Copy own attachments button is not shown to non-architect
   Wait for Page to Load  Mikko  Intonen
   Wait until  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
 
+Mikko deletes own attachment from application
+  Open application  ${appname}  753-416-25-30
+  Open tab  attachments
+  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-osapuolet.cv"]
+  Confirm yes no dialog
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+
+Application is submited and given verdict
+  Submit application
+  Logout
+  As Sonja
+  Open application  ${appname}  753-416-25-30
+  Open tab  verdict
+  Fetch verdict
+  Wait until  Application state should be  verdictGiven
+  Logout
+
+Mikko logs in and sets himself architect
+  As Mikko
+  Click Element  user-name
+  Wait for Page to Load  Mikko  Intonen
+  Wait until  Click Element  architect
+  Save User Data
+  Reload Page
+  Wait Until  Checkbox Should Be Selected  architect
+
+Mikko can add his attachments in post verdict state
+  Open application  ${appname}  753-416-25-30
+  Open tab  attachments
+  Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
+  Select attachment operation option from dropdown  attachmentsCopyOwn
+  Confirm yes no dialog
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+
+
 *** Keywords ***
 
 Save User Data
