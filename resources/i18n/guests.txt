@@ -42,3 +42,5 @@
 "guest-authority.has-access" "sv" "Användaren har redan läsrätt till alla organisationens ansökningar."
 "guest-authority.name" "fi" "Nimi"
 "guest-authority.name" "sv" "Namn"
+"guest-authority.remove-title" "fi" "Poista hankekohtainen lukuoikeus"
+"guest-authority.remove-body" "fi" "Oletko varma? Samalla käyttäjältä poistetaan jo annetut hankekohtaiset lukuoikeudet tämän organisaation hakemuksilta."
