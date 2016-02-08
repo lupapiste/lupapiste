@@ -205,7 +205,7 @@
       hasConstructionTimeDocs(!!constructionTimeDocs.length);
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
-
+      var scroll = {x: window.scrollX, y: window.scrollY };
       if (!lightLoad) {
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
@@ -231,7 +231,6 @@
                                 {dataTestSpecifiers: devMode,
                                  accordionCollapsed: isAuthority,
                                  updateCommand: "update-construction-time-doc"});
-
       }
 
       // Options
@@ -248,6 +247,12 @@
       pageutil.hideAjaxWait();
 
       hub.send("application-model-updated", {applicationId: app.id});
+      // There really should be a better way to restore
+      // the scroll position than waiting for 500 ms and hoping
+      // that everything has been rendered.
+      _.delay( function() {
+        window.scrollTo( scroll.x, scroll.y );
+      }, 500);
     });
   }
 
@@ -332,7 +337,6 @@
             return "info";
           }
         };
-
         selectTab(tab || fallbackTab(application));
       });
     }
