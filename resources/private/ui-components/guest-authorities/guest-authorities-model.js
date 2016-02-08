@@ -112,8 +112,13 @@ self.canEdit = function() {
     LUPAPISTE.ModalDialog.open( "#dialog-add-guest-authority");
   };
   self.removeGuest = function( data ) {
-    ajax.command( "remove-guest-authority-organization", {email: data.email})
-    .success( fetchGuestAuthorities )
-    .call();
+    LUPAPISTE.ModalDialog.showDynamicYesNo( loc( "guest-authority.remove-title"),
+                                            loc( "guest-authority.remove-body"),
+                                            {title: loc( "yes"),
+                                             fn: function() {
+                                               ajax.command( "remove-guest-authority-organization",
+                                                             {email: data.email})
+                                               .success( fetchGuestAuthorities )
+                                               .call()}});
   };
 };

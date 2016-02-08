@@ -38,12 +38,14 @@
   [{admin :user}]
   (ok :guestAuthorities (guest/organization-guest-authorities (usr/authority-admins-organization-id admin))))
 
-(defcommand remove-guest-authority-organization
-  {:parameters [email]
+(defcommand remove-guest-authority-organization {:description "Removes
+  guestAuthority from organisation and from every (applicable)
+  application within the organization."
+   :parameters [email]
    :input-validators [(partial action/non-blank-parameters [:email])]
    :user-roles #{:authorityAdmin}}
   [{admin :user}]
-  (guest/remove-guest-authority-organization admin email))
+  (ok :applications (guest/remove-guest-authority-organization admin email)))
 
 (defcommand invite-guest
   {:description         "Sends invitation email and grants guest (or
