@@ -27,7 +27,7 @@ Authority can be a statement giver multiple times
   Create statement giver  sonja.sibbo@sipoo.fi  Erityislausunto
   Logout
 
-New applications does not have statements
+New applications do not have statements
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
@@ -109,6 +109,7 @@ Sonja can give statement to own request
   Input text  statement-text  salibandy on the rocks.
   Select From List By Value  statement-type-select  puoltaa
   Wait and click  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element should be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']
 
 Comment is added
@@ -159,6 +160,7 @@ Veikko from Tampere can give statement
   Select From List By Value  statement-type-select  ehdoilla
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-1']  Puoltaa ehdoilla
   [Teardown]  logout
 

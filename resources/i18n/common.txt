@@ -4922,6 +4922,8 @@
 "statement.reply.state.replyable" "sv" "Svaromål begärt"
 "statement.reply.state.replied" "fi" "Vastine annettu"
 "statement.reply.state.replied" "sv" "Svaromål givet"
+"statement.confirm.title" "fi" "Lähetä lausunto"
+"statement.confirm.body" "fi" "Lausuntoa ei voi lähettämisen jälkeen enää muokata. Haluatko varmasti lähettää lausunnon?"
 "error.startdate-before-enddate" "fi" "Alkupäivämäärä on ennen loppupäivämäärää"
 "error.startdate-before-enddate" "sv" "Startdatumet är före slutdatumet"
 "error.service-lockdown" "fi" "Palvelu on hetkellisesti lukutilassa ylläpitotoimien vuoksi. Voit selailla hakemuksia, mutta tietojen muokkaus on tilapäisesti estetty. Pahoittelemme häiriötä!"
