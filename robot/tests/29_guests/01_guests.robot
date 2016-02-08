@@ -29,7 +29,7 @@ Change Veikko's guest authority description
 Add new user Richard Guest
   Add new authority  richard.guest@example.com  Richard  Guest  Random
 
-Deleting user from guest authority table still keeps him/her in the organization
+Delete guest authority Richard Guest
   Delete guest authority  richard.guest@example.com  Richard  Guest  Random
 
 Luukas cannot be guest authority
@@ -247,4 +247,73 @@ Veikko logs in but cannot access application
   Veikko logs in
   Authority applications page should be open
   Page Should Not Contain  ${appname}
+  [Teardown]  Logout
+
+
+# -------------------------------------
+# Authority one more time
+# -------------------------------------
+
+Sonja logs in and invites Veikko again
+  Sonja logs in
+  Open application  ${appname}  ${propertyid}
+  Open tab  parties
+  Wait test id visible  application-guest-add
+  Invite application guest authority  Veikko Viranomainen  ${veikko}  Saunamajuri  ${veikko-message}
+  Guest table contains  ${veikko-name}
+  Guest row inviter  veikko  Sonja Sibbo
+  Guest table contains  Saunamajuri
+  [Teardown]  Logout
+
+# -------------------------------------
+# Guest authority once more
+# -------------------------------------
+
+Veikko logs in again and can see the application
+  Veikko logs in
+  Authority applications page should be open
+
+  Element Should Contain  jquery=tr.application-row td[data-test-col-name=location]  ${appname}, Sipoo
+  Open application  ${appname}  ${propertyid}
+  Open tab  parties
+  Wait test id visible  application-guest-table
+  Wait test id hidden  application-guest-add
+  Wait test id hidden  application-invite-person
+  Wait test id hidden  application-invite-company
+  Guest row name  veikko  ${veikko-name}
+  Guest row inviter  veikko  Sonja Sibbo
+  [Teardown]  Logout
+
+
+# -------------------------------------
+# Authority admin again
+# -------------------------------------
+
+Authority admin removes Veikko from the guest authorities
+  Sipoo logs in
+  Wait until page contains  Organisaation viranomaiset
+  Delete guest authority  ${veikko}  Veikko  Viranomainen  Saunamajuri
+  [Teardown]  Logout
+
+
+# -------------------------------------
+# Guest authority again
+# -------------------------------------
+
+Veikko logs in but cannot access application again
+  Veikko logs in
+  Authority applications page should be open
+  Page Should Not Contain  ${appname}
+  [Teardown]  Logout
+
+# -------------------------------------
+# Authority one last time
+# -------------------------------------
+
+Sonja logs in and sees no guests
+  Sonja logs in
+  Open application  ${appname}  ${propertyid}
+  Open tab  parties
+  Wait test id visible  application-guest-add
+  Wait test id hidden  application-guest-table
   [Teardown]  Logout
