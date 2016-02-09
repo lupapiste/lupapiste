@@ -4632,6 +4632,7 @@ i.toggle {
 .stacked--inline {
   display: table;
   display: inline-table;
+  vertical-align: top;
 }
 /* line 442, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline .btn, .stacked--inline .like-btn, .stacked--inline a.link-btn, .stacked--inline a.link-btn-julkipano, .stacked--inline .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked--inline .paginate_disabled_previous, .stacked--inline .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked--inline .paginate_disabled_next, .stacked--inline button {
@@ -4644,56 +4645,56 @@ i.toggle {
   overflow-y: hidden;
 }
 
-/* line 463, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 464, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins .btn, .inner-margins .like-btn, .inner-margins a.link-btn, .inner-margins a.link-btn-julkipano, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins div, .inner-margins a {
   margin-left: 12px;
 }
-/* line 466, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 467, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins :first-child {
   margin-left: 0;
 }
 
-/* line 472, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 473, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked .btn, .inner-margins.stacked .like-btn, .inner-margins.stacked a.link-btn, .inner-margins.stacked a.link-btn-julkipano, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked div, .inner-margins.stacked a {
   margin-left: 0;
   margin-top: 12px;
 }
-/* line 476, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 477, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked :first-child {
   margin-top: 0;
 }
 
-/* line 482, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 483, ../../../private/common-html/sass/partials/_buttons.scss */
 .margins-s {
   margin: 6px 6px 6px 6px;
 }
 
-/* line 488, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 489, ../../../private/common-html/sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 492, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 493, ../../../private/common-html/sass/partials/_buttons.scss */
 #partiesDocgen button {
   margin-bottom: 6px;
 }
 
-/* line 496, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 497, ../../../private/common-html/sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
 }
 
-/* line 502, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 503, ../../../private/common-html/sass/partials/_buttons.scss */
 button:focus {
   outline: 0;
 }
 
-/* line 507, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 508, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button {
   position: relative;
 }
-/* line 509, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 510, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
@@ -4703,30 +4704,30 @@ button:focus {
   overflow: hidden;
   z-index: 1;
 }
-/* line 517, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 518, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 520, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 521, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
 }
-/* line 523, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 524, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
-/* line 531, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 532, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 533, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 534, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
 
-/* line 538, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 539, ../../../private/common-html/sass/partials/_buttons.scss */
 .left-buttons > button {
   margin-right: 12px;
 }
@@ -6821,9 +6822,9 @@ div.alleYli-radioGroup {
 }
 /* line 1281, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1281, ../../../private/common-html/sass/partials/_forms.scss */
