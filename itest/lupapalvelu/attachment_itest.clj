@@ -470,7 +470,7 @@
 (facts "Uploading PDF should not create duplicate comments"
   (let [application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
         application-id (:id application)
-        _ (upload-attachment pena application-id {:type {:type-group "osapuolet" :type-id "cv"}} true :filename "dev-resources/test-pdf.pdf")
+        _ (upload-attachment pena application-id {:type {:type-group "osapuolet" :type-id "cv"}} true :filename "dev-resources/invalid-pdfa.pdf")
         {attachments :attachments comments :comments} (query-application pena application-id)
         pdf-attachment (first attachments)]
     (fact "is PDF"
