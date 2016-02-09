@@ -198,6 +198,23 @@
   [_]
   (ok :organizations (o/get-organizations)))
 
+(defquery allowed-autologin-ips-for-organization
+  {:parameters [org-id]
+   :input-validators [(partial non-blank-parameters [:org-id])]
+   :user-roles #{:admin}}
+  [_]
+  (ok :ips (o/get-autologin-ips-for-organization org-id)))
+
+(defcommand update-allowed-autologin-ips
+  {:parameters [org-id ips]
+   :input-validators [(partial non-blank-parameters [:org-id])
+                      (comp o/valid-ip-addresses :ips :data)]
+   :user-roles #{:admin}}
+  [_]
+  (->> (o/autogin-ip-mongo-changes ips)
+       (o/update-organization org-id))
+  (ok))
+
 (defquery organization-by-id
   {:parameters [organizationId]
    :input-validators [(partial non-blank-parameters [:organizationId])]

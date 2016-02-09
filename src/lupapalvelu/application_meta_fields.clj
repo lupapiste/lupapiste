@@ -176,7 +176,10 @@
                            ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
                            ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
                            ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
-                           ;;
+
+                           ;
+                           ; FIXME fetch data with 1 query instead of N
+                           ;
                            (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
                                                       (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
                                                           :primaryOperation :name))]

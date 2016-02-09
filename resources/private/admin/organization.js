@@ -12,7 +12,17 @@
     self.permitTypes = ko.observableArray([]);
     self.municipalities = ko.observableArray([]);
 
+    self.allowedAutologinIps = ko.observableArray();
+    self.ssoKeys = ko.observableArray();
+
+    function updateSsoKeys() {
+      _.forEach(self.ssoKeys(), function(ssoKey) {
+        ssoKey.selected(_.includes(self.allowedAutologinIps(), ssoKey.ip));
+      });
+    }
+
     self.open = function(orgId) {
+      self.allowedAutologinIps
 
       ajax
         .query("organization-by-id", {organizationId: orgId})
@@ -22,6 +32,14 @@
           isLoading = true;
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           isLoading = false;
+        })
+        .call()
+
+      ajax
+        .query("allowed-autologin-ips-for-organization", {"org-id": orgId})
+        .success(function(d) {
+          self.allowedAutologinIps(d.ips);
+          updateSsoKeys();
         })
         .call();
 
@@ -74,6 +92,13 @@
       }
     };
 
+    self.saveAutologinIps = function(organizationId) {
+      var ips = _(self.ssoKeys()).filter(function(ssoKey) {return ssoKey.selected();}).map("ip").value();
+      ajax
+        .command("update-allowed-autologin-ips", {"org-id": self.organization().id(), ips: ips})
+        .call();
+    }
+
     self.permanentArchiveEnabled.subscribe(function(value) {
       if (isLoading) {
         return;
@@ -97,6 +122,16 @@
       .query("municipalities")
       .success(function(d) {
         self.municipalities(d.municipalities);
+      })
+      .call();      
+
+    ajax
+      .query("get-single-sign-on-keys")
+      .success(function(d) {
+        self.ssoKeys(_.map(d.ssoKeys, function(ssoKey) {
+          return _.assign(ssoKey, {selected: ko.observable(false)});
+        }));
+        updateSsoKeys();
       })
       .call();
   }
