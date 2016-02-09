@@ -46,10 +46,10 @@
      :archivable is-pdf-a?
      :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
      :missing-fonts []
-     :copy-of {:type type :id id}}))
+     :source {:type type :id id}}))
 
 (defn get-child-attachment-id [app child-type id]
-  (let [attachment (filter #(= {:type (name child-type) :id id} (:copy-of %)) (:attachments app))
+  (let [attachment (filter #(= {:type (name child-type) :id id} (:source %)) (:attachments app))
         attachment-id (:id (first attachment))]
     attachment-id))
 

@@ -179,8 +179,7 @@
                  (sc/optional-key :scale)              (apply sc/enum attachment-scales)
                  (sc/optional-key :size)               (apply sc/enum attachment-sizes)
                  :auth                                 [AttachmentAuthUser]
-                 (sc/optional-key :metadata)           {sc/Any sc/Any}
-                 (sc/optional-key :copy-of)            Source})
+                 (sc/optional-key :metadata)           {sc/Any sc/Any}})
 
 ;; Helper for reporting purposes
 (defn localised-attachments-by-permit-type [permit-type]
@@ -252,7 +251,7 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents read-only? copy-of]]
+(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents read-only? source]]
   (cond-> {:id (or attachment-id (mongo/create-id))
            :type attachment-type
            :modified now
@@ -272,7 +271,7 @@
            :versions []
            :auth []
            :contents contents}
-          (map? copy-of) (assoc :copy-of copy-of)
+          (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
 
 (defn make-attachments
@@ -286,10 +285,10 @@
       metadata
       {:nakyvyys :julkinen})))
 
-(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? copy-of]]
+(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
   {:pre [(map? application)]}
   (let [metadata (default-metadata-for-attachment-type attachment-type application)
-        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents read-only? copy-of)]
+        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents read-only? source)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -441,13 +440,13 @@
 (defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op created user target locked required contents read-only copy-of] :as options}]
+  [{:keys [application attachment-id attachment-type op created user target locked required contents read-only source] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? user))
         att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents read-only copy-of)
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents read-only source)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents read-only copy-of))]
+                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents read-only source))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]
