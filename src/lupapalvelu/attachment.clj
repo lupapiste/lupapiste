@@ -271,8 +271,8 @@
            :signatures []
            :versions []
            :auth []
-           :contents contents
-           :copy-of copy-of}
+           :contents contents}
+          (map? copy-of) (assoc :copy-of copy-of)
           (seq metadata) (assoc :metadata metadata)))
 
 (defn make-attachments
