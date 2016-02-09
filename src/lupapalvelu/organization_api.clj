@@ -358,18 +358,33 @@
 
 (defn split-emails [emails] (ss/split emails #"[\s,;]+"))
 
+(def email-list-validators [(partial action/string-parameters [:emails])
+                            (fn [{{emails :emails} :data}]
+                              (let [splitted (split-emails emails)]
+                                (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
+                                  (fail :error.email))))])
+
 (defcommand set-organization-neighbor-order-email
   {:parameters [emails]
+   :description "When application is submitted and the applicant wishes that the organization hears neighbours,
+                 send notification to these email addresses"
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial action/string-parameters [:emails])
-                      (fn [{{emails :emails} :data}]
-                        (let [splitted (split-emails emails)]
-                          (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
-                            (fail :error.email))))]}
+   :input-validators email-list-validators}
   [{user :user}]
   (let [addresses (when-not (ss/blank? emails) (split-emails emails))
         organization-id (user/authority-admins-organization-id user)]
     (o/update-organization organization-id {$set {:notifications.neighbor-order-emails addresses}})
+    (ok)))
+
+(defcommand set-organization-submit-notification-email
+  {:parameters [emails]
+   :description "When application is submitted, send notification to these email addresses"
+   :user-roles #{:authorityAdmin}
+   :input-validators email-list-validators}
+  [{user :user}]
+  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+        organization-id (user/authority-admins-organization-id user)]
+    (o/update-organization organization-id {$set {:notifications.submit-notification-emails addresses}})
     (ok)))
 
 (defquery krysp-config
