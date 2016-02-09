@@ -95,7 +95,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     ajax.command(command, params )
     .pending( self.waiting )
     .success( function() {
-      hub.send( "bubble-dialog", {id: "close all"});
+      hub.send( "bubble-dialog::bubble-dialog", {id: "close all"});
       // It would be better to implement a service for authorized parties,
       // instead of repository.load
       repository.load(application().id());
