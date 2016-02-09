@@ -1691,6 +1691,19 @@
                 1) ; one application updated
               0))))
 
+(defmigration duplicate-comments-cleanup
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                application (mongo/select collection
+                                          {:attachments.versions.archivable true ; for applications that have pdf/a checked attachments
+                                           :created {$gt 1433462400000}}
+                                          [:comments])]
+            (let [comments (:comments application)
+                  distinct-comments (distinct comments)]
+              (if (< (count distinct-comments) (count comments))
+                (mongo/update-n collection {:_id (:id application)} {$set {:comments distinct-comments}})
+                0)))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
