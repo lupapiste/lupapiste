@@ -81,6 +81,14 @@
         (map remove-sensitive-data)
         (map with-scope-defaults))))
 
+(defn get-autologin-ips-for-organization [org-id]
+  (-> (mongo/by-id :organizations org-id [:allowedAutologinIPs])
+      :allowedAutologinIPs))
+
+(defn autogin-ip-mongo-changes [ips]
+  (when (nil? (sc/check [ssc/IpAddress] ips))
+    {$set {:allowedAutologinIPs ips}}))
+
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
   (->> (mongo/by-id :organizations id)
@@ -348,6 +356,10 @@
 (defn valid-language [cmd]
   (when-not  (->> cmd :data :lang ss/lower-case keyword (contains? (set i18n/supported-langs)) )
     (fail :error.unsupported-language)))
+
+(defn valid-ip-addresses [ips]
+  (when-let [error (sc/check [ssc/IpAddress] ips)]
+    (fail :error.invalid-ip :desc (str error))))
 
 (defn-
   ^org.geotools.data.simple.SimpleFeatureCollection
