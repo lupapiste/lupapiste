@@ -49,7 +49,7 @@
 (defn- fuzzy-re
   "Takes search term and turns it into 'fuzzy' regular expression
   string (not pattern!) that matches any string that contains the
-  substrings in the correct order. The search term is split bot for
+  substrings in the correct order. The search term is split both for
   regular whitespace and Unicode no-break space. The original string
   parts are escaped for (inadvertent) regex syntax.
   Sample matching: 'ear onk' will match 'year of the monkey' after fuzzying"
