@@ -893,8 +893,8 @@ Fill application person invite bubble
 Invite ${email} to application
   Open tab  parties
   ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/table//tr[@class='party']
-  Fill application persion invite bubble  ${email}  Tervetuloa muokkaamaan hakemusta
-  Scroll and click  person-invite-bubble-dialog-ok
+  Fill application person invite bubble  ${email}  Tervetuloa muokkaamaan hakemusta
+  Scroll and click test id  person-invite-bubble-dialog-ok
   Wait test id hidden  person-invite-bubble-dialog-ok
   Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//tr[@class='party'][${invites_count} + 1]
   ${email_found}=  Run Keyword And Return Status  Is authorized party  ${email}
