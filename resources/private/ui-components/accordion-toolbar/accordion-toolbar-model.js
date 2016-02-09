@@ -229,4 +229,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                   || self.showReject()
                   || self.showApprove();
 
+  self.dispose = function() {
+    AccordionState.deregister(self.docModel.docId);
+  };
+
 };
