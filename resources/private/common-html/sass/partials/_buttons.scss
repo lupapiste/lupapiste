@@ -456,6 +456,7 @@ i.toggle {
 .stacked--inline {
   @include stacked;
   display: inline-table;
+  vertical-align: top;
 }
 
 // Only inner margins
