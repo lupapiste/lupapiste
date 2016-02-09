@@ -23,7 +23,7 @@
     :foremanHistory   nil
     nil))
 
-(defn dummy-values [user-id {:keys [type subtype case name body dummy-test] :as element}]
+(defn dummy-values [user-id {:keys [type subtype case name body dummy-test max-len] :as element}]
   (condp = (keyword dummy-test)
     :postal-code "12345"
     (condp = (keyword type)
@@ -56,7 +56,7 @@
                           :rakennusnumero   "001"
                           :rakennustunnus   "1234567892"
                           :ovt              "003712345678"
-                          nil               "string"
+                          nil               (if max-len (ss/substring "string" 0 max-len) "string")
                           :letter           (condp = (keyword case)
                                               :lower "a"
                                               :upper "A"
