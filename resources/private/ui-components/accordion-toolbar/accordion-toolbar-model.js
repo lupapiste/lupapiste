@@ -59,7 +59,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   }
 
   var lastSent = {};
-  self.approval = ko.computed( function() {
+  self.approval = ko.pureComputed( function() {
     var master = safeMaster();
     var later = laterGroups();
     var result = _.every( later,
