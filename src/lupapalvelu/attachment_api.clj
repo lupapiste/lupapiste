@@ -529,12 +529,12 @@
      (let [attachments (attachment/get-attachments-infos application attachmentIds)
            signature {:user (user/summary u)
                       :created (:created command)}
-           updates (reduce (fn [m {attachment-id :id {version :version} :latestVersion}]
+           updates (reduce (fn [m {attachment-id :id {version :version file-id :fileId} :latestVersion}]
                              (merge m (mongo/generate-array-updates
                                         :attachments
                                         (:attachments application)
                                         #(= (:id %) attachment-id)
-                                        :signatures (assoc signature :version version))))
+                                        :signatures (assoc signature :version version :fileId file-id))))
                      {} attachments)]
 
        ; Indexes are calculated on the fly so there is a small change of

@@ -138,6 +138,7 @@
 
 (def Signature  {:user                                 user/SummaryUser
                  :created                              ssc/Timestamp
+                 :fileId                               sc/Str
                  :version                              VersionNumber})
 
 (def Version    {:version                              VersionNumber
@@ -330,18 +331,6 @@
         latest     (last sorted)]
     latest))
 
-(defn get-version-by-file-id [attachment fileId]
-  (->> attachment
-       :versions
-       (filter #(= (:fileId %) fileId))
-       first))
-
-(defn get-version-number
-  [{:keys [attachments] :as application} attachment-id fileId]
-  (let [attachment (get-attachment-info application attachment-id)
-        version    (get-version-by-file-id attachment fileId)]
-    (:version version)))
-
 (defn set-attachment-version
   ([options]
     {:pre [(map? options)]}
@@ -505,7 +494,7 @@
       (application->command application)
       {:attachments {$elemMatch {:id attachment-id}}}
       {$pull {:attachments.$.versions {:fileId fileId}
-              :attachments.$.signatures {:version (get-version-number application attachment-id fileId)}}
+              :attachments.$.signatures {:fileId fileId}}
        $set  {:attachments.$.latestVersion latest-version}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
