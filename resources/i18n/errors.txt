@@ -2,3 +2,7 @@
 "error.file-upload.illegal-upload-size" "sv" "Filen större än tillåtet (15 Mb)"
 "error.file-upload.illegal-file-type" "fi" "Tiedoston tyyppi ei ole sallittu. Valitse PDF-, kuva-, Microsoft Office-, OpenOffice- tai zip-tiedosto."
 "error.file-upload.illegal-file-type" "sv" "Filtypen är inte tillåten. Välj en Pdf-, bild-, Microsoft Office-, OpenOffice- eller zip-fil."
+"error.illegal-ip-address" "fi" "Virheellinen ip osoite"
+"error.ip-already-in-use" "fi" "IP osoite on jo käytössä"
+"error.invalid-key" "fi" "Virheellinen avain"
+"error.unknown-id" "fi" "Tuntematon id"

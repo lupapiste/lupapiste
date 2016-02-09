@@ -12,6 +12,8 @@
             [lupapalvelu.fixture.core :as fixture]
             [monger.operators :refer :all]
             [sade.core :as sade]
+            [sade.schemas :as ssc]
+            [sade.schema-generators :as ssg]
             [lupapalvelu.itest-util :as util]))
 
 (apply-remote-minimal)
@@ -747,3 +749,44 @@
                     => nil)
               (fact "Unsupported language CN" (local-org-api/valid-language {:data {:lang "CN"}})
                     => {:ok false, :text "error.unsupported-language"})))
+
+
+
+(facts allowed-autologin-ips-for-organization
+
+  (fact "applicant is not authorized"
+    (query pena :allowed-autologin-ips-for-organization :org-id "753-R") => unauthorized?)
+  (fact "authority is not authorized"
+    (query sonja :allowed-autologin-ips-for-organization :org-id "753-R") => unauthorized?)
+  (fact "authorityadmin is not authorized"
+    (query sipoo :allowed-autologin-ips-for-organization :org-id "753-R") => unauthorized?)
+  (fact "admin is authorized"
+    (query admin :allowed-autologin-ips-for-organization :org-id "753-R") => ok?)
+  
+  (fact "no allowed autologin ips for sipoo is empty"
+    (-> (query admin :allowed-autologin-ips-for-organization :org-id "753-R") :ips) => empty?)
+
+  (fact "three allowed autologin ips for porvoo"
+    (-> (query admin :allowed-autologin-ips-for-organization :org-id "638-R") :ips count) => 3))
+
+(facts update-allowed-autologin-ips
+
+  (fact "applicant is not authorized"
+    (command pena :update-allowed-autologin-ips :org-id "753-R" :ips []) => unauthorized?)
+  (fact "authority is not authorized"
+    (command sonja :update-allowed-autologin-ips :org-id "753-R" :ips []) => unauthorized?)
+  (fact "authorityadmin is not authorized"
+    (command sipoo :update-allowed-autologin-ips :org-id "753-R" :ips []) => unauthorized?)
+  (fact "admin is authorized"
+    (command admin :update-allowed-autologin-ips :org-id "753-R" :ips []) => ok?)
+
+  (fact "autologin ips are updated for sipoo"
+    (let [ips (repeatedly 5 #(ssg/generate ssc/IpAddress))]
+      (command admin :update-allowed-autologin-ips :org-id "753-R" :ips ips) => ok?
+      (-> (query admin :allowed-autologin-ips-for-organization :org-id "753-R") :ips) => ips))
+
+  (fact "there is still three allowed autologin ips for porvoo"
+    (-> (query admin :allowed-autologin-ips-for-organization :org-id "638-R") :ips count) => 3)
+
+  (fact "trying to update with invalid ip address"
+    (command admin :update-allowed-autologin-ips :org-id "753-R" :ips ["inv.val.id.ip"]) => (partial expected-failure? :error.invalid-ip)))

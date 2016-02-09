@@ -220,8 +220,7 @@
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles auth/all-authz-roles
-         :org-authz-roles auth/reader-org-authz-roles
-         :feature :preview}
+         :org-authz-roles auth/reader-org-authz-roles}
         [{{:keys [attachment-id]} :data user :user}]
         (attachment/output-attachment-preview attachment-id (partial attachment/get-attachment-file-as user)))
 
