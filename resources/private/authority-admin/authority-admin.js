@@ -302,11 +302,8 @@
                      municipality: item.municipality(),
                      enabled: item.caseManagement.enabled(),
                      version: item.caseManagement.version()})
-        .success(function() {
-          self.indicator("asianhallinta");
-        }).error(function() {
-          self.indicator({name: "asianhallinta", type: "err"});
-        })
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
         .call();
       };
 
