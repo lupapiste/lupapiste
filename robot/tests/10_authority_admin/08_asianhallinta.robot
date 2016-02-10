@@ -22,4 +22,4 @@ Asianhallinta is enabled in minimal with version 1.1
 
 Unchecking checkbox results in instant save
   Unselect checkbox  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
-  Wait Until  Element should be visible  xpath=//section[@data-test-id="asianhallinta"]//span[@class="indicator-wrapper"]//span[@data-test-id="save-indicator"]
+  Positive indicator should be visible
