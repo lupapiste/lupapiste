@@ -1691,8 +1691,8 @@
                 1) ; one application updated
               0))))
 
-(defn set-signature-fileId [versions {version :version :as signature}]
-  (->> (filter (comp (partial = version) :version) versions)
+(defn set-signature-fileId [versions {version :version created :created :as signature}]
+  (->> (filter #(and (= (:version %) version) (< (:created %) created)) versions)
        first
        :fileId
        (assoc signature :fileId)))
