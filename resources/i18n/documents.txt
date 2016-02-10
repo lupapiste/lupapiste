@@ -1,1 +1,2 @@
 "document.operation-identifiers" "fi" "Tunnisteet"
+"document.operation-editor.description" "fi" "Kuvaus"

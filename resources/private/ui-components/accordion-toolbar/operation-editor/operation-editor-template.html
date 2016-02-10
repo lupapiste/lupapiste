@@ -1,17 +1,17 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="operation-editor-template">
 
-  <div class="description-bubble">
-    <input type="text"
+    <label class="col-1 is-right" data-bind="ltext: 'document.operation-editor.description', attr: {'id': docId + 'op-description-editor'}"></label>
+    <input class="col-1" type="text"
            data-bind="textInput: description,
-                      attr: {'data-test-id': docModel.testId( 'op-description-editor-' + docModel.schemaName)}">
-  </div>
-  <button class="secondary is-left"
-          data-bind="attr: {'data-op-name': operation.name()},
-                     disable: isPrimaryOperation,
-                     click: clickStar,
-                     visible: showStar">
-    <i class="lupicon-star"></i>
-    <span data-bind="ltext: starTitle"></span>
-  </button>
+                      attr: {'data-test-id': docModel.testId('op-description-editor-' + docModel.schemaName),
+                             'id': docId + '-op-description-editor'}">
+    <button class="col-1 secondary"
+            data-bind="attr: {'data-op-name': operation.name()},
+                       disable: isPrimaryOperation,
+                       click: clickStar,
+                       visible: showStar">
+      <i class="lupicon-star"></i>
+      <span data-bind="ltext: starTitle"></span>
+    </button>
 
 </script>

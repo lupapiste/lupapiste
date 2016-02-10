@@ -63,12 +63,14 @@
         <span data-bind="ltext: 'document.approve'"></span>
       </button>
       <!-- ko if: showIdentifierEditors -->
-      <div class="identifier-editors" data-bind="event: {keydown: closeEditors}">
-        <div data-bind="component: {name: 'operation-editor',
-                                    params: {docModel: docModel,
-                                             operation: operation,
-                                             isPrimary: isPrimaryOperation,
-                                             auth: auth}}"></div>
+      <div class="identifier-editors container-bubble" data-bind="event: {keydown: closeEditors}">
+        <div class="form-grid form-grid--no-border">
+          <div class="row" data-bind="component: {name: 'operation-editor',
+                                      params: {docModel: docModel,
+                                               operation: operation,
+                                               isPrimary: isPrimaryOperation,
+                                               auth: auth}}"></div>
+        </div>
 
       </div>
       <!-- /ko -->

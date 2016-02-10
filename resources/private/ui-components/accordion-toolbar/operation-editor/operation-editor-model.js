@@ -3,6 +3,7 @@ LUPAPISTE.OperationEditorModel = function(params) {
   var self = this;
 
   self.docModel = params.docModel;
+  self.docId = self.docModel.docId;
   self.operation = params.operation;
   self.isPrimaryOperation = params.isPrimary;
   var auth = params.auth;
