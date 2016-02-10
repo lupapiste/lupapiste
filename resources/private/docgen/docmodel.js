@@ -1211,8 +1211,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
-    if (!_.includes(documentsInDocumentDataService, doc.id)) {    
-      lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});  
+    if (!_.includes(updatedDocumentsInDocumentDataService, doc.id)) {
+      lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
       updatedDocumentsInDocumentDataService.push(doc.id);
     }
 

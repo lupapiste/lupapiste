@@ -281,14 +281,11 @@
             vastuu (xml/select tyonjohtaja [:vastattavaTyotieto])]
         (fact "rooli" (xml/get-text tyonjohtaja [:tyonjohtajaRooliKoodi]) => "KVV-ty\u00f6njohtaja")
         (fact "sijaistettavan nimi" (xml/get-text tyonjohtaja [:sijaistettavaHlo]) => "Jaska Jokunen")
-        (fact "5 vastuuta" (count vastuu) => 5)
+        (fact "2 vastuuta" (count vastuu) => 2)
         (fact "vastuun alkamisPvm" (xml/get-text tyonjohtaja [:alkamisPvm]) => "2014-02-13")
         (fact "vastuun paattymisPvm" (xml/get-text tyonjohtaja [:paattymisPvm]) => "2014-02-20")
         (fact "vastattavaTyo"
-          (map #(xml/get-text % [:vastattavaTyo]) vastuu) => (just #{"Rakennuksen purkaminen"
-                                                                     "IV-laitoksen korjaus- ja muutosty\u00f6"
-                                                                     "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
-                                                                     "Maanrakennusty\u00f6t"
+          (map #(xml/get-text % [:vastattavaTyo]) vastuu) => (just #{"Sis\u00e4puolinen KVV-ty\u00f6"
                                                                      "Muu tyotehtava"}))
         (fact "postiosoite"
           (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")))))
