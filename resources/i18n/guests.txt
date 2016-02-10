@@ -10,6 +10,8 @@
 "application-guests.message.default" "sv" "Hej! Du har tilldelats läsrätt för en ansökan i Lupapiste."
 "application-guests.no-more-authorities" "fi" "Organisaatiossa ei ole enempää viranomaisia, joille olisi määritelty hankekohtainen lukuoikeus."
 "application-guests.no-more-authorities" "sv" "I organisationen finns inte flera myndigheter som har tilldelats projektenlig läsrätt."
+"application-guests.no-authorities-defined" "fi" "Organisaatiossa ei ole viranomaisia, joille olisi määritelty hankekohtainen lukuoikeus."
+"application-guests.no-authorities-defined" "sv" "I organisationen finns inte myndigheter som har tilldelats projektenlig läsrätt."
 "application-guests.notifications" "fi" "Sähköposti-ilmoitukset"
 "application-guests.notifications" "sv" "Epost-anmälningar"
 "application-guests.remove" "fi" "Poista lukuoikeus"
