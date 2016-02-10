@@ -43,15 +43,21 @@
                  (gen/bind (gen/set (ssg/generator VersionNumber))
                            (fn [vns]
                              (gen/fmap
-                              (fn [[v s fid]] [(map #(assoc %1 :version %2 :created 0 :fileId %3) v vns fid)
-                                               (map #(assoc %1 :version %2 :created 1) s vns)])
+                              (fn [[v s s2 fid]] [(map #(assoc %1 :version %2 :created 0 :fileId %3) v vns fid)
+                                                  (map #(assoc %1 :version %2 :created 1) s vns)
+                                                  (assoc s2 :created 1)])
                               (gen/tuple (gen/vector (ssg/generator Version) (count vns))
                                          (gen/vector (ssg/generator SignatureWithOutFileId) 0 (count vns))
+                                         (ssg/generator SignatureWithOutFileId 
+                                                        {VersionNumber (gen/such-that (comp not vns) 
+                                                                                      (ssg/generator VersionNumber))})
                                          (gen/vector ssg/object-id (count vns))))))]
                 (let [versions   (first versions+signatures)
                       signatures (second versions+signatures)
-                      updated (-> attachment (assoc :versions versions :signatures signatures) add-fileId-for-signatures)]
-                  (is (= (count (second versions+signatures)) (count (:signatures updated))) "Some signature missing from updated attachment")
+                      not-matching-signature (last versions+signatures)
+                      updated (-> attachment (assoc :versions versions :signatures (cons not-matching-signature signatures)) add-fileId-for-signatures)]
+                  (is (= (count (second versions+signatures)) (count (:signatures updated)))  "Some signature missing from updated attachment")
+                  (is (not-any? (comp #(= % (:version not-matching-signature)) :version) (:signatures updated)) "Updated attachment contain unmatching signature")
                   (is (every? (comp (set (map :fileId versions)) :fileId) (:signatures updated)) "No mathing fileId for all signatures")
                   (is (->> updated (sc/check Attachment) nil?) "Invalid attachement"))))
 

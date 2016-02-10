@@ -1699,6 +1699,7 @@
 
 (defn add-fileId-for-signatures [{signatures :signatures versions :versions :as attachment}]
   (->> (map (partial set-signature-fileId versions) signatures)
+       (filter :fileId)
        (assoc attachment :signatures)))
 
 (defmigration add-fileId-for-attachment-signatures
