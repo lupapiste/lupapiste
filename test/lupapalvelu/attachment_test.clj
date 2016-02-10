@@ -7,9 +7,36 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.attachment-metadata :refer :all]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.states :as states]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.generators :as gen]
+            [clojure.test :refer [is]]
+            [schema.core :as sc]
+            [sade.schemas :as ssc]
+            [sade.schema-generators :as ssg]))
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
+
+(defspec make-attachement-spec
+  (prop/for-all [attachment-id           ssg/object-id
+                 now                     ssg/timestamp
+                 target                  (ssg/generator Target)
+                 required?               gen/boolean
+                 requested-by-authority? gen/boolean
+                 locked?                 gen/boolean
+                 application-state       (gen/elements states/all-states)
+                 operation               (ssg/generator Operation)
+                 attachment-type         (ssg/generator Type)
+                 metadata                (ssg/generator  {sc/Str sc/Str})
+                 ;; Optional parameters
+                 contents                (ssg/generator (sc/maybe sc/Str))
+                 read-only?              (ssg/generator (sc/maybe sc/Bool))
+                 source                  (ssg/generator (sc/maybe Source))]
+                (let [validation-error (->> (make-attachment now target required? requested-by-authority? locked? application-state operation attachment-type metadata attachment-id contents read-only? source)
+                                            (sc/check Attachment))]
+                  (is (nil? validation-error)  "Validation-error"))))
 
 (facts "Test file name encoding"
   (fact (encode-filename nil)                                 => nil)
