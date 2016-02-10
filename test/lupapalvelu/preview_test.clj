@@ -3,8 +3,9 @@
             [lupapalvelu.preview :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]])
-  (:import (java.io FileOutputStream FileInputStream)
-           (javax.imageio ImageIO)))
+  (:import (javax.imageio ImageIO)))
+
+(testable-privates lupapalvelu.preview to-buffered-image pdf-to-buffered-image scale-image buffered-image-to-input-stream)
 
 (def pdf-1 "dev-resources/test-pdf.pdf")
 (def jpg-1 "resources/preview-sample-1.jpg")
