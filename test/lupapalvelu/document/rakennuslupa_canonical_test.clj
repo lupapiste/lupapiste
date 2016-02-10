@@ -150,7 +150,7 @@
   {:id "tyonjohtaja"
    :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
-           {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
+                {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
             :patevyys-tyonjohtaja {:koulutusvalinta {:value "other"}, :koulutus {:value "Koulutus"}   ;; "Muu" option ( i.e. :other-key) is selected
                                    :patevyysvaatimusluokka {:value "A"}
                                    :valmistumisvuosi {:value "2010"}
@@ -203,7 +203,7 @@
                                      :rakennuksenMuutosJaKorjaustyo {:value false}
                                      :linjasaneeraus {:value false}
                                      :ivLaitoksenAsennustyo {:value false}
-                                     :sisapuolinenKvvTyo {:value false}
+                                     :sisapuolinenKvvTyo {:value true}
                                      :muuMika {:value "Muu tyotehtava"}}
             :muutHankkeet {:0 {:katuosoite {:value "katuosoite"}
                                :3kk {:value "1"}
@@ -711,13 +711,10 @@
     (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat"
-      (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,Muu tyotehtava")
+          (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,sisapuolinenKvvTyo,Muu tyotehtava")
     (fact "vastattavaTyo contents"
-      (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Rakennuksen purkaminen"
-                                                                                                    "IV-laitoksen korjaus- ja muutosty\u00f6"
-                                                                                                    "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
-                                                                                                    "Maanrakennusty\u00f6t"
-                                                                                                    "Muu tyotehtava"}))))
+          (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Sis\u00e4puolinen KVV-ty\u00f6"
+                                                                                                        "Muu tyotehtava"}))))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
