@@ -261,9 +261,9 @@
   white-space: pre-wrap;
 }
 
-.comment-bubble.attachment > .content > span,
-.comment-bubble-authority.attachment > .content > span {
-  white-space: normal !important;
+.comment-bubble.attachment > .content > span.target,
+.comment-bubble-authority.attachment > .content > span.target {
+  white-space: normal;
 }
 
 
