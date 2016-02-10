@@ -11,11 +11,7 @@
         <span class="title"
               data-bind="attr: {'data-app-id': docModel.appId,
                                 'data-doc-id': docModel.docId},
-                         ltext: title">
-        </span>
-        <span class="description"
-              data-bind="text: description() ? ' - ' + description() : '',
-                         attr: {'data-test-id': testId( 'op-description')}">
+                         text: headerText">
         </span>
       </span>
       <span class="icons">
@@ -30,7 +26,7 @@
       <span class="form-approval-status is-status no-border-bottom"
             data-bind="css: {approved: isApproved,
                              rejected: isRejected,
-                             'own-line': showDescription || showStar},
+                             'own-line': hasOperation},
                        visible: showStatus">
         <div class="like-btn">
           <i class="lupicon-circle-attention rejected"></i>
@@ -41,26 +37,17 @@
       </span>
       <button class="secondary is-left"
               data-bind="attr: {'data-test-id': testId('edit-op-description') },
-                         visible: showDescription,
-                         event: {mousedown: toggleEditor}">
+                         visible: hasOperation,
+                         toggleClick: showIdentifierEditors">
         <i class="lupicon-pen"></i>
-        <span data-bind="ltext: 'op-description.edit'">
-        </span>
-      </button>
-      <button class="secondary is-left"
-              data-bind="attr: {'data-op-name': operationName},
-                         disable: isPrimaryOperation,
-                         click: clickStar,
-                         visible: showStar">
-        <i class="lupicon-star"></i>
-        <span data-bind="ltext: starTitle"></span>
+        <span data-bind="ltext: 'document.operation-identifiers'"></span>
       </button>
       <button class="secondary is-right"
           data-bind="visible: remove.fun,
                      attr: {'data-test-class': remove.testClass},
                      click: remove.fun">
         <i class="lupicon-remove"></i>
-    <span data-bind="ltext: 'remove'"></span>
+        <span data-bind="ltext: 'remove'"></span>
       </button>
       <button class="secondary is-right"
               data-bind="attr: {'data-test-id': rejectTestId},
@@ -75,13 +62,16 @@
         <i class="lupicon-check"></i>
         <span data-bind="ltext: 'document.approve'"></span>
       </button>
-      <div class="description-bubble"
-           data-bind="visible: showEditor">
-        <input type="text"
-               data-bind="value: description,
-                          event: {keydown: specialKeys},
-                          hasFocus: showEditor,
-                          attr: {'data-test-id': testId( 'op-description-editor')}">
+      <!-- ko if: showIdentifierEditors -->
+      <div class="identifier-editors" data-bind="event: {keydown: closeEditors}">
+        <div data-bind="component: {name: 'operation-editor',
+                                    params: {docModel: docModel,
+                                             operation: operation,
+                                             isPrimary: isPrimaryOperation,
+                                             auth: auth}}"></div>
+
+      </div>
+      <!-- /ko -->
       </div>
     </div>
   </div>
