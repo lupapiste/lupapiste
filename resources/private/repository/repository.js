@@ -88,7 +88,7 @@ var repository = (function() {
 
   function doLoad(id, pending, callback, isLightLoad) {
     currentQuery = ajax
-      .query("application", {id: id})
+      .query("application", {id: id, lang: loc.getCurrentLanguage()})
       .pending(pending || _.noop)
       .error(_.partial(loadingErrorHandler, id))
       .fail(function (jqXHR) {
