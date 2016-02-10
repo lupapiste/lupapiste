@@ -28,10 +28,7 @@ var repository = (function() {
     var versions = _.filter(attachment.versions);
     if (lastSignature && versions.length > 0) {
       var signedVersion = _.find(versions, function(v) {
-        // Check that signed version was created before the signature
-        return v.created < lastSignature.created &&
-           v.version.major === lastSignature.version.major &&
-           v.version.minor === lastSignature.version.minor;
+        return v.fileId === lastSignature.fileId;
       });
 
       var unsignedVersions = _(versions)
