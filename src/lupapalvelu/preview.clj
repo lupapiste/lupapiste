@@ -9,14 +9,14 @@
 
 (def rez 600.0)
 
-(defn buffered-image-to-input-stream
+(defn- buffered-image-to-input-stream
   "Converts BufferedImage inputStream"
   [image]
   (let [output (ByteArrayOutputStream.)]
     (ImageIOUtil/writeImage image "jpg" output ImageIOUtil/DEFAULT_SCREEN_RESOLUTION 0.5)
     (ByteArrayInputStream. (.toByteArray output))))
 
-(defn scale-image
+(defn- scale-image
   "Crops and scales BufferedImage to predefined resolution"
   [image]
   (let [
@@ -37,13 +37,13 @@
       (.dispose))
     new-image))
 
-(defn pdf-to-buffered-image
+(defn- pdf-to-buffered-image
   "Converts 1. page from PDF to BufferedImage"
   [pdf-input]
   (with-open [document (PDDocument/load pdf-input)]
     (.. document getDocumentCatalog getAllPages iterator next convertToImage)))
 
-(defn raster-to-buffered-image
+(defn- raster-to-buffered-image
   "Converts Raster image to BufferedImage"
   [input]
   (ImageIO/read (if (= (type input) java.lang.String) (FileInputStream. input) input)))
@@ -53,7 +53,7 @@
     (= "application/pdf" content-type) pdf-to-buffered-image
     (re-matches (re-pattern "(image/(gif|jpeg|png|tiff))") content-type) raster-to-buffered-image))
 
-(defn to-buffered-image
+(defn- to-buffered-image
   "Tries to read content to image by JAI or apache.pdfbox. Retuns nil on fail"
   [content content-type]
   (try
