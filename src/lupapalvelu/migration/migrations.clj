@@ -1704,6 +1704,26 @@
                 (mongo/update-n collection {:_id (:id application)} {$set {:comments distinct-comments}})
                 0)))))
 
+(defn set-signature-fileId [versions {version :version created :created :as signature}]
+  (->> (filter #(and (= (:version %) version) (< (:created %) created)) versions)
+       first
+       :fileId
+       (assoc signature :fileId)))
+
+(defn add-fileId-for-signatures [{signatures :signatures versions :versions :as attachment}]
+  (->> (map (partial set-signature-fileId versions) signatures)
+       (filter :fileId)
+       (assoc attachment :signatures)))
+
+(defmigration add-fileId-for-attachment-signatures
+  {:apply-when (pos? (+ (mongo/count :applications
+                                     {:attachments.signatures.version {$exists true}})
+                        (mongo/count :submitted-applications
+                                     {:attachments.signatures.version {$exists true}})))}
+  (update-applications-array :attachments
+                             add-fileId-for-signatures
+                             {:attachments.signatures.version {$exists true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
