@@ -511,27 +511,29 @@
                             (-> "753-YA" local-org-api/get-organization :map-layers :server
                                 (select-keys [:password :crypto-iv])) => {:password ""})))))))
 
-(facts "set-organization-neighbor-order-email"
-       (fact "Emails are not set in fixture"
-             (let [resp (query sipoo :organization-by-user)]
-               resp => ok?
-               (:organization resp) => seq
-               (get-in resp [:organization :notifications :neighbor-order-emails]) => empty?))
+(doseq [[command-name config-key] [[:set-organization-neighbor-order-email :neighbor-order-emails]
+                                   [:set-organization-submit-notification-email :submit-notification-emails]]]
+  (facts {:midje/description (name command-name)}
+    (fact "Emails are not set in fixture"
+      (let [resp (query sipoo :organization-by-user)]
+        resp => ok?
+        (:organization resp) => seq
+        (get-in resp [:organization :notifications config-key]) => empty?))
 
-       (fact "One email is set"
-             (command sipoo :set-organization-neighbor-order-email :emails "kirjaamo@sipoo.example.com") => ok?
-             (-> (query sipoo :organization-by-user)
-                 (get-in [:organization :notifications :neighbor-order-emails])) => ["kirjaamo@sipoo.example.com"])
+    (fact "One email is set"
+      (command sipoo command-name :emails "kirjaamo@sipoo.example.com") => ok?
+      (-> (query sipoo :organization-by-user)
+        (get-in [:organization :notifications config-key])) => ["kirjaamo@sipoo.example.com"])
 
-       (fact "Three emails are set"
-             (command sipoo :set-organization-neighbor-order-email :emails "kirjaamo@sipoo.example.com,  sijainen1@sipoo.example.com;sijainen2@sipoo.example.com") => ok?
-             (-> (query sipoo :organization-by-user)
-                 (get-in [:organization :notifications :neighbor-order-emails])) => ["kirjaamo@sipoo.example.com", "sijainen1@sipoo.example.com", "sijainen2@sipoo.example.com"])
+    (fact "Three emails are set"
+      (command sipoo command-name :emails "kirjaamo@sipoo.example.com,  sijainen1@sipoo.example.com;sijainen2@sipoo.example.com") => ok?
+      (-> (query sipoo :organization-by-user)
+        (get-in [:organization :notifications config-key])) => ["kirjaamo@sipoo.example.com", "sijainen1@sipoo.example.com", "sijainen2@sipoo.example.com"])
 
-       (fact "Reset email addresses"
-             (command sipoo :set-organization-neighbor-order-email :emails "") => ok?
-             (-> (query sipoo :organization-by-user)
-                 (get-in [:organization :notifications :neighbor-order-emails])) => empty?))
+    (fact "Reset email addresses"
+      (command sipoo command-name :emails "") => ok?
+      (-> (query sipoo :organization-by-user)
+        (get-in [:organization :notifications config-key])) => empty?)))
 
 (facts "Construction waste feeds"
        (mongo/with-db local-db-name
@@ -762,7 +764,7 @@
     (query sipoo :allowed-autologin-ips-for-organization :org-id "753-R") => unauthorized?)
   (fact "admin is authorized"
     (query admin :allowed-autologin-ips-for-organization :org-id "753-R") => ok?)
-  
+
   (fact "no allowed autologin ips for sipoo is empty"
     (-> (query admin :allowed-autologin-ips-for-organization :org-id "753-R") :ips) => empty?)
 
