@@ -147,6 +147,10 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                                                 + self.docModel.schemaName );
   }
   self.showIdentifierEditors = ko.observable(false);
+  var stickyRefresh = self.showIdentifierEditors.subscribe(function() {
+    // refresh accordion sitcky state
+    _.delay(window.Stickyfill.rebuild, 0);
+  });
 
   // Approval functionality
   self.isApprovable = Boolean(self.info.approvable);
@@ -207,6 +211,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     descriptionSub.dispose();
+    stickyRefresh.dispose();
   };
 
 };
