@@ -144,7 +144,7 @@
    & [attachment]]
   (let [s2-metadata (-> (or (:metadata attachment) (:metadata application))
                         (assoc :tila :arkistoitu))
-        base-metadata {:type                  (if attachment (make-attachment-type attachment) :application)
+        base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
                        :buildingIds           (remove nil? (map :buildingId (:buildings application)))
                        :nationalBuildingIds   (remove nil? (map :nationalId (:buildings application)))
