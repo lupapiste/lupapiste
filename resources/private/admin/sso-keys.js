@@ -44,6 +44,7 @@
           "key": ssoKey.key(),
           "comment": ssoKey.comment(),
         })
+        .success(util.showSavedIndicator)
         .call();
     }
 
@@ -59,7 +60,7 @@
                                component: "yes-no-dialog",
                                componentParams: {text: "Haluatko varmasti poistaa SSO-avaimen",
                                                  yesFn: removeFn}});
-    } 
+    }
   }
 
   var ssoKeysModel = new SsoKeysModel();
