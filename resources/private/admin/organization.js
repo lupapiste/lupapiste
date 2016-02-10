@@ -21,9 +21,18 @@
       });
     }
 
-    self.open = function(orgId) {
-      self.allowedAutologinIps
+    function loadAvailableSsoKeys() {
+      ajax.query("get-single-sign-on-keys")
+        .success(function(d) {
+          self.ssoKeys(_.map(d.ssoKeys, function(ssoKey) {
+            return _.assign(ssoKey, {selected: ko.observable(false)});
+          }));
+          updateSsoKeys();
+        })
+        .call();
+    }
 
+    self.open = function(orgId) {
       ajax
         .query("organization-by-id", {organizationId: orgId})
         .pending(self.pending)
@@ -33,7 +42,7 @@
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           isLoading = false;
         })
-        .call()
+        .call();
 
       ajax
         .query("allowed-autologin-ips-for-organization", {"org-id": orgId})
@@ -92,12 +101,13 @@
       }
     };
 
-    self.saveAutologinIps = function(organizationId) {
+    self.saveAutologinIps = function() {
       var ips = _(self.ssoKeys()).filter(function(ssoKey) {return ssoKey.selected();}).map("ip").value();
       ajax
         .command("update-allowed-autologin-ips", {"org-id": self.organization().id(), ips: ips})
+        .success(util.showSavedIndicator)
         .call();
-    }
+    };
 
     self.permanentArchiveEnabled.subscribe(function(value) {
       if (isLoading) {
@@ -123,17 +133,11 @@
       .success(function(d) {
         self.municipalities(d.municipalities);
       })
-      .call();      
-
-    ajax
-      .query("get-single-sign-on-keys")
-      .success(function(d) {
-        self.ssoKeys(_.map(d.ssoKeys, function(ssoKey) {
-          return _.assign(ssoKey, {selected: ko.observable(false)});
-        }));
-        updateSsoKeys();
-      })
       .call();
+
+
+    loadAvailableSsoKeys();
+    hub.subscribe("sso-keys-changed", loadAvailableSsoKeys);
   }
 
   var organizationModel = new OrganizationModel();
