@@ -95,6 +95,18 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
+  self.submitNotificationEmails = ko.observable("");
+  self.submitNotificationEmailsIndicator = ko.observable().extend({notify: "always"});
+  ko.computed(function() {
+    var emails = self.submitNotificationEmails();
+    if (self.initialized) {
+      ajax.command("set-organization-submit-notification-email", {emails: emails})
+        .success(_.partial(self.submitNotificationEmailsIndicator, {type: "saved"}))
+        .error(_.partial(self.submitNotificationEmailsIndicator, {type: "err"}))
+        .call();
+    }
+  });
+
   self.init = function(data) {
     var organization = data.organization;
     self.organizationId(organization.id);
@@ -129,6 +141,7 @@ LUPAPISTE.OrganizationModel = function () {
     };
 
     self.neighborOrderEmails(util.getIn(organization, ["notifications", "neighbor-order-emails"], []).join("; "));
+    self.submitNotificationEmails(util.getIn(organization, ["notifications", "submit-notification-emails"], []).join("; "));
 
     _.forOwn(operationsAttachmentsPerPermitType, function(value, permitType) {
       var operationsAttachments = _(value)

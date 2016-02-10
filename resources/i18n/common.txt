@@ -1386,6 +1386,8 @@
 "auth-admin.email-notifications" "sv" "E-postanmälaningar"
 "auth-admin.email-notifications.neighbor" "fi" "Kunnan halutaan hoitavan naapurien kuuleminen tai tiedotus"
 "auth-admin.email-notifications.neighbor" "sv" "Kommunen förväntas ombesörja hörandet av eller informationen till grannarna"
+"auth-admin.email-notifications.submit" "fi" "Hakemus jätetty"
+"auth-admin.email-notifications.submit" "sv" "Ansökan lämnad"
 "auth-admin.email-notifications.param-name" "fi" "Tapahtuma"
 "auth-admin.email-notifications.param-name" "sv" "Skeende"
 "auth-admin.email-notifications.param-value" "fi" "Sähköpostiosoitteet"
