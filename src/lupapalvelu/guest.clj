@@ -106,7 +106,7 @@
                                              {$push {:auth     (assoc auth :inviter (:id user))}
                                               $set  {:modified timestamp}})]
         (when-not err
-          (notifications/notify! :invite (assoc command :recipients [guest])))
+          (notifications/notify! :guest-invite (assoc command :recipients [guest])))
         (or err (ok))))))
 
 (defn- guest-authority-description-map
