@@ -310,7 +310,7 @@
                  :op {:name "kerrostalo-rivitalo"
                       :description "kerrostalo-rivitalo-kuvaus"
                       :id "kerrostalo-rivitalo-id"}}
-   :data common-rakennus})
+   :data (assoc common-rakennus :tunnus {:value "A"})})
 
 (def- rakennuksen-muuttaminen
   {:id "muuttaminen"
