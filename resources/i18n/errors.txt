@@ -6,3 +6,5 @@
 "error.ip-already-in-use" "fi" "IP osoite on jo käytössä"
 "error.invalid-key" "fi" "Virheellinen avain"
 "error.unknown-id" "fi" "Tuntematon id"
+"application.approve.statement-not-requested" "fi" "Hakemuksella on antamaton lausunto"
+"application.approve.statement-not-requested-warning-text" "fi" "Hakemuksella on ainakin yksi antamaton lausunto. Kun hakemus siirretään käsittelyyn, lausuntoa ei voi enää antaa. Haluatko varmasti siirtää hakemuksen käsittelyyn?"

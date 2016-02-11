@@ -329,20 +329,33 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.approveApplication = function() {
-    ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
-      .success(function(resp) {
-        self.reload();
-        if (!resp.integrationAvailable) {
-          LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
-        } else if (self.externalApi.enabled()) {
-          var permit = externalApiTools.toExternalPermit(self._js);
-          hub.send("external-api::integration-sent", permit);
-        }
-      })
-      .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
-      .processing(self.processing)
-      .call();
-    hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
+    
+    var approve = function() {
+      ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
+        .success(function(resp) {
+          self.reload();
+          if (!resp.integrationAvailable) {
+            LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
+          } else if (self.externalApi.enabled()) {
+            var permit = externalApiTools.toExternalPermit(self._js);
+            hub.send("external-api::integration-sent", permit);
+          }
+        })
+        .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
+        .processing(self.processing)
+        .call();
+      hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
+    };
+
+    if (!_(ko.mapping.toJS(self.statements)).reject("given").isEmpty()) {
+      hub.send("show-dialog", {ltitle: "application.approve.statement-not-requested",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
+                                                 yesFn: approve}});
+    } else {
+      approve();
+    }
     return false;
   };
 
