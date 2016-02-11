@@ -293,7 +293,7 @@
    :post [%]}
   (schemas/get-schema schema-info))
 
-(defn- validate-document [schema document info data]
+(defn- validate-document [{data :data :as document} info]
   (let [doc-validation-results (validator/validate document)]
     (map
       #(let [element (find-by-name (:schema-body info) (:path %))]
@@ -319,7 +319,7 @@
           (concat
             (validate-fields application info nil data [])
             (validate-required-fields info [] data [])
-            (validate-document schema document info data)))))))
+            (validate-document document info)))))))
 
 (defn has-errors?
   [results]
