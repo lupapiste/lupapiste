@@ -147,7 +147,7 @@
 
 (def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
 
-(def tunnus {:name "tunnus" :type :string :required false :hidden true :max-len 3})
+(def tunnus {:name "tunnus" :type :string :required false :hidden true :max-len 3 :identifier true})
 
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size "xl" :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
@@ -1359,6 +1359,7 @@
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
    {:info {:name "uusiRakennus" :approvable true}
+    :accordion-paths [["maksaja" "henkilo" "etunimi"] ["maksaja" "henkilo" "sukunimi"]]
     :body (body tunnus rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
    {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
