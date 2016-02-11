@@ -1717,12 +1717,12 @@
 
 (defmigration add-fileId-for-attachment-signatures
   {:apply-when (pos? (+ (mongo/count :applications
-                                     {:attachments.signatures.version {$exists true}})
+                                     {:attachments.signatures {$elemMatch {:version {$exists true} :fileId {$exists false}}}})
                         (mongo/count :submitted-applications
-                                     {:attachments.signatures.version {$exists true}})))}
+                                     {:attachments.signatures {$elemMatch {:version {$exists true} :fileId {$exists false}}}})))}
   (update-applications-array :attachments
                              add-fileId-for-signatures
-                             {:attachments.signatures.version {$exists true}}))
+                             {:attachments.signatures {$elemMatch {:version {$exists true} :fileId {$exists false}}}}))
 
 ;;
 ;; ****** NOTE! ******
