@@ -1384,6 +1384,8 @@
 "auth-admin.editUser" "sv" "Redigera användare"
 "auth-admin.email-notifications" "fi" "Sähköposti-ilmoitukset"
 "auth-admin.email-notifications" "sv" "E-postanmälaningar"
+"auth-admin.email-notifications.info" "fi" "Voit lisätä useita sähköpostiosoitteita erottelemalla ne puolipisteellä (esim. matti@example.com; teppo@example.com)"
+"auth-admin.email-notifications.info!" "sv" ""
 "auth-admin.email-notifications.neighbor" "fi" "Kunnan halutaan hoitavan naapurien kuuleminen tai tiedotus"
 "auth-admin.email-notifications.neighbor" "sv" "Kommunen förväntas ombesörja hörandet av eller informationen till grannarna"
 "auth-admin.email-notifications.submit" "fi" "Hakemus jätetty"
