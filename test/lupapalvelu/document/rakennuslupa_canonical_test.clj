@@ -14,13 +14,20 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
 
-;;
-;; Facts
-;;
-
 (facts "Date format"
   (fact (util/to-xml-date (date-time 2012 1 14)) => "2012-01-14")
   (fact (util/to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
+
+(fact "get-rakennustunnus"
+  (let [application {:primaryOperation {:id "1" :description "desc"}}
+        document {:op {:id "1"}}
+        base-result {:jarjestysnumero nil
+                     :kiinttun nil
+                     :muuTunnustieto {:MuuTunnus {:sovellus "toimenpideId", :tunnus "1"}}}]
+    (get-rakennustunnus {} {} document) => base-result
+    (get-rakennustunnus {:tunnus "B"} application document) => (assoc base-result :rakennuksenSelite "B: desc")
+    (get-rakennustunnus {:tunnus ""} application document) => (assoc base-result :rakennuksenSelite "desc")
+    (get-rakennustunnus {:tunnus "B"} {} document) => (assoc base-result :rakennuksenSelite "B")))
 
 (def- municipality 753)
 
@@ -875,7 +882,7 @@
       (:rakennustunnus tiedot) => {:jarjestysnumero nil,
                                    :kiinttun "21111111111111"
                                    :muuTunnustieto {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
-                                   :rakennuksenSelite "kerrostalo-rivitalo-kuvaus"})))
+                                   :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
