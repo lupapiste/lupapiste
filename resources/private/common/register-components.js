@@ -108,7 +108,8 @@ jQuery(document).ready(function() {
     {name: "authorized-parties"},
     {name: "person-invite"},
     {name: "company-invite-bubble"},
-    {name: "operation-editor"}
+    {name: "operation-editor"},
+    {name: "document-identifier"}
 ];
 
   _.forEach(components, function(component) {
