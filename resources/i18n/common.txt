@@ -2056,6 +2056,7 @@
 "error.attachment-placeholder" "sv" "Skapandet av bilaga misslyckades"
 "error.bad-postal-code" "fi" "Postinumero on virheellinen"
 "error.bad-postal-code" "sv" "Postnummern är felaktig"
+"error.bulletin.not-found" "fi" "Ilmoitusta ei löydy."
 "error.command-illegal-state" "fi" "Toimintoa ei voi suorittaa tässä tilassa"
 "error.command-illegal-state" "sv" "Funktionen kan inte genomföras i detta läge"
 "error.company-not-accessible" "fi" "Yritystä ei voida näyttää"

@@ -86,10 +86,6 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     }
   });
 
-  self.dispose = function() {
-    id.dispose();
-  };
-
   self.clickAuthenticationButton = function() {
     $("#vetuma-init")[0].click();
   };
@@ -120,6 +116,19 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
     }
   };
 
+  var hubId = hub.subscribe("oskari-map-initialized", function() {
+    if( self.bulletin() && _.every( self.bulletin().location, _.isNumber )) {
+      var location = self.bulletin().location;
+      var x = _.first(location);
+      var y = _.last(location);
+      hub.send("oskari-center-map", {
+        data:  [{location: {x: x, y: y}, iconUrl: "/lp-static/img/map-marker-orange.png"}],
+        clear: true
+      });
+    }
+  });
+
+
   self.exportToPdf = function() {
     window.open("/api/raw/bulletin-pdf-export?bulletinId=" + self.bulletinId() + "&lang=" + loc.currentLanguage, "_blank");
   };
@@ -137,4 +146,10 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
                        y:       returnUrl,
                        vtj:     returnUrl,
                        id:      "vetuma-init"};
+
+  self.dispose = function() {
+    hub.unsubscribe( hubId );
+    id.dispose();
+  };
+
 };
