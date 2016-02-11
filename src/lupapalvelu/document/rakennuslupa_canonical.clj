@@ -42,12 +42,13 @@
   (:description (util/find-by-id op-id (cons primary secondaries)) ))
 
 (defn get-rakennustunnus [unwrapped-doc-data application {{op-id :id} :op}]
-  (let [{:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
+  (let [{:keys [tunnus rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
+        description-parts (remove ss/blank? [tunnus (operation-description application op-id)])
         defaults (util/assoc-when {:jarjestysnumero nil
                                    :kiinttun (:propertyId application)
                                    :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}}
                    :rakennusnro rakennusnro
-                   :rakennuksenSelite (operation-description application op-id)
+                   :rakennuksenSelite (ss/join ": " description-parts)
                    :valtakunnallinenNumero valtakunnallinenNumero)]
     (if manuaalinen_rakennusnro
       (assoc defaults :rakennusnro manuaalinen_rakennusnro)

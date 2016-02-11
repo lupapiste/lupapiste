@@ -87,9 +87,15 @@
                 (count (xml/select lp-xml_220 [:toimenpidetieto :Toimenpide :Rakennus])) => pos?)
 
               (doseq [op xml-operations
-                      :let [rakennus (xml/select1 op [:Rakennus])]
+                      :let [op-tag (-> op :content first :tag)
+                            rakennus (xml/select1 op [:Rakennus])]
                       :when rakennus]
-                (fact "Building ID includes operation ID"
+
+                (when (= :uusi op-tag)
+                  (fact "Operation description for a new building"
+                    (xml/get-text rakennus [:rakennustunnus :rakennuksenSelite]) => "A: kerrostalo-rivitalo-kuvaus"))
+
+                (fact {:midje/description (str "Building ID includes operation ID of " (name op-tag))}
                   (xml/get-text rakennus [:rakennustunnus :MuuTunnus :tunnus]) =not=> ss/blank?)))))
 
         (fact "hakija and maksaja parties exist"
