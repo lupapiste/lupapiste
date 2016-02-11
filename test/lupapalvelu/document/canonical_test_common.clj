@@ -20,7 +20,7 @@
         documents (get application collection)
         reduced-application (select-keys application [:auth])]
     (doseq [document documents]
-      (fact {:midje/description document}
+      (fact {:midje/description (get-in document [:schema-info :name])}
         (validate-against-current-schema reduced-application document) => empty?))))
 
 ;; Fixture

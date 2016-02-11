@@ -235,7 +235,7 @@
         (assoc validation-result :path []) ; Invalid path from user input should not be echoed
         validation-result))))
 
-(defn- validate-fields [application info k data path]
+(defn validate-fields [application info k data path]
   (let [current-path (if k (conj path (name k)) path)
         element (if (not-empty current-path)
                   (keywordize-keys (find-by-name (:schema-body info) current-path))
@@ -250,10 +250,10 @@
                      data
                      (dissoc data (if (= selected "henkilo") :yritys :henkilo))))]
         (filter
-         (comp not nil?)
-         (concat (flatten [result])
-                 (map (fn [[k2 v2]]
-                        (validate-fields application info k2 v2 current-path)) data)))))))
+          (comp not nil?)
+          (concat (flatten [result])
+            (map (fn [[k2 v2]]
+                   (validate-fields application info k2 v2 current-path)) data)))))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -293,12 +293,21 @@
    :post [%]}
   (schemas/get-schema schema-info))
 
-(defn- validate-document [schema document info data]
+(defn- validate-document [{data :data :as document} info]
   (let [doc-validation-results (validator/validate document)]
     (map
       #(let [element (find-by-name (:schema-body info) (:path %))]
          (->validation-result info data (:path %) element (:result %)))
       doc-validation-results)))
+
+(defn document-info
+  "Creates an info map for validators"
+  [document schema]
+  {:document {:id (:id document)
+              :name (-> schema :info :name)
+              :locKey (or (-> schema :info :i18name) (-> schema :info :name))
+              :type (-> schema :info :type)}
+   :schema-body (:body schema)})
 
 (defn validate
   "Validates document against schema and document level rules. Returns list of validation errors.
@@ -309,17 +318,13 @@
     {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
-          info {:document {:id (:id document)
-                           :name (-> schema :info :name)
-                           :locKey (or (-> schema :info :i18name) (-> schema :info :name))
-                           :type (-> schema :info :type)}
-                :schema-body (:body schema)}]
+          info (document-info document schema)]
       (when data
         (flatten
           (concat
             (validate-fields application info nil data [])
             (validate-required-fields info [] data [])
-            (validate-document schema document info data)))))))
+            (validate-document document info)))))))
 
 (defn has-errors?
   [results]

@@ -2,7 +2,7 @@ LUPAPISTE.IndicatorModel = function() {
   "use strict";
   var self = this;
 
-  self.showIndicator = ko.observable().extend({notify: "always"});
+  self.showIndicator = ko.observable(false).extend({notify: "always"});
   self.indicatorStyle = ko.observable("neutral");
   // keep indicator on screen
   self.sticky = ko.observable(false);

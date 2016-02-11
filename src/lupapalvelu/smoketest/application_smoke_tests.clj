@@ -22,13 +22,15 @@
   ; Support the old and the new application schema
   (or (:operations application) (app/get-operations application)))
 
-(defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
+(defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]
   (if (and (:name schema-info) (:version schema-info))
     (let [ignored (set ignored-errors)
+          schema (model/get-document-schema doc)
+          info (model/document-info doc schema)
           results (filter
                     (fn [{result :result}]
                       (and (= :err (first result)) (not (ignored (second result)))))
-                    (model/validate application doc))]
+                    (flatten (model/validate-fields application info nil data [])))]
       (when (seq results)
         {:document-id id :schema-info schema-info :results results}))
     {:document-id id :schema-info schema-info :results "Schema name or version missing"}))
