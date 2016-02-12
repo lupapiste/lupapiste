@@ -64,21 +64,19 @@
       </button>
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-bind="event: {keydown: closeEditors}">
-        <div class="form-grid form-grid--no-border">
+        <div>
           <!-- ko if: lupapisteApp.services.accordionService.getIdentifier(docModel.docId) -->
-          <div class="row"
-               data-bind="component: {name: 'document-identifier',
-                                      params: {docId: docModel.docId,
-                                               authModel: auth,
-                                               options: docModelOptions}}"></div>
-           <!-- /ko -->
-          <div class="row"
+          <div class="inline-col identifier-component" data-bind="component: {name: 'document-identifier',
+                                    params: {docId: docModel.docId,
+                                             authModel: auth,
+                                             options: docModelOptions}}"></div>
+          <!-- /ko -->
+          <div class="inline-col identifier-component"
                data-bind="component: {name: 'operation-editor',
                                       params: {docModel: docModel,
                                                operation: operation,
                                                isPrimary: isPrimaryOperation,
                                                auth: auth}}"></div>
-
         </div>
         <p data-bind="ltext: 'document.operation-identifier.notice'"></p>
       </div>
