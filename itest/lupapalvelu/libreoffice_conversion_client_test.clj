@@ -11,17 +11,19 @@
 
 ;;TODO: run multiple simoultanious requests in pararaller threads
 (facts "Test localhost pdfa-conversion service"
-       (if client/enabled?
-         (with-open
-           [xin (io/input-stream file-uri)]
-           (let [response (client/convert-to-pdfa file-uri xin)
-                 file-out (File/createTempFile "test-libre-rtf-" ".pdf")]
-             ;(debug " creating temp file: " file-out " for\n" (keys response) ", body is : " (type (:body response)))
-             (io/copy (:body response) file-out)
-             (let [pdf-content (pdfbox/extract (.getAbsolutePath file-out))
-                   rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
-               (fact "PDF data rows "
-                     (count rows) => 36
-                     (nth rows 1) => "xxx"))
-             (.delete file-out)))
-         (debug "   skipping lupapalvelu.libreoffice-conversion-client-test - no libreoffice.url defined !")))
+       (with-open
+         [xin (io/input-stream file-uri)]
+         (let [response (client/convert-to-pdfa file-uri xin)
+               file-out (File/createTempFile "test-libre-rtf-" ".pdf")]
+           (if client/enabled?
+             (do (fact "libre enabled, No connnection error expected "
+                       (:archivabilityError response) => nil)
+                 (io/copy (:content response) file-out)
+                 (let [pdf-content (pdfbox/extract (.getAbsolutePath file-out))
+                       rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
+                   (fact "PDF data rows "
+                         (count rows) => 100
+                         (nth rows 1) => "Once there was a miller who was poor, but who had a beautiful"))
+                 (.delete file-out))
+             (fact "libre not enabled, expect connection error"
+                   (:archivabilityError response) => :libre-connection-error)))))

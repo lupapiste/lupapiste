@@ -115,7 +115,7 @@
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
 
-(defschema AttachmentAuthUser 
+(defschema AttachmentAuthUser
   "User summary for authorized users in attachment.
    Only name and role is used for users without Lupapiste account."
   (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
@@ -125,7 +125,7 @@
 
 (defschema VersionNumber
   {:minor                                sc/Int
-   :major                                sc/Int})          
+   :major                                sc/Int})
 
 (defschema Target
   "Refers to part of the application which attachment is targetted.
@@ -149,7 +149,7 @@
 
 (defschema Signature
   "Signature for attachment version"
-  {:user                                 user/SummaryUser   ;; 
+  {:user                                 user/SummaryUser   ;;
    :created                              ssc/Timestamp      ;;
    :fileId                               sc/Str             ;; used as 'foreign key' to attachment version
    :version                              VersionNumber})    ;; version number of the signed attachment version
@@ -165,7 +165,7 @@
    :filename                             sc/Str             ;; original filename
    :contentType                          sc/Str             ;; MIME type of the file
    :size                                 (sc/maybe sc/Int)  ;; file size
-   (sc/optional-key :stamped)            sc/Bool 
+   (sc/optional-key :stamped)            sc/Bool
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
    (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
@@ -180,11 +180,11 @@
    :type                                 Type               ;; Attachment type
    :modified                             ssc/Timestamp      ;; last modified
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
-   :locked                               sc/Bool            ;; 
+   :locked                               sc/Bool            ;;
    (sc/optional-key :readOnly)           sc/Bool            ;;
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
    :state                                (apply sc/enum attachment-states) ;; attachment state
-   :target                               (sc/maybe Target)  ;; 
+   :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
    :required                             sc/Bool            ;;
    :requestedByAuthority                 sc/Bool            ;;
@@ -577,8 +577,7 @@
 
 (defn pre-process-attachment [{:keys [attachment-type filename content]}]
   (if (and libreoffice-client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
-    {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
-     :content  (:body (libreoffice-client/convert-to-pdfa filename content))}
+    (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
 (defn attach-file!
@@ -593,12 +592,13 @@
   (let [db-name mongo/*db-name* ; pass db-name to threadpool context
         file-id (mongo/create-id)
         application-id (-> options :application :id)
-        {:keys [filename content]} (pre-process-attachment options)
+        {:keys [filename content archivabilityError]} (pre-process-attachment options)
         sanitized-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitized-filename)
-        options (merge options {:file-id file-id
-                                :filename sanitized-filename
-                                :content-type content-type})]
+        options (merge options (cond-> {:file-id file-id
+                                        :filename sanitized-filename
+                                        :content-type content-type}
+                                       (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)))]
     (mongo/upload file-id sanitized-filename content-type content :application application-id)
     (.submit preview-threadpool #(create-preview file-id sanitized-filename content-type content application-id db-name))
     (update-or-create-attachment options)))
