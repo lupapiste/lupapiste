@@ -42,8 +42,8 @@ LUPAPISTE.verdictPageController = (function($) {
         self.draft(verdict.draft);
         self.status(pk.status);
         self.name(pk.paatoksentekija);
-        self.given(new Date(dates.anto));
-        self.official(new Date(dates.lainvoimainen));
+        self.given(dates.anto && new Date(dates.anto));
+        self.official(dates.lainvoimainen && new Date(dates.lainvoimainen));
         self.text(pk.paatos);
         self.agreement(verdict.sopimus);
         self.section(pk.pykala);
@@ -96,6 +96,7 @@ LUPAPISTE.verdictPageController = (function($) {
     self.returnToApplication = function() {
       repository.load(currentApplicationId);
       pageutil.openApplicationPage({id:currentApplicationId}, "verdict");
+      hub.send("indicator-icon", {clear: true});
     };
 
     self.save = function(onSuccess) {
@@ -117,21 +118,8 @@ LUPAPISTE.verdictPageController = (function($) {
       return false;
     };
 
-
-    self.indicatorTimeout = null;
     self.submit = function() {
-      var i$ = $("#verdictSubmitIndicator");
-      if (self.indicatorTimeout) {
-        clearTimeout(self.indicatorTimeout);
-      }
-      i$.hide();
-
-      self.save(function() {
-        i$.show();
-        self.indicatorTimeout = setTimeout(function () {
-          i$.fadeOut(200);
-        }, 3000);
-      });
+      self.save(_.partial(hub.send,"indicator-icon", {style: "positive"}));
       return true;
     };
 
