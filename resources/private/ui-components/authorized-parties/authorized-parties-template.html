@@ -8,6 +8,7 @@
             <table class="auth-table">
               <thead>
                 <th data-bind="ltext: 'application.authorizedParties'"></th>
+                <th data-bind="ltext: 'application-guests.inviter'"></th>
                 <th data-bind="ltext: 'guest-authority.description'"></th>
                 <th data-bind="ltext: 'authorized.invite'"></th>
                 <th data-bind="ltext: 'application-guests.notifications'"></th>
@@ -16,6 +17,7 @@
               <tbody data-bind="foreach: authorizedParties">
                 <tr class="party">
                   <td data-bind="text: $parent.nameInformation( $data )"></td>
+                  <td data-bind="text: $parent.inviterInformation( $data )"></td>
                   <td data-bind="text: $parent.roleInformation( $data )"> </td>
                   <td>
                     <span data-bind="if: $data.invite">

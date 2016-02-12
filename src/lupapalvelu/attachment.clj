@@ -132,6 +132,7 @@
    Possible types are verdict, statement etc."
   {:id                                   ssc/ObjectIdStr
    :type                                 sc/Keyword
+   (sc/optional-key :poytakirjaId)       sc/Str
    (sc/optional-key :urlHash)            sc/Str})
 
 (defschema Source

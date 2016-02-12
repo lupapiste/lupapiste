@@ -1,28 +1,17 @@
 (ns lupapalvelu.smoketest.user-smoke-tests
-  (:require [schema.core :as sc]
-            [lupapalvelu.smoketest.core :refer [defmonster]]
+  (:require [lupapiste.mongocheck.core :refer [mongocheck]]
+            [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as usr]))
 
-(def users (delay (mongo/select :users)))
+(def user-keys (map #(if (keyword? %) % (:k %)) (keys usr/User)))
 
+(mongocheck :users
+  #(when-let [res (sc/check usr/User (mongo/with-id %))]
+     (assoc (select-keys % [:username]) :errors res))
+  user-keys)
 
-(defmonster valid-users
-  (let [results (seq (remove nil? (map
-                                    #(when-let [res (sc/check user/User %)]
-                                       (assoc (select-keys % [:id :username]) :errors res))
-                                    @users)))]
-    (if results
-      {:ok false :results results}
-      {:ok true})))
-
-(defmonster disabled-dummy-users-no-password
- (let [results (seq (remove nil? (map
-                                   #(when (and (= "dummy" (:role %))
-                                               (not (:enabled %))
-                                               (-> % :private :password))
-                                      %)
-                                   @users)))]
-   (if (seq results)
-     {:ok false :results results}
-     {:ok true})))
+(mongocheck :users
+  #(when (and (= "dummy" (:role %)) (not (:enabled %)) (-> % :private :password))
+     (format "Dummy user %s has password" (:username %)))
+  :role :private)
