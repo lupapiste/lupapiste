@@ -346,15 +346,16 @@ LUPAPISTE.ApplicationModel = function() {
         .call();
       hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     };
-
-    if (!_(ko.mapping.toJS(self.statements)).reject("given").isEmpty()) {
+    
+    if (_(self._js.statements).reject("given").isEmpty()) {
+      // All statements have been given
+      approve();
+    } else {
       hub.send("show-dialog", {ltitle: "application.approve.statement-not-requested",
                                size: "medium",
                                component: "yes-no-dialog",
                                componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
                                                  yesFn: approve}});
-    } else {
-      approve();
     }
     return false;
   };
