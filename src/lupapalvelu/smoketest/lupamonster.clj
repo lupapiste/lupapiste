@@ -38,5 +38,5 @@
                   true
                   results)]
     (println "Tests done, disconnecting")
-    ;(mongo/disconnect!)
-    #_(when (and started-from-cli (not all-ok)) (System/exit 1))))
+    (mongo/disconnect!)
+    (when (and started-from-cli (not all-ok)) (System/exit 1))))

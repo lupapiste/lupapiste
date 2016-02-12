@@ -115,7 +115,7 @@
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
 
-(defschema AttachmentAuthUser 
+(defschema AttachmentAuthUser
   "User summary for authorized users in attachment.
    Only name and role is used for users without Lupapiste account."
   (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
@@ -125,13 +125,14 @@
 
 (defschema VersionNumber
   {:minor                                sc/Int
-   :major                                sc/Int})          
+   :major                                sc/Int})
 
 (defschema Target
   "Refers to part of the application which attachment is targetted.
    Possible types are verdict, statement etc."
   {:id                                   ssc/ObjectIdStr
    :type                                 sc/Keyword
+   (sc/optional-key :poytakirjaId)       sc/Str
    (sc/optional-key :urlHash)            sc/Str})
 
 (defschema Source
@@ -149,7 +150,7 @@
 
 (defschema Signature
   "Signature for attachment version"
-  {:user                                 user/SummaryUser   ;; 
+  {:user                                 user/SummaryUser   ;;
    :created                              ssc/Timestamp      ;;
    :fileId                               sc/Str             ;; used as 'foreign key' to attachment version
    :version                              VersionNumber})    ;; version number of the signed attachment version
@@ -165,7 +166,7 @@
    :filename                             sc/Str             ;; original filename
    :contentType                          sc/Str             ;; MIME type of the file
    :size                                 (sc/maybe sc/Int)  ;; file size
-   (sc/optional-key :stamped)            sc/Bool 
+   (sc/optional-key :stamped)            sc/Bool
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
    (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
@@ -180,11 +181,11 @@
    :type                                 Type               ;; Attachment type
    :modified                             ssc/Timestamp      ;; last modified
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
-   :locked                               sc/Bool            ;; 
+   :locked                               sc/Bool            ;;
    (sc/optional-key :readOnly)           sc/Bool            ;;
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
    :state                                (apply sc/enum attachment-states) ;; attachment state
-   :target                               (sc/maybe Target)  ;; 
+   :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
    :required                             sc/Bool            ;;
    :requestedByAuthority                 sc/Bool            ;;
