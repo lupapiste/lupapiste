@@ -211,7 +211,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
-    descriptionSub.dispose();
+    if (descriptionSub) { descriptionSub.dispose(); }
     stickyRefresh.dispose();
   };
 
