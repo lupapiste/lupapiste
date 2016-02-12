@@ -18,6 +18,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   var NEUTRAL  = "neutral";
 
   self.docModel = params.docModel;
+  self.docModelOptions = params.docModelOptions;
   self.auth = self.docModel.authorizationModel;
   self.isOpen = ko.observable();
   self.isOpen.subscribe( params.openCallback );

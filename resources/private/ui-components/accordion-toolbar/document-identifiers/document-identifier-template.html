@@ -2,6 +2,7 @@
 <label>Tunnus</label>
 <input type="text"
        data-bind="textInput: identifier,
+                  enable: enabled,
                   attr: {'data-test-id': documentId + '-identifier-input',
                          'id': documentId + '-identifier-input',
                          'readonly': readonly,

@@ -4,6 +4,8 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
   self.params = params;
 
   self.documentId = params.docId;
+  self.authModel = params.authModel;
+  self.options = params.options; // DocModel options (disabled setting)
 
   self.myService = lupapisteApp.services.accordionService;
 
@@ -16,6 +18,10 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
       hub.send("accordionService::saveIdentifier", {docId: self.documentId, key: self.identifierObject.key, value: value});
     });
   }
+
+  self.enabled = ko.pureComputed(function() {
+    return self.options.disabled === false || self.authModel.ok("update-doc");
+  });
 
   self.readonly = ko.observable(false);
   self.inputOptions = {maxLength: self.schema["max-len"] || LUPAPISTE.config.inputMaxLength};
