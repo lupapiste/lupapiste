@@ -113,7 +113,7 @@
        (#(map first (partition 2 %)))
        (set)))
 
-(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
+(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
 
 (defschema AttachmentAuthUser
   "User summary for authorized users in attachment.
