@@ -14,9 +14,10 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.password-reset :as pw-reset]
-            [lupapalvelu.document.schemas :as schema])
+            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.authorization :as auth])
   (:import [java.util Date]))
 
 ;;
@@ -119,7 +120,7 @@
   (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit] (array-map :name 1)))
 
 (defn find-company-users [company-id]
-  (user/get-users {:company.id company-id}))
+  (usr/get-users {:company.id company-id}))
 
 (defn company-users-count [company-id]
   (mongo/count :users {:company.id company-id}))
@@ -144,7 +145,7 @@
     data))
 
 (defn find-company-admins [company-id]
-  (user/get-users {:company.id company-id, :company.role "admin"}))
+  (usr/get-users {:company.id company-id, :company.role "admin"}))
 
 (defn ensure-custom-limit
   "Checks that custom account's customAccountLimit is set and allowed. Nullifies customAcconutLimit with normal accounts."
@@ -173,10 +174,10 @@
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
-    (when (and (not (user/admin? caller))
+    (when (and (not (usr/admin? caller))
                (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
       (fail! :error.unauthorized))
-    (when (and (not (user/admin? caller)) (not (custom-account? company)) (< limit old-limit))
+    (when (and (not (usr/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
@@ -203,7 +204,7 @@
                                    :model-fn      (fn [model _ __] model)})
 
 (defn add-user-after-company-creation! [user company role]
-  (let [user (update-in user [:email] user/canonize-email)
+  (let [user (update-in user [:email] usr/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
     (notif/notify! :new-company-admin-user {:user       user
                                             :company    company
@@ -212,7 +213,7 @@
     token-id))
 
 (defn add-user! [user company role]
-  (let [user (update-in user [:email] user/canonize-email)
+  (let [user (update-in user [:email] usr/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
     (notif/notify! :new-company-user {:user       user
                                       :company    company
@@ -222,7 +223,7 @@
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
-  (user/create-new-user nil {:email       (:email user)
+  (usr/create-new-user nil {:email       (:email user)
                              :username    (:email user)
                              :firstName   (:firstName user)
                              :lastName    (:lastName user)
@@ -237,7 +238,7 @@
 
 (defn invite-user! [user-email company-id]
   (let [company   (find-company! {:id company-id})
-        user      (user/get-user-by-email user-email)
+        user      (usr/get-user-by-email user-email)
         token-id  (token/make-token :invite-company-user nil {:user user, :company company, :role :user} :auto-consume false)]
     (notif/notify! :invite-company-user {:user       user
                                          :company    company
@@ -257,12 +258,12 @@
 ;;
 
 (defn link-user-to-company! [user-id company-id role]
-  (if-let [user (user/get-user-by-id user-id)]
+  (if-let [user (usr/get-user-by-id user-id)]
     (let [updates (merge {:company {:id company-id, :role role}}
-                    (when (user/dummy? user) {:role :applicant})
+                    (when (usr/dummy? user) {:role :applicant})
                     (when-not (:enabled user) {:enabled true}))]
       (mongo/update :users {:_id user-id} {$set updates})
-      (when (user/dummy? user)
+      (when (usr/dummy? user)
         (pw-reset/reset-password (assoc user :role "applicant"))))
     (fail! :error.user-not-found)))
 
@@ -300,6 +301,7 @@
         auth      (assoc (company->auth company)
                     :id "" ; prevents access to application before accepting invite
                     :role ""
+                    :inviter (usr/summary caller)
                     :invite {:user {:id company-id}})
         admins    (find-company-admins company-id)
         application-id (:id application)
@@ -323,8 +325,10 @@
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
   (when-let [application (domain/get-application-no-access-checking application-id)]
-    (update-application
-      (application->command application)
-      {:auth {$elemMatch {:invite.user.id company-id}}}
-      {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
+    (let [company           (find-company! {:id company-id})
+          {:keys [inviter]} (some #(when (= (:y company) (:y %)) %) (:auth application))]
+      (update-application
+       (application->command application)
+       {:auth {$elemMatch {:invite.user.id company-id}}}
+       {$set  {:auth.$  (-> company (company->auth) (assoc :inviter inviter :inviteAccepted (now)))}}))
     (ok)))
