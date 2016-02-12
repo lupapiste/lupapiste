@@ -8,6 +8,15 @@ LUPAPISTE.AccordionService = function() {
 
   self.appModel = lupapisteApp.models.application;
   self.authModel = lupapisteApp.models.applicationAuthModel;
+  self.indicator = ko.observable({});
+  ko.computed(function() {
+    var resultType = self.indicator().type;
+    if (resultType === "saved") {
+      hub.send("indicator", {style: "positive"});
+    } else if (resultType === "err") {
+      hub.send("indicator", {style: "negative"});
+    }
+  });
 
   self.documents = ko.pureComputed(function() {
     self.appModel.id(); // trigger when id changes
@@ -41,22 +50,8 @@ LUPAPISTE.AccordionService = function() {
   hub.subscribe("accordionService::saveIdentifier", function(event) {
     var docId = event.docId;
     var value = event.value;
-    var path = event.key;
-    ajax
-      .command("update-doc", {
-          doc: docId,
-          id: self.appModel.id.peek(),
-          collection: "documents",
-          updates: [[path, value]]
-        }
-      )
-      .success(function(e) {
-        util.showSavedIndicator(e);
-      })
-      .error(function (e) {
-        util.showSavedIndicator(e);
-      })
-      .call();
+    var path = [event.key];
+    lupapisteApp.services.documentDataService.updateDoc(docId, [[path, value]], self.indicator);
   });
 
 };
