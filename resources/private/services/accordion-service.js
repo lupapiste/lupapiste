@@ -35,7 +35,7 @@ LUPAPISTE.AccordionService = function() {
         var subSchema = _.find(doc.schema.body, "identifier"); // finds first
         if (subSchema) { // if we found the 'identifier' tag
           var key = _.get(subSchema, "name");
-          return {docId: doc.docId, key: key, value: ko.observable(util.getIn(doc, ["data", key, "value"]))};
+          return {docId: doc.docId, schema: subSchema, key: key, value: ko.observable(util.getIn(doc, ["data", key, "value"]))};
         }
       })
       .filter(_.identity) // cleanup undefineds
