@@ -3277,7 +3277,7 @@
 "neighbors.edit.title" "sv" "Grannens uppgifter"
 "neighbors.manage" "fi" "Valitse naapurit"
 "neighbors.manage" "sv" "Hantera grannar"
-"neighbors.missing" "fi" "Mikäli hanke edellyttää naapurien tiedottamista, tekee viranomainen tarvittavat toimenpiteet ,jonka jälkeen näet listan tiedotettavista naapureista tällä välilehdellä."
+"neighbors.missing" "fi" "Mikäli hanke edellyttää naapurien tiedottamista, tekee viranomainen tarvittavat toimenpiteet, jonka jälkeen näet listan tiedotettavista naapureista tällä välilehdellä."
 "neighbors.missing" "sv" "Om projektet förutsätter att grannarna informeras vidtar myndigheten de nödvändiga åtgärderna, varefter du ser en lista över grannar som ska informeras under denna flik."
 "neighbors.missing-from-prev-permit" "fi" "Hakemukselle ei ole haettu tiedotettavia osapuolia"
 "neighbors.missing-from-prev-permit" "sv" "Inga partier som bör informeras har hämtats till ansökningen"
