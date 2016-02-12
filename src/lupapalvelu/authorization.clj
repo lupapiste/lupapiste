@@ -1,5 +1,5 @@
 (ns lupapalvelu.authorization
-  (:require [lupapalvelu.user :as user]))
+  (:require [lupapalvelu.user :as usr]))
 
 ;;
 ;; Roles
@@ -54,7 +54,8 @@
 
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
   {:pre [(seq inviter) (seq invited) application-id role timestamp]}
-  (let [invite {:application  application-id
+  (let [inviter-info (usr/summary inviter)
+        invite {:application  application-id
                 :text         text
                 :path         path
                 :documentName document-name
@@ -62,9 +63,9 @@
                 :created      timestamp
                 :email        (:email invited)
                 :role         role
-                :user         (user/summary invited)
-                :inviter      (user/summary inviter)}]
-    (assoc (user/user-in-role invited :reader) :invite invite)))
+                :user         (usr/summary invited)
+                :inviter      inviter-info}]
+    (assoc (usr/user-in-role invited :reader) :inviter inviter-info :invite invite)))
 
 ;;
 ;; Authz checkers
@@ -84,5 +85,4 @@
   "Returns true if user has requested roles in organization"
   [requested-authz-roles {organization :organization} user]
   (let [user-org-authz (org-authz organization user)]
-    (and (user/authority? user) requested-authz-roles (some requested-authz-roles user-org-authz))))
-
+    (and (usr/authority? user) requested-authz-roles (some requested-authz-roles user-org-authz))))

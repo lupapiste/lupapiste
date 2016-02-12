@@ -55,6 +55,14 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
            .join( ", ");
   };
 
+  self.inviterInformation = function( role ) {
+    var info = "";
+    if( _.isObject( role.inviter )) {
+      info = role.inviter.firstName() + " " + role.inviter.lastName();
+    }
+    return info;
+  };
+
   self.isNotOwner = function( role ) {
     return application().isNotOwner( role );
   };
