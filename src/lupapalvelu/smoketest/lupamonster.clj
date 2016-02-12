@@ -1,10 +1,16 @@
 (ns lupapalvelu.smoketest.lupamonster
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [lupapiste.mongocheck.core :as mongocheck]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.smoketest.core :refer :all]
             [lupapalvelu.smoketest.application-smoke-tests]
             [lupapalvelu.smoketest.organization-smoke-tests]
             [lupapalvelu.smoketest.user-smoke-tests]))
 
+(defmonster mongochecks
+  (let [results (mongocheck/execute-checks (mongo/get-db))]
+    (if (->> results vals (filter seq) seq)
+      {:ok false :results (str results)}
+      {:ok true})))
 
 (defn- print-info [{:keys [name test-ok test-duration-ms]}]
   (let [minutes (int (/ test-duration-ms (* 60 1000)))
@@ -32,5 +38,5 @@
                   true
                   results)]
     (println "Tests done, disconnecting")
-    (mongo/disconnect!)
-    (when (and started-from-cli (not all-ok)) (System/exit 1))))
+    ;(mongo/disconnect!)
+    #_(when (and started-from-cli (not all-ok)) (System/exit 1))))
