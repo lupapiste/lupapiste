@@ -424,14 +424,14 @@
    })
 
 (def- p-operations
-  {:poikkeamis                  {:schema "rakennushanke"
-                                 :permit-type permit/P
-                                 :applicant-doc-schema applicant-doc-schema-name-hakija
-                                 :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
-                                 :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed true
-                                 :min-outgoing-link-permits 0
-                                 :asianhallinta true}
+  {:poikkeamis {:schema                    "rakennushanke"
+                :permit-type               permit/P
+                :applicant-doc-schema      applicant-doc-schema-name-hakija
+                :required                  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
+                :attachments               [:paapiirustus [:asemapiirros]]
+                :add-operation-allowed     true
+                :min-outgoing-link-permits 0
+                :asianhallinta             true}
    })
 
 (defn- tyonjohtaja-state-machine-resolver [{subtype :permitSubtype :as application}]
