@@ -10,7 +10,7 @@ LUPAPISTE.OperationEditorModel = function(params) {
 
   // Operation description.
   self.description = ko.observable(self.operation.description()).extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
-  self.showDescription = self.operation && auth.ok( "update-op-description");
+  self.enabled = self.operation && auth.ok( "update-op-description");
 
   var descriptionSub = self.description.subscribe( function( desc ) {
     ajax.command ("update-op-description", {id: self.docModel.appId,
