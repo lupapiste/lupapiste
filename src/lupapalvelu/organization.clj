@@ -195,8 +195,9 @@
       (debugf "organization '%s' not found with id." id)
       (fail :error.organization-not-found))))
 
-(defn has-ftp-user? [organization permit-type]
-  (not (ss/blank? (get-in organization [:krysp (keyword permit-type) :ftpUser]))))
+(defn krysp-integration? [organization permit-type]
+  (when-let [krysp (get-in organization [:krysp (keyword permit-type)])]
+    (not-any? ss/blank? (vals krysp))))
 
 (defn allowed-roles-in-organization [organization]
   {:pre [(map? organization)]}
