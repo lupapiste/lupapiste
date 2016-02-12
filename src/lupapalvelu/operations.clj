@@ -418,7 +418,7 @@
                                                   :applicant-doc-schema applicant-doc-schema-name-hakija
                                                   :required []
                                                   :attachments []
-                                                  :add-operation-allowed false
+                                                  :add-operation-allowed true
                                                   :min-outgoing-link-permits 0
                                                   :asianhallinta true}
    })
@@ -429,7 +429,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-hakija
                                  :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
                                  :attachments [:paapiirustus [:asemapiirros]]
-                                 :add-operation-allowed false
+                                 :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta true}
    })
