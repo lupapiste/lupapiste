@@ -10,7 +10,8 @@
       <span class="bar-text">
         <span class="title"
               data-bind="attr: {'data-app-id': docModel.appId,
-                                'data-doc-id': docModel.docId},
+                                'data-doc-id': docModel.docId,
+                                'data-test-id': docModel.schemaName + '-accordion-header-text'},
                          text: headerText">
         </span>
       </span>
@@ -36,7 +37,7 @@
         </div>
       </span>
       <button class="secondary is-left"
-              data-bind="attr: {'data-test-id': testId('edit-op-description') },
+              data-bind="attr: {'data-test-id': testId('toggle-identifiers') },
                          visible: hasOperation,
                          toggleClick: showIdentifierEditors">
         <i class="lupicon-pen"></i>
