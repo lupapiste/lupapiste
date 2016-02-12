@@ -142,7 +142,7 @@
 (defschema Operation
   "Operation for operation specific attachments"
   {:id                                   ssc/ObjectIdStr    ;;
-   (sc/optional-key :optional)           [sc/Str]           ;; only empty arrays @ talos
+   (sc/optional-key :optional)           [sc/Str]           ;; FIXME: only empty arrays @ talos
    (sc/optional-key :name)               sc/Str             ;;
    (sc/optional-key :description)        (sc/maybe sc/Str)  ;;
    (sc/optional-key :created)            ssc/Timestamp})    ;;
