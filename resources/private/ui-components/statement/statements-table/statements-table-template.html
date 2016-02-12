@@ -28,7 +28,7 @@
               </thead>
               <tbody data-bind="foreach: $data.statements()">
                   <tr class="statement-row"
-                      data-bind="click: $component.openStatement.bind($data, 'statement')">
+                      data-bind="click: _.partial($component.openStatement, 'statement')">
                       <td>
                         <i class="lupicon-paperclip" data-bind="visible: $component.hasAttachment($data),
                                                                 attr: {'title': loc('tooltip.statement-or-reply-has-attachments')}"></i>
@@ -56,7 +56,7 @@
                       <td data-bind="visible: $component.repliesEnabled">
                         <!-- ko if: $component.isReplyable($data) && !$component.showReplyState($data) -->
                         <a href="#" data-bind="ltext: 'statement.reply.give-reply-link',
-                                               click: $component.openStatement.bind($data, 'reply'),
+                                               click: _.partial($component.openStatement, 'reply'),
                                                clickBubble: false,
                                                attr: {'data-test-id' : 'open-statement-reply-' + $index()}"></a>
                         <!-- /ko -->
