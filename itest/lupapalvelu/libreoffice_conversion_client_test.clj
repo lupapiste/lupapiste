@@ -10,7 +10,7 @@
 (def file-uri (str (.toURI (io/resource "resources/sample-paatosote.rtf"))))
 
 ;;TODO: run multiple simoultanious requests in pararaller threads
-(facts "Test localhost pdfa-conversion service"
+(facts "Test localhost pdfa-conversion service [in normal code floe conversion is not called when feature is disabled, so no :archivabilityError. Here we call the service even when it is disabled and assume it service is not running. So if the service is running in the ci/local env but feature disabled = fail]"
        (with-open
          [xin (io/input-stream file-uri)]
          (let [response (client/convert-to-pdfa file-uri xin)
@@ -25,5 +25,5 @@
                          (count rows) => 100
                          (nth rows 1) => "Once there was a miller who was poor, but who had a beautiful"))
                  (.delete file-out))
-             (fact "libre not enabled, expect connection error"
-                   (:archivabilityError response) => :libre-connection-error)))))
+             (fact "libre not enabled [so the service should *NOT* be running in this ENV], expect connection error"
+                   (:archivabilityError response) => :libre-conversion-error)))))

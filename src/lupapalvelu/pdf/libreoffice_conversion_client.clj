@@ -14,8 +14,7 @@
 
 (defn- convert-to-pdfa-request [filename content]
   (http/post url
-             {:debug     true
-              :as        :stream
+             {:as        :stream
               :multipart [{:name      filename
                            :part-name "file"
                            :mime-type (mime/mime-type (mime/sanitize-filename filename))
@@ -26,7 +25,6 @@
 (defn convert-to-pdfa [filename content]
   (try
     (let [response (convert-to-pdfa-request filename content)]
-      (with-out-str (clojure.pprint/pprint response))
       {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
        :content  (:body response)})
 
