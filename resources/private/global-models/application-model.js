@@ -335,7 +335,10 @@ LUPAPISTE.ApplicationModel = function() {
         .success(function(resp) {
           self.reload();
           if (!resp.integrationAvailable) {
-            LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
+            hub.send("show-dialog", {ltitle: "integration.title",
+                                     size: "medium",
+                                     component: "ok-dialog",
+                                     componentParams: {ltext: "integration.unavailable"}});
           } else if (self.externalApi.enabled()) {
             var permit = externalApiTools.toExternalPermit(self._js);
             hub.send("external-api::integration-sent", permit);
