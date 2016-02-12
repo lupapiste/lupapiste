@@ -3,7 +3,7 @@
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
             [sade.util :as util]
             [sade.env :as env]
@@ -115,72 +115,91 @@
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
 
-(def AttachmentAuthUser (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
-                          (sc/if :id
-                            SummaryAuthUser
-                            (select-keys SummaryAuthUser [:firstName :lastName :role]))))
+(defschema AttachmentAuthUser 
+  "User summary for authorized users in attachment.
+   Only name and role is used for users without Lupapiste account."
+  (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
+    (sc/if :id
+      SummaryAuthUser
+      (select-keys SummaryAuthUser [:firstName :lastName :role]))))
 
-(def VersionNumber {:minor                             sc/Int
-                    :major                             sc/Int})
+(defschema VersionNumber
+  {:minor                                sc/Int
+   :major                                sc/Int})          
 
-(def Target     {:id                                   ssc/ObjectIdStr
-                 :type                                 sc/Keyword
-                 (sc/optional-key :urlHash)            sc/Str})
+(defschema Target
+  "Refers to part of the application which attachment is targetted.
+   Possible types are verdict, statement etc."
+  {:id                                   ssc/ObjectIdStr
+   :type                                 sc/Keyword
+   (sc/optional-key :urlHash)            sc/Str})
 
-(def Source     {:id                                   ssc/ObjectIdStr
-                 :type                                 sc/Str})
+(defschema Source
+  "Source for the automatically generated attachment."
+  {:id                                   ssc/ObjectIdStr
+   :type                                 sc/Str})
 
-(def Operation  {:id                                   ssc/ObjectIdStr
-                 (sc/optional-key :optional)           [sc/Str] ;; only empty arrays @ talos
-                 (sc/optional-key :name)               sc/Str
-                 (sc/optional-key :description)        (sc/maybe sc/Str)
-                 (sc/optional-key :created)            ssc/Timestamp})
+(defschema Operation
+  "Operation for operation specific attachments"
+  {:id                                   ssc/ObjectIdStr    ;;
+   (sc/optional-key :optional)           [sc/Str]           ;; only empty arrays @ talos
+   (sc/optional-key :name)               sc/Str             ;;
+   (sc/optional-key :description)        (sc/maybe sc/Str)  ;;
+   (sc/optional-key :created)            ssc/Timestamp})    ;;
 
-(def Signature  {:user                                 user/SummaryUser
-                 :created                              ssc/Timestamp
-                 :fileId                               sc/Str
-                 :version                              VersionNumber})
+(defschema Signature
+  "Signature for attachment version"
+  {:user                                 user/SummaryUser   ;; 
+   :created                              ssc/Timestamp      ;;
+   :fileId                               sc/Str             ;; used as 'foreign key' to attachment version
+   :version                              VersionNumber})    ;; version number of the signed attachment version
 
-(def Version    {:version                              VersionNumber
-                 :fileId                               sc/Str
-                 :created                              ssc/Timestamp
-                 :user                                 (sc/if :id
-                                                         user/SummaryUser
-                                                         (select-keys user/User [:firstName :lastName]))
-                 :filename                             sc/Str
-                 :contentType                          sc/Str
-                 :size                                 (sc/maybe sc/Int)
-                 (sc/optional-key :stamped)            sc/Bool
-                 (sc/optional-key :archivable)         (sc/maybe sc/Bool)
-                 (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
-                 (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
+(defschema Version
+  "Attachment version"
+  {:version                              VersionNumber
+   :fileId                               sc/Str             ;; fileId in GridFS
+   :created                              ssc/Timestamp
+   :user                                 (sc/if :id         ;; User who created the version
+                                           user/SummaryUser ;; Only name is used for users without Lupapiste account
+                                           (select-keys user/User [:firstName :lastName]))
+   :filename                             sc/Str             ;; original filename
+   :contentType                          sc/Str             ;; MIME type of the file
+   :size                                 (sc/maybe sc/Int)  ;; file size
+   (sc/optional-key :stamped)            sc/Bool 
+   (sc/optional-key :archivable)         (sc/maybe sc/Bool)
+   (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
+   (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
 
-(def Type       {:type-id                              (apply sc/enum all-attachment-type-ids)
-                 :type-group                           (apply sc/enum all-attachment-type-groups)})
+(defschema Type
+  "Attachment type"
+  {:type-id                              (apply sc/enum all-attachment-type-ids)
+   :type-group                           (apply sc/enum all-attachment-type-groups)})
 
-(def Attachment {:id                                   sc/Str
-                 :type                                 Type
-                 :modified                             ssc/Timestamp
-                 (sc/optional-key :sent)               ssc/Timestamp
-                 :locked                               sc/Bool
-                 (sc/optional-key :readOnly)           sc/Bool
-                 :applicationState                     (apply sc/enum states/all-states)
-                 :state                                (apply sc/enum attachment-states)
-                 :target                               (sc/maybe Target)
-                 (sc/optional-key :source)             Source
-                 :required                             sc/Bool
-                 :requestedByAuthority                 sc/Bool
-                 :notNeeded                            sc/Bool
-                 :forPrinting                          sc/Bool
-                 :op                                   (sc/maybe Operation)
-                 :signatures                           [Signature]
-                 :versions                             [Version]
-                 (sc/optional-key :latestVersion)      (sc/maybe Version)
-                 (sc/optional-key :contents)           (sc/maybe sc/Str)
-                 (sc/optional-key :scale)              (apply sc/enum attachment-scales)
-                 (sc/optional-key :size)               (apply sc/enum attachment-sizes)
-                 :auth                                 [AttachmentAuthUser]
-                 (sc/optional-key :metadata)           {sc/Any sc/Any}})
+(defschema Attachment
+  {:id                                   sc/Str
+   :type                                 Type               ;; Attachment type
+   :modified                             ssc/Timestamp      ;; last modified
+   (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
+   :locked                               sc/Bool            ;; 
+   (sc/optional-key :readOnly)           sc/Bool            ;;
+   :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
+   :state                                (apply sc/enum attachment-states) ;; attachment state
+   :target                               (sc/maybe Target)  ;; 
+   (sc/optional-key :source)             Source             ;;
+   :required                             sc/Bool            ;;
+   :requestedByAuthority                 sc/Bool            ;;
+   :notNeeded                            sc/Bool            ;;
+   :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
+   :op                                   (sc/maybe Operation)
+   :signatures                           [Signature]
+   :versions                             [Version]
+   (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
+   (sc/optional-key :contents)           (sc/maybe sc/Str)  ;; content description
+   (sc/optional-key :scale)              (apply sc/enum attachment-scales)
+   (sc/optional-key :size)               (apply sc/enum attachment-sizes)
+   :auth                                 [AttachmentAuthUser]
+   (sc/optional-key :metadata)           {sc/Any sc/Any}})
+
 
 ;; Helper for reporting purposes
 (defn localised-attachments-by-permit-type [permit-type]
