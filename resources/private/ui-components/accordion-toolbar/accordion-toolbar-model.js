@@ -147,11 +147,6 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     self.remove.testClass = self.docModel.testId( "delete-schemas."
                                                 + self.docModel.schemaName );
   }
-  self.showIdentifierEditors = ko.observable(false);
-  var stickyRefresh = self.showIdentifierEditors.subscribe(function() {
-    // refresh accordion sitcky state
-    _.delay(window.Stickyfill.rebuild, 0);
-  });
 
   // Approval functionality
   self.isApprovable = Boolean(self.info.approvable);
@@ -197,6 +192,16 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                   || self.showReject()
                   || self.showApprove()
                   || self.hasOperation();
+
+  self.showIdentifierEditors = ko.observable(false);
+  var stickyRefresh = self.showIdentifierEditors.subscribe(function() {
+    // refresh accordion sitcky state
+    _.delay(window.Stickyfill.rebuild, 0);
+  });
+
+  self.hasIdentifierField = ko.pureComputed(function() {
+    return lupapisteApp.services.accordionService.getIdentifier(self.docModel.docId);
+  });
 
   self.closeEditors = function( data, event ) {
     // Toggle editors visibility with key press

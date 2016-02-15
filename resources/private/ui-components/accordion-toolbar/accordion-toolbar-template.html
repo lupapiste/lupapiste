@@ -68,7 +68,7 @@
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-bind="event: {keydown: closeEditors}">
         <div>
-          <!-- ko if: lupapisteApp.services.accordionService.getIdentifier(docModel.docId) -->
+          <!-- ko if: hasIdentifierField -->
           <div class="inline-col identifier-component" data-bind="component: {name: 'document-identifier',
                                     params: {docId: docModel.docId,
                                              authModel: auth,
@@ -81,7 +81,9 @@
                                                isPrimary: isPrimaryOperation,
                                                auth: auth}}"></div>
         </div>
+        <!-- ko if: hasIdentifierField -->
         <p data-bind="ltext: 'document.operation-identifier.notice'"></p>
+        <!-- /ko -->
       </div>
       <!-- /ko -->
       </div>
