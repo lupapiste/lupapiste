@@ -119,7 +119,7 @@ LUPAPISTE.StatementService = function(params) {
   hub.subscribe("statement::changed", function(e) {
     var statementId = self.statementId();
     statements(_.set(statements(), [statementId].concat(e.path).join("."), e.value));
-    if (!draftTimerId && statementId && e.tab) {
+    if (!draftTimerId && !saving() && statementId && e.tab) {
       draftTimerId = _.delay(function() {
         updateDraft(statementId, e.tab);
         draftTimerId = null;
