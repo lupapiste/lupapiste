@@ -53,7 +53,7 @@ Add link
 
 Update link
   [Arguments]  ${name}  ${url}
-  Execute Javascript  window.scrollTo(0, 500);
+  Scroll to test id  organization-links-table
   Wait and click  xpath=//table[@data-test-id='organization-links-table']//td[text()='${name} fi']/..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
   Input Text  jquery=#dialog-edit-link #link-url  ${url}
@@ -61,7 +61,7 @@ Update link
 
 Remove link
   [Arguments]  ${name}
-  Execute Javascript  window.scrollTo(0, 500);
+  Scroll to test id  organization-links-table
   Wait and click  xpath=//table[@data-test-id='organization-links-table']//td[text()='${name} fi']/..//a[@data-test-id='remove']
 
 User sees link

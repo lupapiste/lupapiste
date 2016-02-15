@@ -217,9 +217,16 @@
             (count (:signatures signed-attachment)) => 1)
 
           (fact "Delete version and its signature"
-            (command veikko :delete-attachment-version :id application-id
-                     :attachmentId (:id versioned-attachment) :fileId (get-in signed-attachment [:latestVersion :fileId])) => ok?
+                (command veikko :delete-attachment-version :id application-id
+                     :attachmentId (:id versioned-attachment) :fileId (get-in signed-attachment [:latestVersion :fileId]))=> ok?
                      (fact (count (:signatures (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 0))
+
+          (fact "Deleting the last version clears attachment auth"
+                (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+                  (count (:versions attachment )) => 1
+                  (command veikko :delete-attachment-version :id application-id
+                           :attachmentId (:id attachment) :fileId (get-in attachment [:latestVersion :fileId])))
+                (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment))) => empty?)
 
           (fact "Authority deletes attachment"
             (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?

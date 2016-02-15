@@ -1,6 +1,6 @@
 (ns lupapalvelu.statement
   (:require [clojure.set]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.schemas :as ssc]
@@ -28,33 +28,38 @@
                ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa"
                 "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
-(def StatementGiver {:userId                          ssc/ObjectIdStr
-                     (sc/optional-key :id)            sc/Str
-                     :text                            sc/Str
-                     :email                           ssc/Email
-                     :name                            sc/Str})
+(defschema StatementGiver
+  "Statement giver user summary"
+  {:userId                          ssc/ObjectIdStr ;; id for user
+   (sc/optional-key :id)            sc/Str          ;; 'official' statement giver id in organization
+   :text                            sc/Str          ;; text field describing statement giver role or job
+   :email                           ssc/Email       ;; email
+   :name                            sc/Str})        ;; full name of the statement giver
 
-(def Reply          {:editor-id                       ssc/ObjectIdStr
-                     (sc/optional-key :saateText)     sc/Str
-                     :nothing-to-add                  sc/Bool
-                     (sc/optional-key :text)          sc/Str})
+(defschema Reply
+  "Statement reply"
+  {:editor-id                       ssc/ObjectIdStr ;; id of the user last edited the reply
+   (sc/optional-key :saateText)     sc/Str          ;; cover note for statement reply, written by authority
+   :nothing-to-add                  sc/Bool         ;; indicator that user has read the statement and has nothing to add
+   (sc/optional-key :text)          sc/Str})        ;; reply text that user has written
 
-(def Statement      {:id                              ssc/ObjectIdStr
-                     :state                           (apply sc/enum statement-states)
-                     (sc/optional-key :saateText)     sc/Str
-                     (sc/optional-key :status)        (apply sc/enum statement-statuses-more-options)
-                     (sc/optional-key :text)          sc/Str
-                     (sc/optional-key :dueDate)       ssc/Timestamp
-                     (sc/optional-key :requested)     ssc/Timestamp
-                     (sc/optional-key :given)         ssc/Timestamp
-                     (sc/optional-key :reminder-sent) ssc/Timestamp
-                     (sc/optional-key :modified)      ssc/Timestamp
-                     (sc/optional-key :duedate-reminder-sent)  ssc/Timestamp
-                     (sc/optional-key :modify-id)     sc/Str
-                     (sc/optional-key :editor-id)     sc/Str
-                     (sc/optional-key :reply)         Reply
-                     :person                          StatementGiver
-                     (sc/optional-key :metadata)      {sc/Any sc/Any}})
+(defschema Statement
+  {:id                              ssc/ObjectIdStr ;; statement id
+   :state                           (apply sc/enum statement-states) ;; handling state of the statement
+   (sc/optional-key :saateText)     sc/Str          ;; cover note for statement, written by authority
+   (sc/optional-key :status)        (apply sc/enum statement-statuses-more-options) ;; status indicator
+   (sc/optional-key :text)          sc/Str          ;; statement text written by statement giver
+   (sc/optional-key :dueDate)       ssc/Timestamp   ;; due date for statement to be given
+   (sc/optional-key :requested)     ssc/Timestamp   ;; when requested
+   (sc/optional-key :given)         ssc/Timestamp   ;; when given
+   (sc/optional-key :reminder-sent) ssc/Timestamp   ;; for remiders sent week after the request
+   (sc/optional-key :modified)      ssc/Timestamp   ;; last modified
+   (sc/optional-key :duedate-reminder-sent) ssc/Timestamp ;; for reminders sent after due date exceeded
+   (sc/optional-key :modify-id)     sc/Str          ;; id for restrict overlapping modifications
+   (sc/optional-key :editor-id)     sc/Str          ;; id of the user last edited the statement
+   (sc/optional-key :reply)         Reply
+   :person                          StatementGiver
+   (sc/optional-key :metadata)      {sc/Any sc/Any}})
 
 (defn create-statement [now metadata saate-text due-date person]
   (sc/validate Statement

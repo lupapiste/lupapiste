@@ -29,12 +29,13 @@
         .command("add-single-sign-on-key", ssoKeyJS)
         .success(function(d) {
           self.ssoKeys.push(ko.mapping.fromJS(_.assign(ssoKeyJS, {id: d.id, key: ""})));
-          _.forEach(self.newRow, function(value, key) {
+          _.forEach(self.newRow, function(value) {
             value("");
           });
+          hub.send("sso-keys-changed");
         })
         .call();
-    }
+    };
 
     self.update = function(ssoKey) {
       ajax
@@ -42,24 +43,31 @@
           "sso-id": ssoKey.id().toString(),
           "ip": ssoKey.ip(),
           "key": ssoKey.key(),
-          "comment": ssoKey.comment(),
+          "comment": ssoKey.comment()
         })
+       .success(function(resp){
+         util.showSavedIndicator(resp);
+         hub.send("sso-keys-changed");
+       })
         .call();
-    }
+    };
 
     self.remove = function(ssoKey) {
       var removeFn = function () {
         ajax
           .command("remove-single-sign-on-key", {"sso-id": ssoKey.id()})
-          .success(function() { self.ssoKeys.remove(ssoKey); })
-          .call()
+          .success(function() {
+            self.ssoKeys.remove(ssoKey);
+            hub.send("sso-keys-changed");
+          })
+          .call();
       };
       hub.send("show-dialog", {title: "Poista SSO-avain",
                                size: "medium",
                                component: "yes-no-dialog",
                                componentParams: {text: "Haluatko varmasti poistaa SSO-avaimen",
                                                  yesFn: removeFn}});
-    } 
+    };
   }
 
   var ssoKeysModel = new SsoKeysModel();

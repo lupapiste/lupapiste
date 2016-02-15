@@ -3,9 +3,8 @@
 <body>
   <section class="page">
     <script type="text/x-jquery-tmpl" id="bulletin-attachments-tab-template">
-        <h3 class="left" data-bind="ltext: 'application.tabAttachments'"></h3>
-        <span data-bind="component: {name: 'help-toggle',
-                                     params: {lhtml: 'help.bulletin.attachments'}}"></span>
+      <h3 data-bind="ltext: 'application.tabAttachments'"></h3>
+
         <!-- ko if: attachments().length > 0 -->
         <div data-bind="template: {name: 'bulletin-attachments-table-template',
                                    data: attachments}"></div>

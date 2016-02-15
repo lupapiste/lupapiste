@@ -893,10 +893,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return div;
   }
 
+  // List of document ids added into document data service after docmodel loaded.
+  // Multiple additions is restricted but document is reloaded after repository load.
+  var updatedDocumentsInDocumentDataService = [];
+
   function buildGroupComponent (name, subSchema, model, path) {
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
 
-    lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+    if (!_.includes(updatedDocumentsInDocumentDataService, doc.id)) {
+      lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+      updatedDocumentsInDocumentDataService.push(doc.id);
+    }
 
     var params = {
       applicationId: self.appId,
@@ -1204,7 +1211,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
-    lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+    if (!_.includes(updatedDocumentsInDocumentDataService, doc.id)) {
+      lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
+      updatedDocumentsInDocumentDataService.push(doc.id);
+    }
+
     var i18npath = subSchema.i18nkey ? [subSchema.i18nkey] : [self.schemaI18name].concat(_.reject(path, _.isNumber));
     var params = {
       applicationId: self.appId,

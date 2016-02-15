@@ -14,13 +14,20 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
 
-;;
-;; Facts
-;;
-
 (facts "Date format"
   (fact (util/to-xml-date (date-time 2012 1 14)) => "2012-01-14")
   (fact (util/to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
+
+(fact "get-rakennustunnus"
+  (let [application {:primaryOperation {:id "1" :description "desc"}}
+        document {:op {:id "1"}}
+        base-result {:jarjestysnumero nil
+                     :kiinttun nil
+                     :muuTunnustieto {:MuuTunnus {:sovellus "toimenpideId", :tunnus "1"}}}]
+    (get-rakennustunnus {} {} document) => base-result
+    (get-rakennustunnus {:tunnus "B"} application document) => (assoc base-result :rakennuksenSelite "B: desc")
+    (get-rakennustunnus {:tunnus ""} application document) => (assoc base-result :rakennuksenSelite "desc")
+    (get-rakennustunnus {:tunnus "B"} {} document) => (assoc base-result :rakennuksenSelite "B")))
 
 (def- municipality 753)
 
@@ -150,7 +157,7 @@
   {:id "tyonjohtaja"
    :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
-           {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
+                {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
             :patevyys-tyonjohtaja {:koulutusvalinta {:value "other"}, :koulutus {:value "Koulutus"}   ;; "Muu" option ( i.e. :other-key) is selected
                                    :patevyysvaatimusluokka {:value "A"}
                                    :valmistumisvuosi {:value "2010"}
@@ -203,7 +210,7 @@
                                      :rakennuksenMuutosJaKorjaustyo {:value false}
                                      :linjasaneeraus {:value false}
                                      :ivLaitoksenAsennustyo {:value false}
-                                     :sisapuolinenKvvTyo {:value false}
+                                     :sisapuolinenKvvTyo {:value true}
                                      :muuMika {:value "Muu tyotehtava"}}
             :muutHankkeet {:0 {:katuosoite {:value "katuosoite"}
                                :3kk {:value "1"}
@@ -310,7 +317,7 @@
                  :op {:name "kerrostalo-rivitalo"
                       :description "kerrostalo-rivitalo-kuvaus"
                       :id "kerrostalo-rivitalo-id"}}
-   :data common-rakennus})
+   :data (assoc common-rakennus :tunnus {:value "A"})})
 
 (def- rakennuksen-muuttaminen
   {:id "muuttaminen"
@@ -711,13 +718,10 @@
     (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat"
-      (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,Muu tyotehtava")
+          (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,sisapuolinenKvvTyo,Muu tyotehtava")
     (fact "vastattavaTyo contents"
-      (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Rakennuksen purkaminen"
-                                                                                                    "IV-laitoksen korjaus- ja muutosty\u00f6"
-                                                                                                    "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
-                                                                                                    "Maanrakennusty\u00f6t"
-                                                                                                    "Muu tyotehtava"}))))
+          (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Sis\u00e4puolinen KVV-ty\u00f6"
+                                                                                                        "Muu tyotehtava"}))))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
@@ -878,7 +882,7 @@
       (:rakennustunnus tiedot) => {:jarjestysnumero nil,
                                    :kiinttun "21111111111111"
                                    :muuTunnustieto {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
-                                   :rakennuksenSelite "kerrostalo-rivitalo-kuvaus"})))
+                                   :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]

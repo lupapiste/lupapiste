@@ -142,8 +142,9 @@
   [{:keys [id propertyId applicant address organization municipality location location-wgs84] :as application}
    user
    & [attachment]]
-  (let [s2-metadata (or (:metadata attachment) (:metadata application))
-        base-metadata {:type                  (if attachment (make-attachment-type attachment) :application)
+  (let [s2-metadata (-> (or (:metadata attachment) (:metadata application))
+                        (assoc :tila :arkistoitu))
+        base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
                        :buildingIds           (remove nil? (map :buildingId (:buildings application)))
                        :nationalBuildingIds   (remove nil? (map :nationalId (:buildings application)))

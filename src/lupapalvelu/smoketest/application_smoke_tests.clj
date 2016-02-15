@@ -1,6 +1,6 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
-  (:require [lupapalvelu.smoketest.core :refer [defmonster]]
-            [lupapalvelu.mongo :as mongo]
+  (:require [lupapiste.mongocheck.core :refer [mongocheck]]
+            [lupapiste.mongocheck.checks :as checks]
             [lupapalvelu.states :as states]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.application :as app]
@@ -9,49 +9,28 @@
             [sade.schemas :as ssc])
   (:import [schema.utils.ErrorContainer]))
 
-(def application-keys [:infoRequest
-                       :operations :secondaryOperations :primaryOperation
-                       :documents :schema-version :attachments :auth
-                       :state :modified  :created :opened :submitted :sent :started :closed
-                       :organization :municipality :propertyId :location])
-
-(def applications (delay (mongo/select :applications {} application-keys)))
-(def submitted-applications (delay (mongo/select :submitted-applications {} application-keys)))
-
-(defn- resolve-operations [application]
-  ; Support the old and the new application schema
-  (or (:operations application) (app/get-operations application)))
-
-(defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
+(defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]
   (if (and (:name schema-info) (:version schema-info))
     (let [ignored (set ignored-errors)
+          schema (model/get-document-schema doc)
+          info (model/document-info doc schema)
           results (filter
                     (fn [{result :result}]
                       (and (= :err (first result)) (not (ignored (second result)))))
-                    (model/validate application doc))]
+                    (flatten (model/validate-fields application info nil data [])))]
       (when (seq results)
         {:document-id id :schema-info schema-info :results results}))
     {:document-id id :schema-info schema-info :results "Schema name or version missing"}))
 
-(defn- validate-documents [ignored-errors {id :id state :state documents :documents :as application}]
+(defn- validate-documents [ignored-errors {documents :documents :as application}]
   (let [results (filter seq (map (partial validate-doc ignored-errors application) documents))]
     (when (seq results)
-      {:id id
-       :state state
-       :results results})))
-
-(defn- documents-are-valid [applications & ignored-errors]
-  (if-let [validation-results (seq (filter seq (pmap (partial validate-documents ignored-errors) applications)))]
-    {:ok false :results validation-results}
-    {:ok true}))
+      results)))
 
 ;; Every document is valid.
+(mongocheck :applications (partial validate-documents []) :documents :state :auth)
 
-(defmonster applications-documents-are-valid
-  (documents-are-valid @applications))
-
-(defmonster submitted-applications-documents-are-valid
-  (documents-are-valid @submitted-applications "illegal-hetu"))
+(mongocheck :submitted-applications (partial validate-documents ["illegal-hetu"]) :documents :state :auth)
 
 ;; Latest attachment version and latestVersion match
 (defn validate-latest-version [{id :id versions :versions latestVersion :latestVersion}]
@@ -65,108 +44,59 @@
     (when (instance? schema.utils.ErrorContainer coercion-result)
       {:attachment-id id :error "Not valid attachment" :coercion-result coercion-result})))
 
-(defn validate-attachments [attachments]
+(defn validate-attachments [{attachments :attachments id :id}]
   (->> attachments
        (mapcat (juxt validate-attachment-against-schema validate-latest-version))
        (remove nil?)
        seq))
 
-(defmonster attachment-validation
-  (if-let [results (->> @applications
-                        (pmap (fn [{attachments :attachments id :id}]
-                                (some->> (validate-attachments attachments)
-                                         (assoc {:application-id id} :result))))
-                        (remove nil?)
-                        seq)]
-    {:ok false :results results}
-    {:ok true}))
+(mongocheck :applications validate-attachments :attachments)
 
 ;; Documents have operation information
 
 (defn- application-schemas-have-ops [{documents :documents :as application}]
   (when-not (:infoRequest application)
-    (let [operations (resolve-operations application)
+    (let [operations (app/get-operations application)
           docs-with-op (count (filter #(get-in % [:schema-info :op]) documents))
           ops          (count operations)]
       (when-not (= docs-with-op ops)
-        (:id application)))))
+        (format "Different number of operations and documents refering to an operation: %d != %d" docs-with-op ops)))))
 
-(defn- schemas-have-ops [apps]
-  (let [app-ids-with-invalid-docs (remove nil? (map application-schemas-have-ops apps))]
-    (when (seq app-ids-with-invalid-docs)
-      {:ok false :results (into [] app-ids-with-invalid-docs)})))
 
-(defmonster applications-schemas-have-ops
-  (schemas-have-ops @applications))
+(mongocheck :applications application-schemas-have-ops :documents :primaryOperation :secondaryOperations :infoRequest)
 
-(defmonster submitted-applications-schemas-have-ops
-  (schemas-have-ops @submitted-applications))
+(mongocheck :submitted-applications application-schemas-have-ops :documents :primaryOperation :secondaryOperations :infoRequest)
 
-;; not null
-(defn nil-property [property]
-  (if-let [results (seq (remove nil? (map #(when (nil? (property %)) (:id %)) @applications)))]
-    {:ok false :results results}
-    {:ok true}))
+(mongocheck :applications (checks/not-null-property :organization) :organization)
 
-(defmonster organization-is-set
-  (nil-property :organization))
+(mongocheck :applications (checks/not-null-property :propertyId) :propertyId)
 
-(defmonster property-id-is-set
-  (nil-property :propertyId))
+(mongocheck :applications (checks/not-null-property :location) :location)
 
-(defmonster location-is-set
-  (nil-property :location))
+(mongocheck :applications (checks/not-null-property :municipality) :municipality)
 
-(defmonster municipality-is-set
-  (nil-property :municipality))
-
-(defmonster schema-version-is-set
-  (nil-property :schema-version))
+(mongocheck :applications (checks/not-null-property :schema-version) :schema-version)
 
 (defn timestamp-is-set [ts-key states]
-  (if-let [results (seq (remove nil? (map #(when (and (states (keyword (:state %))) (nil? (ts-key %))) (:id %)) @applications)))]
-    {:ok false :results results}
-    {:ok true}))
+  (fn [application]
+    (when (and (states (keyword (:state application))) (nil? (ts-key application)))
+      (format "Timestamp %s is null in state %s" (name ts-key) (:state application)))))
 
-(defmonster opened-timestamp
-  (timestamp-is-set :opened (states/all-states-but [:draft :canceled])))
+(mongocheck :applications (timestamp-is-set :opened (states/all-states-but [:draft :canceled])) :state :opened)
 
 ;;
 ;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
 ;;
-(defmonster submitted-timestamp
- (if-let [results (seq (remove nil? (map
-                                      (fn [app]
-                                        (when (and
-                                                ((states/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
-                                                (when-not (some #(= "aiemmalla-luvalla-hakeminen" %) (map :name (resolve-operations app)))
-                                                  (nil? (:submitted app))))
-                                          (:id app)))
-                                      @applications)))]
-   {:ok false :results results}
-   {:ok true}))
+(mongocheck :applications
+  (fn [application]
+    (when (and
+            ((states/all-application-states-but [:canceled :draft :open]) (keyword (:state application)))
+            (when-not (some #(= "aiemmalla-luvalla-hakeminen" %) (map :name (app/get-operations application)))
+              (nil? (:submitted application))))
+      "Submitted timestamp is null"))
+  :submitted :state :primaryOperation :secondaryOperations)
 
-; Fails with 255 applications
-;(defmonster canceled-timestamp
-;  (timestamp-is-set :canceled #{:canceled}))
+(mongocheck :applications (timestamp-is-set :sent #{:sent :complementNeeded}) :state :sent)
 
-(defmonster sent-timestamp
-  (timestamp-is-set :sent #{:sent :complementNeeded}))
+(mongocheck :applications (timestamp-is-set :closed #{:closed}) :state :closed)
 
-(defmonster closed-timestamp
-  (timestamp-is-set :closed #{:closed}))
-
-
-; Not a valid test anymore. Fails if a verdict is replaced.
-(comment
-
-  ;; task source is set
-  (defn every-task-refers-verdict [{:keys [verdicts tasks id]}]
-    (let [verdict-ids (set (map :id verdicts))]
-       (when-not (every? (fn [{:keys [source]}] (or (not= "verdict" (:type source)) (verdict-ids (:id source)))) tasks)
-         id)))
-
-  (defmonster task-source-refers-verdict
-       (if-let [results (seq (remove nil? (map every-task-refers-verdict @applications)))]
-         {:ok false :results results}
-         {:ok true})))

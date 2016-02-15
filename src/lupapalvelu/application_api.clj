@@ -34,9 +34,11 @@
 
 ;; Notifications
 
-(notifications/defemail :application-state-change
-                        {:subject-key    "state-change"
-                         :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
+(def state-change {:subject-key    "state-change"
+                   :template "application-state-change.md"
+                   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
+
+(notifications/defemail :application-state-change state-change)
 
 ;; Validators
 
@@ -233,6 +235,13 @@
                       (map (fn [e] {:email e, :role "authority"}) emails)))
    :tab "statement"})
 
+(notifications/defemail :organization-on-submit
+  (assoc state-change
+    :recipients-fn (fn [{application :application}]
+                      (let [organization (organization/get-organization (:organization application))
+                            emails (get-in organization [:notifications :submit-notification-emails])]
+                        (map (fn [e] {:email e, :role "authority"}) emails)))))
+
 (defcommand submit-application
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -240,7 +249,8 @@
    :states           #{:draft :open}
    :notified         true
    :on-success       [(notify :application-state-change)
-                      (notify :neighbor-hearing-requested)]
+                      (notify :neighbor-hearing-requested)
+                      (notify :organization-on-submit)]
    :pre-checks       [domain/validate-owner-or-write-access
                       a/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
