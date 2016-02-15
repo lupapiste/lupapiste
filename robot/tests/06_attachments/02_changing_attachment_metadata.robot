@@ -30,13 +30,7 @@ Mikko adds an operation
 
 Mikko edits operation B description
   Open accordions  info
-  ${button} =  Set Variable  $("#application-info-tab button[data-test-id='edit-op-description-uusiRakennus']:last")
-  Execute Javascript  ${button}.mousedown();
-
-  ${selector} =   Set Variable  $("input[data-test-id='op-description-editor-uusiRakennus']:visible")
-  Wait For Condition  return ${selector}.length===1;  10
-
-  Execute Javascript  ${selector}.val("Talo B").change().blur();
+  Edit operation description  uusiRakennus  Talo B  2
   Wait for jQuery
 
 Mikko adds txt attachment without comment

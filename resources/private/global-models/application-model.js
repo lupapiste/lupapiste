@@ -19,6 +19,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.propertyId = ko.observable();
   self.title = ko.observable();
   self.created = ko.observable();
+  self.modified = ko.observable();
   self.started = ko.observable();
   self.startedBy = ko.observable();
   self.closed = ko.observable();
@@ -329,7 +330,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.approveApplication = function() {
-    
+
     var approve = function() {
       ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
         .success(function(resp) {
@@ -349,7 +350,7 @@ LUPAPISTE.ApplicationModel = function() {
         .call();
       hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     };
-    
+
     if (_(self._js.statements).reject("given").isEmpty()) {
       // All statements have been given
       approve();
