@@ -1,3 +1,5 @@
+// Buttons for statemen, reply and reply request dialogs.
+// Parameters are defined in StatementService.
 LUPAPISTE.StatementControlButtonsModel = function(params) {
   "use strict";
   var self = this;
@@ -20,16 +22,21 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
 
   self.refreshVisible = self.submitVisible;
 
+  function send() {
+    hub.send( "statement::submit",
+              {applicationId: applicationId(),
+               statementId: statementId(),
+               tab: self.tab()});
+  }
+
   self.submit = function() {
-    LUPAPISTE.ModalDialog.showDynamicYesNo( loc( "statement.confirm.title"),
-                                            loc( "statement.confirm.body"),
-                                          {title: loc( "yes"),
-                                           fn: _.partial(hub.send,
-                                                         "statement::submit",
-                                                         {applicationId: applicationId(),
-                                                           statementId: statementId(),
-                                                           tab: self.tab()})},
-                                          {title: loc( "cancel")});
+    if( commands[self.tab()].confirm ) {
+      LUPAPISTE.ModalDialog.showDynamicYesNo( loc( self.tab() + ".confirm.title"),
+                                              loc( self.tab() + ".confirm.body"),
+                                              {title: loc( "yes"),
+                                                fn: send },
+                                               {title: loc( "cancel")});
+    }
   };
 
   self.refresh = function() {
