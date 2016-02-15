@@ -14,14 +14,9 @@ LUPAPISTE.StatementEditModel = function(params) {
   self.selectedStatus = ko.observable();
   self.text = ko.observable();
 
-  var statementId = ko.pureComputed(function() {
-    return util.getIn(self.data, ["id"]);
-  });
-
   var initSubscription = self.data.subscribe(function() {
     self.selectedStatus(util.getIn(self.data, ["status"]));
     self.text(util.getIn(self.data, ["text"]));
-    initSubscription.dispose();
   });
 
   var commands = params.commands;
@@ -33,7 +28,7 @@ LUPAPISTE.StatementEditModel = function(params) {
   });
 
   self.enabled = ko.pureComputed(function() {
-    return self.authModel.ok(commands["submit"]);
+    return self.authModel.ok(commands.submit);
   });
 
   self.isDraft = ko.pureComputed(function() {
@@ -42,31 +37,28 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   self.showStatement = ko.pureComputed(function() {
     return self.isDraft() ? self.enabled() : true;
-  })
+  });
 
   self.coverNote = ko.pureComputed(function() {
     var canViewCoverNote = util.getIn(self.data, ["person", "userId"]) === lupapisteApp.models.currentUser.id() || lupapisteApp.models.currentUser.isAuthority();
     return self.tab === "statement" && canViewCoverNote ? util.getIn(self.data, ["saateText"]) : "";
   });
 
-  // FIXME computed + dispose
-  self.text.subscribe(function(value) {
+  var textSubscription = self.text.subscribe(function(value) {
     if(util.getIn(self.data, ["text"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["text"], value: self.text()});
     }
   });
 
-  // FIXME computed + dispose
-  self.selectedStatus.subscribe(function(value) {
+  var statusSubscription = self.selectedStatus.subscribe(function(value) {
     if(util.getIn(self.data, ["status"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["status"], value: self.selectedStatus()});
     }
   });
 
-  hub.send("statement::submitAllowed", {tab: self.tab, value: submitAllowed()})
+  hub.send("statement::submitAllowed", {tab: self.tab, value: submitAllowed()});
 
-  // FIXME computed + dispose
-  submitAllowed.subscribe(function(value) {
+  var submitSubscription = submitAllowed.subscribe(function(value) {
     hub.send("statement::submitAllowed", {tab: self.tab, value: value});
   });
 
@@ -83,7 +75,7 @@ LUPAPISTE.StatementEditModel = function(params) {
     .call();
   }
 
-  if(applicationId()) {
+  if (applicationId()) {
     initStatementStatuses(applicationId());
   } else {
     applicationId.subscribe(function(appId) {
@@ -93,4 +85,11 @@ LUPAPISTE.StatementEditModel = function(params) {
       }
     });
   }
+
+  self.dispose = function() {
+    initSubscription.dispose();
+    textSubscription.dispose();
+    statusSubscription.dispose();
+    submitSubscription.dispose();
+  };
 };
