@@ -109,30 +109,30 @@
   (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type) ; FIXME set in permit meta data
     (fail :error.organization-has-not-enabled-statement-replies)))
 
-(defn- update-statement [statement modify-id prev-modify-id & updates]
-  (if (or (= prev-modify-id (:modify-id statement)) (nil? (:modify-id statement)))
-    (->> (apply assoc statement :modified (now) :modify-id modify-id updates)
+(defn- update-statement [statement modify-id & updates]
+  (if (or (= modify-id (:modify-id statement)) (nil? (:modify-id statement)))
+    (->> (apply assoc statement :modified (now) :modify-id (mongo/create-id) updates)
          (util/strip-nils)
          (sc/validate Statement))
     (fail! :error.statement-updated-after-last-save :statementId (:id statement))))
 
-(defn update-draft [statement text status modify-id prev-modify-id editor-id]
-  (update-statement statement modify-id prev-modify-id :state :draft :text text :status status :editor-id editor-id))
+(defn update-draft [statement text status modify-id editor-id]
+  (update-statement statement modify-id :state :draft :text text :status status :editor-id editor-id))
 
-(defn give-statement [statement text status modify-id prev-modify-id editor-id]
-  (update-statement statement modify-id prev-modify-id :state :given :text text :status status :given (now) :editor-id editor-id))
+(defn give-statement [statement text status modify-id editor-id]
+  (update-statement statement modify-id :state :given :text text :status status :given (now) :editor-id editor-id))
 
-(defn update-reply-draft [{reply :reply :as statement} text nothing-to-add modify-id prev-modify-id editor-id]
+(defn update-reply-draft [{reply :reply :as statement} text nothing-to-add modify-id editor-id]
   (->> (assoc reply :text text :nothing-to-add (boolean nothing-to-add) :editor-id editor-id)
-       (update-statement statement modify-id prev-modify-id :state :replyable :reply)))
+       (update-statement statement modify-id :state :replyable :reply)))
 
-(defn reply-statement [{reply :reply :as statement} text nothing-to-add modify-id prev-modify-id editor-id]
+(defn reply-statement [{reply :reply :as statement} text nothing-to-add modify-id editor-id]
   (->> (assoc reply :text (when-not nothing-to-add text) :nothing-to-add (boolean nothing-to-add) :editor-id editor-id)
-       (update-statement statement modify-id prev-modify-id :state :replied :reply)))
+       (update-statement statement modify-id :state :replied :reply)))
 
 (defn request-for-reply [{reply :reply modify-id :modify-id :as statement} text user-id]
   (->> (assoc reply :saateText text :nothing-to-add false :editor-id user-id)
-       (update-statement statement modify-id modify-id :state :replyable :reply)))
+       (update-statement statement modify-id :state :replyable :reply)))
 
 ;;
 ;; Statement givers

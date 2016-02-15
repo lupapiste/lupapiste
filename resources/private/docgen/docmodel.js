@@ -1894,7 +1894,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildSection() {
-    var section = $("<section>").addClass( "accordion").attr( "data-doc-type", self.schemaName );
+    var section = $("<section>").addClass( "accordion").attr({"data-doc-type": self.schemaName, "data-doc-id": self.docId});
 
     var contents = $("<div>").addClass( "accordion_content");
     // id is used to remove validation indicators in showValidationResults

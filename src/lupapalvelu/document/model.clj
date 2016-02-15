@@ -232,11 +232,9 @@
                              :document    (:document info)
                              :result      result}]
 
-      ; return the whole validation result for now so we can clean old data
-      validation-result
-      #_(if (= illegal-key result)
-         (assoc validation-result :path []) ; Invalid path from user input should not be echoed
-         validation-result))))
+      (if (= illegal-key result)
+        (assoc validation-result :path []) ; Invalid path from user input should not be echoed
+        validation-result))))
 
 (defn validate-fields [application info k data path]
   (let [current-path (if k (conj path (name k)) path)

@@ -1,0 +1,4 @@
+"document.operation-identifiers" "fi" "Tunnisteet"
+"document.operation-identifiers.identifier" "fi" "Tunnus"
+"document.operation-editor.description" "fi" "Kuvaus"
+"document.operation-identifier.notice" "fi" "Huom! Asemapiiroksessa on tällä rakennuksella käytettävä samaa tunnusta."
