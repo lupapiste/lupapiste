@@ -150,7 +150,19 @@ Pena can link existing foreman application to foreman task
   Pena logs in
   Open project application
   Open tab  tasks
-  Select From List By Value  xpath=//select[@data-test-id="foreman-selection"]  ${foremanAppId}
+  Select From List By Value  xpath=//select[@data-test-id="foreman-selection-1"]  ${foremanAppId}
+  # Sleep so the repository reload does not prune dom when waiting
+  Sleep  2s
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-1"]  ${foremanAppId}
+
+Pena can clear the link and change the foreman role
+  Select From List By Index  xpath=//select[@data-test-id="foreman-selection-1"]  0
+  # Sleep so the repository reload does not prune dom when waiting
+  Sleep  2s
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-1"]  Valitse…
+  Select From List By Value  xpath=//select[@data-test-id="foreman-selection-0"]  ${foremanAppId}
+  Sleep  2s
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-0"]  ${foremanAppId}
 
 Pena can move to linked foreman application and back
   Click by test id  foreman-application-link-${foremanAppId}
