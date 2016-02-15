@@ -488,8 +488,7 @@ Edit operation description
 # This only works if there is only one applicable document.
 Operation description is
   [Arguments]  ${doc}  ${text}
-  ${upperCase}=  Convert To Uppercase  ${text}
-  Wait until  Element Should Contain  xpath=//div[@id='application-info-tab']//span[@data-test-id='${doc}-accordion-header-text']  ${upperCase}
+  Wait until  Element Should Contain  xpath=//div[@id='application-info-tab']//span[@data-test-id='${doc}-accordion-description-text']  ${text}
 
 Input building indentifier
   [Arguments]  ${doc}  ${text}  ${idx}=1

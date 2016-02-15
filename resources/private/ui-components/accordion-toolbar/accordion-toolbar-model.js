@@ -58,8 +58,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.titleLoc = ((op && op.name) || self.info.name) + "._group_label";
 
-  self.headerText = ko.pureComputed(function() { // Accordion header text
-    return loc(self.titleLoc) + (self.operationDescription() ? " - " + self.operationDescription() : "");
+  self.headerDescription = ko.pureComputed(function() { // Accordion header text
+    return self.operationDescription() ? " - " + self.operationDescription() : "";
   });
 
   self.toggleAccordion = function() {
