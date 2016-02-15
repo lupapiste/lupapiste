@@ -536,19 +536,6 @@
                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
         statement-attachments (attachments-canon/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
-        attachments-with-generated-pdfs (conj attachments-canonical
-                                          {:Liite
-                                           {:kuvaus "Vireille tullut hakemus"
-                                            :linkkiliitteeseen (str begin-of-link (writer/get-submitted-filename (:id application)))
-                                            :muokkausHetki (util/to-xml-datetime (:submitted application))
-                                            :versionumero 1
-                                            :tyyppi "hakemus_vireilletullessa"}}
-                                          {:Liite
-                                           {:kuvaus "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
-                                            :linkkiliitteeseen (str begin-of-link (writer/get-current-filename (:id application)))
-                                            :muokkausHetki (util/to-xml-datetime (now))
-                                            :versionumero 1
-                                            :tyyppi "hakemus_taustajarjestelmaan_siirrettaessa"}})
         canonical-with-statement-attachments  (attachments-canon/add-statement-attachments
                                                 canonical-without-attachments
                                                 statement-attachments
@@ -556,7 +543,7 @@
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
-                    attachments-with-generated-pdfs)
+                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
         xml (rakennuslupa-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
