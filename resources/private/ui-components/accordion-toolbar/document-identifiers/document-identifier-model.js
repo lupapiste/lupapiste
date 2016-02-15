@@ -11,7 +11,8 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
 
   self.identifierObject = self.myService.getIdentifier(self.documentId);
   self.schema = self.identifierObject.schema;
-  self.identifier = self.identifierObject && self.identifierObject.value.extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
+  self.identifier = self.identifierObject &&
+                    ko.observable(self.identifierObject.value()).extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
 
   if (ko.isObservable(self.identifier)) {
     self.identifier.subscribe(function(value) {
