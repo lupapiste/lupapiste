@@ -1359,7 +1359,6 @@
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
    {:info {:name "uusiRakennus" :approvable true}
-    :accordion-paths [["maksaja" "henkilo" "etunimi"] ["maksaja" "henkilo" "sukunimi"]]
     :body (body tunnus rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
    {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
