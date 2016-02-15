@@ -201,7 +201,7 @@
 
 (defn missing-command [command]
   (when-not (meta-data command)
-    (warnf "command '%s' not found" (:action command))
+    (errorf "command '%s' not found" (log/sanitize 50 (:action command)))
     (fail :error.invalid-command)))
 
 (defn missing-feature [command]
@@ -272,7 +272,6 @@
         (ok)))))
 
 (def authorize-validators [check-lockdown
-                           missing-command
                            missing-feature
                            missing-roles
                            impersonation])
@@ -375,12 +374,17 @@
         (fail :error.unknown)))))
 
 (defn execute [{action :action :as command}]
-  (let [before   (System/currentTimeMillis)
-        response (run command execute-validators true)
-        after    (System/currentTimeMillis)]
-    (debug action "->" (:ok response) "(took" (- after before) "ms)")
-    (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
-    response))
+  (or
+    ; Invalid commands should have as little side effect as possible:
+    ; call must not be counted (don't put the invalid command in actions atom)
+    ; and there is no point logging exec time.
+    (missing-command command)
+    (let [before   (System/currentTimeMillis)
+          response (run command execute-validators true)
+          after    (System/currentTimeMillis)]
+      (debug action "->" (:ok response) "(took" (- after before) "ms)")
+      (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
+      response)))
 
 (defn validate [command]
   (run command authorize-validators false))
