@@ -120,8 +120,8 @@ Link foreman approval to base app
   Required foreman state is  Vastaava työnjohtaja  missing
 
   ${foremanAppId} =  Get From List  ${foremanApps}  1
-  Focus  xpath=//select[@data-test-id="foreman-selection"]
-  Select From List By Value  xpath=//tr[@data-test-name="Vastaava työnjohtaja"]//select[@data-test-id="foreman-selection"]  ${foremanAppId}
+  Focus  xpath=//select[@data-test-id="foreman-selection-0"]
+  Select From List By Value  xpath=//tr[@data-test-name="Vastaava työnjohtaja"]//select[@data-test-id="foreman-selection-0"]  ${foremanAppId}
 
   Wait Until  Required foreman state is  Vastaava työnjohtaja  ok
 
