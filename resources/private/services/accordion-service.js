@@ -20,6 +20,7 @@ LUPAPISTE.AccordionService = function() {
 
   self.documents = ko.pureComputed(function() {
     self.appModel.id(); // trigger when id changes
+    self.appModel.modified(); // or trigger when modified changes
     var docsWithOperation = _.filter(self.appModel._js.documents, function(doc) {
       return doc["schema-info"].op;
     });
