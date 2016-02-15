@@ -31,14 +31,14 @@ LUPAPISTE.AccordionService = function() {
   self.accordionFields = ko.observableArray([]);
   self.documents.subscribe(function() {
     var identifiers = _(self.documents())
-      .map(function(doc) {
-        var subSchema = _.find(doc.schema.body, "identifier"); // finds first
-        if (subSchema) { // if we found the 'identifier' tag
-          var key = _.get(subSchema, "name");
-          return {docId: doc.docId, schema: subSchema, key: key, value: ko.observable(util.getIn(doc, ["data", key, "value"]))};
-        }
+      .filter(function(doc) {
+        return _.find(doc.schema.body, "identifier"); // finds first
       })
-      .filter(_.identity) // cleanup undefineds
+      .map(function(doc) {
+        var subSchema = _.find(doc.schema.body, "identifier");
+        var key = _.get(subSchema, "name");
+        return {docId: doc.docId, schema: subSchema, key: key, value: ko.observable(util.getIn(doc, ["data", key, "value"]))};
+      })
       .value();
     self.accordionFields(identifiers); // set the fields for each document
   });
