@@ -19,6 +19,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.docModel = params.docModel;
   self.docModelOptions = params.docModelOptions;
+  self.accordionService = lupapisteApp.services.accordionService;
   self.auth = self.docModel.authorizationModel;
   self.isOpen = ko.observable();
   self.isOpen.subscribe( params.openCallback );
@@ -33,21 +34,11 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   // Operation data
   var op = self.info.op;
-  self.operation = ko.mapping.fromJS(op);
+  self.operation = self.accordionService.getOperation(self.docModel.docId);
   self.hasOperation = ko.pureComputed(function() {
     return _.isObject(op);
   });
-  self.operationDescription = self.operation.description || ko.observable();
-
-  if (self.hasOperation()) { // subscribe only if operation is involved with accordion
-    var descriptionSub = hub.subscribe("op-description-changed", function(e) {
-      var opid = e["op-id"];
-      var desc = e["op-desc"];
-      if (opid === self.operation.id()) {
-        self.operationDescription(desc);
-      }
-    });
-  }
+  self.operationDescription = self.operation && self.operation.description || ko.observable();
 
   self.isPrimaryOperation = ko.pureComputed( function() {
     var id = op && op.id;
@@ -200,7 +191,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   });
 
   self.hasIdentifierField = ko.pureComputed(function() {
-    return lupapisteApp.services.accordionService.getIdentifier(self.docModel.docId);
+    return self.accordionService.getIdentifier(self.docModel.docId);
   });
 
   self.closeEditors = function( data, event ) {

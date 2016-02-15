@@ -24,7 +24,7 @@ LUPAPISTE.AccordionService = function() {
       return doc["schema-info"].op;
     });
     return _.map(docsWithOperation, function(doc) {
-      return {docId: doc.id, operation: doc["schema-info"].op, schema: doc.schema, data: doc.data};
+      return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: doc.data};
     });
   });
 
@@ -42,6 +42,16 @@ LUPAPISTE.AccordionService = function() {
       .value();
     self.accordionFields(identifiers); // set the fields for each document
   });
+
+  self.getOperation = function(docId) {
+    return util.getIn(_.find(self.documents(), {docId: docId}), ["operation"]);
+  };
+
+  self.getOperationByOpId = function(opId) {
+    return util.getIn(_.find(self.documents(), function(doc) {
+      return doc.operation.id() === opId;
+    }), ["operation"]);
+  };
 
   self.getIdentifier = function(docId) {
     return _.find(self.accordionFields(), {docId: docId});
@@ -62,16 +72,20 @@ LUPAPISTE.AccordionService = function() {
     var appId = event.appId;
     var operationId = event.operationId;
     var value = event.description;
-    ajax.command ("update-op-description", {id: appId,
+    var operation = self.getOperationByOpId(operationId);
+    if (operation.description() !== value) {
+      ajax.command ("update-op-description", {id: appId,
+                                              "op-id": operationId,
+                                              desc: value})
+      .success (function(resp) {
+        operation.description(value);
+        hub.send("op-description-changed", {appId: appId,
                                             "op-id": operationId,
-                                            desc: value})
-    .success (function(resp) {
-      hub.send("op-description-changed", {appId: appId,
-                                          "op-id": operationId,
-                                          "op-desc": value});
-      util.showSavedIndicator(resp);
-    })
-    .call();
+                                            "op-desc": value});
+        util.showSavedIndicator(resp);
+      })
+      .call();
+    }
   });
 
 };
