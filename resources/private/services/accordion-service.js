@@ -58,4 +58,20 @@ LUPAPISTE.AccordionService = function() {
     }
   });
 
+  hub.subscribe("accordionService::saveOperationDescription", function(event) {
+    var appId = event.appId;
+    var operationId = event.operationId;
+    var value = event.description;
+    ajax.command ("update-op-description", {id: appId,
+                                            "op-id": operationId,
+                                            desc: value})
+    .success (function(resp) {
+      hub.send("op-description-changed", {appId: appId,
+                                          "op-id": operationId,
+                                          "op-desc": value});
+      util.showSavedIndicator(resp);
+    })
+    .call();
+  });
+
 };

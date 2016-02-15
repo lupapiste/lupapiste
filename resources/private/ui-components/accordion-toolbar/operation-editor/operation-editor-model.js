@@ -12,17 +12,10 @@ LUPAPISTE.OperationEditorModel = function(params) {
   self.description = ko.observable(self.operation.description()).extend({rateLimit: {timeout: 500, method: "notifyWhenChangesStop"}});
   self.enabled = self.operation && auth.ok( "update-op-description");
 
-  var descriptionSub = self.description.subscribe( function( desc ) {
-    ajax.command ("update-op-description", {id: self.docModel.appId,
-                                            "op-id": self.operation.id(),
-                                            desc: desc  })
-    .success (function(resp) {
-      hub.send("op-description-changed", {appId: self.docModel.appId,
-                                          "op-id": self.operation.id(),
-                                          "op-desc": desc  });
-      util.showSavedIndicator(resp);
-    })
-    .call();
+  var descriptionSub = self.description.subscribe( function(desc) {
+    hub.send("accordionService::saveOperationDescription", {appId: self.docModel.appId,
+                                                            operationId: self.operation.id(),
+                                                            description: desc});
   });
 
   // Star
