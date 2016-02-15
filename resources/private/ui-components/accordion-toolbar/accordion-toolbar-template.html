@@ -68,11 +68,13 @@
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-bind="event: {keydown: closeEditors}">
         <div>
-          <!-- ko if: hasIdentifierField -->
-          <div class="inline-col identifier-component" data-bind="component: {name: 'document-identifier',
-                                    params: {docId: docModel.docId,
+          <!-- ko if: hasIdentifierField() && features.enabled("document-identifier") -->
+          <div class="inline-col identifier-component"
+              data-bind="component: {name: 'document-identifier',
+                                     params: {docId: docModel.docId,
                                              authModel: auth,
-                                             options: docModelOptions}}"></div>
+                                             options: docModelOptions}},
+                         css: {feature: features.enabled('document-identifier')}"></div>
           <!-- /ko -->
           <div class="inline-col identifier-component"
                data-bind="component: {name: 'operation-editor',
