@@ -15,20 +15,3 @@
         (commons-resources/write-txt
           (commons-resources/sheet->map sheet)
           (io/file (str "resources/i18n/" sheet-name ".txt")))))))
-
-(defn translations-to-txt
-  "Reads translation excel and generates corresponding txt files (one
-  for each sheet) into the same folder. For example,
-  lupapiste_translations_20160204.xlsx -> translations.txt
-  where translations is the name of the sheet in the excel."
-  [xlsx-path]
-  (let [file (io/file xlsx-path)
-        dir (.getParent file)]
-    (with-open [in (io/input-stream file)]
-      (let [wb      (xls/load-workbook in)
-            sheets  (seq wb)]
-        (doseq [sheet sheets
-               :let [sheet-name (.getSheetName sheet)]]
-         (commons-resources/write-txt
-          (commons-resources/sheet->map sheet)
-          (io/file dir (str sheet-name ".txt"))))))))

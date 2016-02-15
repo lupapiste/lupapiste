@@ -61,7 +61,7 @@
                  [org.clojure/data.json "0.2.6"]
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
                  [lupapiste/oskari "0.9.56"]
-                 [lupapiste/commons "0.6.5"]
+                 [lupapiste/commons "0.6.51"]
                  [lupapiste/mongocheck "0.1.1"]
                  [pdfa-core "0.0.3"]
                  [clj-rss "0.2.3"]]
