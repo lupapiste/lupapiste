@@ -18,17 +18,11 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
     return self.authModel.ok(util.getIn(commands, [self.tab(), "submit"]));
   });
 
-  self.refreshVisible = self.submitVisible;
-
   self.submit = function() {
     hub.send("statement::submit", {
       applicationId: applicationId(),
       statementId: statementId(),
       tab: self.tab()
     });
-  };
-
-  self.refresh = function() {
-    hub.send("statement::refresh");
   };
 };
