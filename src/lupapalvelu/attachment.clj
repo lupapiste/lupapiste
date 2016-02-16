@@ -576,8 +576,8 @@
         (create-preview file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
-(defn pre-process-attachment [{:keys [attachment-type filename content]}]
-  (if (and libreoffice-client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
+(defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
+  (if (and libreoffice-client/enabled? (= (keyword type-group) :muut) (= (keyword type-id) :paatosote))
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
