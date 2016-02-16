@@ -18,7 +18,7 @@ LUPAPISTE.StatementService = function(params) {
 
   self.commands = {
     statement: {saveDraft: "save-statement-as-draft", submit: "give-statement", confirm: true},
-    reply: {saveDraft: "save-statement-reply-as-draft", submit:"reply-statement"},
+    reply: {saveDraft: "save-statement-reply-as-draft", submit:"reply-statement", confirm: true},
     "reply-request": {submit: "request-for-statement-reply"}};
 
   var saving = ko.observable(false);

@@ -36,6 +36,8 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
                                               {title: loc( "yes"),
                                                 fn: send },
                                                {title: loc( "cancel")});
+    } else {
+      send();
     }
   };
 
