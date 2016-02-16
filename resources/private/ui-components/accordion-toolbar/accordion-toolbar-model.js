@@ -35,7 +35,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   // Operation data
   var op = self.info.op;
   // if service is defined use accordion service, if not (bulletins-app) use operation data from docgen
-  self.operation = self.accordionService ? self.accordionService.getOperation(self.docModel.docId) : ko.mapping.fromJS(op);
+  self.operation = ko.mapping.fromJS(op);
   self.hasOperation = ko.pureComputed(function() {
     return _.isObject(op);
   });
@@ -216,7 +216,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     stickyRefresh.dispose();
-    toggleEditorSubscription.dispose();
+    hub.unsubscribe(toggleEditorSubscription);
   };
 
 };

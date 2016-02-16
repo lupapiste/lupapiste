@@ -18,16 +18,16 @@ LUPAPISTE.AccordionService = function() {
     }
   });
 
-  self.documents = ko.pureComputed(function() {
-    self.appModel.id(); // trigger when id changes
-    self.appModel.modified(); // or trigger when modified changes
-    var docsWithOperation = _.filter(self.appModel._js.documents, function(doc) {
+  self.documents = ko.observable();
+
+  self.setDocuments = function(docs) {
+    var docsWithOperation = _.filter(docs, function(doc) {
       return doc["schema-info"].op;
     });
-    return _.map(docsWithOperation, function(doc) {
+    self.documents(_.map(docsWithOperation, function(doc) {
       return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: doc.data};
-    });
-  });
+    }));
+  }
 
   self.accordionFields = ko.observableArray([]);
   self.documents.subscribe(function() {
@@ -49,6 +49,7 @@ LUPAPISTE.AccordionService = function() {
   };
 
   self.getOperationByOpId = function(opId) {
+    console.log(opId);
     return util.getIn(_.find(self.documents(), function(doc) {
       return doc.operation.id() === opId;
     }), ["operation"]);
