@@ -7,9 +7,36 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.attachment-metadata :refer :all]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.states :as states]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.generators :as gen]
+            [clojure.test :refer [is]]
+            [schema.core :as sc]
+            [sade.schemas :as ssc]
+            [sade.schema-generators :as ssg]))
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
+
+(defspec make-attachement-spec
+  (prop/for-all [attachment-id           ssg/object-id
+                 now                     ssg/timestamp
+                 target                  (ssg/generator Target)
+                 required?               gen/boolean
+                 requested-by-authority? gen/boolean
+                 locked?                 gen/boolean
+                 application-state       (gen/elements states/all-states)
+                 operation               (ssg/generator Operation)
+                 attachment-type         (ssg/generator Type)
+                 metadata                (ssg/generator  {sc/Str sc/Str})
+                 ;; Optional parameters
+                 contents                (ssg/generator (sc/maybe sc/Str))
+                 read-only?              (ssg/generator (sc/maybe sc/Bool))
+                 source                  (ssg/generator (sc/maybe Source))]
+                (let [validation-error (->> (make-attachment now target required? requested-by-authority? locked? application-state operation attachment-type metadata attachment-id contents read-only? source)
+                                            (sc/check Attachment))]
+                  (is (nil? validation-error)  "Validation-error"))))
 
 (facts "Test file name encoding"
   (fact (encode-filename nil)                                 => nil)
@@ -121,21 +148,6 @@
   (facts "create-sent-timestamp-update-statements"
     (create-sent-timestamp-update-statements attachments ["12" "23"] 123) => {"attachments.1.sent" 123
                                                                               "attachments.2.sent" 123}))
-
-(let [attachments [{:id 1 :versions [{:fileId "11", :version {:major 1, :minor 1}}
-                                     {:fileId "21", :version {:major 2, :minor 1}}]}
-                   {:id 2 :versions [{:fileId "12", :version {:major 1, :minor 2}}
-                                     {:fileId "22", :version {:major 2, :minor 2}}]}]]
-
-  (facts "get attachment version by file id"
-    (get-version-by-file-id (first attachments) "11") => {:fileId "11", :version {:major 1, :minor 1}}
-    (get-version-by-file-id (first attachments) "21") => {:fileId "21", :version {:major 2, :minor 1}}
-    (get-version-by-file-id (first attachments) "10") => nil)
-
-  (facts "get attachment version number by file id"
-    (get-version-number {:attachments attachments} 2 "12") => {:major 1, :minor 2}
-    (get-version-number {:attachments attachments} 1 "11") => {:major 1, :minor 1}
-    (get-version-number {:attachments attachments} 0 "12") => nil))
 
 (fact "attachment type IDs are unique"
   (let [known-duplicates (set (conj attachment-types-osapuoli

@@ -10,9 +10,18 @@ Mikko creates an application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  approve-app${secs}
-  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-30  sisatila-muutos
   Execute Javascript  $("textarea[name='kuvaus']").val('Hieno hanke...').change();
   Execute Javascript  $("textarea[name='poikkeamat']").val('poikkeuksetta!').change();
+
+Mikko selects building
+  Open tab  info
+  Open accordions  info
+  Wait Until  Select From List  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']  199887766E
+  Confirm  dynamic-yes-no-confirm-dialog
+
+Got owner info from backed
+  Wait Until  Textfield Value Should Be  //section[@data-doc-type='rakennuksen-muuttaminen']//input[@data-docgen-path="rakennuksenOmistajat.0.yritys.yritysnimi"]  Testiyritys 9242
 
 Mikko sets himself the applicant
   Open tab  parties
@@ -25,7 +34,7 @@ Mikko can't approve application
 
 Mikko adds an attachment
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Rakennuksen sisätilojen muutos (käyttötarkoitus ja/tai muu merkittävä sisämuutos)
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Mikko decides to submit application
@@ -33,7 +42,7 @@ Mikko decides to submit application
 
 Mikko still can't approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
-  Kill session
+  [Teardown]  Kill session
 
 Ronja tries to approve application without permission
   Ronja logs in
@@ -63,14 +72,14 @@ Sonja approves group lammitys
 
 Sonja rejects group mitat
   Reject group  mitat
-  Sonja accordion negated  uusiRakennus
+  Sonja accordion negated  rakennuksen-muuttaminen
 
-Sonja approves accordion uusiRakennus
-  Approve accordion  uusiRakennus
+Sonja approves accordion rakennuksen-muuttaminen
+  Approve accordion  rakennuksen-muuttaminen
 
 Sonja rejects group kaytto
   Reject group  kaytto
-  Sonja accordion negated  uusiRakennus
+  Sonja accordion negated  rakennuksen-muuttaminen
   [Teardown]  Kill session
 
 Mikko logs in and sees correct approval state
@@ -78,18 +87,18 @@ Mikko logs in and sees correct approval state
   Open application  ${appname}  753-416-25-30
   Open accordions  info
   Accordion approved  hankkeen-kuvaus-rakennuslupa
-  Accordion negated  uusiRakennus
+  Accordion negated  rakennuksen-muuttaminen
   Group rejected  mitat
   Group rejected  kaytto
   Group approved  lammitys
   [Teardown]  Kill session
 
-Sonja logs in and approves group kaytto: uusiRakennus is now approved.
+Sonja logs in and approves group kaytto: rakennuksen-muuttaminen is now approved.
   Sonja logs in
   Open application  ${appname}  753-416-25-30
   Open accordions  info
   Approve group  kaytto
-  Sonja accordion approved  uusiRakennus
+  Sonja accordion approved  rakennuksen-muuttaminen
 
 Party tab has indicators
   Wait Until  Element should be visible  applicationPartyDocumentIndicator
@@ -109,6 +118,12 @@ Party tab indicators have been reset
 Sonja sees that attachment has transferred indicator icon
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="transfered-muut.muu"]
+
+Building selector keeps its value
+  Open tab  info
+  Open accordions  info
+  Element should be visible  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']
+  List Selection Should Be  //section[@data-doc-type='rakennuksen-muuttaminen']//select[@name='buildingId']  199887766E
 
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement

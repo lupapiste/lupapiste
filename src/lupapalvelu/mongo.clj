@@ -359,6 +359,7 @@
   (ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (ensure-index :applications {:address 1})
   (ensure-index :applications {:tags 1})
+  (ensure-index :applications {:organization 1 :state 1})
   (ensure-index :activation {:email 1})
   (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (ensure-index :vetuma {:user.stamp 1})
@@ -377,7 +378,8 @@
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (ensure-index :propertyCache {:created 1} {:expireAfterSeconds (* 60 60 24)}) ; 24 h
   (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
-  (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
+  (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32})
+  (ensure-index :ssoKeys {:ip 1} {:unique true}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

@@ -220,8 +220,7 @@
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles auth/all-authz-roles
-         :org-authz-roles auth/reader-org-authz-roles
-         :feature :preview}
+         :org-authz-roles auth/reader-org-authz-roles}
         [{{:keys [attachment-id]} :data user :user}]
         (attachment/output-attachment-preview attachment-id (partial attachment/get-attachment-file-as user)))
 
@@ -303,6 +302,7 @@
                                  :attachment-id new-id
                                  :content output-file
                                  :filename new-filename
+                                 :make-comment false
                                  :archivable true
                                  :archivabilityError nil)]
       (if (attachment/attach-file! pdfa-attachment-data)
@@ -528,12 +528,12 @@
      (let [attachments (attachment/get-attachments-infos application attachmentIds)
            signature {:user (user/summary u)
                       :created (:created command)}
-           updates (reduce (fn [m {attachment-id :id {version :version} :latestVersion}]
+           updates (reduce (fn [m {attachment-id :id {version :version file-id :fileId} :latestVersion}]
                              (merge m (mongo/generate-array-updates
                                         :attachments
                                         (:attachments application)
                                         #(= (:id %) attachment-id)
-                                        :signatures (assoc signature :version version))))
+                                        :signatures (assoc signature :version version :fileId file-id))))
                      {} attachments)]
 
        ; Indexes are calculated on the fly so there is a small change of

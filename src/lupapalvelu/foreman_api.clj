@@ -44,7 +44,9 @@
                               foreman-user
                               (not (auth/has-auth? application (:id foreman-user))))
 
-        applicant-invites (foreman/applicant-invites new-application-docs (:auth application))
+        applicant-invites (->>
+                            (foreman/applicant-invites new-application-docs (:auth application))
+                            (remove #(= (:email %) (:email user)))) ;; LPK-1331, Don't double-invite the user of command, if applicant
         auths             (remove nil?
                                  (conj
                                    (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
@@ -71,10 +73,13 @@
            $set  {:modified created}})
         (notif/notify! :invite {:application application :recipients [foreman-user]}))
 
+      ; Invite notifications
       (let [recipients (for [auth (:other grouped-auths)
                              :let [user (get-in auth [:invite :user])]]
                          (set/rename-keys user {:username :email}))]
         (notif/notify! :invite {:application foreman-app :recipients recipients}))
+
+      ; Company invites
       (doseq [auth (:company grouped-auths)
               :let [company-id (-> auth :invite :user :id)
                     token-id (company/company-invitation-token user company-id (:id foreman-app))]]

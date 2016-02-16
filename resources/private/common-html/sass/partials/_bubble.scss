@@ -1,0 +1,117 @@
+// Separate upwards bubble arrow that is stacked with
+// the bubble opening element (e.g., button).
+// Parameters:
+// $csl: name for the generated arrow class
+// $border: bubble border color
+// $bg: bubble background color
+// $size: arrow size.
+@mixin bubble-arrow( $cls, $border, $bg, $size: 15px ) {
+  .#{$cls} {
+  position: relative;
+  z-index: 100;
+}
+
+  .#{$cls}:after,
+  .#{$cls}:before {
+                    bottom: 100%;
+                    left: 50%;
+                    border: solid transparent;
+                    content: " ";
+                    height: 0;
+                    width: 0;
+                    position: absolute;
+                    pointer-events: none;
+                    z-index: 100;
+                    overflow-y: visible;
+                  }
+
+  .#{$cls}:after {
+    border-color: transparentize( $bg, 1);
+    border-bottom-color: $bg;
+    border-width: $size - 1px; //14px;
+    margin-left:  -$size + 1px; //-14px;
+  }
+  .#{$cls}:before {
+    border-color: transparentize( $border, 1);
+    border-bottom-color: $border;
+    border-width: $size; //15px;
+    margin-left:  -$size //-15px;
+  }
+
+
+  .stacked .#{$cls},
+  .stacked--inline .#{$cls} {
+    overflow-y: visible;
+    margin-top: $size + 5px; //20px;
+    margin-bottom: -1px;
+  }
+}
+
+.bubble-dialog {
+  $border-color: $grid-border-color;
+  $bg-color: white;
+  $pad: 20px;
+
+  padding: $pad $pad $pad $pad;
+  margin-bottom: $pad;
+  position: relative;
+  background: $bg-color;
+  border: 1px solid $border-color;
+
+  .autocomplete-component {
+    margin: {
+    top: 10px;
+    bottom: 10px;
+  }
+  }
+
+  .left-buttons {
+    margin-top: $pad;
+  }
+
+  label.mandatory:after {
+    content: " *";
+    color: $input-required-border-color;
+  }
+  input[type=text], textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 4px;
+    display: block;
+    &:focus {
+      border-color: $input-focus-border-color;
+    }
+  }
+
+  textarea {
+    min-height: 8em;
+  }
+
+  input.mandatory {
+    border-color: $input-required-border-color;
+    margin-bottom: $pad;
+  }
+
+  .error {
+    margin-top: $pad;
+    border: 1px solid red;
+    color: red;
+    padding: $pad;
+  }
+
+  table.mandatory {
+    tr {
+      background-color: initial;
+      td {
+        border: 1px solid $input-required-border-color;
+        background-color: none;
+      }
+      td.full {
+        width: 33%;
+      }
+    }
+  }
+}
+
+// Bubble dialog arrow
+@include bubble-arrow( bubble-dialog-arrow, $grid-border-color, white, 20px);

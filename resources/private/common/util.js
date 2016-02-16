@@ -204,7 +204,9 @@ var util = (function($) {
 
 
   function dissoc(m, k) {
-    delete m[k];
+    if( _.isObject( m ) ) {
+      delete m[k];
+    }
     return m;
   }
 

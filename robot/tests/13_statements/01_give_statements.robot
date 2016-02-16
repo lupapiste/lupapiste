@@ -24,10 +24,10 @@ Authorities from different municipality can be added as statement giver
 
 Authority can be a statement giver multiple times
   Create statement giver  sonja.sibbo@sipoo.fi  Rakennuslausunto
-  Create statement giver  sonja.sibbo@sipoo.fi  Erityslausunto
+  Create statement giver  sonja.sibbo@sipoo.fi  Erityislausunto
   Logout
 
-New applications does not have statements
+New applications do not have statements
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
@@ -54,6 +54,10 @@ Sonja adds five statement givers to application
 
   Input text  xpath=//*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
   Invite read-only statement giver  0  01.06.2018
+  Open statement  0
+  Wait until  Element should be visible  statement-cover-note
+  Wait until  Element text should be  statement-cover-note  Tama on saateteksti.
+  Return from statement
 
   # Checkbox selection and maaraaika are cleared, the saate text stays filled with value.
   Wait Until  Checkbox Should Not Be Selected  statement-giver-checkbox-0
@@ -101,9 +105,12 @@ Sonja types in draft
 
 Sonja can give statement to own request
   Open statement  4
+  Wait until  Element text should be  xpath=//div[@data-test-id='header-statement-edit']//span[@data-bind='text: person.text']  ERITYISLAUSUNTO
   Input text  statement-text  salibandy on the rocks.
-  Wait until  Select From List By Value  statement-type-select  puoltaa
+  Select From List By Value  statement-type-select  puoltaa
   Wait and click  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']
 
 Comment is added
   Open statement  4
@@ -153,6 +160,7 @@ Veikko from Tampere can give statement
   Select From List By Value  statement-type-select  ehdoilla
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-1']  Puoltaa ehdoilla
   [Teardown]  logout
 

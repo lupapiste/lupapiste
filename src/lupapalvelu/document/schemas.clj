@@ -147,13 +147,15 @@
 
 (def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
 
-(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
+(def tunnus {:name "tunnus" :type :string :required false :hidden true :max-len 3})
+
+(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size "xl" :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
                            {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
                            {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
-(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro" :required true}
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :size "xl" :i18nkey "rakennusnro" :required true}
                                 {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
@@ -1357,7 +1359,7 @@
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
    {:info {:name "uusiRakennus" :approvable true}
-    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
+    :body (body tunnus rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
    {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}

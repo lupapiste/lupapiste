@@ -55,10 +55,8 @@
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
-  "Reader role has access to every application within org. guestAuthority can
-  only access those applications that have extended an explicit
-  invitation."
-  (concat [:authority :approver :commenter :reader :guestAuthority] permanent-archive-authority-roles))
+  "Reader role has access to every application within org."
+  (concat [:authority :approver :commenter :reader] permanent-archive-authority-roles))
 
 (defn- with-scope-defaults [org]
   (if (:scope org)
@@ -82,6 +80,14 @@
    (->> (mongo/select :organizations query projection)
         (map remove-sensitive-data)
         (map with-scope-defaults))))
+
+(defn get-autologin-ips-for-organization [org-id]
+  (-> (mongo/by-id :organizations org-id [:allowedAutologinIPs])
+      :allowedAutologinIPs))
+
+(defn autogin-ip-mongo-changes [ips]
+  (when (nil? (sc/check [ssc/IpAddress] ips))
+    {$set {:allowedAutologinIPs ips}}))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
@@ -189,8 +195,9 @@
       (debugf "organization '%s' not found with id." id)
       (fail :error.organization-not-found))))
 
-(defn has-ftp-user? [organization permit-type]
-  (not (ss/blank? (get-in organization [:krysp (keyword permit-type) :ftpUser]))))
+(defn krysp-integration? [organization permit-type]
+  (when-let [krysp (get-in organization [:krysp (keyword permit-type)])]
+    (not-any? ss/blank? (vals krysp))))
 
 (defn allowed-roles-in-organization [organization]
   {:pre [(map? organization)]}
@@ -350,6 +357,10 @@
 (defn valid-language [cmd]
   (when-not  (->> cmd :data :lang ss/lower-case keyword (contains? (set i18n/supported-langs)) )
     (fail :error.unsupported-language)))
+
+(defn valid-ip-addresses [ips]
+  (when-let [error (sc/check [ssc/IpAddress] ips)]
+    (fail :error.invalid-ip :desc (str error))))
 
 (defn-
   ^org.geotools.data.simple.SimpleFeatureCollection

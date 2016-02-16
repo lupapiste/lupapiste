@@ -5,7 +5,9 @@
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.actions-api :as ca]))
+            [lupapalvelu.actions-api :as ca]
+            ;; ensure all actions are registered by requiring server ns
+            [lupapalvelu.server]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 

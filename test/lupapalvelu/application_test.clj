@@ -50,7 +50,17 @@
   (fact "ya-jatkoaika requires" (is-link-permit-required {:secondaryOperations [{:name "ya-jatkoaika"}]}) => truthy))
 
 (facts "Add operation allowed"
-       (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen :rajankaynti :pima}
+       (let [not-allowed-for #{;; R-operations, adding not allowed
+                               :raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen 
+                               :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen 
+                               ;; KT-operations, adding not allowed
+                               :rajankaynti 
+                               ;; YL-operations, adding not allowed
+                               :pima
+                               ;; YM-operations, adding not allowed
+                               :muistomerkin-rauhoittaminen :jatteen-keraystoiminta :lannan-varastointi
+                               :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan
+                               :koeluontoinen-toiminta :maa-ainesten-kotitarveotto :ilmoitus-poikkeuksellisesta-tilanteesta}
         error {:ok false :text "error.add-operation-not-allowed"}]
 
     (doseq [operation lupapalvelu.operations/operations]
@@ -58,7 +68,7 @@
             application {:primaryOperation {:name (name op)} :permitSubtype nil}
             operation-allowed (add-operation-allowed? nil application)]
         (fact {:midje/description (name op)}
-              (if (or (not (contains? #{"R" "KT"} permit-type)) (not-allowed-for op))
+          (if (or (not (contains? #{"R" "KT" "P" "YM"} permit-type)) (not-allowed-for op))
             (fact "Add operation not allowed" operation-allowed => error)
             (fact "Add operation allowed" operation-allowed => nil?)))))
 

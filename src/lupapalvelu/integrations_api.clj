@@ -62,7 +62,7 @@
 
 (defn- do-approve [application created id lang jatkoaika-app? do-rest-fn user]
   (let [organization (organization/get-organization (:organization application))]
-    (if (organization/has-ftp-user? organization (permit/permit-type application))
+    (if (organization/krysp-integration? organization (permit/permit-type application))
       (or
         (application/validate-link-permits application)
         (let [sent-file-ids (if jatkoaika-app?
@@ -71,7 +71,7 @@
                                 (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
           (do-rest-fn attachments-updates)))
-      ;; SFTP user not defined for the organization -> let the approve command pass
+      ;; Integration details not defined for the organization -> let the approve command pass
       (do-rest-fn nil))))
 
 (defcommand approve-application
@@ -223,10 +223,10 @@
 ;; Building info
 ;;
 
-(defcommand get-building-info-from-wfs
+(defquery get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     krysp-enrichment-states
+   :states     states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]

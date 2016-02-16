@@ -253,7 +253,7 @@
 
 (defn collect-task-fields [tasks]
   (map
-    (fn [{:keys [duedate taskname closed created state schema-info source assignee data rakennus]}]
+    (fn [{:keys [duedate taskname closed created state schema-info source assignee data]}]
       (let [i18n-prefix (:i18nprefix schema-info)
             katselmuksenLaji (get-in data [:katselmuksenLaji :value])
             vaadittuLupaehtona (get-in data [:vaadittuLupaehtona :value])
@@ -265,7 +265,8 @@
             huomautus-toteasHetki (get-in data [:katselmus :huomautukset :toteamisHetki :value])
             lasnaolijat (get-in data [:katselmus :lasnaolijat :value])
             poikkeamat (get-in data [:katselmus :poikkeamat :value])
-            tila (get-in data [:katselmus :tila :value])]
+            tila (get-in data [:katselmus :tila :value])
+            rakennus (:rakennus data)]
         (array-map
           (loc "task-katselmus.katselmuksenLaji._group_label") (if (ss/blank? katselmuksenLaji) "-" (loc (str i18n-prefix "." katselmuksenLaji)))
           (loc "vaadittuLupaehtona") (if vaadittuLupaehtona (loc "yes") (loc "no"))
@@ -489,6 +490,7 @@
   (let [title (loc "application.building")
         empty (loc "hankkeen-kuvaus.hankkeenVaativuus.ei tiedossa")
         buildings (:rakennus fields)]
+    (debug "tasks fields:" fields )
     `[~@(render-fields (take 12 fields))
       [:pagebreak]
       ~@(document-section-header (loc "application.building"))

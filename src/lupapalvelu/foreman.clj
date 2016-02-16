@@ -180,6 +180,7 @@
   {:pre [(= "henkilo" (get-in applicant [:data :_selected]))
          (sequential? auth)]}
   (when-let [email (user/canonize-email (get-in applicant [:data :henkilo :yhteystiedot :email]))]
+    ;; Create invite for applicant if authed
     (when (some #(= email (:username %)) auth)
       {:email email
        :role "writer"})))
@@ -188,12 +189,15 @@
   {:pre [(= "yritys" (get-in applicant [:data :_selected]))
          (sequential? auth)]}
   (if-let [company-id (get-in applicant [:data :yritys :companyId])]
+    ;; invite the Company if it's authed
     (some
       #(when (= company-id (or (:id %) (get-in % [:invite :user :id])))
          {:company-id company-id})
       auth)
+
     (when-let [contact-email (user/canonize-email
                                (get-in applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email]))]
+      ;; invite the filled contact person if authed
       (some
         #(when (= contact-email (:username %))
            {:email contact-email
@@ -207,7 +211,7 @@
         (map
           #(case (-> % :data :_selected)
              "henkilo" (henkilo-invite % auth)
-             "yritys" (yritys-invite % auth)))
+             "yritys"  (yritys-invite % auth)))
         (remove nil?))))
 
 (defn create-company-auth [company-id]

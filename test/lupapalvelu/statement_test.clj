@@ -126,10 +126,10 @@
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
         (dissoc :modified)
-        (update-draft "some text" "puoltaa" id-b id-a id-1))
+        (update-draft "some text" "puoltaa" id-a id-1))
     => (contains #{[:text "some text"] 
                    [:status "puoltaa"] 
-                   [:modify-id id-b]
+                   [:modify-id anything]
                    [:editor-id id-1]
                    [:state :draft]
                    [:modified anything]}))
@@ -137,23 +137,23 @@
   (fact "update-draft - wrong modify-id"
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
-        (update-draft "some text" "puoltaa" id-b id-2 id-1))
+        (update-draft "some text" "puoltaa" id-b id-1))
     => (throws Exception))
 
   (fact "update-draft - updated statement is missing person should produce validation error"
     (-> (ssg/generate Statement)
         (dissoc :person)
-        (update-draft "some text" "puoltaa" id-b id-a id-1))
+        (update-draft "some text" "puoltaa" id-b id-1))
     => (throws Exception))
 
   (fact "give-statement"
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
         (dissoc :given)
-        (give-statement "some text" "puoltaa" id-b id-a id-1))
+        (give-statement "some text" "puoltaa" id-a id-1))
     => (contains #{[:text "some text"] 
                    [:status "puoltaa"] 
-                   [:modify-id id-b] 
+                   [:modify-id anything] 
                    [:editor-id id-1]
                    [:state :given] 
                    [:given anything]}))
@@ -163,9 +163,9 @@
         (assoc :modify-id id-a :editor-id id-1 :state :announced :text "statement text")
         (assoc-in [:reply :saateText] "saate")
         (dissoc :modified)
-        (update-reply-draft "reply text" true id-b id-a id-2))
+        (update-reply-draft "reply text" true id-a id-2))
     => (contains #{[:text "statement text"] 
-                   [:modify-id id-b]
+                   [:modify-id anything]
                    [:editor-id id-1]
                    [:state :replyable]
                    [:modified anything]
@@ -177,7 +177,7 @@
   (fact "update-reply-draft - nil values"
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a :reply {:saateText "saate"})
-        (update-reply-draft nil nil id-b id-a id-2))
+        (update-reply-draft nil nil id-a id-2))
     => (contains #{[:reply {:editor-id id-2
                             :nothing-to-add false
                             :saateText "saate"}]}))
@@ -186,7 +186,7 @@
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a :state :announced)
         (dissoc :reply)
-        (reply-statement "reply text" false id-b id-a id-2))
+        (reply-statement "reply text" false id-a id-2))
     => (contains #{[:state :replied]
                    [:reply {:editor-id id-2
                             :nothing-to-add false

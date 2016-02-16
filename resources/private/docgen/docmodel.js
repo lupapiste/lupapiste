@@ -41,7 +41,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   };
 
-  self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long"};
+  self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long", "xl": "form-input really-long"};
 
   // Context help
   self.addFocus = function (e) {
@@ -348,7 +348,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return button;
   }
 
-  function makeLabel(schema, type, pathStr, groupLabel) {
+  function makeLabel(schema, type, pathStr, groupLabel, validationResult) {
     var label = document.createElement("label");
     var path = groupLabel ? pathStr + "._group_label" : pathStr;
 
@@ -360,6 +360,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var className = "form-label form-label-" + type;
     if (schema.labelclass) {
       className = className + " " + schema.labelclass;
+    }
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      className += " " + level;
     }
 
     label.id = pathStrToLabelID(pathStr);
@@ -379,7 +383,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function makeInput(type, pathStr, modelOrValue, subSchema) {
+  function makeInput(type, pathStr, modelOrValue, subSchema, validationResult) {
     var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
     var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
     var source = _.isObject(modelOrValue) ? getModelSource(modelOrValue, subSchema.name) : undefined;
@@ -399,6 +403,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     input.className = "form-input " + type + " " + (extraClass || "");
+
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      input.className += " " + level;
+    }
 
     if (readonly) {
       input.readOnly = true;
@@ -431,7 +440,23 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return input;
   }
 
-  function makeEntrySpan(subSchema, pathStr) {
+  function makeErrorPanel(pathStr, validationResult) {
+    var errorPanel = document.createElement("span");
+    errorPanel.className = "errorPanel";
+    errorPanel.id = pathStrToID(pathStr) + "-errorPanel";
+
+    if (validationResult && validationResult[0] !== "tip") {
+      var level = validationResult[0],
+          code = validationResult[1],
+          errorSpan = document.createElement("span");
+      errorSpan.className = level;
+      errorSpan.innerHTML = loc(["error", code]);
+      errorPanel.appendChild(errorSpan);
+    }
+    return errorPanel;
+  }
+
+  function makeEntrySpan(subSchema, pathStr, validationResult) {
     var help = null;
     var helpLocKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + ".help");
     if (subSchema.i18nkey) {
@@ -456,9 +481,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     // durable field error panels
-    var errorPanel = document.createElement("span");
-    errorPanel.className = "errorPanel";
-    errorPanel.id = pathStrToID(pathStr) + "-errorPanel";
+    var errorPanel = makeErrorPanel(pathStr, validationResult);
+
     span.appendChild(errorPanel);
 
     // Add span for help text
@@ -477,8 +501,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildCheckbox(subSchema, model, path) {
     var myPath = path.join(".");
-    var span = makeEntrySpan(subSchema, myPath);
-    var input = makeInput("checkbox", myPath, model, subSchema);
+    var validationResult = getValidationResult(model, subSchema.name);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
+    var input = makeInput("checkbox", myPath, model, subSchema, validationResult);
     input.onmouseover = self.showHelp;
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
@@ -486,7 +511,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     if (subSchema.label) {
-      var label = makeLabel(subSchema, "checkbox", myPath);
+      var label = makeLabel(subSchema, "checkbox", myPath, false, validationResult);
       label.onmouseover = self.showHelp;
       label.onmouseout = self.hideHelp;
       span.appendChild(label);
@@ -504,18 +529,23 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildString(subSchema, model, path, partOfChoice) {
     var myPath = path.join(".");
-    var span = makeEntrySpan(subSchema, myPath);
+    var validationResult = getValidationResult(model, subSchema.name);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     var supportedInputSubtypes = ["email", "time"];
     var inputType = _.contains(supportedInputSubtypes, subSchema.subtype) ? subSchema.subtype : "text";
 
-    var input = makeInput(inputType, myPath, model, subSchema);
+    var input = makeInput(inputType, myPath, model, subSchema, validationResult);
     setMaxLen(input, subSchema);
 
     listen(subSchema, myPath, input);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
+      span.appendChild(makeLabel(subSchema,
+                                 partOfChoice ? "string-choice" : "string",
+                                 myPath,
+                                 false,
+                                 validationResult));
     }
 
     if (subSchema.subtype === "maaraala-tunnus" ) {
@@ -566,6 +596,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function getValidationResult(model, name) {
+    return util.getIn(model, [name, "validationResult"]);
+  }
+
   function getModelValue(model, name) {
     return util.getIn(model, [name, "value"], "");
   }
@@ -588,8 +622,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildText(subSchema, model, path) {
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var input = document.createElement("textarea");
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     input.id = pathStrToID(myPath);
 
@@ -604,6 +639,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     setMaxLen(input, subSchema);
 
     input.className = "form-input textarea";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      input.className += " " + level;
+    }
+
     var value = getModelValue(model, subSchema.name);
     input.value = value;
 
@@ -626,7 +666,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "text", myPath));
+      span.appendChild(makeLabel(subSchema, "text", myPath, false, validationResult));
     }
     span.appendChild(input);
     return span;
@@ -635,20 +675,26 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildDate(subSchema, model, path) {
     var lang = loc.getCurrentLanguage();
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var value = getModelValue(model, subSchema.name);
 
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "date", myPath));
+      span.appendChild(makeLabel(subSchema, "date", myPath, false, validationResult));
     }
 
+    var className = "form-input text form-date";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      className += " " + level;
+    }
     // date
     var input = $("<input>", {
       id: pathStrToID(myPath),
       name: self.docId + "." + myPath,
       type: "text",
-      "class": "form-input text form-date",
+      "class": className,
       value: value
     });
 
@@ -682,13 +728,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildSelect(subSchema, model, path) {
     var myPath = path.join(".");
     var select = document.createElement("select");
+    var validationResult = getValidationResult(model, subSchema.name);
 
     $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
     var source = getModelSource(model, subSchema.name);
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
     var sizeClass = self.sizeClasses[subSchema.size] || "";
 
     select.onfocus = self.showHelp;
@@ -700,6 +747,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     select.name = myPath;
     select.className = "form-input combobox " + (sizeClass || "");
+
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      select.className += " " + level;
+    }
 
     select.id = pathStrToID(myPath);
 
@@ -782,7 +834,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     emitLater(select, subSchema);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath, true));
+      span.appendChild(makeLabel(subSchema, "select", myPath, true, validationResult));
     }
     span.appendChild(select);
     return span;
@@ -819,17 +871,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
-    var opts = {};
     if (subSchema.approvable) {
-      opts.approval = {};
-    }
-    opts.remove = resolveRemoveOptions( subSchema, path);
     $(div).append(createComponent( "group-approval",
                                    {docModel: self,
                                     subSchema: subSchema,
                                     model: myModel,
                                     path: path,
-                                    remove: opts.remove }));
+        remove: resolveRemoveOptions( subSchema, path) }));
+    }
 
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
@@ -891,6 +940,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildRadioGroup(subSchema, model, path) {
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var myModel;
     if (model[subSchema.name] && model[subSchema.name].value) {
       myModel = model[subSchema.name].value;
@@ -900,7 +950,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var partsDiv = document.createElement("div");
 
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
     span.className = span.className + " radioGroup";
     partsDiv.id = pathStrToID(myPath);
     partsDiv.className = subSchema.name + "-radioGroup";
@@ -923,16 +973,20 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildBuildingSelector(subSchema, model, path) {
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var select = document.createElement("select");
     var selectedOption = getModelValue(model, subSchema.name);
     var option = document.createElement("option");
-    var span = makeEntrySpan(subSchema, myPath);
-    span.className = "form-entry really-long";
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     select.id = pathStrToID(myPath);
 
     select.name = myPath;
     select.className = "form-input combobox long";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      select.className += " " + level;
+    }
 
     $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
@@ -1001,7 +1055,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     ajax
-      .command("get-building-info-from-wfs", { id: self.appId })
+      .query("get-building-info-from-wfs", { id: self.appId })
       .success(function (data) {
         _.each(data.data, function (building) {
           var name = building.buildingId;
@@ -1032,7 +1086,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .call();
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath));
+      span.appendChild(makeLabel(subSchema, "select", myPath, false, validationResult));
     }
     span.appendChild(select);
     return span;
@@ -1040,17 +1094,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildNewBuildingSelector(subSchema, model, path) {
     var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
     var select = document.createElement("select");
     var selectedOption = getModelValue(model, subSchema.name);
     var emptyOption = document.createElement("option");
-    var span = makeEntrySpan(subSchema, myPath);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
     var unknownOption = document.createElement("option");
-    span.className = "form-entry really-long";
 
     select.id = pathStrToID(myPath);
 
     select.name = myPath;
     select.className = "form-input combobox long";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      select.className += " " + level;
+    }
 
     $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
@@ -1116,7 +1174,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     select.appendChild(unknownOption);
 
-    span.appendChild(makeLabel(subSchema, "select", myPath));
+    span.appendChild(makeLabel(subSchema, "select", myPath, false, validationResult));
     span.appendChild(select);
     return span;
   }
@@ -1134,7 +1192,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     $(element)
       .attr("params", paramsStr(params))
-      .addClass(classes)
+      .addClass(classes ? classes + " docgen-component" : "docgen-component")
       .applyBindings(params);
 
     ko.options.deferUpdates = false;
@@ -1153,8 +1211,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
-    if (!_.includes(updatedDocumentsInDocumentDataService, doc.id)) {    
-      lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});  
+    if (!_.includes(updatedDocumentsInDocumentDataService, doc.id)) {
+      lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
       updatedDocumentsInDocumentDataService.push(doc.id);
     }
 
@@ -1197,7 +1255,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildPersonSelector(subSchema, model, path) {
     var myPath = path.join(".");
-    var span = makeEntrySpan(subSchema, myPath);
+    var validationResult = getValidationResult(model, subSchema.name);
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
     span.className = span.className + " personSelector";
     var myNs = path.slice(0, path.length - 1).join(".");
     var select = document.createElement("select");
@@ -1206,6 +1265,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.id = pathStrToID(myPath);
     select.name = myPath;
     select.className = "form-input combobox";
+    var validationLevel = validationResult && validationResult[0];
+    if (validationLevel) {
+      select.className += " " + validationLevel;
+    }
+
     if (authorizationModel.ok("set-user-to-document")) {
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -1260,6 +1324,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var label = document.createElement("label");
     var locKey = ("person-selector");
     label.className = "form-label form-label-select";
+    if (validationLevel) {
+      label.className += " " + validationLevel;
+    }
     label.innerHTML = loc(locKey);
     span.appendChild(label);
     span.appendChild(select);
@@ -1660,16 +1727,24 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
         callback(updateCommand, status, e.results);
       })
-      .error(function (e) { error(e); callback(updateCommand, "err"); })
-      .fail(function (e) { error(e); callback(updateCommand, "err"); })
+      .error(function (e) { error(e); callback(updateCommand, "err", e.results); })
+      .fail(function (e) { error(e); callback(updateCommand, "err", e.results); })
       .call();
   }
 
   self.showValidationResults = function(results) {
     // remove warning and error highlights
-    $("#document-" + self.docId).find("*").removeClass("warn").removeClass("error").removeClass("tip");
+    $(self.element)
+      .find("#document-" + self.docId)
+      .find("*")
+      .not(".docgen-component *") // components handle their validation
+      .removeClass("warn")
+      .removeClass("error")
+      .removeClass("err")
+      .removeClass("tip");
     // clear validation errors
-    $("#document-" + self.docId + " .errorPanel").html("").fadeOut();
+    $(self.element).find("#document-" + self.docId + " .errorPanel").not(".docgen-component *").html("").fadeOut();
+
     // apply new errors & highlights
     if (results && results.length > 0) {
       _.each(results, function (r) {

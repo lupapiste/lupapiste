@@ -47,6 +47,9 @@
 (notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-email-model})
 
+(notifications/defemail :guest-invite  {:recipients-fn :recipients
+                                        :model-fn create-invite-email-model})
+
 (defn- create-prev-permit-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
     :kuntalupatunnus (get-in command [:data :kuntalupatunnus])
@@ -104,12 +107,14 @@
    :states     states/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
-    (let [role (or (:role my-invite) (:role (auth/get-auth application (:id user))))
+    (let [my-auth (auth/get-auth application (:id user))
+          role (or (:role my-invite) (:role my-auth))
+          inviter (:inviter my-auth)
           document-id (:documentId my-invite)]
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
         {$set {:modified created
-               :auth.$   (assoc (user/user-in-role user role) :inviteAccepted created)}})
+               :auth.$   (assoc (user/user-in-role user role) :inviter inviter :inviteAccepted created)}})
       (when-not (empty? document-id)
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.

@@ -310,6 +310,8 @@
                                    :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
             {auth-array :auth} (query-application pena foreman-app-id) => truthy
             {orig-auth :auth}  (query-application pena application-id)]
+        (count auth-array) => 4
+        (fact "Pena is owner" (:username (some #(when (= (:role %) "owner") %) auth-array)) => "pena")
         (fact "applicant 'foo@example.com' is authed to foreman application"
           (has-auth? "foo@example.com" auth-array) => true)
         (fact "applicant 'unknown@example.com' is not authed to foreman app"
@@ -347,5 +349,23 @@
               (count (filter (partial = "heppu@example.com") recipients)) => 1)
             recipients => (just ["heppu@example.com"
                                  "contact@example.com"
-                                 "Kaino Solita <kaino@solita.fi>"])))))))
+                                 "Kaino Solita <kaino@solita.fi>"])))))
+
+    (fact "No double-auth, if owner of foreman-application is authed as writer in original application" ;; LPK-1331
+      (let [{writer-applicant :doc} (command apikey :create-doc :id application-id :schemaName "hakija-r")
+            ;; Pena fills Teppo's email to applicant document
+            _                       (command apikey :update-doc :id application-id :doc writer-applicant
+                                             :collection "documents"
+                                             :updates [["henkilo.yhteystiedot.email" "teppo@example.com"]]) => ok?
+            ;; Pena invites Teppo to application
+            _                       (command apikey :invite-with-role :id application-id :email "teppo@example.com" :text "" :documentName ""
+                                             :documentId "" :path "" :role "writer")
+            _                       (command teppo :approve-invite :id application-id)
+            ;; Teppo (with writer role) creates foreman-application
+            {foreman-app-id :id}    (command teppo :create-foreman-application :id application-id
+                                            :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
+            {auth-array :auth}      (query-application teppo foreman-app-id) => truthy]
+        (fact "Teppo is owner" (:username (some #(when (= (:role %) "owner") %) auth-array)) => "teppo@example.com")
+        (fact "Teppo is not double authed"
+          (count (filter #(= (:username %) "teppo@example.com") auth-array)) => 1)))))
 

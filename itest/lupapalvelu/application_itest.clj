@@ -305,7 +305,10 @@
 
     (fact "there is no suunnittelija"
       suunnittelija => truthy
-      (get-in suunnittelija [:data :henkilotiedot]) => {:etunimi {:value ""}, :hetu {:value nil}, :sukunimi {:value ""}})
+      (->> (get-in suunnittelija [:data :henkilotiedot])
+           (map (fn [[k v]] [k (:value v)]))
+           (into {}))
+      => {:etunimi "", :hetu nil, :sukunimi ""})
 
     (let [doc-id (:id suunnittelija)
           code "RAK-rakennesuunnittelija"]

@@ -111,6 +111,18 @@
        (remove nil?)
        (first)))
 
+(defn- get-paatospvm [{:keys [verdicts]}]
+  (let [ts (->> verdicts
+                (map (fn [{:keys [paatokset]}]
+                       (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
+                (flatten)
+                (remove nil?)
+                (sort)
+                (last))]
+    (println ts)
+    (when ts
+      (->iso-8601-date (c/from-long ts)))))
+
 (defn- get-usages [{:keys [documents]} op-id]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
         id-to-usage (into {} (map (fn [d] {(get-in d [:schema-info :op :id])
@@ -130,8 +142,9 @@
   [{:keys [id propertyId applicant address organization municipality location location-wgs84] :as application}
    user
    & [attachment]]
-  (let [s2-metadata (or (:metadata attachment) (:metadata application))
-        base-metadata {:type                  (if attachment (make-attachment-type attachment) :application)
+  (let [s2-metadata (-> (or (:metadata attachment) (:metadata application))
+                        (assoc :tila :arkistoitu))
+        base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
                        :buildingIds           (remove nil? (map :buildingId (:buildings application)))
                        :nationalBuildingIds   (remove nil? (map :nationalId (:buildings application)))
@@ -148,7 +161,7 @@
                        :location-wgs84        location-wgs84
                        :kuntalupatunnukset    (map :kuntalupatunnus (:verdicts application))
                        :lupapvm               (get-verdict-date application :lainvoimainen)
-                       :paatospvm             (get-verdict-date application :anto)
+                       :paatospvm             (get-paatospvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (:authority application) [:username :firstName :lastName])

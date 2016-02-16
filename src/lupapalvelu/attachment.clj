@@ -3,7 +3,7 @@
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
             [sade.util :as util]
             [sade.env :as env]
@@ -24,7 +24,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [lupapalvelu.preview :as preview])
+            [lupapiste-commons.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -113,73 +113,94 @@
        (#(map first (partition 2 %)))
        (set)))
 
-(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff})
+(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
 
-(def AttachmentAuthUser (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
-                          (sc/if :id
-                            SummaryAuthUser
-                            (select-keys SummaryAuthUser [:firstName :lastName :role]))))
+(defschema AttachmentAuthUser
+  "User summary for authorized users in attachment.
+   Only name and role is used for users without Lupapiste account."
+  (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
+    (sc/if :id
+      SummaryAuthUser
+      (select-keys SummaryAuthUser [:firstName :lastName :role]))))
 
-(def VersionNumber {:minor                             sc/Int
-                    :major                             sc/Int})
+(defschema VersionNumber
+  {:minor                                sc/Int
+   :major                                sc/Int})
 
-(def Target     {:id                                   ssc/ObjectIdStr
-                 :type                                 sc/Keyword
-                 (sc/optional-key :urlHash)            sc/Str})
+(defschema Target
+  "Refers to part of the application which attachment is targetted.
+   Possible types are verdict, statement etc."
+  {:id                                   ssc/ObjectIdStr
+   :type                                 sc/Keyword
+   (sc/optional-key :poytakirjaId)       sc/Str
+   (sc/optional-key :urlHash)            sc/Str})
 
-(def Source     {:id                                   ssc/ObjectIdStr
-                 :type                                 sc/Str})
+(defschema Source
+  "Source for the automatically generated attachment."
+  {:id                                   ssc/ObjectIdStr
+   :type                                 sc/Str})
 
-(def Operation  {:id                                   ssc/ObjectIdStr
-                 (sc/optional-key :optional)           [sc/Str] ;; only empty arrays @ talos
-                 (sc/optional-key :name)               sc/Str
-                 (sc/optional-key :description)        (sc/maybe sc/Str)
-                 (sc/optional-key :created)            ssc/Timestamp})
+(defschema Operation
+  "Operation for operation specific attachments"
+  {:id                                   ssc/ObjectIdStr    ;;
+   (sc/optional-key :optional)           [sc/Str]           ;; FIXME: only empty arrays @ talos
+   (sc/optional-key :name)               sc/Str             ;;
+   (sc/optional-key :description)        (sc/maybe sc/Str)  ;;
+   (sc/optional-key :created)            ssc/Timestamp})    ;;
 
-(def Signature  {:user                                 user/SummaryUser
-                 :created                              ssc/Timestamp
-                 :version                              VersionNumber})
+(defschema Signature
+  "Signature for attachment version"
+  {:user                                 user/SummaryUser   ;;
+   :created                              ssc/Timestamp      ;;
+   :fileId                               sc/Str             ;; used as 'foreign key' to attachment version
+   :version                              VersionNumber})    ;; version number of the signed attachment version
 
-(def Version    {:version                              VersionNumber
-                 :fileId                               sc/Str 
-                 :created                              ssc/Timestamp
-                 :user                                 (sc/if :id
-                                                         user/SummaryUser 
-                                                         (select-keys user/User [:firstName :lastName]))
-                 :filename                             sc/Str
-                 :contentType                          sc/Str
-                 :size                                 (sc/maybe sc/Int)
-                 (sc/optional-key :stamped)            sc/Bool
-                 (sc/optional-key :archivable)         (sc/maybe sc/Bool) 
-                 (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors)) 
-                 (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
+(defschema Version
+  "Attachment version"
+  {:version                              VersionNumber
+   :fileId                               sc/Str             ;; fileId in GridFS
+   :created                              ssc/Timestamp
+   :user                                 (sc/if :id         ;; User who created the version
+                                           user/SummaryUser ;; Only name is used for users without Lupapiste account
+                                           (select-keys user/User [:firstName :lastName]))
+   :filename                             sc/Str             ;; original filename
+   :contentType                          sc/Str             ;; MIME type of the file
+   :size                                 (sc/maybe sc/Int)  ;; file size
+   (sc/optional-key :stamped)            sc/Bool
+   (sc/optional-key :archivable)         (sc/maybe sc/Bool)
+   (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
+   (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
 
-(def Type       {:type-id                              (apply sc/enum all-attachment-type-ids)
-                 :type-group                           (apply sc/enum all-attachment-type-groups)})
+(defschema Type
+  "Attachment type"
+  {:type-id                              (apply sc/enum all-attachment-type-ids)
+   :type-group                           (apply sc/enum all-attachment-type-groups)})
 
-(def Attachment {:id                                   sc/Str
-                 :type                                 Type
-                 :modified                             ssc/Timestamp
-                 (sc/optional-key :sent)               ssc/Timestamp
-                 :locked                               sc/Bool
-                 (sc/optional-key :readOnly)           sc/Bool
-                 :applicationState                     (apply sc/enum states/all-states)
-                 :state                                (apply sc/enum attachment-states)
-                 :target                               (sc/maybe Target)
-                 (sc/optional-key :source)             Source
-                 :required                             sc/Bool
-                 :requestedByAuthority                 sc/Bool
-                 :notNeeded                            sc/Bool
-                 :forPrinting                          sc/Bool
-                 :op                                   (sc/maybe Operation)
-                 :signatures                           [Signature]
-                 :versions                             [Version]
-                 (sc/optional-key :latestVersion)      (sc/maybe Version)
-                 (sc/optional-key :contents)           (sc/maybe sc/Str)
-                 (sc/optional-key :scale)              (apply sc/enum attachment-scales)
-                 (sc/optional-key :size)               (apply sc/enum attachment-sizes)
-                 :auth                                 [AttachmentAuthUser]
-                 (sc/optional-key :metadata)           {sc/Any sc/Any}})
+(defschema Attachment
+  {:id                                   sc/Str
+   :type                                 Type               ;; Attachment type
+   :modified                             ssc/Timestamp      ;; last modified
+   (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
+   :locked                               sc/Bool            ;;
+   (sc/optional-key :readOnly)           sc/Bool            ;;
+   :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
+   :state                                (apply sc/enum attachment-states) ;; attachment state
+   :target                               (sc/maybe Target)  ;;
+   (sc/optional-key :source)             Source             ;;
+   :required                             sc/Bool            ;;
+   :requestedByAuthority                 sc/Bool            ;;
+   :notNeeded                            sc/Bool            ;;
+   :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
+   :op                                   (sc/maybe Operation)
+   :signatures                           [Signature]
+   :versions                             [Version]
+   (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
+   (sc/optional-key :contents)           (sc/maybe sc/Str)  ;; content description
+   (sc/optional-key :scale)              (apply sc/enum attachment-scales)
+   (sc/optional-key :size)               (apply sc/enum attachment-sizes)
+   :auth                                 [AttachmentAuthUser]
+   (sc/optional-key :metadata)           {sc/Any sc/Any}})
+
 
 ;; Helper for reporting purposes
 (defn localised-attachments-by-permit-type [permit-type]
@@ -251,7 +272,7 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents read-only?]]
+(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents read-only? source]]
   (cond-> {:id (or attachment-id (mongo/create-id))
            :type attachment-type
            :modified now
@@ -271,6 +292,7 @@
            :versions []
            :auth []
            :contents contents}
+          (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
 
 (defn make-attachments
@@ -284,10 +306,10 @@
       metadata
       {:nakyvyys :julkinen})))
 
-(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only?]]
+(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
   {:pre [(map? application)]}
   (let [metadata (default-metadata-for-attachment-type attachment-type application)
-        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents read-only?)]
+        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents read-only? source)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -328,18 +350,6 @@
         latest     (last sorted)]
     latest))
 
-(defn get-version-by-file-id [attachment fileId]
-  (->> attachment
-       :versions
-       (filter #(= (:fileId %) fileId))
-       first))
-
-(defn get-version-number
-  [{:keys [attachments] :as application} attachment-id fileId]
-  (let [attachment (get-attachment-info application attachment-id)
-        version    (get-version-by-file-id attachment fileId)]
-    (:version version)))
-
 (defn set-attachment-version
   ([options]
     {:pre [(map? options)]}
@@ -352,7 +362,7 @@
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
             next-version (next-attachment-version latest-version user)
-            user-summary (user/summary user)            
+            user-summary (user/summary user)
             user-role (if stamped :stamper :uploader)
             version-model {:version  next-version
                            :fileId   file-id
@@ -439,13 +449,13 @@
 (defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required contents read-only] :as options}]
+  [{:keys [application attachment-id attachment-type op created user target locked required contents read-only source] :as options}]
   {:pre [(map? application)]}
-  (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
+  (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? user))
         att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents read-only)
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents read-only source)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents read-only))]
+                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents read-only source))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]
@@ -500,11 +510,16 @@
     (mongo/delete-file-by-id fileId)
     (infof "2/3 deleted file %s of attachment %s" fileId attachment-id)
     (update-application
-      (application->command application)
-      {:attachments {$elemMatch {:id attachment-id}}}
-      {$pull {:attachments.$.versions {:fileId fileId}
-              :attachments.$.signatures {:version (get-version-number application attachment-id fileId)}}
-       $set  {:attachments.$.latestVersion latest-version}})
+     (application->command application)
+     {:attachments {$elemMatch {:id attachment-id}}}
+     {$pull {:attachments.$.versions {:fileId fileId}
+             :attachments.$.signatures {:fileId fileId}}
+      $set  {:attachments.$.latestVersion latest-version}})
+    (update-application
+     (application->command application)
+     {:attachments {$elemMatch {:id attachment-id
+                                :versions []}}}
+     {$set {:attachments.$.auth []}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
 (defn get-attachment-file-as
@@ -538,7 +553,7 @@
 
 (defn create-preview
   [file-id filename content-type content application-id & [db-name]]
-  (when (and (env/feature? :preview) (preview/converter content-type))
+  (when (preview/converter content-type)
     (mongo/with-db (or db-name mongo/default-db-name)
       (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
       (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
@@ -563,8 +578,7 @@
 
 (defn pre-process-attachment [{:keys [attachment-type filename content]}]
   (if (and libreoffice-client/enabled? (= attachment-type {:type-group "muut" :type-id "paatosote"}))
-    {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
-     :content  (:body (libreoffice-client/convert-to-pdfa filename content))}
+    (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
 (defn attach-file!
@@ -579,12 +593,13 @@
   (let [db-name mongo/*db-name* ; pass db-name to threadpool context
         file-id (mongo/create-id)
         application-id (-> options :application :id)
-        {:keys [filename content]} (pre-process-attachment options)
+        {:keys [filename content archivabilityError]} (pre-process-attachment options)
         sanitized-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitized-filename)
-        options (merge options {:file-id file-id
-                                :filename sanitized-filename
-                                :content-type content-type})]
+        options (merge options (cond-> {:file-id file-id
+                                        :filename sanitized-filename
+                                        :content-type content-type}
+                                       (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)))]
     (mongo/upload file-id sanitized-filename content-type content :application application-id)
     (.submit preview-threadpool #(create-preview file-id sanitized-filename content-type content application-id db-name))
     (update-or-create-attachment options)))

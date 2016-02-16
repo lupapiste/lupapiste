@@ -29,9 +29,10 @@ Add existing user as authority
   Test id disabled  guest-dialog-firstname
   Test id disabled  guest-dialog-lastname
 
-User table row contains
-  [Arguments]  ${email}  ${data}
-  Wait Until  Element Should Contain  xpath=//section[@id='users']//tr[@data-user-email='${email}']  ${data}
+# Guest authorities are not added to the organization users table.
+User table does not contain
+  [Arguments]  ${email}
+  Wait Until  Element Should Not Contain  jquery=section#users div.admin-users-table  ${email}
 
 Guest authority table row contains
   [Arguments]  ${description}  ${data}
@@ -39,12 +40,8 @@ Guest authority table row contains
 
 Guest authority added
   [Arguments]  ${email}  ${firstname}  ${lastname}  ${description}
-  # In org user table
-  # It seems to be impossible create a jquery selector or an attribute that contains @
-  User table row contains  ${email}  ${lastname} ${firstname}
-  User table row contains  ${email}  Hankekohtainen lukuoikeus
+  User table does not contain  ${email}
 
-  Xpath Should Match X Times  //section[@id='users']//tr[@data-user-email='${email}']  1
   Guest authority table row contains  ${description}  ${description}
   Guest authority table row contains  ${description}  ${firstname} ${lastname}
   Guest authority table row contains  ${description}  ${email}
@@ -79,9 +76,8 @@ Add new statement giver as authority
   Fill test id  guest-dialog-description  ${description}
   Scroll And Click  [data-test-id=guest-dialog-ok]
   # New names are not visible in the user table
-  User table row contains  ${email}  Hankekohtainen lukuoikeus
+  User table does not contain  ${email}
 
-  Xpath Should Match X Times  //section[@id='users']//tr[@data-user-email='${email}']  1
   Guest authority table row contains  ${description}  ${description}
   Guest authority table row contains  ${description}  ${firstname} ${lastname}
   Guest authority table row contains  ${description}  ${email}
@@ -89,7 +85,8 @@ Add new statement giver as authority
 Delete new statement giver guest authority
   [Arguments]  ${email}  ${description}
   Click Link  jquery=tr[data-test-guest-description=${description}] a
-  User table row contains  ${email}  Hankekohtainen lukuoikeus
+  Confirm  dynamic-yes-no-confirm-dialog
+  User table does not contain  ${email}
 
   Wait Until Page Does Not Contain Element  jquery=tr[data-test-guest-description=${description}]
 
@@ -103,9 +100,7 @@ Add bad authority
 Delete guest authority
   [Arguments]  ${email}  ${firstname}  ${lastname}  ${description}
   Click Link  jquery=tr[data-test-guest-description=${description}] a
-  User table row contains  ${email}  ${lastname} ${firstname}
-  User table row contains  ${email}  Hankekohtainen lukuoikeus
-
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until Page Does Not Contain Element  jquery=tr[data-test-guest-description=${description}]
 
 Bad email address
@@ -119,15 +114,11 @@ Bad email address
 # --------------------------------
 
 Guest bubble ok
-  Element Should Be Enabled  jquery=.application-guests [data-test-id=bubble-dialog-ok]
-  #Scroll to test id  bubble-dialog-ok
-  Scroll and click  .application-guests [data-test-id=bubble-dialog-ok]
+  Scroll and click test id  guest-bubble-dialog-ok
 
 Guest bubble cancel
-  Wait test id visible  bubble-dialog-cancel
-  #Scroll to test id  bubble-dialog-cancel
-  Scroll and click  .application-guests [data-test-id=bubble-dialog-cancel]
-  Wait test id hidden  bubble-dialog-cancel
+  Scroll and click test id  guest-bubble-dialog-cancel
+  Wait test id hidden  guest-bubble-dialog-cancel
 
 Guest table contains
   [Arguments]  ${data}
@@ -189,13 +180,13 @@ No subscribe column
 
 Invite application guest start
   [Arguments]  ${email}  ${message}
-  Wait test id hidden  bubble-dialog-ok
+  Wait test id hidden  guest-bubble-dialog-ok
   Scroll to test id  application-guest-add
   Wait test id visible  application-guest-add
   Scroll and click  [data-test-id=application-guest-add]
   Test id empty  application-guest-email
   Textarea Value Should be  jquery=[data-test-id=application-guest-message]  Hei! Sinulle on annettu lukuoikeus hakemukselle Lupapisteessä.
-  Element Should Be Disabled  jquery=.application-guests [data-test-id=bubble-dialog-ok]
+  Element Should Be Disabled  jquery=.application-guests [data-test-id=guest-bubble-dialog-ok]
   Fill test id  application-guest-email  ${email}
   Fill test id  application-guest-message  ${message}
 
@@ -206,7 +197,7 @@ Invite application guest
 
 Bad guest email and cancel check
   Invite application guest start  bad.email  foo
-  Element Should Be Disabled  jquery=.application-guests [data-test-id=bubble-dialog-ok]
+  Element Should Be Disabled  jquery=.application-guests [data-test-id=guest-bubble-dialog-ok]
   Guest bubble cancel
 
   # Check that the bubble is properly initialized after cancel as well.
@@ -219,7 +210,7 @@ Invite application guest authority
   Scroll and click  [data-test-id=application-guest-add]
   Wait test id visible  application-guest-authorities
   Textarea Value Should be  jquery=[data-test-id=application-guest-message]  Hei! Sinulle on annettu lukuoikeus hakemukselle Lupapisteessä.
-  Element Should Be Disabled  jquery=.application-guests [data-test-id=bubble-dialog-ok]
+  Element Should Be Disabled  jquery=.application-guests [data-test-id=guest-bubble-dialog-ok]
   Fill test id  application-guest-message  ${message}
   Element Should Contain  jquery=table[data-test-id=application-guest-authorities] tr[data-test-id=${description}]  ${name}
   Element Should Contain  jquery=table[data-test-id=application-guest-authorities] tr[data-test-id=${description}]  ${email}
@@ -231,5 +222,11 @@ Invite application guest authority
 No more guest authorities
   Wait test id visible  application-guest-add
   Scroll and click  [data-test-id=application-guest-add]
-  Wait test id visible  application-guest-error
+  Wait test id visible  guest-bubble-dialog-error
+  Guest bubble cancel
+
+Redundant invitation
+  [Arguments]  ${email}
+  Invite application guest  ${email}  Welcome to application, again!?
+  Wait test id visible  guest-bubble-dialog-error
   Guest bubble cancel

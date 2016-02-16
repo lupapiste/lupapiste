@@ -19,10 +19,14 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
   });
 
   self.submit = function() {
-    hub.send("statement::submit", {
-      applicationId: applicationId(),
-      statementId: statementId(),
-      tab: self.tab()
-    });
+    LUPAPISTE.ModalDialog.showDynamicYesNo( loc( "statement.confirm.title"),
+                                            loc( "statement.confirm.body"),
+                                          {title: loc( "yes"),
+                                           fn: _.partial(hub.send,
+                                                         "statement::submit",
+                                                         {applicationId: applicationId(),
+                                                           statementId: statementId(),
+                                                           tab: self.tab()})},
+                                          {title: loc( "cancel")});
   };
 };

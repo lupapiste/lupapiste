@@ -14,11 +14,9 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
 
   var commands = params.commands;
 
-  // FIXME computed + dispose
   var initSubscription = self.data.subscribe(function() {
     self.nothingToAdd(util.getIn(self.data, ["reply", "nothing-to-add"]));
     self.text(util.getIn(self.data, ["reply", "text"]));
-    initSubscription.dispose();
   });
 
   var submitAllowed = ko.pureComputed(function() {
@@ -26,7 +24,7 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   });
 
   self.enabled = ko.pureComputed(function() {
-    return self.authModel.ok(commands["submit"]);
+    return self.authModel.ok(commands.submit);
   });
 
   self.isDraft = ko.pureComputed(function() {
@@ -34,11 +32,10 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   });
 
   self.replyVisible = ko.computed(function() {
-    return _.contains(["replied"], util.getIn(self.data, ["state"])) || self.authModel.ok(commands["submit"]);
+    return _.contains(["replied"], util.getIn(self.data, ["state"])) || self.authModel.ok(commands.submit);
   });
 
-  // FIXME computed + dispose
-  self.text.subscribe(function(value) {
+  var textSubscription = self.text.subscribe(function(value) {
     if(value && util.getIn(self.data, ["reply", "text"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["reply", "text"], value: value});
     }
@@ -48,16 +45,21 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
     return util.getIn(self.data, ["reply", "saateText"]) || "";
   });
 
-  // FIXME computed + dispose
-  self.nothingToAdd.subscribe(function(value) {
+  var statusSubscription = self.nothingToAdd.subscribe(function(value) {
     if(value != null && util.getIn(self.data, ["reply", "nothing-to-add"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["reply", "nothing-to-add"], value: value});
     }
   });
 
-  // FIXME computed + dispose
-  submitAllowed.subscribe(function(value) {
+  var submitSubscription = submitAllowed.subscribe(function(value) {
     hub.send("statement::submitAllowed", {tab: self.tab, value: value});
   });
 
+  self.dispose = function() {
+    initSubscription.dispose();
+    textSubscription.dispose();
+    statusSubscription.dispose();
+    submitSubscription.dispose();
+    self.replyVisible.dispose();
+  };
 };

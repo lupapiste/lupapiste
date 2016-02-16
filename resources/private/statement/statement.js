@@ -16,7 +16,14 @@
     }
   });
 
-  var selectedTab = ko.observable("statement");
+  var defaultTab = "statement"
+
+  var selectedTab = ko.observable(defaultTab);
+
+  var selectTab = function(tab) {
+    selectedTab(tab);
+    pageutil.openPage("statement", [applicationId(), statementId(), tab].join("/"));
+  };
 
   repository.loaded(["statement"], function(app) {
     if (applicationId() === app.id) {
@@ -28,6 +35,7 @@
   hub.onPageLoad("statement", function(e) {
     applicationId(e.pagePath[0]);
     statementId(e.pagePath[1]);
+    selectedTab(e.pagePath[2] || defaultTab);
     repository.load(applicationId());
   });
 
@@ -37,6 +45,7 @@
       service: new LUPAPISTE.StatementService({statementId: statementId, application: application}),
       authModel: authModel,
       selectedTab: selectedTab,
+      selectTab: selectTab,
       tabs: tabs
     });
   });
