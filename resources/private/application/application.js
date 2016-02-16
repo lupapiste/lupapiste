@@ -204,6 +204,10 @@
 
       hasConstructionTimeDocs(!!constructionTimeDocs.length);
 
+      if (lupapisteApp.services.accordionService) {
+        lupapisteApp.services.accordionService.setDocuments(app.documents);
+      }
+
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
       var scroll = {x: window.scrollX, y: window.scrollY };
       if (!lightLoad) {

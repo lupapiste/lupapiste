@@ -21,6 +21,7 @@
   (println "  hist ............... Show migration executions")
   (println "  hist -l ............ Show migration executions in long format")
   (println "  update ............. Execute migrations that have not been executed successfully")
+  (println "  count .............. Count migrations that have not been executed successfully, returned as exit code")
   (println "  run [name...] ...... Execute migrations by name(s)")
   (println "  run-all ............ Execute all migrations"))
 
@@ -79,6 +80,9 @@
 
 (defn failing-migrations [] (map :name (remove :ok (migration-results-summary-by-name))))
 
+(defn count! []
+  (System/exit (count (unexecuted-migrations))))
+
 (defn -main [& [action & args]]
   (mongo/connect!)
   (cond
@@ -88,5 +92,6 @@
     (= action "run")           (if (seq args) (run-migrations! args) (rtfm))
     (= action "run-all")       (run-migrations! (map :name (->> @migrations vals (sort-by :order))))
     (= action "update")        (update!)
+    (= action "count")         (count!)
     (= action "update-or-die") (update-or-die!)
     :else                      (rtfm)))

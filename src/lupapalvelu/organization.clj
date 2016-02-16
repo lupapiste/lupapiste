@@ -279,7 +279,7 @@
    ;; 1. Every application that maybe has available materials.
    (mongo/select
     :applications
-    {:organization org-id
+    {:organization (or org-id {$exists true})
      :documents {$elemMatch {:data.availableMaterials {$exists true }
                              :data.contact {$nin ["" nil]}}}})
    ;; 2. Create materials, contact, modified map.
@@ -346,16 +346,18 @@
 
 ;; Waste feed enpoint parameter validators
 
-(defn valid-org [cmd]
-  (when-not (-> cmd :data :org ss/upper-case get-organization)
+(defn valid-org
+  "Empty organization is valid"
+  [{{:keys [org]} :data}]
+  (when-not (or (ss/blank? org) (-> org ss/upper-case get-organization))
     (fail :error.organization-not-found)))
 
 (defn valid-feed-format [cmd]
   (when-not (->> cmd :data :fmt ss/lower-case keyword (contains? #{:rss :json}) )
     (fail :error.invalid-feed-format)))
 
-(defn valid-language [cmd]
-  (when-not  (->> cmd :data :lang ss/lower-case keyword (contains? (set i18n/supported-langs)) )
+(defn valid-language [{{:keys [lang]} :data}]
+  (when-not (or (ss/blank? lang) (->> lang ss/lower-case keyword (contains? (set i18n/supported-langs)) ))
     (fail :error.unsupported-language)))
 
 (defn valid-ip-addresses [ips]

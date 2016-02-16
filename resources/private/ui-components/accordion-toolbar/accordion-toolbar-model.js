@@ -35,7 +35,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   // Operation data
   var op = self.info.op;
   // if service is defined use accordion service, if not (bulletins-app) use operation data from docgen
-  self.operation = self.accordionService ? self.accordionService.getOperation(self.docModel.docId) : ko.mapping.fromJS(op);
+  self.operation = ko.mapping.fromJS(op);
   self.hasOperation = ko.pureComputed(function() {
     return _.isObject(op);
   });
@@ -206,9 +206,17 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     return true;
   };
 
+  var toggleEditorSubscription = hub.subscribe("accordionToolbar::toggleEditor", function(event) {
+    if ((!event.docId || event.docId === self.docModel.docId) && self.hasOperation()) {
+      var visibility = _.has(event, "show") ? Boolean(event.show) : !self.showIdentifierEditors();
+      self.showIdentifierEditors(visibility);
+    }
+  });
+
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     stickyRefresh.dispose();
+    hub.unsubscribe(toggleEditorSubscription);
   };
 
 };

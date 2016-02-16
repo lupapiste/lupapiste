@@ -40,8 +40,4 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
       send();
     }
   };
-
-  self.refresh = function() {
-    hub.send("statement::refresh");
-  };
 };
