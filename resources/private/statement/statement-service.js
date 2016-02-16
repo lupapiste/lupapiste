@@ -104,6 +104,15 @@ LUPAPISTE.StatementService = function(params) {
     return false;
   };
 
+  function handleError(err) {
+    var modificationConflict = err.text === "error.statement-updated-after-last-save";
+    hub.send("show-dialog", {ltitle: "error.dialog.title",
+                             component: "ok-dialog",
+                             componentParams: {ltext: err.text,
+                                               okFn: modificationConflict ? function() { repository.load(self.applicationId()); } : _.noop,
+                                               okTitle: modificationConflict && loc("statement.refresh")}});
+  }
+
   function updateDraft(statementId, tab) {
     var params = getCommandParams(statementId, tab),
         commandName = util.getIn(self.commands, [tab, "saveDraft"]);
@@ -116,6 +125,8 @@ LUPAPISTE.StatementService = function(params) {
         hub.send("indicator-icon", {style: "positive"});
         return false;
       })
+      .error(handleError)
+      .fail(handleError)
       .complete(function() {
         saving(false);
       })
