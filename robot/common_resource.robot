@@ -187,6 +187,9 @@ Open accordions
   # Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
   # Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
+Open accordion editors
+  Execute Javascript  lupapisteApp.services.accordionService.toggleEditors( true );
+
 Open accordion by test id
   [Arguments]  ${testId}
   ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="${testId}"]//div[@data-accordion-state="open"]

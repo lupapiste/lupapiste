@@ -45,12 +45,15 @@ Application contains three operations
   Wait Until  Element should Contain  xpath=//ul[@data-test-id="application-secondary-operations"]  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen
 
 Primary operation can be changed
+  Open accordion editors
   Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="kerrostalo-rivitalo"]/i[@class="lupicon-star"]
   Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]/i[@class="lupicon-star"]
   Wait Until  Element Should Be Visible  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]/i[@class="lupicon-star"]
 
   Click Element  //button[@data-op-name="muu-uusi-rakentaminen"]
 
+  Wait until  Primary operation is  muu-uusi-rakentaminen
+  Open accordion editors
   Wait Until  Element Should Be Enabled  xpath=//button[@data-op-name="kerrostalo-rivitalo"]
   Wait Until  Element Should Be Disabled  xpath=//button[@data-op-name="muu-uusi-rakentaminen"]
   Wait Until  Element Should Be Enabled  xpath=//button[@data-op-name="vapaa-ajan-asuinrakennus"]
