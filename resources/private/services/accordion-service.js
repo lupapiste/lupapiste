@@ -27,7 +27,7 @@ LUPAPISTE.AccordionService = function() {
     self.documents(_.map(docsWithOperation, function(doc) {
       return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: doc.data};
     }));
-  }
+  };
 
   self.accordionFields = ko.observableArray([]);
   self.documents.subscribe(function() {
@@ -49,7 +49,6 @@ LUPAPISTE.AccordionService = function() {
   };
 
   self.getOperationByOpId = function(opId) {
-    console.log(opId);
     return util.getIn(_.find(self.documents(), function(doc) {
       return doc.operation.id() === opId;
     }), ["operation"]);
