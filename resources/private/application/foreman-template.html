@@ -60,10 +60,10 @@
                 </td>
                 <td data-bind="attr: {'data-test-col-name': 'foreman-name-or-invite'}">
                   <select
-                     data-test-id="foreman-selection"
                      name="foreman-selection"
                      class="form-input combobox long"
-                     data-bind="options: $data.selectableForemen,
+                     data-bind="attr: {'data-test-id': 'foreman-selection-' + $index()},
+                                options: $data.selectableForemen,
                                 optionsText: 'displayName',
                                 optionsValue: 'id',
                                 optionsCaption: loc('choose'),
