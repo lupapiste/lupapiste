@@ -58,6 +58,10 @@ LUPAPISTE.AccordionService = function() {
     return _.find(self.accordionFields(), {docId: docId});
   };
 
+  self.toggleEditors = function(show) {
+    hub.send("accordionToolbar::toggleEditor", {show: show});
+  };
+
   hub.subscribe("accordionService::saveIdentifier", function(event) {
     var docId = event.docId;
     var value = event.value;

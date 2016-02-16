@@ -206,9 +206,17 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     return true;
   };
 
+  var toggleEditorSubscription = hub.subscribe("accordionToolbar::toggleEditor", function(event) {
+    if ((!event.docId || event.docId === self.docModel.docId) && self.hasOperation()) {
+      var visibility = _.has(event, "show") ? Boolean(event.show) : !self.showIdentifierEditors();
+      self.showIdentifierEditors(visibility);
+    }
+  });
+
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     stickyRefresh.dispose();
+    toggleEditorSubscription.dispose();
   };
 
 };
