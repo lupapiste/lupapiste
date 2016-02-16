@@ -18,8 +18,6 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
     return self.authModel.ok(util.getIn(commands, [self.tab(), "submit"]));
   });
 
-  self.refreshVisible = self.submitVisible;
-
   self.submit = function() {
     LUPAPISTE.ModalDialog.showDynamicYesNo( loc( "statement.confirm.title"),
                                             loc( "statement.confirm.body"),
@@ -30,9 +28,5 @@ LUPAPISTE.StatementControlButtonsModel = function(params) {
                                                            statementId: statementId(),
                                                            tab: self.tab()})},
                                           {title: loc( "cancel")});
-  };
-
-  self.refresh = function() {
-    hub.send("statement::refresh");
   };
 };
