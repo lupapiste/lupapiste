@@ -19,6 +19,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.propertyId = ko.observable();
   self.title = ko.observable();
   self.created = ko.observable();
+  self.modified = ko.observable();
   self.started = ko.observable();
   self.startedBy = ko.observable();
   self.closed = ko.observable();
@@ -329,13 +330,16 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.approveApplication = function() {
-    
+
     var approve = function() {
       ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
         .success(function(resp) {
           self.reload();
           if (!resp.integrationAvailable) {
-            LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
+            hub.send("show-dialog", {ltitle: "integration.title",
+                                     size: "medium",
+                                     component: "ok-dialog",
+                                     componentParams: {ltext: "integration.unavailable"}});
           } else if (self.externalApi.enabled()) {
             var permit = externalApiTools.toExternalPermit(self._js);
             hub.send("external-api::integration-sent", permit);
@@ -347,14 +351,15 @@ LUPAPISTE.ApplicationModel = function() {
       hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     };
 
-    if (!_(ko.mapping.toJS(self.statements)).reject("given").isEmpty()) {
+    if (_(self._js.statements).reject("given").isEmpty()) {
+      // All statements have been given
+      approve();
+    } else {
       hub.send("show-dialog", {ltitle: "application.approve.statement-not-requested",
                                size: "medium",
                                component: "yes-no-dialog",
                                componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
                                                  yesFn: approve}});
-    } else {
-      approve();
     }
     return false;
   };

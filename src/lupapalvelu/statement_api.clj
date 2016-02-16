@@ -171,14 +171,15 @@
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :description "statement owners can save statements as draft before giving final statement."}
-  [{application :application user :user {:keys [text status modify-id prev-modify-id]} :data :as command}]
+  [{application :application user :user {:keys [text status modify-id]} :data :as command}]
   (when (and status (not ((possible-statement-statuses application) status)))
     (fail! :error.unknown-statement-status))
   (let [statement (-> (util/find-by-id statementId (:statements application))
-                      (update-draft text status modify-id prev-modify-id (:id user)))]
+                      (update-draft text status modify-id (:id user)))]
     (update-application command
                         {:statements {$elemMatch {:id statementId}}}
-                        {$set {:statements.$ statement}})))
+                        {$set {:statements.$ statement}})
+    (ok :modify-id (:modify-id statement))))
 
 (defcommand give-statement
   {:parameters  [:id statementId status text :lang]
@@ -190,14 +191,14 @@
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "statement owners can give statements - notifies via comment."}
-  [{:keys [application user created lang] {:keys [modify-id prev-modify-id]} :data :as command}]
+  [{:keys [application user created lang] {:keys [modify-id]} :data :as command}]
   (when-not ((possible-statement-statuses application) status)
     (fail! :error.unknown-statement-status))
   (let [comment-text (i18n/loc "statement.given")
         comment-target {:type :statement :id statementId}
         comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)
         statement   (-> (util/find-by-id statementId (:statements application))
-                        (give-statement text status modify-id prev-modify-id (:id user)))
+                        (give-statement text status modify-id (:id user)))
         response (update-application command
                                      {:statements {$elemMatch {:id statementId}}}
                                      (util/deep-merge
@@ -205,7 +206,7 @@
                                       {$set {:statements.$ statement}}))
         updated-app (assoc application :statements (util/update-by-id statement (:statements application)))]
     (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
-    response))
+    (ok :modify-id (:modify-id statement))))
 
 (defcommand request-for-statement-reply
   {:parameters       [:id statementId :lang]
@@ -219,7 +220,8 @@
                       (request-for-reply text (:id user)))]
     (update-application command
                         {:statements {$elemMatch {:id statementId}}}
-                        {$set {:statements.$ statement}})))
+                        {$set {:statements.$ statement}})
+    (ok :modify-id (:modify-id statement))))
 
 (defcommand save-statement-reply-as-draft
   {:parameters       [:id statementId :lang]
@@ -229,12 +231,13 @@
    :user-roles       #{:applicant}
    :user-authz-roles auth/default-authz-writer-roles
    :description      "save reply for the statement as draft"}
-  [{application :application user :user {:keys [text nothing-to-add modify-id prev-modify-id]} :data :as command}]
+  [{application :application user :user {:keys [text nothing-to-add modify-id]} :data :as command}]
   (let [statement (-> (util/find-by-id statementId (:statements application))
-                      (update-reply-draft text nothing-to-add modify-id prev-modify-id (:id user)))]
+                      (update-reply-draft text nothing-to-add modify-id (:id user)))]
     (update-application command
                         {:statements {$elemMatch {:id statementId}}}
-                        {$set {:statements.$ statement}})))
+                        {$set {:statements.$ statement}})
+    (ok :modify-id (:modify-id statement))))
 
 (defcommand reply-statement
   {:parameters       [:id statementId :lang]
@@ -244,12 +247,13 @@
    :user-roles       #{:applicant}
    :user-authz-roles auth/default-authz-writer-roles
    :description      "reply to statement"}
-  [{application :application user :user {:keys [text nothing-to-add modify-id prev-modify-id]} :data :as command}]
+  [{application :application user :user {:keys [text nothing-to-add modify-id]} :data :as command}]
   (let [statement (-> (util/find-by-id statementId (:statements application))
-                      (reply-statement text nothing-to-add modify-id prev-modify-id (:id user)))]
+                      (reply-statement text nothing-to-add modify-id (:id user)))]
     (update-application command
                         {:statements {$elemMatch {:id statementId}}}
-                        {$set {:statements.$ statement}})))
+                        {$set {:statements.$ statement}})
+    (ok :modify-id (:modify-id statement))))
 
 (defquery statement-replies-enabled
   {:description      "Pseudo query for UI authorization logic"

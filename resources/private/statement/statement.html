@@ -15,7 +15,7 @@
           <ul data-bind="foreach: tabs" class="tabs">
             <li data-bind="attr: {'data-test-id': 'statement-tab-selector-' + $data},
                            css: {active: $parent.selectedTab() === $data},
-                           click: $parent.selectedTab">
+                           click: $parent.selectTab">
               <a href="#" class="link-btn" data-bind="ltext: 'statement.tab.' + $data"></a>
             </li>
           </ul>

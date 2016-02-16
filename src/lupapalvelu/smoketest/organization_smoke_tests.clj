@@ -1,7 +1,6 @@
 (ns lupapalvelu.smoketest.organization-smoke-tests
   (:require [lupapalvelu.smoketest.core :refer [defmonster]]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.mongo :as mongo]))
 
 (def organization-keys [:scope])
 

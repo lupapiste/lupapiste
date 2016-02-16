@@ -231,6 +231,7 @@
                              :element     (merge element {:locKey (resolve-element-loc-key info element path)})
                              :document    (:document info)
                              :result      result}]
+
       (if (= illegal-key result)
         (assoc validation-result :path []) ; Invalid path from user input should not be echoed
         validation-result))))

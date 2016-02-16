@@ -74,8 +74,8 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return false;
   };
 
-  self.openStatement = function(model) {
-    pageutil.openPage("statement", self.application.id() + "/" + model.id());
+  self.openStatement = function(tab, model) {
+    pageutil.openPage("statement", [self.application.id(), model.id(), tab].join("/"));
     return false;
   };
 

@@ -474,22 +474,34 @@ Primary operation is
 
 # This only works if there is only one applicable document.
 Edit operation description
-  [Arguments]  ${doc}  ${text}
-  Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-${doc}] :first
-  #Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :first
-  Execute Javascript  $('div#application-info-tab [data-test-id=edit-op-description-${doc}] :first').mousedown();
+  [Arguments]  ${doc}  ${text}  ${idx}=1
+  Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
+  # for jQuery ${idx}-1 because xpath indeces start from 1!
+  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
   Input text by test id  op-description-editor-${doc}  ${text}
-  # Close the input bubble. Press key fails if the bubble has already been closed.
-  Run Keyword And Ignore Error  Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]  \\13
-
   Positive indicator should be visible
+  # Close the input
+  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
 
 # This only works if there is only one applicable document.
 Operation description is
   [Arguments]  ${doc}  ${text}
-  Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-${doc}']  - ${text}
+  Wait until  Element Should Contain  xpath=//div[@id='application-info-tab']//span[@data-test-id='${doc}-accordion-description-text']  ${text}
+
+Input building indentifier
+  [Arguments]  ${doc}  ${text}  ${idx}=1
+  Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
+  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
+  # for jQuery ${idx}-1 because xpath indeces start from 1!
+  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+  Input text by test id  ${docId}-identifier-input  ${text}
+  Positive indicator should be visible
+  # Close the input
+  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
 
 Table with id should have rowcount
   [Arguments]  ${id}  ${expectedRowcount}

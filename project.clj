@@ -9,29 +9,29 @@
                  [commons-fileupload "1.3.1"] ; The latest version - ring requires 1.3
                  [ring "1.4.0"]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
-                 [bultitude "0.2.6"] ; noir requires 0.2.0, midje 1.6 requires 0.2.2
+                 [bultitude "0.2.8"] ; noir requires 0.2.0
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
-                 [com.novemberain/monger "3.0.0"]
+                 [com.novemberain/monger "3.0.2"]
                  [com.taoensso/timbre "4.0.2"]
-                 [org.slf4j/slf4j-log4j12 "1.7.7"]
-                 [enlive "1.1.5"]
+                 [org.slf4j/slf4j-log4j12 "1.7.16"]
+                 [enlive "1.1.6"]
                  [org.jasypt/jasypt "1.9.2"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [cheshire "5.5.0"]
-                 [clj-http "2.0.0" :exclusions [commons-codec]]
+                 [clj-http "2.0.1" :exclusions [commons-codec]]
                  [camel-snake-kebab "0.1.2"]
                  [org.bouncycastle/bcprov-jdk15on "1.46"]
                  [pandect "0.3.0" :exclusions [org.bouncycastle/bcprov-jdk15on]]
-                 [clj-time "0.9.0"]
-                 [org.apache.commons/commons-lang3 "3.3.2"] ; Already a dependency but required explicitly
+                 [clj-time "0.11.0"]
+                 [org.apache.commons/commons-lang3 "3.4"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
                  [commons-codec/commons-codec "1.10"]
                  [itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14 org.apache.xmlgraphics/batik-gvt]]
                  [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [endophile "0.1.2" :exclusions [hiccup]]
-                 [com.draines/postal "1.11.1" :exclusions [commons-codec/commons-codec]]
+                 [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
                  [swiss-arrows "1.0.0"]
                  [me.raynes/fs "1.4.6" :exclusions [org.apache.commons/commons-compress]] ; later version required by pantomime -> tika
                  [ontodev/excel "0.2.3" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
@@ -45,7 +45,7 @@
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
                  [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]
-                 [org.freemarker/freemarker  "2.3.22"]
+                 [org.freemarker/freemarker  "2.3.23"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.5"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.5"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.5"]
@@ -61,7 +61,8 @@
                  [org.clojure/data.json "0.2.6"]
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
                  [lupapiste/oskari "0.9.56"]
-                 [lupapiste/commons "0.6.5"]
+                 [lupapiste/commons "0.6.51"]
+                 [lupapiste/mongocheck "0.1.1"]
                  [pdfa-core "0.0.3"]
                  [clj-rss "0.2.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]

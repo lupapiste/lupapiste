@@ -45,4 +45,6 @@
 "guest-authority.name" "fi" "Nimi"
 "guest-authority.name" "sv" "Namn"
 "guest-authority.remove-title" "fi" "Poista hankekohtainen lukuoikeus"
+"guest-authority.remove-title" "sv" "Stryk projektspecifik läsrätt"
 "guest-authority.remove-body" "fi" "Oletko varma? Samalla käyttäjältä poistetaan jo annetut hankekohtaiset lukuoikeudet tämän organisaation hakemuksilta."
+"guest-authority.remove-body" "sv" "Är du säker? I ansökningar från denna organisation stryks samtidigt alla projektspecifika läsrättigheter som redan har beviljats för denna användare."

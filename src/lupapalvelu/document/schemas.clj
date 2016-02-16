@@ -147,7 +147,7 @@
 
 (def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
 
-(def tunnus {:name "tunnus" :type :string :required false :hidden true :max-len 3})
+(def tunnus {:name "tunnus" :type :string :required false :hidden true :max-len 3 :identifier true})
 
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size "xl" :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}

@@ -7,7 +7,7 @@
                            :order 50
                            :removable true
                            :deny-removing-last-document true
-                           :repeating true}
+                           :repeating false}
                     :body [{:name "kaytettykerrosala" :type :group
                             :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
                                    {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname :size "l"

@@ -16,5 +16,4 @@ Mikko edits operation description
 Mikko can see new operation description
   Reload Page
   Operation description is  uusiRakennus  Talo A
-  #Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-uusiRakennus']  - Talo A
   [Teardown]  logout

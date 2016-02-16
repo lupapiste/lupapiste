@@ -13,26 +13,27 @@ LUPAPISTE.StatementReplyRequestModel = function(params) {
 
   var commands = params.commands;
 
-  // FIXME computed + dispose
   var initSubscription = self.data.subscribe(function() {
     self.text(util.getIn(self.data, ["reply", "saateText"]));
     hub.send("statement::submitAllowed", {tab: self.tab, value: true});
-    initSubscription.dispose();
   });
 
   self.enabled = ko.pureComputed(function() {
-    return self.authModel.ok(commands["submit"]);
+    return self.authModel.ok(commands.submit);
   });
 
   self.submitAuthorized = ko.pureComputed(function() {
     return self.authModel.ok("request-for-statement-reply");
   });
 
-  // FIXME computed + dispose
-  self.text.subscribe(function(value) {
+  var textSubscription = self.text.subscribe(function(value) {
     if(value && util.getIn(self.data, ["reply", "saateText"]) !== value) {
       hub.send("statement::changed", {tab: self.tab, path: ["reply", "saateText"], value: value});
     }
   });
 
+  self.dispose = function() {
+    initSubscription.dispose();
+    textSubscription.dispose();
+  };
 };

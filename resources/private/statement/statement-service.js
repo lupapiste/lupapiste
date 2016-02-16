@@ -17,13 +17,12 @@ LUPAPISTE.StatementService = function(params) {
     "reply-request": ko.observable(true)};
 
   self.commands = {
-    statement: {saveDraft: "save-statement-as-draft", submit: "give-statement"},
-    reply: {saveDraft: "save-statement-reply-as-draft", submit:"reply-statement"},
+    statement: {saveDraft: "save-statement-as-draft", submit: "give-statement", confirm: true},
+    reply: {saveDraft: "save-statement-reply-as-draft", submit:"reply-statement", confirm: true},
     "reply-request": {submit: "request-for-statement-reply"}};
 
   var saving = ko.observable(false);
   var submitId = ko.observable(null);
-  var modifyId = ko.observable(util.randomElementId());
 
   var draftTimerId;
 
@@ -42,7 +41,7 @@ LUPAPISTE.StatementService = function(params) {
           reply: { saateText: null,
                    text: null,
                    nothingToAdd: null }
-        }, statement))]
+        }, statement))];
       })
       .zipObject()
       .value());
@@ -55,11 +54,6 @@ LUPAPISTE.StatementService = function(params) {
     }
   });
 
-  function updateModifyId(statementId) {
-    statements()[statementId]["modify-id"](modifyId());
-    modifyId(util.randomElementId());
-  }
-
   function getCommandParams(statementId, tab) {
     var statement = statements()[statementId];
     var params = {
@@ -69,8 +63,7 @@ LUPAPISTE.StatementService = function(params) {
     };
     return _.extend({
       id: self.applicationId(),
-      "modify-id": modifyId(),
-      "prev-modify-id": util.getIn(statement, ["modify-id"], ""),
+      "modify-id": util.getIn(statement, ["modify-id"], ""),
       statementId: self.statementId(),
       lang: loc.getCurrentLanguage()
     }, _.pick(params[tab], _.identity));
@@ -82,8 +75,8 @@ LUPAPISTE.StatementService = function(params) {
     clearTimeout(draftTimerId);
     ajax
       .command(util.getIn(self.commands, [tab, "submit"]), params)
-      .success(function() {
-        updateModifyId(statementId);
+      .success(function(resp) {
+        statements()[statementId]["modify-id"](resp["modify-id"]);
         pageutil.openApplicationPage({id: self.applicationId()}, "statement");
         repository.load(self.applicationId());
         hub.send("indicator-icon", {clear: true});
@@ -102,7 +95,7 @@ LUPAPISTE.StatementService = function(params) {
       })
       .call();
     return false;
-  };
+  }
 
   function updateDraft(statementId, tab) {
     var params = getCommandParams(statementId, tab),
@@ -111,8 +104,8 @@ LUPAPISTE.StatementService = function(params) {
     saving(true);
     ajax
       .command(commandName, params)
-      .success(function() {
-        updateModifyId(statementId);
+      .success(function(resp) {
+        statements()[statementId]["modify-id"](resp["modify-id"]);
         hub.send("indicator-icon", {style: "positive"});
         return false;
       })
@@ -126,7 +119,7 @@ LUPAPISTE.StatementService = function(params) {
   hub.subscribe("statement::changed", function(e) {
     var statementId = self.statementId();
     statements(_.set(statements(), [statementId].concat(e.path).join("."), e.value));
-    if (!draftTimerId && statementId && e.tab) {
+    if (!draftTimerId && !saving() && statementId && e.tab) {
       draftTimerId = _.delay(function() {
         updateDraft(statementId, e.tab);
         draftTimerId = null;

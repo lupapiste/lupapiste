@@ -18,6 +18,11 @@
   (query pena :actions) => unauthorized?
   (query sonja :actions) => unauthorized?)
 
+(fact "invalid command is not persisted in memory"
+  (query pena :aaaa-foopar) => (partial expected-failure? "error.invalid-command")
+  (query pena :aaaa-foopar) => (partial expected-failure? "error.invalid-command")
+  (-> (query pena :allowed-actions) :actions :aaaa-foopar) => nil)
+
 (let [{id :id :as resp}  (create-app mikko :propertyId sipoo-property-id)]
   (fact "Mikko must be able to create an application!"
     resp => ok?)
