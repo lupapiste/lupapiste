@@ -9,7 +9,7 @@ LUPAPISTE.StatementService = function(params) {
   self.applicationId = ko.pureComputed(function() { return util.getIn(application, ["id"]);});
   self.applicationTitle = ko.pureComputed(function() { return util.getIn(application, ["title"]);});
 
-  self.data = ko.pureComputed(function() {return statements()[self.statementId()]});
+  self.data = ko.pureComputed(function() {return statements()[self.statementId()];});
 
   self.submitAllowed = {
     statement: ko.observable(false), 
@@ -47,7 +47,7 @@ LUPAPISTE.StatementService = function(params) {
       .value());
   });
 
-  doSubmit.subscribe(function() {
+  var doSubmitSubscription = doSubmit.subscribe(function() {
     var sid = submitId();
     if (!saving() && sid.statementId && sid.tab) {
       submit(sid.statementId, sid.tab);
@@ -97,10 +97,19 @@ LUPAPISTE.StatementService = function(params) {
     return false;
   }
 
+  function handleError(err) {
+    var modificationConflict = err.text === "error.statement-updated-after-last-save";
+    hub.send("show-dialog", {ltitle: "error.dialog.title",
+                             component: "ok-dialog",
+                             componentParams: {ltext: err.text,
+                                               okFn: modificationConflict ? function() { repository.load(self.applicationId()); } : _.noop,
+                                               okTitle: modificationConflict && loc("statement.refresh")}});
+  }
+
   function updateDraft(statementId, tab) {
     var params = getCommandParams(statementId, tab),
         commandName = util.getIn(self.commands, [tab, "saveDraft"]);
-    if (!commandName) return;
+    if (!commandName) {return;}
     saving(true);
     ajax
       .command(commandName, params)
@@ -109,6 +118,8 @@ LUPAPISTE.StatementService = function(params) {
         hub.send("indicator-icon", {style: "positive"});
         return false;
       })
+      .error(handleError)
+      .fail(handleError)
       .complete(function() {
         saving(false);
       })
@@ -116,7 +127,7 @@ LUPAPISTE.StatementService = function(params) {
     return false;
   }
 
-  hub.subscribe("statement::changed", function(e) {
+  var changedSubscription = hub.subscribe("statement::changed", function(e) {
     var statementId = self.statementId();
     statements(_.set(statements(), [statementId].concat(e.path).join("."), e.value));
     if (!draftTimerId && !saving() && statementId && e.tab) {
@@ -127,18 +138,21 @@ LUPAPISTE.StatementService = function(params) {
     }
   });
 
-  hub.subscribe("statement::submit", function(e) {
+  var submitSubscription = hub.subscribe("statement::submit", function(e) {
     if (self.applicationId() === e.applicationId && self.statementId() === e.statementId) {
       submitId({statementId: self.statementId(), tab: e.tab});
       self.submitAllowed[e.tab](false);
     }
   });
 
-  hub.subscribe("statement::submitAllowed", function(e) {
+  var submitAllowedSubscription = hub.subscribe("statement::submitAllowed", function(e) {
     self.submitAllowed[e.tab](e.value);
   });
 
-  hub.subscribe("statement::refresh", function() {
-    repository.load(self.applicationId());
-  });
+  self.dispose = function() {
+    hub.unsubscribe(changedSubscription);
+    hub.unsubscribe(submitSubscription);
+    hub.unsubscribe(submitAllowedSubscription);
+    doSubmitSubscription.dispose();
+  };
 };

@@ -4,5 +4,7 @@ LUPAPISTE.OkDialogModel = function (params) {
 
   self.text = params.ltext ? loc(params.ltext) : params.text;
 
+  self.okTitle = params.okTitle;
+
   self.ok = params.okFn || _.noop;
 };
