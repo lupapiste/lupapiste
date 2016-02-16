@@ -1738,6 +1738,19 @@
     #(-> % (assoc :requestedByAuthority (:requested-by-authority %)) (dissoc :requested-by-authority))
     {:attachments.requested-by-authority {$exists true}}))
 
+(defn guest-authority? [roles]
+  (contains? (set roles) "guestAuthority"))
+
+(defn remove-guest-authorities [org-auths]
+  (reduce (fn [acc [k v]]
+            (assoc acc k (remove #(= "guestAuthority" %) v))) {} org-auths))
+
+(defmigration no-more-guest-authority-org-authz
+  (let [users (->> (mongo/select :users {:orgAuthz {$exists true}})
+                   (filter (fn [u] (some guest-authority? (vals (:orgAuthz u))))))]
+    (doseq [{id :id auths :orgAuthz} users]
+      (mongo/update-by-id :users id {$set {:orgAuthz (remove-guest-authorities auths)}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

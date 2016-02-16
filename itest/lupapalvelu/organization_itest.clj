@@ -725,7 +725,9 @@
                                                                              :kuvaus {:value "Rouheaa"
                                                                                       :modified 100}}}
                                             }}]}))
-               (count (local-org-api/waste-ads "753-R")) => 100))
+               (count (local-org-api/waste-ads "753-R")) => 100
+               (count (local-org-api/waste-ads nil)) => 100
+               (count (local-org-api/waste-ads "")) => 100))
 
        (facts "Validators"
               (fact "Bad format: nil" (local-org-api/valid-feed-format {:data {:fmt nil}})
@@ -741,7 +743,9 @@
                     => nil)
               (fact "Valid organization 753-R" (local-org-api/valid-org {:data {:org "753-R"}})
                     => nil)
-                            (fact "Valid organization 753-r" (local-org-api/valid-org {:data {:org "753-r"}})
+              (fact "Valid organization 753-r" (local-org-api/valid-org {:data {:org "753-r"}})
+                    => nil)
+              (fact "Empty organization is valid " (local-org-api/valid-org {:data {}})
                     => nil)
               (fact "Invalid organization 888-X" (local-org-api/valid-org {:data {:org "888-X"}})
                     => {:ok false, :text "error.organization-not-found"})
@@ -749,6 +753,7 @@
                     => nil)
               (fact "Supported language sV" (local-org-api/valid-language {:data {:lang "sV"}})
                     => nil)
+              (fact "Empty language is valid" (local-org-api/valid-language {:data {}}))
               (fact "Unsupported language CN" (local-org-api/valid-language {:data {:lang "CN"}})
                     => {:ok false, :text "error.unsupported-language"})))
 
