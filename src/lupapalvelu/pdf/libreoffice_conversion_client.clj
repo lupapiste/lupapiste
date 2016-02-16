@@ -26,10 +26,11 @@
   (try
     (let [response (convert-to-pdfa-request filename content)]
       {:filename (str (FilenameUtils/removeExtension filename) ".pdf")
-       :content  (:body response)})
+       :content  (:body response)
+       :archivable true})
 
     (catch Exception e
-      (error "convert-to-pdfa-request conversion error: " (.getMessage e))
+      (error "libreoffice conversion error: " (.getMessage e))
       {:filename           filename
        :content            content
        :archivabilityError :libre-conversion-error})))

@@ -579,7 +579,9 @@
 (defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
   (if (and libreoffice-client/enabled? (= (keyword type-group) :muut) (= (keyword type-id) :paatosote))
     (libreoffice-client/convert-to-pdfa filename content)
-    {:filename filename :content content}))
+    (do
+      (info "Danger: Libreoffice conversion feature disabled.")
+      {:filename filename :content content})))
 
 (defn attach-file!
   "1) Converts file to PDF/A, if required by attachment type and
@@ -593,12 +595,13 @@
   (let [db-name mongo/*db-name* ; pass db-name to threadpool context
         file-id (mongo/create-id)
         application-id (-> options :application :id)
-        {:keys [filename content archivabilityError]} (pre-process-attachment options)
+        {:keys [filename content archivabilityError archivable]} (pre-process-attachment options)
         sanitized-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitized-filename)
         options (merge options (cond-> {:file-id file-id
                                         :filename sanitized-filename
                                         :content-type content-type}
+                                       (true? archivable) (assoc :archivable true)
                                        (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)))]
     (mongo/upload file-id sanitized-filename content-type content :application application-id)
     (.submit preview-threadpool #(create-preview file-id sanitized-filename content-type content application-id db-name))
