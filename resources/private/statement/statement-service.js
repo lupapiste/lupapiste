@@ -17,8 +17,8 @@ LUPAPISTE.StatementService = function(params) {
     "reply-request": ko.observable(true)};
 
   self.commands = {
-    statement: {saveDraft: "save-statement-as-draft", submit: "give-statement"},
-    reply: {saveDraft: "save-statement-reply-as-draft", submit:"reply-statement"},
+    statement: {saveDraft: "save-statement-as-draft", submit: "give-statement", confirm: true},
+    reply: {saveDraft: "save-statement-reply-as-draft", submit:"reply-statement", confirm: true},
     "reply-request": {submit: "request-for-statement-reply"}};
 
   var saving = ko.observable(false);
@@ -41,7 +41,7 @@ LUPAPISTE.StatementService = function(params) {
           reply: { saateText: null,
                    text: null,
                    nothingToAdd: null }
-        }, statement))]
+        }, statement))];
       })
       .zipObject()
       .value());
@@ -95,7 +95,7 @@ LUPAPISTE.StatementService = function(params) {
       })
       .call();
     return false;
-  };
+  }
 
   function updateDraft(statementId, tab) {
     var params = getCommandParams(statementId, tab),

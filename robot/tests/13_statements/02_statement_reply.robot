@@ -111,7 +111,6 @@ Olli requests reply for statement
   Wait until  Element should be visible  statement-submit
   Input text  statement-reply-covering-note  please reply this statement
   Wait and click  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-2']  Vastine pyydetty
 
 Olli requests reply for another statement
@@ -120,7 +119,6 @@ Olli requests reply for another statement
   Wait until  Element should be visible  statement-submit
   Input text  statement-reply-covering-note  please reply also this statement
   Wait and click  statement-submit
-  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-3']  Vastine pyydetty
 
 Olli goes back to statement and sees reply as draft
