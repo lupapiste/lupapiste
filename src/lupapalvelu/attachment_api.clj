@@ -52,13 +52,17 @@
              (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defn- attachment-deletable [{{attachmentId :attachmentId} :data user :user} application]
-  (let [{read-only :readOnly required :required} (attachment/get-attachment-info application attachmentId)]
-    (cond
-      read-only (fail :error.unauthorized
-                      :desc "Readonly attachments cannot be removed.")
-      (and required (not (user/authority? user))) (fail :error.unauthorized
-                                                        :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))))
+(defn- attachment-not-readOnly [{{attachmentId :attachmentId} :data user :user} application]
+  (let [{read-only :readOnly} (attachment/get-attachment-info application attachmentId)]
+    (when read-only 
+      (fail :error.unauthorized
+            :desc "Readonly attachments cannot be removed."))))
+
+(defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user} application]
+  (let [{required :required} (attachment/get-attachment-info application attachmentId)]
+    (when (and required (not (user/authority? user)))
+      (fail :error.unauthorized
+            :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))))
 
 (defn- attachment-editable-by-application-state [{{attachmentId :attachmentId} :data user :user} {current-state :state :as application}]
   (when-not (ss/blank? attachmentId)
@@ -192,7 +196,10 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts attachment-deletable attachment-editable-by-application-state]}
+   :pre-checks  [a/validate-authority-in-drafts 
+                 attachment-not-readOnly 
+                 attachment-not-required
+                 attachment-editable-by-application-state]}
   [{:keys [application user]}]
   (attachment/delete-attachment application attachmentId)
   (ok))
@@ -204,7 +211,9 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts attachment-editable-by-application-state]}
+   :pre-checks  [a/validate-authority-in-drafts
+                 attachment-not-readOnly
+                 attachment-editable-by-application-state]}
   [{:keys [application user]}]
 
   (if (attachment/file-id-in-application? application attachmentId fileId)
