@@ -60,7 +60,7 @@
                  [lupapiste/commons "0.6.51"]
                  [lupapiste/mongocheck "0.1.1"]
                  [lupapiste/openpdf "1.0.2"]
-                 [lupapiste/pdfa-generator "1.0.0"]
+                 [lupapiste/pdfa-generator "1.0.1"]
                  [clj-rss "0.2.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]

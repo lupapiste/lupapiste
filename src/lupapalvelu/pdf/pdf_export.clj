@@ -1,11 +1,10 @@
 (ns lupapalvelu.pdf.pdf-export
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [clojure.java.io :as io]
-            [pdfa.core :as pdf]
+            [pdfa-generator.core :as pdf]
             [clj-time.local :as tl]
             [clj-time.format :as tf]
             [lupapalvelu.i18n :refer [with-lang loc]]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [sade.util :as util]
