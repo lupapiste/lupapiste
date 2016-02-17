@@ -57,8 +57,9 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
 
   self.inviterInformation = function( role ) {
     var info = "";
-    if( _.isObject( role.inviter )) {
-      info = role.inviter.firstName() + " " + role.inviter.lastName();
+    var obj = ko.mapping.toJS( role );
+    if( _.isObject( obj.inviter )) {
+      info = obj.inviter.firstName + " " + obj.inviter.lastName;
     }
     return info;
   };
