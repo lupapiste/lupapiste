@@ -52,17 +52,16 @@
              (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defn- attachment-not-readOnly [{{attachmentId :attachmentId} :data user :user} application]
-  (let [{read-only :readOnly} (attachment/get-attachment-info application attachmentId)]
-    (when read-only 
-      (fail :error.unauthorized
-            :desc "Readonly attachments cannot be removed."))))
+(defn- attachment-not-readOnly [{{attachmentId :attachmentId} :data} application]
+  (when (-> (attachment/get-attachment-info application attachmentId) :readOnly true?)
+    (fail :error.unauthorized
+          :desc "Readonly attachments cannot be removed.")))
 
 (defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user} application]
-  (let [{required :required} (attachment/get-attachment-info application attachmentId)]
-    (when (and required (not (user/authority? user)))
-      (fail :error.unauthorized
-            :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))))
+  (when (and (-> (attachment/get-attachment-info application attachmentId) :required true?)
+             (not (user/authority? user)))
+    (fail :error.unauthorized
+          :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority.")))
 
 (defn- attachment-editable-by-application-state [{{attachmentId :attachmentId} :data user :user} {current-state :state :as application}]
   (when-not (ss/blank? attachmentId)
