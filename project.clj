@@ -59,7 +59,7 @@
                  [lupapiste/oskari "0.9.56"]
                  [lupapiste/commons "0.6.51"]
                  [lupapiste/mongocheck "0.1.1"]
-                 [lupapiste/openpdf "1.0.0"]
+                 [lupapiste/openpdf "1.0.1"]
                  [pdfa-core "0.0.4" :exclusions [itext]]
                  [clj-rss "0.2.3"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
