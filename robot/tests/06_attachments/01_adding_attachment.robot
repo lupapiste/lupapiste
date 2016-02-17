@@ -37,6 +37,28 @@ Mikko deletes attachment immediately by using remove icon
   Confirm yes no dialog
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
+Mikko adds txt attachment without comment again
+  [Tags]  attachments
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Application state should be  draft
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+
+Mikko deletes attachment version
+  [Tags]  attachments
+  Click element  xpath=//div[@id="application-attachments-tab"]//tr[@id='attachment-row-muut-muu']//td[contains(@class, 'attachment-type-id')]/a
+  Wait and click  show-attachment-versions
+  Wait and click  //tr[@data-test-id='version-row-1.0']//a[@data-test-id='delete-version']
+  Confirm yes no dialog
+  Wait until  Element should not be visible  show-attachment-versions
+
+Mikko deletes also the attachment template
+  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
+  Scroll to test id  back-to-application-from-attachment
+  Click element  jquery=[data-test-id=back-to-application-from-attachment]
+  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
+  Confirm yes no dialog
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+
 Mikko adds again txt attachment with comment
   [Tags]  attachments
   Add attachment  application  ${TXT_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
@@ -55,6 +77,8 @@ Mikko opens attachment details
 # Tests against bug fix LPK-1042
 Mikko returns to application right away
   [Tags]  attachments
+  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
+  Scroll to test id  back-to-application-from-attachment
   Click element  jquery=[data-test-id=back-to-application-from-attachment]
   Wait Until Page Contains  ${propertyId}
 
@@ -127,7 +151,9 @@ Change attachment type
   Select From List  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
-  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
+  Scroll to test id  back-to-application-from-attachment
+  Click element  jquery=[data-test-id=back-to-application-from-attachment]
   Wait Until  Tab should be visible  attachments
   Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
@@ -180,7 +206,8 @@ Sonja goes to conversation tab
 Sonja goes to attachments tab
   [Tags]  attachments
   Wait Until  Element should be visible  xpath=//a[@data-test-id="back-to-application-from-attachment"]
-  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Scroll to test id  back-to-application-from-attachment
+  Click element  jquery=[data-test-id=back-to-application-from-attachment]
   Open tab  attachments
 
 Sonja adds new attachment template
@@ -235,7 +262,9 @@ Approve-button should be disabled
 
 Attachment state should be ok
   [Tags]  attachments
-  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
+  Scroll to test id  back-to-application-from-attachment
+  Click element  jquery=[data-test-id=back-to-application-from-attachment]
   Tab should be visible  attachments
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  ok
 
