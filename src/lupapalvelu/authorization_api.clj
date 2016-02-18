@@ -109,7 +109,7 @@
   (when-let [my-invite (domain/invite application (:email user))]
     (let [my-auth (auth/get-auth application (:id user))
           role (or (:role my-invite) (:role my-auth))
-          inviter (:inviter my-auth)
+          inviter (:inviter my-invite)
           document-id (:documentId my-invite)]
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
