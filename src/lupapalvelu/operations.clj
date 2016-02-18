@@ -692,7 +692,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
-   :aita                        {:schema "kaupunkikuvatoimenpide"
+   :aita                        {:schema "kaupunkikuvatoimenpide-ei-tunnusta"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas

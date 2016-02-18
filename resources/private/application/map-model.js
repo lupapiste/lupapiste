@@ -12,9 +12,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
 
   var createMap = function(divName) {
-    return gis
-      .makeMap(divName, {zoomWheelEnabled: false})
-      .center(404168, 6693765, 14);
+    return gis.makeMap(divName, {zoomWheelEnabled: false});
   };
 
   var getOrCreateMap = function(kind) {
@@ -162,7 +160,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       return;
     }
 
-    map.clear().updateSize().center(x, y).add({x: x, y: y});
+    map.clear().updateSize().center(x, y, 14).add({x: x, y: y});
 
     // In some cases, e.g. in location {x: 461586.443, y: 7472906.0969994}
     // map is initialized to wrong size in IE 11.
