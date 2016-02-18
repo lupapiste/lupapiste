@@ -383,7 +383,7 @@
                                    :schema-info {:removable true
                                                  :op {:id  "kaupunkikuva-id"
                                                       :name "aita"}
-                                                 :name "kaupunkikuvatoimenpide"
+                                                 :name "kaupunkikuvatoimenpide-ei-tunnusta"
                                                  :version 1}})
 
 (def- puun-kaataminen {:created 6
