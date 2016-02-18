@@ -2,7 +2,8 @@
   (:require [lupapalvelu.permit :as permit]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (def- rakval-yht {"2.1.2" "2.1.0"
                   "2.1.3" "2.1.1"
@@ -621,6 +622,24 @@
            (get-child-element % (rest path))
            %))
       children)))
+
+(defn add-generated-pdf-attachments
+  "Adds the generated application pdf information to the canonical
+  attachments."
+  [application begin-of-link attachments]
+  (conj attachments
+        {:Liite
+         {:kuvaus            "Vireille tullut hakemus"
+          :linkkiliitteeseen (str begin-of-link (writer/get-submitted-filename (:id application)))
+          :muokkausHetki     (util/to-xml-datetime (:submitted application))
+          :versionumero      1
+          :tyyppi            "hakemus_vireilletullessa"}}
+        {:Liite
+         {:kuvaus            "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
+          :linkkiliitteeseen (str begin-of-link (writer/get-current-filename (:id application)))
+          :muokkausHetki     (util/to-xml-datetime (now))
+          :versionumero      1
+          :tyyppi            "hakemus_taustajarjestelmaan_siirrettaessa"}}))
 
 
 (defn attachment-details-from-canonical
