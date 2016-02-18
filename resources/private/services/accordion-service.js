@@ -50,7 +50,7 @@ LUPAPISTE.AccordionService = function() {
 
   self.getOperationByOpId = function(opId) {
     return util.getIn(_.find(self.documents(), function(doc) {
-      return doc.operation.id() === opId;
+      return doc.operation.id && doc.operation.id() === opId;
     }), ["operation"]);
   };
 
