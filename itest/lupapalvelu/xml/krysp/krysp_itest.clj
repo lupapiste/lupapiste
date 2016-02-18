@@ -128,7 +128,6 @@
                         (io/file (get-local-filename output-dir filename-starts-with)))
              xml-as-string (slurp xml-file)
              xml (parse (io/reader xml-file))
-             _ (>pprint xml)
              liitetieto (xml/select xml [:liitetieto])
              polygon (xml/select xml [:Polygon])]
 
