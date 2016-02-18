@@ -1751,6 +1751,24 @@
     (doseq [{id :id auths :orgAuthz} users]
       (mongo/update-by-id :users id {$set {:orgAuthz (remove-guest-authorities auths)}}))))
 
+(defn rename-kaupunkikuvatoimenpide-documents-with-op [operations-to-rename doc]
+  (if (and (= "kaupunkikuvatoimenpide" (get-in doc [:schema-info :name]))
+           (set operations-to-rename)  (get-in doc [:schema-info :op :name]))
+    (update doc :schema-info assoc :name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide")
+    doc))
+
+(defmigration schemas-without-building-identifier []
+  {:apply-when (pos? (+ (mongo/count :applications 
+                                     {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                              :schema-info.op.name {$in ["aita"]}}}})
+                        (mongo/count :submitted-applications 
+                                     {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                              :schema-info.op.name {$in ["aita"]}}}})))}
+  (update-applications-array :documents
+                             (partial rename-kaupunkikuvatoimenpide-documents-with-op #{"aita"})
+                             {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                      :schema-info.op.name {$in ["aita"]}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

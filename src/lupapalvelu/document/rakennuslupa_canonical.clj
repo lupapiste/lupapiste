@@ -203,6 +203,7 @@
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen-ei-huoneistoja documents-by-type))
                                                (map #(get-purku-toimenpide % application) (:purkaminen documents-by-type))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents-by-type))
+                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide-ei-tunnusta documents-by-type))
                                                (map #(get-maalampokaivo % application) (:maalampokaivo documents-by-type))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))

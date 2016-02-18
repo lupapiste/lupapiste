@@ -121,7 +121,13 @@ Sonja cannot regive statement to own statement
   Wait until  Element should not be visible  statement-submit
   [Teardown]  Return from statement
 
+Attachment is generated and not removable
+  Open tab  attachments
+  Wait until  Element should be visible  //table[@data-test-id='attachments-template-table']//tr[@id='attachment-row-ennakkoluvat_ja_lausunnot-lausunto']
+  Element should not be visible  //table[@data-test-id='attachments-template-table']//tr[@data-test-icon='delete-ennakkoluvat_ja_lausunnot.lausunto']
+
 Statement status is visible for given statement in summary table
+  Open tab  statement
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Puoltaa
 
 ...but not for draft

@@ -255,7 +255,7 @@
       frame))
 
   ; Run this in REPL and check that every new file has been stamped
-  (let [d "problematic-pdfs"
+  (let [d "checkouts/lupapiste-aux/problematic-pdfs"
         my-stamp (make-stamp "OK" 0 0 ["Solita Oy"])]
     (doseq [f (remove #(.endsWith (.getName %) "-leima.pdf") (fs/list-dir d))]
       (println f)
@@ -266,7 +266,7 @@
           (catch Throwable t (error t))))))
 
   ; This REPL-snippet can be used to read metadata from a given pdf. Data is written to target/pdf-metadata-output.txt
-  (let [fpath       "problematic-pdfs/pohjapiirros.pdf"
+  (let [fpath       "checkouts/lupapiste-aux/problematic-pdfs/pohjapiirros.pdf"
         output-path "target/pdf-metadata-output.txt"]
     (with-open [in (io/input-stream fpath)
                 reader (PdfReader. in)

@@ -101,6 +101,7 @@ LUPAPISTE.StatementService = function(params) {
     var modificationConflict = err.text === "error.statement-updated-after-last-save";
     hub.send("show-dialog", {ltitle: "error.dialog.title",
                              component: "ok-dialog",
+                             size: "small",
                              componentParams: {ltext: err.text,
                                                okFn: modificationConflict ? function() { repository.load(self.applicationId()); } : _.noop,
                                                okTitle: modificationConflict && loc("statement.refresh")}});

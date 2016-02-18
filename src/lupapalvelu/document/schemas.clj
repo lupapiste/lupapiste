@@ -147,7 +147,7 @@
 
 (def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
 
-(def tunnus {:name "tunnus" :type :string :required false :hidden true :max-len 3 :identifier true})
+(def tunnus {:name "tunnus" :type :string :required true :hidden true :max-len 3 :identifier true})
 
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size "xl" :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
@@ -1362,7 +1362,7 @@
     :body (body tunnus rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
 
    {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
-    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
+    :body (body tunnus rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
 
    {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-muutos)}
@@ -1383,6 +1383,9 @@
     :body (approvable-top-level-groups purku)}
 
    {:info {:name "kaupunkikuvatoimenpide" :approvable true}
+    :body (body tunnus (approvable-top-level-groups rakennelma))}
+
+   {:info {:name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide" :approvable true}
     :body (approvable-top-level-groups rakennelma)}
 
    {:info {:name "maalampokaivo" :approvable true :i18name "maalampokaivo"}

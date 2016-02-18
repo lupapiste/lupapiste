@@ -279,7 +279,9 @@
    ;; 1. Every application that maybe has available materials.
    (mongo/select
     :applications
-    {:organization (or org-id {$exists true})
+    {:organization (if (ss/blank? org-id)
+                     {$exists true}
+                     org-id)
      :documents {$elemMatch {:data.availableMaterials {$exists true }
                              :data.contact {$nin ["" nil]}}}})
    ;; 2. Create materials, contact, modified map.
