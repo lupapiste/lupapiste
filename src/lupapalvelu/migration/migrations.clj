@@ -1758,10 +1758,10 @@
     doc))
 
 (defmigration schemas-without-building-identifier []
-  {:apply-when (pos? (+ (mongo/count :applications 
+  {:apply-when (pos? (+ (mongo/count :applications
                                      {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
                                                               :schema-info.op.name {$in ["aita"]}}}})
-                        (mongo/count :submitted-applications 
+                        (mongo/count :submitted-applications
                                      {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
                                                               :schema-info.op.name {$in ["aita"]}}}})))}
   (update-applications-array :documents
@@ -1780,6 +1780,12 @@
             (assoc-in [:schema-info :name] "hankkeen-kuvaus"))
         doc))
     {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
+
+(defmigration init-designer-index
+              (reduce + 0
+                      (for [collection [:applications :submitted-applications]]
+                        (let [applications (mongo/select collection)]
+                          (count (map #(mongo/update-by-id collection (:id %) {$set {:_designerIndex (app-meta-fields/designers-index %)}}) applications))))))
 
 ;;
 ;; ****** NOTE! ******

@@ -25,5 +25,5 @@
                          (count rows) => 100
                          (nth rows 1) => "Once there was a miller who was poor, but who had a beautiful"))
                  (.delete file-out))
-             (fact "libre not enabled [so the service should *NOT* be running in this ENV], expect connection error"
+             (fact "libre is not enabled in this ENV [so the service should *NOT* be running in this ENV], expect connection error"
                    (:archivabilityError response) => :libre-conversion-error)))))
