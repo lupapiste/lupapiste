@@ -238,7 +238,7 @@
   "Transforms application mongodb-document to canonical model."
   [application lang]
   (let [application (tools/unwrapped application)
-        link-permit-data (first (:linkPermitData application))
+        link-permits (:linkPermitData application)
         documents-by-type (documents-by-type-without-blanks application)
         toimenpiteet (get-operations documents-by-type application)
         operation-name (-> application :primaryOperation :name)
@@ -262,9 +262,9 @@
                       :asianTiedot (get-asian-tiedot documents-by-type)
                       :lisatiedot (get-lisatiedot documents-by-type lang)
                       :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}}}}
-        canonical (if link-permit-data
+        canonical (if (not-empty link-permits)
                     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
-                      (get-viitelupatieto link-permit-data))
+                              (map get-viitelupatieto link-permits))
                     canonical)
         canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
                             (= operation-name "suunnittelijan-nimeaminen")
