@@ -25,7 +25,7 @@ LUPAPISTE.AccordionService = function() {
     self.documents(_.map(docs, function(doc) {
       var fields = doc.schema.info["accordion-fields"];
       var data = _.reduce(fields, function(result, path) {
-        return _.set(result, path.join("."), util.getIn(doc.data, path.concat("value")));
+        return _.set(result, path.join("."), ko.observable(util.getIn(doc.data, path.concat("value"))));
       }, {});
       return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: data, accordionPaths: fields};
     }));
@@ -94,4 +94,15 @@ LUPAPISTE.AccordionService = function() {
     }
   });
 
+  hub.subscribe("accordionUpdate", function(event) {
+    var eventPath = event.path;
+    var value = event.value;
+    var docId = event.docId;
+
+    var documentData = self.getDocumentData(docId);
+
+    var accordionDataObservable = _.get(documentData.data, _.words(eventPath, "."));
+    accordionDataObservable(value);
+
+  });
 };

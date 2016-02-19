@@ -61,7 +61,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   function buildAccordionText(paths, data) {
     return _(paths)
       .map(function(path) {
-        return _.get(data, path);
+        return ko.unwrap(_.get(data, path));
       })
       .reject(_.isEmpty)
       .value()
@@ -78,7 +78,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
       if (isSelected) { // are we dealing with _selected special case
         var selectedValue = _.get(docData.data, firstPathValue);
         var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
-          return path[0] === selectedValue;
+          return path[0] === selectedValue();
         });
         return buildAccordionText(selectedPaths, docData.data);
 

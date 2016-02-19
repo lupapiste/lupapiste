@@ -1875,6 +1875,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     },
     emitUnknown: function(event) {
       error("Unknown emitter event:", event);
+    },
+    accordionUpdate: function(event, value, path) {
+      hub.send(event, {path: path, value: value, docId: self.docId});
     }
   };
 
