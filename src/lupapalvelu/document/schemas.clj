@@ -4,14 +4,14 @@
             [lupapiste-commons.usage-types :as usages]))
 
 
-(defn assoc-in-body
-  "Assocs v to k, into body in given path. Body is vector of maps, path is vector of strings."
+(defn update-in-body
+  "Updates k in given body path with fn. Body is vector of maps, path is vector of strings."
   [body path k f]
   (map
     (fn [body-part]
       (if (= (name (first path)) (:name body-part))
         (if (seq (rest path))
-          (update body-part :body assoc-in-body (rest path) k f)
+          (update body-part :body update-in-body (rest path) k f)
           (update body-part k f))
         body-part))
     body))
@@ -22,7 +22,7 @@
   (if (seq accordion-fields)
     (reduce
       (fn [body field-path]
-        (assoc-in-body body field-path :emit #(conj % :accordionUpdate)))
+        (update-in-body body field-path :emit #(conj % :accordionUpdate)))
       body
       accordion-fields)
     body))
