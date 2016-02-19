@@ -3,6 +3,31 @@
             [lupapalvelu.document.tools :refer :all]
             [lupapiste-commons.usage-types :as usages]))
 
+
+(defn assoc-in-body
+  "Assocs v to k, into body in given path. Body is vector of maps, path is vector of strings."
+  [body path k f]
+  (map
+    (fn [body-part]
+      (if (= (name (first path)) (:name body-part))
+        (if (seq (rest path))
+          (update body-part :body assoc-in-body (rest path) k f)
+          (update body-part k f))
+        body-part))
+    body))
+
+(defn accordion-field-emitters
+  "Adds :accordionUpdate emitters to paths defined by accordion-fields"
+  [body accordion-fields]
+  (if (seq accordion-fields)
+    (reduce
+      (fn [body field-path]
+        (assoc-in-body body field-path :emit #(conj % :accordionUpdate)))
+      body
+      accordion-fields)
+    body))
+
+
 ;;
 ;; Register schemas
 ;;
@@ -41,8 +66,9 @@
       assoc-in
       [version schema-name]
       (-> data
-        (assoc-in [:info :name] schema-name)
-        (assoc-in [:info :version] version)))))
+          (assoc-in [:info :name] schema-name)
+          (assoc-in [:info :version] version)
+          (update :body accordion-field-emitters (get-in data [:info :accordion-fields]))))))
 
 (defn defschemas [version schemas]
   (doseq [schema schemas]

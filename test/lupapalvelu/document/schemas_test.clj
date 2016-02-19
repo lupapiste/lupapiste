@@ -14,3 +14,23 @@
                                                   :body [{:name :beer
                                                           :type :string}]}]))
 
+(fact "assoc-in-body"
+  (let [body [{:name "foo"
+               :body [{:name "bar"
+                       :body [{:name "baz"}]}]}
+              {:name "hoo"
+               :body [{:name "haa"}
+                      {:name "huu"}]}]]
+    (assoc-in-body body ["foo" "bar" "baz"] :testi true) => [{:name "foo"
+                                                              :body [{:name "bar"
+                                                                      :body [{:name "baz" :testi true}]}]}
+                                                             {:name "hoo"
+                                                              :body [{:name "haa"}
+                                                                     {:name "huu"}]}]
+    (assoc-in-body body ["foo" "bar" "wrong"] :testi true) => body
+
+    (last (assoc-in-body body ["hoo"] :testi false)) => {:name "hoo"
+                                                         :body [{:name "haa"}
+                                                                {:name "huu"}]
+                                                         :testi false}))
+
