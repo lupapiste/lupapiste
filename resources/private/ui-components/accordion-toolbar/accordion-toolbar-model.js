@@ -48,6 +48,18 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                                                "id"] );
   });
 
+  self.showIdentifierEditors = ko.observable(false);
+  var stickyRefresh = self.showIdentifierEditors.subscribe(function() {
+    // refresh accordion sitcky state
+    _.delay(window.Stickyfill.rebuild, 0);
+  });
+
+  self.identifierField = ko.pureComputed(function() {
+    return self.accordionService.getIdentifier(self.docModel.docId);
+  });
+
+
+  // Required accordion title from operation/schema-info name
   self.titleLoc = ((op && op.name) || self.info.name) + "._group_label";
 
   self.headerDescription = ko.pureComputed(function() { // Accordion header text
@@ -184,16 +196,6 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                   || self.showReject()
                   || self.showApprove()
                   || self.hasOperation();
-
-  self.showIdentifierEditors = ko.observable(false);
-  var stickyRefresh = self.showIdentifierEditors.subscribe(function() {
-    // refresh accordion sitcky state
-    _.delay(window.Stickyfill.rebuild, 0);
-  });
-
-  self.hasIdentifierField = ko.pureComputed(function() {
-    return self.accordionService.getIdentifier(self.docModel.docId);
-  });
 
   self.closeEditors = function( data, event ) {
     // Toggle editors visibility with key press
