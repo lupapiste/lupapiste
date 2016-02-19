@@ -1758,10 +1758,10 @@
     doc))
 
 (defmigration schemas-without-building-identifier []
-  {:apply-when (pos? (+ (mongo/count :applications 
+  {:apply-when (pos? (+ (mongo/count :applications
                                      {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
                                                               :schema-info.op.name {$in ["aita"]}}}})
-                        (mongo/count :submitted-applications 
+                        (mongo/count :submitted-applications
                                      {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
                                                               :schema-info.op.name {$in ["aita"]}}}})))}
   (update-applications-array :documents
