@@ -89,7 +89,8 @@ self.canEdit = function() {
     dd.guestClick = function() {
         ajax.command( "update-guest-authority-organization",
                       {email: dd.email(),
-                       name: dd.firstName() + " " + dd.lastName(),
+                       firstName: dd.firstName(),
+                       lastName: dd.lastName(),
                        description: dd.description()})
      .pending( dd.waitingOk )
         .success( function() {

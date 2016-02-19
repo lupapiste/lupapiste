@@ -124,13 +124,13 @@
     (notify-new-authority new-user caller)
     (ok :operation "invited")))
 
-(defcommand create-user
-  {:parameters [:email role]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :user-roles #{:admin :authorityAdmin}}
-  [{user-data :data caller :user}]
-  (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]}) user-data)
+(defn do-create-user
+  "Since create-user command is typically called by authority admin to
+  create authorities, there are some peculiar details."
+ [user-data caller]
+ (let [updated-user-data (if (:organization user-data)
+                           (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]})
+                           user-data)
         user (user/create-new-user caller updated-user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (user/authority? user)
@@ -142,6 +142,14 @@
           :user user
           :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
           :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
+
+(defcommand create-user
+  {:parameters [:email role]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :user-roles #{:admin :authorityAdmin}}
+  [{user-data :data caller :user}]
+  (do-create-user user-data caller))
 
 ;;
 ;; ==============================================================================
