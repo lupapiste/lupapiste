@@ -68,7 +68,7 @@
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-bind="event: {keydown: closeEditors}">
         <div>
-          <!-- ko if: identifierField() && features.enabled("document-identifier") -->
+          <!-- ko if: identifierField && features.enabled("document-identifier") -->
           <div class="inline-col identifier-component"
               data-bind="component: {name: 'document-identifier',
                                      params: {docId: docModel.docId,

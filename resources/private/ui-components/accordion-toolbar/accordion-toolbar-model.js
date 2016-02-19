@@ -54,16 +54,55 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     _.delay(window.Stickyfill.rebuild, 0);
   });
 
-  self.identifierField = ko.pureComputed(function() {
-    return self.accordionService.getIdentifier(self.docModel.docId);
-  });
+  self.identifierField = self.accordionService.getIdentifier(self.docModel.docId);
 
+  var docData = self.accordionService.getDocumentData(self.docModel.docId);
+
+  self.accordionText = ko.pureComputed(function() {
+    // resolve values from given accordionPaths
+    var paths = docData.accordionPaths;
+    if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
+      var firstPathValue = paths[0][0];
+      var isSelected = firstPathValue === "_selected";
+      if (isSelected) { // are we dealing with _selected special case
+        var selectedValue = _.get(docData.data, firstPathValue);
+        var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
+          return path[0] === selectedValue;
+        });
+        // reduce _selected paths to a string of values
+        return _.reduce(selectedPaths, function(result, path) {
+          // return data value in path
+          return _.trim(result + " " + _.get(docData.data, path));
+        }, "");
+      } else { // no _selected, use paths as is
+        // reduce paths to a string of values
+        return _.reduce(paths, function(result, path) {
+          // return data value in path
+          return _.trim(result + " " + _.get(docData.data, path));
+        }, "");
+      }
+    }
+  });
 
   // Required accordion title from operation/schema-info name
   self.titleLoc = ((op && op.name) || self.info.name) + "._group_label";
 
-  self.headerDescription = ko.pureComputed(function() { // Accordion header text
-    return self.operationDescription() ? " - " + self.operationDescription() : "";
+  // Optional accordion header text.
+  // Consists of optional properties: identifier field, operation description, and accordion paths (from schema)
+  self.headerDescription = ko.pureComputed(function() {
+    var identifier = self.identifierField && self.identifierField.value();
+    var operation  = self.operationDescription();
+    var accordionFieldStr = self.accordionText();
+    var isEmpty = !identifier && !operation && !accordionFieldStr;
+    if (!isEmpty) {
+      var resultStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
+      resultStr += identifier ? identifier : "";
+      resultStr += operation ? (identifier ? ": " + operation : operation) : "";
+      resultStr += accordionFieldStr ? (operation || identifier ? " - " + accordionFieldStr : accordionFieldStr) : "";
+      return resultStr;
+    } else {
+      return "";
+    }
   });
 
   self.toggleAccordion = function() {
