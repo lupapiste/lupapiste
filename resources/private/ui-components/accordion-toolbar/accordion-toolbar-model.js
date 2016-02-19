@@ -54,9 +54,9 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     _.delay(window.Stickyfill.rebuild, 0);
   });
 
-  self.identifierField = self.accordionService.getIdentifier(self.docModel.docId);
+  self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
 
-  var docData = self.accordionService.getDocumentData(self.docModel.docId);
+  var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
 
   function buildAccordionText(paths, data) {
     return _(paths)
@@ -70,7 +70,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   self.accordionText = ko.pureComputed(function() {
     // resolve values from given accordionPaths
-    var paths = docData.accordionPaths;
+    var paths = docData && docData.accordionPaths;
     if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
       var firstPathValue = paths[0][0];
       var isSelected = firstPathValue === "_selected";
