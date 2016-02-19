@@ -36,7 +36,7 @@
 "guest-authority.add" "sv" "Lägg till läsrätt"
 "guest-authority.description" "fi" "Rooli"
 "guest-authority.description" "sv" "Roll"
-"guest-authority.email" "fi" "Sähköposti"
+"guest-authority.email" "fi" "Sähköpostiosoite"
 "guest-authority.email" "sv" "Epost"
 "guest-authority.failure" "fi" "Toimenpide epäonnistui. Yritä myöhemmin uudelleen."
 "guest-authority.failure" "sv" "Åtgärden misslyckades. Försök på nytt senare."
