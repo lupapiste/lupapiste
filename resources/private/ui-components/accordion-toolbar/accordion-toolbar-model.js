@@ -58,28 +58,32 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   var docData = self.accordionService.getDocumentData(self.docModel.docId);
 
+  function buildAccordionText(paths, data) {
+    return _(paths)
+      .map(function(path) {
+        return _.get(data, path);
+      })
+      .reject(_.isEmpty)
+      .value()
+      .join(" ");
+  }
+
   self.accordionText = ko.pureComputed(function() {
     // resolve values from given accordionPaths
     var paths = docData.accordionPaths;
     if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
       var firstPathValue = paths[0][0];
       var isSelected = firstPathValue === "_selected";
+
       if (isSelected) { // are we dealing with _selected special case
         var selectedValue = _.get(docData.data, firstPathValue);
         var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
           return path[0] === selectedValue;
         });
-        // reduce _selected paths to a string of values
-        return _.reduce(selectedPaths, function(result, path) {
-          // return data value in path
-          return _.trim(result + " " + _.get(docData.data, path));
-        }, "");
+        return buildAccordionText(selectedPaths, docData.data);
+
       } else { // no _selected, use paths as is
-        // reduce paths to a string of values
-        return _.reduce(paths, function(result, path) {
-          // return data value in path
-          return _.trim(result + " " + _.get(docData.data, path));
-        }, "");
+        return buildAccordionText(paths, docData.data);
       }
     }
   });
