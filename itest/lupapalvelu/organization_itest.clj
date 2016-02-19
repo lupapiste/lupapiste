@@ -47,8 +47,8 @@
     (fact "sipoo can set working krysp-url with only username set"
       (command sipoo :set-krysp-endpoint :url uri :username "pena" :password "" :permitType "R" :version "2") => ok?)
 
-    (fact "query krysp config - no url or credentials set for P endpoint"
-      (-> (query sipoo :krysp-config) :krysp :P (select-keys [:url :username :password])) => {})
+    (fact "query krysp config - no credentials set for P endpoint"
+          (-> (query sipoo :krysp-config) :krysp :P (select-keys [:url :username :password])) => (just {:url anything}))
 
     (fact "query krysp config - credentials not set for YA endpoint"
       (-> (query sipoo :krysp-config) :krysp :YA (select-keys [:url :username :password])) => (just {:url anything}))
