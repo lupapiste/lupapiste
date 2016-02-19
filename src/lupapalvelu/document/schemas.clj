@@ -28,7 +28,8 @@
                  :after-update
                  :repeating :no-repeat-button :order
                  :exclude-from-pdf
-                 :construction-time})
+                 :construction-time
+                 :accordion-fields})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -1414,7 +1415,7 @@
 
 
 
-      {:info {:name "hakija"
+   {:info {:name "hakija"
            :i18name "osapuoli"
            :order 3
            :removable true
@@ -1426,6 +1427,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
        :body party}
 
@@ -1442,8 +1444,8 @@
            :group-help "hakija.group.help"
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
-    :accordion-fields hakija-accordion-paths
     :body party}
 
    {:info {:name "hakija-kt"
@@ -1458,6 +1460,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body party}
 
@@ -1473,6 +1476,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body (schema-body-without-element-by-name ya-party turvakielto)}
 
@@ -1488,6 +1492,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body party}
 

@@ -23,7 +23,7 @@ LUPAPISTE.AccordionService = function() {
 
   self.setDocuments = function(docs) {
     self.documents(_.map(docs, function(doc) {
-      var fields = doc.schema["accordion-fields"];
+      var fields = doc.schema.info["accordion-fields"];
       var data = _.reduce(fields, function(result, path) {
         return _.set(result, path.join("."), util.getIn(doc.data, path.concat("value")));
       }, {});
