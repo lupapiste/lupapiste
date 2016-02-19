@@ -19,30 +19,29 @@ LUPAPISTE.AccordionService = function() {
   });
 
   self.documents = ko.observable();
+  self.identifierFields = ko.observableArray([]);
 
   self.setDocuments = function(docs) {
-    var docsWithOperation = _.filter(docs, function(doc) {
-      return doc["schema-info"].op;
-    });
-    self.documents(_.map(docsWithOperation, function(doc) {
-      return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: doc.data};
+    self.documents(_.map(docs, function(doc) {
+      var fields = doc.schema["accordion-fields"];
+      var data = _.reduce(fields, function(result, path) {
+        return _.set(result, path.join("."), util.getIn(doc.data, path.concat("value")));
+      }, {});
+      return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: data, accordionPaths: fields};
     }));
-  };
 
-  self.accordionFields = ko.observableArray([]);
-  self.documents.subscribe(function() {
-    var identifiers = _(self.documents())
+    var identifiers = _(docs)
       .filter(function(doc) {
         return _.find(doc.schema.body, "identifier"); // finds first
       })
       .map(function(doc) {
         var subSchema = _.find(doc.schema.body, "identifier");
         var key = _.get(subSchema, "name");
-        return {docId: doc.docId, schema: subSchema, key: key, value: ko.observable(util.getIn(doc, ["data", key, "value"]))};
+        return {docId: doc.id, schema: subSchema, key: key, value: ko.observable(util.getIn(doc, ["data", key, "value"]))};
       })
       .value();
-    self.accordionFields(identifiers); // set the fields for each document
-  });
+    self.identifierFields(identifiers); // set the fields for each document
+  };
 
   self.getOperation = function(docId) {
     return util.getIn(_.find(self.documents(), {docId: docId}), ["operation"]);
@@ -55,8 +54,10 @@ LUPAPISTE.AccordionService = function() {
   };
 
   self.getIdentifier = function(docId) {
-    return _.find(self.accordionFields(), {docId: docId});
+    return _.find(self.identifierFields(), {docId: docId});
   };
+
+  self.getDocumentData = function(docId) { return _.find(self.documents(), {docId: docId});};
 
   self.toggleEditors = function(show) {
     hub.send("accordionToolbar::toggleEditor", {show: show});
@@ -66,7 +67,7 @@ LUPAPISTE.AccordionService = function() {
     var docId = event.docId;
     var value = event.value;
     var path = [event.key];
-    var doc = _.find(self.accordionFields(), {docId: docId});
+    var doc = _.find(self.identifierFields(), {docId: docId});
     if (doc.value() !== value) {
       lupapisteApp.services.documentDataService.updateDoc(docId, [[path, value]], self.indicator);
       doc.value(value);
