@@ -1751,6 +1751,11 @@
     (doseq [{id :id auths :orgAuthz} users]
       (mongo/update-by-id :users id {$set {:orgAuthz (remove-guest-authorities auths)}}))))
 
+(defmigration init-designer-index
+              (reduce + 0
+                      (for [collection [:applications :submitted-applications]]
+                        (let [applications (mongo/select collection)]
+                          (count (map #(mongo/update-by-id collection (:id %) {$set {:_designerIndex (app-meta-fields/designers-index %)}}) applications))))))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
