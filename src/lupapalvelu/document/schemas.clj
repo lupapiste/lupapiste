@@ -1329,6 +1329,12 @@
                                {:name "paattymispvm"
                                 :type :date}]})
 
+(def hakija-accordion-paths
+  "Data from paths are visible in accordion header"
+  [["_selected"]
+   ["henkilo" "henkilotiedot" "etunimi"]
+   ["henkilo" "henkilotiedot" "sukunimi"]
+   ["yritys" "yritysnimi"]])
 
 ;;
 ;; schemas
@@ -1437,6 +1443,7 @@
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            }
+    :accordion-fields hakija-accordion-paths
     :body party}
 
    {:info {:name "hakija-kt"
