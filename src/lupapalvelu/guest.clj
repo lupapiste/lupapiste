@@ -36,16 +36,22 @@
 
 (defn update-guest-authority-organization
   "Namesake command implementation."
-  [admin email name description]
+  [admin email first-name last-name description]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)
         guests (->> org-id
                     organization-guest-authorities
                     (remove #(= email (:email %)))
                     (concat [{:email email
-                              :name name
+                              :name (str first-name " " last-name)
                               :description description}]))]
-    (org/update-organization org-id {$set {:guestAuthorities guests}})))
+    (org/update-organization org-id {$set {:guestAuthorities guests}})
+    (when-not (usr/get-user-by-email email)
+      (lupapalvelu.user-api/do-create-user {:firstName first-name
+                                            :lastName last-name
+                                            :email email
+                                            :role :authority}
+                                           admin))))
 
 (defn remove-guest-authority-organization
   "Namesake command implementation."
