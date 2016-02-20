@@ -8,7 +8,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.action :as action]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user-api :as user-api]))
 
 (defn resolve-guest-authority-candidate
   "Namesake query implementation."
@@ -47,11 +48,11 @@
                               :description description}]))]
     (org/update-organization org-id {$set {:guestAuthorities guests}})
     (when-not (usr/get-user-by-email email)
-      (lupapalvelu.user-api/do-create-user {:firstName first-name
-                                            :lastName last-name
-                                            :email email
-                                            :role :authority}
-                                           admin))))
+      (user-api/do-create-user {:firstName first-name
+                                :lastName last-name
+                                :email email
+                                :role :authority}
+                               admin))))
 
 (defn remove-guest-authority-organization
   "Namesake command implementation."
