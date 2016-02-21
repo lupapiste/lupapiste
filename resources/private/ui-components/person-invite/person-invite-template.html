@@ -17,10 +17,11 @@
             <label data-bind="ltext: 'guest-authority.email',
                               attr: {'for': $parent.emailId}"
                    class="mandatory"></label>
-            <input type="text" class="mandatory"
+            <input type="text"
                    data-test-id="person-invite-email"
                    data-bind="textInput: $parent.email,
-                              attr: {id: $parent.emailId}" />
+                              attr: {id: $parent.emailId},
+                              css: {mandatory: $parent.showMandatory}" />
             <label data-bind="ltext: 'application-guests.message',
                               attr: {'for': $parent.messageId }"></label>
             <textarea data-bind="value: $parent.message,

@@ -16,6 +16,8 @@ LUPAPISTE.PersonInviteModel = function( params ) {
     return util.isValidEmailAddress( self.email());
   });
 
+  self.showMandatory = ko.pureComputed( _.negate( self.sendEnabled) );
+
   self.init = function() {
     self.email( "" );
     self.message(  loc( "invite.default-text" ));
