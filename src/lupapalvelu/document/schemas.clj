@@ -5,7 +5,7 @@
 
 
 (defn update-in-body
-  "Updates k in given body path with fn. Body is vector of maps, path is vector of strings."
+  "Updates k in given body path with update function f. Body is vector of maps, path is vector of strings."
   [body path k f]
   (map
     (fn [body-part]
