@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1455528567081');
+@import url('main-blessed1.css?z=1456078372403');
 
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
@@ -1228,17 +1228,20 @@ ul.tabs {
   padding: 20px;
 }
 /* line 103, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog table.mandatory tr {
+.bubble-dialog table tr {
   background-color: initial;
 }
 /* line 105, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog table.mandatory tr td {
-  border: 1px solid #f39129;
+.bubble-dialog table tr td {
   background-color: none;
 }
-/* line 109, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog table.mandatory tr td.full {
+/* line 108, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table tr td.full {
   width: 33%;
+}
+/* line 115, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table.mandatory td {
+  border: 1px solid #f39129;
 }
 
 /* line 9, ../../../private/common-html/sass/partials/_bubble.scss */

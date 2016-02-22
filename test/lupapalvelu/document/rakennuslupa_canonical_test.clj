@@ -1126,7 +1126,7 @@
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
 
-        viitelupatieto (:viitelupatieto rakennusvalvontaasia) => truthy
+        viitelupatieto (first (:viitelupatieto rakennusvalvontaasia)) => truthy
         viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
         viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => falsey
 
@@ -1185,7 +1185,7 @@
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
 
-        viitelupatieto (:viitelupatieto rakennusvalvontaasia) => truthy
+        viitelupatieto (first (:viitelupatieto rakennusvalvontaasia)) => truthy
         viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
         viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => truthy
 
