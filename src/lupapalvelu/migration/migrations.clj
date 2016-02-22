@@ -1769,6 +1769,18 @@
                              {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
                                                       :schema-info.op.name {$in ["aita"]}}}}))
 
+#_(defmigration rename-hankkeen-kuvaus-rakennuslupa-back-to-hankkeen-kuvaus ;; TODO: migrate, LPK-1448
+  {:apply-when (or (pos? (mongo/count :applications {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
+                   (pos? (mongo/count :submitted-applications {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}})))}
+  (update-applications-array
+    :documents
+    (fn [{{name :name} :schema-info :as doc}]
+      (if (= "hankkeen-kuvaus-rakennuslupa" (:name schema-info))
+        (-> (update doc :data dissoc :hankkeenVaativuus)
+            (assoc-in [:schema-info :name] "hankkeen-kuvaus"))
+        doc))
+    {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
