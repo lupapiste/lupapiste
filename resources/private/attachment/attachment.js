@@ -180,11 +180,6 @@ var attachment = (function() {
       model.showTosMetadata(!model.showTosMetadata());
     },
 
-    isToBeArchived: ko.pureComputed(function() {
-      var arkistointi = util.getIn(ko.unwrap(model.metadata), ["sailytysaika", "arkistointi"]);
-      return arkistointi && arkistointi !== 'ei';
-    }),
-
     previewUrl: ko.pureComputed(function() {
       return "/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId;
     }),
