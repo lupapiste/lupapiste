@@ -2,14 +2,35 @@
 <html>
 <body>
   <section class="page container" id="change-email-template">
-  <div><form><div class="form-grid">
+  <form data-bind="if: authorized">
+    <div class="form-grid">
+      <div class="row">
+        <span data-bind="text: email"></span>
+      </div>
+      <div class="row">
+        <div class="col-4"
+             data-bind="component: {name: 'text-field',
+                                    params: {value: newEmail,
+                                             id: 'newEmail',
+                                             disable: disable,
+                                             lLabel: 'userinfo.newEmail'}}"></div>
 
-  <span data-bind="text: email"></span>
-
-  <input type="email">
-  <button>Jatka</button>
-
-  </div></form></div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <button data-bind="click: save,
+                             disable: disable,
+                             enable: ok,
+                             css: {waiting: pending}" class="positive"
+                  data-test-id="change-email">
+              <i class="lupicon-refresh"></i>
+              <i class="wait spin lupicon-refresh"></i>
+              <span data-bind="ltext: 'userinfo.changeEmail'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
   </section>
 </body>
 </html>
