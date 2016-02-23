@@ -180,8 +180,8 @@
                   :js [ "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common-html]
-                  :js ["mypage.js"]
-                  :html ["mypage.html"]}
+                  :js ["change-email-model.js" "mypage.js"]
+                  :html ["change-email-template.html" "mypage.html"]}
 
    :header     {:html ["header.html"], :js ["header.js"]}
 

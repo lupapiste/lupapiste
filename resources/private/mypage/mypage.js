@@ -44,6 +44,8 @@
     self.firstName = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.lastName = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.username = ko.observable();
+    self.email = ko.observable();
+    self.newEmail = ko.observable().extend({email: true});
     self.street = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.city = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.zip = ko.observable().extend({number: true, maxLength: 5, minLength: 5});
@@ -124,6 +126,8 @@
         .firstName(u.firstName)
         .lastName(u.lastName)
         .username(u.username)
+        .email(u.email)
+        .newEmail("")
         .street(u.street)
         .city(u.city)
         .zip(u.zip)
@@ -351,6 +355,7 @@
     $("#mypage")
       .find("#own-info-form").applyBindings(ownInfo).end()
       .find("#pw-form").applyBindings(pw).end()
+      .find("#mypage-change-email").applyBindings(ownInfo).end()
       .find("#mypage-register-company").applyBindings(ownInfo).end()
       .find("#mypage-company").applyBindings(ownInfo).end()
       .find("#dialog-userinfo-architect-upload")

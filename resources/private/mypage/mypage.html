@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container" id="mypage">
-    <div id="own-info-form">
+    <div id="own-info-form"  class="accordion-container">
       <button class="secondary" data-bind="click: function() { history.go(-1); }">
         <i class="lupicon-chevron-start"></i>
         <span data-bind="ltext: 'back'"></span>
@@ -209,7 +209,7 @@
     </div>
 
     <!-- TODO: componentize mypage -->
-    <div id="pw-form">
+    <div id="pw-form" class="accordion-container">
       <div data-test-id="mypage-change-password-accordion"
            data-bind="component: {name: 'accordion', params: {ltitle: 'userinfo.changePassword',
                                                               accordionContentTemplate: 'mypage-change-password',
@@ -261,7 +261,12 @@
       </script>
     </div>
 
-    <div id="mypage-company">
+    <div id="mypage-change-email"  class="accordion-container">
+      <div data-test-id="mypage-change-email-accordion"
+           data-bind="component: {name: 'change-email', params: {ltitle: 'userinfo.changeEmail', data: $data}}"></div>
+    </div>
+
+    <div id="mypage-company" class="accordion-container">
       <!-- ko if: companyShow -->
       <div data-test-id="mypage-company-accordion"
            data-bind="component: {name: 'accordion', params: {ltitle: 'company.title',
@@ -303,7 +308,7 @@
       </script>
     </div>
 
-    <div id="mypage-register-company">
+    <div id="mypage-register-company" class="accordion-container">
       <!-- ko if: !authority() && !companyShow() -->
       <div data-test-id="mypage-register-company-accordion"
            data-bind="component: {name: 'accordion', params: {ltitle: 'register.company.header',
