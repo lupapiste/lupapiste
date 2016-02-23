@@ -8,7 +8,7 @@
 ;; Util
 ;;
 
-(def dynamically-created-schemas (atom {}))
+(defonce dynamically-created-schemas (atom {}))
 
 (defmacro defdynamicschema [name params form]
   {:pre [(vector? params)]}

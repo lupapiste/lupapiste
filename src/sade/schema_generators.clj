@@ -5,8 +5,8 @@
             [clojure.string :as s]
             [clojure.test.check.generators :as gen]))
 
-(def static-schema-generators (atom {}))
-(def dynamic-schema-generator-constructors (atom {}))
+(defonce static-schema-generators (atom {}))
+(defonce dynamic-schema-generator-constructors (atom {}))
 
 (defn register-generator [schema generator]
   (if (fn? generator)
