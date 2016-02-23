@@ -295,7 +295,7 @@
                                 {:keys [attachment-id application filename upload-pdfa-only] :as attachment-data}]
   (if pdfa?
     (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! attachment-data) (fail! :error.unknown))
-          new-filename (ss/replace filename #"(-PDFA)?\.pdf$" "-PDFA.pdf" )
+          new-filename (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf" )
           new-id       (or (:id attach-file-result) attachment-id)
           pdfa-attachment-data (assoc attachment-data
                                  :application (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
