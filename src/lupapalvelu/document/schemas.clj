@@ -421,17 +421,19 @@
    {:name "vaativa kosteusvaurion korjaussuunnittelu"}
    {:name "poikkeuksellisen vaativa kosteusvaurion korjaussuunnittelu"}])
 
+(def patevyysluokka {:name "patevyysluokka" :type :select :sortBy nil :required true
+                     :body [{:name "AA"}
+                            {:name "A"}
+                            {:name "B"}
+                            {:name "C"}
+                            {:name "ei tiedossa"}]})
+
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                {:name "fise" :type :string :required false}
                {:name "fiseKelpoisuus" :type :select :sortBy :displayname :i18nkey "fisekelpoisuus" :size "l" :required false :body fise-kelpoisuus-lajit}
-               {:name "patevyysluokka" :type :select :sortBy nil :required true
-                :body [{:name "AA"}
-                       {:name "A"}
-                       {:name "B"}
-                       {:name "C"}
-                       {:name "ei tiedossa"}]}
+               patevyysluokka
                {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
                {:name "patevyys" :type :string :required false}])
 
@@ -444,10 +446,13 @@
                       simple-osoite
                       yhteystiedot))
 
+(def suunnittelutehtavan-vaativuusluokka (assoc patevyysluokka :name "suunnittelutehtavanVaativuusluokka"))
+
 (def paasuunnittelija (body
-                        henkilo-valitsin
-                        designer-basic
-                        {:name "patevyys" :type :group :body patevyys}))
+                       suunnittelutehtavan-vaativuusluokka
+                       henkilo-valitsin
+                       designer-basic
+                       {:name "patevyys" :type :group :body patevyys}))
 
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
@@ -473,10 +478,11 @@
                               ]}])
 
 (def suunnittelija (body
-                     kuntaroolikoodi
-                     henkilo-valitsin
-                     designer-basic
-                     {:name "patevyys" :type :group :body patevyys}))
+                    kuntaroolikoodi
+                    suunnittelutehtavan-vaativuusluokka
+                    henkilo-valitsin
+                    designer-basic
+                    {:name "patevyys" :type :group :body patevyys}))
 
 (def vastattavat-tyotehtavat-tyonjohtaja [{:name "vastattavatTyotehtavat"
                                            :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
@@ -505,12 +511,7 @@
                                           {:name "ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.ty\u00f6njohtaja"}
                                           {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
-(def patevyysvaatimusluokka {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required true
-                             :body [{:name "AA"}
-                                    {:name "A"}
-                                    {:name "B"}
-                                    {:name "C"}
-                                    {:name "ei tiedossa"}]})
+(def patevyysvaatimusluokka (assoc patevyysluokka :name "patevyysvaatimusluokka"))
 
 (def patevyys-tyonjohtaja [koulutusvalinta
                            {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
