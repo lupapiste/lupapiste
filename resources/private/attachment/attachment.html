@@ -180,7 +180,7 @@
                                        value: visibility,
                                        enable: $root.authorization.ok('set-attachment-visibility') && editable"/>
                   </div>
-                  <div data-bind="if: $root.authorization.ok('permanent-archive-enabled') && latestVersion && isToBeArchived">
+                  <div data-bind="if: $root.authorization.ok('permanent-archive-enabled') && latestVersion">
                     <div class="archive-valid" data-bind="with: latestVersion">
                       <div>
                         <span data-bind="ltext: 'attachment.archivability'"></span>:
