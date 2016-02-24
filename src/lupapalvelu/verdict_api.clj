@@ -49,7 +49,7 @@
 
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
+  (when-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
     (let [app-xml (normalize-special-verdict application app-xml)]
       (or
        (let [organization (organization/get-organization (:organization application))
