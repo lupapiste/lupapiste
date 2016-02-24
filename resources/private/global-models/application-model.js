@@ -1,9 +1,20 @@
+LUPAPISTE.EmptyApplicationModel = function() {
+  "use strict";
+  return {startedBy: {firstName: "", lastName: ""},
+          closedBy: {firstName: "", lastName: ""}};
+};
+
 LUPAPISTE.ApplicationModel = function() {
   "use strict";
   var self = this;
 
   // POJSO
   self._js = {};
+
+  function fullNameInit() {
+    return {firstName: ko.observable( "" ),
+           lastName: ko.observable( "")};
+  }
 
   // Observables
   self.id = ko.observable();
@@ -20,9 +31,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.title = ko.observable();
   self.created = ko.observable();
   self.started = ko.observable();
-  self.startedBy = ko.observable();
+  self.startedBy = fullNameInit();
   self.closed = ko.observable();
-  self.closedBy = ko.observable();
+  self.closedBy = fullNameInit();
   self.attachments = ko.observable([]);
   self.hasAttachment = ko.computed(function() {
     return _.some((ko.toJS(self.attachments) || []), function(a) {return a.versions && a.versions.length;});

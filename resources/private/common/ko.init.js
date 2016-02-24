@@ -190,6 +190,17 @@
   };
 
   ko.bindingHandlers.fullName = {
+    // The originally bound object should be a regular object and
+    // contain firstName and lastName observables as properties.
+    // However, there could be 'legacy' code that is initially
+    // an empty observable. The latter are ignored in binding init.
+    init: function( element, valueAccessor ) {
+      if( !ko.isObservable( valueAccessor)) {
+        // Unwrapping the observable properties creates dependency.
+        // Thus, the property changes will trigger update (see below).
+        ko.toJS( valueAccessor() );
+      }
+    },
     update: function(element, valueAccessor) {
       var value = ko.toJS(valueAccessor()) || {};
       $(element).text(_.filter([value.lastName, value.firstName]).join("\u00a0"));

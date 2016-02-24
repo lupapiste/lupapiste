@@ -74,7 +74,8 @@
   (apply shell/sh (pdftools-analyze-command input-file output-file))
   (let [log (apply str (parse-log-file output-file))
         required-part (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d'." log))
-        cl (str "pdfa-" (or required-part "2") "b")]
+        level (if (= required-part "1") "b" "u")
+        cl (str "pdfa-" (or required-part "2") level)]
     (debug "Determined required compliance to be:" cl)
     cl))
 

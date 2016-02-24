@@ -149,7 +149,8 @@
     isInitializing = true;
 
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
-      var app = applicationDetails.application;
+      // Sensible empty default values for those properties not received from the backend.
+      var app = _.merge( LUPAPISTE.EmptyApplicationModel(), applicationDetails.application);
 
       // Plain data
       applicationModel._js = app;
