@@ -425,6 +425,7 @@
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
       (merge codes
         {:koulutus koulutus
+         :vaadittuPatevyysluokka (:suunnittelutehtavanVaativuusluokka suunnittelija)
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
          :FISEpatevyyskortti (:fise patevyys)

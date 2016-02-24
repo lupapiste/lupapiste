@@ -14,3 +14,29 @@
                                                   :body [{:name :beer
                                                           :type :string}]}]))
 
+(fact "update-in-body"
+  (let [body [{:name "foo"
+               :body [{:name "bar"
+                       :body [{:name "baz"}]}]}
+              {:name "hoo"
+               :body [{:name "haa"}
+                      {:name "huu"}]}]]
+    (update-in-body body ["foo" "bar" "baz"] :testi (constantly true)) => [{:name "foo"
+                                                                            :body [{:name "bar"
+                                                                                    :body [{:name "baz" :testi true}]}]}
+                                                                           {:name "hoo"
+                                                                            :body [{:name "haa"}
+                                                                                   {:name "huu"}]}]
+    (update-in-body body ["foo" "bar" "wrong"] :testi (constantly true)) => body
+
+    (last (update-in-body body ["hoo"] :testi (constantly false))) => {:name "hoo"
+                                                                       :body [{:name "haa"}
+                                                                              {:name "huu"}]
+                                                                       :testi false}
+
+    (first (update-in-body body ["foo"] :body (fn [old-val] (remove map? old-val)))) => {:name "foo" :body []}
+    (first (update-in-body body ["foo"] :body #(conj % "faa"))) => {:name "foo"
+                                                                    :body [{:name "bar"
+                                                                            :body [{:name "baz"}]}
+                                                                           "faa"]}))
+
