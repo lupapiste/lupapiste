@@ -211,20 +211,6 @@
       (mongo/update :users {:email email} {$set {:role "authority"}})
       (fail :error.user-not-found))))
 
-(defcommand change-email
-  {:parameters [email]
-   :user-roles #{:applicant}
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :description "Starts the workflow for changing user password"}
-  [{user :user}]
-  (let [email (usr/canonize-email email)]
-    (when (not= email (:email user))
-      ; WIP
-      )
-    )
-  )
-
 ;;
 ;; Saved search filters
 ;;

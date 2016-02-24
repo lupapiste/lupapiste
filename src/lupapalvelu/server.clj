@@ -36,6 +36,7 @@
             [lupapalvelu.tasks-api]
             [lupapalvelu.verdict-api]
             [lupapalvelu.notice-api]
+            [lupapalvelu.change-email-api]
             [lupapalvelu.company-api]
             [lupapalvelu.onnistuu-api]
             [lupapalvelu.kopiolaitos-api]
