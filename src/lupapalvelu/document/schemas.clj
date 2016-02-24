@@ -1358,7 +1358,7 @@
 
 (def hakija-accordion-paths
   "Data from paths are visible in accordion header"
-  [["_selected"]
+  [[select-one-of-key]
    ["henkilo" "henkilotiedot" "etunimi"]
    ["henkilo" "henkilotiedot" "sukunimi"]
    ["yritys" "yritysnimi"]])
