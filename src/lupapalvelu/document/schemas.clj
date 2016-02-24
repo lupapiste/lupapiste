@@ -1585,6 +1585,7 @@
            :removable true
            :approvable true
            :subtype :maksaja
+           :accordion-fields hakija-accordion-paths
            :type :party}
     :body maksaja}
 
