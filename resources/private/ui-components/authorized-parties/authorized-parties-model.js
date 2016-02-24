@@ -57,8 +57,10 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
 
   self.inviterInformation = function( role ) {
     var info = "";
-    if( _.isObject( role.inviter )) {
-      info = role.inviter.firstName() + " " + role.inviter.lastName();
+    var obj = ko.mapping.toJS( role );
+    var inviter = obj.inviter || _.get( obj, "invite.inviter" );
+    if( _.isObject( inviter )) {
+      info = inviter.firstName + " " + inviter.lastName;
     }
     return info;
   };
@@ -104,6 +106,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     .pending( self.waiting )
     .success( function() {
       hub.send( "bubble-dialog::bubble-dialog", {id: "close all"});
+      hub.send( "indicator", {style: "positive"});
       // It would be better to implement a service for authorized parties,
       // instead of repository.load
       repository.load(application().id());

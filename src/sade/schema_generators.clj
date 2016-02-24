@@ -1,11 +1,12 @@
 (ns sade.schema-generators
   (:require [sade.schemas :as ssc]
+            [schema.core :as sc]
             [schema.experimental.generators :as sg]
             [clojure.string :as s]
             [clojure.test.check.generators :as gen]))
 
-(def static-schema-generators (atom {}))
-(def dynamic-schema-generator-constructors (atom {}))
+(defonce static-schema-generators (atom {}))
+(defonce dynamic-schema-generator-constructors (atom {}))
 
 (defn register-generator [schema generator]
   (if (fn? generator)
@@ -35,6 +36,10 @@
   ([schema]                          (generator schema {}))
   ([schema leaf-generators]          (generator schema leaf-generators {}))
   ([schema leaf-generators wrappers] (sg/generator schema (generators leaf-generators) wrappers)))
+
+;; Overwrite default prismatic schema generators
+
+(register-generator sc/Str gen/string-ascii)
 
 ;; Custom static schema generators
 

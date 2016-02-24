@@ -192,8 +192,8 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def- common-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"])
-(def- mini-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija"])
+(def- common-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"]) ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
+(def- mini-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija"])  ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
 
 (def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
 
@@ -692,7 +692,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
-   :aita                        {:schema "kaupunkikuvatoimenpide"
+   :aita                        {:schema "kaupunkikuvatoimenpide-ei-tunnusta"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas

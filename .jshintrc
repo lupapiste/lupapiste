@@ -37,6 +37,7 @@
     "currentUser": true,
     "debug": true,
     "docgen": true,
+    "docvars": true,
     "DocModel" : true,
     "error": true,
     "features": true,

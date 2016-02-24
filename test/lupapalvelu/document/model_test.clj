@@ -150,6 +150,7 @@
         (apply-update [:patevyys :koulutus] "tekniikan kandidaatti")
         (apply-update [:patevyys :valmistumisvuosi] "2010")
         (apply-update [:patevyys :patevyysluokka] "AA")
+        (apply-update [:suunnittelutehtavanVaativuusluokka] "B")
         (apply-update [:yhteystiedot :email] "tauno@example.com")
         (apply-update [:yhteystiedot :puhelin] "050")) => valid?
       (apply-update document [:henkilotiedot :etunimiz] "Tauno") => (invalid-with? [:err "illegal-key"])

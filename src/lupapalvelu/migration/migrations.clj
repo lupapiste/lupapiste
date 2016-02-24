@@ -1751,6 +1751,36 @@
     (doseq [{id :id auths :orgAuthz} users]
       (mongo/update-by-id :users id {$set {:orgAuthz (remove-guest-authorities auths)}}))))
 
+(defn rename-kaupunkikuvatoimenpide-documents-with-op [operations-to-rename doc]
+  (if (and (= "kaupunkikuvatoimenpide" (get-in doc [:schema-info :name]))
+           (set operations-to-rename)  (get-in doc [:schema-info :op :name]))
+    (update doc :schema-info assoc :name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide")
+    doc))
+
+(defmigration schemas-without-building-identifier []
+  {:apply-when (pos? (+ (mongo/count :applications
+                                     {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                              :schema-info.op.name {$in ["aita"]}}}})
+                        (mongo/count :submitted-applications
+                                     {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                              :schema-info.op.name {$in ["aita"]}}}})))}
+  (update-applications-array :documents
+                             (partial rename-kaupunkikuvatoimenpide-documents-with-op #{"aita"})
+                             {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                      :schema-info.op.name {$in ["aita"]}}}}))
+
+#_(defmigration rename-hankkeen-kuvaus-rakennuslupa-back-to-hankkeen-kuvaus ;; TODO: migrate, LPK-1448
+  {:apply-when (or (pos? (mongo/count :applications {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
+                   (pos? (mongo/count :submitted-applications {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}})))}
+  (update-applications-array
+    :documents
+    (fn [{{name :name} :schema-info :as doc}]
+      (if (= "hankkeen-kuvaus-rakennuslupa" (:name schema-info))
+        (-> (update doc :data dissoc :hankkeenVaativuus)
+            (assoc-in [:schema-info :name] "hankkeen-kuvaus"))
+        doc))
+    {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
+
 (defmigration init-designer-subtype
               (update-applications-array
                 :documents
@@ -1765,6 +1795,7 @@
                       (for [collection [:applications :submitted-applications]]
                         (let [applications (mongo/select collection)]
                           (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

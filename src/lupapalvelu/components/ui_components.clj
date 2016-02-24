@@ -294,7 +294,7 @@
                   :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
 
    :docgen       {:depends [:accordion :common-html]
-                  :js ["docmodel.js" "docgen.js"]}
+                  :js ["docmodel.js" "docgen.js" "docvars.js"]}
 
    :create       {:depends [:common-html :map]
                   :js ["locationmodel.js" "municipalities.js" "create.js"]

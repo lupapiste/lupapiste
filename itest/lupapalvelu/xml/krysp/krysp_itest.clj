@@ -170,7 +170,7 @@
 
             (when (pos? expected-attachment-count)
                   (let [take-liite-fn (case permit-type
-                                            :YA first
+                                            :YA #(nth % 2)
                                             last)
                         liite-edn (-> liitetieto take-liite-fn (xml/select1 [:Liite]) xml/xml->edn :Liite (util/ensure-sequential :metatietotieto))
                         kuvaus (:kuvaus liite-edn)
@@ -253,12 +253,9 @@
       (let [generated-attachment-count 3       ; see generate-attachment, generate-statement+1
             approved-application (query-application pena application-id)
             email (last-email)
-            expected-attachment-count (case permit-type
-                                        :R (+ generated-attachment-count 2) ; 2 auto-generated PDFs
-                                        generated-attachment-count)
-            expected-sent-attachment-count (case permit-type
-                                             :R (- expected-attachment-count 2) ; 2 auto-generated PDFs
-                                             expected-attachment-count)]
+            ;; Two generated application pdf attachments.
+            expected-attachment-count (+ generated-attachment-count 2)
+            expected-sent-attachment-count (- expected-attachment-count 2)]
         (fact "application is sent" (:state approved-application) => "sent")
         (final-xml-validation approved-application expected-attachment-count expected-sent-attachment-count)
 

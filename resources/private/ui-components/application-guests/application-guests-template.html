@@ -68,7 +68,8 @@
               <label class="mandatory"
                      data-bind="ltext: 'application-guests.caption'">
               </label>
-              <table class="mandatory" data-test-id="application-guest-authorities">
+              <table data-test-id="application-guest-authorities"
+                     data-bind="css: {mandatory: $parent.show.mandatory}">
                 <tbody data-bind="foreach: $parent.guestAuthorities">
                   <tr data-bind="attr: {'data-test-id': description}">
                     <td><input type="radio" name="guest-authorities"
@@ -86,10 +87,11 @@
             <label data-bind="ltext: 'guest-authority.email',
                               attr: {'for': $parent.emailId}"
                    class="mandatory"></label>
-            <input type="text" class="mandatory"
+            <input type="text"
                    data-test-id="application-guest-email"
                    data-bind="textInput: $parent.email,
-                              attr: {id: $parent.emailId}" />
+                              attr: {id: $parent.emailId},
+                              css: {mandatory: $parent.show.mandatory}"/>
             <!-- /ko -->
             <div data-bind="visible: $parent.show.inviteMessage">
               <label data-bind="ltext: 'application-guests.message',

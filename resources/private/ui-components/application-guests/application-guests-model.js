@@ -70,6 +70,7 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     .success( function() {
       fetchGuests();
       self.bubbleVisible( false );
+      hub.send( "indicator", {style: "positive"})
     })
     .error( function( res ) {
       self.guestError( res.text );
@@ -181,7 +182,8 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     }),
     inviteMessage: ko.pureComputed( function() {
       return !self.isAuthority() || self.guestAuthorities().length;
-    })
+    }),
+    mandatory: ko.pureComputed( _.negate( self.sendEnabled) )
   };
 
   self.dispose = _.partial( hub.unsubscribe, hubId);

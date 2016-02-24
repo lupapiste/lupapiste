@@ -68,12 +68,12 @@
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-bind="event: {keydown: closeEditors}">
         <div>
-          <!-- ko if: hasIdentifierField() && features.enabled("document-identifier") -->
+          <!-- ko if: identifierField && features.enabled("document-identifier") -->
           <div class="inline-col identifier-component"
               data-bind="component: {name: 'document-identifier',
                                      params: {docId: docModel.docId,
-                                             authModel: auth,
-                                             options: docModelOptions}},
+                                              authModel: auth,
+                                              options: docModelOptions}},
                          css: {feature: features.enabled('document-identifier')}"></div>
           <!-- /ko -->
           <div class="inline-col identifier-component"
@@ -83,7 +83,7 @@
                                                isPrimary: isPrimaryOperation,
                                                auth: auth}}"></div>
         </div>
-        <!-- ko if: hasIdentifierField -->
+        <!-- ko if: identifierField -->
         <p data-bind="ltext: 'document.operation-identifier.notice'"></p>
         <!-- /ko -->
       </div>

@@ -54,8 +54,7 @@
 
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
   {:pre [(seq inviter) (seq invited) application-id role timestamp]}
-  (let [inviter-info (usr/summary inviter)
-        invite {:application  application-id
+  (let [invite {:application  application-id
                 :text         text
                 :path         path
                 :documentName document-name
@@ -64,8 +63,8 @@
                 :email        (:email invited)
                 :role         role
                 :user         (usr/summary invited)
-                :inviter      inviter-info}]
-    (assoc (usr/user-in-role invited :reader) :inviter inviter-info :invite invite)))
+                :inviter      (usr/summary inviter)}]
+    (assoc (usr/user-in-role invited :reader) :invite invite)))
 
 ;;
 ;; Authz checkers
