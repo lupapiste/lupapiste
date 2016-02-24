@@ -6,12 +6,10 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
-            [lupapalvelu.user :as usr]
-            )
-  )
+            [lupapalvelu.user :as usr]))
 
 (defn change-email-link [lang token]
-  (str (env/value :host) "/app/" lang "/welcome#!/TODO/" token))
+  (str (env/value :host) "/app/" lang "/welcome#!/email/" token))
 
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
@@ -19,7 +17,7 @@
                {:link-fi (change-email-link "fi" token), :link-sv (change-email-link "sv" token)})})
 
 (defn- init-email-change [user new-email]
-  (let [token (token/make-token :change-email user {:new-email new-email})]
+  (let [token (token/make-token :change-email user {:new-email new-email} :auto-consume false :ttl ttl/change-email-token-ttl)]
     (notifications/notify! :change-email {:user user, :data {:token token}})))
 
 (defcommand change-email
