@@ -9,6 +9,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.company :as com]
             [lupapalvelu.vetuma :as vetuma]))
 
 (defn change-email-link [lang token]
@@ -17,7 +18,19 @@
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
    :model-fn (fn [{{token :token} :data} conf recipient]
-               {:link-fi (change-email-link "fi" token), :link-sv (change-email-link "sv" token)})})
+               {:name (:firstName recipient)
+                :link-fi (change-email-link "fi" token), :link-sv (change-email-link "sv" token)})})
+
+(notifications/defemail :email-changed
+  {:recipients-fn (fn [{user :user}]
+                    (if-let [company-id (get-in user [:company :id])]
+                      (->> (com/find-company-admins company-id) (remove #(= (:id %) (:id user))) (cons user))
+                      [user]))
+   :model-fn (fn [{:keys [user data]} conf recipient]
+               (let [res {:name (:firstName recipient) :old-email (:email user) :new-email (:new-email data)}]
+                 (debug res)
+                 res)
+               )})
 
 (defn- init-email-change [user new-email]
   (let [token (token/make-token :change-email user {:new-email new-email} :auto-consume false :ttl ttl/change-email-token-ttl)]
@@ -61,6 +74,9 @@
     ; Cleanup tokens
     (vetuma/consume-user stamp)
     (token/get-token (:id token) :consume true)
+
+    ; Send notifications
+    (notifications/notify! :email-changed {:user user, :data {:new-email new-email}})
 
     (ok)))
 
