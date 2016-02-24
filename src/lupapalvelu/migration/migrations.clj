@@ -1795,6 +1795,7 @@
                       (for [collection [:applications :submitted-applications]]
                         (let [applications (mongo/select collection)]
                           (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
