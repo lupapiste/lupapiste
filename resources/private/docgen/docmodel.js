@@ -3,10 +3,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   var self = this;
 
-  // Magic key: if schema contains "_selected" radioGroup,
-  // user can select only one of the schemas named in "_selected" group
-  var SELECT_ONE_OF_GROUP_KEY = "_selected";
-
   self.schema = schema;
   self.schemaName = schema.info.name;
   self.schemaI18name = schema.info.i18name;
@@ -1638,7 +1634,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function getSelectOneOfDefinition(schema) {
     var selectOneOfSchema = _.find(schema.body, function (subSchema) {
-      return subSchema.name === SELECT_ONE_OF_GROUP_KEY && subSchema.type === "radioGroup";
+      return subSchema.name === docvars.SELECT_ONE_OF_GROUP_KEY && subSchema.type === "radioGroup";
     });
 
     if (selectOneOfSchema) {
@@ -1685,13 +1681,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (selectOneOf.length) {
       // Show current selection or the first of the group
       var myModel = _.first(selectOneOf);
-      if (model[SELECT_ONE_OF_GROUP_KEY]) {
-        myModel = model[SELECT_ONE_OF_GROUP_KEY].value;
+      if (model[docvars.SELECT_ONE_OF_GROUP_KEY]) {
+        myModel = model[docvars.SELECT_ONE_OF_GROUP_KEY].value;
       }
 
       toggleSelectedGroup(myModel);
 
-      var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
+      var s = "[name$='." + docvars.SELECT_ONE_OF_GROUP_KEY + "']";
       $(body).find(s).change(function () {
         toggleSelectedGroup(this.value);
       });
