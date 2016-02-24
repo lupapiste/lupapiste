@@ -54,6 +54,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     _.delay(window.Stickyfill.rebuild, 0);
   });
 
+  // identifier field is object with keys docId, schema, key, value. Value is observable (can be edited).
   self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
 
   var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
@@ -94,6 +95,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   // Optional accordion header text.
   // Consists of optional properties: identifier field, operation description, and accordion paths (from schema)
   self.headerDescription = ko.pureComputed(function() {
+    // if identifier exists, subscribing to it's "value" observable
     var identifier = self.identifierField && self.identifierField.value();
     var operation  = self.operationDescription();
     var accordionFieldStr = self.accordionText();
