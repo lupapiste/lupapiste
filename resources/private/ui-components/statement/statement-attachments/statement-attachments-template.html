@@ -7,7 +7,7 @@
         <h3 data-bind="ltext: 'inforequest.attachments',
                        visible: attachments().length || tab() === 'statement'"></h3>
         <div data-bind="if: attachments().length">
-          <table class="table" data-test-id="inforequest-attachments-table">
+          <table class="table" data-test-id="statement-attachments-table">
             <thead>
               <tr>
                 <th data-bind="ltext: 'statement.attachment.file'">Tiedosto</th>
@@ -41,7 +41,7 @@
 
         <div data-bind="ifnot: attachments().length,
                         visible: canAddAttachment() && tab() === 'statement'">
-          <i data-bind="ltext: 'statement.attachments'" data-test-id="inforequest-attachments-no-attachments"></i>
+          <i data-bind="ltext: 'statement.attachments'" data-test-id="statement-attachments-no-attachments"></i>
         </div>
 
         <button class="positive"
