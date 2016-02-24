@@ -4,6 +4,7 @@ Documentation   Application statements are managed
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Variables       ../06_attachments/variables.py
 
 *** Test Cases ***
 
@@ -101,6 +102,16 @@ Sonja types in draft
   Sleep  2.5
   Reload Page
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
+
+Sonja adds and removes attachment to statement draft
+  Wait test id visible  statement-attachments-no-attachments
+  Scroll and click test id  add-statement-attachment
+  Add attachment  statement  ${TXT_TESTFILE_PATH}  Important note
+  Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  Important note
+  Scroll to test id  add-statement-attachment
+  Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait test id hidden  statement-attachments-table
   [Teardown]  Return from statement
 
 Sonja can give statement to own request
@@ -139,8 +150,8 @@ Veikko can see statements as he is being requested a statement to the applicatio
   Open application  ${appname}  ${appPropertyId}
 
 Statement giver sees comments
-  # 1+1 statement comments, 1 auto generated attachment
-  Comment count is  3
+  # 1+1 statement comments, 1 auto generated attachment, 1 added (and later removed) attachment.
+  Comment count is  4
 
 Statement can export application as PDF
   Element Should Be Visible  xpath=//button[@data-test-id="application-pdf-btn"]
