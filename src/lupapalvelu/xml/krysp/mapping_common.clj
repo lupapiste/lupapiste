@@ -440,11 +440,12 @@
            henkilo
            yritys_211
            {:tag :patevyysvaatimusluokka}
-           {:tag :koulutus}]})
+           {:tag :koulutus}
+           {:tag :valmistumisvuosi}
+           {:tag :vaadittuPatevyysluokka}]})
 
 (def- suunnittelija_211
-  (update-in suunnittelija_210 [:child] concat [{:tag :valmistumisvuosi}
-                                                {:tag :kokemusvuodet}]))
+  (update-in suunnittelija_210 [:child] concat [{:tag :kokemusvuodet}]))
 
 (def- suunnittelija_213
   (update-in suunnittelija_211 [:child] update-child-element [:yritys] yritys_213))

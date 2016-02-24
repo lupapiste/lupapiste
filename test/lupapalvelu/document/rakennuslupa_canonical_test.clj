@@ -80,6 +80,7 @@
                  :version 1}
    :data (merge
            suunnittelija-henkilo
+           {:suunnittelutehtavanVaativuusluokka {:value "AA"}}
            {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                        :patevyysluokka {:value "ei tiedossa"}
                        :valmistumisvuosi {:value "2010"}
@@ -93,6 +94,7 @@
                                       :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "rakennusfysikaalinen suunnittelija"}}
+                {:suunnittelutehtavanVaativuusluokka {:value "C"}}
                 {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
@@ -106,6 +108,7 @@
                                        :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
+                {:suunnittelutehtavanVaativuusluokka {:value "A"}}
                 {:patevyys {:koulutusvalinta {:value "other"} :koulutus {:value "El\u00e4m\u00e4n koulu"}  ;; "Muu" option ( i.e. :other-key) is selected
                             :patevyysluokka {:value "AA"}
                             :valmistumisvuosi {:value "2010"}
@@ -621,6 +624,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
+    (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "AA")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "FISEpatevyyskortti" (:FISEpatevyyskortti suunnittelija-model) => "http://www.ym.fi")
@@ -636,6 +640,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
+    (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
@@ -649,6 +654,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "muu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
+    (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "A")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
