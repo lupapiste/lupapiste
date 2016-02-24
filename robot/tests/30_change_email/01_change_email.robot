@@ -27,8 +27,8 @@ Old email is preset
 Can not submit yet
   Element Should Be Disabled  //section[@id='mypage']//button[@data-test-id='change-email']
 
-Change to .fi address
-  Input text by test id  newEmail  mikko@example.fi
+Change to .net address
+  Input text by test id  newEmail  mikko@example.net
   Wait Until  Element Should Be Enabled  //section[@id='mypage']//button[@data-test-id='change-email']
   Click element  //section[@id='mypage']//button[@data-test-id='change-email']
   # TODO implement and test that a help popup is present
@@ -37,7 +37,7 @@ Change to .fi address
 
 Got email
   Open last email
-  Wait Until  Page Should Contain  mikko@example.fi
+  Wait Until  Page Should Contain  mikko@example.net
   Page Should Contain  /app/fi/welcome#!/email/
   ## Click the first link
   Click link  xpath=//a
@@ -58,11 +58,15 @@ Login with the old email fails
   Login fails  mikko@example.com  mikko123
 
 Login with the new email succeeds
-  Applicant logs in  mikko@example.fi  mikko123  Mikko Intonen
+  Applicant logs in  mikko@example.net  mikko123  Mikko Intonen
 
 Mikko can open the old application
   Open application  ${appname}  ${propertyId}
-# TODO check that auth has updated
+
+Party table has been updated
+  Open tab  parties
+  Page Should Not Contain  mikko@example.com
+  Page Should Contain  mikko@example.net
 
 *** Keywords ***
 

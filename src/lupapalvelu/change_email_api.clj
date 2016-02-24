@@ -3,6 +3,7 @@
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.env :as env]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.token :as token]
@@ -39,14 +40,23 @@
 
   (let [vetuma-data (vetuma/get-user stamp)
         new-email (get-in token [:data :new-email])
-        {hetu :personId email :email} (usr/get-user-by-id! (:user-id token))]
+        {hetu :personId old-email :email :as user} (usr/get-user-by-id! (:user-id token))]
 
     (cond
       (not= (:token-type token) :change-email) (fail! :error.unknown)
       (not= hetu (:userid vetuma-data)) (fail! :error.personid-mismatch)
       (usr/get-user-by-email new-email) (fail! :error.duplicate-email))
 
-    (usr/update-user-by-email email {:personId hetu} {$set {:username new-email :email new-email}})
+    ; Strictly this atomic update is enough.
+    ; Access to applications is determined by user id.
+    (usr/update-user-by-email old-email {:personId hetu} {$set {:username new-email :email new-email}})
+
+    ; Update application.auth arrays.
+    ; They might have duplicates due to old bugs, ensure everything is updated.
+    (loop [n 1]
+      (when (pos? n)
+        ; loop exists when no applications with the old username were found
+        (recur (mongo/update-by-query :applications {:auth {$elemMatch {:id (:id user), :username old-email}}} {$set {:auth.$.username new-email}}))))
 
     ; Cleanup tokens
     (vetuma/consume-user stamp)
