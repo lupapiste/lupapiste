@@ -1781,12 +1781,20 @@
         doc))
     {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
 
+(defmigration init-designer-subtype
+              (update-applications-array
+                :documents
+                (fn [doc]
+                  (if (re-matches #".*suunnittelija" (str (get-in doc [:schema-info :name])))
+                    (assoc-in doc [:schema-info :subtype] "suunnittelija")
+                    doc))
+                {"documents.schema-info.name" {$regex #".*suunnittelija"}}))
+
 (defmigration init-designer-index
               (reduce + 0
                       (for [collection [:applications :submitted-applications]]
                         (let [applications (mongo/select collection)]
-                          (count (map #(mongo/update-by-id collection (:id %) {$set {:_designerIndex (app-meta-fields/designers-index %)}}) applications))))))
-
+                          (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
