@@ -54,16 +54,61 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     _.delay(window.Stickyfill.rebuild, 0);
   });
 
-  self.identifierField = ko.pureComputed(function() {
-    return self.accordionService.getIdentifier(self.docModel.docId);
-  });
+  // identifier field is object with keys docId, schema, key, value. Value is observable (can be edited).
+  self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
 
+  var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
+
+  function buildAccordionText(paths, data) {
+    return _(paths)
+      .map(function(path) {
+        return ko.unwrap(_.get(data, path));
+      })
+      .reject(_.isEmpty)
+      .value()
+      .join(" ");
+  }
+
+  self.accordionText = ko.pureComputed(function() {
+    // resolve values from given accordionPaths
+    var paths = docData && docData.accordionPaths;
+    if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
+      var firstPathValue = paths[0][0];
+      // are we dealing with _selected special case
+      var selectedValue = firstPathValue === docvars.SELECT_ONE_OF_GROUP_KEY ? _.get(docData.data, firstPathValue)() : false;
+      if (selectedValue) {
+        var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
+          return path[0] === selectedValue;
+        });
+        return buildAccordionText(selectedPaths, docData.data);
+
+      } else { // no _selected, use paths as is
+        return buildAccordionText(paths, docData.data);
+      }
+    }
+  });
 
   // Required accordion title from operation/schema-info name
   self.titleLoc = ((op && op.name) || self.info.name) + "._group_label";
 
-  self.headerDescription = ko.pureComputed(function() { // Accordion header text
-    return self.operationDescription() ? " - " + self.operationDescription() : "";
+  // Optional accordion header text.
+  // Consists of optional properties: identifier field, operation description, and accordion paths (from schema)
+  self.headerDescription = ko.pureComputed(function() {
+    // if identifier exists, subscribing to it's "value" observable
+    var identifier = self.identifierField && self.identifierField.value();
+    var operation  = self.operationDescription();
+    var accordionFieldStr = self.accordionText();
+    var isEmpty = !identifier && !operation && !accordionFieldStr;
+    if (!isEmpty) {
+      var initStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
+      var identifierAndOperation = _.filter([identifier, operation]).join(": ");
+      var withAccordionField = identifierAndOperation
+                               ? _.filter([identifierAndOperation, accordionFieldStr]).join(" - ")
+                               : accordionFieldStr;
+      return initStr + withAccordionField;
+    } else {
+      return "";
+    }
   });
 
   self.toggleAccordion = function() {

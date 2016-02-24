@@ -3,6 +3,31 @@
             [lupapalvelu.document.tools :refer :all]
             [lupapiste-commons.usage-types :as usages]))
 
+
+(defn update-in-body
+  "Updates k in given body path with update function f. Body is vector of maps, path is vector of strings."
+  [body path k f]
+  (map
+    (fn [body-part]
+      (if (= (name (first path)) (:name body-part))
+        (if (seq (rest path))
+          (update body-part :body update-in-body (rest path) k f)
+          (update body-part k f))
+        body-part))
+    body))
+
+(defn accordion-field-emitters
+  "Adds :accordionUpdate emitters to paths defined by accordion-fields"
+  [body accordion-fields]
+  (if (seq accordion-fields)
+    (reduce
+      (fn [body field-path]
+        (update-in-body body field-path :emit #(conj % :accordionUpdate)))
+      body
+      accordion-fields)
+    body))
+
+
 ;;
 ;; Register schemas
 ;;
@@ -28,7 +53,8 @@
                  :after-update
                  :repeating :no-repeat-button :order
                  :exclude-from-pdf
-                 :construction-time})
+                 :construction-time
+                 :accordion-fields})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -40,8 +66,9 @@
       assoc-in
       [version schema-name]
       (-> data
-        (assoc-in [:info :name] schema-name)
-        (assoc-in [:info :version] version)))))
+          (assoc-in [:info :name] schema-name)
+          (assoc-in [:info :version] version)
+          (update :body accordion-field-emitters (get-in data [:info :accordion-fields]))))))
 
 (defn defschemas [version schemas]
   (doseq [schema schemas]
@@ -1329,6 +1356,12 @@
                                {:name "paattymispvm"
                                 :type :date}]})
 
+(def hakija-accordion-paths
+  "Data from paths are visible in accordion header"
+  [[select-one-of-key]
+   ["henkilo" "henkilotiedot" "etunimi"]
+   ["henkilo" "henkilotiedot" "sukunimi"]
+   ["yritys" "yritysnimi"]])
 
 ;;
 ;; schemas
@@ -1408,7 +1441,7 @@
 
 
 
-      {:info {:name "hakija"
+   {:info {:name "hakija"
            :i18name "osapuoli"
            :order 3
            :removable true
@@ -1420,6 +1453,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
        :body party}
 
@@ -1436,6 +1470,7 @@
            :group-help "hakija.group.help"
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body party}
 
@@ -1451,6 +1486,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body party}
 
@@ -1466,6 +1502,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body (schema-body-without-element-by-name ya-party turvakielto)}
 
@@ -1481,6 +1518,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body party}
 
