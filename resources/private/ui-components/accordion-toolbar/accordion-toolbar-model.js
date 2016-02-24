@@ -100,11 +100,12 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     var accordionFieldStr = self.accordionText();
     var isEmpty = !identifier && !operation && !accordionFieldStr;
     if (!isEmpty) {
-      var resultStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
-      resultStr += identifier ? identifier : "";
-      resultStr += operation ? (identifier ? ": " + operation : operation) : "";
-      resultStr += accordionFieldStr ? (operation || identifier ? " - " + accordionFieldStr : accordionFieldStr) : "";
-      return resultStr;
+      var initStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
+      var identifierAndOperation = _.filter([identifier, operation]).join(": ");
+      var withAccordionField = identifierAndOperation
+                               ? _.filter([identifierAndOperation, accordionFieldStr]).join(" - ")
+                               : accordionFieldStr;
+      return initStr + withAccordionField;
     } else {
       return "";
     }
