@@ -51,10 +51,16 @@ Got info that email is changed
   Element should be visible by test id  login-new-email
   Click by test id  login-new-email
   Wait Until  Page should contain  Haluan kirjautua palveluun
-  # Reset to http protocol on localhost
-  Go to login page
+
+Got email to old address
+  Open last email
+  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  mikko@example.com
+
+Email should mention the new email address
+  Page Should Contain  mikko@example.net
 
 Login with the old email fails
+  Go to login page
   Login fails  mikko@example.com  mikko123
 
 Login with the new email succeeds
