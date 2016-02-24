@@ -18,7 +18,7 @@
 
 (defn- init-email-change [user new-email]
   (let [token (token/make-token :change-email user {:new-email new-email} :auto-consume false :ttl ttl/change-email-token-ttl)]
-    (notifications/notify! :change-email {:user user, :data {:token token}})))
+    (notifications/notify! :change-email {:user (assoc user :email new-email), :data {:token token}})))
 
 (defcommand change-email
   {:parameters [email]
