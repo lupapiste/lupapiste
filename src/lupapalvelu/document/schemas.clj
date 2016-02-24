@@ -1486,7 +1486,10 @@
            :order 4
            :removable false
            :approvable true
-           :type :party}
+           :type :party
+           :subtype :suunnittelija
+           :after-update 'lupapalvelu.application-meta-fields/designers-index-update
+           }
     :body paasuunnittelija}
 
    {:info {:name "suunnittelija"
@@ -1495,7 +1498,11 @@
            :order 5
            :removable true
            :approvable true
-           :type :party}
+           :type :party
+           :subtype :suunnittelija
+           :after-update 'lupapalvelu.application-meta-fields/designers-index-update
+           }
+
     :body suunnittelija}
 
    {:info {:name "tyonjohtaja"
