@@ -37,8 +37,9 @@ console.log(token);
 console.log(vetumaData);
         },
         _.partial(pageutil.openPage, "email", token),
-        function(e){$("#change-email-error").text(loc(e.text));}
-    );
+        function(e){
+          changingModel.error(e.text);
+        });
   });
 
   $(function(){

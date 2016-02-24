@@ -4,10 +4,11 @@
   <section class="page container" id="change-email">
     <div class="container">
       <h1 data-bind="ltext: 'change-email.header'"></h1>
-      <p data-bind="ltext: 'change-email.info'" class="register-info"></p>
-
+      <p data-bind="ltext: 'change-email.info'"></p>
 
       <span class="error-message register-error" data-bind="ltext: error"></span>
+
+      <a data-bind="attr: {href: '#login'" class="btn btn-primary" data-test-id="login-new-email"><i class="lupicon-log-in"></i><span data-bind="ltext: 'continue'"></span></a>
 
     </div>
   </section>
