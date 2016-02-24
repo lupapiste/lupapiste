@@ -26,7 +26,8 @@ Authenticate via Osuuspankki via Vetuma
   Click element  xpath=//button[@type='submit']
 
 Authenticate via Nordea via Vetuma
-  Click element  vetuma-init
+  [Arguments]  ${initButton}=vetuma-init
+  Click element   ${initButton}
   Wait Until  Element Should Be Visible  xpath=//img[@alt='Pankkitunnistus']
   Click element  xpath=//img[@alt='Pankkitunnistus']
   Wait Until  Element Should Be Visible  xpath=//a[@class='nordea']
@@ -39,7 +40,8 @@ Authenticate via Nordea via Vetuma
   Click element  xpath=//button[@type='submit']
 
 Start Vetuma authentication but cancel via Nordea
-  Click element  vetuma-init
+  [Arguments]  ${initButton}=vetuma-init
+  Click element   ${initButton}
   Wait Until  Element Should Be Visible  xpath=//a[@title='<< Palaa palveluun: Lupapiste']
   Click element  xpath=//a[@title='<< Palaa palveluun: Lupapiste']
   Wait Until  Element Should Be Visible  xpath=//button[@title='Palaa palveluun: Lupapiste']
