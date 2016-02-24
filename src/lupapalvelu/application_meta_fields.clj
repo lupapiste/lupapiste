@@ -31,26 +31,13 @@
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
         (ss/trim (str (:value last-name) \space (:value first-name)))))))
 
-(defn- designer-name-from-doc [document]
-  (when (re-matches #".*suunnittelija" (str (get-in document [:schema-info :name])))
-    (when-let [henkilo (get-in document [:data :henkilotiedot])]
-      (let [{first-name :etunimi last-name :sukunimi} henkilo]
-        (ss/trim (str (:value last-name) \space (:value first-name)))))))
-
-(defn designers-index [application]
-  (let [designers (remove ss/blank? (map designer-name-from-doc (:documents application)))
-        index (if (seq designers) designers [])]
-    index))
-
 (defn applicant-index [application]
   (let [applicants (remove ss/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
         applicant (or (first applicants) (applicant-name-from-auth application))
-        index (if (seq applicants) applicants [applicant])
-        designers (seq (designers-index application))]
-    (tracef "applicant: '%s', applicant-index: %s, designers: %s" applicant index designers)
+        index (if (seq applicants) applicants [applicant])]
+    (tracef "applicant: '%s', applicant-index: %s" applicant index)
     {:applicant applicant
-     :_applicantIndex index
-     :_designerIndex designers}))
+     :_applicantIndex index}))
 
 (defn applicant-index-update [application]
   {$set (applicant-index application)})
