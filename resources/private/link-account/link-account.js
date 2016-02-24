@@ -2,34 +2,7 @@
   "use strict";
 
   var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
-
-  var VetumaButtonModel = function() {
-    var self = this;
-
-    self.id = "vetuma-linking-init";
-
-    self.token = ko.observable();
-
-    self.success = ko.pureComputed(function() {
-      return urlPrefix + "#!/link-account-2/" + self.token();
-    });
-    self.cancel = ko.pureComputed(function() {
-      return urlPrefix + "#!/link-account/" + self.token() + "/cancel";
-    });
-    self.error = ko.pureComputed(function() {
-      return urlPrefix + "#!/link-account/" + self.token() + "/error";
-    });
-    self.y = ko.pureComputed(function() {
-      return urlPrefix + "#!/link-account/" + self.token() + "/y";
-    });
-    self.vtj = ko.pureComputed(function() {
-      return urlPrefix + "#!/link-account/" + self.token() + "/vtj";
-    });
-
-    self.visible = ko.observable(false);
-  };
-
-  var vetumaParams = new VetumaButtonModel();
+  var vetumaParams = new LUPAPISTE.VetumaButtonModel(urlPrefix, "vetuma-linking-init", "link-account", "link-account-2");
 
   var afterRegistrationSuccess = function(username, password) {
     // Display ajax loader
