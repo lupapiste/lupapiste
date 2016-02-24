@@ -1373,6 +1373,12 @@
   [["henkilotiedot" "etunimi"]
    ["henkilotiedot" "sukunimi"]])
 
+(def foreman-accordion-paths
+  "Data from paths are visible in accordion header"
+  [["kuntaRoolikoodi"]
+   ["henkilotiedot" "etunimi"]
+   ["henkilotiedot" "sukunimi"]])
+
 ;;
 ;; schemas
 ;;
@@ -1568,7 +1574,8 @@
            :repeating false
            :approvable true
            :type :party
-           :after-update 'lupapalvelu.application-meta-fields/foreman-index-update}
+           :after-update 'lupapalvelu.application-meta-fields/foreman-index-update
+           :accordion-fields foreman-accordion-paths}
     :body tyonjohtaja-v2}
 
    {:info {:name "maksaja"
