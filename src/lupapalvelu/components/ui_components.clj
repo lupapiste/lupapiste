@@ -318,6 +318,10 @@
                     :js ["password-reset.js"]
                     :html ["password-reset.html"]}
 
+   :change-email {:depends [:common-html]
+                  :js ["change-email.js"]
+                  :html ["init-email-change.html" "change-email.html"]}
+
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
@@ -376,9 +380,8 @@
    :welcome-app {:depends []
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer :global-models :ui-components]
+   :welcome {:depends [:welcome-app  :global-models :ui-components :login :register :register-company :link-account :debug :header :screenmessages :password-reset :change-email :analytics :footer]
              :js ["company-user.js"]
-
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
