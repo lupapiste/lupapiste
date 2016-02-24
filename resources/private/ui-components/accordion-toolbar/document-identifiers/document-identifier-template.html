@@ -1,11 +1,11 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="document-identifier-template">
 <div class="inline-col">
   <label data-bind="ltext: 'document.operation-identifiers.identifier',
-                    css: {'required': schema.required}"></label>
+                    css: {'required': requiredHighlight}"></label>
   <input class="form-input inline short" type="text"
          data-bind="textInput: identifier,
                     enable: enabled,
-                    css: {'required': schema.required},
+                    css: {'required': requiredHighlight},
                     attr: {'data-test-id': documentId + '-identifier-input',
                            'id': documentId + '-identifier-input',
                            'readonly': readonly,
