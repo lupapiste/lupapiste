@@ -1357,12 +1357,21 @@
                                {:name "paattymispvm"
                                 :type :date}]})
 
+;;
+;; Accordion paths
+;;
+
 (def hakija-accordion-paths
   "Data from paths are visible in accordion header"
   [[select-one-of-key]
    ["henkilo" "henkilotiedot" "etunimi"]
    ["henkilo" "henkilotiedot" "sukunimi"]
    ["yritys" "yritysnimi"]])
+
+(def designer-accordion-paths
+  "Data from paths are visible in accordion header"
+  [["henkilotiedot" "etunimi"]
+   ["henkilotiedot" "sukunimi"]])
 
 ;;
 ;; schemas
@@ -1528,6 +1537,7 @@
            :order 4
            :removable false
            :approvable true
+           :accordion-fields designer-accordion-paths
            :type :party}
     :body paasuunnittelija}
 
@@ -1537,6 +1547,7 @@
            :order 5
            :removable true
            :approvable true
+           :accordion-fields designer-accordion-paths
            :type :party}
     :body suunnittelija}
 
