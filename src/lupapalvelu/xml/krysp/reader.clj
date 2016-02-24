@@ -168,7 +168,7 @@
   (let [national-id    (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
         local-short-id (-> (get-text xml-no-ns id-container :rakennusnro) ss/trim (#(when-not (ss/blank? %) %)))
         local-id       (-> (get-text xml-no-ns id-container :kunnanSisainenPysyvaRakennusnumero) ss/trim (#(when-not (ss/blank? %) %)))
-        edn            (-> xml-no-ns (select [:Rakennus :rakennustunnus]) first xml->edn :rakennustunnus)]
+        edn            (-> xml-no-ns (select [id-container]) first xml->edn id-container)]
     {:propertyId   (get-text xml-no-ns id-container :kiinttun)
      :buildingId   (first (remove ss/blank? [national-id local-short-id]))
      :nationalId   national-id
