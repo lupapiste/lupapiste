@@ -14,7 +14,7 @@ LUPAPISTE.ChangeEmailModel = function(params) {
   self.save = function() {
     // Edge might allow button to be clicked even if it is disabled, check again!
     if (self.ok()) {
-      ajax.command("change-email", {email: self.newEmail()})
+      ajax.command("change-email-init", {email: self.newEmail()})
         .success(debug) // TODO show help?
         .processing(self.processing)
         .pending(self.pending)

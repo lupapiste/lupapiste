@@ -422,7 +422,7 @@
     :username "mikko@example.com"
     :enabled true
     :role "applicant"
-    :personId "210281-0002"
+    :personId "210281-9988" ; = Nordea demo
     :firstName "Mikko"
     :lastName "Intonen"
     :email "mikko@example.com"
