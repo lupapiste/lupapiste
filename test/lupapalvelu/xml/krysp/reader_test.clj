@@ -403,6 +403,15 @@
         (get-in owner2 [:yritys :osoite :postinumero]) => "06500"
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
 
+(facts "Buildings exist with operation id (tags)"
+  (let [xml (xml/parse (slurp "resources/krysp/dev/buildings-with-operationIds.xml"))
+        buildings (->buildings-summary xml)
+        rakennus (first buildings)
+        rakennelma (second buildings)]
+    (:tags rakennus) => (just [{:tag "abcdefghijklmnopqr" :id "toimenpideId"}
+                               {:tag "rqponmlkjihgfedcba" :id "toimenpideId"}])
+    (:tags rakennelma) => (just [{:tag "56c72f3cf165623f0132a28b" :id "toimenpideId"}])))
+
 (facts "KRYSP rakval 2.2.0 ->rakennuksen-tiedot"
   (let [xml      (xml/parse (slurp "dev-resources/krysp/building-2.2.0.xml"))
         building (->> xml ->buildings-summary first :buildingId (->rakennuksen-tiedot xml))]
