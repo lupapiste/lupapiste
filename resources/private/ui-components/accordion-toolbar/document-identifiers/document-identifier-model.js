@@ -24,6 +24,10 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
     return self.options.disabled === false || self.authModel.ok("update-doc");
   });
 
+  self.requiredHighlight = ko.pureComputed(function() {
+    return self.schema.required && !self.identifier();
+  });
+
   self.readonly = ko.observable(false);
   self.inputOptions = {maxLength: self.schema["max-len"] || LUPAPISTE.config.inputMaxLength};
 

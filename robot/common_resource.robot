@@ -493,7 +493,7 @@ Operation description is
   [Arguments]  ${doc}  ${text}
   Wait until  Element Should Contain  xpath=//div[@id='application-info-tab']//span[@data-test-id='${doc}-accordion-description-text']  ${text}
 
-Input building indentifier
+Input building identifier
   [Arguments]  ${doc}  ${text}  ${idx}=1
   Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
   ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
