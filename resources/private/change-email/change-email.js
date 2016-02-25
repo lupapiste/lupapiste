@@ -1,13 +1,6 @@
 ;(function() {
   "use strict";
 
-  var statusModel = ko.observable();
-  var infoModel = {email: ko.observable()};
-  var changingModel = {error: ko.observable(), done: ko.observable()};
-
-  var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
-  var vetumaParams = new LUPAPISTE.VetumaButtonModel(urlPrefix, "vetuma-init-email", "email", "change-email");
-
   function getToken() {
     var token = pageutil.subPage();
     if (!token) {
@@ -16,6 +9,21 @@
     }
     return token;
   }
+
+  function back() {
+    pageutil.openPage("email", getToken());
+  }
+
+  var statusModel = ko.observable();
+  var infoModel = {email: ko.observable()};
+  var changingModel = {error: ko.observable(),
+                       success: ko.observable(false),
+                       back: back,
+                       done: ko.observable(false)};
+
+  var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
+  var vetumaParams = new LUPAPISTE.VetumaButtonModel(urlPrefix, "vetuma-init-email", "email", "change-email");
+
 
   hub.onPageLoad("email", function() {
     var token = getToken();
@@ -36,7 +44,11 @@
     vetuma.getUser(
         function(vetumaData) {
           ajax.command("change-email", {tokenId: token, stamp: vetumaData.stamp})
-            .success(function() {changingModel.done(true);})
+            .success(_.partial(changingModel.success, true))
+            .error(function(e) {
+              changingModel.error(e.text);
+            })
+            .complete(_.partial(changingModel.done, true))
             .call();
         },
         _.partial(pageutil.openPage, "email", token),
