@@ -2,21 +2,25 @@
 <html>
 <body>
   <section class="page container" id="change-email-template">
-  <form data-bind="if: authorized">
+  <form>
     <div class="form-grid">
       <div class="row">
-        <span data-bind="text: email"></span>
-      </div>
-      <div class="row">
-        <div class="col-4"
+        <div class="col-1"
+             data-bind="component: {name: 'text-field',
+                                    params: {value: email,
+                                             id: 'oldEmail',
+                                             disable: true,
+                                             lLabel: 'userinfo.old-email'}}"></div>
+        <!-- ko if: authorized() -->
+        <div class="col-1"
              data-bind="component: {name: 'text-field',
                                     params: {value: newEmail,
                                              id: 'newEmail',
                                              disable: disable,
                                              lLabel: 'userinfo.new-email'}}"></div>
-
+        <!-- /ko -->
       </div>
-      <div class="row">
+      <div class="row" data-bind="if: authorized()">
         <div class="col-4">
           <button data-bind="click: save,
                              disable: disable,
@@ -31,6 +35,9 @@
       </div>
     </div>
   </form>
+  <div data-bind="ifnot: authorized()" class="form-grid">
+    <p data-bind="ltext: 'userinfo.change-email-not-possible'"></p>
+  </div>
   </section>
 </body>
 </html>

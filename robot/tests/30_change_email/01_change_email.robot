@@ -9,6 +9,13 @@ Resource        ../common_keywords/vetuma_helpers.robot
 
 # TODO tag integration
 
+Auhtority can not change email
+  Sonja logs in
+  Navigate to email change
+  Wait Until  Textfield Value Should Be  oldEmail  sonja.sibbo@sipoo.fi
+  Page Should Contain  Sähköpostiosoitteen vaihtaminen ei onnistu
+  Logout
+
 Create an application
   Mikko logs in
   ${secs} =  Get Time  epoch
@@ -16,13 +23,9 @@ Create an application
   Set Suite Variable  ${propertyId}  753-416-30-1
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
 
-Navigate to email change
-  Click Element  user-name
-  Open accordion by test id  mypage-change-email-accordion
-  Wait Until  Element Should be visible  newEmail
-
-Old email is preset
-  Textfield Value Should Be  newEmail  mikko@example.com
+Old email is preset when changing it
+  Navigate to email change
+  Wait Until  Textfield Value Should Be  newEmail  mikko@example.com
 
 Can not submit yet
   Element Should Be Disabled  //section[@id='mypage']//button[@data-test-id='change-email']
@@ -73,8 +76,14 @@ Party table has been updated
   Open tab  parties
   Page Should Not Contain  mikko@example.com
   Page Should Contain  mikko@example.net
+  Logout
 
 *** Keywords ***
 
 Vetuma button is visible
   Wait until page contains element  vetuma-init-email
+
+Navigate to email change
+  Click Element  user-name
+  Open accordion by test id  mypage-change-email-accordion
+  Wait Until  Element Should be visible  oldEmail

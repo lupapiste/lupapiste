@@ -3,6 +3,7 @@
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.env :as env]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
             [lupapalvelu.notifications :as notifications]
@@ -36,11 +37,18 @@
   (let [token (token/make-token :change-email user {:new-email new-email} :auto-consume false :ttl ttl/change-email-token-ttl)]
     (notifications/notify! :change-email {:user (assoc user :email new-email), :data {:token token}})))
 
+(defn- has-person-id? [user]
+  (if-let [user-id (:id user)]
+    (let [full-user (if (contains? user :personId) user (usr/get-user-by-id! user-id))]
+      (not (ss/blank? (:personId full-user))))
+    false))
+
 (defcommand change-email-init
   {:parameters [email]
-   :user-roles #{:applicant}
+   :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
+   :pre-checks [(fn [{user :user} _] (when-not (has-person-id? user) (warn "UNAUTHZ" user) (fail :error.unauthorized)))]
    :description "Starts the workflow for changing user password"}
   [{user :user}]
   (let [email (usr/canonize-email email)]
