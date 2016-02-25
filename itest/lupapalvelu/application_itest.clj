@@ -372,7 +372,7 @@
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
           (:authority app) => (contains {:id sonja-id})
-          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-0002"))
+          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-9988"))
 
       (fact "Ronja still does not see the full person ID"
         (let [app (query-application ronja application-id)
