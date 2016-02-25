@@ -382,12 +382,14 @@
    {:info {:name "maa-ainesluvan-omistaja"
            :i18name "osapuoli"
            :order 3
-           :type :party}
+           :type :party
+           :accordion-fields hakija-accordion-paths}
     :body party}
    {:info {:name "ottamis-suunnitelman-laatija"
            :i18name "osapuoli"
            :order 4
-           :type :party}
+           :type :party
+           :accordion-fields hakija-accordion-paths}
     :body party}
    {:info {:name "ymp-maksaja"
            :i18name "osapuoli"
@@ -396,7 +398,8 @@
            :removable false
            :approvable true
            :subtype :maksaja
-           :type :party}
+           :type :party
+           :accordion-fields hakija-accordion-paths}
      :body maksaja}
    {:info {:name "yl-hankkeen-kuvaus"
            :order 1}
