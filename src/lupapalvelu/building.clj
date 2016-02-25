@@ -28,14 +28,14 @@
 (defn operation-building-updates [operation-buildings application]
   (remove
     util/empty-or-nil?
-    (flatten
-      (map
-        (fn [{tags :tags bid :nationalId}]
-          (map (partial buildingid-updates-for-operation application bid) tags))
-        operation-buildings))))
+    (map
+      (fn [{tags :tags bid :nationalId}]
+        (buildingid-updates-for-operation application bid (first tags))) ; building belongs to only one operation, thus 'first'
+      operation-buildings)))
 
 (defn building-updates
-  "Returns both updates: :buildings array of all buildings, and document specific buildingId updates."
+  "Returns both updates: buildings array of all buildings, and document specific buildingId updates.
+   Return value is a map of updates. Example: {:buildings [{:nationalId '123'}] :documents.1.data.valtakunnallinenNumero.value '123'}"
   [buildings application]
   (let [operation-buildings (buildings-with-operation buildings)
         op-documents-array-updates (operation-building-updates operation-buildings application)]
