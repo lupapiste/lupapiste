@@ -66,6 +66,7 @@
            :type :party
            :removable false
            :repeating false
+           :accordion-fields hakija-accordion-paths
            :order 61}
     :body tyomaasta-vastaava}
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
@@ -74,6 +75,7 @@
            :removable false
            :repeating false
            :order 62
+           :accordion-fields hakija-accordion-paths
            :subtype :maksaja}
     :body yleiset-alueet-maksaja}
    {:info {:name "tyoaika"                                                 ;; alkuPvm / loppuPvm

@@ -42,6 +42,21 @@
 (defn applicant-index-update [application]
   {$set (applicant-index application)})
 
+(defn- designer-name-from-doc [document]
+  (when (= "suunnittelija" (str (get-in document [:schema-info :subtype])))
+    (when-let [henkilo (get-in document [:data :henkilotiedot])]
+      (let [{first-name :etunimi last-name :sukunimi} henkilo]
+        (ss/trim (str (:value last-name) \space (:value first-name)))))))
+
+(defn designers-index [application]
+  (let [designers (remove ss/blank? (map designer-name-from-doc (:documents application)))
+        index (if (seq designers) designers [])]
+    (tracef "designers: %s" index)
+    {:_designerIndex index}))
+
+(defn designers-index-update [application]
+  {$set (designers-index application)})
+
 (defn get-applicant-phone [_ app]
   (let [owner (first (auth/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]

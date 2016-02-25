@@ -61,3 +61,5 @@ user.properties
 /GRTAGS
 /GTAGS
 /TAGS
+*.pandoc
+/docs/developerguide.html

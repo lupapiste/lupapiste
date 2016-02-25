@@ -49,7 +49,7 @@ Muut lupamaaraykset
 Add attachment to Aloituskokous
   Open task  Aloituskokous
   Wait Until  Title Should Be  ${appname} - Lupapiste
-  Click enabled by test id  add-targetted-attachment
+  Scroll and click test id  add-targetted-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
   Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${TXT_TESTFILE_PATH}
@@ -160,7 +160,9 @@ Mikko is unable to edit Aloituskokous (LPK-494)
 Mikko sets started past date for YA application (LPK-1054)
   Open application  ${appname-ya}  ${propertyId}
   Open tab  tasks
+  Wait Until  Element Text Should Be  jquery=[data-test-id=task-started-by]  ${EMPTY}
   Set date and check  application-inform-construction-started-btn  construction-state-change-info-started  10.8.2012
+  Wait Until  Element Text Should Be  jquery=[data-test-id=task-started-by]  Intonen Mikko
   [Teardown]  Logout
 
 # TODO: Sonja sets ready past date for YA application (LPK-1054)
@@ -180,6 +182,7 @@ Create katselmus task
 Open task
   [Arguments]  ${name}
   Wait until  Element should be visible  xpath=//div[@id='application-tasks-tab']//table[@class="tasks"]//td/a[text()='${name}']
+  Scroll to  div#application-tasks-tab table.tasks
   Wait until  Click Element  //div[@id='application-tasks-tab']//table[@class="tasks"]//td/a[text()='${name}']
   Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
   Wait Until  Element should be visible  taskAttachments
