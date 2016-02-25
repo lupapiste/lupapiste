@@ -47,20 +47,26 @@
       (verdict/verdict-xml-with-foreman-designer-verdicts application xml)
       app-xml)))
 
+(defn save-verdicts-from-xml
+  "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
+  [{:keys [application] :as command} app-xml]
+  (let [updates (verdict/find-verdicts-from-xml command app-xml)]
+    (when updates
+      (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+        (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+        (t/mark-app-and-attachments-final! (:id application) (:created command))))
+    (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
-    (let [app-xml (normalize-special-verdict application app-xml)]
+    (let [app-xml (normalize-special-verdict application app-xml)
+          organization (organization/get-organization (:organization application))
+          validator-fn (permit/get-verdict-validator (permit/permit-type application))
+          validation-errors (validator-fn app-xml organization)]
       (or
-       (let [organization (organization/get-organization (:organization application))
-             validator-fn (permit/get-verdict-validator (permit/permit-type application))]
-         (validator-fn app-xml organization))
-       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-         (when updates
-           (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
-             (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
-             (t/mark-app-and-attachments-final! (:id application) (:created command))))
-         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))))
+        validation-errors
+        (save-verdicts-from-xml command app-xml)))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
