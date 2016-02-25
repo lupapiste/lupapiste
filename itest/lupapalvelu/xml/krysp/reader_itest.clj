@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.xml.krysp.building-reader :refer [building-xml ->buildings-summary ->rakennuksen-tiedot]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.itest-util :refer :all]))
 

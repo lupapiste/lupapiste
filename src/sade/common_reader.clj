@@ -7,7 +7,8 @@
             [sade.env :as env]
             [sade.util :refer [prewalk-map postwalk-map boolean? convert-values]]
             [sade.xml :refer :all]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 ;;
 ;; parsing time
@@ -78,6 +79,8 @@
 (defn strip-xml-namespaces
   "strips namespace-part of xml-element-keys"
   [xml] (postwalk-map (partial map (fn [[k v]] [k (if (= :tag k) (strip-key v) v)])) xml))
+
+(def cleanup (comp util/strip-empty-maps util/strip-nils))
 
 (defn translate
   "translates a value against the dictionary. return nil if cant be translated."

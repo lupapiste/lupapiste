@@ -6,8 +6,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.reader]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]))
 
 (defraw admin-download-application-xml
   {:parameters [applicationId]
@@ -56,7 +55,7 @@
     (if-let [application (mongo/by-id :applications applicationId ["organization" "permitType" "propertyId"])]
       (let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
         {:status  200
-         :body    (krysp-reader/building-xml url credentials (:propertyId application) true)
+         :body    (building-reader/building-xml url credentials (:propertyId application) true)
          :headers {"Content-Type"        "application/xml;charset=UTF-8"
                    "Content-Disposition" (format "attachment;filename=\"%s-%s-%s.xml\"" applicationId (:propertyId application) (now))
                    "Cache-Control"       "no-cache"}})
