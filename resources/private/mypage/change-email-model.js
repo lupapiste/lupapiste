@@ -6,7 +6,7 @@ LUPAPISTE.ChangeEmailModel = function(params) {
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
 
-  self.authorized = _.partial(params.authorization.ok, "change-email");
+  self.authorized = _.partial(params.authorization.ok, "change-email-init");
   self.ok = ko.pureComputed(function() {
     return self.newEmail() && self.validated.isValid() && self.newEmail() !== params.data.email() && self.authorized() && !self.processing();
   });
