@@ -928,6 +928,8 @@
                                {:name "P2/P3"}
                                {:name "P1/P2/P3"}]}]})
 
+(def rakennustunnus {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true :readonly true})
+
 (def rakennuksen-tiedot-ilman-huoneistoa [kaytto
                                           mitat
                                           rakenne
@@ -1408,10 +1410,16 @@
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
    {:info {:name "uusiRakennus" :approvable true}
-    :body (body tunnus rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
+    :body (body tunnus
+                rakennuksen-omistajat
+                (approvable-top-level-groups rakennuksen-tiedot)
+                rakennustunnus)}
 
    {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
-    :body (body tunnus rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
+    :body (body tunnus
+                rakennuksen-omistajat
+                (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa)
+                rakennustunnus)}
 
    {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-muutos)}
@@ -1432,7 +1440,9 @@
     :body (approvable-top-level-groups purku)}
 
    {:info {:name "kaupunkikuvatoimenpide" :approvable true}
-    :body (body tunnus (approvable-top-level-groups rakennelma))}
+    :body (body tunnus
+                (approvable-top-level-groups rakennelma)
+                rakennustunnus)}
 
    {:info {:name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide" :approvable true}
     :body (approvable-top-level-groups rakennelma)}
