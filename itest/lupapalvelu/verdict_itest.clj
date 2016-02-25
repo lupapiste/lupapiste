@@ -296,3 +296,24 @@
                         => {:paatoksentekija "Liisa Lohkominen"
                             :paatoskoodi "Kiinteist\u00f6toimitus"
                             :status "43"})))))
+
+(fact "When checking verdict, if no valid verdict exits, buildingIds are still saved to application"
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
+        app-id (:id application)
+        op1    (:primaryOperation application)]
+    (override-krysp-xml sipoo "753-R" :R [{:selector [:rakval:paatostieto] :value nil}
+                                          {:selector [:rakval:rakennuksenTiedot :rakval:rakennustunnus :rakval:muuTunnustieto :rakval:MuuTunnus :yht:tunnus] :value (:id op1)}])
+
+    (let [response (command sonja :check-for-verdict :id app-id)
+          application (query-application mikko app-id)
+          op-document (some #(when (= (:id op1) (-> % :schema-info :op :id)) %) (:documents application))]
+      (fact "No verdicts found"
+        (:ok response) => false
+        (:text response) => "info.no-verdicts-found-from-backend")
+      (fact "Buildings were still read"
+        (:buildings response) => truthy
+        (:buildings application) => sequential?)
+      (fact "building id from KRYSP is saved to document"
+        (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")))
+
+  (against-background (after :facts (remove-krysp-xml-overrides sipoo "753-R" :R))))

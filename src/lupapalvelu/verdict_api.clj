@@ -10,9 +10,10 @@
             [sade.core :refer [ok fail fail! ok?]]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.building :as building]
+            [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
@@ -23,7 +24,8 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]))
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]))
 
 ;;
 ;; KRYSP verdicts
@@ -57,6 +59,15 @@
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
 
+(defn save-buildings
+  "Get buildings from verdict XML and save to application. Updates also operation documents
+   with building data, if applicable."
+  [{:keys [application] :as command} buildings]
+  (let [operation-buildings (building/buildings-with-operation buildings)
+        op-documents-array-updates (building/operation-building-updates operation-buildings application)]
+    (update-application command {$set (apply merge (conj op-documents-array-updates {:buildings buildings}))})
+    (when (seq operation-buildings) {:buildings (map :nationalId operation-buildings)})))
+
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
@@ -64,9 +75,11 @@
           organization (organization/get-organization (:organization application))
           validator-fn (permit/get-verdict-validator (permit/permit-type application))
           validation-errors (validator-fn app-xml organization)]
-      (or
-        validation-errors
-        (save-verdicts-from-xml command app-xml)))))
+      (if-not validation-errors
+        (save-verdicts-from-xml command app-xml)
+        (if-let [buildings (seq (building-reader/->buildings-summary app-xml))]
+          (merge validation-errors (save-buildings command buildings))
+          validation-errors)))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
