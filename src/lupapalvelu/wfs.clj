@@ -685,7 +685,8 @@
                       {:query-params params
                        :headers headers
                        :basic-auth (:raster auth)
-                       :as :stream})
+                       :as :stream
+                       :throw-exceptions false})
       ;; Municipality map layers are prefixed. For example: Lupapiste-753-R:wms-layer-name
       "wms" (if-let [[_ org-id layer] (re-matches #"(?i)Lupapiste-([\d]+-[\w]+):(.+)" layer)]
               (query-organization-map-server (ss/upper-case org-id)
@@ -694,7 +695,8 @@
               (http/get wms-url
                         {:query-params params
                          :headers headers
-                         :as :stream}))
+                         :as :stream
+                         :throw-exceptions false}))
       "wmts" (let [{:keys [username password]} (env/value :wmts :raster)
                    url-part (case layer
                               "taustakartta" "maasto"
@@ -705,10 +707,12 @@
                          {:query-params params
                           :headers headers
                           :basic-auth [username password]
-                          :as :stream}))
+                          :as :stream
+                          :throw-exceptions false}))
       "plandocument" (let [id (:id params) ]
                        (assert (ss/numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
                                  {:query-params params
                                   :headers headers
-                                  :as :stream})))))
+                                  :as :stream
+                                  :throw-exceptions false})))))
