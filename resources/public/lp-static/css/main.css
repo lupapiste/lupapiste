@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1456231258046');
+@import url('main-blessed1.css?z=1456411885978');
 
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
@@ -1163,8 +1163,8 @@ ul.tabs {
 
 /* line 1, ../../../private/common-html/sass/partials/_errors.scss */
 .context-error {
-  color: #f00;
-  border: 1px solid #f00;
+  color: red;
+  border: 1px solid red;
   border-radius: 3px;
   padding: 6px;
   margin: 12px 0;
