@@ -63,10 +63,9 @@
   "Get buildings from verdict XML and save to application. Updates also operation documents
    with building data, if applicable."
   [{:keys [application] :as command} buildings]
-  (let [operation-buildings (building/buildings-with-operation buildings)
-        op-documents-array-updates (building/operation-building-updates operation-buildings application)]
-    (update-application command {$set (apply merge (conj op-documents-array-updates {:buildings buildings}))})
-    (when (seq operation-buildings) {:buildings (map :nationalId operation-buildings)})))
+  (let [building-updates (building/building-updates buildings application)]
+    (update-application command {$set building-updates})
+    (when building-updates {:buildings (map :nationalId buildings)})))
 
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}

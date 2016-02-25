@@ -8,7 +8,8 @@
             [lupapalvelu.document.tools :as tools]
             [sade.util :as util]
             [lupapalvelu.document.schemas :as schema]
-            [lupapalvelu.permit :as permit]))
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.building :as building]))
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
@@ -200,12 +201,12 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
-
-(defn- buildings-summary-for-application [xml]
+(defn- buildings-summary-for-application
+  "Returns application building updates from xml (if buildings exist)."
+  [xml application]
   (let [summary (->buildings-summary xml)]
     (when (seq summary)
-      {:buildings summary})))
+      (building/building-updates summary application))))
 
 (permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
-
 

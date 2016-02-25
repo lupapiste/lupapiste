@@ -33,3 +33,10 @@
         (fn [{tags :tags bid :nationalId}]
           (map (partial buildingid-updates-for-operation application bid) tags))
         operation-buildings))))
+
+(defn building-updates
+  "Returns both updates: :buildings array of all buildings, and document specific buildingId updates."
+  [buildings application]
+  (let [operation-buildings (buildings-with-operation buildings)
+        op-documents-array-updates (operation-building-updates operation-buildings application)]
+    (apply merge (conj op-documents-array-updates {:buildings buildings}))))
