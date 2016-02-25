@@ -1,5 +1,11 @@
-@import url('main-blessed1.css?z=1456411885978');
+@import url('main-blessed1.css?z=1456414186239');
 
+
+/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-73em {
+  max-height: 73em;
+  overflow-y: auto;
+}
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
 .scroll-74em {
@@ -2106,11 +2112,6 @@ ul.no-bullets {
   top: 0;
   bottom: 0;
   margin: auto;
-}
-
-/* line 2, ../../../private/common-html/sass/partials/_upload.scss */
-.upload-component .success-message {
-  color: #04c714;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_metadata-editor.scss */
@@ -6639,50 +6640,50 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 /*
   Lupapalvelu CSS:
 */
-/* line 157, ../../../private/common-html/sass/main.scss */
+/* line 156, ../../../private/common-html/sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 163, ../../../private/common-html/sass/main.scss */
+/* line 162, ../../../private/common-html/sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 167, ../../../private/common-html/sass/main.scss */
+/* line 166, ../../../private/common-html/sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 171, ../../../private/common-html/sass/main.scss */
+/* line 170, ../../../private/common-html/sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 175, ../../../private/common-html/sass/main.scss */
+/* line 174, ../../../private/common-html/sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 179, ../../../private/common-html/sass/main.scss */
+/* line 178, ../../../private/common-html/sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 183, ../../../private/common-html/sass/main.scss */
+/* line 182, ../../../private/common-html/sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 188, ../../../private/common-html/sass/main.scss */
+/* line 187, ../../../private/common-html/sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 192, ../../../private/common-html/sass/main.scss */
+/* line 191, ../../../private/common-html/sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -6694,27 +6695,27 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   display: table-cell;
 }
 
-/* line 203, ../../../private/common-html/sass/main.scss */
+/* line 202, ../../../private/common-html/sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 211, ../../../private/common-html/sass/main.scss */
+/* line 210, ../../../private/common-html/sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 217, ../../../private/common-html/sass/main.scss */
+/* line 216, ../../../private/common-html/sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 222, ../../../private/common-html/sass/main.scss */
+/* line 221, ../../../private/common-html/sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -6728,47 +6729,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 235, ../../../private/common-html/sass/main.scss */
+/* line 234, ../../../private/common-html/sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 237, ../../../private/common-html/sass/main.scss */
+/* line 236, ../../../private/common-html/sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 243, ../../../private/common-html/sass/main.scss */
+/* line 242, ../../../private/common-html/sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 248, ../../../private/common-html/sass/main.scss */
+/* line 247, ../../../private/common-html/sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 250, ../../../private/common-html/sass/main.scss */
+/* line 249, ../../../private/common-html/sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 253, ../../../private/common-html/sass/main.scss */
+/* line 252, ../../../private/common-html/sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 254, ../../../private/common-html/sass/main.scss */
+/* line 253, ../../../private/common-html/sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 257, ../../../private/common-html/sass/main.scss */
+/* line 256, ../../../private/common-html/sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 259, ../../../private/common-html/sass/main.scss */
+/* line 258, ../../../private/common-html/sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 261, ../../../private/common-html/sass/main.scss */
+/* line 260, ../../../private/common-html/sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
