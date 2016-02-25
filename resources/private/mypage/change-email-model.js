@@ -5,6 +5,7 @@ LUPAPISTE.ChangeEmailModel = function(params) {
   self.validated = ko.validatedObservable([self.newEmail]);
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
+  self.proceed = ko.observable(false);
 
   self.authorized = _.partial(params.authorization.ok, "change-email-init");
   self.ok = ko.pureComputed(function() {
@@ -15,7 +16,8 @@ LUPAPISTE.ChangeEmailModel = function(params) {
     // Edge might allow button to be clicked even if it is disabled, check again!
     if (self.ok()) {
       ajax.command("change-email-init", {email: self.newEmail()})
-        .success(debug) // TODO show help?
+        .success(_.partial(self.proceed, true))
+        .error(util.showSavedIndicator)
         .processing(self.processing)
         .pending(self.pending)
         .call();
@@ -26,7 +28,7 @@ LUPAPISTE.ChangeEmailModel = function(params) {
   // Parameters for the parent component:
   var superParams = {ltitle: params.ltitle,
                      accordionContentTemplate: "change-email-template",
-                     accordionContentTemplateData: _.merge(params.data, _.pick(self, ["newEmail", "authorized", "processing", "pending", "ok", "save"]))};
+                     accordionContentTemplateData: _.merge(params.data, _.pick(self, ["newEmail", "authorized", "proceed", "processing", "pending", "ok", "save"]))};
   ko.utils.extend(self, new LUPAPISTE.AccordionModel(superParams));
 
   // Initialize new email with current value

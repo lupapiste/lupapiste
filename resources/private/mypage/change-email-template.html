@@ -10,7 +10,7 @@
                                     params: {value: email,
                                              id: 'oldEmail',
                                              disable: true,
-                                             lLabel: 'userinfo.old-email'}}"></div>
+                                             lLabel: 'userinfo.current-email'}}"></div>
         <!-- ko if: authorized() -->
         <div class="col-1"
              data-bind="component: {name: 'text-field',
@@ -18,10 +18,8 @@
                                              id: 'newEmail',
                                              disable: disable,
                                              lLabel: 'userinfo.new-email'}}"></div>
-        <!-- /ko -->
-      </div>
-      <div class="row" data-bind="if: authorized()">
-        <div class="col-4">
+
+        <div class="col-1" style="padding-top: 24px">
           <button data-bind="click: save,
                              disable: disable,
                              enable: ok,
@@ -32,6 +30,13 @@
               <span data-bind="ltext: 'userinfo.change-email-submit'"></span>
           </button>
         </div>
+        <!-- /ko -->
+      </div>
+      <div data-bind="if: proceed" class="row">
+        <p data-bind="ltext: 'userinfo.change-email-proceed'"></p>
+      </div>
+      <div data-bind="if: authorized()" class="row">
+        <p data-bind="lhtml: 'userinfo.change-email-info'"></p>
       </div>
     </div>
   </form>
