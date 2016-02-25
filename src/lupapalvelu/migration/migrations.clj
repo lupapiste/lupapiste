@@ -1793,7 +1793,7 @@
 (defmigration init-designer-index
               (reduce + 0
                       (for [collection [:applications :submitted-applications]]
-                        (let [applications (mongo/select collection)]
+                        (let [applications (mongo/select collection {:documents.schema-info.subtype "suunnittelija"} {:documents 1})]
                           (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
 
 ;;
