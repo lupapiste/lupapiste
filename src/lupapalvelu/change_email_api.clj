@@ -56,7 +56,7 @@
         {hetu :personId old-email :email :as user} (usr/get-user-by-id! (:user-id token))]
 
     (cond
-      (not= (:token-type token) :change-email) (fail! :error.unknown)
+      (not= (:token-type token) :change-email) (fail! :error.token-not-found)
       (not= hetu (:userid vetuma-data)) (fail! :error.personid-mismatch)
       (usr/get-user-by-email new-email) (fail! :error.duplicate-email))
 
@@ -87,4 +87,4 @@
   [_]
   (if-let [token (token/get-token tokenId)]
     (change-email token stamp)
-    (fail :error.unknown)))
+    (fail :error.token-not-found)))
