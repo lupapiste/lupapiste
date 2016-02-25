@@ -48,7 +48,7 @@
       (let [{first-name :etunimi last-name :sukunimi} henkilo]
         (ss/trim (str (:value last-name) \space (:value first-name)))))))
 
-(defn- designers-index [application]
+(defn designers-index [application]
   (let [designers (remove ss/blank? (map designer-name-from-doc (:documents application)))
         index (if (seq designers) designers [])]
     (tracef "designers: %s" index)
