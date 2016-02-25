@@ -19,66 +19,8 @@
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.verdict :as verdict]))
-
-;; Object types (URL encoded)
-(def building-type    "typeName=rakval%3AValmisRakennus")
-(def rakval-case-type "typeName=rakval%3ARakennusvalvontaAsia")
-(def poik-case-type   "typeName=ppst%3APoikkeamisasia,ppst%3ASuunnittelutarveasia")
-(def ya-type          "typeName=yak%3AYleisetAlueet")
-(def yl-case-type     "typeName=ymy%3AYmparistolupa")
-(def mal-case-type    "typeName=ymm%3AMaaAineslupaAsia")
-(def vvvl-case-type   "typeName=ymv%3AVapautus")
-
-;;(def kt-case-type-prefix  "typeName=kiito%3A")
-
-;; Object types as enlive selector
-(def case-elem-selector #{[:RakennusvalvontaAsia]
-                          [:Poikkeamisasia]
-                          [:Suunnittelutarveasia]
-                          [:Sijoituslupa]
-                          [:Kayttolupa]
-                          [:Liikennejarjestelylupa]
-                          [:Tyolupa]
-                          [:Ilmoitukset]
-                          [:Ymparistolupa]
-                          [:MaaAineslupaAsia]
-                          [:Vapautus]})
-
-(def outlier-elem-selector #{[:Lohkominen]
-                             [:Rasitetoimitus]
-                             [:YleisenAlueenLohkominen]
-                             [:KiinteistolajinMuutos]
-                             [:YhtAlueenOsuuksienSiirto]
-                             [:KiinteistojenYhdistaminen]
-                             [:Halkominen]
-                             [:KiinteistonMaaritys]
-                             [:Tilusvaihto]})
-
-;; Only those types supported by Facta are included.
-(def kt-types (let [elems (map (comp (partial str "kiito:") name)
-                               [:KiinteistolajinMuutos
-                                :KiinteistojenYhdistaminen
-                                :Lohkominen
-                                :YleisenAlueenLohkominen
-                                :Rasitetoimitus])]
-                (str "typeName=" (ss/join "," elems))))
-
-
-(defn- get-tunnus-path
-  [permit-type search-type]
-  (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)
-        tunnus-location (case search-type
-                          :application-id  "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus"
-                          :kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")]
-    (str prefix tunnus-location)))
-
-(def- rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
-
-(defn property-equals
-  "Returns URL-encoded search parameter suitable for 'filter'"
-  [property value]
-  (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
+            [lupapalvelu.xml.krysp.verdict :as verdict]
+            [lupapalvelu.xml.krysp.common-reader :as common]))
 
 (defn- post-body-for-ya-application [id id-path]
   {:body (str "<wfs:GetFeature service=\"WFS\"
@@ -98,54 +40,43 @@
          </wfs:Query>
        </wfs:GetFeature>")})
 
-(defn wfs-krysp-url [server object-type filter]
-  (let [server (if (ss/contains? server "?")
-                 (if (ss/ends-with server "&")
-                   server
-                   (str server "&"))
-                 (str server "?"))]
-    (str server "request=GetFeature&" object-type "&filter=" filter)))
-
-(defn wfs-krysp-url-with-service [server object-type filter]
-  (str (wfs-krysp-url server object-type filter) "&service=WFS"))
-
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
   ([server credentials property-id]
    (building-xml server credentials property-id false))
   ([server credentials property-id raw?]
-   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
+   (let [url (common/wfs-krysp-url server common/building-type (common/property-equals common/rakennuksen-kiinteistotunnus property-id))]
      (trace "Get building: " url)
      (or (cr/get-xml url credentials raw?) {}))))
 
 (defn- application-xml [type-name id-path server credentials id raw?]
-  (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))]
+  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-equals id-path id))]
     (trace "Get application: " url)
     (cr/get-xml url credentials raw?)))
 
 (defn rakval-application-xml [server credentials id search-type raw?]
-  (application-xml rakval-case-type (get-tunnus-path permit/R search-type)    server credentials id raw?))
+  (application-xml common/rakval-case-type (common/get-tunnus-path permit/R search-type)    server credentials id raw?))
 
 (defn poik-application-xml   [server credentials id search-type raw?]
-  (application-xml poik-case-type   (get-tunnus-path permit/P search-type)    server credentials id raw?))
+  (application-xml common/poik-case-type   (common/get-tunnus-path permit/P search-type)    server credentials id raw?))
 
 (defn yl-application-xml     [server credentials id search-type raw?]
-  (application-xml yl-case-type     (get-tunnus-path permit/YL search-type)   server credentials id raw?))
+  (application-xml common/yl-case-type     (common/get-tunnus-path permit/YL search-type)   server credentials id raw?))
 
 (defn mal-application-xml    [server credentials id search-type raw?]
-  (application-xml mal-case-type    (get-tunnus-path permit/MAL search-type)  server credentials id raw?))
+  (application-xml common/mal-case-type    (common/get-tunnus-path permit/MAL search-type)  server credentials id raw?))
 
 (defn vvvl-application-xml   [server credentials id search-type raw?]
-  (application-xml vvvl-case-type   (get-tunnus-path permit/VVVL search-type) server credentials id raw?))
+  (application-xml common/vvvl-case-type   (common/get-tunnus-path permit/VVVL search-type) server credentials id raw?))
 
 (defn ya-application-xml     [server credentials id search-type raw?]
-  (let [options (post-body-for-ya-application id (get-tunnus-path permit/YA search-type))]
+  (let [options (post-body-for-ya-application id (common/get-tunnus-path permit/YA search-type))]
     (trace "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
 
 (defn kt-application-xml   [server credentials id search-type raw?]
   (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
-    (application-xml kt-types path server credentials id raw?)))
+    (application-xml common/kt-types path server credentials id raw?)))
 
 (permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P    :xml-from-krysp poik-application-xml)
@@ -671,13 +602,13 @@
                            (cleanup)
                            (filter seq))]
         (util/assoc-when verdict-model :paatokset verdicts)))
-    (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
+    (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)))
 
 ;; Outliers (KT) do not have kuntalupatunnus
 (defmethod ->verdicts ->outlier-verdicts
   [xml fun]
   (for [elem (enlive/select (cr/strip-xml-namespaces xml)
-                            outlier-elem-selector)]
+                            common/outlier-elem-selector)]
     {:kuntalupatunnus "-"
      :paatokset (->> elem fun cleanup (filter seq))}))
 
@@ -747,7 +678,7 @@
 (defn get-app-info-from-message [xml kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
-        asiat (enlive/select xml-no-ns case-elem-selector)
+        asiat (enlive/select xml-no-ns common/case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
         asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
     (when (pos? (count asiat-with-kuntalupatunnus))
