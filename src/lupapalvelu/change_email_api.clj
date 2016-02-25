@@ -4,6 +4,7 @@
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
             [lupapalvelu.notifications :as notifications]
@@ -18,9 +19,14 @@
 
 (notifications/defemail :change-email
   {:recipients-fn notifications/from-user
-   :model-fn (fn [{{token :token} :data} conf recipient]
+   :model-fn (fn [{data :data} conf recipient]
+               (let [{:keys [id expires]} (:token data)]
+                 (merge
+                   (select-keys data [:old-email :new-email])
                {:name (:firstName recipient)
-                :link-fi (change-email-link "fi" token), :link-sv (change-email-link "sv" token)})})
+                    :expires (util/to-local-datetime expires)
+                    :link-fi (change-email-link "fi" id)
+                    :link-sv (change-email-link "sv" id)})))})
 
 (notifications/defemail :email-changed
   {:recipients-fn (fn [{user :user}]
@@ -28,14 +34,13 @@
                       (->> (com/find-company-admins company-id) (remove #(= (:id %) (:id user))) (cons user))
                       [user]))
    :model-fn (fn [{:keys [user data]} conf recipient]
-               (let [res {:name (:firstName recipient) :old-email (:email user) :new-email (:new-email data)}]
-                 (debug res)
-                 res)
+               {:name (:firstName recipient) :old-email (:email user) :new-email (:new-email data)}
                )})
 
 (defn- init-email-change [user new-email]
-  (let [token (token/make-token :change-email user {:new-email new-email} :auto-consume false :ttl ttl/change-email-token-ttl)]
-    (notifications/notify! :change-email {:user (assoc user :email new-email), :data {:token token}})))
+  (let [token-id (token/make-token :change-email user {:new-email new-email} :auto-consume false :ttl ttl/change-email-token-ttl)
+        token (token/get-token token-id)]
+    (notifications/notify! :change-email {:user (assoc user :email new-email), :data {:old-email (:email user), :new-email new-email, :token token}})))
 
 (defn- has-person-id? [user]
   (if-let [user-id (:id user)]
