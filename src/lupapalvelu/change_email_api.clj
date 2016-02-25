@@ -23,7 +23,7 @@
                (let [{:keys [id expires]} (:token data)]
                  (merge
                    (select-keys data [:old-email :new-email])
-               {:name (:firstName recipient)
+                   {:name    (:firstName recipient)
                     :expires (util/to-local-datetime expires)
                     :link-fi (change-email-link "fi" id)
                     :link-sv (change-email-link "sv" id)})))})

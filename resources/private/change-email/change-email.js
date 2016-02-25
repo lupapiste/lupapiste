@@ -14,6 +14,7 @@
     pageutil.openPage("email", getToken());
   }
 
+  var initError = ko.observable();
   var statusModel = ko.observable();
   var infoModel = {email: ko.observable()};
   var changingModel = {error: ko.observable(),
@@ -27,13 +28,13 @@
 
   hub.onPageLoad("email", function() {
     var token = getToken();
-    ajax.get("/api/token/" + token).success(function(t) {
-      debug(t);
-      vetumaParams.token(token);
-      vetumaParams.visible(true);
-    })
-    .fail() // TODO
-    .call();
+    ajax.get("/api/token/" + token).raw(false)
+      .success(function() {
+        vetumaParams.token(token);
+        vetumaParams.visible(true);
+      })
+      .fail(_.partial(initError, "error.token-not-found"))
+      .call();
 
     statusModel(pageutil.lastSubPage());
   });
@@ -58,7 +59,7 @@
   });
 
   $(function(){
-    $("#email").applyBindings({status: statusModel, vetuma: vetumaParams, info: infoModel});
+    $("#email").applyBindings({error: initError, status: statusModel, vetuma: vetumaParams, info: infoModel});
     $("#change-email").applyBindings(changingModel);
   });
 
