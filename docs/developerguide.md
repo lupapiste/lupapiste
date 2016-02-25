@@ -561,6 +561,39 @@ Lue myös [Top 5 syntactic weirdnesses to be aware of in MongoDB](http://devblog
 4. Special treatment for arrays
 5. $near geo-location operator
 
+### Käyttäjien oikeudet ja hakemukset
+
+Kun käyttäjä kirjautuu sisään Lupapisteeseen, niin mitkä hakemukset
+hän näkee? Hakemuksen näkyvyys määräytyy hakemuksen organization- ja
+auth-kenttien perusteella seuraavasti:
+
+Jos käyttäjä on viranomainen samassa organisaatiossa kuin hakemuskin,
+niin hakemus näkyy. Tietokannassa tämä tarkoittaa, että käyttäjän
+(eli users-collectionin alkion) orgAuthz-kenttä sisältää
+ko. organisaation.
+
+Jos hakemuksen auth-kenttä sisältää käyttäjän tiedot, niin ko. käyttäjä näkee
+hakemuksen.
+
+Jos käyttäjä on ns. yrityskäyttäjä, niin hän näkee hakemukset joiden
+auth-kentässä on yrityksen tiedot.
+
+Mitä käyttäjä sitten voi hakemukselle tehdä riippuu puolestaan käyttäjälle
+(joko auth- tai orgAuthz-kentässä) määritellystä roolista.
+
+Hienosäätöä:
+
+- Viranomainen voi kuulua useampaan organisaatioon ja hänellä voi olla samassa organisaatiossa useampi rooli.
+- Kaikki viranomaiset eivät "orgAuthz-mielessä" kuulu
+  organisaatioon. Esimerkiksi lausunnonantajat ja
+  vierailijaviranomaiset (nämä ovat viranomaisia, joille "oikeat"
+  viranomaiset voivat antaa lukuoikeuden yksittäiselle hankkeelle)
+  listataan erikseen organisaation statementGivers-
+  guestAuthorities-kentissä. Huomaa, että viranomainen voi olla
+  toisessa organisaatiossa esim. lausunnonantaja ja toisessa
+  organisaatiossa "oikea" viranomainen. Toisaalta,
+  vierailijaviranomaisen ei tarvitse välttämättä olla viranomainen
+  (authority) lainkaan.
 
 ## Schemat
 
