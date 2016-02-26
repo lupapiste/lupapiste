@@ -384,6 +384,13 @@
             (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
       $addToSet {:attachments.$.auth (user/user-in-role (user/summary user) user-role)}})))
 
+(defn- remove-old-files! [{old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
+  (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)
+           (first)
+           ((juxt :fileId :originalFileId))
+           (remove (set [file-id original-file-id]))
+           (run! mongo/delete-file-by-id)))
+
 (defn set-attachment-version!
   ([application attachment options]
     {:pre [(map? options)]}
@@ -400,7 +407,9 @@
                                               :latestVersion.version.fileId (:fileId latest-version)}}}
                    (build-version-updates application attachment version-model options)
                    true))
-          (assoc version-model :id attachment-id)
+          (do 
+            (remove-old-files! attachment version-model)
+            (assoc version-model :id attachment-id))
           (do
             (errorf
               "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
