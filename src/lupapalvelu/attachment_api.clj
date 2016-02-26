@@ -383,11 +383,12 @@
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
   [{:keys [application user created]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [contentType fileId filename] :as latest-version} (last (:versions attachment))
+    (let [{:keys [contentType fileId originalFileId filename] :as latest-version} (last (:versions attachment))
           temp-pdf (File/createTempFile fileId ".tmp")
           upload-options (merge
                            base-upload-options
                            {:content temp-pdf
+                            :original-file-id originalFileId
                             :upload-pdfa-only true
                             :attachment-id attachmentId
                             :filename filename
@@ -439,8 +440,11 @@
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
         (attachment/update-latest-version-content user application attachment-id new-file-id (.length file) now)
-        (attachment/set-attachment-version {:application application :attachment-id attachment-id
-                                            :file-id new-file-id :filename filename
+        (attachment/set-attachment-version application
+                                           (attachment/get-attachment-info application attachment-id)
+                                           {:attachment-id  attachment-id
+                                            :file-id new-file-id :original-file-id new-file-id
+                                            :filename filename
                                             :content-type contentType :size (.length file)
                                             :comment-text nil :now now :user user
                                             :archivable is-pdf-a?

@@ -159,6 +159,7 @@
   "Attachment version"
   {:version                              VersionNumber
    :fileId                               sc/Str             ;; fileId in GridFS
+   :originalFileId                       sc/Str             ;; fileId of the unrotated file
    :created                              ssc/Timestamp
    :user                                 (sc/if :id         ;; User who created the version
                                            user/SummaryUser ;; Only name is used for users without Lupapiste account
@@ -306,16 +307,15 @@
       metadata
       {:nakyvyys :julkinen})))
 
-(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
+(defn- create-attachment! [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
   {:pre [(map? application)]}
   (let [metadata (default-metadata-for-attachment-type attachment-type application)
         attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents read-only? source)]
     (update-application
-      (application->command application)
+     (application->command application)
       {$set {:modified now}
        $push {:attachments attachment}})
-
-    (:id attachment)))
+    attachment))
 
 (defn create-attachments [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
@@ -325,18 +325,12 @@
       (application->command application)
       {$set {:modified now}
        $push {:attachments {$each attachments}}})
-
     (map :id attachments)))
 
-(defn next-attachment-version [{major :major minor :minor} user]
-  (let [major (or major 0)
-        minor (or minor 0)]
-    (if (user/authority? user)
-      {:major major, :minor (inc minor)}
-      {:major (inc major), :minor 0})))
-
-(defn attachment-latest-version [attachments attachment-id]
-  (:version (:latestVersion (some #(when (= attachment-id (:id %)) %) attachments))))
+(defn next-attachment-version [{:keys [major minor] :or {major 0 minor 0}} user]
+  (if (user/authority? user)
+    {:major major, :minor (inc minor)}
+    {:major (inc major), :minor 0}))
 
 (defn version-number
   [{{:keys [major minor]} :version}]
@@ -350,63 +344,74 @@
         latest     (last sorted)]
     latest))
 
+(defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts]}]
+  (let [version-number (or (->> (:versions attachment) 
+                                (filter (comp #{original-file-id} :originalFileId))
+                                last
+                                :version)
+                           (next-attachment-version (get-in attachment [:latestVersion :version]) user))]
+    (cond-> {:version        version-number
+             :fileId         file-id
+             :originalFileId (or original-file-id file-id)
+             :created        now
+             :user           (user/summary user)
+             ;; File name will be presented in ASCII when the file is downloaded.
+             ;; Conversion could be done here as well, but we don't want to lose information.
+             :filename       filename
+             :contentType    content-type
+             :size           size}
+      (not (nil? stamped))       (assoc :stamped stamped)
+      (not (nil? archivable))    (assoc :archivable archivable)
+      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
+      (not (nil? missing-fonts)) (assoc :missing-fonts missing-fonts))))
+
+(defn- build-version-updates [application attachment version-model {:keys [now target state user stamped comment? comment-text]
+                                                                    :or   {comment? true state :requires_authority_action} :as options}]
+  (let [version-index  (or (-> (map :originalFileId (:versions attachment))
+                               (zipmap (range))
+                               (some [(:original-file-id version-model)]))
+                           (count (:versions attachment)))
+        user-role      (if stamped :stamper :uploader)
+        comment-target (merge {:type :attachment
+                               :id (:id  attachment)}
+                              (select-keys version-model [:version :fileId :filename]))]
+    (util/deep-merge
+     (when comment? 
+       (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
+     (when target 
+       {$set {:attachments.$.target target}})
+     (when (>= (version-number version-model) (version-number (:latestVersion attachment))) 
+       {$set {:attachments.$.latestVersion version-model}})
+     {$set {:modified now
+            :attachments.$.modified now
+            :attachments.$.state  state
+            (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
+      $addToSet {:attachments.$.auth (user/user-in-role (user/summary user) user-role)}})))
+
 (defn set-attachment-version
-  ([options]
+  ([application attachment options]
     {:pre [(map? options)]}
-    (set-attachment-version options 5))
-  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target archivable archivabilityError missing-fonts]
-     :or {make-comment true state :requires_authority_action} :as options}
-    retry-limit]
-    {:pre [(map? options) (map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
-    ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
+    (set-attachment-version application attachment options 5))
+  ([application {attachment-id :id :as attachment} {:keys [stamped] :as options} retry-limit]
+    {:pre [(map? application) (map? attachment) (map? options) (not (nil? stamped))]}
     (if (pos? retry-limit)
-      (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
-            next-version (next-attachment-version latest-version user)
-            user-summary (user/summary user)
-            user-role (if stamped :stamper :uploader)
-            version-model {:version  next-version
-                           :fileId   file-id
-                           :created  now
-                           :user     user-summary
-                           ; File name will be presented in ASCII when the file is downloaded.
-                           ; Conversion could be done here as well, but we don't want to lose information.
-                           :filename filename
-                           :contentType content-type
-                           :size size
-                           :stamped stamped
-                           :archivable archivable
-                           :archivabilityError archivabilityError
-                           :missing-fonts missing-fonts}
-
-            comment-target {:type :attachment
-                            :id attachment-id
-                            :version next-version
-                            :filename filename
-                            :fileId file-id}
-
-            result-count (update-application
-                           (application->command application)
-                           {:attachments {$elemMatch {:id attachment-id
-                                                      :latestVersion.version.major (:major latest-version)
-                                                      :latestVersion.version.minor (:minor latest-version)}}}
-                           (util/deep-merge
-                             (when make-comment (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
-                             (when target {$set {:attachments.$.target target}})
-                             {$set {:modified now
-                                    :attachments.$.modified now
-                                    :attachments.$.state  state
-                                    :attachments.$.latestVersion version-model}
-                              $push {:attachments.$.versions version-model}
-                              $addToSet {:attachments.$.auth (user/user-in-role user-summary user-role)}})
-                           true)]
+      (let [latest-version (get-in attachment [:latestVersion :version])
+            version-model  (make-version attachment options)]
         ; Check return value and try again with new version number
-        (if (pos? result-count)
+        (if (pos? (update-application 
+                   (application->command application)
+                   {:attachments {$elemMatch {:id attachment-id
+                                              :latestVersion.version.fileId (:fileId latest-version)}}}
+                   (build-version-updates application attachment version-model options)
+                   true))
           (assoc version-model :id attachment-id)
           (do
             (errorf
               "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
               attachment-id retry-limit)
-            (set-attachment-version (assoc options :application (mongo/by-id :applications (:id application))) (dec retry-limit)))))
+            (let [application (mongo/by-id :applications (:id application))
+                  attachment  (get-attachment-info application attachment-id)]
+              (set-attachment-version application attachment options (dec retry-limit))))))
       (do
         (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
@@ -446,17 +451,17 @@
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
 
-(defn- update-or-create-attachment
+(defn- get-or-create-attachment!
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op created user target locked required contents read-only source] :as options}]
+  [application {:keys [attachment-id attachment-type op created user target locked required contents read-only source] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? user))
-        att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority? nil contents read-only source)
-                 (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id contents read-only source))]
-    (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
+        find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id}))]
+    (cond
+      (ss/blank? attachment-id) (create-attachment! application attachment-type op created target locked required requested-by-authority? nil contents read-only source)
+      @find-application-delay   (get-attachment-info @find-application-delay attachment-id)
+      :else (create-attachment! application attachment-type op created target locked required requested-by-authority? attachment-id contents read-only source))))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
@@ -583,29 +588,37 @@
       (info "Danger: Libreoffice conversion feature disabled.")
       {:filename filename :content content})))
 
+(defn- upload-file!
+  "Converts file to PDF/A, if required by attachment type,  uploads the file to MongoDB
+   and creates a preview image. Content can be a file or input-stream.
+   Returns attachment options."
+  [{application-id :id :as application} options]
+  {:pre [(map? application)]}
+  (let [db-name mongo/*db-name* ; pass db-name to threadpool context
+        file-id (mongo/create-id)
+        {:keys [filename content archivabilityError archivable]} (pre-process-attachment options)
+        sanitized-filename (mime/sanitize-filename filename)
+        content-type (mime/mime-type sanitized-filename)]
+    (mongo/upload file-id sanitized-filename content-type content :application application-id)
+    (.submit preview-threadpool #(create-preview file-id sanitized-filename content-type content application-id db-name))
+    (cond-> {:file-id file-id
+             :original-file-id (or (:original-file-id options) file-id)
+             :filename sanitized-filename
+             :content-type content-type}
+      (true? archivable) (assoc :archivable true)
+      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError))))
+
 (defn attach-file!
   "1) Converts file to PDF/A, if required by attachment type and
-   1) uploads the file to MongoDB and
-   2) creates a preview image and
-   3) creates a corresponding attachment structure to application
+   2) uploads the file to MongoDB and
+   3) creates a preview image and
+   4) creates a corresponding attachment structure to application
    Content can be a file or input-stream.
    Returns attachment version."
   [application options]
-  {:pre [(map? application))]}
-  (let [db-name mongo/*db-name* ; pass db-name to threadpool context
-        file-id (mongo/create-id)
-        application-id (-> options :application :id)
-        {:keys [filename content archivabilityError archivable]} (pre-process-attachment options)
-        sanitized-filename (mime/sanitize-filename filename)
-        content-type (mime/mime-type sanitized-filename)
-        options (merge options (cond-> {:file-id file-id
-                                        :filename sanitized-filename
-                                        :content-type content-type}
-                                       (true? archivable) (assoc :archivable true)
-                                       (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)))]
-    (mongo/upload file-id sanitized-filename content-type content :application application-id)
-    (.submit preview-threadpool #(create-preview file-id sanitized-filename content-type content application-id db-name))
-    (update-or-create-attachment options)))
+  (->> (upload-file! application options)
+       (merge options {:now (:created options) :stamped false})
+       (set-attachment-version application (get-or-create-attachment! application options))))
 
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
