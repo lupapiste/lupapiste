@@ -104,9 +104,7 @@
 
       (fact "Verdict is now read"
         (command sonja :check-for-verdict :id app-id) => ok?
-        (-> (query-application mikko app-id) :verdicts count) => pos?)))
-
-  (against-background (after :facts (remove-krysp-xml-overrides sipoo "753-R" :R))))
+        (-> (query-application mikko app-id) :verdicts count) => pos?))))
 
 (facts* "Fetch verdict from KRYSP backend"
   (last-email) ; Inbox zero
@@ -313,6 +311,24 @@
       (fact "Buildings were still read"
         (:buildings response) => truthy
         (:buildings application) => sequential?)
+      (fact "building id from KRYSP is saved to document"
+        (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M"))))
+
+(fact "In verdicts-extra-reader, buildingIds are updated to documents also"
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
+        app-id (:id application)
+        op1    (:primaryOperation application)]
+    (override-krysp-xml sipoo "753-R" :R [{:selector [:rakval:rakennuksenTiedot :rakval:rakennustunnus :rakval:muuTunnustieto :rakval:MuuTunnus :yht:tunnus] :value (:id op1)}])
+
+    (let [response (command sonja :check-for-verdict :id app-id)
+          application (query-application mikko app-id)
+          op-document (some #(when (= (:id op1) (-> % :schema-info :op :id)) %) (:documents application))]
+      (fact "Verdicts are ok"
+        (:ok response) => true
+        (count (:verdicts application)) => 2
+        (count (:tasks application)) => 9)
+      (fact "Buildings were saved"
+        (:buildings application) => (every-checker not-empty sequential?))
       (fact "building id from KRYSP is saved to document"
         (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")))
 
