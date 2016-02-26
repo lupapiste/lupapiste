@@ -51,7 +51,7 @@
                                      (http/get url :as :stream :throw-exceptions false)
                                      (catch Exception e {:status -1 :body (str e)}))
                    header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
-                                      (ss/replace content-disposition #"attachment;filename=" ""))
+                                      (ss/replace content-disposition #"(attachment|inline);\s*filename=" ""))
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
