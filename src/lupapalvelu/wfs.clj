@@ -680,39 +680,40 @@
   (let [{:keys [params headers]}  request
         layer   (or (:LAYER params) (:LAYERS params) (:layer params))
         headers (select-keys headers ["accept" "accept-encoding"])]
-    (case service
-      "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
-                      {:query-params params
-                       :headers headers
-                       :basic-auth (:raster auth)
-                       :as :stream
-                       :throw-exceptions false})
-      ;; Municipality map layers are prefixed. For example: Lupapiste-753-R:wms-layer-name
-      "wms" (if-let [[_ org-id layer] (re-matches #"(?i)Lupapiste-([\d]+-[\w]+):(.+)" layer)]
-              (query-organization-map-server (ss/upper-case org-id)
-                                             (merge params {:LAYERS layer})
-                                             headers)
-              (http/get wms-url
-                        {:query-params params
-                         :headers headers
-                         :as :stream
-                         :throw-exceptions false}))
-      "wmts" (let [{:keys [username password]} (env/value :wmts :raster)
-                   url-part (case layer
-                              "taustakartta" "maasto"
-                              "kiinteistojaotus" "kiinteisto"
-                              "kiinteistotunnukset" "kiinteisto")
-                   wmts-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")]
-               (http/get wmts-url
-                         {:query-params params
-                          :headers headers
-                          :basic-auth [username password]
-                          :as :stream
-                          :throw-exceptions false}))
-      "plandocument" (let [id (:id params) ]
-                       (assert (ss/numeric? id))
-                       (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
-                                 {:query-params params
-                                  :headers headers
-                                  :as :stream
-                                  :throw-exceptions false})))))
+    (-> (case service
+          "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
+                          {:query-params     params
+                           :headers          headers
+                           :basic-auth       (:raster auth)
+                           :as               :stream
+                           :throw-exceptions false})
+          ;; Municipality map layers are prefixed. For example: Lupapiste-753-R:wms-layer-name
+          "wms" (if-let [[_ org-id layer] (re-matches #"(?i)Lupapiste-([\d]+-[\w]+):(.+)" layer)]
+                  (query-organization-map-server (ss/upper-case org-id)
+                                                 (merge params {:LAYERS layer})
+                                                 headers)
+                  (http/get wms-url
+                            {:query-params     params
+                             :headers          headers
+                             :as               :stream
+                             :throw-exceptions false}))
+          "wmts" (let [{:keys [username password]} (env/value :wmts :raster)
+                       url-part (case layer
+                                  "taustakartta" "maasto"
+                                  "kiinteistojaotus" "kiinteisto"
+                                  "kiinteistotunnukset" "kiinteisto")
+                       wmts-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")]
+                   (http/get wmts-url
+                             {:query-params     params
+                              :headers          headers
+                              :basic-auth       [username password]
+                              :as               :stream
+                              :throw-exceptions false}))
+          "plandocument" (let [id (:id params)]
+                           (assert (ss/numeric? id))
+                           (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
+                                     {:query-params     params
+                                      :headers          headers
+                                      :as               :stream
+                                      :throw-exceptions false})))
+        (http/secure-headers))))

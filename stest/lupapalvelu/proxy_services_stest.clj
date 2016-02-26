@@ -259,7 +259,14 @@
       (fact {:midje/description (get layer "LAYERS")}
         (let [request {:params (merge base-params layer)
                        :headers {"accept-encoding" "gzip, deflate"}}]
-          (wfs/raster-images request "wmts") => http200?)))))
+          (wfs/raster-images request "wmts") => http200?)))
+
+    (fact "Error response is returned to caller"
+      (let [request {:params (merge base-params {:LAYER "taustakartta"
+                                                 :TILECOL "-1"
+                                                 :TILEROW "3"})
+                     :headers {"accept-encoding" "gzip, deflate"}}]
+        (wfs/raster-images request "wmts") => http404?))))
 
 (facts "WMS layers"
   (let [base-params {:FORMAT "image/png"
