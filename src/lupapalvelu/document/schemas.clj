@@ -161,6 +161,8 @@
 (def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa]})
 (def kytkimet-with-vain-sahkoinen-asiointi (update-in kytkimet [:body] conj vain-sahkoinen-asiointi))
 
+(def national-building-id "valtakunnallinenNumero")
+
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
 (def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil :hidden true ;; TODO: remove, LPK-1448
@@ -179,11 +181,11 @@
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size "xl" :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
-                           {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
+                           {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true}
                            {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
 (def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :size "xl" :i18nkey "rakennusnro" :required true}
-                                {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
+                                {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true}
                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
                                 {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
@@ -928,7 +930,7 @@
                                {:name "P2/P3"}
                                {:name "P1/P2/P3"}]}]})
 
-(def rakennustunnus {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true :readonly true})
+(def rakennustunnus {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true :readonly true})
 
 (def rakennuksen-tiedot-ilman-huoneistoa [kaytto
                                           mitat
@@ -1381,6 +1383,9 @@
    ["henkilotiedot" "etunimi"]
    ["henkilotiedot" "sukunimi"]])
 
+(def buildingid-accordion-paths
+  [[national-building-id]])
+
 ;;
 ;; schemas
 ;;
@@ -1409,13 +1414,18 @@
            hankkeen-vaativuus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
-   {:info {:name "uusiRakennus" :approvable true}
+   {:info {:name "uusiRakennus"
+           :approvable true
+           :accordion-fields buildingid-accordion-paths}
     :body (body tunnus
                 rakennuksen-omistajat
                 (approvable-top-level-groups rakennuksen-tiedot)
                 rakennustunnus)}
 
-   {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
+   {:info {:name "uusi-rakennus-ei-huoneistoa"
+           :i18name "uusiRakennus"
+           :approvable true
+           :accordion-fields buildingid-accordion-paths}
     :body (body tunnus
                 rakennuksen-omistajat
                 (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa)
@@ -1439,7 +1449,9 @@
    {:info {:name "purkaminen" :i18name "purku" :approvable true}
     :body (approvable-top-level-groups purku)}
 
-   {:info {:name "kaupunkikuvatoimenpide" :approvable true}
+   {:info {:name "kaupunkikuvatoimenpide"
+           :approvable true
+           :accordion-fields buildingid-accordion-paths}
     :body (body tunnus
                 (approvable-top-level-groups rakennelma)
                 rakennustunnus)}
