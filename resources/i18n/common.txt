@@ -4960,3 +4960,5 @@
 "lisaaja" "sv" "lisaaja" "sv" "Vem lägger till?"
 "attachment.archivability" "fi" "Tiedosto soveltuu pysyvään säilytykseen"
 "attachment.archivability" "sv" "Filen lämpar sig för permanent lagring"
+"attachment.downloadOriginalVersion.info" "fi" "Tiedostoa on käännetty,"
+"attachment.downloadOriginalVersion.link" "fi" "lataa alkuperäinen versio."
