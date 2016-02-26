@@ -22,7 +22,7 @@
       self.showTosMetadata(!self.showTosMetadata());
     };
 
-    hub.subscribe("application-loaded", function(e) {
+    hub.subscribe("application-loaded", function() {
       fetchCaseFile();
     });
 

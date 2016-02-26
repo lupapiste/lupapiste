@@ -14,6 +14,7 @@ function LupapisteApi() {
 * @param {Array<PermitFilter>} permits Permits from Lupapiste view
 */
 LupapisteApi.showPermitsOnMap = function (permits) {
+  "use strict";
   hub.send("show-dialog", {title: "LupapisteApi.showPermitsOnMap",
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permits, null, 2)}});
@@ -25,6 +26,7 @@ LupapisteApi.showPermitsOnMap = function (permits) {
 * @param {PermitFilter} filter Filter for lupapiste api
 */
 LupapisteApi.showPermitOnMap = function (permit) {
+  "use strict";
   hub.send("show-dialog", {title: "LupapisteApi.showPermitOnMap",
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permit, null, 2)}});
@@ -36,6 +38,7 @@ LupapisteApi.showPermitOnMap = function (permit) {
 * @param {PermitFilter} permit
 */
 LupapisteApi.openPermit = function (permit) {
+  "use strict";
   hub.send("show-dialog", {title: "LupapisteApi.openPermit",
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permit, null, 2)}});
@@ -47,6 +50,7 @@ LupapisteApi.openPermit = function (permit) {
 * @param {PermitFilter} permit
 */
 LupapisteApi.integrationSent = function (permit) {
+  "use strict";
   hub.send("show-dialog", {title: "LupapisteApi.integrationSent",
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permit, null, 2)}});
@@ -59,5 +63,6 @@ LupapisteApi.integrationSent = function (permit) {
 * @returns {boolean} is the permit in SitoGis?
 */
 LupapisteApi.isInSitoGis = function (id) {
-
+  "use strict";
+  return id === "";
 };
