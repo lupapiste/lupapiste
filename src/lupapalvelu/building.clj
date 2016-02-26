@@ -5,20 +5,23 @@
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]))
 
-(defn buildingId-in-document? [operation {{op :op :as info} :schema-info}]
+(defn buildingId-in-document?
+  "Predicate to validate that given building-operation's id matches document's operation id.
+   Document schema is checked to contain valtakunnallinenNumero"
+  [building-operation {{op :op :as info} :schema-info}]
   (let [schema-body (:body (schemas/get-schema info))]
     (when (and op
                (:id op)
                (some #(= (:name %) "valtakunnallinenNumero") schema-body))
-      (= (:id op) (:tag operation)))))
+      (= (:id op) (:tag building-operation)))))
 
 (defn buildingid-updates-for-operation
   "Generates valtakunnallinenNumero updates to documents regarding operation.
    Example update: {documents.1.data.valtakunnalinenNumero.value '123456001M'}"
-  [{:keys [documents]} buildingId operation]
+  [{:keys [documents]} buildingId building-operation]
   (mongo/generate-array-updates :documents
                                 documents
-                                (partial buildingId-in-document? operation)
+                                (partial buildingId-in-document? building-operation)
                                 "data.valtakunnallinenNumero.value"
                                 buildingId))
 
@@ -29,8 +32,8 @@
   (remove
     util/empty-or-nil?
     (map
-      (fn [{tags :tags bid :nationalId}]
-        (buildingid-updates-for-operation application bid (first tags))) ; building belongs to only one operation, thus 'first'
+      (fn [{tags :tags buildingId :nationalId}]
+        (buildingid-updates-for-operation application buildingId (first tags))) ; building belongs to only one operation, thus 'first'
       operation-buildings)))
 
 (defn building-updates
