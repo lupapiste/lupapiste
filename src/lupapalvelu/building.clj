@@ -5,7 +5,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]))
 
-(defn buildingId-in-document? [operation {{op :op :as info} :schema-info data :data}]
+(defn buildingId-in-document? [operation {{op :op :as info} :schema-info}]
   (let [schema-body (:body (schemas/get-schema info))]
     (when (and op
                (:id op)
