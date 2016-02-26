@@ -1,0 +1,48 @@
+# Lupapisteen HTTP/JSON-rajapinnat
+
+## Autentikaatio
+
+Rajapintoja voi käyttää joko istuntokohtaisen kirjautumisen avulla tai API-keyn avulla.
+
+Istunto aloitetaan lähettämällä HTTP POST -pyyntönä username- ja password-parametrit /api/login osoitteeseen.
+Vastauksessa saatavia cookieita kuljetetaan mukana tätä seuraavissa rajapintakutsuissa.
+Cookieiden arvot saattavat muuttua istunnon aikana.
+
+Istunnossa on lisäksi välitettävä `anti-csrf-token` niminen cookie ja
+`x-anti-forgery-token` niminen header. Cookien ja headerin arvojen on vastattava
+toisiaan.
+
+API-key autentikaatio tapahtuu lähettämällä jokaisen HTTP-otsikkotiedoissa Authorization-header.
+Arvo on muotoa apikey=salainen avain. Esim.
+
+    Authorization: apikey=minun-avaimeni
+
+API-keyta käytettessä csrf-tokenia ei tarvita.
+
+## Yleisperiaatteet tietojen muodosta
+
+Merkistönä käytetään UTF-8:aa,
+
+Koordinaatit esitetään ETRS-TM35FIN -tasokoordinaatistossa, jollei toisin ole ilmoitettu.
+
+Ajanhetket esitetään 64bit kokonaislukuna eli aikaleimana UTC-aikavyöhykkeellä.
+Aikaleima esitetään millisekuntien tarkkuudella.
+
+JSON-vastaussanoma sisältää päätasolla aina yhden objektin, jonka rakenne on seuraava:
+
+Kenttä        | Tietotyyppi     | Kuvaus
+--------------|-----------------|--------------------------------------------------------------------------
+ok            | boolean         | true / false sen mukaan menikö rajapintakutsun käsittely läpi virheettä
+(text)        | String          | Jos ok=false, sisältää virhekoodin.
+(muut kentät) | (yleensä Array) | Rajapintakohtaisesti määritellyt varsinaiset data-kentät
+
+Esimerkkivastaukset:
+
+```JavaScript
+{"ok" : true,
+ "data" : [{"id":1, "name": "foo"},
+           {"id":2, "name": "bar"}]}
+
+{"ok" : false,
+ "text" : "error.unauthorized"}
+```
