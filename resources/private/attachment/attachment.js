@@ -30,9 +30,9 @@ var attachment = (function() {
   // this function is mutated over in the attachement.deleteVersion
   var deleteAttachmentVersionFromServerProxy;
 
-  function deleteAttachmentVersionFromServer(fileId) {
+  function deleteAttachmentVersionFromServer(fileId, originalFileId) {
     ajax
-      .command("delete-attachment-version", {id: applicationId, attachmentId: attachmentId, fileId: fileId})
+      .command("delete-attachment-version", {id: applicationId, attachmentId: attachmentId, fileId: fileId, originalFileId: originalFileId})
       .success(function() {
         repository.load(applicationId, undefined, undefined, true);
       })
@@ -156,8 +156,9 @@ var attachment = (function() {
 
     deleteVersion: function(fileModel) {
       var fileId = fileModel.fileId;
+      var originalFileId = fileModel.originalFileId;
       deleteAttachmentVersionFromServerProxy = function() {
-        deleteAttachmentVersionFromServer(fileId);
+        deleteAttachmentVersionFromServer(fileId, originalFileId);
       };
       model.previewDisabled(true);
       hub.send("show-dialog", {ltitle: "attachment.delete.version.header",

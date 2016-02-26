@@ -205,7 +205,7 @@
 
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-   :parameters  [:id attachmentId fileId]
+   :parameters  [:id attachmentId fileId originalFileId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
@@ -214,9 +214,10 @@
                  attachment-not-readOnly
                  attachment-editable-by-application-state]}
   [{:keys [application user]}]
-
-  (if (attachment/file-id-in-application? application attachmentId fileId)
-    (attachment/delete-attachment-version! application attachmentId fileId)
+  
+  (if (and (attachment/file-id-in-application? application attachmentId fileId)
+           (attachment/file-id-in-application? application attachmentId originalFileId))
+    (attachment/delete-attachment-version! application attachmentId fileId originalFileId)
     (fail :file_not_linked_to_the_document)))
 
 ;;

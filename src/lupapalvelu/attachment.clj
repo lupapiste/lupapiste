@@ -475,37 +475,39 @@
   [{:keys [attachments]} file-id]
   (first (filter (partial by-file-ids #{file-id}) attachments)))
 
-(defn attachment-file-ids
+(defn- attachment-file-ids
   "Gets all file-ids from attachment."
-  [application attachment-id]
-  (->> (get-attachment-info application attachment-id) :versions (map :fileId)))
+  [attachment]
+  (->> (:versions attachment)
+       (mapcat (juxt :originalFileId :fileId))
+       (distinct)))
 
 (defn attachment-latest-file-id
   "Gets latest file-id from attachment."
   [application attachment-id]
-  (last (attachment-file-ids application attachment-id)))
+  (last (attachment-file-ids (get-attachment-info application attachment-id))))
 
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
   [application attachment-id file-id]
-  (let [file-ids (attachment-file-ids application attachment-id)]
+  (let [file-ids (attachment-file-ids (get-attachment-info application attachment-id))]
     (boolean (some #{file-id} file-ids))))
 
 (defn delete-attachment!
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
   [{:keys [attachments] :as application} attachment-id]
   (info "1/3 deleting files of attachment" attachment-id)
-  (dorun (map mongo/delete-file-by-id (attachment-file-ids application attachment-id)))
+  (run! mongo/delete-file-by-id (attachment-file-ids (get-attachment-info application attachment-id)))
   (info "2/3 deleted files of attachment" attachment-id)
   (update-application (application->command application) {$pull {:attachments {:id attachment-id}}})
   (info "3/3 deleted meta-data of attachment" attachment-id))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-  [application attachment-id fileId]
+  [application attachment-id fileId originalFileId]
   (let [latest-version (latest-version-after-removing-file (get-attachment-info application attachment-id) fileId)]
-    (infof "1/3 deleting file %s of attachment %s" fileId attachment-id)
-    (mongo/delete-file-by-id fileId)
+    (infof "1/3 deleting files [%s] of attachment %s" (ss/join ", " #{fileId originalFileId}) attachment-id)
+    (run! mongo/delete-file-by-id #{fileId originalFileId})
     (infof "2/3 deleted file %s of attachment %s" fileId attachment-id)
     (update-application
      (application->command application)
