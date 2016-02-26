@@ -14,7 +14,8 @@
             [taoensso.timbre :refer [info error warn]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [clj-time.format :as f])
+            [clj-time.format :as f]
+            [lupapalvelu.application-meta-fields :as amf])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -146,7 +147,7 @@
                         (assoc :tila :arkistoitu))
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
-                       :buildingIds           (remove nil? (map :buildingId (:buildings application)))
+                       :buildingIds           (remove nil? (map :localId (:buildings application)))
                        :nationalBuildingIds   (remove nil? (map :nationalId (:buildings application)))
                        :propertyId            propertyId
                        :applicant             applicant
@@ -170,7 +171,8 @@
                                                 (get-usages application (get-in attachment [:op :id]))
                                                 (get-usages application nil))
                        :kieli                 "fi"
-                       :versio                (if attachment (make-version-number attachment) "1.0")}]
+                       :versio                (if attachment (make-version-number attachment) "1.0")
+                       :suunnittelijat        (:_designerIndex (amf/designers-index application))}]
     (cond-> base-metadata
             (:contents attachment) (conj {:contents (:contents attachment)})
             (:size attachment) (conj {:size (:size attachment)})

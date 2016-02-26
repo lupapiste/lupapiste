@@ -1758,10 +1758,10 @@
     doc))
 
 (defmigration schemas-without-building-identifier []
-  {:apply-when (pos? (+ (mongo/count :applications 
+  {:apply-when (pos? (+ (mongo/count :applications
                                      {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
                                                               :schema-info.op.name {$in ["aita"]}}}})
-                        (mongo/count :submitted-applications 
+                        (mongo/count :submitted-applications
                                      {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
                                                               :schema-info.op.name {$in ["aita"]}}}})))}
   (update-applications-array :documents
@@ -1780,6 +1780,21 @@
             (assoc-in [:schema-info :name] "hankkeen-kuvaus"))
         doc))
     {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
+
+(defmigration init-designer-subtype
+              (update-applications-array
+                :documents
+                (fn [doc]
+                  (if (re-matches #".*suunnittelija" (str (get-in doc [:schema-info :name])))
+                    (assoc-in doc [:schema-info :subtype] "suunnittelija")
+                    doc))
+                {"documents.schema-info.name" {$regex #".*suunnittelija"}}))
+
+(defmigration init-designer-index
+              (reduce + 0
+                      (for [collection [:applications :submitted-applications]]
+                        (let [applications (mongo/select collection {:documents.schema-info.subtype "suunnittelija"} {:documents 1})]
+                          (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
 
 ;;
 ;; ****** NOTE! ******

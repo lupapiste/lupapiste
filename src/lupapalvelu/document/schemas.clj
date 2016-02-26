@@ -1554,7 +1554,10 @@
            :removable false
            :approvable true
            :accordion-fields designer-accordion-paths
-           :type :party}
+           :type :party
+           :subtype :suunnittelija
+           :after-update 'lupapalvelu.application-meta-fields/designers-index-update
+           }
     :body paasuunnittelija}
 
    {:info {:name "suunnittelija"
@@ -1564,7 +1567,11 @@
            :removable true
            :approvable true
            :accordion-fields designer-accordion-paths
-           :type :party}
+           :type :party
+           :subtype :suunnittelija
+           :after-update 'lupapalvelu.application-meta-fields/designers-index-update
+           }
+
     :body suunnittelija}
 
    {:info {:name "tyonjohtaja"
