@@ -295,43 +295,43 @@
    :upload-pdfa-only false
    :missing-fonts []})
 
-(defn- attach-or-fail! [attachment-data]
-  (when-not (attachment/attach-file! attachment-data)
+(defn- attach-or-fail! [application attachment-data]
+  (when-not (attachment/attach-file! application attachment-data)
     (fail :error.unknown)))
 
-(defn- convert-pdf-and-upload! [{:keys [pdfa? output-file missing-fonts]}
-                                {:keys [attachment-id application filename upload-pdfa-only] :as attachment-data}]
+(defn- convert-pdf-and-upload! [application {:keys [pdfa? output-file missing-fonts]}
+                                {:keys [attachment-id filename upload-pdfa-only] :as attachment-data}]
   (if pdfa?
-    (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! attachment-data) (fail! :error.unknown))
+    (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! application attachment-data) (fail! :error.unknown))
           new-filename (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf" )
           new-id       (or (:id attach-file-result) attachment-id)
+          application  (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
           pdfa-attachment-data (assoc attachment-data
-                                 :application (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
                                  :attachment-id new-id
                                  :content output-file
                                  :filename new-filename
                                  :make-comment false
                                  :archivable true
                                  :archivabilityError nil)]
-      (if (attachment/attach-file! pdfa-attachment-data)
+      (if (attachment/attach-file! application pdfa-attachment-data)
         (do (io/delete-file output-file :silently)
             nil)
         (fail :error.unknown)))
     (let [missing-fonts (or missing-fonts [])]
-      (attach-or-fail! (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
+      (attach-or-fail! application (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
 
-(defn- upload! [{:keys [filename content application] :as attachment-data}]
+(defn- upload! [application {:keys [filename content] :as attachment-data}]
   (case (mime/mime-type filename)
     "application/pdf" (if (pdf-conversion/pdf-a-required? (:organization application))
                         (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
                           (if (:already-valid-pdfa? processing-result)
-                            (attach-or-fail! (assoc attachment-data :archivable true :archivabilityError nil))
-                            (convert-pdf-and-upload! processing-result attachment-data)))
-                        (attach-or-fail! attachment-data))
+                            (attach-or-fail! application (assoc attachment-data :archivable true :archivabilityError nil))
+                            (convert-pdf-and-upload! application processing-result attachment-data)))
+                        (attach-or-fail! application attachment-data))
     "image/tiff"      (let [valid? (tiff-validation/valid-tiff? content)
                             attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
-                        (attach-or-fail! attachment-data))
-    (attach-or-fail! attachment-data)))
+                        (attach-or-fail! application attachment-data))
+    (attach-or-fail! application attachment-data)))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
@@ -353,10 +353,10 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (upload! (merge
+  (upload! application
+           (merge
              base-upload-options
-             {:application application
-              :filename filename
+             {:filename filename
               :size size
               :content tempfile
               :attachment-id attachmentId
@@ -387,8 +387,7 @@
           temp-pdf (File/createTempFile fileId ".tmp")
           upload-options (merge
                            base-upload-options
-                           {:application application
-                            :content temp-pdf
+                           {:content temp-pdf
                             :upload-pdfa-only true
                             :attachment-id attachmentId
                             :filename filename
@@ -399,7 +398,7 @@
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
         (with-open [content ((:content (mongo/download fileId)))]
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
-          (upload! (assoc upload-options :size (.length temp-pdf))))
+          (upload! application (assoc upload-options :size (.length temp-pdf))))
         (finally
           (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))

@@ -590,8 +590,8 @@
    3) creates a corresponding attachment structure to application
    Content can be a file or input-stream.
    Returns attachment version."
-  [options]
-  {:pre [(map? (:application options))]}
+  [application options]
+  {:pre [(map? application))]}
   (let [db-name mongo/*db-name* ; pass db-name to threadpool context
         file-id (mongo/create-id)
         application-id (-> options :application :id)
