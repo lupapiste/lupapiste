@@ -415,7 +415,7 @@
     (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
 
 (defn- key-by [f coll]
-  (into {} (for [e coll] [(f e) e])))
+  (zipmap (map f coll) coll))
 
 (defn ->long [v]
   (if (string? v) (Long/parseLong v) v))

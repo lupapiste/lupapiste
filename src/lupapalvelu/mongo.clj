@@ -191,7 +191,7 @@
                                         (query/sort order-by)))))
 
 (defn select-one
-  "returns one entry by matching the monger query"
+  "Returns one entry by matching the monger query, nil if query did not match."
   ([collection query]
     {:pre [(map? query)]}
     (with-id (mc/find-one-as-map (get-db) collection (remove-null-chars query))))

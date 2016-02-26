@@ -334,13 +334,11 @@
   [{{:keys [major minor] :or {major 0 minor 0}} :version}]
   (+ (* 1000 major) minor))
 
-(defn latest-version-after-removing-file [attachments attachment-id fileId]
-  (let [attachment (some #(when (= attachment-id (:id %)) %) attachments)
-        versions   (:versions attachment)
-        stripped   (filter #(not= (:fileId %) fileId) versions)
-        sorted     (sort-by version-number stripped)
-        latest     (last sorted)]
-    latest))
+(defn- latest-version-after-removing-file [attachment fileId]
+  (->> (:versions attachment)
+       (remove (comp #{fileId} :fileId))
+       (sort-by version-number)
+       (last)))
 
 (defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts]}]
   (let [version-number (or (->> (:versions attachment) 
@@ -475,10 +473,7 @@
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
   [{:keys [attachments]} file-id]
-  (first
-    (filter
-      (partial by-file-ids #{file-id})
-      attachments)))
+  (first (filter (partial by-file-ids #{file-id}) attachments)))
 
 (defn attachment-file-ids
   "Gets all file-ids from attachment."
@@ -507,8 +502,8 @@
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-  [{:keys [id attachments] :as application} attachment-id fileId]
-  (let [latest-version (latest-version-after-removing-file attachments attachment-id fileId)]
+  [application attachment-id fileId]
+  (let [latest-version (latest-version-after-removing-file (get-attachment-info application attachment-id) fileId)]
     (infof "1/3 deleting file %s of attachment %s" fileId attachment-id)
     (mongo/delete-file-by-id fileId)
     (infof "2/3 deleted file %s of attachment %s" fileId attachment-id)
