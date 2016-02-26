@@ -24,7 +24,7 @@
 (defn pysyva-rakennustunnus
   "Returns national building id or nil if the input was not valid"
   [^String s]
-  (let [building-id (ss/trim (str s))]
+  (let [building-id (or (ss/trim s) "")]
     (when (v/rakennustunnus? building-id)
       building-id)))
 
