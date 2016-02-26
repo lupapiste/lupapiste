@@ -16,7 +16,7 @@
     }
   });
 
-  var defaultTab = "statement"
+  var defaultTab = "statement";
 
   var selectedTab = ko.observable(defaultTab);
 

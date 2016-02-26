@@ -147,7 +147,7 @@
       }
     });
 
-    ajax.query("tos-metadata-schema", {schema: params.caseFile ? 'caseFile' : 'document'})
+    ajax.query("tos-metadata-schema", {schema: params.caseFile ? "caseFile" : "document"})
       .success(function(data) {
         self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), data.schema, roles));
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);

@@ -8,7 +8,7 @@ LUPAPISTE.UploadZoneModel = function(params) {
 
   _.defer(function() {
     $("#" + self.id).fileupload({
-      dropZone: $('.drop-zone'),
+      dropZone: $(".drop-zone"),
       add: function(e, data) {
         // TODO folders are supported in chrome so they need to be filtered on different browsers
         self.files([].concat(self.files()).concat(data.files[0]));

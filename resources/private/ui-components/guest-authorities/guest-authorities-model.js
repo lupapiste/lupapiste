@@ -120,6 +120,6 @@ self.canEdit = function() {
                                                ajax.command( "remove-guest-authority-organization",
                                                              {email: data.email})
                                                .success( fetchGuestAuthorities )
-                                               .call()}});
+                                               .call();}});
   };
 };

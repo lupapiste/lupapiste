@@ -188,6 +188,15 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
+(def merge-operation-skeleton (partial merge domain/operation-skeleton))
+
+(defn ensure-operations
+  "Ensure operations have all properties set."
+  [app]
+  (-> app
+      (update :primaryOperation merge-operation-skeleton)
+      (update :secondaryOperations (fn [operations] (map merge-operation-skeleton operations)))))
+
 ;; Meta fields with default values.
 (def- operation-meta-fields-to-enrich {:optional []})
 (defn- enrich-primary-operation-with-metadata [app]
@@ -205,6 +214,7 @@
        process-foreman-v2
        (process-documents-and-tasks user)
        location->object
+       ensure-operations
        enrich-primary-operation-with-metadata))
 
 ;;
