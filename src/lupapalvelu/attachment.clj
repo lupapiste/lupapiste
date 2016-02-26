@@ -242,10 +242,8 @@
 ;; Api
 ;;
 
-(defn by-file-ids [file-ids attachment]
-  (let [file-id-set (set file-ids)
-        attachment-file-ids (map :fileId (:versions attachment))]
-    (some #(file-id-set %) attachment-file-ids)))
+(defn- by-file-ids [file-ids {versions :versions :as attachment}]
+  (some (comp (set file-ids) :fileId) versions))
 
 (defn get-attachments-infos
   "gets attachments from application"
@@ -317,7 +315,7 @@
        $push {:attachments attachment}})
     attachment))
 
-(defn create-attachments [application attachment-types now locked? required? requested-by-authority?]
+(defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
   (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (default-metadata-for-attachment-type type application)}) attachment-types)
         attachments (make-attachments now (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
@@ -332,8 +330,8 @@
     {:major major, :minor (inc minor)}
     {:major (inc major), :minor 0}))
 
-(defn version-number
-  [{{:keys [major minor]} :version}]
+(defn- version-number
+  [{{:keys [major minor] :or {major 0 minor 0}} :version}]
   (+ (* 1000 major) minor))
 
 (defn latest-version-after-removing-file [attachments attachment-id fileId]
@@ -388,10 +386,10 @@
             (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
       $addToSet {:attachments.$.auth (user/user-in-role (user/summary user) user-role)}})))
 
-(defn set-attachment-version
+(defn set-attachment-version!
   ([application attachment options]
     {:pre [(map? options)]}
-    (set-attachment-version application attachment options 5))
+    (set-attachment-version! application attachment options 5))
   ([application {attachment-id :id :as attachment} {:keys [stamped] :as options} retry-limit]
     {:pre [(map? application) (map? attachment) (map? options) (not (nil? stamped))]}
     (if (pos? retry-limit)
@@ -411,12 +409,12 @@
               attachment-id retry-limit)
             (let [application (mongo/by-id :applications (:id application))
                   attachment  (get-attachment-info application attachment-id)]
-              (set-attachment-version application attachment options (dec retry-limit))))))
+              (set-attachment-version! application attachment options (dec retry-limit))))))
       (do
         (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-attachment-key [command attachmentId k v now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
+(defn update-attachment-key! [command attachmentId k v now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
   (let [update-key (->> (name k) (str "attachments.$.") keyword)]
     (update-application command
       {:attachments {$elemMatch {:id attachmentId}}}
@@ -425,7 +423,7 @@
               (when set-app-modified? {:modified now})
               (when set-attachment-modified? {:attachments.$.modified now}))})))
 
-(defn update-latest-version-content
+(defn update-latest-version-content!
   "Updates latest version when version is stamped"
   [user application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
@@ -498,7 +496,7 @@
   (let [file-ids (attachment-file-ids application attachment-id)]
     (boolean (some #{file-id} file-ids))))
 
-(defn delete-attachment
+(defn delete-attachment!
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
   [{:keys [attachments] :as application} attachment-id]
   (info "1/3 deleting files of attachment" attachment-id)
@@ -507,7 +505,7 @@
   (update-application (application->command application) {$pull {:attachments {:id attachment-id}}})
   (info "3/3 deleted meta-data of attachment" attachment-id))
 
-(defn delete-attachment-version
+(defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
   [{:keys [id attachments] :as application} attachment-id fileId]
   (let [latest-version (latest-version-after-removing-file attachments attachment-id fileId)]
@@ -527,14 +525,14 @@
      {$set {:attachments.$.auth []}})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
-(defn get-attachment-file-as
+(defn get-attachment-file-as!
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
   [user file-id]
   (when-let [attachment-file (mongo/download file-id)]
     (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]
       (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
 
-(defn get-attachment-file
+(defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
   [file-id]
   (when-let [attachment-file (mongo/download file-id)]
@@ -556,7 +554,7 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
-(defn create-preview
+(defn- create-preview!
   [file-id filename content-type content application-id & [db-name]]
   (when (preview/converter content-type)
     (mongo/with-db (or db-name mongo/default-db-name)
@@ -567,18 +565,18 @@
         (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
         (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))))
 
-(defn output-attachment-preview
+(defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
   [file-id attachment-fn]
   (let [preview-id (str file-id "-preview")]
     (when (zero? (mongo/count :fs.files {:_id preview-id}))
-      (let [attachment (get-attachment-file file-id)
+      (let [attachment (get-attachment-file! file-id)
             file-name (:file-name attachment)
             content-type (:content-type attachment)
             content-fn (:content attachment)
             application-id (:application attachment)]
         (assert content-fn (str "content for file " file-id))
-        (create-preview file-id file-name content-type (content-fn) application-id)))
+        (create-preview! file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
 (defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
@@ -600,7 +598,7 @@
         sanitized-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitized-filename)]
     (mongo/upload file-id sanitized-filename content-type content :application application-id)
-    (.submit preview-threadpool #(create-preview file-id sanitized-filename content-type content application-id db-name))
+    (.submit preview-threadpool #(create-preview! file-id sanitized-filename content-type content application-id db-name))
     (cond-> {:file-id file-id
              :original-file-id (or (:original-file-id options) file-id)
              :filename sanitized-filename
@@ -618,13 +616,13 @@
   [application options]
   (->> (upload-file! application options)
        (merge options {:now (:created options) :stamped false})
-       (set-attachment-version application (get-or-create-attachment! application options))))
+       (set-attachment-version! application (get-or-create-attachment! application options))))
 
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
   (filter #(= (:id (:op %)) op-id) attachments))
 
-(defn- append-gridfs-file [zip {:keys [filename fileId]}]
+(defn- append-gridfs-file! [zip {:keys [filename fileId]}]
   (when fileId
     (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
     (with-open [in ((:content (mongo/download fileId)))]
@@ -635,7 +633,7 @@
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)))
 
-(defn get-all-attachments
+(defn get-all-attachments!
   "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
   [attachments & [application lang]]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
@@ -644,7 +642,7 @@
       (let [zip (ZipOutputStream. out)]
         ; Add all attachments:
         (doseq [attachment attachments]
-          (append-gridfs-file zip (-> attachment :versions last)))
+          (append-gridfs-file! zip (-> attachment :versions last)))
 
         (when (and application lang)
           ; Add submitted PDF, if exists:

@@ -187,7 +187,7 @@
                     (when step-back? {$set {:state (if (and sent (sm/valid-state? application :sent)) :sent :submitted)}}))]
       (update-application command updates)
       (doseq [{attachment-id :id} attachments]
-        (attachment/delete-attachment application attachment-id))
+        (attachment/delete-attachment! application attachment-id))
       (when step-back?
         (notifications/notify! :application-state-change command)))))
 

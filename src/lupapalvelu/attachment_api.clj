@@ -124,7 +124,7 @@
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? attachment-type application)
-      (attachment/update-attachment-key command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
+      (attachment/update-attachment-key! command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.illegal-attachment-type)))))
@@ -152,7 +152,7 @@
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
+  (attachment/update-attachment-key! command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
 
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
@@ -162,7 +162,7 @@
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
+  (attachment/update-attachment-key! command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
 
 ;;
 ;; Create
@@ -180,7 +180,7 @@
    :user-roles #{:authority :oirAuthority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (attachment/create-attachments application attachmentTypes created false true true)]
+  (if-let [attachment-ids (attachment/create-attachments! application attachmentTypes created false true true)]
     (ok :applicationId id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
@@ -200,7 +200,7 @@
                  attachment-not-required
                  attachment-editable-by-application-state]}
   [{:keys [application user]}]
-  (attachment/delete-attachment application attachmentId)
+  (attachment/delete-attachment! application attachmentId)
   (ok))
 
 (defcommand delete-attachment-version
@@ -216,7 +216,7 @@
   [{:keys [application user]}]
 
   (if (attachment/file-id-in-application? application attachmentId fileId)
-    (attachment/delete-attachment-version application attachmentId fileId)
+    (attachment/delete-attachment-version! application attachmentId fileId)
     (fail :file_not_linked_to_the_document)))
 
 ;;
@@ -230,7 +230,7 @@
          :user-authz-roles auth/all-authz-roles
          :org-authz-roles auth/reader-org-authz-roles}
         [{{:keys [attachment-id]} :data user :user}]
-        (attachment/output-attachment-preview attachment-id (partial attachment/get-attachment-file-as user)))
+        (attachment/output-attachment-preview! attachment-id (partial attachment/get-attachment-file-as! user)))
 
 (defraw "view-attachment"
         {:parameters [:attachment-id]
@@ -239,7 +239,7 @@
          :user-authz-roles auth/all-authz-roles
          :org-authz-roles auth/reader-org-authz-roles}
         [{{:keys [attachment-id]} :data user :user}]
-        (attachment/output-attachment attachment-id false (partial attachment/get-attachment-file-as user)))
+        (attachment/output-attachment attachment-id false (partial attachment/get-attachment-file-as! user)))
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
@@ -248,7 +248,7 @@
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
-  (attachment/output-attachment attachment-id true (partial attachment/get-attachment-file-as user)))
+  (attachment/output-attachment attachment-id true (partial attachment/get-attachment-file-as! user)))
 
 (defraw "download-bulletin-attachment"
   {:parameters [attachment-id]
@@ -270,7 +270,7 @@
       {:status 200
         :headers {"Content-Type" "application/octet-stream"
                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-        :body (attachment/temp-file-input-stream (attachment/get-all-attachments attachments application lang))})
+        :body (attachment/temp-file-input-stream (attachment/get-all-attachments! attachments application lang))})
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -310,7 +310,7 @@
                                  :attachment-id new-id
                                  :content output-file
                                  :filename new-filename
-                                 :make-comment false
+                                 :comment? false
                                  :archivable true
                                  :archivabilityError nil)]
       (if (attachment/attach-file! application pdfa-attachment-data)
@@ -381,9 +381,9 @@
    :pre-checks  attachment-modification-prechecks
    :states      (conj (states/all-states-but states/terminal-states) :answered)
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
-  [{:keys [application user created]}]
+  [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [contentType fileId originalFileId filename] :as latest-version} (last (:versions attachment))
+    (let [{:keys [contentType fileId originalFileId filename user created] :as latest-version} (last (:versions attachment))
           temp-pdf (File/createTempFile fileId ".tmp")
           upload-options (merge
                            base-upload-options
@@ -439,8 +439,8 @@
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-        (attachment/update-latest-version-content user application attachment-id new-file-id (.length file) now)
-        (attachment/set-attachment-version application
+        (attachment/update-latest-version-content! user application attachment-id new-file-id (.length file) now)
+        (attachment/set-attachment-version! application
                                            (attachment/get-attachment-info application attachment-id)
                                            {:attachment-id  attachment-id
                                             :file-id new-file-id :original-file-id new-file-id
@@ -449,7 +449,7 @@
                                             :comment-text nil :now now :user user
                                             :archivable is-pdf-a?
                                             :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
-                                            :stamped true :make-comment false :state :ok}))
+                                            :stamped true :comment? false :state :ok}))
       (io/delete-file file :silently)
       (tiedonohjaus/mark-attachment-final! application now attachment-id))
     new-file-id))
@@ -571,7 +571,7 @@
   [{:keys [application user created] :as command}]
   ; FIXME yhdella updatella!
   (doseq [[k v] meta]
-    (attachment/update-attachment-key command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
+    (attachment/update-attachment-key! command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
   (ok))
 
 (defcommand set-attachment-not-needed
@@ -582,7 +582,7 @@
    :states     #{:draft :open :submitted}
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
+  (attachment/update-attachment-key! command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
   (ok))
 
 (defcommand set-attachments-as-verdict-attachment

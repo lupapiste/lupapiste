@@ -70,4 +70,5 @@
     (io/delete-file file :silently)))
 
 (defn delete-child-attachment [app child-type id]
-    (attachment/delete-attachment app (get-child-attachment-id app child-type id)))
+    (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))
+
