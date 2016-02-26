@@ -365,7 +365,7 @@
                                                                     :or   {comment? true state :requires_authority_action} :as options}]
   (let [version-index  (or (-> (map :originalFileId (:versions attachment))
                                (zipmap (range))
-                               (some [(:original-file-id version-model)]))
+                               (some [(:originalFileId version-model)]))
                            (count (:versions attachment)))
         user-role      (if stamped :stamper :uploader)
         comment-target (merge {:type :attachment
