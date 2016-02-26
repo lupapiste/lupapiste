@@ -317,12 +317,16 @@
 (fact "In verdicts-extra-reader, buildingIds are updated to documents also"
   (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         app-id (:id application)
-        op1    (:primaryOperation application)]
+        op1    (:primaryOperation application)
+        doc-count (count (:documents application))]
+    doc-count => 9
+
     (override-krysp-xml sipoo "753-R" :R [{:selector [:rakval:rakennuksenTiedot :rakval:rakennustunnus :rakval:muuTunnustieto :rakval:MuuTunnus :yht:tunnus] :value (:id op1)}])
 
     (let [response (command sonja :check-for-verdict :id app-id)
           application (query-application mikko app-id)
-          op-document (some #(when (= (:id op1) (-> % :schema-info :op :id)) %) (:documents application))]
+          op-document (some #(when (= (:id op1) (-> % :schema-info :op :id)) %) (:documents application))
+          new-docs (:documents application)]
       (fact "Verdicts are ok"
         (:ok response) => true
         (count (:verdicts application)) => 2
@@ -330,6 +334,12 @@
       (fact "Buildings were saved"
         (:buildings application) => (every-checker not-empty sequential?))
       (fact "building id from KRYSP is saved to document"
-        (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")))
+        (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")
+
+      (fact "Rakennusjateselvitys is a new document"
+        (count new-docs) => 10
+        (-> (last new-docs)
+            :schema-info
+            :name) => "rakennusjateselvitys")))
 
   (against-background (after :facts (remove-krysp-xml-overrides sipoo "753-R" :R))))

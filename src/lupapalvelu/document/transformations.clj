@@ -40,7 +40,7 @@
            (persistence/validated-model-updates application :documents selvitys-doc updates created)))
         {:mongo-updates
          {$set ; use index to comply with other document updates when saving verdict
-          {(str "documents." (dec (count docs))) (persistence/new-doc application schema created updates)}}}))))
+          {(str "documents." (count docs)) (persistence/new-doc application schema created updates)}}}))))
 
 (defn get-state-transition-updates [command next-state]
   (case next-state
