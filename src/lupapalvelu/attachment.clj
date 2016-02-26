@@ -325,9 +325,9 @@
        $push {:attachments {$each attachments}}})
     (map :id attachments)))
 
-(defn delete-attachment-files-and-previews [file-ids]
-  (run! mongo/delete-file-by-id file-ids)
-  (run! mongo/delete-file-by-id (map #(str % "-preview") file-ids)))
+(defn- delete-attachment-file-and-preview! [file-id]
+  (mongo/delete-file-by-id file-id)
+  (mongo/delete-file-by-id (str file-id "-preview")))
 
 (defn next-attachment-version [{:keys [major minor] :or {major 0 minor 0}} user]
   (if (user/authority? user)
@@ -393,7 +393,7 @@
            (first)
            ((juxt :fileId :originalFileId))
            (remove (set [file-id original-file-id]))
-           (run! delete-attachment-files-and-previews)))
+           (run! delete-attachment-file-and-preview!)))
 
 (defn set-attachment-version!
   ([application attachment options]
@@ -444,7 +444,7 @@
         user-summary (user/summary user)]
 
     (when-not (= old-file-id file-id)
-      (delete-attachment-files-and-previews old-file-id))
+      (delete-attachment-file-and-preview! old-file-id))
 
     (update-application
       (application->command application)
@@ -510,7 +510,7 @@
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
   [{:keys [attachments] :as application} attachment-id]
   (info "1/3 deleting files of attachment" attachment-id)
-  (run! delete-attachment-files-and-previews (attachment-file-ids (get-attachment-info application attachment-id)))
+  (run! delete-attachment-file-and-preview! (attachment-file-ids (get-attachment-info application attachment-id)))
   (info "2/3 deleted files of attachment" attachment-id)
   (update-application (application->command application) {$pull {:attachments {:id attachment-id}}})
   (info "3/3 deleted meta-data of attachment" attachment-id))
@@ -520,7 +520,7 @@
   [application attachment-id fileId originalFileId]
   (let [latest-version (latest-version-after-removing-file (get-attachment-info application attachment-id) fileId)]
     (infof "1/3 deleting files [%s] of attachment %s" (ss/join ", " #{fileId originalFileId}) attachment-id)
-    (run! delete-attachment-files-and-previews (set fileId originalFileId))
+    (run! delete-attachment-file-and-preview! (set fileId originalFileId))
     (infof "2/3 deleted file %s of attachment %s" fileId attachment-id)
     (update-application
      (application->command application)
