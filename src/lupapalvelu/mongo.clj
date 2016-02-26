@@ -266,6 +266,7 @@
     (gfs/remove (get-gfs) query)))
 
 (defn ^{:perfmon-exclude true} delete-file-by-id [file-id]
+  {:pre [(string? file-id)]}
   (delete-file {:id file-id}))
 
 (defn count
