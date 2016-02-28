@@ -99,7 +99,7 @@ Sonja types in draft
   Wait Until  Element should be enabled  statement-text
   Input text  statement-text  typed in statement text but not gonna submit the statement.
   Wait until  Select From List By Value  statement-type-select  puoltaa
-  Sleep  2.5
+  Positive indicator icon should be visible
   Reload Page
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
@@ -179,7 +179,7 @@ Veikko from Tampere can give statement
   Click Element  statement-submit
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-1']  Puoltaa ehdoilla
-  [Teardown]  logout
+  Logout
 
 Sonja can see statement indicator
   Sonja logs in

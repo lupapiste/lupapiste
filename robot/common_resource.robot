@@ -851,8 +851,8 @@ Open to authorities
 Input comment
   [Arguments]  ${message}
   Open side panel  conversation
-  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
+  Wait Until  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Wait Until  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
