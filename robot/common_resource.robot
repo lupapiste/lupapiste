@@ -1170,7 +1170,7 @@ Clear mocks
 
 Scroll to
   [Arguments]  ${selector}
-  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
+  Wait Until  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
 
 Scroll to test id
   [Arguments]  ${id}
@@ -1184,7 +1184,8 @@ Scroll and click
 
 Scroll and click test id
   [Arguments]  ${id}
-  Scroll and click  [data-test-id=${id}]
+  Scroll to  [data-test-id=${id}]
+  Click by test id  ${id}
 
 Wait test id visible
   [Arguments]  ${id}

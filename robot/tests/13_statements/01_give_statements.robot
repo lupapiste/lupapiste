@@ -53,7 +53,7 @@ Sonja adds five statement givers to application
   # We now have 4 statement givers and one empty row (for adding a new statement giver), so there is 5 rows visible
   Wait until  Page Should Contain Element  xpath=//*[@data-test-id='statement-giver-checkbox-4']
 
-  Input text  xpath=//*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
+  Wait until  Input text  invite-statement-giver-saateText  Tama on saateteksti.
   Invite read-only statement giver  0  01.06.2018
   Open statement  0
   Wait until  Element should be visible  statement-cover-note
@@ -77,7 +77,7 @@ Sonja adds five statement givers to application
   Statement count is  6
 
 Sonja can delete statement
-  Wait and Click  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-5']
+  Scroll and click test id  delete-statement-5
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Statement count is  5
   Wait Until  Title Should Be  ${appname} - Lupapiste
@@ -202,12 +202,15 @@ Set maaraaika-datepicker field value
 
 Invite read-only statement giver
   [Arguments]  ${index}  ${date}
+  Scroll to test id  table-application-statements-givers
   Wait until  Select Checkbox  statement-giver-checkbox-${index}
   Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
   Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
   Wait and click  xpath=//*[@data-test-id='add-statement-giver']
   Element should be visible  xpath=//*[@data-test-id='add-statement-giver']
-  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait until  Positive indicator should be visible
+  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait Until  Positive indicator should not be visible
 
 Invite 'manual' statement giver
   [Arguments]  ${index}  ${roletext}  ${name}  ${email}  ${date}
@@ -234,12 +237,14 @@ Statement count is
   Wait until  Xpath Should Match X Times  //div[@id='application-statement-tab']//tr[@class="statement-row"]  ${amount}
 
 Return from statement
+  Scroll to test id  statement-return
   Wait and click  xpath=//*[@data-test-id='statement-return']
+  Tab should be visible  statement
 
 Open statement
   [Arguments]  ${number}
-  Execute javascript  window.scrollTo(0,0)
-  Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-${number}']
+  Wait Until  Positive indicator should not be visible
+  Scroll and click test id  open-statement-${number}
   Wait until  element should be visible  xpath=//div[@class='statement-top']//div[@class='tabs-container']
 
 Statement is disabled
