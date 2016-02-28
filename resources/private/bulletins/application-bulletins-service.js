@@ -103,8 +103,6 @@ LUPAPISTE.ApplicationBulletinsService = function() {
     fetchBulletins(ko.mapping.toJS(self.query));
   });
 
-  var commentForm;
-
   hub.subscribe("bulletinService::newComment", function(comment) {
     hub.send("bulletinService::commentProcessing");
     ajax

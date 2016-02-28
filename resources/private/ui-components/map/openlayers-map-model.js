@@ -9,16 +9,6 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
 
   var map;
 
-  // fit viewport to feature layer extent
-  function updateView() {
-    if (map) {
-      map.updateSize();
-      if (map.getSize() && !ol.extent.isEmpty(vectorLayer.getSource().getExtent())) {
-        view.fit(vectorLayer.getSource().getExtent(), map.getSize());
-      }
-    }
-  }
-
   proj4.defs("EPSG:3067","+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 
   // style for multipolygon
@@ -48,6 +38,16 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
   });
 
   var popup = new ol.Overlay.Popup();
+
+  // fit viewport to feature layer extent
+  function updateView() {
+    if (map) {
+      map.updateSize();
+      if (map.getSize() && !ol.extent.isEmpty(vectorLayer.getSource().getExtent())) {
+        view.fit(vectorLayer.getSource().getExtent(), map.getSize());
+      }
+    }
+  }
 
   function updateMap(data) {
     vectorSource.clear();
@@ -122,7 +122,7 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
       popup.hide();
 
       // try to find feature from all visible layers under the cursor
-      var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+      var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
         return feature;
       });
 
@@ -145,5 +145,5 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
     if (map) {
       map.destroy();
     }
-  }
+  };
 };

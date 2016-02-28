@@ -29,7 +29,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
     }
   };
 
-  var DataTemplate = function() {
+  function DataTemplate() {
     var selfie = this;
     selfie.text = ko.observable("").extend({ required: true });
     selfie.name = ko.observable("").extend({ required: true });
@@ -48,7 +48,7 @@ LUPAPISTE.StatementsTabModel = function(params) {
       }
     });
     return selfie;
-  };
+  }
 
   self.toggleInviteSection = function() {
     self.submitting(false);

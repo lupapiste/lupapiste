@@ -7,9 +7,6 @@
       if (v.dependencies) {
         _.forEach(v.dependencies, function (depArray) {
           _.forEach(depArray, function (depVal) {
-            if (!depVal["calculated"]) {
-
-            }
             newMap[depVal.type] = ko.observable(actualMetadata && actualMetadata[depVal.type] !== undefined ? actualMetadata[depVal.type] : null);
           });
         });

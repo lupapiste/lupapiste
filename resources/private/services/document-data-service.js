@@ -115,13 +115,17 @@ LUPAPISTE.DocumentDataService = function(params) {
       )
       .success(function(e) {
         var doc = self.findDocumentById(documentId);
-        doc && doc.validationResults(e.results);
+        if (doc) {
+          doc.validationResults(e.results);
+        }
         indicator({type: "saved"});
         cb(e);
       })
       .error(function (e) {
         var doc = self.findDocumentById(documentId);
-        doc && doc.validationResults(e.results);
+        if (doc) {
+          doc.validationResults(e.results);
+        }
         indicator({type: "err"});
       })
       .fail(function () {
