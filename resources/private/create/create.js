@@ -8,7 +8,7 @@
     return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : {op: value}];
   }
 
-  var model = new function() {
+  function CreateApplicationModel() {
     var self = this;
 
     self.locationModel = new LUPAPISTE.CreateApplicationLocationModel();
@@ -354,8 +354,9 @@
         })
         .call();
     };
+  }
 
-  }();
+  var model = new CreateApplicationModel();
 
   hub.onPageLoad("create-part-1", model.clear);
   hub.onPageLoad("create-page-prev-permit", model.initCreateAppWithPrevPermit);
