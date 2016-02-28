@@ -8,7 +8,9 @@ var docgen = (function () {
       other.parent().css("visibility", select.val() === "other" ? "visible" : "hidden");
     }
     function initSelectWithOther(i, e) { updateOther($(e)); }
-    function selectWithOtherChanged() { updateOther($(this)); }
+    function selectWithOtherChanged(event) {
+      updateOther($(event.target));
+    }
 
     var isDisabled = options && options.disabled;
 

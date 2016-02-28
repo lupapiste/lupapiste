@@ -10,8 +10,8 @@
     return f;
   }
 
-  function localize(prefix) {
-    var e = $(this),
+  function localize(prefix, i, elem) {
+    var e = $(elem),
         t = e.attr("data-loc");
     if (t) {
       var locci = prefix ? loc([t, prefix]) : loc(t);
