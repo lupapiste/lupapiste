@@ -57,7 +57,7 @@ var hub = (function() {
     }
 
     _.each(subscriptions, function(s, id) {
-      if (s.deliver(event)) {
+      if (s !== undefined && s.deliver(event)) {
         if (s.oneshot) {
           unsubscribe(id);
         }
