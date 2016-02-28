@@ -111,7 +111,7 @@ Sonja adds and removes attachment to statement draft
   Scroll to test id  add-statement-attachment
   Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait test id hidden  statement-attachments-table
+  Wait until  Element Should Not Be Visible  jquery=table[data-test-id=statement-attachments-table]
   [Teardown]  Return from statement
 
 Sonja can give statement to own request
