@@ -31,12 +31,9 @@ var loc;
     var term = loc.terms[key];
 
     if (term !== undefined) {
-      if (!_.isEmpty(formatParams)) {
-        formatParams = _.map(formatParams, String);
-        for (var argIndex in formatParams) {
-          term = term.replace("{" + argIndex + "}", formatParams[argIndex]);
-        }
-      }
+      _.each(formatParams, function(value, argIndex) {
+        term = term.replace("{" + argIndex + "}", value);
+      });
     } else {
       error("Missing localization key", key);
       term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "";

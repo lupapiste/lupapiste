@@ -127,12 +127,9 @@ LUPAPISTE.OpenlayersMapModel = function(params) {
       });
 
       if (feature) {
-        var props = feature.getProperties();
         // convert properties to lowercase i.e. NIMI -> nimi
-        for(var key in props) {
-          props[key.toLowerCase()] = props[key];
-        }
-
+        // mapKeys passes key at index 1, pass only that to util.lowerCase
+        var props = _.mapKeys(feature.getProperties(), _.rearg(util.lowerCase, 1));
         popup.show(evt.coordinate, props.nimi);
       }
     });
