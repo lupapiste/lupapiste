@@ -465,7 +465,7 @@
                 (map #(ss/limit % 100) info-fields))]
     (doseq [file-info (vals file-infos)]
       (try
-        (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
+        (debug "Stamping" (select-keys file-info [:attachment-id :contentType :originalFileId :fileId :filename :re-stamp?]))
         (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
         (let [new-file-id (stamp-attachment! stamp file-info context)]
           (job/update job-id assoc (:attachment-id file-info) {:status :done :fileId new-file-id}))
