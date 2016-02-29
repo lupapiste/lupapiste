@@ -8,7 +8,10 @@ Toimenpide (operation) | Toimenpiteet määrittävät hakemuksen tyypin eli mill
 Organisaatio (organization) | Viranomainen kuuluu aina yhteen tai useampaan organisaatioon. Viranomaisella on oikeus nähdä ja käsitellä omaan organisaatioonsa jäteyt hakemukset. Organisaatio on useissa tapauksessa kunnan tietty viranomaisorganisaatio (esimerkiksi rakennusvalvonta). Tietomalli mahdollistaa helposti ylikunnallisen lupakäsittelyn, sillä yksi organisaatio on konfiguroitavissa usean kunnan käyttöön.
 Neuvontapyyntö (info request) | Hakemuksen esiversio. Neuvontapyynnön avulla hakija voi pyytää  viranomaiselta neuvoa jo ennen varsinaisen hakemuksen tekoa. Neuvontapyyntö voidaan muuntaa hakemukseksi, jolloin asioinnin valmistelun voi aloittaa suoraan neuvontapyynnön pohjalta.
 
-## Käyttäjien perusroolit
+## Käyttäjät
+
+Käyttäjällä on yksiselitteinen perusrooli. Rooli määrittää peruskäyttöoikeustason,
+ja roolin mukaan käyttäjälle tarjotaan palvelussa tietty näkymä (oma Single Page Application).
 
 Rooli | Selite
 ----- | ---
@@ -18,6 +21,36 @@ Viranomainen (authority) | Viranomainen kuuluu yhteen tai useampaan organisaatio
 Hakija (applicant) | Vahvasti tunnistautunut hakija. Hakijat voivat luoda hakemuksia palveluun. Hakija voi myös saada valtuutuksia muiden hakijoiden tekemiin hakemuksiin, jolloin samaa hakemusta voi valmistella useampi henkilö
 Avoimen neuvontapyynnön viranomaiskäyttäjä (oirAuthority) | Käyttäjä saa ilmoituksia avoimista neuvontapyynnöistä. Käyttäjä voi antaa vastauksen hakijan avoimeen neuvontapyyntön. Käytössä organisaatioissa, jotka eivät vielä ole ottaneet varsinaista asiointia käyttöön.
 Dummy (dummy) | Dummy käyttäjä, joka ei ole vielä rekisteröitynyt ja vahvasti tunnistautunut palveluun. Dummy käyttäjä syntyy esimerkiksi kun hakemukselle valtuutetaan käyttäjä, jonka sähköpostiosoite ei ole vielä rekisteröitynyt palvelun käyttäjäksi.
+
+## Organisaatiot
+
+![](organisaatiot.png)
+
+Yllä olevassa kuvassa on hahmoteltu reaalimaailman mallia Lupapisteen käyttöön
+ottavista viranomaisorganisaatioista. Lupapisteen kannalta asiakas on jokin kunnan
+organisaatio, ei kunta itse. Näiden organisaatioiden nimet vaihtelevat kunnittain,
+mutta suurin piirtein vastuualueiden jako on seuraava:
+
+- Rakennusvalvonta, joka vastaa rakentamisen luvista
+- Ympäristötoimi, joka vastaa Ympäristöluvista ja maankäytön luvista
+- Tekninen toimi, joka vastaa sijoitus- ja kaivuluvista sekä yleisen alueen käytön luvista
+
+Joskus kunnat järjestävät nämä palvelunsa alueellisina. Esimerkiksi Säkylällä,
+Euralla ja Köylilöllä yhteinen rakennusvalvonta ja Keski-Uudenmaan ympäristökeskuksella
+monen kunnan ympäristötoimi.
+
+Lupapisteen viranomaiskäyttäjät kuuluvat  kunnan tiettyyn organisaatioon tai
+alueelliseen organisaatioon. Käytännössä on tilanteita, että sama henkilö kuuluu
+useampaan organisaatioon. (Esim kesän ajan tuuraa naapurikunnan viranomaista,
+tai joissakin kunnissa, esim Järvenpäässä yhteispalvelun henkilöstö, joka ottaa
+vastaan kaikkien organisaatioiden hakemuksia).
+
+Lupahakemukset osoitetaan aina yhdelle organisaatiolle. Näin voidaan hallita
+organisaatiokohtaisia työjonoja. Esim. ympäristölupia ei haluta näkymään
+rakennusvalvonnan jonossa. Organisaatiota ei voi vaihtaa hakemuksen luomisen jälkeen.
+
+Tietyn kunnan alueelle kohdistuvia tietyn lupatyypin hakemuksia voi käsitellä
+vain yksi organisaatio.
 
 ## Käyttäjien oikeudet ja hakemukset
 
