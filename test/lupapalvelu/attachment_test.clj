@@ -4,11 +4,13 @@
             [midje.util :refer [testable-privates]]
             [sade.strings :refer [encode-filename]]
             [sade.env :as env]
+            [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.attachment-metadata :refer :all]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen]
@@ -16,6 +18,13 @@
             [schema.core :as sc]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]))
+
+(testable-privates lupapalvelu.attachment
+                   attachment-file-ids
+                   version-number
+                   latest-version-after-removing-file
+                   make-version
+                   build-version-updates)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -36,7 +45,7 @@
                  source                  (ssg/generator (sc/maybe Source))]
                 (let [validation-error (->> (make-attachment now target required? requested-by-authority? locked? application-state operation attachment-type metadata attachment-id contents read-only? source)
                                             (sc/check Attachment))]
-                  (is (nil? validation-error)  "Validation-error"))))
+                  (nil? validation-error))))
 
 (facts "Test file name encoding"
   (fact (encode-filename nil)                                 => nil)
@@ -57,10 +66,6 @@
   (fact (parse-attachment-type nil)        => nil))
 
 (def test-attachments [{:id "1", :latestVersion {:version {:major 9, :minor 7}}}])
-
-(facts "Test attachment-latest-version"
-  (fact (attachment-latest-version test-attachments "1")    => {:major 9, :minor 7})
-  (fact (attachment-latest-version test-attachments "none") => nil?))
 
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
@@ -85,14 +90,17 @@
                                     :versions []}
                                    {:id :attachment2
                                     :versions [{:version { :major 1 :minor 0 }
-                                                :fileId :file1}
+                                                :fileId :file1
+                                                :originalFileId :originalFileId1}
                                                {:version { :major 1 :minor 1 }
-                                                :fileId :file2}]}]}
-        attachments (:attachments application)]
-    (latest-version-after-removing-file attachments :attachment2 :file1) => {:version { :major 1 :minor 1}
-                                                                             :fileId :file2}
+                                                :fileId :file2
+                                                :originalFileId :originalFileId2}]}]}
+        attachment (last (:attachments application))]
+    (latest-version-after-removing-file attachment :file1) => {:version {:major 1 :minor 1}
+                                                               :fileId :file2
+                                                               :originalFileId :originalFileId2}
 
-    (attachment-file-ids application :attachment2) => [:file1 :file2]
+    (attachment-file-ids attachment) => (just #{:file1 :originalFileId1 :file2 :originalFileId2})
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
