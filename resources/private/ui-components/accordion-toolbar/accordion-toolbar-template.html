@@ -14,7 +14,11 @@
                                 'data-test-id': docModel.schemaName + '-accordion-title-text'},
                          ltext: titleLoc">
         </span>
-        <span class="description" data-bind="text: headerDescription, attr: {'data-test-id': docModel.schemaName + '-accordion-description-text'}">
+        <span class="description" data-bind="text: headerDescription, attr: {'data-test-id': docModel.schemaName + '-accordion-description-text'}"></span>
+        <span>
+          <!-- ko if: isPrimaryOperation -->
+          <i class="lupicon-star" data-bind="attr: {title: loc('operations.primary')}"></i>
+          <!-- /ko -->
         </span>
       </span>
       <span class="icons">
