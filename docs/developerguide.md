@@ -191,21 +191,16 @@ Asiointisovellus on toteutettu HTML5 Single-page application-pohjaisesti. Käytt
 
 Sovellus on toteutettu Command Query Responsibility Segregation periaatteiden mukaisesti. Commandeja käytetään komentojen suorittamiseen (tiedon muokkaamiseen) ja Queryjä käytetään tiedon kyselemiseen. Frontendistä kutsutaan backendin tarjoamia JSON rajapintoja (*/api/command/<nimi>* (POST metodi) ja */api/query/<nimi>* (GET metodi)).
 
-
-
-front+back
-fyysinen pino: front, app, mongodb, geoserver, sftp jne
+## Keskeisimmät teknologiat
 
 Frontend:
 - [KnockoutJS](http://knockoutjs.com/documentation/introduction.html)
-- jQuery
-- lo-dash
+- [jQuery](http://api.jquery.com/)
+- [lo-dash](http://lodash.com/)
 
 Backend:
-- Clojure
-- MongoDB
-
-
+- [Clojure](http://clojure.org/)
+- [MongoDB](http://docs.mongodb.org/)
 
 # Frontend arkkitehtuuri
 ## Yleistä
