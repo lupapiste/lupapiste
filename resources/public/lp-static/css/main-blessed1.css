@@ -375,6 +375,11 @@ i {
   color: red;
 }
 
+/* line 56, ../../../private/common-html/sass/partials/_typography.scss */
+.success-message {
+  color: #04c714;
+}
+
 /* ABSTRACTIONS (OOCSS style)
 ----------------------------------------------------------------------------- */
 /* Media object (http://stubbornella.org/content/2010/06/25/the-media-object-saves-hundreds-of-lines-of-code) */
@@ -6867,9 +6872,9 @@ div.alleYli-radioGroup {
 }
 /* line 1317, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1317, ../../../private/common-html/sass/partials/_forms.scss */
@@ -7918,11 +7923,5 @@ table.attachments-template-table td.attachment-version-info {
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
 .scroll-72em {
   max-height: 72em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-73em {
-  max-height: 73em;
   overflow-y: auto;
 }

@@ -1,12 +1,13 @@
 *** Keywords ***
 Cancel via vetuma
-  Click element  vetuma-init
+  [Arguments]  ${initButton}=vetuma-init
+  Wait Until  Click element   ${initButton}
   Wait Until  Click link  << Palaa palveluun
   Click button  Palaa palveluun
 
 Authenticate via Osuuspankki via Vetuma
   [Arguments]  ${initButton}
-  Click element   ${initButton}
+  Wait Until  Click element   ${initButton}
   Wait Until  Element Should Be Visible  xpath=//img[@alt='Pankkitunnistus']
   Click element  xpath=//img[@alt='Pankkitunnistus']
   Wait Until  Element Should Be Visible  xpath=//a[@class='osuuspankki']
@@ -26,7 +27,8 @@ Authenticate via Osuuspankki via Vetuma
   Click element  xpath=//button[@type='submit']
 
 Authenticate via Nordea via Vetuma
-  Click element  vetuma-init
+  [Arguments]  ${initButton}=vetuma-init
+  Wait Until  Click element   ${initButton}
   Wait Until  Element Should Be Visible  xpath=//img[@alt='Pankkitunnistus']
   Click element  xpath=//img[@alt='Pankkitunnistus']
   Wait Until  Element Should Be Visible  xpath=//a[@class='nordea']
@@ -39,7 +41,8 @@ Authenticate via Nordea via Vetuma
   Click element  xpath=//button[@type='submit']
 
 Start Vetuma authentication but cancel via Nordea
-  Click element  vetuma-init
+  [Arguments]  ${initButton}=vetuma-init
+  Wait Until  Click element   ${initButton}
   Wait Until  Element Should Be Visible  xpath=//a[@title='<< Palaa palveluun: Lupapiste']
   Click element  xpath=//a[@title='<< Palaa palveluun: Lupapiste']
   Wait Until  Element Should Be Visible  xpath=//button[@title='Palaa palveluun: Lupapiste']

@@ -63,8 +63,8 @@
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
          (if (= 200 (:status resp))
-           (attachment/attach-file! {:application current-application
-                                     :filename (or header-filename filename)
+           (attachment/attach-file! current-application 
+                                    {:filename (or header-filename filename)
                                      :size content-length
                                      :content (:body resp)
                                      :attachment-id attachment-id
@@ -109,7 +109,7 @@
         (util/deep-merge
           {$set (merge {:verdicts verdicts-with-attachments, :modified created}
                   (when-not has-old-verdict-tasks {:tasks tasks})
-                  (when extras-reader (extras-reader app-xml)))}
+                  (when extras-reader (extras-reader app-xml application)))}
           (when-not (states/post-verdict-states (keyword (:state application)))
             (application/state-transition-update (sm/verdict-given-state application) created user))
           )))))

@@ -1,12 +1,8 @@
-#mypage {
+#mypage .accordion-container {
   .button-group {
     margin: 20px;
     position: relative;
   }
-}
-
-/*  */
-#own-info-form {
   padding:0 $marginL;
   .architect-toggle, .allowDirectMarketing-toggle {
     height: 55px;
@@ -28,19 +24,7 @@
   }
 }
 
-#pw-form {
-  padding: 0 $marginL;
-
-  .form-group {
-    padding: $marginM;
-  }
-  .form-entry {
-    height: 78px;
-  }
-}
-
 #mypage-register-company, #mypage-company {
-  padding: 0 $marginL;
   p {
     // TODO not needed after all links are changed
     a {
@@ -48,9 +32,3 @@
     }
   }
 }
-
-.architect-info {
-  transition: height 2s;
-
-}
-

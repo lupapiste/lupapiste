@@ -483,7 +483,6 @@ Edit operation description
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
   Input text by test id  op-description-editor-${doc}  ${text}
-  Positive indicator should be visible
   # Close the input
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
@@ -501,7 +500,6 @@ Input building identifier
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
   Input text by test id  ${docId}-identifier-input  ${text}
-  Positive indicator should be visible
   # Close the input
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]

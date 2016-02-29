@@ -250,7 +250,7 @@ var util = (function($) {
     if (response.ok) {
       hub.send("indicator", {style: "positive"});
     } else {
-      hub.send("indicator", {style: "negative"});
+      hub.send("indicator", {style: "negative", message: response.text});
     }
   }
 

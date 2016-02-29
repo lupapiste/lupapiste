@@ -421,8 +421,8 @@
                                          (find-national-id rakennus)
                                          (:valtakunnallinenNumero rakennus))
                                    b (assoc-in b [:rakennus :valtakunnallinenNumero] nid)
-                                   tags (:tags (find-building nid))
-                                   b (if tags (assoc-in b [:rakennus :tags] tags) b)
+                                   op-id (:operationId (find-building nid))
+                                   b (if op-id (assoc-in b [:rakennus :operationId] op-id) b)
                                    desc (:description (find-building nid))
                                    b (if desc (assoc-in b [:rakennus :description] desc) b)]
                                b))))
