@@ -7,7 +7,7 @@
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [clojure.java.io :as io]
-            [lupapalvelu.attachment]
+            [lupapalvelu.attachment :as att]
             [ring.util.codec :as codec]
             [lupapalvelu.action :as action]
             [monger.operators :refer :all]
@@ -186,6 +186,6 @@
             metadata (generate-archive-metadata application user)]
         (upload-and-set-state (str id "-application") application-file "application/pdf" metadata application created set-application-state)))
     (doseq [attachment selected-attachments]
-      (let [{:keys [content content-type]} (lupapalvelu.attachment/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
+      (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
             metadata (generate-archive-metadata application user attachment)]
         (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state)))))
