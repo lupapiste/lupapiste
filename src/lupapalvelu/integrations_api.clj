@@ -22,7 +22,7 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -165,10 +165,10 @@
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
 (defn- load-building-data [url credentials property-id building-id overwrite-all?]
-  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url credentials property-id) building-id)]
+  (let [all-data (building-reader/->rakennuksen-tiedot (building-reader/building-xml url credentials property-id) building-id)]
     (if overwrite-all?
       all-data
-      (select-keys all-data (keys krysp-reader/empty-building-ids)))))
+      (select-keys all-data (keys building-reader/empty-building-ids)))))
 
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
@@ -207,7 +207,7 @@
                             (fn [[path _]] (model/find-by-name (:body schema) path))
                             (tools/path-vals
                               (if clear-ids?
-                                krysp-reader/empty-building-ids
+                                building-reader/empty-building-ids
                                 (load-building-data url credentials propertyId buildingId overwrite))))
             krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
@@ -231,8 +231,8 @@
   [{{:keys [organization municipality propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
     (try
-      (let [kryspxml    (krysp-reader/building-xml url credentials propertyId)
-            buildings   (krysp-reader/->buildings-summary kryspxml)]
+      (let [kryspxml    (building-reader/building-xml url credentials propertyId)
+            buildings   (building-reader/->buildings-summary kryspxml)]
         (ok :data buildings))
       (catch java.io.IOException e
         (errorf "Unable to get building info from %s backend: %s" (i18n/loc "municipality" municipality) (.getMessage e))

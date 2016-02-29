@@ -60,16 +60,16 @@
                   <rakval:kiinttun>18601234567890</rakval:kiinttun>
                   <rakval:rakennusnro>101</rakval:rakennusnro>
                   <rakval:muuTunnustieto>
-                    <rakval:Muutunnus>
+                    <rakval:MuuTunnus>
                       <yht:tunnus>abcdefghijklmnopqr</yht:tunnus>
                       <yht:sovellus>toimenpideId</yht:sovellus>
-                    </rakval:Muutunnus>
+                    </rakval:MuuTunnus>
                   </rakval:muuTunnustieto>
                   <rakval:muuTunnustieto>
-                    <rakval:Muutunnus>
+                    <rakval:MuuTunnus>
                       <yht:tunnus>rqponmlkjihgfedcba</yht:tunnus>
                       <yht:sovellus>toimenpideId</yht:sovellus>
-                    </rakval:Muutunnus>
+                    </rakval:MuuTunnus>
                   </rakval:muuTunnustieto>
                   <rakval:rakennuksenSelite>Talo A, Toinen selite</rakval:rakennuksenSelite>
                 </rakval:rakennustunnus>

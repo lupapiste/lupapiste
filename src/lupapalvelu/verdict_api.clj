@@ -10,9 +10,10 @@
             [sade.core :refer [ok fail fail! ok?]]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.building :as building]
+            [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
@@ -23,7 +24,8 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]))
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]))
 
 ;;
 ;; KRYSP verdicts
@@ -47,20 +49,36 @@
       (verdict/verdict-xml-with-foreman-designer-verdicts application xml)
       app-xml)))
 
+(defn save-verdicts-from-xml
+  "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
+  [{:keys [application] :as command} app-xml]
+  (let [updates (verdict/find-verdicts-from-xml command app-xml)]
+    (when updates
+      (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+        (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+        (t/mark-app-and-attachments-final! (:id application) (:created command))))
+    (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+
+(defn save-buildings
+  "Get buildings from verdict XML and save to application. Updates also operation documents
+   with building data, if applicable."
+  [{:keys [application] :as command} buildings]
+  (let [building-updates (building/building-updates buildings application)]
+    (update-application command {$set building-updates})
+    (when building-updates {:buildings (map :nationalId buildings)})))
+
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
-    (let [app-xml (normalize-special-verdict application app-xml)]
-      (or
-       (let [organization (organization/get-organization (:organization application))
-             validator-fn (permit/get-verdict-validator (permit/permit-type application))]
-         (validator-fn app-xml organization))
-       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-         (when updates
-           (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
-             (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
-             (t/mark-app-and-attachments-final! (:id application) (:created command))))
-         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))))))
+  (when-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
+    (let [app-xml (normalize-special-verdict application app-xml)
+          organization (organization/get-organization (:organization application))
+          validator-fn (permit/get-verdict-validator (permit/permit-type application))
+          validation-errors (validator-fn app-xml organization)]
+      (if-not validation-errors
+        (save-verdicts-from-xml command app-xml)
+        (if-let [buildings (seq (building-reader/->buildings-summary app-xml))]
+          (merge validation-errors (save-buildings command buildings))
+          validation-errors)))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"

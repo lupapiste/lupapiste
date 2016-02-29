@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.xml.krysp.building-reader :refer [building-xml ->buildings-summary ->rakennuksen-tiedot]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.itest-util :refer :all]))
 
@@ -32,7 +33,7 @@
                               :usage       "039 muut asuinkerrostalot"
                               :area        "2682"
                               :index       nil
-                              :tags       '()
+                              :target      nil
                               :description nil
                               :created     "1962"})
 
@@ -45,7 +46,7 @@
                                :usage        "021 rivitalot"
                                :area         "281"
                                :index        nil
-                               :tags       '()
+                               :target      nil
                                :description nil
                                :created     "1998"}))))
 
