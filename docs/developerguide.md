@@ -135,6 +135,27 @@ myös JavaScript-koodissa.
 
 JavaScript-koodi tulee tarkastaa JSHint-työkalulla, jonka asetukset ovat projektin juuressa.
 
+Clojure-koodissa käytetään seuraavia aliaksia nimiavaruuksille:
+
+namespace                 | alias
+--------------------------|-------
+lupapalvelu.action        | action
+lupapalvelu.application   | app
+lupapalvelu.attachment    | att
+lupapalvelu.authorization | auth
+lupapalvelu.company       | com
+lupapalvelu.domain        | domain
+lupapalvelu.operations    | op
+lupapalvelu.organization  | org
+lupapalvelu.user          | usr
+sade.env                  | env
+sade.strings              | ss
+sade.util                 | util
+
+Nimiavaruuksiin viitataan aina :require tyylillä (:use avainsanaa ei käytetä).
+Koko nimiavaruuden sisällyttämistä (`:require [lupapalvelu.namespace :refer :all]`)
+tulee välttää. Poikkeustapauksia ovat mm. `sade.core` ja `monger.operators`.
+
 ## Versionhallinta
 
 Kehitys tehdään develop-haaraan git flow -mallin mukaisesti. Tuotannossa on master-haara.
