@@ -24,6 +24,7 @@
 (defn pysyva-rakennustunnus
   "Returns national building id or nil if the input was not valid"
   [^String s]
+  {:pre [(or (nil? s) (string? s))]}
   (let [building-id (or (ss/trim s) "")]
     (when (v/rakennustunnus? building-id)
       building-id)))

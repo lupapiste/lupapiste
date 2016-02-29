@@ -11,7 +11,8 @@
   (fact (pysyva-rakennustunnus nil) => nil)
   (fact (pysyva-rakennustunnus "") => nil)
   (fact (pysyva-rakennustunnus "123456") => nil)
-  (fact (pysyva-rakennustunnus "1234567892") => "1234567892"))
+  (fact (pysyva-rakennustunnus "1234567892") => "1234567892")
+  (fact (pysyva-rakennustunnus 12345678) => (throws AssertionError)))
 
 
 (facts "Buildings exist with operation id (tags)"
