@@ -380,7 +380,7 @@
        (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
      (when target 
        {$set {:attachments.$.target target}})
-     (when (>= (version-number version-model) (version-number (:latestVersion attachment))) 
+     (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
        {$set {:attachments.$.latestVersion version-model}})
      {$set {:modified now
             :attachments.$.modified now
