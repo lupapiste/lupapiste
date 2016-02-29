@@ -1,26 +1,61 @@
 # Tietomalli
 
-Käsite | Selite
------- | ---
-Lupatyyppi (permit type) | Lupatyyppi määrittää millaisesta lupa-asioinnista on kyse. Esimerkiksi rakennusvalvonta, yleiset alueet ja ympäristötoimi ovat omia lupatyyppejään.
-Hakemus (application) | Hakija täyttää palvelussa hakemuksen, joka sisältää mm. lomaketietoja ja liitteitä. Hakemuksella on aina tila (state), joka kuvaa hakemuksen tilaa lupa- tai ilmoitusprosessissa. Viranomainen tarkastaa ja käsittelee palveluun jätetyn hakemuksen.
-Toimenpide (operation) | Toimenpiteet määrittävät hakemuksen tyypin eli millaisia tietoja hakemukseen täytyy täyttää. Toimenpide kuuluu aina tiettyyn lupatyyppiin. Esimerkiksi toimenpide "Aidan rakentaminen" kuuluu rakennusvalvonnan lupatyyppiin. Toimenpiteellä on skeema (schema), joka määrittää hakemuksella täytettävät lomaketiedot.
-Organisaatio (organization) | Viranomainen kuuluu aina yhteen tai useampaan organisaatioon. Viranomaisella on oikeus nähdä ja käsitellä omaan organisaatioonsa jäteyt hakemukset. Organisaatio on useissa tapauksessa kunnan tietty viranomaisorganisaatio (esimerkiksi rakennusvalvonta). Tietomalli mahdollistaa helposti ylikunnallisen lupakäsittelyn, sillä yksi organisaatio on konfiguroitavissa usean kunnan käyttöön.
-Neuvontapyyntö (info request) | Hakemuksen esiversio. Neuvontapyynnön avulla hakija voi pyytää  viranomaiselta neuvoa jo ennen varsinaisen hakemuksen tekoa. Neuvontapyyntö voidaan muuntaa hakemukseksi, jolloin asioinnin valmistelun voi aloittaa suoraan neuvontapyynnön pohjalta.
+![](user-application-organization.png)
 
-## Käyttäjät
+Peruskäsitteet on esitetty oheisessa kuvassa.
 
-Käyttäjällä on yksiselitteinen perusrooli. Rooli määrittää peruskäyttöoikeustason,
-ja roolin mukaan käyttäjälle tarjotaan palvelussa tietty näkymä (oma Single Page Application).
+## Hakemus (application)
 
-Rooli | Selite
------ | ---
-Pääkäyttäjä (admin) | Palvelun hallinnointi
-Organisaation pääkäyttäjä (authorityAdmin) | Organisaation pääkäyttäjä hallitsee organisaation tietoja ja konfiguraatioita
-Viranomainen (authority) | Viranomainen kuuluu yhteen tai useampaan organisaatioon. Viranomainen voi käsitellä organisaatioon tulleita hakemuksia. Viranomaisrooleja organisaatioihin hallinnoi organisaation pääkäyttäjä
-Hakija (applicant) | Vahvasti tunnistautunut hakija. Hakijat voivat luoda hakemuksia palveluun. Hakija voi myös saada valtuutuksia muiden hakijoiden tekemiin hakemuksiin, jolloin samaa hakemusta voi valmistella useampi henkilö
-Avoimen neuvontapyynnön viranomaiskäyttäjä (oirAuthority) | Käyttäjä saa ilmoituksia avoimista neuvontapyynnöistä. Käyttäjä voi antaa vastauksen hakijan avoimeen neuvontapyyntön. Käytössä organisaatioissa, jotka eivät vielä ole ottaneet varsinaista asiointia käyttöön.
-Dummy (dummy) | Dummy käyttäjä, joka ei ole vielä rekisteröitynyt ja vahvasti tunnistautunut palveluun. Dummy käyttäjä syntyy esimerkiksi kun hakemukselle valtuutetaan käyttäjä, jonka sähköpostiosoite ei ole vielä rekisteröitynyt palvelun käyttäjäksi.
+Hakija täyttää palvelussa hakemuksen, joka sisältää mm. lomaketietoja ja liitteitä.
+Hakemuksella on aina tila (state), joka kuvaa hakemuksen tilaa lupa- tai
+ilmoitusprosessissa. Viranomainen tarkastaa ja käsittelee palveluun jätetyn hakemuksen.
+
+Hakemus voi olla joko lupahakemus tai *neuvontapyyntö* (hakemuksella infoRequest=true).
+Neuvontapyynnön avulla hakija voi pyytää viranomaiselta neuvoa jo ennen varsinaisen
+hakemuksen tekoa. Neuvontapyyntö voidaan muuntaa hakemukseksi, jolloin asioinnin
+valmistelun voi aloittaa suoraan neuvontapyynnön pohjalta.
+
+Hakemuksella voi olla yksi *käsittelijä*. Käsittelijä on viranomainen siinä
+organisaatiossa, joka on ottanut hakemuksen vastaan.
+
+## Lupatyyppi (permit type)
+
+Lupatyyppi määrittää millaisesta lupa-asioinnista on kyse.
+Esimerkiksi rakennusvalvonta, yleiset alueet ja ympäristötoimi ovat omia lupatyyppejään.
+Hakemuksen tilakaavio määräytyy lupatyypin perusteella.
+
+Lupatyyppijako perustuu [KuntaGML-skeemajakoon](http://www.paikkatietopalvelu.fi/gml/KuntaGML.html).
+Lupatyyppiin liittyy konfiguraatiota, joka ohjaa integraatiota kuntien järjestelmiin.
+
+## Toimenpide (operation)
+
+Toimenpiteet määrittävät hakemuksen tyypin eli millaisia tietoja hakemukseen täytyy täyttää.
+Toimenpide kuuluu aina tiettyyn lupatyyppiin. Esimerkiksi toimenpide "Aidan rakentaminen"
+kuuluu rakennusvalvonnan lupatyyppiin.
+
+Hakemuksen luontivaiheessa määritelty ensimmäinen toimenpide määrää hakemuksen lupatyypin.
+Yhdessä lupatyyppi ja hakemuksen sijaintikunta määrittävät mikä organisaatio käsittelee hakemuksen.
+
+## Hakemuksen tietosisällön määräytyminen
+
+![](application-content.png)
+
+Hakemuksen keskeisintä tietosisältöä ovat lomakkeet (documents) ja liitteet
+(attachments). Hakemukselle luodaan pohjat vaadittaville tiedoille sen mukaisesti,
+mitä toimenpiteitä hakemukseen liittyy.
+
+Organisaatio voi määritellä toimenpidekohtaisesti, mitä liitetyyppejä toimenpiteen
+yhteydessä vaaditaan.
+
+Toimenpiteeseen liittyy myös erilaisia lomakkeita, joiden tiedot kuvataan kaikille
+organisaatioille yhteisillä skeemoilla (schema). Toimenpiteeseen liittyy aina
+täsmälleen yksi päälomake. Lisäksi toimenpiteeseen voi liittyä lomakkeita,
+jotka käyttäjä pystyy lisäämään hakemisen aikana.
+
+Koko hanketta koskevat lomakkeet, kuten hakija-, maksaja- ja muiden osapuolien
+tiedot, määräytyvät niin ikään toimenpiteen mukaan, mutta tyypillisesti nämä ovat
+samat kaikilla lupatyypin toimenpiteillä.
+
 
 ## Organisaatiot
 
@@ -39,10 +74,10 @@ Joskus kunnat järjestävät nämä palvelunsa alueellisina. Esimerkiksi Säkyl�
 Euralla ja Köylilöllä yhteinen rakennusvalvonta ja Keski-Uudenmaan ympäristökeskuksella
 monen kunnan ympäristötoimi.
 
-Lupapisteen viranomaiskäyttäjät kuuluvat  kunnan tiettyyn organisaatioon tai
+Lupapisteen viranomaiskäyttäjät kuuluvat kunnan organisaatioon tai
 alueelliseen organisaatioon. Käytännössä on tilanteita, että sama henkilö kuuluu
-useampaan organisaatioon. (Esim kesän ajan tuuraa naapurikunnan viranomaista,
-tai joissakin kunnissa, esim Järvenpäässä yhteispalvelun henkilöstö, joka ottaa
+useampaan organisaatioon. (Esim. kesän ajan tuuraa naapurikunnan viranomaista,
+tai joissakin kunnissa, esim. Järvenpäässä yhteispalvelun henkilöstö, joka ottaa
 vastaan kaikkien organisaatioiden hakemuksia).
 
 Lupahakemukset osoitetaan aina yhdelle organisaatiolle. Näin voidaan hallita
@@ -50,7 +85,24 @@ organisaatiokohtaisia työjonoja. Esim. ympäristölupia ei haluta näkymään
 rakennusvalvonnan jonossa. Organisaatiota ei voi vaihtaa hakemuksen luomisen jälkeen.
 
 Tietyn kunnan alueelle kohdistuvia tietyn lupatyypin hakemuksia voi käsitellä
-vain yksi organisaatio.
+vain yksi organisaatio. Organisaatio voi määritellä, mitä lupatyyppiin liittyviä
+toimenpiteitä se käsittelee.
+
+
+## Käyttäjä
+
+Käyttäjällä on Lupapisteessä perusrooli. Rooli määrittää peruskäyttöoikeustason,
+ja roolin mukaan käyttäjälle tarjotaan palvelussa tietty näkymä (oma Single Page Application).
+
+Rooli | Selite
+----- | ---
+Pääkäyttäjä (admin) | Palvelun hallinnointi
+Organisaation pääkäyttäjä (authorityAdmin) | Organisaation pääkäyttäjä hallitsee organisaation tietoja ja konfiguraatioita
+Viranomainen (authority) | Viranomainen kuuluu yhteen tai useampaan organisaatioon. Viranomainen voi käsitellä organisaatioon tulleita hakemuksia. Viranomaisrooleja organisaatioihin hallinnoi organisaation pääkäyttäjä
+Hakija (applicant) | Vahvasti tunnistautunut hakija. Hakijat voivat luoda hakemuksia palveluun. Hakija voi myös saada valtuutuksia muiden hakijoiden tekemiin hakemuksiin, jolloin samaa hakemusta voi valmistella useampi henkilö
+Avoimen neuvontapyynnön viranomaiskäyttäjä (oirAuthority) | Käyttäjä saa ilmoituksia avoimista neuvontapyynnöistä. Käyttäjä voi antaa vastauksen hakijan avoimeen neuvontapyyntön. Käytössä organisaatioissa, jotka eivät vielä ole ottaneet varsinaista asiointia käyttöön.
+Dummy (dummy) | Dummy käyttäjä, joka ei ole vielä rekisteröitynyt ja vahvasti tunnistautunut palveluun. Dummy käyttäjä syntyy esimerkiksi kun hakemukselle valtuutetaan käyttäjä, jonka sähköpostiosoite ei ole vielä rekisteröitynyt palvelun käyttäjäksi.
+
 
 ## Käyttäjien oikeudet ja hakemukset
 
@@ -74,7 +126,8 @@ Mitä käyttäjä sitten voi hakemukselle tehdä riippuu puolestaan käyttäjäl
 
 Hienosäätöä:
 
-- Viranomainen voi kuulua useampaan organisaatioon ja hänellä voi olla samassa organisaatiossa useampi rooli.
+- Viranomainen voi kuulua useampaan organisaatioon ja hänellä voi olla samassa
+  organisaatiossa useampi rooli.
 - Kaikki viranomaiset eivät "orgAuthz-mielessä" kuulu
   organisaatioon. Esimerkiksi lausunnonantajat ja
   vierailijaviranomaiset (nämä ovat viranomaisia, joille "oikeat"
