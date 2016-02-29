@@ -79,7 +79,7 @@
     {:email-address address :sending-succeeded sending-succeeded?}))
 
 (defn- send-kopiolaitos-email [lang email-addresses attachments orderInfo]
-  (let [zip (attachment/get-all-attachments attachments)
+  (let [zip (attachment/get-all-attachments! attachments)
         email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (localize lang :kopiolaitos-email-subject) \space (:ordererOrganization orderInfo))
         orderInfo (merge orderInfo {:titles (get-kopiolaitos-order-email-titles lang)

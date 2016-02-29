@@ -191,7 +191,7 @@
                                         (query/sort order-by)))))
 
 (defn select-one
-  "returns one entry by matching the monger query"
+  "Returns one entry by matching the monger query, nil if query did not match."
   ([collection query]
     {:pre [(map? query)]}
     (with-id (mc/find-one-as-map (get-db) collection (remove-null-chars query))))
@@ -266,6 +266,7 @@
     (gfs/remove (get-gfs) query)))
 
 (defn ^{:perfmon-exclude true} delete-file-by-id [file-id]
+  {:pre [(string? file-id)]}
   (delete-file {:id file-id}))
 
 (defn count

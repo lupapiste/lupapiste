@@ -192,8 +192,12 @@
                 (:to email) => (contains pena-email)))
 
             (fact "Delete version"
-              (command veikko :delete-attachment-version :id application-id
-                :attachmentId (:id versioned-attachment) :fileId (get-in updated-attachment [:latestVersion :fileId])) => ok?
+              (command veikko 
+                       :delete-attachment-version 
+                       :id application-id
+                       :attachmentId (:id versioned-attachment) 
+                       :fileId (get-in updated-attachment [:latestVersion :fileId]) 
+                       :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
               (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
                 (get-in ver-del-attachment [:latestVersion :version :major]) => 1
                 (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
@@ -217,15 +221,23 @@
             (count (:signatures signed-attachment)) => 1)
 
           (fact "Delete version and its signature"
-                (command veikko :delete-attachment-version :id application-id
-                     :attachmentId (:id versioned-attachment) :fileId (get-in signed-attachment [:latestVersion :fileId]))=> ok?
+            (command veikko 
+                       :delete-attachment-version 
+                       :id application-id
+                       :attachmentId (:id versioned-attachment) 
+                       :fileId (get-in signed-attachment [:latestVersion :fileId]) 
+                       :originalFileId (get-in signed-attachment [:latestVersion :originalFileId]))=> ok?
                      (fact (count (:signatures (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 0))
 
           (fact "Deleting the last version clears attachment auth"
                 (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
                   (count (:versions attachment )) => 1
-                  (command veikko :delete-attachment-version :id application-id
-                           :attachmentId (:id attachment) :fileId (get-in attachment [:latestVersion :fileId])))
+                  (command veikko 
+                       :delete-attachment-version 
+                       :id application-id
+                       :attachmentId (:id attachment) 
+                       :fileId (get-in attachment [:latestVersion :fileId]) 
+                       :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?)
                 (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment))) => empty?)
 
           (fact "Authority deletes attachment"
