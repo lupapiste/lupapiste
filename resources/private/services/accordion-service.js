@@ -67,9 +67,10 @@ LUPAPISTE.AccordionService = function() {
     var docId = event.docId;
     var value = event.value;
     var path = [event.key];
+    var indicator = event.indicator;
     var doc = _.find(self.identifierFields(), {docId: docId});
     if (doc.value() !== value) {
-      lupapisteApp.services.documentDataService.updateDoc(docId, [[path, value]], self.indicator);
+      lupapisteApp.services.documentDataService.updateDoc(docId, [[path, value]], indicator);
       doc.value(value);
     }
   });

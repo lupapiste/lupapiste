@@ -1356,7 +1356,7 @@ $max-columns: 12;
       border-color: $input-focus-border-color;
     }
   }
-  .identifier-component {
+  &> div {
     margin: $marginM $marginM;
   }
   button {

@@ -28,6 +28,11 @@
         padding-right: 0;
       }
     }
+    .identifier-component {
+      .form-indicator {
+        right: -100px;
+      }
+    }
   }
 
   .accordion-toggle > button, button.accordion-toggle {
