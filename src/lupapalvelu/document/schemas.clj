@@ -1431,22 +1431,22 @@
                 (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa)
                 rakennustunnus)}
 
-   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-muutos)}
 
-   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos)}
 
-   {:info {:name "rakennuksen-muuttaminen" :approvable true}
+   {:info {:name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
 
-   {:info {:name "rakennuksen-laajentaminen" :approvable true}
+   {:info {:name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true}
+   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-laajentaminen-ei-huoneistoja)}
 
-   {:info {:name "purkaminen" :i18name "purku" :approvable true}
+   {:info {:name "purkaminen" :i18name "purku" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups purku)}
 
    {:info {:name "kaupunkikuvatoimenpide"
