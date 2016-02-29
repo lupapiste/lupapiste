@@ -33,7 +33,7 @@
                               :usage       "039 muut asuinkerrostalot"
                               :area        "2682"
                               :index       nil
-                              :tags       '()
+                              :target      nil
                               :description nil
                               :created     "1962"})
 
@@ -46,7 +46,7 @@
                                :usage        "021 rivitalot"
                                :area         "281"
                                :index        nil
-                               :tags       '()
+                               :target      nil
                                :description nil
                                :created     "1998"}))))
 

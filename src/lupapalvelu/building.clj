@@ -13,7 +13,7 @@
     (when (and op
                (:id op)
                (some #(= (:name %) "valtakunnallinenNumero") schema-body))
-      (= (:id op) (:tag building-operation)))))
+      (= (:id op) (:id building-operation)))))
 
 (defn buildingid-updates-for-operation
   "Generates valtakunnallinenNumero updates to documents regarding operation.
@@ -26,14 +26,14 @@
                                 buildingId))
 
 (defn buildings-with-operation [buildings]
-  (remove (comp empty? :tags) buildings))
+  (remove (comp empty? :target) buildings))
 
 (defn operation-building-updates [operation-buildings application]
   (remove
     util/empty-or-nil?
     (map
-      (fn [{tags :tags buildingId :nationalId}]
-        (buildingid-updates-for-operation application buildingId (first tags))) ; building belongs to only one operation, thus 'first'
+      (fn [{target :target buildingId :nationalId}]
+        (buildingid-updates-for-operation application buildingId target))
       operation-buildings)))
 
 (defn building-updates

@@ -15,14 +15,14 @@
   (fact (pysyva-rakennustunnus 12345678) => (throws AssertionError)))
 
 
-(facts "Buildings exist with operation id (tags)"
+(facts "Buildings exist with operation id"
   (let [xml (xml/parse (slurp "resources/krysp/dev/buildings-with-operationIds.xml"))
         buildings (->buildings-summary xml)
         rakennus (first buildings)
         rakennelma (second buildings)]
-    (:tags rakennus) => (just [{:tag "abcdefghijklmnopqr" :id "toimenpideId"}
-                               {:tag "rqponmlkjihgfedcba" :id "toimenpideId"}])
-    (:tags rakennelma) => (just [{:tag "56c72f3cf165623f0132a28b" :id "toimenpideId"}])))
+
+    (:target rakennus) => {:id "abcdefghijklmnopqr" :type "operation"}
+    (:target rakennelma) => {:id "56c72f3cf165623f0132a28b" :type "operation"}))
 
 (facts "KRYSP yhteiset 2.1.0"
   (let [xml (xml/parse (slurp "dev-resources/krysp/building-2.1.2.xml"))
