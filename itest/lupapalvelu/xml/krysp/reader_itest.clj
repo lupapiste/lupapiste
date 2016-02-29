@@ -33,7 +33,7 @@
                               :usage       "039 muut asuinkerrostalot"
                               :area        "2682"
                               :index       nil
-                              :target      nil
+                              :operationId nil
                               :description nil
                               :created     "1962"})
 
@@ -46,8 +46,8 @@
                                :usage        "021 rivitalot"
                                :area         "281"
                                :index        nil
-                               :target      nil
-                               :description nil
+                               :operationId  nil
+                               :description  nil
                                :created     "1998"}))))
 
 (fact "converting building krysp to lupapiste domain model"

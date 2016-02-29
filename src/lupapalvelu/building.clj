@@ -6,34 +6,34 @@
             [sade.util :as util]))
 
 (defn buildingId-in-document?
-  "Predicate to validate that given building-operation's id matches document's operation id.
+  "Predicate to validate that given operation id matches document's operation id.
    Document schema is checked to contain valtakunnallinenNumero"
-  [building-operation {{op :op :as info} :schema-info}]
+  [op-id {{op :op :as info} :schema-info}]
   (let [schema-body (:body (schemas/get-schema info))]
     (when (and op
                (:id op)
                (some #(= (:name %) "valtakunnallinenNumero") schema-body))
-      (= (:id op) (:id building-operation)))))
+      (= (:id op) op-id))))
 
 (defn buildingid-updates-for-operation
   "Generates valtakunnallinenNumero updates to documents regarding operation.
    Example update: {documents.1.data.valtakunnalinenNumero.value '123456001M'}"
-  [{:keys [documents]} buildingId building-operation]
+  [{:keys [documents]} buildingId op-id]
   (mongo/generate-array-updates :documents
                                 documents
-                                (partial buildingId-in-document? building-operation)
+                                (partial buildingId-in-document? op-id)
                                 "data.valtakunnallinenNumero.value"
                                 buildingId))
 
 (defn buildings-with-operation [buildings]
-  (remove (comp empty? :target) buildings))
+  (filter :operationId buildings))
 
 (defn operation-building-updates [operation-buildings application]
   (remove
     util/empty-or-nil?
     (map
-      (fn [{target :target buildingId :nationalId}]
-        (buildingid-updates-for-operation application buildingId target))
+      (fn [{op-id :operationId buildingId :nationalId}]
+        (buildingid-updates-for-operation application buildingId op-id))
       operation-buildings)))
 
 (defn building-updates

@@ -21,8 +21,8 @@
         rakennus (first buildings)
         rakennelma (second buildings)]
 
-    (:target rakennus) => {:id "abcdefghijklmnopqr" :type "operation"}
-    (:target rakennelma) => {:id "56c72f3cf165623f0132a28b" :type "operation"}))
+    (:operationId rakennus) => "abcdefghijklmnopqr"
+    (:operationId rakennelma) => "56c72f3cf165623f0132a28b"))
 
 (facts "KRYSP yhteiset 2.1.0"
   (let [xml (xml/parse (slurp "dev-resources/krysp/building-2.1.2.xml"))

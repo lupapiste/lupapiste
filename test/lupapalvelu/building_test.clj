@@ -4,7 +4,7 @@
 
 (def buildings [{:description "Talo A",
                  :localShortId "101",
-                 :target {:id "321" :type "operation"}
+                 :operationId "321"
                  :buildingId "123456001M",
                  :index "1",
                  :created "2013",
@@ -17,7 +17,7 @@
 (def test-docs [{:id "123" :schema-info {:name "testi1"}}
                 {:id "1234" :schema-info {:name "testi2" :op {:id "321"}}}])
 
-(def test-operation (-> buildings first :target))
+(def test-operation (-> buildings first :operationId))
 
 (against-background
   [(lupapalvelu.document.schemas/get-schema anything) => {:body [{:name "valtakunnallinenNumero"}]}]
@@ -39,6 +39,6 @@
   (facts "Building and document updates together"
     (fact "buildings array and document update OK"
       (building-updates buildings {:documents test-docs}) => {:buildings buildings, "documents.1.data.valtakunnallinenNumero.value" "123456001M"})
-    (let [first-tag-unknown (map #(assoc % :target {:type "operation" :id "foobar"}) buildings)]
+    (let [first-tag-unknown (map #(assoc % :operationId "foobar") buildings)]
       (fact "no document updates if unknown operation in buildings"
         (building-updates first-tag-unknown {:documents test-docs}) => {:buildings first-tag-unknown}))))

@@ -339,9 +339,9 @@
                                                                                      building-canonical)
                                                                 building-canonical (util/assoc-when
                                                                                     building-canonical
-                                                                                    :muuTunnustieto (when-let [operation-target (:target building)]
+                                                                                    :muuTunnustieto (when-let [op-id (:operationId building)]
                                                                                                       (list {:MuuTunnus
-                                                                                                             {:tunnus (:id operation-target)
+                                                                                                             {:tunnus op-id
                                                                                                               :sovellus "toimenpideId"}}))
                                                                                     :rakennuksenSelite (:description building)) ; v2.2.0
                                                                 ]
