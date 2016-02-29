@@ -1,7 +1,7 @@
 ;(function() {
   "use strict";
 
-  var screenMessagesListModel = new (function() {
+  function ScreenMessagesListModel() {
     var self = this;
 
     self.textFi = ko.observable("");
@@ -16,8 +16,8 @@
       self.textFi("");
       self.textSv("");
     };
-
-  })();
+  }
+  var screenMessagesListModel = new ScreenMessagesListModel();
 
   hub.onPageLoad("screenmessages", LUPAPISTE.Screenmessage.refresh);
 

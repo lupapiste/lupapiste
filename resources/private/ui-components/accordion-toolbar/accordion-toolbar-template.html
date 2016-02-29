@@ -14,7 +14,11 @@
                                 'data-test-id': docModel.schemaName + '-accordion-title-text'},
                          ltext: titleLoc">
         </span>
-        <span class="description" data-bind="text: headerDescription, attr: {'data-test-id': docModel.schemaName + '-accordion-description-text'}">
+        <span class="description" data-bind="text: headerDescription, attr: {'data-test-id': docModel.schemaName + '-accordion-description-text'}"></span>
+        <span>
+          <!-- ko if: isPrimaryOperation -->
+          <i class="lupicon-star" data-bind="attr: {title: loc('operations.primary')}"></i>
+          <!-- /ko -->
         </span>
       </span>
       <span class="icons">
@@ -67,21 +71,19 @@
       </button>
       <!-- ko if: showIdentifierEditors -->
       <div class="identifier-editors container-bubble" data-bind="event: {keydown: closeEditors}">
-        <div>
-          <!-- ko if: identifierField -->
-          <div class="inline-col identifier-component"
-              data-bind="component: {name: 'document-identifier',
-                                     params: {docId: docModel.docId,
-                                              authModel: auth,
-                                              options: docModelOptions}}"></div>
-          <!-- /ko -->
-          <div class="inline-col identifier-component"
-               data-bind="component: {name: 'operation-editor',
-                                      params: {docModel: docModel,
-                                               operation: operation,
-                                               isPrimary: isPrimaryOperation,
-                                               auth: auth}}"></div>
-        </div>
+        <!-- ko if: identifierField -->
+        <div class="inline-col identifier-component"
+            data-bind="component: {name: 'document-identifier',
+                                   params: {docId: docModel.docId,
+                                            authModel: auth,
+                                            options: docModelOptions}}"></div>
+        <!-- /ko -->
+        <div class="inline-col"
+             data-bind="component: {name: 'operation-editor',
+                                    params: {docModel: docModel,
+                                             operation: operation,
+                                             isPrimary: isPrimaryOperation,
+                                             auth: auth}}"></div>
         <!-- ko if: identifierField -->
         <p data-bind="ltext: 'document.operation-identifier.notice'"></p>
         <!-- /ko -->

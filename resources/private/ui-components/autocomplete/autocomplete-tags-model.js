@@ -11,11 +11,12 @@ LUPAPISTE.AutocompleteTagsModel = function(params) {
 
   self.data = ko.pureComputed(function() {
     var result = [];
+    var tagGroups = lupapisteApp.services.tagFilterService.data();
 
-    for (var key in lupapisteApp.services.tagFilterService.data()) {
-      var header = {label: lupapisteApp.services.tagFilterService.data()[key].name[loc.currentLanguage], groupHeader: true};
+    _.each(tagGroups, function(tagGroup) {
+      var header = {label: tagGroup.name[loc.currentLanguage], groupHeader: true};
 
-      var filteredData = util.filterDataByQuery({data: lupapisteApp.services.tagFilterService.data()[key].tags,
+      var filteredData = util.filterDataByQuery({data: tagGroup.tags,
                                                  query: self.query(),
                                                  selected: self.selected()});
       // append group header and group items to result data
@@ -25,7 +26,7 @@ LUPAPISTE.AutocompleteTagsModel = function(params) {
         }
         result = result.concat(_.sortBy(filteredData, "label"));
       }
-    }
+    });
     return result;
   });
 };

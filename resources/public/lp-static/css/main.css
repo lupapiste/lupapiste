@@ -1,5 +1,4 @@
-@import url('main-blessed1.css?z=1456414607466');
-
+@import url('main-blessed1.css?z=1456750358448');
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
 .scroll-73em {
@@ -1793,25 +1792,29 @@ ul.no-bullets {
 .accordion div.sticky span.icons .rejected {
   padding-right: 0;
 }
-/* line 33, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 32, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky .identifier-component .form-indicator {
+  right: -100px;
+}
+/* line 38, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion-toggle > button, .accordion button.accordion-toggle {
   width: 100%;
   margin-bottom: 0 !important;
 }
-/* line 35, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 40, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion-toggle > button span.bar-text, .accordion button.accordion-toggle span.bar-text {
   width: 100%;
   text-transform: uppercase;
 }
-/* line 43, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 48, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion div.sticky button.positive > span.icons > .approved {
   display: table-cell;
 }
-/* line 47, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 52, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion div.sticky button.rejected > span.icons > .rejected {
   display: table-cell;
 }
-/* line 53, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 58, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion_content {
   display: none;
   padding-top: 6px;
@@ -1819,43 +1822,43 @@ ul.no-bullets {
   border: 1px solid #dddddd;
   border-top: none;
 }
-/* line 62, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 67, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-content-part {
   margin-left: 12px;
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 67, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 72, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields {
   width: 100%;
 }
-/* line 70, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 75, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h2 {
   color: black;
 }
-/* line 74, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 79, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .authority-accept-fields h2 {
   background: #f6f6f6;
 }
-/* line 78, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 83, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h3 {
   margin-top: 12px;
 }
-/* line 81, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 86, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .form-group {
   margin-top: 6px;
 }
-/* line 87, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 92, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion_content.expanded {
   display: block;
 }
 
-/* line 92, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 97, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-fields > .button-group:last-child {
   border-bottom: none;
 }
 
-/* line 96, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 101, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator {
   z-index: 12000;
   width: 112px;
@@ -1864,25 +1867,25 @@ ul.no-bullets {
   padding: 0 24px 0 0;
   margin-left: 12px;
 }
-/* line 104, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 109, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
-/* line 109, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 114, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-saved .icon {
   display: inline-block;
   background-position: 4px -2499px;
   border-right: none;
 }
-/* line 116, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 121, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-warn .icon {
   display: inline-block;
   background-position: 4px -3199px;
   border-right: none;
 }
-/* line 123, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 128, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-err .icon {
   display: inline-block;
   background-position: 4px -2399px;
@@ -5000,45 +5003,54 @@ td.comment-text {
   margin-bottom: 12px;
   overflow: hidden;
 }
-/* line 183, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 184, ../../../private/common-html/sass/views/_attachment.scss */
+.attachment-label #attachment-latest-version-info {
+  margin-bottom: 24px;
+}
+/* line 188, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-label-header {
   font-size: 0.85em;
   font-weight: 700;
   letter-spacing: 0.125em;
 }
-/* line 189, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 194, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-label-header-item {
   margin-right: 24px;
+  font-weight: bold;
 }
-/* line 193, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 199, ../../../private/common-html/sass/views/_attachment.scss */
+.attachment-label .attachment-label-info-item {
+  margin-right: 24px;
+}
+/* line 203, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label input {
   display: block;
   margin: 0;
   width: 100%;
   height: 26px;
 }
-/* line 200, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 210, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label input[type="checkbox"] {
   display: inline-block;
   width: 3.75em;
 }
-/* line 205, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 215, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label select {
   display: block;
   width: 100%;
 }
-/* line 210, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 220, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-info-field {
   margin-bottom: 6px;
   position: relative;
 }
 
-/* line 216, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 226, ../../../private/common-html/sass/views/_attachment.scss */
 .signatures {
   margin-top: 12px;
 }
 
-/* line 220, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 230, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-table {
   display: table;
   width: auto;
@@ -5046,7 +5058,7 @@ td.comment-text {
   margin-left: 6px;
 }
 
-/* line 227, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 237, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-row {
   display: table-row;
   width: auto;
@@ -5055,58 +5067,58 @@ td.comment-text {
   line-height: 27px;
 }
 
-/* line 235, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 245, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-cell {
   display: table-cell;
   width: 200px;
 }
 
-/* line 240, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 250, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content {
   margin-top: 12px;
 }
-/* line 243, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 253, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable {
   margin: 0;
 }
-/* line 245, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 255, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable tr {
   background: transparent;
   border: none;
 }
-/* line 249, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 259, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable th, .tos-metadata-content .subtable td {
   background: transparent;
   padding: 0;
 }
 
-/* line 256, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 266, ../../../private/common-html/sass/views/_attachment.scss */
 .upload-instructions {
   margin-bottom: 24px;
 }
-/* line 257, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 267, ../../../private/common-html/sass/views/_attachment.scss */
 .upload-instructions p {
   line-height: normal;
   margin-bottom: 12px;
 }
 
-/* line 264, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 274, ../../../private/common-html/sass/views/_attachment.scss */
 .archive-valid {
   margin-top: 12px;
 }
-/* line 266, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 276, ../../../private/common-html/sass/views/_attachment.scss */
 .archive-valid [class^="lupicon-"] {
   vertical-align: middle;
   margin-left: 2px;
   font-size: 18px;
 }
 
-/* line 273, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 283, ../../../private/common-html/sass/views/_attachment.scss */
 .modal-body p {
   max-width: 600px;
 }
 
-/* line 277, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 287, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone {
   display: table-cell;
   vertical-align: middle;
@@ -5116,17 +5128,17 @@ td.comment-text {
   text-align: center;
   background-color: #2ca92c;
 }
-/* line 285, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 295, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone h1 {
   float: none;
   display: block;
   color: #fff;
 }
-/* line 290, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 300, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone.active {
   background-color: #46b02d;
 }
-/* line 293, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 303, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone i {
   font-size: 50px;
 }

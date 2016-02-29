@@ -180,6 +180,11 @@ td.comment-text {
   margin-bottom: $marginM;
   overflow: hidden;
 
+
+  #attachment-latest-version-info {
+    margin-bottom: $marginL;
+  }
+
   .attachment-label-header {
     font-size: 0.85em;
     font-weight: 700;
@@ -187,6 +192,11 @@ td.comment-text {
   }
 
   .attachment-label-header-item {
+    margin-right: $marginL;
+    font-weight: bold;
+  }
+
+  .attachment-label-info-item {
     margin-right: $marginL;
   }
 

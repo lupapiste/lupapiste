@@ -6,6 +6,7 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
   self.documentId = params.docId;
   self.authModel = params.authModel;
   self.options = params.options; // DocModel options (disabled setting)
+  self.indicator = ko.observable();
 
   self.myService = lupapisteApp.services.accordionService;
 
@@ -16,7 +17,7 @@ LUPAPISTE.DocumentIdentifierModel = function(params) {
 
   if (ko.isObservable(self.identifier)) {
     self.identifier.subscribe(function(value) {
-      hub.send("accordionService::saveIdentifier", {docId: self.documentId, key: self.identifierObject.key, value: value});
+      hub.send("accordionService::saveIdentifier", {docId: self.documentId, key: self.identifierObject.key, value: value, indicator: self.indicator});
     });
   }
 

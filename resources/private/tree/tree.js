@@ -1,13 +1,14 @@
 var tree = (function() {
   "use strict";
 
-  var setup = new function() {
+  function SetupModel() {
     var self = this;
     self.speed = 200;
     self.animation = function(enabled) {
       self.speed = enabled ? 200 : 0;
     };
-  }();
+  }
+  var setup = new SetupModel();
 
   function nop() { return true; }
 

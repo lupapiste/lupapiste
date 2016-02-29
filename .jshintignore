@@ -1,1 +1,6 @@
-**/*.min.js
+**/*.min.*js
+**/*.debug.js
+resources/private/jquery/*
+resources/private/jquery-upload/*
+resources/private/knockout/*
+resources/private/ol/*

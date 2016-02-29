@@ -128,7 +128,7 @@
   };
 
   var collectMainDocuments = function(application) {
-    return [{documentNameKey: "applications.application", metadata: application.metadata, id: application.id() + '-application'}];
+    return [{documentNameKey: "applications.application", metadata: application.metadata, id: application.id() + "-application"}];
   };
 
   var model = function(params) {
@@ -209,14 +209,14 @@
 
     self.selectAll = function() {
       var selectIfArchivable = function(attachment) {
-        if (attachment.archivable && attachment.state() !== 'arkistoitu') {
+        if (attachment.archivable && attachment.state() !== "arkistoitu") {
           attachment.sendToArchive(true);
         }
       };
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
-        if (doc.state() !== 'arkistoitu') {
+        if (doc.state() !== "arkistoitu") {
           doc.sendToArchive(true);
         }
       });
@@ -227,7 +227,7 @@
         var newState = stateMap[ko.unwrap(doc.id)];
         if (newState) {
           doc.metadata().tila(newState);
-          if (newState === 'arkistoitu') {
+          if (newState === "arkistoitu") {
             doc.sendToArchive(false);
           }
         }

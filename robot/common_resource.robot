@@ -483,7 +483,6 @@ Edit operation description
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
   Input text by test id  op-description-editor-${doc}  ${text}
-  Positive indicator should be visible
   # Close the input
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
@@ -501,7 +500,6 @@ Input building identifier
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
   Input text by test id  ${docId}-identifier-input  ${text}
-  Positive indicator should be visible
   # Close the input
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
@@ -851,8 +849,8 @@ Open to authorities
 Input comment
   [Arguments]  ${message}
   Open side panel  conversation
-  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
+  Wait Until  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Wait Until  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
@@ -1170,7 +1168,7 @@ Clear mocks
 
 Scroll to
   [Arguments]  ${selector}
-  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
+  Wait Until  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
 
 Scroll to test id
   [Arguments]  ${id}
@@ -1184,7 +1182,8 @@ Scroll and click
 
 Scroll and click test id
   [Arguments]  ${id}
-  Scroll and click  [data-test-id=${id}]
+  Scroll to  [data-test-id=${id}]
+  Click by test id  ${id}
 
 Wait test id visible
   [Arguments]  ${id}

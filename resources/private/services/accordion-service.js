@@ -67,9 +67,10 @@ LUPAPISTE.AccordionService = function() {
     var docId = event.docId;
     var value = event.value;
     var path = [event.key];
+    var indicator = event.indicator;
     var doc = _.find(self.identifierFields(), {docId: docId});
     if (doc.value() !== value) {
-      lupapisteApp.services.documentDataService.updateDoc(docId, [[path, value]], self.indicator);
+      lupapisteApp.services.documentDataService.updateDoc(docId, [[path, value]], indicator);
       doc.value(value);
     }
   });
@@ -78,17 +79,18 @@ LUPAPISTE.AccordionService = function() {
     var appId = event.appId;
     var operationId = event.operationId;
     var value = event.description;
+    var indicator = event.indicator;
     var operation = self.getOperationByOpId(operationId);
     if (operation.description() !== value) {
       ajax.command ("update-op-description", {id: appId,
                                               "op-id": operationId,
                                               desc: value})
-      .success (function(resp) {
+      .success (function() {
         operation.description(value);
         hub.send("op-description-changed", {appId: appId,
                                             "op-id": operationId,
                                             "op-desc": value});
-        util.showSavedIndicator(resp);
+        if (indicator) { indicator({type: "saved"}); }
       })
       .call();
     }

@@ -1,4 +1,4 @@
-LUPAPISTE.CompanyInviteDialogModel = function(params) {
+LUPAPISTE.CompanyInviteDialogModel = function() {
   "use strict";
   var self = this;
 

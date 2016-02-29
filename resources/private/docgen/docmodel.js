@@ -1199,7 +1199,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return element;
   }
 
-  function buildForemanHistory(subSchema, model, path) {
+  function buildForemanHistory() {
     var params = {
       applicationId: self.appId
     };

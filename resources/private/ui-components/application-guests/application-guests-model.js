@@ -70,7 +70,7 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     .success( function() {
       fetchGuests();
       self.bubbleVisible( false );
-      hub.send( "indicator", {style: "positive"})
+      hub.send( "indicator", {style: "positive"});
     })
     .error( function( res ) {
       self.guestError( res.text );

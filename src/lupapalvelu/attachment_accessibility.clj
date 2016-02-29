@@ -53,7 +53,8 @@
     (boolean
       (when-let [attachment (util/find-first
                               (fn [{versions :versions :as attachment}]
-                                (util/find-first #{file-id} (map :fileId versions)))
+                                (->> (mapcat (juxt :fileId :originalFileId) versions)
+                                     (util/find-first #{file-id})))
                               attachments)]
         (can-access-attachment? user application attachment)))))
 

@@ -1769,6 +1769,25 @@
                              {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
                                                       :schema-info.op.name {$in ["aita"]}}}}))
 
+(defn add-original-file-id-for-version [{:keys [fileId originalFileId] :as version}]
+  (assoc version :originalFileId (or originalFileId fileId)))
+
+(defn add-original-file-id-for-versions-and-latestVersion [{latest-version :latestVersion :as attachment}]
+  (if latest-version
+    (-> attachment
+        (update :versions (partial map add-original-file-id-for-version))
+        (update :latestVersion add-original-file-id-for-version))
+    attachment))
+
+(defmigration add-original-file-id-for-attachment-versions
+  {:apply-when (pos? (mongo/count :applications
+                                  {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                                                                      :originalFileId {$exists false}}}}))}
+  (update-applications-array :attachments
+                             add-original-file-id-for-versions-and-latestVersion
+                             {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                                                                 :originalFileId {$exists false}}}}))
+
 #_(defmigration rename-hankkeen-kuvaus-rakennuslupa-back-to-hankkeen-kuvaus ;; TODO: migrate, LPK-1448
   {:apply-when (or (pos? (mongo/count :applications {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
                    (pos? (mongo/count :submitted-applications {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}})))}
