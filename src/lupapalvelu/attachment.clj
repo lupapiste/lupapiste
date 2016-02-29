@@ -519,8 +519,8 @@
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
   [application attachment-id fileId originalFileId]
   (let [latest-version (latest-version-after-removing-file (get-attachment-info application attachment-id) fileId)]
-    (infof "1/3 deleting files [%s] of attachment %s" (ss/join ", " #{fileId originalFileId}) attachment-id)
-    (run! delete-attachment-file-and-preview! (set fileId originalFileId))
+    (infof "1/3 deleting files [%s] of attachment %s" (ss/join ", " (set [fileId originalFileId])) attachment-id)
+    (run! delete-attachment-file-and-preview! (set [fileId originalFileId]))
     (infof "2/3 deleted file %s of attachment %s" fileId attachment-id)
     (update-application
      (application->command application)
