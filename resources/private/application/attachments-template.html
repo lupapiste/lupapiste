@@ -19,11 +19,12 @@
              <th></th>
             </tr>
 
+            <!-- TODO: refaktoroi td- ja tr- data-bindit -->
             <!-- ko foreach: attachments -->
             <tr class="attachment-row"
-                data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; },
-                           attr: {'id': 'attachment-row-' + type['type-group'] + '-' + type['type-id']}">
-              <td class="attachmentState">
+                data-bind="attr: {'id': 'attachment-row-' + type['type-group'] + '-' + type['type-id']}">
+              <td class="attachmentState"
+              data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <i data-bind="attr: {'class': LUPAPISTE.statusIcon(statusName),
                                         'data-test-state': state,
                                         'data-test-type': type['type-group'] + '.' + type['type-id'],
@@ -60,7 +61,8 @@
                                         'data-test-icon': 'not-public-attachment-' + type['type-group'] + '.' + type['type-id']}">
                 </i>
               </td>
-              <td class="attachment-type-group">
+              <td class="attachment-type-group"
+              data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <span data-bind="if: type">
                   <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
                 </span>
@@ -68,7 +70,8 @@
                   <i data-bind="ltext: 'attachment.noName'"></i>
                 </span>
               </td>
-              <td class="attachment-type-id">
+              <td class="attachment-type-id"
+              data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                   <span data-bind="if: type">
                     <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
@@ -82,9 +85,10 @@
                 <!-- /ko -->
               </td>
               <td class="attachment-help-info">
-                <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
+                <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
               </td>
-              <td class="attachment-not-needed center">
+              <td class="attachment-not-needed center"
+              data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                   <input type="checkbox" data-bind="checked: notNeeded,
                                                     disable: $data.notNeededFieldDisabled() || !$root.authorization.ok('set-attachment-not-needed'),
                                                     attr: {'data-test-id': ['attachment-not-needed', type['type-group'], type['type-id']].join('-'),
@@ -92,7 +96,8 @@
                                                     click: $root.attachmentsTab.toggleNeeded,
                                                     clickBubble: false"/>
               </td>
-              <td class="attachment-file-info">
+              <td class="attachment-file-info"
+              data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <span data-bind="if: $data.latestVersion">
                   <a href="#" data-bind="text: latestVersion.filename,
                                          attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId,
@@ -106,13 +111,15 @@
                 <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                 <!-- /ko -->
               </td>
-              <td class="attachment-file-changed">
+              <td class="attachment-file-changed"
+              data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <span data-bind="if: $data.latestVersion">
                   <span data-bind="dateString: modified"></span>
                   <span data-bind="fullName: latestVersion.user"></span>
                 </span>
               </td>
-              <td class="attachment-delete-single">
+              <td class="attachment-delete-single"
+              data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
                                  clickBubble: false,
                                  visible: $root.authorization.ok('delete-attachment') && $parent.editable && authorized && !$data.readOnly,
