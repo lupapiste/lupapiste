@@ -52,11 +52,12 @@
      :applicationType "all"
      :handlers  ["321"]
      :tags ["test1" "test2"]}
-    {:role "authority"}) => {"$and" [{:auth.id "123"}
-                                                 {:state {"$nin" ["draft" "canceled"]}}
-                                                 {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
-                                     {:tags {"$in" ["test1" "test2"]}}
-                                     {:permitSubtype {"$nin" ["tyonjohtaja-hakemus" "tyonjohtaja-ilmoitus"]}}]})
+    {:role "authority"}) => {"$and"
+                               [{:auth.id "123"}
+                                {:state {"$nin" ["draft" "canceled"]}}
+                                {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
+                                {:tags {"$in" ["test1" "test2"]}}
+                                {:permitSubtype {"$nin" ["tyonjohtaja-hakemus" "tyonjohtaja-ilmoitus"]}}]})
 
 (fact "Organization are present in query"
   (-> (make-query {} {:organizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})
@@ -138,4 +139,7 @@
                                                        [404059.221 6693545.0867]
                                                        [404059.221 6693545.0867]
                                                        [402644.2941 6693912.6002]]]}}]}}]))
+
+(facts "Building ID search"
+  (make-text-query "123456001M") => {:buildings.nationalId "123456001M"})
 

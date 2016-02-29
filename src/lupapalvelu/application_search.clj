@@ -4,10 +4,11 @@
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [monger.query :as query]
+            [sade.core :refer :all]
+            [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.property :as p]
-            [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.mongo :as mongo]
@@ -76,6 +77,7 @@
   (cond
     (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search) {:_id (ss/upper-case filter-search)}
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
+    (re-matches v/rakennustunnus-pattern filter-search) {:buildings.nationalId filter-search}
     :else (make-free-text-query filter-search)))
 
 (defn- make-area-query [areas user]
