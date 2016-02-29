@@ -25,9 +25,6 @@
                                 "data.valtakunnallinenNumero.value"
                                 buildingId))
 
-(defn buildings-with-operation [buildings]
-  (filter :operationId buildings))
-
 (defn operation-building-updates [operation-buildings application]
   (remove
     util/empty-or-nil?
@@ -40,6 +37,6 @@
   "Returns both updates: buildings array of all buildings, and document specific buildingId updates.
    Return value is a map of updates. Example: {:buildings [{:nationalId '123'}] :documents.1.data.valtakunnallinenNumero.value '123'}"
   [buildings application]
-  (let [operation-buildings (buildings-with-operation buildings)
+  (let [operation-buildings        (filter :operationId buildings)
         op-documents-array-updates (operation-building-updates operation-buildings application)]
     (apply merge (conj op-documents-array-updates {:buildings buildings}))))
