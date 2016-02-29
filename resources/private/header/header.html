@@ -73,7 +73,7 @@
     <div  class="nav-notification" id="sys-notification" style="display: none"
           data-bind="visible: $data.screenMessage && screenMessage.messages && screenMessage.messages().length > 0">
         <div class="nav-box" data-bind="if: $data.screenMessage">
-            <div class="notification-info"><span class="lupicon-circle-info"></span><</div>
+            <div class="notification-info"><span class="lupicon-circle-info"></span></div>
             <div  class="notification-list">
                 <ul class="wrapper" data-bind="foreach: $data.screenMessage.messages">
                     <li data-bind="html: $data[loc.getCurrentLanguage()]" data-test-id="test-screenmessage"></li>

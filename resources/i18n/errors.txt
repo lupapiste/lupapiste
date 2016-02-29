@@ -10,6 +10,8 @@
 "error.invalid-key" "sv" "Felaktig nyckel"
 "error.unknown-id" "fi" "Tuntematon id"
 "error.unknown-id" "sv" "Okänt id"
+"error.token-not-found" "fi" "Linkki on vanhentunut tai se on jo käytetty."
+"error.token-not-found" "sv" "Länken är fåråldrad eller har redan använts"
 "application.approve.statement-not-requested" "fi" "Hakemuksella on antamaton lausunto"
 "application.approve.statement-not-requested" "sv" "Denna ansökan saknar ett utlåtande"
 "application.approve.statement-not-requested-warning-text" "fi" "Hakemuksella on ainakin yksi antamaton lausunto. Kun hakemus siirretään käsittelyyn, lausuntoa ei voi enää antaa. Haluatko varmasti siirtää hakemuksen käsittelyyn?"

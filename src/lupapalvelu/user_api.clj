@@ -22,7 +22,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.token :as token]
@@ -39,9 +39,9 @@
 ;;
 
 (defn- get-user [user]
-  (if (user/virtual-user? user)
+  (if (usr/virtual-user? user)
     user
-    (let [full-user (user/get-user-by-id (:id user))]
+    (let [full-user (usr/get-user-by-id (:id user))]
       (dissoc full-user :private :personId))))
 
 (defquery user
@@ -61,18 +61,18 @@
                   (:organization data) [(:organization data)]
                   (:organizations data) (:organizations data))
         query (if (seq org-ids)
-                {$and [base-query, (user/org-authz-match org-ids)]}
+                {$and [base-query, (usr/org-authz-match org-ids)]}
                 base-query)
-        users (user/find-users query)]
-    (ok :users (map (comp user/with-org-auth user/non-private) users))))
+        users (usr/find-users query)]
+    (ok :users (map (comp usr/with-org-auth usr/non-private) users))))
 
 (defquery users-in-same-organizations
   {:user-roles #{:authority}}
   [{user :user}]
-  (if-let [organization-ids (seq (user/organization-ids user))]
-    (let [query {$and [{:role "authority"}, (user/org-authz-match organization-ids)]}
-          users (user/find-users query)]
-      (ok :users (map user/summary users)))
+  (if-let [organization-ids (seq (usr/organization-ids user))]
+    (let [query {$and [{:role "authority"}, (usr/org-authz-match organization-ids)]}
+          users (usr/find-users query)]
+      (ok :users (map usr/summary users)))
     (ok :users [])))
 
 (env/in-dev
@@ -81,12 +81,12 @@
     :input-validators [(partial action/non-blank-parameters [:email])]
     :user-roles #{:admin}}
    [_]
-   (ok :user (user/get-user-by-email email))))
+   (ok :user (usr/get-user-by-email email))))
 
 (defquery users-for-datatables
   {:user-roles #{:admin :authorityAdmin}}
   [{caller :user {params :params} :data}]
-  (ok :data (user/users-for-datatables caller params)))
+  (ok :data (usr/users-for-datatables caller params)))
 
 
 
@@ -112,14 +112,14 @@
     (notifications/notify! :invite-authority {:user new-user, :data {:token token}})))
 
 (defn- notify-authority-added [email organization-id]
-  (let [user (user/get-user-by-email email)
+  (let [user (usr/get-user-by-email email)
         org-name (:name (organization/get-organization organization-id))]
     (notifications/notify! :notify-authority-added {:user user, :data org-name})))
 
 (defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
   (let [org-authz {new-organization (into #{} roles)}
         user-data {:email email :orgAuthz org-authz :role :authority :enabled true :firstName firstName :lastName lastName}
-        new-user (user/create-new-user caller user-data :send-email false)]
+        new-user (usr/create-new-user caller user-data :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
     (notify-new-authority new-user caller)
     (ok :operation "invited")))
@@ -131,9 +131,9 @@
  (let [updated-user-data (if (:organization user-data)
                            (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]})
                            user-data)
-        user (user/create-new-user caller updated-user-data :send-email false)]
+        user (usr/create-new-user caller updated-user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
-    (if (user/authority? user)
+    (if (usr/authority? user)
       (do
         (notify-new-authority user caller)
         (ok :id (:id user) :user user))
@@ -169,33 +169,33 @@
   (let [caller-email    (:email caller)
         user-email      (:email user-data)]
 
-    (if (user/admin? caller)
+    (if (usr/admin? caller)
       (when (= user-email caller-email)    (fail! :error.unauthorized :desc "admin may not change his/her own data"))
       (when (not= user-email caller-email) (fail! :error.unauthorized :desc "can't edit others data")))
 
     true))
 
 ;; Define schema for update data
-(def- UserUpdate (dissoc user/User :id :role :email :username :enabled))
+(def- UserUpdate (dissoc usr/User :id :role :email :username :enabled))
 
 (defn- validate-updatable-user [{user-data :data}]
   (when (sc/check UserUpdate user-data)
     (fail :error.invalid-user-data)))
 
 (defn- validate-registrable-user [{user-data :data}]
-  (when (sc/check user/RegisterUser user-data)
+  (when (sc/check usr/RegisterUser user-data)
     (fail :error.invalid-user-data)))
 
 (defcommand update-user
   {:user-roles #{:applicant :authority :authorityAdmin :admin}
    :input-validators [validate-updatable-user]}
   [{caller :user user-data :data :as command}]
-  (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
+  (let [email     (usr/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
       (if (= email (:email caller))
-        (ssess/merge-to-session command (ok) {:user (user/session-summary (user/get-user-by-id (:id caller)))})
+        (ssess/merge-to-session command (ok) {:user (usr/session-summary (usr/get-user-by-id (:id caller)))})
         (ok))
       (fail :not-found :email email))))
 
@@ -206,7 +206,7 @@
                       action/email-validator]
    :description "Changes applicant or dummy account into authority"}
   [_]
-  (let [user (user/get-user-by-email email)]
+  (let [user (usr/get-user-by-email email)]
     (if (#{"dummy" "applicant"} (:role user))
       (mongo/update :users {:email email} {$set {:role "authority"}})
       (fail :error.user-not-found))))
@@ -232,7 +232,7 @@
    :user-roles       #{:authority}
    :input-validators [validate-filter-type
                       (fn [{{filter-id :filterId filter-type :filterType} :data {user-id :id} :user}]
-                        (let [user (user/get-user-by-id user-id)
+                        (let [user (usr/get-user-by-id user-id)
                               filters (get user (filter-storage-key filter-type))]
                           (when-not (or (nil? filter-id) (util/find-by-id filter-id filters))
                             (fail :error.filter-not-found))))]
@@ -257,7 +257,7 @@
   (let [filter-id        (or filter-id (mongo/create-id))
         storage-key      (filter-storage-key filterType)
         id-key           (default-filter-storage-key filterType)
-        user             (user/get-user-by-id user-id)
+        user             (usr/get-user-by-id user-id)
         filters          (get user storage-key)
         title-collision? (->> filters
                               (filter #(= (:title %) title))
@@ -281,7 +281,7 @@
     (doseq [filter updated-filters]
       ; Should always  pass, but if not, throws exception which will be caught
       ; by our action framework. User gets an unexpected error.
-      (sc/validate user/SearchFilter filter))
+      (sc/validate usr/SearchFilter filter))
 
     (mongo/update-by-id :users user-id update)
     (ok :filter search-filter)))
@@ -293,7 +293,7 @@
                       (partial action/non-blank-parameters [:filterId])]
    :description "Removes users application filter"}
   [{{user-id :id} :user}]
-  (let [user (user/get-user-by-id user-id)
+  (let [user (usr/get-user-by-id user-id)
         storage-key (filter-storage-key filterType)
         id-key (default-filter-storage-key filterType)
         update (merge {$pull {storage-key {:id filterId}}}
@@ -331,15 +331,15 @@
                       (partial allowed-roles organization/authority-roles)]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
-  (let [organization-id (user/authority-admins-organization-id caller)
+  (let [organization-id (usr/authority-admins-organization-id caller)
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)
-        email           (user/canonize-email email)
-        result          (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
+        email           (usr/canonize-email email)
+        result          (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})]
     (if (ok? result)
       (do
         (notify-authority-added email organization-id)
         (ok :operation "add"))
-      (if-not (user/get-user-by-email email)
+      (if-not (usr/get-user-by-email email)
         (create-authority-user-with-organization caller organization-id email firstName lastName actual-roles)
         (fail :error.user-not-found)))))
 
@@ -349,8 +349,8 @@
                       action/email-validator]
    :user-roles       #{:authorityAdmin}}
   [{caller :user}]
-  (let [organization-id (user/authority-admins-organization-id caller)]
-    (user/update-user-by-email email {:role "authority"} {$unset {(str "orgAuthz." organization-id) ""}})))
+  (let [organization-id (usr/authority-admins-organization-id caller)]
+    (usr/update-user-by-email email {:role "authority"} {$unset {(str "orgAuthz." organization-id) ""}})))
 
 (defcommand update-user-roles
   {:parameters [email roles]
@@ -360,15 +360,15 @@
                       (partial allowed-roles organization/authority-roles)]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
-  (let [organization-id (user/authority-admins-organization-id caller)
+  (let [organization-id (usr/authority-admins-organization-id caller)
         actual-roles    (organization/filter-valid-user-roles-in-organization organization-id roles)]
-    (user/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
+    (usr/update-user-by-email email {:role "authority"} {$set {(str "orgAuthz." organization-id) actual-roles}})))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
-  (let [caller (user/get-user-by-email caller-email)]
+  (let [caller (usr/get-user-by-email caller-email)]
     (when-not caller (fail! :not-found :desc (format "can't process invitation token for email %s, authority admin (%s) no longer exists" email caller-email)))
-    (user/change-password email password)
+    (usr/change-password email password)
     (infof "invitation was accepted: email=%s, organization=%s" email organization)
     (ok)))
 
@@ -385,7 +385,7 @@
     (if (security/check-password oldPassword (-> user-data :private :password))
       (do
         (debug "Password change: user-id:" user-id)
-        (user/change-password (:email user) newPassword)
+        (usr/change-password (:email user) newPassword)
         (ok))
       (do
         (warn "Password change: failed: old password does not match, user-id:" user-id)
@@ -400,8 +400,8 @@
                       action/email-validator]
    :notified      true}
   [_]
-  (let [user (user/get-user-by-email email) ]
-    (if (and user (not (user/dummy? user)))
+  (let [user (usr/get-user-by-email email) ]
+    (if (and user (not (usr/dummy? user)))
       (do
         (pw-reset/reset-password user)
         (ok))
@@ -416,14 +416,14 @@
                       action/email-validator]
    :notified      true}
   [_]
-  (let [user (user/get-user-by-email email) ]
-    (if (and user (not (user/dummy? user)))
+  (let [user (usr/get-user-by-email email) ]
+    (if (and user (not (usr/dummy? user)))
       (ok :link (pw-reset/reset-link "fi" (pw-reset/reset-password user)))
       (fail :error.email-not-found))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
-  (let [email (user/canonize-email (:email data))]
-    (user/change-password email password)
+  (let [email (usr/canonize-email (:email data))]
+    (usr/change-password email password)
     (infof "password reset performed: email=%s" email)
     (ok)))
 
@@ -437,7 +437,7 @@
                       action/email-validator]
    :user-roles #{:admin}}
   [_]
-  (let [email (user/canonize-email email)
+  (let [email (usr/canonize-email email)
        enabled (contains? #{true "true"} enabled)]
    (infof "%s user: email=%s" (if enabled "enable" "disable") email)
    (if (= 1 (mongo/update-n :users {:email email} {$set {:enabled enabled}}))
@@ -456,25 +456,25 @@
    :input-validators [(partial action/non-blank-parameters [:username :password])]
    :user-roles #{:anonymous}}
   [command]
-  (if (user/throttle-login? username)
+  (if (usr/throttle-login? username)
     (do
       (info "login throttled, username:" username)
       (fail :error.login-trottle))
-    (if-let [user (user/get-user-with-password username password)]
+    (if-let [user (usr/get-user-with-password username password)]
       (do
         (info "login successful, username:" username)
-        (user/clear-logins username)
-        (if-let [application-page (user/applicationpage-for (:role user))]
+        (usr/clear-logins username)
+        (if-let [application-page (usr/applicationpage-for (:role user))]
           (ssess/merge-to-session
             command
-            (ok :user (-> user user/with-org-auth user/non-private) :applicationpage application-page)
-            {:user (user/session-summary user)})
+            (ok :user (-> user usr/with-org-auth usr/non-private) :applicationpage application-page)
+            {:user (usr/session-summary user)})
           (do
             (error "Unknown user role:" (:role user))
             (fail :error.login))))
       (do
         (info "login failed, username:" username)
-        (user/login-failed username)
+        (usr/login-failed username)
         (fail :error.login)))))
 
 (defquery redirect-after-login
@@ -489,7 +489,7 @@
                       (fn [{data :data}] (when-not (#{"authority" "authorityAdmin"} (:role data)) (fail :error.invalid-role)))]
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
-  (if (user/get-user-with-password (:username user) password)
+  (if (usr/get-user-with-password (:username user) password)
     (let [imposter (assoc user :impersonating true :role role :orgAuthz {(keyword organizationId) #{(keyword role)}})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
@@ -506,11 +506,11 @@
    :input-validators [action/email-validator validate-registrable-user]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
-        email (user/canonize-email email)]
+        email (usr/canonize-email email)]
     (when-not vetuma-data (fail! :error.create-user))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (user/create-new-user
+      (if-let [user (usr/create-new-user
                       nil
                       (merge
                         (set/rename-keys vetuma-data {:userid :personId})
@@ -536,7 +536,7 @@
                       action/email-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
-        email (user/canonize-email email)
+        email (usr/canonize-email email)
         token (token/get-token tokenId)]
     (when-not (and vetuma-data
                 (= (:token-type token) :activate-linked-account)
@@ -544,7 +544,7 @@
       (fail! :error.create-user))
     (try
       (infof "Confirm linked account: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (user/create-new-user
+      (if-let [user (usr/create-new-user
                       nil
                       (merge data vetuma-data {:email email :role "applicant" :enabled true})
                       :send-email false)]
@@ -563,7 +563,7 @@
                       action/email-validator]
    :description "Admin can retry sending data to rakentaja.fi, if account is not linked"}
   [_]
-  (if-let [user (user/get-user-by-email email)]
+  (if-let [user (usr/get-user-by-email email)]
     (when-not (get-in user [:partnerApplications :rakentajafi])
       (if (idf/send-user-data user "rakentaja.fi")
         (ok)
@@ -579,11 +579,11 @@
 (defquery user-attachments
   {:user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{user :user}]
-  (if-let [current-user (user/get-user-by-id (:id user))]
+  (if-let [current-user (usr/get-user-by-id (:id user))]
     (ok :attachments (:attachments current-user))
     (fail :error.user-not-found)))
 
-(defn- add-user-attachment-allowed? [user] (user/applicant? user))
+(defn- add-user-attachment-allowed? [user] (usr/applicant? user))
 
 (defquery add-user-attachment-allowed
   {:description "Dummy command for UI logic: returns falsey if current user is not allowed to add \"user attachments\"."
@@ -593,7 +593,7 @@
    :user-roles #{:anonymous}})
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
-  (let [user              (user/current-user (request/ring-request))
+  (let [user              (usr/current-user (request/ring-request))
         filename          (mime/sanitize-filename filename)
         attachment-type   (attachment/parse-attachment-type attachmentType)
         attachment-id     (mongo/create-id)
@@ -676,7 +676,7 @@
    :input-validators [email-validator]
    :user-roles       #{:anonymous}}
   [_]
-  (if (user/email-in-use? email)
+  (if (usr/email-in-use? email)
     (ok)
     (fail :email-not-in-use)))
 
@@ -689,7 +689,7 @@
   {:user-roles #{:authority}
    :org-authz-roles (disj auth/all-org-authz-roles :tos-editor :tos-publisher)
    :pre-checks [(fn [command application]
-                  (let [org-ids (user/organization-ids (:user command))]
+                  (let [org-ids (usr/organization-ids (:user command))]
                     (if-not application
                       (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
                         unauthorized)
@@ -702,7 +702,7 @@
    :pre-checks [(fn [command {:keys [organization]}]
                   (let [org-set (if organization
                                   #{organization}
-                                  (user/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher :archivist}))]
+                                  (usr/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher :archivist}))]
                     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
   [_])

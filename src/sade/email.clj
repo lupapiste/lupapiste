@@ -161,6 +161,9 @@
 ;; Apply template:
 ;; ---------------
 
+(defn unescape-at [s]
+  (ss/replace s #"[\\]+@" "@"))
+
 (defn apply-md-template [template context]
   (let [master      (fetch-template "master.md")
         header      (fetch-template "header.md")
@@ -168,9 +171,12 @@
         footer      (fetch-template "footer.md")
         html-wrap   (fetch-html-template "html-wrap.html")
         rendered    (clostache/render master context {:header header :body body :footer footer})
-        content     (endophile/to-clj (endophile/mp rendered))]
-    [(-> content ->str* ss/unescape-html)
-     (->> content enlive/content (enlive/transform html-wrap [:body]) endophile/html-string)]))
+        ; Avoid email links to be generated, see also https://github.com/theJohnnyBrown/endophile/issues/6
+        escaped     (ss/replace rendered "@" "\\@")
+        content     (endophile/to-clj (endophile/mp escaped))
+        ]
+    [(-> content ->str* ss/unescape-html unescape-at)
+     (->> content enlive/content (enlive/transform html-wrap [:body]) endophile/html-string unescape-at)]))
 
 (defn apply-html-template [template-name context]
   (let [master    (fetch-html-template "master.html")

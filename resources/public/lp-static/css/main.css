@@ -1,5 +1,10 @@
 @import url('main-blessed1.css?z=1456750358448');
 
+/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-73em {
+  max-height: 73em;
+  overflow-y: auto;
+}
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
 .scroll-74em {
@@ -1163,8 +1168,8 @@ ul.tabs {
 
 /* line 1, ../../../private/common-html/sass/partials/_errors.scss */
 .context-error {
-  color: #f00;
-  border: 1px solid #f00;
+  color: red;
+  border: 1px solid red;
   border-radius: 3px;
   padding: 6px;
   margin: 12px 0;
@@ -2110,11 +2115,6 @@ ul.no-bullets {
   top: 0;
   bottom: 0;
   margin: auto;
-}
-
-/* line 2, ../../../private/common-html/sass/partials/_upload.scss */
-.upload-component .success-message {
-  color: #04c714;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_metadata-editor.scss */
@@ -5201,57 +5201,38 @@ td.comment-text {
   margin-bottom: 24px;
 }
 
+/* line 1, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container {
+  padding: 0 24px;
+}
 /* line 2, ../../../private/common-html/sass/views/_mypage.scss */
-#mypage .button-group {
+#mypage .accordion-container .button-group {
   margin: 20px;
   position: relative;
 }
-
-/*  */
-/* line 9, ../../../private/common-html/sass/views/_mypage.scss */
-#own-info-form {
-  padding: 0 24px;
-}
-/* line 11, ../../../private/common-html/sass/views/_mypage.scss */
-#own-info-form .architect-toggle, #own-info-form .allowDirectMarketing-toggle {
+/* line 7, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .architect-toggle, #mypage .accordion-container .allowDirectMarketing-toggle {
   height: 55px;
   margin: 9px 0;
   display: block;
   width: 100%;
 }
-/* line 17, ../../../private/common-html/sass/views/_mypage.scss */
-#own-info-form .architect-toggle label, #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle label, #own-info-form .allowDirectMarketing-toggle input {
+/* line 13, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .architect-toggle label, #mypage .accordion-container .architect-toggle input, #mypage .accordion-container .allowDirectMarketing-toggle label, #mypage .accordion-container .allowDirectMarketing-toggle input {
   display: inline;
   width: 3.75em;
 }
-/* line 21, ../../../private/common-html/sass/views/_mypage.scss */
-#own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle input {
+/* line 17, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .architect-toggle input, #mypage .accordion-container .allowDirectMarketing-toggle input {
   margin-right: 12px;
   display: inline;
 }
-/* line 26, ../../../private/common-html/sass/views/_mypage.scss */
-#own-info-form .form-group {
+/* line 22, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .form-group {
   padding: 12px;
 }
 
-/* line 31, ../../../private/common-html/sass/views/_mypage.scss */
-#pw-form {
-  padding: 0 24px;
-}
-/* line 34, ../../../private/common-html/sass/views/_mypage.scss */
-#pw-form .form-group {
-  padding: 12px;
-}
-/* line 37, ../../../private/common-html/sass/views/_mypage.scss */
-#pw-form .form-entry {
-  height: 78px;
-}
-
-/* line 42, ../../../private/common-html/sass/views/_mypage.scss */
-#mypage-register-company, #mypage-company {
-  padding: 0 24px;
-}
-/* line 46, ../../../private/common-html/sass/views/_mypage.scss */
+/* line 30, ../../../private/common-html/sass/views/_mypage.scss */
 #mypage-register-company p a, #mypage-company p a {
   color: #f39129;
   text-decoration: none;
@@ -5269,11 +5250,6 @@ td.comment-text {
 #mypage-register-company p a:active, #mypage-company p a:active {
   color: #fbc732;
   text-decoration: underline;
-}
-
-/* line 52, ../../../private/common-html/sass/views/_mypage.scss */
-.architect-info {
-  transition: height 2s;
 }
 
 /* line 1, ../../../private/common-html/sass/views/_admin.scss */
@@ -6672,50 +6648,50 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 /*
   Lupapalvelu CSS:
 */
-/* line 157, ../../../private/common-html/sass/main.scss */
+/* line 156, ../../../private/common-html/sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 163, ../../../private/common-html/sass/main.scss */
+/* line 162, ../../../private/common-html/sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 167, ../../../private/common-html/sass/main.scss */
+/* line 166, ../../../private/common-html/sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 171, ../../../private/common-html/sass/main.scss */
+/* line 170, ../../../private/common-html/sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 175, ../../../private/common-html/sass/main.scss */
+/* line 174, ../../../private/common-html/sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 179, ../../../private/common-html/sass/main.scss */
+/* line 178, ../../../private/common-html/sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 183, ../../../private/common-html/sass/main.scss */
+/* line 182, ../../../private/common-html/sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 188, ../../../private/common-html/sass/main.scss */
+/* line 187, ../../../private/common-html/sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 192, ../../../private/common-html/sass/main.scss */
+/* line 191, ../../../private/common-html/sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -6727,27 +6703,27 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   display: table-cell;
 }
 
-/* line 203, ../../../private/common-html/sass/main.scss */
+/* line 202, ../../../private/common-html/sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 211, ../../../private/common-html/sass/main.scss */
+/* line 210, ../../../private/common-html/sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 217, ../../../private/common-html/sass/main.scss */
+/* line 216, ../../../private/common-html/sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 222, ../../../private/common-html/sass/main.scss */
+/* line 221, ../../../private/common-html/sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -6761,47 +6737,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 235, ../../../private/common-html/sass/main.scss */
+/* line 234, ../../../private/common-html/sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 237, ../../../private/common-html/sass/main.scss */
+/* line 236, ../../../private/common-html/sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 243, ../../../private/common-html/sass/main.scss */
+/* line 242, ../../../private/common-html/sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 248, ../../../private/common-html/sass/main.scss */
+/* line 247, ../../../private/common-html/sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 250, ../../../private/common-html/sass/main.scss */
+/* line 249, ../../../private/common-html/sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 253, ../../../private/common-html/sass/main.scss */
+/* line 252, ../../../private/common-html/sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 254, ../../../private/common-html/sass/main.scss */
+/* line 253, ../../../private/common-html/sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 257, ../../../private/common-html/sass/main.scss */
+/* line 256, ../../../private/common-html/sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 259, ../../../private/common-html/sass/main.scss */
+/* line 258, ../../../private/common-html/sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 261, ../../../private/common-html/sass/main.scss */
+/* line 260, ../../../private/common-html/sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
