@@ -6,6 +6,7 @@ LUPAPISTE.OperationEditorModel = function(params) {
   self.docId = self.docModel.docId;
   self.operation = params.operation;
   self.isPrimaryOperation = params.isPrimary;
+  self.indicator = ko.observable();
   var auth = params.auth;
 
   // Operation description.
@@ -15,7 +16,8 @@ LUPAPISTE.OperationEditorModel = function(params) {
   self.description.subscribe( function(desc) {
     hub.send("accordionService::saveOperationDescription", {appId: self.docModel.appId,
                                                             operationId: self.operation.id(),
-                                                            description: desc});
+                                                            description: desc,
+                                                            indicator: self.indicator});
   });
 
   // Star
