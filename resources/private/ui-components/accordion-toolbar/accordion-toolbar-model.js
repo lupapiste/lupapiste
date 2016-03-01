@@ -266,8 +266,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     hub.unsubscribe(toggleEditorSubscription);
   };
 
-  _.debounce(function() {
+  _.defer(function() {
     self.showIdentifierEditors(self.identifierField ? (self.identifierField.value() ? false : true) : false);
-  }, 10)();
+  });
 
 };
