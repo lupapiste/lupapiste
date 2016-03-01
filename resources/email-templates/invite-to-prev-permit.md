@@ -27,27 +27,27 @@ Ty&ouml;njohtajan pit&auml;&auml; saada kutsu rakennusluvalle hankkeeseen ryhtyv
 
 # Hej,
 
-Du har fått detta e-post meddelande eftersom du har ans&ouml;kt om byggnadslov från Helsingfors byggnadstillsynsverk inom loppet två år.
+Du har f&aring;tt detta e-post meddelande eftersom du har ans&ouml;kt om byggnadslov fr&aring;n Helsingfors byggnadstillsynsverk inom loppet tv&aring; &aring;r.
 
-Lupapiste &auml;r en elektronisk servicetj&auml;nst, d&auml;r du kan ans&ouml;ka on lov som g&auml;ller byggande då det b&auml;st passar dig. Helsingfors stad har tagit i bruk tj&auml;nsten i februari och tj&auml;nstens anv&auml;ndning utvidgas under året 2015.
+Lupapiste &auml;r en elektronisk servicetj&auml;nst, d&auml;r du kan ans&ouml;ka on lov som g&auml;ller byggande d&aring; det b&auml;st passar dig. Helsingfors stad har tagit i bruk tj&auml;nsten i februari och tj&auml;nstens anv&auml;ndning utvidgas under &aring;ret 2015.
 
-Anm&auml;lan av arbetsledare sker från denna stund framåt elektroniskt i Lupapiste –tj&auml;nsten. Anm&auml;lan av arbetsledare g&ouml;rs till beviljade bygglov. {{kuntalupatunnus}} f&ouml;r byggnadslovet du ans&ouml;kt om har nu skapats i Lupapiste-tj&auml;nsten. Klicka h&auml;r f&ouml;r att komma dit:
+Anm&auml;lan av arbetsledare sker fr&aring;n denna stund fram&aring;t elektroniskt i Lupapiste –tj&auml;nsten. Anm&auml;lan av arbetsledare g&ouml;rs till beviljade bygglov. {{kuntalupatunnus}} f&ouml;r byggnadslovet du ans&ouml;kt om har nu skapats i Lupapiste-tj&auml;nsten. Klicka h&auml;r f&ouml;r att komma dit:
 
 {{link-sv}}
 
-Ifall du inte tidigare anv&auml;nt Lupapiste-tj&auml;nsten med denna {{recipient-email}} e-postadress, måste du f&ouml;rst registrera dig som anv&auml;ndare till Lupapiste-tj&auml;nsten. Registreringen g&ouml;rs med personliga bankkoder eller mobilcertifikat.
+Ifall du inte tidigare anv&auml;nt Lupapiste-tj&auml;nsten med denna {{recipient-email}} e-postadress, m&aring;ste du f&ouml;rst registrera dig som anv&auml;ndare till Lupapiste-tj&auml;nsten. Registreringen g&ouml;rs med personliga bankkoder eller mobilcertifikat.
 
-Beskrivning på hur du anm&auml;ler arbetsledare hittar du h&auml;r: https://www.lupapiste.fi/ohjeet/luvanhakijoille/tyonjohtajan-nimeaminen
+Beskrivning p&aring; hur du anm&auml;ler arbetsledare hittar du h&auml;r: https://www.lupapiste.fi/ohjeet/luvanhakijoille/tyonjohtajan-nimeaminen
 
-Ifall du redan tidigare anm&auml;lt arbetsledare g&auml;llande ditt byggnadslov, syns dessa inte i  Lupapiste-tj&auml;nsten. Tidigare anm&auml;lda arbetsledare eller ans&ouml;kningar beh&ouml;vs inte g&ouml;ras på nytt.
+Ifall du redan tidigare anm&auml;lt arbetsledare g&auml;llande ditt byggnadslov, syns dessa inte i  Lupapiste-tj&auml;nsten. Tidigare anm&auml;lda arbetsledare eller ans&ouml;kningar beh&ouml;vs inte g&ouml;ras p&aring; nytt.
 
-## Helsingfors byggnadstillsynsverkets nyhetsbrev angående &auml;mnet:
+## Helsingfors byggnadstillsynsverkets nyhetsbrev ang&aring;ende &auml;mnet:
 
-Från och med 25.5.2015 g&ouml;r arbetsledarna i Helsingfors anm&auml;lan och ans&ouml;kan endast via tj&auml;nsten Lupapiste.fi.
+Fr&aring;n och med 25.5.2015 g&ouml;r arbetsledarna i Helsingfors anm&auml;lan och ans&ouml;kan endast via tj&auml;nsten Lupapiste.fi.
 
-Två år gamla bygglovbeslut, som "s&ouml;kts på papper", kopieras automatiskt till tj&auml;nsten Lupapiste.fi. &Auml;ldre beslut h&auml;mtas vid behov, ett i taget.
+Tv&aring; &aring;r gamla bygglovbeslut, som "s&ouml;kts p&aring; papper", kopieras automatiskt till tj&auml;nsten Lupapiste.fi. &Auml;ldre beslut h&auml;mtas vid behov, ett i taget.
 
-Arbetsledaren måste få en inbjudan till bygglovet av den som påb&ouml;rjar byggprojektet. Inbjudan skickas till arbetsledarens e-post.
+Arbetsledaren m&aring;ste f&aring; en inbjudan till bygglovet av den som p&aring;b&ouml;rjar byggprojektet. Inbjudan skickas till arbetsledarens e-post.
 
 
 
