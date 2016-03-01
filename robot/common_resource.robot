@@ -480,7 +480,6 @@ Primary operation is
   [Arguments]  ${opId}
   Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
 
-# This only works if there is only one applicable document.
 Edit operation description
   [Arguments]  ${doc}  ${text}  ${idx}=1
   Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
@@ -488,11 +487,14 @@ Edit operation description
   ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
   Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
-  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
-  Input text by test id  op-description-editor-${doc}  ${text}
+  ${opDescriptionXpath}=  Set Variable  //div[@id='application-info-tab']//section[@data-doc-id='${docId}']//input[@data-test-id='op-description-editor-${doc}']
+  Wait until element is visible  ${opDescriptionXpath}
+  Input text   ${opDescriptionXpath}  ${text}
+  # Blur
+  Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-id='${docId}']//button[@data-test-id='toggle-identifiers-${doc}']
   # Close the input
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
-  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
+  Wait until  Element should not be visible  ${opDescriptionXpath}
 
 # This only works if there is only one applicable document.
 Operation description is
