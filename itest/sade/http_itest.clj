@@ -17,7 +17,9 @@
         response (http/get url request)
         insecure (:headers response)
         secured (:headers (http/secure-headers response))
-        filtered (dissoc secured "Accept-Encoding" "Content-Security-Policy" "Content-Security-Policy-Report-Only" "Date" "User-Agent")]
+        filtered (dissoc secured "Accept-Encoding" "Content-Security-Policy"
+                   "Content-Security-Policy-Report-Only" "Date" "User-Agent"
+                   "Strict-Transport-Security" "Transfer-Encoding")]
 
     (doseq [h (keys (:headers request))]
       (fact {:midje/description (str h " is echoed")} (contains? insecure h) => true))
