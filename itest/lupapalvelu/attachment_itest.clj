@@ -290,6 +290,41 @@
     (fact "Can not rotate txt"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
 
+(facts "Rotate PDF - versions and files"
+  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment (first (:attachments application))
+        attachment-id (:id attachment)]
+
+    (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
+
+    (let [v1 (-> (get-attachment-by-id sonja application-id attachment-id)
+                 :versions 
+                 first)]
+      (fact "fileID is set" (:fileId v1) => truthy)
+      (fact "fileID is set" (:originalFileId v1) => truthy)
+      (fact "File is original before rotation" (:fileId v1) => (:originalFileId v1))
+
+      (fact "version number is set" (:version v1) => {:major 0 :minor 1})
+      
+      (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
+      
+      (let [v2 (->> (get-attachment-by-id sonja application-id  attachment-id)
+                    :versions 
+                    first)]
+        (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
+        (fact "Original file is the same" (:originalFileId v1) => (:originalFileId v1))
+
+        (fact "version number is not changed" (:version v1) => {:major 0 :minor 1})
+
+        (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
+        
+        (let [v3 (->> (get-attachment-by-id sonja application-id  attachment-id)
+                      :versions 
+                      first)]
+          (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
+          (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
+
 (defn- poll-job [id version limit]
   (when (pos? limit)
     (let [resp (query sonja :stamp-attachments-job :job-id id :version version)]
