@@ -272,8 +272,8 @@ Näkymä valitaan sen perusteella, mikä ankkuri eli niin sanottu hash-bang sove
 osoitteessa on. Sovellus asettaa näkyville elementin, jonka ID:tä tämä vastaa.
 Esim. http://localhost:8000/app/fi/authority#!/application/LP-753-2016-00001
 osoiteessa näytetään nimeämiskäytännön mukaisesti
-[application.html]( ../resources/private/application/application.html)
-tiedostossa oleva elementti:
+[application.html](../resources/private/application/application.html)
+-tiedostossa oleva elementti:
 
     <section class="page" id="application">
 
