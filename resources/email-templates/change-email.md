@@ -5,3 +5,13 @@ S&auml;hk&ouml;postiosoitteen {{old-email}} vaihtoa on pyydetty Lupapiste-palvel
 {{link-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Aktivointilinkki on voimassa 24 tuntia ({{expires}} asti). Ongelmatilanteissa ota yhteytt&auml; tuki@lupapiste.fi.
+
+--
+
+Hej {{name}},
+
+Du har bett om att &auml;ndra e-postadressen {{old-email}} i Lupapiste-tj&auml;nsten. Verifiera den nya e-postadressen {{new-email}} genom att identifiera dig med personliga bankkoder eller mobilcertifikat via l&auml;nken nedan:
+
+{{link-sv}}
+
+Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt. Aktiveringsl&auml;nken &auml;r i kraft 24 timmar (till {{expires}}). Vid problem kontakta tuki@lupapiste.fi.
