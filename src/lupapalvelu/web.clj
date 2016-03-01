@@ -622,6 +622,9 @@
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
+  (defpage "/dev/header-echo" []
+    (resp/status 200 (resp/set-headers (:headers (request/ring-request)) "OK")))
+
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [request (request/ring-request)
           response (execute-query "apply-fixture" {:name name} request)]
