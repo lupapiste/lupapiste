@@ -6,6 +6,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
@@ -226,6 +227,8 @@
 (defquery get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
+   :org-authz-roles auth/all-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
    :states     states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]

@@ -45,6 +45,7 @@
                           :preview-attachment
                           :document
                           :mark-seen
+                          :get-building-info-from-wfs
                           :authority-notice
                           :application-guests}
         user {:id "user123" :organizations [] :role :applicant}
@@ -84,6 +85,7 @@
                            :application :validate-doc :fetch-validation-errors :document
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
+                           :get-building-info-from-wfs
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
                            :application-guests}]
