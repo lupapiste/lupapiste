@@ -4,10 +4,11 @@
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [monger.query :as query]
+            [sade.core :refer :all]
+            [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.property :as p]
-            [sade.core :refer :all]
+            [sade.validators :as v]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.mongo :as mongo]
@@ -46,10 +47,26 @@
 ;; Query construction
 ;;
 
+(defn- fuzzy-re
+  "Takes search term and turns it into 'fuzzy' regular expression
+  string (not pattern!) that matches any string that contains the
+  substrings in the correct order. The search term is split both for
+  regular whitespace and Unicode no-break space. The original string
+  parts are escaped for (inadvertent) regex syntax.
+  Sample matching: 'ear onk' will match 'year of the monkey' after fuzzying"
+  [term]
+  (let [whitespace "[\\s\u00a0]+"
+        fuzzy      (->> (ss/split term (re-pattern whitespace))
+                        (map #(java.util.regex.Pattern/quote %))
+                        (ss/join (str ".*" whitespace ".*")))]
+    (str "^.*" fuzzy ".*$")))
+
+
 (defn- make-free-text-query [filter-search]
-  (let [search-keys   [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman]
-        or-query      {$or (map #(hash-map % {$regex filter-search $options "i"}) search-keys)}
-        ops           (operation-names filter-search)]
+  (let [search-keys [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman :_id]
+        fuzzy       (fuzzy-re filter-search)
+        or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
+        ops         (operation-names filter-search)]
     (if (seq ops)
       (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}}
                                         {:secondaryOperations.name {$in ops}}])
@@ -60,6 +77,7 @@
   (cond
     (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search) {:_id (ss/upper-case filter-search)}
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
+    (re-matches v/rakennustunnus-pattern filter-search) {:buildings.nationalId filter-search}
     :else (make-free-text-query filter-search)))
 
 (defn- make-area-query [areas user]

@@ -3,6 +3,31 @@
             [lupapalvelu.document.tools :refer :all]
             [lupapiste-commons.usage-types :as usages]))
 
+
+(defn update-in-body
+  "Updates k in given body path with update function f. Body is vector of maps, path is vector of strings."
+  [body path k f]
+  (map
+    (fn [body-part]
+      (if (= (name (first path)) (:name body-part))
+        (if (seq (rest path))
+          (update body-part :body update-in-body (rest path) k f)
+          (update body-part k f))
+        body-part))
+    body))
+
+(defn accordion-field-emitters
+  "Adds :accordionUpdate emitters to paths defined by accordion-fields"
+  [body accordion-fields]
+  (if (seq accordion-fields)
+    (reduce
+      (fn [body field-path]
+        (update-in-body body field-path :emit #(conj % :accordionUpdate)))
+      body
+      accordion-fields)
+    body))
+
+
 ;;
 ;; Register schemas
 ;;
@@ -28,7 +53,8 @@
                  :after-update
                  :repeating :no-repeat-button :order
                  :exclude-from-pdf
-                 :construction-time})
+                 :construction-time
+                 :accordion-fields})
 
 (def updateable-keys #{:removable})
 (def immutable-keys (set/difference info-keys updateable-keys) )
@@ -40,8 +66,9 @@
       assoc-in
       [version schema-name]
       (-> data
-        (assoc-in [:info :name] schema-name)
-        (assoc-in [:info :version] version)))))
+          (assoc-in [:info :name] schema-name)
+          (assoc-in [:info :version] version)
+          (update :body accordion-field-emitters (get-in data [:info :accordion-fields]))))))
 
 (defn defschemas [version schemas]
   (doseq [schema schemas]
@@ -134,9 +161,11 @@
 (def kytkimet {:name "kytkimet" :type :group :i18nkey "empty" :body [suoramarkkinointilupa]})
 (def kytkimet-with-vain-sahkoinen-asiointi (update-in kytkimet [:body] conj vain-sahkoinen-asiointi))
 
+(def national-building-id "valtakunnallinenNumero")
+
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
-(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil
+(def hankkeen-vaativuus {:name "hankkeenVaativuus" :type :select :sortBy nil :hidden true ;; TODO: remove, LPK-1448
                          :body [{:name "AA"}
                                 {:name "A"}
                                 {:name "B"}
@@ -147,14 +176,16 @@
 
 (def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
 
-(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
+(def tunnus {:name "tunnus" :type :string :required true :hidden true :max-len 3 :identifier true})
+
+(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size "xl" :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
-                           {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
+                           {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true}
                            {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
-(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro" :required true}
-                                {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :size "xl" :i18nkey "rakennusnro" :required true}
+                                {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true}
                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
                                 {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
@@ -419,17 +450,19 @@
    {:name "vaativa kosteusvaurion korjaussuunnittelu"}
    {:name "poikkeuksellisen vaativa kosteusvaurion korjaussuunnittelu"}])
 
+(def patevyysluokka {:name "patevyysluokka" :type :select :sortBy nil :required true
+                     :body [{:name "AA"}
+                            {:name "A"}
+                            {:name "B"}
+                            {:name "C"}
+                            {:name "ei tiedossa"}]})
+
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                {:name "fise" :type :string :required false}
                {:name "fiseKelpoisuus" :type :select :sortBy :displayname :i18nkey "fisekelpoisuus" :size "l" :required false :body fise-kelpoisuus-lajit}
-               {:name "patevyysluokka" :type :select :sortBy nil :required true
-                :body [{:name "AA"}
-                       {:name "A"}
-                       {:name "B"}
-                       {:name "C"}
-                       {:name "ei tiedossa"}]}
+               patevyysluokka
                {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
                {:name "patevyys" :type :string :required false}])
 
@@ -442,10 +475,13 @@
                       simple-osoite
                       yhteystiedot))
 
+(def suunnittelutehtavan-vaativuusluokka (assoc patevyysluokka :name "suunnittelutehtavanVaativuusluokka"))
+
 (def paasuunnittelija (body
-                        henkilo-valitsin
-                        designer-basic
-                        {:name "patevyys" :type :group :body patevyys}))
+                       suunnittelutehtavan-vaativuusluokka
+                       henkilo-valitsin
+                       designer-basic
+                       {:name "patevyys" :type :group :body patevyys}))
 
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
@@ -471,10 +507,11 @@
                               ]}])
 
 (def suunnittelija (body
-                     kuntaroolikoodi
-                     henkilo-valitsin
-                     designer-basic
-                     {:name "patevyys" :type :group :body patevyys}))
+                    kuntaroolikoodi
+                    suunnittelutehtavan-vaativuusluokka
+                    henkilo-valitsin
+                    designer-basic
+                    {:name "patevyys" :type :group :body patevyys}))
 
 (def vastattavat-tyotehtavat-tyonjohtaja [{:name "vastattavatTyotehtavat"
                                            :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
@@ -503,12 +540,7 @@
                                           {:name "ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.ty\u00f6njohtaja"}
                                           {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
-(def patevyysvaatimusluokka {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required true
-                             :body [{:name "AA"}
-                                    {:name "A"}
-                                    {:name "B"}
-                                    {:name "C"}
-                                    {:name "ei tiedossa"}]})
+(def patevyysvaatimusluokka (assoc patevyysluokka :name "patevyysvaatimusluokka"))
 
 (def patevyys-tyonjohtaja [koulutusvalinta
                            {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
@@ -897,6 +929,8 @@
                                {:name "P1/P3"}
                                {:name "P2/P3"}
                                {:name "P1/P2/P3"}]}]})
+
+(def rakennustunnus {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true :readonly true})
 
 (def rakennuksen-tiedot-ilman-huoneistoa [kaytto
                                           mitat
@@ -1327,6 +1361,30 @@
                                {:name "paattymispvm"
                                 :type :date}]})
 
+;;
+;; Accordion paths
+;;
+
+(def hakija-accordion-paths
+  "Data from paths are visible in accordion header"
+  [[select-one-of-key]
+   ["henkilo" "henkilotiedot" "etunimi"]
+   ["henkilo" "henkilotiedot" "sukunimi"]
+   ["yritys" "yritysnimi"]])
+
+(def designer-accordion-paths
+  "Data from paths are visible in accordion header"
+  [["henkilotiedot" "etunimi"]
+   ["henkilotiedot" "sukunimi"]])
+
+(def foreman-accordion-paths
+  "Data from paths are visible in accordion header"
+  [["kuntaRoolikoodi"]
+   ["henkilotiedot" "etunimi"]
+   ["henkilotiedot" "sukunimi"]])
+
+(def buildingid-accordion-paths
+  [[national-building-id]])
 
 ;;
 ;; schemas
@@ -1347,7 +1405,7 @@
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]} ; Longest value in Helsinki production data
 
-   {:info {:name "hankkeen-kuvaus-rakennuslupa"
+   {:info {:name "hankkeen-kuvaus-rakennuslupa" ;; TODO: -> hankkeen-kuvaus, LPK-1448
            :subtype "hankkeen-kuvaus"
            :i18name "hankkeen-kuvaus"
            :approvable true
@@ -1356,31 +1414,49 @@
            hankkeen-vaativuus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
-   {:info {:name "uusiRakennus" :approvable true}
-    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
+   {:info {:name "uusiRakennus"
+           :approvable true
+           :accordion-fields buildingid-accordion-paths}
+    :body (body tunnus
+                rakennuksen-omistajat
+                (approvable-top-level-groups rakennuksen-tiedot)
+                rakennustunnus)}
 
-   {:info {:name "uusi-rakennus-ei-huoneistoa" :i18name "uusiRakennus" :approvable true}
-    :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
+   {:info {:name "uusi-rakennus-ei-huoneistoa"
+           :i18name "uusiRakennus"
+           :approvable true
+           :accordion-fields buildingid-accordion-paths}
+    :body (body tunnus
+                rakennuksen-omistajat
+                (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa)
+                rakennustunnus)}
 
-   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-muutos)}
 
-   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true}
+   {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos)}
 
-   {:info {:name "rakennuksen-muuttaminen" :approvable true}
+   {:info {:name "rakennuksen-muuttaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
 
-   {:info {:name "rakennuksen-laajentaminen" :approvable true}
+   {:info {:name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-laajentaminen)}
 
-   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true}
+   {:info {:name "rakennuksen-laajentaminen-ei-huoneistoja" :i18name "rakennuksen-laajentaminen" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups rakennuksen-laajentaminen-ei-huoneistoja)}
 
-   {:info {:name "purkaminen" :i18name "purku" :approvable true}
+   {:info {:name "purkaminen" :i18name "purku" :approvable true :accordion-fields buildingid-accordion-paths}
     :body (approvable-top-level-groups purku)}
 
-   {:info {:name "kaupunkikuvatoimenpide" :approvable true}
+   {:info {:name "kaupunkikuvatoimenpide"
+           :approvable true
+           :accordion-fields buildingid-accordion-paths}
+    :body (body tunnus
+                (approvable-top-level-groups rakennelma)
+                rakennustunnus)}
+
+   {:info {:name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide" :approvable true}
     :body (approvable-top-level-groups rakennelma)}
 
    {:info {:name "maalampokaivo" :approvable true :i18name "maalampokaivo"}
@@ -1403,7 +1479,7 @@
 
 
 
-      {:info {:name "hakija"
+   {:info {:name "hakija"
            :i18name "osapuoli"
            :order 3
            :removable true
@@ -1415,6 +1491,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
        :body party}
 
@@ -1431,6 +1508,7 @@
            :group-help "hakija.group.help"
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body party}
 
@@ -1446,6 +1524,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body party}
 
@@ -1461,6 +1540,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body (schema-body-without-element-by-name ya-party turvakielto)}
 
@@ -1476,6 +1556,7 @@
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
            }
     :body party}
 
@@ -1484,7 +1565,11 @@
            :order 4
            :removable false
            :approvable true
-           :type :party}
+           :accordion-fields designer-accordion-paths
+           :type :party
+           :subtype :suunnittelija
+           :after-update 'lupapalvelu.application-meta-fields/designers-index-update
+           }
     :body paasuunnittelija}
 
    {:info {:name "suunnittelija"
@@ -1493,7 +1578,12 @@
            :order 5
            :removable true
            :approvable true
-           :type :party}
+           :accordion-fields designer-accordion-paths
+           :type :party
+           :subtype :suunnittelija
+           :after-update 'lupapalvelu.application-meta-fields/designers-index-update
+           }
+
     :body suunnittelija}
 
    {:info {:name "tyonjohtaja"
@@ -1513,7 +1603,8 @@
            :repeating false
            :approvable true
            :type :party
-           :after-update 'lupapalvelu.application-meta-fields/foreman-index-update}
+           :after-update 'lupapalvelu.application-meta-fields/foreman-index-update
+           :accordion-fields foreman-accordion-paths}
     :body tyonjohtaja-v2}
 
    {:info {:name "maksaja"
@@ -1523,6 +1614,7 @@
            :removable true
            :approvable true
            :subtype :maksaja
+           :accordion-fields hakija-accordion-paths
            :type :party}
     :body maksaja}
 

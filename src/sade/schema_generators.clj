@@ -1,11 +1,12 @@
 (ns sade.schema-generators
   (:require [sade.schemas :as ssc]
+            [schema.core :as sc]
             [schema.experimental.generators :as sg]
-            [clojure.string]
+            [clojure.string :as s]
             [clojure.test.check.generators :as gen]))
 
-(def static-schema-generators (atom {}))
-(def dynamic-schema-generator-constructors (atom {}))
+(defonce static-schema-generators (atom {}))
+(defonce dynamic-schema-generator-constructors (atom {}))
 
 (defn register-generator [schema generator]
   (if (fn? generator)
@@ -36,15 +37,21 @@
   ([schema leaf-generators]          (generator schema leaf-generators {}))
   ([schema leaf-generators wrappers] (sg/generator schema (generators leaf-generators) wrappers)))
 
+;; Overwrite default prismatic schema generators
+
+(register-generator sc/Str gen/string-ascii)
+
 ;; Custom static schema generators
 
-(def single-hex (gen/elements "0123456789abcdef"))
+(def single-hex (gen/elements (concat (map str (range 10)) (map (comp str char) (range (int \a) (inc (int \f)))))))
 
 (def single-number-int (gen/elements (range 10)))
 
 (def blank-string (gen/elements ["" nil]))
 
 (register-generator ssc/BlankStr blank-string)
+
+(def not-blank-string (gen/such-that (comp not s/blank?) gen/string))
 
 (def email (gen/such-that (ssc/max-length-constraint 255)
                           (gen/fmap (fn [[name domain]] (str name "@" domain ".com"))
@@ -58,7 +65,7 @@
 
 (register-generator ssc/Timestamp timestamp)
 
-(def finnish-zipcode (gen/fmap clojure.string/join
+(def finnish-zipcode (gen/fmap s/join
                                (gen/vector single-number-int 5)))
 
 (register-generator ssc/Zipcode finnish-zipcode)
@@ -85,15 +92,25 @@
 
 (register-generator ssc/Hetu hetu)
 
-(def object-id (gen/fmap clojure.string/join
+(def object-id (gen/fmap s/join
                          (gen/vector single-hex 24)))
 
 (register-generator ssc/ObjectIdStr object-id)
 
+(def ipv4-address (gen/fmap (partial s/join ".")
+                            (gen/vector (gen/elements (range 256)) 4)))
+
+(def ipv6-address (gen/fmap (partial s/join ":")
+                            (gen/vector (gen/fmap s/join (gen/vector single-hex 1 4)) 8)))
+
+(def ip-address (gen/one-of [ipv4-address ipv6-address]))
+
+(register-generator ssc/IpAddress ip-address)
+
 ;; Dynamic schema generator constructors
 
 (defn fixed-length-string [len]
-  (gen/fmap clojure.string/join
+  (gen/fmap s/join
             (gen/vector gen/char len)))
 
 (register-generator ssc/fixed-length-string fixed-length-string)
@@ -105,21 +122,21 @@
 (register-generator ssc/min-length-string min-length-string)
 
 (defn max-length-string [max-len]
-  (gen/fmap clojure.string/join
+  (gen/fmap s/join
             (gen/vector gen/char 0 max-len)))
 
 (register-generator ssc/max-length-string max-length-string)
 
 (defn min-max-length-string [min-len max-len]
-  (gen/fmap clojure.string/join
+  (gen/fmap s/join
             (gen/vector gen/char min-len max-len)))
 
 (register-generator ssc/min-max-length-string min-max-length-string)
 
 (defn min-length-hex-string [min-len]
   (gen/bind (gen/fmap #(+ min-len %) gen/pos-int)
-            #(gen/fmap clojure.string/join
-                      (gen/vector single-hex %))))
+            #(gen/fmap s/join
+                       (gen/vector single-hex %))))
 
 (register-generator ssc/min-length-hex-string min-length-hex-string)
 

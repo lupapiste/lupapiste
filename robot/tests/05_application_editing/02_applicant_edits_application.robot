@@ -149,6 +149,23 @@ Mikko adds party hakija-r using button
   Click enabled by test id  hakija-r_append_btn
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  2
 
+Mikko fills his name as applicant, accordion text is updated
+  Input text  ${hakijaXpath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']  Mikko
+  Input text  ${hakijaXpath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']  Intonen
+  Focus  ${hakijaXpath}//input[@data-docgen-path='_selected']
+  Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
+
+Mikko toggles applicant to company, company's name is updated to accordion
+  Click element  ${hakijaXpath}//input[@data-docgen-path='_selected' and @value='yritys']
+  Wait until  Element should be visible  ${hakijaXpath}//input[@data-docgen-path='yritys.yritysnimi']
+  Wait until  Element should not contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
+  Input text  ${hakijaXpath}//input[@data-docgen-path='yritys.yritysnimi']  Mikon Firma
+  Focus  ${hakijaXpath}//input[@data-docgen-path='_selected']
+  Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikon Firma
+  # Toggle applicant back to 'person'
+  Click element  ${hakijaXpath}//input[@data-docgen-path='_selected' and @value='henkilo']
+  Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
+
 Mikko changes application address
   Page should not contain  ${newName}
   Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']

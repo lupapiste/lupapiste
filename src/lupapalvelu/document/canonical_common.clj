@@ -425,6 +425,7 @@
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
       (merge codes
         {:koulutus koulutus
+         :vaadittuPatevyysluokka (:suunnittelutehtavanVaativuusluokka suunnittelija)
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
          :FISEpatevyyskortti (:fise patevyys)
@@ -484,7 +485,22 @@
                       (let [loc-s (i18n/localize lang (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." (name k)))]
                         (assert (not (re-matches #"^\?\?\?.*" loc-s)))
                         loc-s))}}))
-           tyotehtavat))})))
+              tyotehtavat))})))
+
+(defn- foreman-tasks-by-role [{role :kuntaRoolikoodi tasks :vastattavatTyotehtavat}]
+  (let [role-tasks {"KVV-ty\u00F6njohtaja"           [:ulkopuolinenKvvTyo :sisapuolinenKvvTyo :muuMika]
+                    "IV-ty\u00F6njohtaja"            [:ivLaitoksenAsennustyo :ivLaitoksenKorjausJaMuutostyo :muuMika]
+                    "erityisalojen ty\u00F6njohtaja" [:muuMika]
+                    "vastaava ty\u00F6njohtaja"      [:rakennuksenPurkaminen
+                                                      :uudisrakennustyoIlmanMaanrakennustoita
+                                                      :maanrakennustyot
+                                                      :uudisrakennustyoMaanrakennustoineen
+                                                      :rakennuksenMuutosJaKorjaustyo
+                                                      :linjasaneeraus
+                                                      :muuMika]
+                    "ei tiedossa"                    []}]
+    (select-keys  tasks (get role-tasks role))))
+
 
 (defn get-tyonjohtaja-data [application lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti :FISEkelpoisuus)
@@ -543,7 +559,7 @@
        :vainTamaHankeKytkin (:tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja))}
       (when-not (ss/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
       (when-not (ss/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
-      (get-vastattava-tyotieto tyonjohtaja lang)
+      (get-vastattava-tyotieto {:vastattavatTyotehtavat (foreman-tasks-by-role tyonjohtaja)} lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))

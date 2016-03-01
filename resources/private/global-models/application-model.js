@@ -1,9 +1,20 @@
+LUPAPISTE.EmptyApplicationModel = function() {
+  "use strict";
+  return {startedBy: {firstName: "", lastName: ""},
+          closedBy: {firstName: "", lastName: ""}};
+};
+
 LUPAPISTE.ApplicationModel = function() {
   "use strict";
   var self = this;
 
   // POJSO
   self._js = {};
+
+  function fullNameInit() {
+    return {firstName: ko.observable( "" ),
+           lastName: ko.observable( "")};
+  }
 
   // Observables
   self.id = ko.observable();
@@ -19,10 +30,11 @@ LUPAPISTE.ApplicationModel = function() {
   self.propertyId = ko.observable();
   self.title = ko.observable();
   self.created = ko.observable();
+  self.modified = ko.observable();
   self.started = ko.observable();
-  self.startedBy = ko.observable();
+  self.startedBy = fullNameInit();
   self.closed = ko.observable();
-  self.closedBy = ko.observable();
+  self.closedBy = fullNameInit();
   self.attachments = ko.observable([]);
   self.hasAttachment = ko.computed(function() {
     return _.some((ko.toJS(self.attachments) || []), function(a) {return a.versions && a.versions.length;});
@@ -174,7 +186,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.allowedAttachmentTypes = ko.observableArray([]);
 
   self.toBackingSystem = function() {
-    window.open("/api/raw/redirect-to-vendor-backend?id=" + self.id(), "_blank");
+    window.open("/api/raw/redirect-to-vendor-backend?id=" + self.id(), "backend");
   };
 
   self.updateInvites = function() {
@@ -329,20 +341,37 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.approveApplication = function() {
-    ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
-      .success(function(resp) {
-        self.reload();
-        if (!resp.integrationAvailable) {
-          LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
-        } else if (self.externalApi.enabled()) {
-          var permit = externalApiTools.toExternalPermit(self._js);
-          hub.send("external-api::integration-sent", permit);
-        }
-      })
-      .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
-      .processing(self.processing)
-      .call();
-    hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
+
+    var approve = function() {
+      ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
+        .success(function(resp) {
+          self.reload();
+          if (!resp.integrationAvailable) {
+            hub.send("show-dialog", {ltitle: "integration.title",
+                                     size: "medium",
+                                     component: "ok-dialog",
+                                     componentParams: {ltext: "integration.unavailable"}});
+          } else if (self.externalApi.enabled()) {
+            var permit = externalApiTools.toExternalPermit(self._js);
+            hub.send("external-api::integration-sent", permit);
+          }
+        })
+        .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
+        .processing(self.processing)
+        .call();
+      hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
+    };
+
+    if (_(self._js.statements).reject("given").isEmpty()) {
+      // All statements have been given
+      approve();
+    } else {
+      hub.send("show-dialog", {ltitle: "application.approve.statement-not-requested",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
+                                                 yesFn: approve}});
+    }
     return false;
   };
 

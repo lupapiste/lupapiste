@@ -8,7 +8,7 @@
 ;; Util
 ;;
 
-(def dynamically-created-schemas (atom {}))
+(defonce dynamically-created-schemas (atom {}))
 
 (defmacro defdynamicschema [name params form]
   {:pre [(vector? params)]}
@@ -67,6 +67,9 @@
 
 (sc/defschema ObjectIdStr
   (sc/pred (partial validators/matches? #"^[0-9a-f]{24}$") "ObjectId hex string"))
+
+(sc/defschema IpAddress
+  (sc/pred validators/ip-address? "Not valid IP address"))
 
 ;; Dynamic schema constructors
 

@@ -44,7 +44,9 @@
                               foreman-user
                               (not (auth/has-auth? application (:id foreman-user))))
 
-        applicant-invites (foreman/applicant-invites new-application-docs (:auth application))
+        applicant-invites (->>
+                            (foreman/applicant-invites new-application-docs (:auth application))
+                            (remove #(= (:email %) (:email user)))) ;; LPK-1331, Don't double-invite the user of command, if applicant
         auths             (remove nil?
                                  (conj
                                    (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
@@ -71,10 +73,13 @@
            $set  {:modified created}})
         (notif/notify! :invite {:application application :recipients [foreman-user]}))
 
+      ; Invite notifications
       (let [recipients (for [auth (:other grouped-auths)
                              :let [user (get-in auth [:invite :user])]]
                          (set/rename-keys user {:username :email}))]
         (notif/notify! :invite {:application foreman-app :recipients recipients}))
+
+      ; Company invites
       (doseq [auth (:company grouped-auths)
               :let [company-id (-> auth :invite :user :id)
                     token-id (company/company-invitation-token user company-id (:id foreman-app))]]
@@ -110,7 +115,7 @@
   {:user-roles #{:applicant :authority}
    :states states/all-states
    :parameters [id taskId foremanAppId]
-   :input-validators [(partial action/non-blank-parameters [:id :taskId :foremanAppId])]
+   :input-validators [(partial action/non-blank-parameters [:id :taskId])]
    :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]
@@ -158,6 +163,6 @@
         apps-linking-to-us (filter #(= (:type ((keyword id) %)) "linkpermit") app-link-resp)
         foreman-application-links (filter #(= (:apptype (first (:link %)) "tyonjohtajan-nimeaminen")) apps-linking-to-us)
         foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
-        applications (mongo/select :applications {:_id {$in foreman-application-ids}})
-        mapped-applications (map (fn [app] (foreman/foreman-application-info app)) applications)]
+        applications (mongo/select :applications {:_id {$in foreman-application-ids}} [:id :state :auth :documents])
+        mapped-applications (map foreman/foreman-application-info applications)]
     (ok :applications (sort-by :id mapped-applications))))

@@ -1,11 +1,10 @@
 (ns lupapalvelu.pdf.pdf-export
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [clojure.java.io :as io]
-            [pdfa.core :as pdf]
+            [pdfa-generator.core :as pdf]
             [clj-time.local :as tl]
             [clj-time.format :as tf]
             [lupapalvelu.i18n :refer [with-lang loc]]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [sade.util :as util]
@@ -253,7 +252,7 @@
 
 (defn collect-task-fields [tasks]
   (map
-    (fn [{:keys [duedate taskname closed created state schema-info source assignee data rakennus]}]
+    (fn [{:keys [duedate taskname closed created state schema-info source assignee data]}]
       (let [i18n-prefix (:i18nprefix schema-info)
             katselmuksenLaji (get-in data [:katselmuksenLaji :value])
             vaadittuLupaehtona (get-in data [:vaadittuLupaehtona :value])
@@ -265,7 +264,8 @@
             huomautus-toteasHetki (get-in data [:katselmus :huomautukset :toteamisHetki :value])
             lasnaolijat (get-in data [:katselmus :lasnaolijat :value])
             poikkeamat (get-in data [:katselmus :poikkeamat :value])
-            tila (get-in data [:katselmus :tila :value])]
+            tila (get-in data [:katselmus :tila :value])
+            rakennus (:rakennus data)]
         (array-map
           (loc "task-katselmus.katselmuksenLaji._group_label") (if (ss/blank? katselmuksenLaji) "-" (loc (str i18n-prefix "." katselmuksenLaji)))
           (loc "vaadittuLupaehtona") (if vaadittuLupaehtona (loc "yes") (loc "no"))
@@ -489,6 +489,7 @@
   (let [title (loc "application.building")
         empty (loc "hankkeen-kuvaus.hankkeenVaativuus.ei tiedossa")
         buildings (:rakennus fields)]
+    (debug "tasks fields:" fields )
     `[~@(render-fields (take 12 fields))
       [:pagebreak]
       ~@(document-section-header (loc "application.building"))

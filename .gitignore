@@ -38,6 +38,7 @@ checkouts
 # Temp
 temp
 .cache
+*.tmp
 
 # VCS
 *.orig
@@ -61,3 +62,5 @@ user.properties
 /GRTAGS
 /GTAGS
 /TAGS
+*.pandoc
+/docs/developerguide.html

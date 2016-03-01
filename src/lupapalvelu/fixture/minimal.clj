@@ -422,7 +422,7 @@
     :username "mikko@example.com"
     :enabled true
     :role "applicant"
-    :personId "210281-0002"
+    :personId "210281-9988" ; = Nordea demo
     :firstName "Mikko"
     :lastName "Intonen"
     :email "mikko@example.com"
@@ -494,6 +494,9 @@
     :firstName "Kaino"
     :lastName "Solita"
     :email "kaino@solita.fi"
+    :street "Sensorintie 7"
+    :zip "12345"
+    :city "Forssa"
     :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."
               :apikey "502cb9e58426c613c8b85abe"}
     :role "applicant"
@@ -590,8 +593,8 @@
                                                 :maa-aineslupa [[:muut :muu]]
                                                 "vvvl-vesijohdosta" [[:muut :muu]]}
                        :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.1.6"}
-                               :P {:ftpUser "dev_poik_sipoo" :version "2.1.2"}
-                               :YI {:ftpUser "dev_ymp_sipoo" :version "2.2.1"}
+                               :P {:url local-krysp :ftpUser "dev_poik_sipoo" :version "2.1.2"}
+                               :YI {:url local-krysp :ftpUser "dev_ymp_sipoo" :version "2.2.1"}
                                :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
                                :MAL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
                                :VVVL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
@@ -933,8 +936,8 @@
 
 (deffixture "minimal" {}
   (mongo/clear!)
-  (mongo/insert-batch :ssoKeys [{:_id 0 :ip "127.0.0.1" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
-                                {:_id 1 :ip "109.204.231.126" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}])
+  (mongo/insert-batch :ssoKeys [{:_id "12342424c26b7342d92a4321" :ip "127.0.0.1" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
+                                {:_id "12342424c26b7342d92a9876" :ip "109.204.231.126" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}])
   (mongo/insert-batch :users users)
   (mongo/insert-batch :companies companies)
   (mongo/insert-batch :organizations organizations))

@@ -498,7 +498,7 @@
 (defpage [:get "/api/token/:token-id"] {token-id :token-id}
   (if-let [token (token/get-token token-id :consume false)]
     (resp/status 200 (resp/json (ok :token token)))
-    (resp/status 404 (resp/json (fail :error.unknown)))))
+    (resp/status 404 (resp/json (fail :error.token-not-found)))))
 
 (defpage [:post "/api/token/:token-id"] {token-id :token-id}
   (let [params (from-json (request/ring-request))
@@ -621,6 +621,9 @@
 (env/in-dev
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
+
+  (defpage "/dev/header-echo" []
+    (resp/status 200 (resp/set-headers (:headers (request/ring-request)) "OK")))
 
   (defpage "/dev/fixture/:name" {:keys [name]}
     (let [request (request/ring-request)

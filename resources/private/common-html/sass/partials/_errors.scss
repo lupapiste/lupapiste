@@ -1,6 +1,6 @@
 .context-error {
-  color: #f00;
-  border: 1px solid #f00;
+  color: $error-text;
+  border: 1px solid $error-text;
   border-radius: 3px;
   padding: $marginS;
   margin: $marginM 0
@@ -10,5 +10,5 @@
   display: block;
   margin-left:   5px;
   font-style:    italic;
-  color:         red;
+  color:         $error-text;
 }

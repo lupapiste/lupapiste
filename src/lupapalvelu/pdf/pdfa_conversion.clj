@@ -31,8 +31,15 @@
 (defn- pdf2pdf-key []
   (env/value :pdf2pdf :license-key))
 
-(defn- pdftools-pdfa-command [input-file output-file cl]
-  [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-fd" "/usr/share/fonts/msttcore" input-file output-file])
+(defn- pdftools-pdfa-command
+  "Conversion error mask 9028 means that the following things will cause the conversion to fail:
+   - Visual differences in output file
+   - Removal of embedded files
+   - Error during linearization of output file
+   - Removal of digital signature because of conversion
+   - OCR error occurred (OCR not currently in use)"
+  [input-file output-file cl]
+  [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-cem" "9028" "-fd" "/usr/share/fonts/msttcore" input-file output-file])
 
 (defn- pdftools-analyze-command [input-file output-file]
   [(pdf2pdf-executable) "-ma" "-rd" "-lk" (pdf2pdf-key) "-cl" "pdfa-2b" input-file output-file])
@@ -67,7 +74,8 @@
   (apply shell/sh (pdftools-analyze-command input-file output-file))
   (let [log (apply str (parse-log-file output-file))
         required-part (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d'." log))
-        cl (str "pdfa-" (or required-part "2") "b")]
+        level (if (= required-part "1") "b" "u")
+        cl (str "pdfa-" (or required-part "2") level)]
     (debug "Determined required compliance to be:" cl)
     cl))
 
@@ -79,10 +87,10 @@
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
                   :output-file (File. output-file)}
-      (= exit 5) (do (warn "PDF/A conversion was not lossless")
+      (= exit 5) (do (warn "PDF/A conversion failed because it can't be done losslessly")
                      (warn log-lines)
-                     {:pdfa? true
-                      :output-file (File. output-file)})
+                     (io/delete-file output-file :silently)
+                     {:pdfa? false})
       (#{6 139} exit) (let [error-lines (parse-errors-from-log-lines log-lines)]
                         (io/delete-file output-file :silently)
                         (if-let [fonts (parse-missing-fonts-from-log-lines error-lines)]
@@ -106,8 +114,9 @@
                  :else :invalid-pages)]
     (statistics/store-pdf-conversion-page-count db-key count)))
 
-(defn convert-to-pdf-a [pdf-file & [target-file-path]]
-  "Takes PDF File and returns a File that is PDF/A"
+(defn convert-to-pdf-a
+  "Takes a PDF File and returns a File that is PDF/A"
+  [pdf-file & [target-file-path]]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
     (try
       (info "Trying to convert PDF to PDF/A")

@@ -18,7 +18,9 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   var NEUTRAL  = "neutral";
 
   self.docModel = params.docModel;
-  var auth = self.docModel.authorizationModel;
+  self.docModelOptions = params.docModelOptions;
+  self.accordionService = lupapisteApp.services.accordionService;
+  self.auth = self.docModel.authorizationModel;
   self.isOpen = ko.observable();
   self.isOpen.subscribe( params.openCallback );
   self.isOpen( !params.docModelOptions
@@ -30,9 +32,85 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   var meta = self.docModel.getMeta( [] );
   var masterApproval = ko.observable( meta ? meta._approved : null );
 
+  // Operation data
   var op = self.info.op;
+  // if service is defined use accordion service, if not (bulletins-app) use operation data from docgen
+  self.operation = self.accordionService ? self.accordionService.getOperation(self.docModel.docId) : ko.mapping.fromJS(op);
+  self.hasOperation = ko.pureComputed(function() {
+    return _.isObject(op);
+  });
+  self.operationDescription = self.operation && self.operation.description || ko.observable();
 
-  self.title = ((op && op.name) || self.info.name) + "._group_label";
+  self.isPrimaryOperation = ko.pureComputed( function() {
+    var id = op && op.id;
+    return id && id === _.get( self.docModel, ["application",
+                                               "primaryOperation",
+                                               "id"] );
+  });
+
+  self.showIdentifierEditors = ko.observable(false);
+  var stickyRefresh = self.showIdentifierEditors.subscribe(function() {
+    // refresh accordion sitcky state
+    _.delay(window.Stickyfill.rebuild, 0);
+  });
+
+  // identifier field is object with keys docId, schema, key, value. Value is observable (can be edited).
+  self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
+
+  var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
+
+  function buildAccordionText(paths, data) {
+    return _(paths)
+      .map(function(path) {
+        return ko.unwrap(_.get(data, path));
+      })
+      .reject(_.isEmpty)
+      .value()
+      .join(" ");
+  }
+
+  self.accordionText = ko.pureComputed(function() {
+    // resolve values from given accordionPaths
+    var paths = docData && docData.accordionPaths;
+    if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
+      var firstPathValue = paths[0][0];
+      // are we dealing with _selected special case
+      var selectedValue = firstPathValue === docvars.SELECT_ONE_OF_GROUP_KEY ? _.get(docData.data, firstPathValue)() : false;
+      if (selectedValue) {
+        var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
+          return path[0] === selectedValue;
+        });
+        return buildAccordionText(selectedPaths, docData.data);
+
+      } else { // no _selected, use paths as is
+        return buildAccordionText(paths, docData.data);
+      }
+    }
+  });
+
+  // Required accordion title from operation/schema-info name
+  self.titleLoc = ((op && op.name) || self.info.name) + "._group_label";
+
+  // Optional accordion header text.
+  // Consists of optional properties: identifier field, operation description, and accordion paths (from schema)
+  self.headerDescription = ko.pureComputed(function() {
+    // if identifier exists, subscribing to it's "value" observable
+    var identifier = self.identifierField && self.identifierField.value();
+    var operation  = self.operationDescription();
+    var accordionFieldStr = self.accordionText();
+    var isEmpty = !identifier && !operation && !accordionFieldStr;
+    if (!isEmpty) {
+      var initStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
+      var identifierAndOperation = _.filter([identifier, operation]).join(": ");
+      var withAccordionField = identifierAndOperation
+                               ? _.filter([identifierAndOperation, accordionFieldStr]).join(" - ")
+                               : accordionFieldStr;
+      return initStr + withAccordionField;
+    } else {
+      return "";
+    }
+  });
+
   self.toggleAccordion = function() {
     self.isOpen( !self.isOpen());
   };
@@ -59,7 +137,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   }
 
   var lastSent = {};
-  self.approval = ko.computed( function() {
+  self.approval = ko.pureComputed( function() {
     var master = safeMaster();
     var later = laterGroups();
     var result = _.every( later,
@@ -108,75 +186,11 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     return self.docModel.testId( id + "-" + self.docModel.schemaName);
   };
 
-  // Pen
-  // Operation description.
-  self.description = ko.observable( op ? op.description : null);
-  self.showDescription = op && auth.ok( "update-op-description");
-  self.showEditor = ko.observable( false );
-  // It seems that _.delay (even with zero timer) has the side-effect
-  // that allows KO update the rest of the UI before Stickyfill update.
-  self.showEditor.subscribe( _.partial( _.delay, window.Stickyfill.rebuild, 0 ));
-  self.toggleEditor = function() {
-    self.showEditor( !self.showEditor());
-  };
-  self.specialKeys = function( data, event ) {
-    // Enter and Esc also close the bubble. Since clicking outside
-    // the bubble will save description Esc is not undo either.
-    // However, it would be easy to handle Esc as undo here.
-    switch( event.keyCode ) {
-      case 13: // Enter
-      case 27: // Esc
-      self.showEditor( false );
-      break;
-    }
-    return true;
-  };
-
-  self.description.subscribe( function( desc ) {
-    ajax.command ("update-op-description", {id: self.docModel.appId,
-                                            "op-id": op.id,
-                                            desc: desc  })
-    .success (function(resp) {
-      hub.send("op-description-changed", {appId: self.docModel.appId,
-                                          "op-id": op.id,
-                                          "op-desc": desc  });
-      util.showSavedIndicator(resp);
-    })
-    .call();
-  });
-
-  // Star
-  // Primary vs. secondary operation.
-  self.operationName = op ? op.name : "";
-  self.isPrimaryOperation = ko.pureComputed( function() {
-    var id = op && op.id;
-    return id && id === _.get( self.docModel, ["application",
-                                               "primaryOperation",
-                                               "id"] );
-  });
-
-  self.showStar = op && auth.ok( "change-primary-operation");
-  self.starTitle = ko.pureComputed( function() {
-    return self.isPrimaryOperation()
-         ? "operations.primary"
-         : "operations.primary.select";
-  });
-  self.clickStar = function() {
-    ajax.command("change-primary-operation",
-                 {id: self.docModel.appId,
-                  secondaryOperationId: op.id})
-    .success(function() {
-      repository.load(self.docModel.appId);
-    })
-    .call();
-    return false;
-  };
-
   self.remove = {};
   // Remove
   if (self.info.removable
     && !self.docModel.isDisabled
-    && auth.ok("remove-doc")
+    && self.auth.ok("remove-doc")
     && !self.isPrimaryOperation()) {
     self.remove.fun = self.docModel.removeDocument;
     self.remove.testClass = self.docModel.testId( "delete-schemas."
@@ -201,7 +215,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   function showButton( operation, excluder ) {
     return self.isApprovable
-        && auth.ok( operation + "-doc")
+        && self.auth.ok( operation + "-doc")
         && (!excluder() || !self.showStatus());
   }
 
@@ -222,11 +236,38 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
                                              self.approval));
 
-  self.showToolbar = self.showStar
-                  || self.showDescription
-                  || self.remove.fun
+  self.showToolbar = self.remove.fun
                   || self.showStatus()
                   || self.showReject()
-                  || self.showApprove();
+                  || self.showApprove()
+                  || self.hasOperation();
+
+  self.closeEditors = function( data, event ) {
+    // Toggle editors visibility with key press
+    switch( event.keyCode ) {
+      case 13: // Enter
+      case 27: // Esc
+      self.showIdentifierEditors(false);
+      break;
+    }
+    return true;
+  };
+
+  var toggleEditorSubscription = hub.subscribe("accordionToolbar::toggleEditor", function(event) {
+    if ((!event.docId || event.docId === self.docModel.docId) && self.hasOperation()) {
+      var visibility = _.has(event, "show") ? Boolean(event.show) : !self.showIdentifierEditors();
+      self.showIdentifierEditors(visibility);
+    }
+  });
+
+  self.dispose = function() {
+    AccordionState.deregister(self.docModel.docId);
+    stickyRefresh.dispose();
+    hub.unsubscribe(toggleEditorSubscription);
+  };
+
+  _.defer(function() {
+    self.showIdentifierEditors(self.identifierField ? (self.identifierField.value() ? false : true) : false);
+  });
 
 };

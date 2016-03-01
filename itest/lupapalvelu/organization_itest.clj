@@ -12,6 +12,8 @@
             [lupapalvelu.fixture.core :as fixture]
             [monger.operators :refer :all]
             [sade.core :as sade]
+            [sade.schemas :as ssc]
+            [sade.schema-generators :as ssg]
             [lupapalvelu.itest-util :as util]))
 
 (apply-remote-minimal)
@@ -45,8 +47,8 @@
     (fact "sipoo can set working krysp-url with only username set"
       (command sipoo :set-krysp-endpoint :url uri :username "pena" :password "" :permitType "R" :version "2") => ok?)
 
-    (fact "query krysp config - no url or credentials set for P endpoint"
-      (-> (query sipoo :krysp-config) :krysp :P (select-keys [:url :username :password])) => {})
+    (fact "query krysp config - no credentials set for P endpoint"
+          (-> (query sipoo :krysp-config) :krysp :P (select-keys [:url :username :password])) => (just {:url anything}))
 
     (fact "query krysp config - credentials not set for YA endpoint"
       (-> (query sipoo :krysp-config) :krysp :YA (select-keys [:url :username :password])) => (just {:url anything}))
@@ -509,27 +511,29 @@
                             (-> "753-YA" local-org-api/get-organization :map-layers :server
                                 (select-keys [:password :crypto-iv])) => {:password ""})))))))
 
-(facts "set-organization-neighbor-order-email"
-       (fact "Emails are not set in fixture"
-             (let [resp (query sipoo :organization-by-user)]
-               resp => ok?
-               (:organization resp) => seq
-               (get-in resp [:organization :notifications :neighbor-order-emails]) => empty?))
+(doseq [[command-name config-key] [[:set-organization-neighbor-order-email :neighbor-order-emails]
+                                   [:set-organization-submit-notification-email :submit-notification-emails]]]
+  (facts {:midje/description (name command-name)}
+    (fact "Emails are not set in fixture"
+      (let [resp (query sipoo :organization-by-user)]
+        resp => ok?
+        (:organization resp) => seq
+        (get-in resp [:organization :notifications config-key]) => empty?))
 
-       (fact "One email is set"
-             (command sipoo :set-organization-neighbor-order-email :emails "kirjaamo@sipoo.example.com") => ok?
-             (-> (query sipoo :organization-by-user)
-                 (get-in [:organization :notifications :neighbor-order-emails])) => ["kirjaamo@sipoo.example.com"])
+    (fact "One email is set"
+      (command sipoo command-name :emails "kirjaamo@sipoo.example.com") => ok?
+      (-> (query sipoo :organization-by-user)
+        (get-in [:organization :notifications config-key])) => ["kirjaamo@sipoo.example.com"])
 
-       (fact "Three emails are set"
-             (command sipoo :set-organization-neighbor-order-email :emails "kirjaamo@sipoo.example.com,  sijainen1@sipoo.example.com;sijainen2@sipoo.example.com") => ok?
-             (-> (query sipoo :organization-by-user)
-                 (get-in [:organization :notifications :neighbor-order-emails])) => ["kirjaamo@sipoo.example.com", "sijainen1@sipoo.example.com", "sijainen2@sipoo.example.com"])
+    (fact "Three emails are set"
+      (command sipoo command-name :emails "kirjaamo@sipoo.example.com,  sijainen1@sipoo.example.com;sijainen2@sipoo.example.com") => ok?
+      (-> (query sipoo :organization-by-user)
+        (get-in [:organization :notifications config-key])) => ["kirjaamo@sipoo.example.com", "sijainen1@sipoo.example.com", "sijainen2@sipoo.example.com"])
 
-       (fact "Reset email addresses"
-             (command sipoo :set-organization-neighbor-order-email :emails "") => ok?
-             (-> (query sipoo :organization-by-user)
-                 (get-in [:organization :notifications :neighbor-order-emails])) => empty?))
+    (fact "Reset email addresses"
+      (command sipoo command-name :emails "") => ok?
+      (-> (query sipoo :organization-by-user)
+        (get-in [:organization :notifications config-key])) => empty?)))
 
 (facts "Construction waste feeds"
        (mongo/with-db local-db-name
@@ -721,7 +725,9 @@
                                                                              :kuvaus {:value "Rouheaa"
                                                                                       :modified 100}}}
                                             }}]}))
-               (count (local-org-api/waste-ads "753-R")) => 100))
+               (count (local-org-api/waste-ads "753-R")) => 100
+               (count (local-org-api/waste-ads nil)) => 100
+               (count (local-org-api/waste-ads "")) => 100))
 
        (facts "Validators"
               (fact "Bad format: nil" (local-org-api/valid-feed-format {:data {:fmt nil}})
@@ -737,7 +743,9 @@
                     => nil)
               (fact "Valid organization 753-R" (local-org-api/valid-org {:data {:org "753-R"}})
                     => nil)
-                            (fact "Valid organization 753-r" (local-org-api/valid-org {:data {:org "753-r"}})
+              (fact "Valid organization 753-r" (local-org-api/valid-org {:data {:org "753-r"}})
+                    => nil)
+              (fact "Empty organization is valid " (local-org-api/valid-org {:data {}})
                     => nil)
               (fact "Invalid organization 888-X" (local-org-api/valid-org {:data {:org "888-X"}})
                     => {:ok false, :text "error.organization-not-found"})
@@ -745,5 +753,47 @@
                     => nil)
               (fact "Supported language sV" (local-org-api/valid-language {:data {:lang "sV"}})
                     => nil)
+              (fact "Empty language is valid" (local-org-api/valid-language {:data {}}))
               (fact "Unsupported language CN" (local-org-api/valid-language {:data {:lang "CN"}})
                     => {:ok false, :text "error.unsupported-language"})))
+
+
+
+(facts allowed-autologin-ips-for-organization
+
+  (fact "applicant is not authorized"
+    (query pena :allowed-autologin-ips-for-organization :org-id "753-R") => unauthorized?)
+  (fact "authority is not authorized"
+    (query sonja :allowed-autologin-ips-for-organization :org-id "753-R") => unauthorized?)
+  (fact "authorityadmin is not authorized"
+    (query sipoo :allowed-autologin-ips-for-organization :org-id "753-R") => unauthorized?)
+  (fact "admin is authorized"
+    (query admin :allowed-autologin-ips-for-organization :org-id "753-R") => ok?)
+
+  (fact "no allowed autologin ips for sipoo is empty"
+    (-> (query admin :allowed-autologin-ips-for-organization :org-id "753-R") :ips) => empty?)
+
+  (fact "three allowed autologin ips for porvoo"
+    (-> (query admin :allowed-autologin-ips-for-organization :org-id "638-R") :ips count) => 3))
+
+(facts update-allowed-autologin-ips
+
+  (fact "applicant is not authorized"
+    (command pena :update-allowed-autologin-ips :org-id "753-R" :ips []) => unauthorized?)
+  (fact "authority is not authorized"
+    (command sonja :update-allowed-autologin-ips :org-id "753-R" :ips []) => unauthorized?)
+  (fact "authorityadmin is not authorized"
+    (command sipoo :update-allowed-autologin-ips :org-id "753-R" :ips []) => unauthorized?)
+  (fact "admin is authorized"
+    (command admin :update-allowed-autologin-ips :org-id "753-R" :ips []) => ok?)
+
+  (fact "autologin ips are updated for sipoo"
+    (let [ips (repeatedly 5 #(ssg/generate ssc/IpAddress))]
+      (command admin :update-allowed-autologin-ips :org-id "753-R" :ips ips) => ok?
+      (-> (query admin :allowed-autologin-ips-for-organization :org-id "753-R") :ips) => ips))
+
+  (fact "there is still three allowed autologin ips for porvoo"
+    (-> (query admin :allowed-autologin-ips-for-organization :org-id "638-R") :ips count) => 3)
+
+  (fact "trying to update with invalid ip address"
+    (command admin :update-allowed-autologin-ips :org-id "753-R" :ips ["inv.val.id.ip"]) => (partial expected-failure? :error.invalid-ip)))

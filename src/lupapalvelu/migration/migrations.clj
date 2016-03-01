@@ -1481,15 +1481,15 @@
   (update attachment :auth (partial mapv user-summary)))
 
 (defmigration cleanup-attachment-auth-user-summary-v2
-  {:apply-when (pos? (+ (mongo/count :applications 
+  {:apply-when (pos? (+ (mongo/count :applications
                                      {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
                                            {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
                                                                                          :username {$exists false}}}}}}]})
-                        (mongo/count :submitted-applications 
+                        (mongo/count :submitted-applications
                                      {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
                                            {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
                                                                                          :username {$exists false}}}}}}]})))}
-  (update-applications-array :attachments 
+  (update-applications-array :attachments
                              remove-unwanted-fields-from-attachment-auth
                              {$or [{:attachments {$elemMatch {:auth {$elemMatch {:email    {$exists true}}}}}}
                                    {:attachments {$elemMatch {:auth {$elemMatch {:id       {$exists true}
@@ -1505,25 +1505,25 @@
 
 (defn remove-unwanted-fields-from-attachment-versions-user-and-latestVersion-user [attachment]
   (-> attachment
-      remove-unwanted-fields-from-attachment-versions-user 
+      remove-unwanted-fields-from-attachment-versions-user
       remove-unwanted-fields-from-attachment-latestVersion-user))
 
 (defmigration cleanup-attachment-versions-user-summary-v2
-  {:apply-when (pos? (+ (mongo/count :applications 
+  {:apply-when (pos? (+ (mongo/count :applications
                                      {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
                                            {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
                                                                                              :user.username {$exists false}}}}}}
                                            {:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
                                            {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
                                                                       :latestVersion.user.username {$exists false}}}}]})
-                        (mongo/count :submitted-applications 
+                        (mongo/count :submitted-applications
                                      {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
                                            {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
                                                                                              :user.username {$exists false}}}}}}
                                            {:attachments {$elemMatch {:latestVersion.user.email    {$exists true}}}}
                                            {:attachments {$elemMatch {:latestVersion.user.id       {$exists true}
                                                                       :latestVersion.user.username {$exists false}}}}]})))}
-  (update-applications-array :attachments 
+  (update-applications-array :attachments
                              remove-unwanted-fields-from-attachment-versions-user-and-latestVersion-user
                              {$or [{:attachments {$elemMatch {:versions {$elemMatch {:user.email    {$exists true}}}}}}
                                    {:attachments {$elemMatch {:versions {$elemMatch {:user.id       {$exists true}
@@ -1552,7 +1552,7 @@
                                                       {:attachments {$elemMatch {:op                   {$exists false}}}}
                                                       {:attachments {$elemMatch {:signatures           {$exists false}}}}
                                                       {:attachments {$elemMatch {:auth                 {$exists false}}}}]}))}
-  (update-applications-array :attachments 
+  (update-applications-array :attachments
                              merge-required-fields-into-attachment
                              {$or [{:attachments {$elemMatch {:locked               {$exists false}}}}
                                    {:attachments {$elemMatch {:applicationState     {$exists false}}}}
@@ -1583,7 +1583,7 @@
 (defmigration cleanup-attachment-target-with-timestamp-as-value
   {:apply-when (pos? (+ (mongo/count :applications {:attachments {$elemMatch {:target {$type 18}}}})
                         (mongo/count :submitted-applications {:attachments {$elemMatch {:target {$type 18}}}})))}
-  (update-applications-array :attachments 
+  (update-applications-array :attachments
                              set-target-timestamps-as-nil
                              {:attachments {$elemMatch {:target {$type 18}}}}))
 
@@ -1593,7 +1593,7 @@
     attachment))
 
 (defmigration cleanup-attachment-target-nil-valued-maps
-  (update-applications-array :attachments 
+  (update-applications-array :attachments
                              set-target-with-nil-valued-map-as-nil
                              {$or [{:attachments {$elemMatch {:target.type {$type 10}}}}
                                    {:attachments {$elemMatch {:target.type "undefined"}}}]}))
@@ -1608,15 +1608,15 @@
     (for [collection [:applications :submitted-applications]
           {attachments :attachments verdicts :verdicts app-id :id :as a} (mongo/select collection query {:verdicts 1 :attachments 1})]
       (mongo/update-n collection
-                      {:_id app-id} 
+                      {:_id app-id}
                       {$set {:attachments (map (partial set-verdict-id-for-nil-valued-verdict-targets (:id (first verdicts))) attachments)}}))))
 
 (defmigration update-attachment-target-verdict-id-when-nil
-  {:apply-when (pos? (+ (mongo/count :applications 
+  {:apply-when (pos? (+ (mongo/count :applications
                                      {:attachments {$elemMatch {:target.id   {$type 10}
                                                                 :target.type "verdict"}}
                                       :verdicts {$size 1}})
-                        (mongo/count :submitted-applications 
+                        (mongo/count :submitted-applications
                                      {:attachments {$elemMatch {:target.id   {$type 10}
                                                                 :target.type "verdict"}}
                                       :verdicts {$size 1}})))}
@@ -1628,7 +1628,7 @@
   (update attachment :op dissoc :operation-type))
 
 (defmigration remove-operation-type-from-attachment-op
-  {:apply-when (pos? (+ (mongo/count :applications 
+  {:apply-when (pos? (+ (mongo/count :applications
                                      {:attachments {$elemMatch {:op.operation-type {$exists true}}}})
                         (mongo/count :submitted-applications
                                      {:attachments {$elemMatch {:op.operation-type {$exists true}}}})))}
@@ -1650,7 +1650,7 @@
       remove-attachment-latestVersion-accepted))
 
 (defmigration remove-accepted-from-attachment-versions
-  {:apply-when (pos? (+ (mongo/count :applications 
+  {:apply-when (pos? (+ (mongo/count :applications
                                      {$or [{:attachments.versions.accepted {$exists true}}
                                            {:attachments.latestVersion.accepted {$exists true}}]})
                         (mongo/count :submitted-applications
@@ -1660,6 +1660,160 @@
                              remove-accepted-field-from-attachment-versions-and-latest-version
                              {$or [{:attachments.versions.accepted {$exists true}}
                                    {:attachments.latestVersion.accepted {$exists true}}]}))
+
+(defn pull-auth-update [{:keys [id role]}]
+  {$pull {:auth {:role role :id id}}})
+
+(defn remove-owners-double-auth-updates [auths]
+  (let [{owner-id :id :as owner-auth} (some
+                                        #(when (= (:role %) "owner") %)
+                                        auths)]
+    (when-let [removable-auths (seq
+                                 (filter
+                                   #(and
+                                     (= (:id %) owner-id)
+                                     (or (= (:role %) "writer") (= (:role %) "reader")))
+                                   auths))]
+      (map pull-auth-update removable-auths))))
+
+(defmigration double-auths-in-foreman-applications ; LPK-1331
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                application (mongo/select collection
+                                          {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
+                                           :auth.2 {$exists true} ; >= 3 auths
+                                           :created {$gt 1444780800000}} ; since version 1.108 14.10.2015
+                                          [:auth])]
+            (if-let [updates (remove-owners-double-auth-updates (:auth application))]
+              (do
+                (doseq [update-clause updates]
+                  (mongo/update-by-id collection (:id application) update-clause))
+                1) ; one application updated
+              0))))
+
+(defmigration duplicate-comments-cleanup
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                application (mongo/select collection
+                                          {:attachments.versions.archivable true ; for applications that have pdf/a checked attachments
+                                           :created {$gt 1433462400000}}
+                                          [:comments])]
+            (let [comments (:comments application)
+                  distinct-comments (distinct comments)]
+              (if (< (count distinct-comments) (count comments))
+                (mongo/update-n collection {:_id (:id application)} {$set {:comments distinct-comments}})
+                0)))))
+
+(defn set-signature-fileId [versions {version :version created :created :as signature}]
+  (->> (filter #(and (= (:version %) version) (< (:created %) created)) versions)
+       first
+       :fileId
+       (assoc signature :fileId)))
+
+(defn add-fileId-for-signatures [{signatures :signatures versions :versions :as attachment}]
+  (->> (map (partial set-signature-fileId versions) signatures)
+       (filter :fileId)
+       (assoc attachment :signatures)))
+
+(defmigration add-fileId-for-attachment-signatures
+  {:apply-when (pos? (+ (mongo/count :applications
+                                     {:attachments.signatures {$elemMatch {:version {$exists true} :fileId {$exists false}}}})
+                        (mongo/count :submitted-applications
+                                     {:attachments.signatures {$elemMatch {:version {$exists true} :fileId {$exists false}}}})))}
+  (update-applications-array :attachments
+                             add-fileId-for-signatures
+                             {:attachments.signatures {$elemMatch {:version {$exists true} :fileId {$exists false}}}}))
+
+;; Cleanup QA attachments
+(defmigration rename-not-needed
+  {:apply-when (pos? (mongo/count :applications {:attachments.not-needed {$exists true}}))}
+  (update-applications-array :attachments
+    #(-> % (assoc :notNeeded (:not-needed %)) (dissoc :not-needed))
+    {:attachments.not-needed {$exists true}}))
+
+;; Cleanup QA attachments
+(defmigration rename-requested-by-authority
+  {:apply-when (pos? (mongo/count :applications {:attachments.requested-by-authority {$exists true}}))}
+  (update-applications-array :attachments
+    #(-> % (assoc :requestedByAuthority (:requested-by-authority %)) (dissoc :requested-by-authority))
+    {:attachments.requested-by-authority {$exists true}}))
+
+(defn guest-authority? [roles]
+  (contains? (set roles) "guestAuthority"))
+
+(defn remove-guest-authorities [org-auths]
+  (reduce (fn [acc [k v]]
+            (assoc acc k (remove #(= "guestAuthority" %) v))) {} org-auths))
+
+(defmigration no-more-guest-authority-org-authz
+  (let [users (->> (mongo/select :users {:orgAuthz {$exists true}})
+                   (filter (fn [u] (some guest-authority? (vals (:orgAuthz u))))))]
+    (doseq [{id :id auths :orgAuthz} users]
+      (mongo/update-by-id :users id {$set {:orgAuthz (remove-guest-authorities auths)}}))))
+
+(defn rename-kaupunkikuvatoimenpide-documents-with-op [operations-to-rename doc]
+  (if (and (= "kaupunkikuvatoimenpide" (get-in doc [:schema-info :name]))
+           (set operations-to-rename)  (get-in doc [:schema-info :op :name]))
+    (update doc :schema-info assoc :name "kaupunkikuvatoimenpide-ei-tunnusta" :i18name "kaupunkikuvatoimenpide")
+    doc))
+
+(defmigration schemas-without-building-identifier []
+  {:apply-when (pos? (+ (mongo/count :applications
+                                     {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                              :schema-info.op.name {$in ["aita"]}}}})
+                        (mongo/count :submitted-applications
+                                     {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                              :schema-info.op.name {$in ["aita"]}}}})))}
+  (update-applications-array :documents
+                             (partial rename-kaupunkikuvatoimenpide-documents-with-op #{"aita"})
+                             {:documents {$elemMatch {:schema-info.name "kaupunkikuvatoimenpide",
+                                                      :schema-info.op.name {$in ["aita"]}}}}))
+
+(defn add-original-file-id-for-version [{:keys [fileId originalFileId] :as version}]
+  (assoc version :originalFileId (or originalFileId fileId)))
+
+(defn add-original-file-id-for-versions-and-latestVersion [{latest-version :latestVersion :as attachment}]
+  (if latest-version
+    (-> attachment
+        (update :versions (partial map add-original-file-id-for-version))
+        (update :latestVersion add-original-file-id-for-version))
+    attachment))
+
+(defmigration add-original-file-id-for-attachment-versions
+  {:apply-when (pos? (mongo/count :applications
+                                  {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                                                                      :originalFileId {$exists false}}}}))}
+  (update-applications-array :attachments
+                             add-original-file-id-for-versions-and-latestVersion
+                             {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                                                                 :originalFileId {$exists false}}}}))
+
+#_(defmigration rename-hankkeen-kuvaus-rakennuslupa-back-to-hankkeen-kuvaus ;; TODO: migrate, LPK-1448
+  {:apply-when (or (pos? (mongo/count :applications {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
+                   (pos? (mongo/count :submitted-applications {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}})))}
+  (update-applications-array
+    :documents
+    (fn [{{name :name} :schema-info :as doc}]
+      (if (= "hankkeen-kuvaus-rakennuslupa" (:name schema-info))
+        (-> (update doc :data dissoc :hankkeenVaativuus)
+            (assoc-in [:schema-info :name] "hankkeen-kuvaus"))
+        doc))
+    {:documents {"schema-info.name" "hankkeen-kuvaus-rakennuslupa"}}))
+
+(defmigration init-designer-subtype
+              (update-applications-array
+                :documents
+                (fn [doc]
+                  (if (re-matches #".*suunnittelija" (str (get-in doc [:schema-info :name])))
+                    (assoc-in doc [:schema-info :subtype] "suunnittelija")
+                    doc))
+                {"documents.schema-info.name" {$regex #".*suunnittelija"}}))
+
+(defmigration init-designer-index
+              (reduce + 0
+                      (for [collection [:applications :submitted-applications]]
+                        (let [applications (mongo/select collection {:documents.schema-info.subtype "suunnittelija"} {:documents 1})]
+                          (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
 
 ;;
 ;; ****** NOTE! ******

@@ -305,7 +305,10 @@
 
     (fact "there is no suunnittelija"
       suunnittelija => truthy
-      (get-in suunnittelija [:data :henkilotiedot]) => {:etunimi {:value ""}, :hetu {:value nil}, :sukunimi {:value ""}})
+      (->> (get-in suunnittelija [:data :henkilotiedot])
+           (map (fn [[k v]] [k (:value v)]))
+           (into {}))
+      => {:etunimi "", :hetu nil, :sukunimi ""})
 
     (let [doc-id (:id suunnittelija)
           code "RAK-rakennesuunnittelija"]
@@ -369,7 +372,7 @@
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
           (:authority app) => (contains {:id sonja-id})
-          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-0002"))
+          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-9988"))
 
       (fact "Ronja still does not see the full person ID"
         (let [app (query-application ronja application-id)

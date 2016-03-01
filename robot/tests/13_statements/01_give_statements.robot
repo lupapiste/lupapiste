@@ -4,6 +4,7 @@ Documentation   Application statements are managed
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Variables       ../06_attachments/variables.py
 
 *** Test Cases ***
 
@@ -24,10 +25,10 @@ Authorities from different municipality can be added as statement giver
 
 Authority can be a statement giver multiple times
   Create statement giver  sonja.sibbo@sipoo.fi  Rakennuslausunto
-  Create statement giver  sonja.sibbo@sipoo.fi  Erityslausunto
+  Create statement giver  sonja.sibbo@sipoo.fi  Erityislausunto
   Logout
 
-New applications does not have statements
+New applications do not have statements
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Salibandyhalli${secs}
@@ -52,8 +53,12 @@ Sonja adds five statement givers to application
   # We now have 4 statement givers and one empty row (for adding a new statement giver), so there is 5 rows visible
   Wait until  Page Should Contain Element  xpath=//*[@data-test-id='statement-giver-checkbox-4']
 
-  Input text  xpath=//*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
+  Wait until  Input text  invite-statement-giver-saateText  Tama on saateteksti.
   Invite read-only statement giver  0  01.06.2018
+  Open statement  0
+  Wait until  Element should be visible  statement-cover-note
+  Wait until  Element text should be  statement-cover-note  Tama on saateteksti.
+  Return from statement
 
   # Checkbox selection and maaraaika are cleared, the saate text stays filled with value.
   Wait Until  Checkbox Should Not Be Selected  statement-giver-checkbox-0
@@ -72,7 +77,7 @@ Sonja adds five statement givers to application
   Statement count is  6
 
 Sonja can delete statement
-  Wait and Click  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-5']
+  Scroll and click test id  delete-statement-5
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Statement count is  5
   Wait Until  Title Should Be  ${appname} - Lupapiste
@@ -94,16 +99,29 @@ Sonja types in draft
   Wait Until  Element should be enabled  statement-text
   Input text  statement-text  typed in statement text but not gonna submit the statement.
   Wait until  Select From List By Value  statement-type-select  puoltaa
-  Sleep  2.5
+  Positive indicator icon should be visible
   Reload Page
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
+
+Sonja adds and removes attachment to statement draft
+  Wait test id visible  statement-attachments-no-attachments
+  Scroll and click test id  add-statement-attachment
+  Add attachment  statement  ${TXT_TESTFILE_PATH}  Important note
+  Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  Important note
+  Scroll to test id  add-statement-attachment
+  Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Element Should Not Be Visible  jquery=table[data-test-id=statement-attachments-table]
   [Teardown]  Return from statement
 
 Sonja can give statement to own request
   Open statement  4
+  Wait until  Element text should be  xpath=//div[@data-test-id='header-statement-edit']//span[@data-bind='text: person.text']  ERITYISLAUSUNTO
   Input text  statement-text  salibandy on the rocks.
-  Wait until  Select From List By Value  statement-type-select  puoltaa
+  Select From List By Value  statement-type-select  puoltaa
   Wait and click  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']
 
 Comment is added
   Open statement  4
@@ -114,7 +132,13 @@ Sonja cannot regive statement to own statement
   Wait until  Element should not be visible  statement-submit
   [Teardown]  Return from statement
 
+Attachment is generated and not removable
+  Open tab  attachments
+  Wait until  Element should be visible  //table[@data-test-id='attachments-template-table']//tr[@id='attachment-row-ennakkoluvat_ja_lausunnot-lausunto']
+  Element should not be visible  //table[@data-test-id='attachments-template-table']//tr[@data-test-icon='delete-ennakkoluvat_ja_lausunnot.lausunto']
+
 Statement status is visible for given statement in summary table
+  Open tab  statement
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Puoltaa
 
 ...but not for draft
@@ -132,8 +156,8 @@ Veikko can see statements as he is being requested a statement to the applicatio
   Open application  ${appname}  ${appPropertyId}
 
 Statement giver sees comments
-  # 1+1 statement comments, 1 auto generated attachment
-  Comment count is  3
+  # 1+1 statement comments, 1 auto generated attachment, 1 added (and later removed) attachment.
+  Comment count is  4
 
 Statement can export application as PDF
   Element Should Be Visible  xpath=//button[@data-test-id="application-pdf-btn"]
@@ -153,8 +177,9 @@ Veikko from Tampere can give statement
   Select From List By Value  statement-type-select  ehdoilla
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-1']  Puoltaa ehdoilla
-  [Teardown]  logout
+  Logout
 
 Sonja can see statement indicator
   Sonja logs in
@@ -177,12 +202,15 @@ Set maaraaika-datepicker field value
 
 Invite read-only statement giver
   [Arguments]  ${index}  ${date}
+  Scroll to test id  table-application-statements-givers
   Wait until  Select Checkbox  statement-giver-checkbox-${index}
   Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
   Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
   Wait and click  xpath=//*[@data-test-id='add-statement-giver']
   Element should be visible  xpath=//*[@data-test-id='add-statement-giver']
-  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait until  Positive indicator should be visible
+  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait Until  Positive indicator should not be visible
 
 Invite 'manual' statement giver
   [Arguments]  ${index}  ${roletext}  ${name}  ${email}  ${date}
@@ -209,12 +237,14 @@ Statement count is
   Wait until  Xpath Should Match X Times  //div[@id='application-statement-tab']//tr[@class="statement-row"]  ${amount}
 
 Return from statement
+  Scroll to test id  statement-return
   Wait and click  xpath=//*[@data-test-id='statement-return']
+  Tab should be visible  statement
 
 Open statement
   [Arguments]  ${number}
-  Execute javascript  window.scrollTo(0,0)
-  Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-${number}']
+  Wait Until  Positive indicator should not be visible
+  Scroll and click test id  open-statement-${number}
   Wait until  element should be visible  xpath=//div[@class='statement-top']//div[@class='tabs-container']
 
 Statement is disabled

@@ -87,9 +87,15 @@
                 (count (xml/select lp-xml_220 [:toimenpidetieto :Toimenpide :Rakennus])) => pos?)
 
               (doseq [op xml-operations
-                      :let [rakennus (xml/select1 op [:Rakennus])]
+                      :let [op-tag (-> op :content first :tag)
+                            rakennus (xml/select1 op [:Rakennus])]
                       :when rakennus]
-                (fact "Building ID includes operation ID"
+
+                (when (= :uusi op-tag)
+                  (fact "Operation description for a new building"
+                    (xml/get-text rakennus [:rakennustunnus :rakennuksenSelite]) => "A: kerrostalo-rivitalo-kuvaus"))
+
+                (fact {:midje/description (str "Building ID includes operation ID of " (name op-tag))}
                   (xml/get-text rakennus [:rakennustunnus :MuuTunnus :tunnus]) =not=> ss/blank?)))))
 
         (fact "hakija and maksaja parties exist"
@@ -281,14 +287,47 @@
             vastuu (xml/select tyonjohtaja [:vastattavaTyotieto])]
         (fact "rooli" (xml/get-text tyonjohtaja [:tyonjohtajaRooliKoodi]) => "KVV-ty\u00f6njohtaja")
         (fact "sijaistettavan nimi" (xml/get-text tyonjohtaja [:sijaistettavaHlo]) => "Jaska Jokunen")
-        (fact "5 vastuuta" (count vastuu) => 5)
+        (fact "2 vastuuta" (count vastuu) => 2)
         (fact "vastuun alkamisPvm" (xml/get-text tyonjohtaja [:alkamisPvm]) => "2014-02-13")
         (fact "vastuun paattymisPvm" (xml/get-text tyonjohtaja [:paattymisPvm]) => "2014-02-20")
         (fact "vastattavaTyo"
-          (map #(xml/get-text % [:vastattavaTyo]) vastuu) => (just #{"Rakennuksen purkaminen"
-                                                                     "IV-laitoksen korjaus- ja muutosty\u00f6"
-                                                                     "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
-                                                                     "Maanrakennusty\u00f6t"
+          (map #(xml/get-text % [:vastattavaTyo]) vastuu) => (just #{"Sis\u00e4puolinen KVV-ty\u00f6"
                                                                      "Muu tyotehtava"}))
         (fact "postiosoite"
           (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")))))
+
+
+(def suunnittelijan-nimaminen-canonical (application-to-canonical application-suunnittelijan-nimeaminen "fi"))
+
+(facts "Suunnittelija"
+
+  (facts "2.1.2"
+    (let [xml_s (-> suunnittelijan-nimaminen-canonical (rakennuslupa-element-to-xml "2.1.2") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.2")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "ei tiedossa")
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")
+      (fact "patevyysvaatimusluokka"  (xml/get-text suunnittelija [:patevyysvaatimusluokka])  => "B")
+      (fact "koulutus"                (xml/get-text suunnittelija [:koulutus])                => "arkkitehti")
+      (fact "valmistumisvuosi"        (xml/get-text suunnittelija [:valmistumisvuosi])        => "2010")
+      (fact "vaadittuPatevyysluokka"  (xml/get-text suunnittelija [:vaadittuPatevyysluokka])  => "C")
+      (fact "yritys - nimi"           (xml/get-text suunnittelija [:yritys :nimi])            => "Solita Oy")))
+
+  (facts "2.2.0"
+    (let [xml_s (-> suunnittelijan-nimaminen-canonical (rakennuslupa-element-to-xml "2.2.0") indent-str)
+          suunnittelija (-> xml_s xml/parse cr/strip-xml-namespaces (xml/select1 [:Suunnittelija]))]
+
+      (validator/validate xml_s (:permitType application-tyonjohtajan-nimeaminen) "2.2.0")
+
+      (fact "suunnittelijaRoolikoodi" (xml/get-text suunnittelija [:suunnittelijaRoolikoodi]) => "rakennusfysikaalinen suunnittelija")
+      (fact "VRKrooliKoodi"           (xml/get-text suunnittelija [:VRKrooliKoodi])           => "erityissuunnittelija")
+      (fact "patevyysvaatimusluokka"  (xml/get-text suunnittelija [:patevyysvaatimusluokka])  => "B")
+      (fact "koulutus"                (xml/get-text suunnittelija [:koulutus])                => "arkkitehti")
+      (fact "valmistumisvuosi"        (xml/get-text suunnittelija [:valmistumisvuosi])        => "2010")
+      (fact "vaadittuPatevyysluokka"  (xml/get-text suunnittelija [:vaadittuPatevyysluokka])  => "C")
+      (fact "kokemusvuodet"           (xml/get-text suunnittelija [:kokemusvuodet])           => "5")
+      (fact "FISEpatevyyskortti"      (xml/get-text suunnittelija [:FISEpatevyyskortti])      => "http://www.ym.fi")
+      (fact "FISEkelpoisuus"          (xml/get-text suunnittelija [:FISEkelpoisuus])          => "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)")
+      (fact "yritys - nimi"           (xml/get-text suunnittelija [:yritys :nimi])            => "Solita Oy"))))

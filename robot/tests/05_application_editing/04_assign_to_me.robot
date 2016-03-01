@@ -67,7 +67,7 @@ Sonja checks property owners
 Sonja sees Mikko's full person ID
   Open tab  parties
   Open accordions  parties
-  Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-0002
+  Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-9988
 
 # LUPA-23
 Sonja could add an operation

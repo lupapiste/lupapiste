@@ -6,6 +6,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
@@ -22,7 +23,7 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -62,7 +63,7 @@
 
 (defn- do-approve [application created id lang jatkoaika-app? do-rest-fn user]
   (let [organization (organization/get-organization (:organization application))]
-    (if (organization/has-ftp-user? organization (permit/permit-type application))
+    (if (organization/krysp-integration? organization (permit/permit-type application))
       (or
         (application/validate-link-permits application)
         (let [sent-file-ids (if jatkoaika-app?
@@ -71,7 +72,7 @@
                                 (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
           (do-rest-fn attachments-updates)))
-      ;; SFTP user not defined for the organization -> let the approve command pass
+      ;; Integration details not defined for the organization -> let the approve command pass
       (do-rest-fn nil))))
 
 (defcommand approve-application
@@ -165,10 +166,10 @@
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
 (defn- load-building-data [url credentials property-id building-id overwrite-all?]
-  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url credentials property-id) building-id)]
+  (let [all-data (building-reader/->rakennuksen-tiedot (building-reader/building-xml url credentials property-id) building-id)]
     (if overwrite-all?
       all-data
-      (select-keys all-data (keys krysp-reader/empty-building-ids)))))
+      (select-keys all-data (keys building-reader/empty-building-ids)))))
 
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
@@ -207,7 +208,7 @@
                             (fn [[path _]] (model/find-by-name (:body schema) path))
                             (tools/path-vals
                               (if clear-ids?
-                                krysp-reader/empty-building-ids
+                                building-reader/empty-building-ids
                                 (load-building-data url credentials propertyId buildingId overwrite))))
             krysp-update-map (doc-persistence/validated-model-updates application collection document krysp-updates created :source "krysp")
 
@@ -223,16 +224,18 @@
 ;; Building info
 ;;
 
-(defcommand get-building-info-from-wfs
+(defquery get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     krysp-enrichment-states
+   :org-authz-roles auth/all-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
+   :states     states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
     (try
-      (let [kryspxml    (krysp-reader/building-xml url credentials propertyId)
-            buildings   (krysp-reader/->buildings-summary kryspxml)]
+      (let [kryspxml    (building-reader/building-xml url credentials propertyId)
+            buildings   (building-reader/->buildings-summary kryspxml)]
         (ok :data buildings))
       (catch java.io.IOException e
         (errorf "Unable to get building info from %s backend: %s" (i18n/loc "municipality" municipality) (.getMessage e))

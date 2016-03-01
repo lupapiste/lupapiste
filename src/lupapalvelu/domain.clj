@@ -361,4 +361,9 @@
    :metadata                 {}
    :processMetadata          {}})
 
+(def operation-skeleton
+  {:name ""
+   :description nil
+   :created nil})
+
 

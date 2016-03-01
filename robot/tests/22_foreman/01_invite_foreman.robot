@@ -18,14 +18,7 @@ Pena invites Mikko
 Pena invites Solita
   Open tab  parties
   Open foreman accordions
-  Wait Until  Click Element  xpath=//div[@class='parties-list']//button[@data-test-id='company-invite']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='modal-dialog-content']
-  Element should not be visible  xpath=//div[@data-test-id='company-invite-confirm-help']
-  Select From Autocomplete  div[@id="modal-dialog-content-component"]  Solita Oy
-  Click enabled by test id  modal-dialog-submit-button
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='company-invite-confirm-help']
-  Click enabled by test id  modal-dialog-submit-button
-  Wait Until  Page should contain  1060155-5
+  Invite company to application  Solita Oy
 
 Solita accepts invitation
   Open last email
@@ -150,7 +143,19 @@ Pena can link existing foreman application to foreman task
   Pena logs in
   Open project application
   Open tab  tasks
-  Select From List By Value  xpath=//select[@data-test-id="foreman-selection"]  ${foremanAppId}
+  Select From List By Value  xpath=//select[@data-test-id="foreman-selection-1"]  ${foremanAppId}
+  # Sleep so the repository reload does not prune dom when waiting
+  Sleep  2s
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-1"]  ${foremanAppId}
+
+Pena can clear the link and change the foreman role
+  Select From List By Index  xpath=//select[@data-test-id="foreman-selection-1"]  0
+  # Sleep so the repository reload does not prune dom when waiting
+  Sleep  2s
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-1"]  Valitse…
+  Select From List By Value  xpath=//select[@data-test-id="foreman-selection-0"]  ${foremanAppId}
+  Sleep  2s
+  Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-0"]  ${foremanAppId}
 
 Pena can move to linked foreman application and back
   Click by test id  foreman-application-link-${foremanAppId}

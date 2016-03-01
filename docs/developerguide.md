@@ -12,7 +12,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
     - [Compass](http://compass-style.org/): `gem install compass`
     - [Node.js](https://nodejs.org)
     - [Bless](http://blesscss.com): `npm install bless -g`
-- Python 2.x ja Robot Framework selaintestausta varten
+- Python 2.x ja [Robot Framework](http://robotframework.org/) selaintestausta varten
   - `pip install robotframework`
   - `pip install robotframework-selenium2library`
   - IE:llä ajettavia testejä varten ajuri osoitteesta  http://selenium-release.storage.googleapis.com/index.html
@@ -125,6 +125,26 @@ sisään esimerkiksi hakijatunnuksella pena/pena tai viranomaistunnuksella sonja
 
 Hakemuksen voi luoda samaisesta Development
 
+## Lähdekoodin hakemistorakenne
+
+Koodi on jaoteltu seuraavasti:
+
+Hakmisto        | Selitys
+--------------  |----------
+src             | Palvelinpään sovelluskoodi
+src/lupapalvelu | Erityisesti Lupapisteeseen liittyvä palvelinpään sovelluskoodi
+src/sade        | Palvelinpään sovelluskoodi, jota on hyödynnetty muissa SADe-hankkeen projekteissa
+resources       | Selainpään sovelluskoodi
+dev-resources   | Kehitys- ja testausaikaiset aputiedostot
+dev-src         | Kehitysaikainen apulähdekoodi
+test            | Palvelinpään yksikkötestit
+itest           | Palvelinpään integraatiotestit
+stest           | Palvelinpään systeemitestit
+test-utils      | Palvelinpään testien jaettu koodi
+robot           | Selainpään end-to-end-testi
+
+Palvelinpään päätiedosto, josta ohjelmiston suoritus käynnistyy, on
+src/lupapalvelu/main.clj.
 
 ## Tyylikäytännöt
 
@@ -134,6 +154,27 @@ Sisennys on kaksi välilyöntiä. Merkkijonojen ympärillä käytetään lainaus
 myös JavaScript-koodissa.
 
 JavaScript-koodi tulee tarkastaa JSHint-työkalulla, jonka asetukset ovat projektin juuressa.
+
+Clojure-koodissa käytetään seuraavia aliaksia nimiavaruuksille:
+
+namespace                 | alias
+--------------------------|-------
+lupapalvelu.action        | action
+lupapalvelu.application   | app
+lupapalvelu.attachment    | att
+lupapalvelu.authorization | auth
+lupapalvelu.company       | com
+lupapalvelu.domain        | domain
+lupapalvelu.operations    | op
+lupapalvelu.organization  | org
+lupapalvelu.user          | usr
+sade.env                  | env
+sade.strings              | ss
+sade.util                 | util
+
+Nimiavaruuksiin viitataan aina :require tyylillä (:use avainsanaa ei käytetä).
+Koko nimiavaruuden sisällyttämistä (`:require [lupapalvelu.namespace :refer :all]`)
+tulee välttää. Poikkeustapauksia ovat mm. `sade.core` ja `monger.operators`.
 
 ## Versionhallinta
 
@@ -162,58 +203,41 @@ Muista käyttää kahta välilyöntiä .robot-tiedostoissa erottamaan avainsanaa
 
 # Korkean tason domain-kuvaus
 
-TODO
-
-## Tietomalli
-
-Käsite | Selite
---- | ---
-Lupatyyppi (permit type) | Lupatyyppi määrittää millaisesta lupa-asioinnista on kyse. Esimerkiksi rakennusvalvonta, yleiset alueet ja ympäristötoimi ovat omia lupatyyppejään.
-Hakemus (application) | Hakija täyttää palvelussa hakemuksen, joka sisältää mm. lomaketietoja ja liitteitä. Hakemuksella on aina tila (state), joka kuvaa hakemuksen tilaa lupa- tai ilmoitusprosessissa. Viranomainen tarkastaa ja käsittelee palveluun jätetyn hakemuksen.
-Toimenpide (operation) | Toimenpiteet määrittävät hakemuksen tyypin eli millaisia tietoja hakemukseen täytyy täyttää. Toimenpide kuuluu aina tiettyyn lupatyyppiin. Esimerkiksi toimenpide "Aidan rakentaminen" kuuluu rakennusvalvonnan lupatyyppiin. Toimenpiteellä on skeema (schema), joka määrittää hakemuksella täytettävät lomaketiedot.
-Organisaatio (organization) | Viranomainen kuuluu aina yhteen tai useampaan organisaatioon. Viranomaisella on oikeus nähdä ja käsitellä omaan organisaatioonsa jäteyt hakemukset. Organisaatio on useissa tapauksessa kunnan tietty viranomaisorganisaatio (esimerkiksi rakennusvalvonta). Tietomalli mahdollistaa helposti ylikunnallisen lupakäsittelyn, sillä yksi organisaatio on konfiguroitavissa usean kunnan käyttöön.
-Neuvontapyyntö (info request) | Hakemuksen esiversio. Neuvontapyynnön avulla hakija voi pyytää  viranomaiselta neuvoa jo ennen varsinaisen hakemuksen tekoa. Neuvontapyyntö voidaan muuntaa hakemukseksi, jolloin asioinnin valmistelun voi aloittaa suoraan neuvontapyynnön pohjalta.
-
-## Roolit
-
-Rooli | Selite
---- | ---
-Pääkäyttäjä (admin) | Palvelun hallinnointi
-Organisaation pääkäyttäjä (authorityAdmin) | Organisaation pääkäyttäjä hallitsee organisaation tietoja ja konfiguraatioita
-Viranomainen (authority) | Viranomainen kuuluu yhteen tai useampaan organisaatioon. Viranomainen voi käsitellä organisaatioon tulleita hakemuksia. Viranomaisrooleja organisaatioihin hallinnoi organisaation pääkäyttäjä
-Hakija (applicant) | Vahvasti tunnistautunut hakija. Hakijat voivat luoda hakemuksia palveluun. Hakija voi myös saada valtuutuksia muiden hakijoiden tekemiin hakemuksiin, jolloin samaa hakemusta voi valmistella useampi henkilö
-Avoimen neuvontapyynnön viranomaiskäyttäjä (oirAuthority) | Käyttäjä saa ilmoituksia avoimista neuvontapyynnöistä. Käyttäjä voi antaa vastauksen hakijan avoimeen neuvontapyyntön. Käytössä organisaatioissa, jotka eivät vielä ole ottaneet varsinaista asiointia käyttöön.
-Dummy (dummy) | Dummy käyttäjä, joka ei ole vielä rekisteröitynyt ja vahvasti tunnistautunut palveluun. Dummy käyttäjä syntyy esimerkiksi kun hakemukselle valtuutetaan käyttäjä, jonka sähköpostiosoite ei ole vielä rekisteröitynyt palvelun käyttäjäksi.
-
+Ks. [tietomalli](information-architecture.md)
 
 # Arkkitehtuuri yleiskuvaus
 
-Asiointisovellus on toteutettu HTML5 Single-page application-pohjaisesti. Käyttöliittymäkerros kutsuu taustapalvelua, joka edelleen lukee ja muokkaa tietokannan tietoja. Järjestelmä tietosisältö muodostuu hakemuksista, niiden lomaketiedoista ja liitetiedostoista sekä käyttäjistä. Rakenteisen tiedon osalta pääroolissa ovat hakemuksen lomaketiedot, joten sovelluksen käyttöön on valittu dokumenttitietokanta, johon monimuotoiset lomakkeet on helppo mallintaa.
+Asiointisovellus on toteutettu HTML5 Single-page application-pohjaisesti.
+Käyttöliittymäkerros kutsuu taustapalvelua, joka edelleen lukee ja muokkaa
+tietokannan tietoja. Järjestelmä tietosisältö muodostuu hakemuksista, niiden
+lomaketiedoista ja liitetiedostoista sekä käyttäjistä. Rakenteisen tiedon osalta
+pääroolissa ovat hakemuksen lomaketiedot, joten sovelluksen käyttöön on valittu
+dokumenttitietokanta, johon monimuotoiset lomakkeet on helppo mallintaa.
 
-Sovellus on toteutettu Command Query Responsibility Segregation periaatteiden mukaisesti. Commandeja käytetään komentojen suorittamiseen (tiedon muokkaamiseen) ja Queryjä käytetään tiedon kyselemiseen. Frontendistä kutsutaan backendin tarjoamia JSON rajapintoja (*/api/command/<nimi>* (POST metodi) ja */api/query/<nimi>* (GET metodi)).
+Sovellus on toteutettu Command Query Responsibility Segregation periaatteiden
+mukaisesti. Commandeja käytetään komentojen suorittamiseen (tiedon muokkaamiseen) ja
+Queryjä käytetään tiedon kyselemiseen. Frontendistä kutsutaan backendin tarjoamia
+JSON rajapintoja (*/api/command/<nimi>* (POST metodi) ja */api/query/<nimi>*
+(GET metodi)).
 
-
-
-front+back
-fyysinen pino: front, app, mongodb, geoserver, sftp jne
+## Keskeisimmät teknologiat
 
 Frontend:
 - [KnockoutJS](http://knockoutjs.com/documentation/introduction.html)
-- jQuery
-- lo-dash
+- [jQuery](http://api.jquery.com/)
+- [lo-dash](http://lodash.com/)
 
 Backend:
-- Clojure
-- MongoDB
-
-
+- [Clojure](http://clojure.org/)
+- [MongoDB](http://docs.mongodb.org/)
 
 # Frontend arkkitehtuuri
 ## Yleistä
 
 - SPA initial startup
-- Kommunikointi backendiin
-  - Query and Command
+
+## Kommunikointi palvelinpäähän
+ajax.js, query & command
 
 ## Uusien näkymien toteutusarkkitehtuuri
 
@@ -383,8 +407,6 @@ hub.send("indicator-icon", {style: "negative"});
 
 ## Globaalit objektit
 - Ajax
-- Hub
-- User feedback on success and error event
 - Localizations
 - Lupapiste Map
 - lupapisteApp
@@ -504,13 +526,9 @@ TODO
 * KRYSP (miten keskustellaan taustajärjestelmien kanssa)
 * Asianhallinta
 
-## Tilat ja tilakone
+## Tietokanta
 
-## VETUMA
-
-## Database
-
-TODO tietomalli (collectionit)
+Ks. [database.md](database.md)
 
 ## Schemat
 

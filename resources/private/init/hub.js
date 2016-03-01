@@ -56,15 +56,14 @@ var hub = (function() {
       debug(event);
     }
 
-    for (var id in subscriptions) {
-      var s = subscriptions[id];
-      if (s.deliver(event)) {
+    _.each(subscriptions, function(s, id) {
+      if (s !== undefined && s.deliver(event)) {
         if (s.oneshot) {
           unsubscribe(id);
         }
         count++;
       }
-    }
+    });
     return count;
   }
 

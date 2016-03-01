@@ -8,4 +8,4 @@ fi
 
 source remote-config.sh
 
-pybot -d target --variable BROWSER:firefox --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:https://test.lupapiste.fi $target
+pybot -d target --variable BROWSER:firefox --variable SELENIUM:http://$remote:$port/wd/hub --variable SERVER:https://test.lupapiste.fi $target

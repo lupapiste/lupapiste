@@ -42,26 +42,34 @@
               </tr>
             </tbody>
           </table>
-          <button class="positive"
-                  data-test-id="application-guest-add"
-                  data-bind="click: toggleBubble,
-                             visible: canDelete()">
-            <i class="lupicon-circle-plus"></i>
-            <span data-bind="ltext: 'guest-authority.add'"></span>
-          </button>
+          <div class="stacked">
+            <button class="positive"
+                    data-test-id="application-guest-add"
+                    data-bind="click: toggleBubble,
+                               visible: canDelete()">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'guest-authority.add'"></span>
+            </button>
+            <div class="bubble-dialog-arrow"
+                 data-bind="visible: bubbleVisible"></div>
+          </div>
           <bubble-dialog params="visible: bubbleVisible,
                                  buttonIcon: 'lupicon-circle-arrow-right',
                                  buttonText: 'application-guests.send',
-                                 buttonEnabled: sendEnabled,
+                                 okEnabled: sendEnabled,
                                  okFun: send,
-                                 waiting: waiting">
+                                 initFun: initBubble,
+                                 error: error,
+                                 waiting: waiting,
+                                 prefix: 'guest'">
             <p data-bind="ltext: 'application-guests.info'"></p>
             <!-- ko if: $parent.isAuthority -->
             <div data-bind="visible: $parent.show.inviteTable">
               <label class="mandatory"
                      data-bind="ltext: 'application-guests.caption'">
               </label>
-              <table class="mandatory" data-test-id="application-guest-authorities">
+              <table data-test-id="application-guest-authorities"
+                     data-bind="css: {mandatory: $parent.show.mandatory}">
                 <tbody data-bind="foreach: $parent.guestAuthorities">
                   <tr data-bind="attr: {'data-test-id': description}">
                     <td><input type="radio" name="guest-authorities"
@@ -79,10 +87,11 @@
             <label data-bind="ltext: 'guest-authority.email',
                               attr: {'for': $parent.emailId}"
                    class="mandatory"></label>
-            <input type="text" class="mandatory"
+            <input type="text"
                    data-test-id="application-guest-email"
                    data-bind="textInput: $parent.email,
-                              attr: {id: $parent.emailId}" />
+                              attr: {id: $parent.emailId},
+                              css: {mandatory: $parent.show.mandatory}"/>
             <!-- /ko -->
             <div data-bind="visible: $parent.show.inviteMessage">
               <label data-bind="ltext: 'application-guests.message',
@@ -91,10 +100,7 @@
                                    attr: {id: $parent.messageId}"
                         data-test-id="application-guest-message"></textarea>
             </div>
-            <div class="error"
-                 data-test-id="application-guest-error"
-                 data-bind="visible: $parent.error,
-                            ltext: $parent.error"></div>
+
           </bubble-dialog>
         </div>
       </script>

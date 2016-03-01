@@ -187,6 +187,9 @@ Open accordions
   # Execute Javascript  $("#application-${tab}-tab button.accordion-toggle").click();
   # Execute Javascript  $("#application-${tab}-tab div.accordion-toggle [data-accordion-id]").click();
 
+Open accordion editors
+  Execute Javascript  lupapisteApp.services.accordionService.toggleEditors( true );
+
 Open accordion by test id
   [Arguments]  ${testId}
   ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="${testId}"]//div[@data-accordion-state="open"]
@@ -468,28 +471,48 @@ Element should not be visible by test id
 # The following do not take data-test-id as argument
 #
 
+Get identifiers closed
+  [Arguments]  ${docId}
+  ${identifiersClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-id='${docId}']//div[@data-test-id='identifier-editors']
+  [Return]  ${identifiersClosed}
+
 Primary operation is
   [Arguments]  ${opId}
   Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
 
-# This only works if there is only one applicable document.
 Edit operation description
-  [Arguments]  ${doc}  ${text}
-  Wait until element is visible  jquery=div#application-info-tab button[data-test-id=edit-op-description-${doc}] :first
-  #Mouse Down  jquery=div#application-info-tab [data-test-id=edit-op-description-${doc}] :first
-  Execute Javascript  $('div#application-info-tab [data-test-id=edit-op-description-${doc}] :first').mousedown();
-  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
-  Input text by test id  op-description-editor-${doc}  ${text}
-  # Close the input bubble. Press key fails if the bubble has already been closed.
-  Run Keyword And Ignore Error  Press Key  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]  \\13
-
-  Positive indicator should be visible
-  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
+  [Arguments]  ${doc}  ${text}  ${idx}=1
+  Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
+  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
+  ${identifiersClosed} =  Get identifiers closed  ${docId}
+  # for jQuery ${idx}-1 because xpath indeces start from 1!
+  Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  ${opDescriptionXpath}=  Set Variable  //div[@id='application-info-tab']//section[@data-doc-id='${docId}']//input[@data-test-id='op-description-editor-${doc}']
+  Wait until element is visible  ${opDescriptionXpath}
+  Input text   ${opDescriptionXpath}  ${text}
+  # Blur
+  Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-id='${docId}']//button[@data-test-id='toggle-identifiers-${doc}']
+  # Close the input
+  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Wait until  Element should not be visible  ${opDescriptionXpath}
 
 # This only works if there is only one applicable document.
 Operation description is
   [Arguments]  ${doc}  ${text}
-  Wait until  Element text should be  xpath=//div[@id='application-info-tab']//span[@data-test-id='op-description-${doc}']  - ${text}
+  Wait until  Element Should Contain  xpath=//div[@id='application-info-tab']//span[@data-test-id='${doc}-accordion-description-text']  ${text}
+
+Input building identifier
+  [Arguments]  ${doc}  ${text}  ${idx}=1
+  Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
+  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
+  ${identifiersClosed} =  Get identifiers closed  ${docId}
+  # for jQuery ${idx}-1 because xpath indeces start from 1!
+  Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+  Input text by test id  ${docId}-identifier-input  ${text}
+  # Close the input
+  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
 
 Table with id should have rowcount
   [Arguments]  ${id}  ${expectedRowcount}
@@ -836,8 +859,8 @@ Open to authorities
 Input comment
   [Arguments]  ${message}
   Open side panel  conversation
-  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
+  Wait Until  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Wait Until  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'is-comment')]//span[text()='${message}']
   Close side panel  conversation
 
@@ -879,19 +902,23 @@ Comment count is
 Is authorized party
   # Party can be either email or username
   [Arguments]  ${party}
-  Element Should Be Visible  xpath=//div[@class='parties-list']//table//td[contains(., '${party}')]
+  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//table//td[contains(., '${party}')]
+
+Fill application person invite bubble
+  [Arguments]  ${email}  ${message}
+  Element should be visible  xpath=//button[@data-test-id='application-invite-person']
+  Click by test id  application-invite-person
+  Test id disabled  person-invite-bubble-dialog-ok
+  Fill test id  person-invite-email  ${email}
+  Fill test id  person-invite-message  Tervetuloa muokkaamaan hakemusta
+  Test id enabled  person-invite-bubble-dialog-ok
 
 Invite ${email} to application
   Open tab  parties
   ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/table//tr[@class='party']
-  Element should be visible  xpath=//button[@data-test-id='application-invite-person']
-  Click by test id  application-invite-person
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-email  ${email}
-  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
-  Element should be enabled  xpath=//button[@data-test-id='application-invite-submit']
-  Click by test id  application-invite-submit
-  Wait Until  Element Should Not Be Visible  invite-email
+  Fill application person invite bubble  ${email}  Tervetuloa muokkaamaan hakemusta
+  Scroll and click test id  person-invite-bubble-dialog-ok
+  Wait test id hidden  person-invite-bubble-dialog-ok
   Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//tr[@class='party'][${invites_count} + 1]
   ${email_found}=  Run Keyword And Return Status  Is authorized party  ${email}
   # If specified email was not found from auths, try to parse username from the email and test if username exists (case of pena)
@@ -902,6 +929,29 @@ Invite count is
   [Arguments]  ${amount}
   Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
 
+#
+# Authority admin
+#
+
+Create statement person
+  [Arguments]  ${email}  ${text}
+  Scroll to test id  create-statement-giver
+  Click enabled by test id  create-statement-giver
+  Wait until  Element should be visible  //label[@for='statement-giver-email']
+  Input text  statement-giver-email  ${email}
+  Input text  statement-giver-email2  ${email}
+  Input text  statement-giver-text  ${text}
+  Click enabled by test id  create-statement-giver-save
+
+
+Invite company to application
+  [Arguments]  ${company}
+  Open tab  parties
+  Scroll and click test id  application-invite-company
+  Wait test id visible  company-invite-bubble-dialog-ok
+  Select From Autocomplete  div[@data-test-id="company-invite-companies"]  ${company}
+  Scroll and click test id  company-invite-bubble-dialog-ok
+  Is authorized party  ${company}
 
 #
 # Tasks
@@ -1128,7 +1178,7 @@ Clear mocks
 
 Scroll to
   [Arguments]  ${selector}
-  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
+  Wait Until  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
 
 Scroll to test id
   [Arguments]  ${id}
@@ -1137,7 +1187,13 @@ Scroll to test id
 Scroll and click
   [Arguments]  ${selector}
   Scroll to  ${selector}
+  Element should be enabled  jquery=${selector}
   Click Element  jquery=${selector}
+
+Scroll and click test id
+  [Arguments]  ${id}
+  Scroll to  [data-test-id=${id}]
+  Click by test id  ${id}
 
 Wait test id visible
   [Arguments]  ${id}
@@ -1159,8 +1215,14 @@ Test id disabled
   Scroll to test id  ${id}
   Element should be disabled  jquery=[data-test-id=${id}]
 
+Test id enabled
+  [Arguments]  ${id}
+  Scroll to test id  ${id}
+  Element should be enabled  jquery=[data-test-id=${id}]
+
 Fill test id
   [Arguments]  ${id}  ${text}
   Wait test id visible  ${id}
   Element Should Be Enabled  jquery=[data-test-id=${id}]
   Input text by test id  ${id}  ${text}
+

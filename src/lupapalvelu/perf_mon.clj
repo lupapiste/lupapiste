@@ -3,6 +3,7 @@
             [noir.core :refer [defpage]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.logging :as log]
             [clojure.string :refer [join]]
             [noir.server :as server]
             [sade.env :as env]
@@ -74,7 +75,7 @@
           (handler request)
           (finally
             (let [end (System/nanoTime)]
-              (debug (get request :uri) ":"
+              (debug (log/sanitize 200 (get request :uri)) ":"
                 (ns->ms (- end start)) "ms,"
                 (count @*perf-context*) "db calls took totally"
                 (ns->ms (get-total-db-call-duration @*perf-context*)) "ms"))))))))

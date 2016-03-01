@@ -8,9 +8,9 @@ Jatka klikkaamalla linkki&auml;:
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-Kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Tutustu Lupapisteen ohjesivustoon [https://www.lupapiste.fi/ohjeet] (https://www.lupapiste.fi/ohjeet) sek&auml; yleisesti esitettyihin kysymyksiin  [https://www.lupapiste.fi/usein-kysytyt-kysymykset] (https://www.lupapiste.fi/usein-kysytyt-kysymykset).
+Kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Tutustu Lupapisteen ohjesivustoon [https://www.lupapiste.fi/ohjeet](https://www.lupapiste.fi/ohjeet) sek&auml; yleisesti esitettyihin kysymyksiin [https://www.lupapiste.fi/usein-kysytyt-kysymykset](https://www.lupapiste.fi/usein-kysytyt-kysymykset).
 
-Ongelmatilanteissa ota yhteytt&auml; [tuki@lupapiste.fi](tuki@lupapiste.fi).
+Ongelmatilanteissa ota yhteytt&auml; tuki@lupapiste.fi.
 
 Toivottavasti viihdyt palvelumme parissa!
 
@@ -26,9 +26,9 @@ Forts&auml;tt genom att klicka p&aring; l&auml;nken:
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
-Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https://www.lupapiste.fi/ohjeet] (https://www.lupapiste.fi/ohjeet) och vanliga fr&aring;gor [https://www.lupapiste.fi/usein-kysytyt-kysymykset] (https://www.lupapiste.fi/usein-kysytyt-kysymykset).
+Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https://www.lupapiste.fi/ohjeet](https://www.lupapiste.fi/ohjeet) och vanliga fr&aring;gor [https://www.lupapiste.fi/usein-kysytyt-kysymykset](https://www.lupapiste.fi/usein-kysytyt-kysymykset).
 
-Vid problem &auml;r du v&auml;lkommen att kontakta [tuki@lupapiste.fi](tuki@lupapiste.fi).
+Vid problem &auml;r du v&auml;lkommen att kontakta tuki@lupapiste.fi.
 
 Vi hoppas att du trivs med v&aring;r tj&auml;nst!
 

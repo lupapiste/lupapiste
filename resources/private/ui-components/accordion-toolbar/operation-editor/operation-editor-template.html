@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="operation-editor-template">
+  <div class="inline-col">
+    <label data-bind="ltext: 'document.operation-editor.description', attr: {'id': docId + 'op-description-editor'}"></label>
+    <input class="form-input inline long" type="text"
+           data-bind="textInput: description,
+                      enable: enabled,
+                      attr: {'data-test-id': docModel.testId('op-description-editor-' + docModel.schemaName),
+                             'id': docId + '-op-description-editor'}">
+    <span data-bind="saveIndicator: indicator"></span>
+  </div>
+  <div class="inline-col">
+    <button class="secondary"
+            data-bind="attr: {'data-op-name': operation.name()},
+                       disable: isPrimaryOperation,
+                       click: clickStar,
+                       visible: showStar">
+      <i class="lupicon-star"></i>
+      <span data-bind="ltext: starTitle"></span>
+    </button>
+  </div>
+</script>

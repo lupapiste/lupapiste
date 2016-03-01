@@ -14,13 +14,20 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
 
-;;
-;; Facts
-;;
-
 (facts "Date format"
   (fact (util/to-xml-date (date-time 2012 1 14)) => "2012-01-14")
   (fact (util/to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
+
+(fact "get-rakennustunnus"
+  (let [application {:primaryOperation {:id "1" :description "desc"}}
+        document {:op {:id "1"}}
+        base-result {:jarjestysnumero nil
+                     :kiinttun nil
+                     :muuTunnustieto {:MuuTunnus {:sovellus "toimenpideId", :tunnus "1"}}}]
+    (get-rakennustunnus {} {} document) => base-result
+    (get-rakennustunnus {:tunnus "B"} application document) => (assoc base-result :rakennuksenSelite "B: desc")
+    (get-rakennustunnus {:tunnus ""} application document) => (assoc base-result :rakennuksenSelite "desc")
+    (get-rakennustunnus {:tunnus "B"} {} document) => (assoc base-result :rakennuksenSelite "B")))
 
 (def- municipality 753)
 
@@ -73,6 +80,7 @@
                  :version 1}
    :data (merge
            suunnittelija-henkilo
+           {:suunnittelutehtavanVaativuusluokka {:value "AA"}}
            {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                        :patevyysluokka {:value "ei tiedossa"}
                        :valmistumisvuosi {:value "2010"}
@@ -86,6 +94,7 @@
                                       :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "rakennusfysikaalinen suunnittelija"}}
+                {:suunnittelutehtavanVaativuusluokka {:value "C"}}
                 {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
@@ -99,6 +108,7 @@
                                        :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
+                {:suunnittelutehtavanVaativuusluokka {:value "A"}}
                 {:patevyys {:koulutusvalinta {:value "other"} :koulutus {:value "El\u00e4m\u00e4n koulu"}  ;; "Muu" option ( i.e. :other-key) is selected
                             :patevyysluokka {:value "AA"}
                             :valmistumisvuosi {:value "2010"}
@@ -150,7 +160,7 @@
   {:id "tyonjohtaja"
    :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
-           {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
+                {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
             :patevyys-tyonjohtaja {:koulutusvalinta {:value "other"}, :koulutus {:value "Koulutus"}   ;; "Muu" option ( i.e. :other-key) is selected
                                    :patevyysvaatimusluokka {:value "A"}
                                    :valmistumisvuosi {:value "2010"}
@@ -203,7 +213,7 @@
                                      :rakennuksenMuutosJaKorjaustyo {:value false}
                                      :linjasaneeraus {:value false}
                                      :ivLaitoksenAsennustyo {:value false}
-                                     :sisapuolinenKvvTyo {:value false}
+                                     :sisapuolinenKvvTyo {:value true}
                                      :muuMika {:value "Muu tyotehtava"}}
             :muutHankkeet {:0 {:katuosoite {:value "katuosoite"}
                                :3kk {:value "1"}
@@ -310,7 +320,7 @@
                  :op {:name "kerrostalo-rivitalo"
                       :description "kerrostalo-rivitalo-kuvaus"
                       :id "kerrostalo-rivitalo-id"}}
-   :data common-rakennus})
+   :data (assoc common-rakennus :tunnus {:value "A"})})
 
 (def- rakennuksen-muuttaminen
   {:id "muuttaminen"
@@ -376,7 +386,7 @@
                                    :schema-info {:removable true
                                                  :op {:id  "kaupunkikuva-id"
                                                       :name "aita"}
-                                                 :name "kaupunkikuvatoimenpide"
+                                                 :name "kaupunkikuvatoimenpide-ei-tunnusta"
                                                  :version 1}})
 
 (def- puun-kaataminen {:created 6
@@ -614,6 +624,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
+    (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "AA")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "FISEpatevyyskortti" (:FISEpatevyyskortti suunnittelija-model) => "http://www.ym.fi")
@@ -629,6 +640,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
+    (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "C")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
@@ -642,6 +654,7 @@
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "muu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
+    (fact "vaadittuPatevyysluokka" (:vaadittuPatevyysluokka suunnittelija-model) => "A")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
     (fact "henkilo" (:henkilo suunnittelija-model) => truthy)
@@ -711,13 +724,10 @@
     (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat"
-      (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,Muu tyotehtava")
+          (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,sisapuolinenKvvTyo,Muu tyotehtava")
     (fact "vastattavaTyo contents"
-      (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Rakennuksen purkaminen"
-                                                                                                    "IV-laitoksen korjaus- ja muutosty\u00f6"
-                                                                                                    "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
-                                                                                                    "Maanrakennusty\u00f6t"
-                                                                                                    "Muu tyotehtava"}))))
+          (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Sis\u00e4puolinen KVV-ty\u00f6"
+                                                                                                        "Muu tyotehtava"}))))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
@@ -878,7 +888,7 @@
       (:rakennustunnus tiedot) => {:jarjestysnumero nil,
                                    :kiinttun "21111111111111"
                                    :muuTunnustieto {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
-                                   :rakennuksenSelite "kerrostalo-rivitalo-kuvaus"})))
+                                   :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
   (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
@@ -1122,7 +1132,7 @@
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
 
-        viitelupatieto (:viitelupatieto rakennusvalvontaasia) => truthy
+        viitelupatieto (first (:viitelupatieto rakennusvalvontaasia)) => truthy
         viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
         viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => falsey
 
@@ -1181,7 +1191,7 @@
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
 
-        viitelupatieto (:viitelupatieto rakennusvalvontaasia) => truthy
+        viitelupatieto (first (:viitelupatieto rakennusvalvontaasia)) => truthy
         viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
         viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => truthy
 

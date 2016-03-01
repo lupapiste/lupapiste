@@ -13,7 +13,7 @@ function TagModel(tag, saveFn) {
   };
 }
 
-LUPAPISTE.TagsEditorModel = function(params) {
+LUPAPISTE.TagsEditorModel = function() {
   "use strict";
 
   var self = this;

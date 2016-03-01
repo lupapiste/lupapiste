@@ -191,7 +191,7 @@
                                         (query/sort order-by)))))
 
 (defn select-one
-  "returns one entry by matching the monger query"
+  "Returns one entry by matching the monger query, nil if query did not match."
   ([collection query]
     {:pre [(map? query)]}
     (with-id (mc/find-one-as-map (get-db) collection (remove-null-chars query))))
@@ -266,6 +266,7 @@
     (gfs/remove (get-gfs) query)))
 
 (defn ^{:perfmon-exclude true} delete-file-by-id [file-id]
+  {:pre [(string? file-id)]}
   (delete-file {:id file-id}))
 
 (defn count
@@ -359,6 +360,9 @@
   (ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (ensure-index :applications {:address 1})
   (ensure-index :applications {:tags 1})
+  (ensure-index :applications {:buildings.nationalId 1})
+  (ensure-index :applications {:organization 1 :state 1})
+  (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32})
   (ensure-index :activation {:email 1})
   (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (ensure-index :vetuma {:user.stamp 1})
@@ -377,7 +381,7 @@
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (ensure-index :propertyCache {:created 1} {:expireAfterSeconds (* 60 60 24)}) ; 24 h
   (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
-  (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32}))
+  (ensure-index :ssoKeys {:ip 1} {:unique true}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

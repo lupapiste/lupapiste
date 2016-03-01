@@ -155,11 +155,17 @@
             whitelisted-paths)))
 
 ; Process
+
+(defn- validate [application document]
+  (let [all-results   (model/validate application document)
+        create-result (fn [document result]
+                        (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
+    (assoc (reduce create-result document all-results) :validationErrors all-results)))
+
 (defn- process-documents-and-tasks [user {authority :authority :as application}]
-  (let [validate        (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
-        mask-person-ids (person-id-masker-for-user user application)
+  (let [mask-person-ids (person-id-masker-for-user user application)
         disabled-flag   (partial enrich-single-doc-disabled-flag user)
-        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids validate)]
+        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids (partial validate application))]
     (-> application
       (update :documents (partial map mapper))
       (update :tasks (partial map mapper)))))
@@ -182,6 +188,15 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
+(def merge-operation-skeleton (partial merge domain/operation-skeleton))
+
+(defn ensure-operations
+  "Ensure operations have all properties set."
+  [app]
+  (-> app
+      (update :primaryOperation merge-operation-skeleton)
+      (update :secondaryOperations (fn [operations] (map merge-operation-skeleton operations)))))
+
 ;; Meta fields with default values.
 (def- operation-meta-fields-to-enrich {:optional []})
 (defn- enrich-primary-operation-with-metadata [app]
@@ -199,6 +214,7 @@
        process-foreman-v2
        (process-documents-and-tasks user)
        location->object
+       ensure-operations
        enrich-primary-operation-with-metadata))
 
 ;;

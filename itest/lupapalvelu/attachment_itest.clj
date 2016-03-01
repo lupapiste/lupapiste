@@ -3,7 +3,8 @@
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [sade.util :as util]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [sade.env :as env]))
 
 (apply-remote-minimal)
 
@@ -191,8 +192,12 @@
                 (:to email) => (contains pena-email)))
 
             (fact "Delete version"
-              (command veikko :delete-attachment-version :id application-id
-                :attachmentId (:id versioned-attachment) :fileId (get-in updated-attachment [:latestVersion :fileId])) => ok?
+              (command veikko 
+                       :delete-attachment-version 
+                       :id application-id
+                       :attachmentId (:id versioned-attachment) 
+                       :fileId (get-in updated-attachment [:latestVersion :fileId]) 
+                       :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
               (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
                 (get-in ver-del-attachment [:latestVersion :version :major]) => 1
                 (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
@@ -216,9 +221,24 @@
             (count (:signatures signed-attachment)) => 1)
 
           (fact "Delete version and its signature"
-            (command veikko :delete-attachment-version :id application-id
-                     :attachmentId (:id versioned-attachment) :fileId (get-in signed-attachment [:latestVersion :fileId])) => ok?
+            (command veikko 
+                       :delete-attachment-version 
+                       :id application-id
+                       :attachmentId (:id versioned-attachment) 
+                       :fileId (get-in signed-attachment [:latestVersion :fileId]) 
+                       :originalFileId (get-in signed-attachment [:latestVersion :originalFileId]))=> ok?
                      (fact (count (:signatures (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 0))
+
+          (fact "Deleting the last version clears attachment auth"
+                (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+                  (count (:versions attachment )) => 1
+                  (command veikko 
+                       :delete-attachment-version 
+                       :id application-id
+                       :attachmentId (:id attachment) 
+                       :fileId (get-in attachment [:latestVersion :fileId]) 
+                       :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?)
+                (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment))) => empty?)
 
           (fact "Authority deletes attachment"
             (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
@@ -465,3 +485,23 @@
       (fact "Pena can change visibility, as he is authed"
         (command pena :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "julkinen") => ok?)
       )))
+
+(facts "Uploading PDF should not create duplicate comments"
+  (let [application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+        application-id (:id application)
+        _ (upload-attachment pena application-id {:type {:type-group "osapuolet" :type-id "cv"}} true :filename "dev-resources/invalid-pdfa.pdf")
+        {attachments :attachments comments :comments} (query-application pena application-id)
+        pdf-attachment (first attachments)]
+    (fact "is PDF"
+      (-> pdf-attachment :latestVersion :contentType) => "application/pdf")
+
+    (when (string? (env/value :pdf2pdf :license-key)) ; test PDF/A when pdf2pdf converter is enabled
+      (facts "PDF/A conversion"
+        (fact "Original version and PDF/A version exists"
+          (count (:versions pdf-attachment)) => 2)
+        (fact "Is archivable"
+          (-> pdf-attachment :latestVersion :archivable) => true)))
+
+    (fact "After upload comments count is + 1"
+      (count (:comments application)) => 0 ; before upload
+      (count comments) => 1)))

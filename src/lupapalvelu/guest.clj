@@ -7,7 +7,9 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.action :as action]))
+            [lupapalvelu.action :as action]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user-api :as user-api]))
 
 (defn resolve-guest-authority-candidate
   "Namesake query implementation."
@@ -35,23 +37,39 @@
 
 (defn update-guest-authority-organization
   "Namesake command implementation."
-  [admin email name description]
+  [admin email first-name last-name description]
   (let [email (usr/canonize-email email)
         org-id (usr/authority-admins-organization-id admin)
         guests (->> org-id
                     organization-guest-authorities
                     (remove #(= email (:email %)))
                     (concat [{:email email
-                              :name name
+                              :name (str first-name " " last-name)
                               :description description}]))]
-    (org/update-organization org-id {$set {:guestAuthorities guests}})))
+    (org/update-organization org-id {$set {:guestAuthorities guests}})
+    (when-not (usr/get-user-by-email email)
+      (user-api/do-create-user {:firstName first-name
+                                :lastName last-name
+                                :email email
+                                :role :authority}
+                               admin))))
 
 (defn remove-guest-authority-organization
   "Namesake command implementation."
   [admin email]
   (let [email (usr/canonize-email email)
-        org-id (usr/authority-admins-organization-id admin)]
-    (org/update-organization org-id {$pull {:guestAuthorities {:email email}}})))
+        {guest-id :id} (usr/get-user-by-email email)
+        org-id (usr/authority-admins-organization-id admin)
+        match {:id guest-id :role :guestAuthority}]
+    ;; Remove guestAuthority from organization
+    (org/update-organization org-id {$pull {:guestAuthorities {:email email}}})
+    ;; Remove guestAuthority from every application within organization
+    ;; Optimization: if the user does not have id, she has not been
+    ;; actually created yet.
+    (when guest-id
+      (mongo/update-by-query :applications
+                             {:organization org-id :auth {$elemMatch match}}
+                             {$pull {:auth match}}))))
 
 (defn no-duplicate-guests
   "Pre check for avoiding duplicate guests or unnecessary access.
@@ -95,7 +113,7 @@
                                              {$push {:auth     (assoc auth :inviter (:id user))}
                                               $set  {:modified timestamp}})]
         (when-not err
-          (notifications/notify! :invite (assoc command :recipients [guest])))
+          (notifications/notify! :guest-invite (assoc command :recipients [guest])))
         (or err (ok))))))
 
 (defn- guest-authority-description-map

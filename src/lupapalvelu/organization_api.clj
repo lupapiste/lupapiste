@@ -198,6 +198,23 @@
   [_]
   (ok :organizations (o/get-organizations)))
 
+(defquery allowed-autologin-ips-for-organization
+  {:parameters [org-id]
+   :input-validators [(partial non-blank-parameters [:org-id])]
+   :user-roles #{:admin}}
+  [_]
+  (ok :ips (o/get-autologin-ips-for-organization org-id)))
+
+(defcommand update-allowed-autologin-ips
+  {:parameters [org-id ips]
+   :input-validators [(partial non-blank-parameters [:org-id])
+                      (comp o/valid-ip-addresses :ips :data)]
+   :user-roles #{:admin}}
+  [_]
+  (->> (o/autogin-ip-mongo-changes ips)
+       (o/update-organization org-id))
+  (ok))
+
 (defquery organization-by-id
   {:parameters [organizationId]
    :input-validators [(partial non-blank-parameters [:organizationId])]
@@ -341,18 +358,33 @@
 
 (defn split-emails [emails] (ss/split emails #"[\s,;]+"))
 
+(def email-list-validators [(partial action/string-parameters [:emails])
+                            (fn [{{emails :emails} :data}]
+                              (let [splitted (split-emails emails)]
+                                (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
+                                  (fail :error.email))))])
+
 (defcommand set-organization-neighbor-order-email
   {:parameters [emails]
+   :description "When application is submitted and the applicant wishes that the organization hears neighbours,
+                 send notification to these email addresses"
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial action/string-parameters [:emails])
-                      (fn [{{emails :emails} :data}]
-                        (let [splitted (split-emails emails)]
-                          (when (and (not (ss/blank? emails)) (some (complement v/valid-email?) splitted))
-                            (fail :error.email))))]}
+   :input-validators email-list-validators}
   [{user :user}]
   (let [addresses (when-not (ss/blank? emails) (split-emails emails))
         organization-id (user/authority-admins-organization-id user)]
     (o/update-organization organization-id {$set {:notifications.neighbor-order-emails addresses}})
+    (ok)))
+
+(defcommand set-organization-submit-notification-email
+  {:parameters [emails]
+   :description "When application is submitted, send notification to these email addresses"
+   :user-roles #{:authorityAdmin}
+   :input-validators email-list-validators}
+  [{user :user}]
+  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+        organization-id (user/authority-admins-organization-id user)]
+    (o/update-organization organization-id {$set {:notifications.submit-notification-emails addresses}})
     (ok)))
 
 (defquery krysp-config
@@ -558,9 +590,10 @@
 
 (defraw waste-ads-feed
   {:description "Simple RSS feed for construction waste information."
-   :parameters [fmt org lang]
+   :parameters [fmt]
+   :optional-parameters [org lang]
    :input-validators [o/valid-feed-format o/valid-org o/valid-language]
    :user-roles #{:anonymous}}
   (o/waste-ads (ss/upper-case org)
                (-> fmt ss/lower-case keyword)
-               (-> lang ss/lower-case keyword)))
+               (-> (or lang :fi) ss/lower-case keyword)))

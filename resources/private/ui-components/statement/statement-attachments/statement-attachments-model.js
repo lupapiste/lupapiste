@@ -50,7 +50,7 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   }
 
   self.deleteAttachment = function(attachmentId) {
-    deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
+    var deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("attachment.delete.version.header"),
       loc("attachment.delete.version.message"),

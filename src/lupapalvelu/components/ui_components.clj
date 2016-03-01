@@ -167,7 +167,8 @@
                    "application-filters-service.js"
                    "document-data-service.js"
                    "fileupload-service.js"
-                   "side-panel-service.js"]}
+                   "side-panel-service.js"
+                   "accordion-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -179,8 +180,8 @@
                   :js [ "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common-html]
-                  :js ["mypage.js"]
-                  :html ["mypage.html"]}
+                  :js ["change-email-model.js" "mypage.js"]
+                  :html ["change-email-template.html" "mypage.html"]}
 
    :header     {:html ["header.html"], :js ["header.js"]}
 
@@ -293,7 +294,7 @@
                   :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
 
    :docgen       {:depends [:accordion :common-html]
-                  :js ["docmodel.js" "docgen.js"]}
+                  :js ["docmodel.js" "docgen.js" "docvars.js"]}
 
    :create       {:depends [:common-html :map]
                   :js ["locationmodel.js" "municipalities.js" "create.js"]
@@ -316,6 +317,10 @@
    :password-reset {:depends [:common-html]
                     :js ["password-reset.js"]
                     :html ["password-reset.html"]}
+
+   :change-email {:depends [:common-html]
+                  :js ["change-email.js"]
+                  :html ["init-email-change.html" "change-email.html"]}
 
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
@@ -363,10 +368,10 @@
    :admin-app {:depends []
                :js ["admin.js"]}
    :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer :ui-components]
-               :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js" "notifications.js"
+               :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
                     "create-scope-model.js"]
                :html ["index.html" "admin.html" "organization.html"
-                      "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
+                      "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html" "sso-keys.html"
                       "screenmessages-list.html" "notifications.html"
                       "create-scope-template.html"]}
 
@@ -375,9 +380,8 @@
    :welcome-app {:depends []
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics :footer :global-models :ui-components]
+   :welcome {:depends [:welcome-app  :global-models :ui-components :login :register :register-company :link-account :debug :header :screenmessages :password-reset :change-email :analytics :footer]
              :js ["company-user.js"]
-
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}

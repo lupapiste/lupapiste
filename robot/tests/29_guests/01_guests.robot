@@ -21,7 +21,7 @@ Add Veikko as guest authority Saunamajuri to Sipoo
   Set Suite Variable  ${veikko-name}  Veikko Viranomainen (veikko)
   Wait Until   Element should contain  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']  Sibbo Ronja
   Add existing authority  ${veikko}  Veikko  Viranomainen  Talonvahti
-  User table row contains  ${veikko}  Muutosoikeus
+  User table does not contain  ${veikko}
 
 Change Veikko's guest authority description
   Add existing authority  ${veikko}  Veikko  Viranomainen  Saunamajuri
@@ -29,11 +29,19 @@ Change Veikko's guest authority description
 Add new user Richard Guest
   Add new authority  richard.guest@example.com  Richard  Guest  Random
 
-Deleting user from guest authority table still keeps him/her in the organization
+Delete guest authority Richard Guest
   Delete guest authority  richard.guest@example.com  Richard  Guest  Random
 
 Luukas cannot be guest authority
   Add bad authority  luukas.lukija@sipoo.fi  Luukas  Lukija  -
+
+Create new statement giver and add it as guest authority
+  Create statement person  statement@giver.net  Statue
+  Wait test id visible  guest-authority-add
+  Add new statement giver as authority  statement@giver.net  Statement  Giver  Geiwoba
+
+Delete new statement giver from authority table
+  Delete new statement giver guest authority  statement@giver.net  Geiwoba
 
 Bad authority email
   Bad email address  foobar
@@ -72,6 +80,9 @@ Pena invites Mikko as guest
   Wait Until  Page Should Contain  ${mikko-message}
   Go back
 
+Mikko cannot be invited again
+  Redundant invitation  ${mikko}
+
 Pena submits application
   Submit application
   [Teardown]  Logout
@@ -89,6 +100,8 @@ Mikko logs in and can see the application
   Open tab  parties
   Wait test id visible  application-guest-table
   Wait test id hidden  application-guest-add
+  Wait test id hidden  application-invite-person
+  Wait test id hidden  application-invite-company
   Guest row name  ${mikko}  ${mikko-name}
   Guest row inviter  ${mikko}  Pena Panaani
   Guest row subscribed  ${mikko}
@@ -152,6 +165,8 @@ Veikko logs in and can see the application
   Open tab  parties
   Wait test id visible  application-guest-table
   Wait test id hidden  application-guest-add
+  Wait test id hidden  application-invite-person
+  Wait test id hidden  application-invite-company
   Guest row name  veikko  ${veikko-name}
   Guest row inviter  veikko  Sonja Sibbo
   Guest row unsubscribed  veikko
@@ -176,6 +191,8 @@ Luukas logs in and can see the application
   Open tab  parties
   Wait test id visible  application-guest-table
   Wait test id hidden  application-guest-add
+  Wait test id hidden  application-invite-person
+  Wait test id hidden  application-invite-company
   Guest row name  veikko  ${veikko-name}
   Guest row inviter  veikko  Sonja Sibbo
   Guest row description  veikko  Saunamajuri
@@ -230,4 +247,73 @@ Veikko logs in but cannot access application
   Veikko logs in
   Authority applications page should be open
   Page Should Not Contain  ${appname}
+  [Teardown]  Logout
+
+
+# -------------------------------------
+# Authority one more time
+# -------------------------------------
+
+Sonja logs in and invites Veikko again
+  Sonja logs in
+  Open application  ${appname}  ${propertyid}
+  Open tab  parties
+  Wait test id visible  application-guest-add
+  Invite application guest authority  Veikko Viranomainen  ${veikko}  Saunamajuri  ${veikko-message}
+  Guest table contains  ${veikko-name}
+  Guest row inviter  veikko  Sonja Sibbo
+  Guest table contains  Saunamajuri
+  [Teardown]  Logout
+
+# -------------------------------------
+# Guest authority once more
+# -------------------------------------
+
+Veikko logs in again and can see the application
+  Veikko logs in
+  Authority applications page should be open
+
+  Element Should Contain  jquery=tr.application-row td[data-test-col-name=location]  ${appname}, Sipoo
+  Open application  ${appname}  ${propertyid}
+  Open tab  parties
+  Wait test id visible  application-guest-table
+  Wait test id hidden  application-guest-add
+  Wait test id hidden  application-invite-person
+  Wait test id hidden  application-invite-company
+  Guest row name  veikko  ${veikko-name}
+  Guest row inviter  veikko  Sonja Sibbo
+  [Teardown]  Logout
+
+
+# -------------------------------------
+# Authority admin again
+# -------------------------------------
+
+Authority admin removes Veikko from the guest authorities
+  Sipoo logs in
+  Wait until page contains  Organisaation viranomaiset
+  Delete guest authority  ${veikko}  Veikko  Viranomainen  Saunamajuri
+  [Teardown]  Logout
+
+
+# -------------------------------------
+# Guest authority again
+# -------------------------------------
+
+Veikko logs in but cannot access application again
+  Veikko logs in
+  Authority applications page should be open
+  Page Should Not Contain  ${appname}
+  [Teardown]  Logout
+
+# -------------------------------------
+# Authority one last time
+# -------------------------------------
+
+Sonja logs in and sees no guests
+  Sonja logs in
+  Open application  ${appname}  ${propertyid}
+  Open tab  parties
+  Wait test id visible  application-guest-add
+  Wait test id hidden  application-guest-table
   [Teardown]  Logout

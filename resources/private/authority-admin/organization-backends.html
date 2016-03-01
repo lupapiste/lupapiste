@@ -122,8 +122,6 @@
                   <input type="checkbox" data-test-id="enable-asianhallinta"
                          data-bind="checked: $data.caseManagement.enabled,
                                     enable: $root.asianhallinta.versions()[$data.permitType()].length > 0" />
-                  <span data-bind="saveIndicator: $root.asianhallinta.indicator, name: 'asianhallinta'" data-test-id="save-indicator">
-                  </span>
                 </span>
               </td>
               <td><select data-bind="options: $root.asianhallinta.versions()[$data.permitType()],

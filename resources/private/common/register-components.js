@@ -4,20 +4,20 @@ jQuery(document).ready(function() {
   var components = [
     {name: "modal-dialog"},
     {name: "message-panel"},
-    {name: "fill-info"},
-    {name: "foreman-history"},
-    {name: "foreman-other-applications"},
-    {name: "docgen-group"},
-    {name: "docgen-repeating-group"},
-    {name: "docgen-table"},
-    {name: "docgen-checkbox", model: "docgen-input-model"},
-    {name: "docgen-select"},
-    {name: "docgen-string", model: "docgen-input-model"},
-    {name: "docgen-localized-string", model: "docgen-input-model"},
-    {name: "docgen-inline-string", model: "docgen-input-model"},
-    {name: "docgen-button"},
-    {name: "docgen-date"},
-    {name: "construction-waste-report"},
+    {name: "fill-info", synchronous: true},
+    {name: "foreman-history", synchronous: true},
+    {name: "foreman-other-applications", synchronous: true},
+    {name: "docgen-group", synchronous: true},
+    {name: "docgen-repeating-group", synchronous: true},
+    {name: "docgen-table", synchronous: true},
+    {name: "docgen-checkbox", model: "docgen-input-model", synchronous: true},
+    {name: "docgen-select", synchronous: true},
+    {name: "docgen-string", model: "docgen-input-model", synchronous: true},
+    {name: "docgen-localized-string", model: "docgen-input-model", synchronous: true},
+    {name: "docgen-inline-string", model: "docgen-input-model", synchronous: true},
+    {name: "docgen-button", synchronous: true},
+    {name: "docgen-date", synchronous: true},
+    {name: "construction-waste-report", synchronous: true},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
     {name: "authority-select-dialog"},
@@ -77,11 +77,11 @@ jQuery(document).ready(function() {
     {name: "select-field"},
     {name: "radio-field"},
     {name: "search-field"},
-    {name: "maaraala-tunnus"},
-    {name: "property-group"},
+    {name: "maaraala-tunnus", synchronous: true},
+    {name: "property-group", synchronous: true},
     {name: "password-field"},
-    {name: "accordion-toolbar"},
-    {name: "group-approval"},
+    {name: "accordion-toolbar", synchronous: true},
+    {name: "group-approval", synchronous: true},
     {name: "submit-button"},
     {name: "remove-button"},
     {name: "publish-application"},
@@ -105,13 +105,18 @@ jQuery(document).ready(function() {
     {name: "side-panel"},
     {name: "conversation"},
     {name: "authority-notice"},
-    {name: "authorized-parties"}
+    {name: "authorized-parties"},
+    {name: "person-invite"},
+    {name: "company-invite-bubble"},
+    {name: "operation-editor"},
+    {name: "document-identifier"}
 ];
 
   _.forEach(components, function(component) {
     ko.components.register(component.name, {
       viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name + "Model"))],
-      template: { element: (component.template ? component.template : component.name + "-template")}
+      template: { element: (component.template ? component.template : component.name + "-template")},
+      synchronous: component.synchronous ? true : false
     });
   });
 });

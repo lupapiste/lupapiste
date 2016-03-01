@@ -124,10 +124,14 @@ var AccordionState = (function() {
       obs( Boolean( flag ));
     });
   }
+  function deregister(docId) {
+    delete observables[docId];
+  }
   return {
     get: get,
     register: register,
     set: set,
-    toggleAll: toggleAll
+    toggleAll: toggleAll,
+    deregister: deregister
   };
 })();

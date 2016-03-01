@@ -42,6 +42,21 @@
 (defn applicant-index-update [application]
   {$set (applicant-index application)})
 
+(defn- designer-name-from-doc [document]
+  (when (= "suunnittelija" (str (get-in document [:schema-info :subtype])))
+    (when-let [henkilo (get-in document [:data :henkilotiedot])]
+      (let [{first-name :etunimi last-name :sukunimi} henkilo]
+        (ss/trim (str (:value last-name) \space (:value first-name)))))))
+
+(defn designers-index [application]
+  (let [designers (remove ss/blank? (map designer-name-from-doc (:documents application)))
+        index (if (seq designers) designers [])]
+    (tracef "designers: %s" index)
+    {:_designerIndex index}))
+
+(defn designers-index-update [application]
+  {$set (designers-index application)})
+
 (defn get-applicant-phone [_ app]
   (let [owner (first (auth/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]
@@ -176,7 +191,10 @@
                            ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
                            ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
                            ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
-                           ;;
+
+                           ;
+                           ; FIXME fetch data with 1 query instead of N
+                           ;
                            (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
                                                       (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
                                                           :primaryOperation :name))]

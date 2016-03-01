@@ -17,14 +17,8 @@ Mikko creates a new application
 Mikko can see the general invite button and opens invite dialog with it
   Open tab  parties
   Open accordions  parties
-  Element should be visible  xpath=//*[@data-test-id='application-invite-person']
-  Click by test id  application-invite-person
-  Wait until  Element should be visible  invite-email
-  Input Text  invite-email  teppo@example.com
-  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
-  Element should be enabled  xpath=//*[@data-test-id='application-invite-submit']
-  Click Element  xpath=//div[@id='dialog-valtuutus']//p[contains(@class,'close')]
-  Wait until  Mask is invisible
+  Fill application person invite bubble  teppo@example.com  Tervetuloa muokkaamaan hakemusta
+  Scroll and click test id  person-invite-bubble-dialog-cancel
 
 Mikko can see invite paasuunnittelija button
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
@@ -117,15 +111,7 @@ Mikko can't invite himself
   Invite count is  0
 
 Mikko invites Solita
-  # Click enabled by test id  company-invite
-  Wait Until  Click Element  xpath=//div[@class='parties-list']//button[@data-test-id='company-invite']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='modal-dialog-content']
-  Element should not be visible  xpath=//div[@data-test-id='company-invite-confirm-help']
-  Select From Autocomplete  div[@id="modal-dialog-content-component"]  Solita Oy
-  Click enabled by test id  modal-dialog-submit-button
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='company-invite-confirm-help']
-  Click enabled by test id  modal-dialog-submit-button
-  Wait Until  Page should contain  1060155-5
+  Invite company to application  Solita Oy
 
 Mikko decides to go to the desert, put on his ipod, and listen some some British hard-rock band
   Logout

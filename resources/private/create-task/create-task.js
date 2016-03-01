@@ -1,3 +1,8 @@
+/**
+ * Controller for create task dialog.
+ * Singleton, suppress warning about "weird" construction.
+ */
+// jshint supernew:true
 LUPAPISTE.createTaskController = new (function() {
   "use strict";
   var self = this;

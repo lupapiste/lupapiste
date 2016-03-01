@@ -35,6 +35,11 @@ LUPAPISTE.ApplicationGuestsModel = function() {
   self.isAuthority = ko.pureComputed( _.partial( hasAuth,
                                                  "guest-authorities-application-organization"));
 
+  // Current focus
+  self.focus = {email: ko.observable( !self.isAuthority()),
+                message: ko.observable()};
+
+
   // Ajax calls to backend endpoints
 
   function fetchGuests() {
@@ -65,6 +70,7 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     .success( function() {
       fetchGuests();
       self.bubbleVisible( false );
+      hub.send( "indicator", {style: "positive"});
     })
     .error( function( res ) {
       self.guestError( res.text );
@@ -143,7 +149,9 @@ LUPAPISTE.ApplicationGuestsModel = function() {
   self.error = ko.pureComputed( function() {
     var err = self.guestError();
     if( !err && self.isAuthority() && !_.size( self.guestAuthorities()) ) {
-      err = "application-guests.no-more-authorities";
+      err =  _.size(self.allGuestAuthorities())
+          ? "application-guests.no-more-authorities"
+          : "application-guests.no-authorities-defined";
     }
     return err;
   });
@@ -156,14 +164,12 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     return util.isValidEmailAddress( self.email());
   });
 
-  // Reset the dialog contents when it is closed.
-  ko.computed( function() {
-    if( !self.bubbleVisible()) {
-      self.email( "");
-      self.message( loc( "application-guests.message.default") );
-      self.guestError( null );
-    }
-  });
+  self.initBubble = function() {
+    self.waiting( false );
+    self.email( "");
+    self.message( loc( "application-guests.message.default") );
+    self.guestError( null );
+  };
 
   // Visibility flags
 
@@ -176,7 +182,8 @@ LUPAPISTE.ApplicationGuestsModel = function() {
     }),
     inviteMessage: ko.pureComputed( function() {
       return !self.isAuthority() || self.guestAuthorities().length;
-    })
+    }),
+    mandatory: ko.pureComputed( _.negate( self.sendEnabled) )
   };
 
   self.dispose = _.partial( hub.unsubscribe, hubId);

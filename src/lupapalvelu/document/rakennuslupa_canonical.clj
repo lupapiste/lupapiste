@@ -42,12 +42,13 @@
   (:description (util/find-by-id op-id (cons primary secondaries)) ))
 
 (defn get-rakennustunnus [unwrapped-doc-data application {{op-id :id} :op}]
-  (let [{:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
+  (let [{:keys [tunnus rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
+        description-parts (remove ss/blank? [tunnus (operation-description application op-id)])
         defaults (util/assoc-when {:jarjestysnumero nil
                                    :kiinttun (:propertyId application)
                                    :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}}
                    :rakennusnro rakennusnro
-                   :rakennuksenSelite (operation-description application op-id)
+                   :rakennuksenSelite (ss/join ": " description-parts)
                    :valtakunnallinenNumero valtakunnallinenNumero)]
     (if manuaalinen_rakennusnro
       (assoc defaults :rakennusnro manuaalinen_rakennusnro)
@@ -202,6 +203,7 @@
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen-ei-huoneistoja documents-by-type))
                                                (map #(get-purku-toimenpide % application) (:purkaminen documents-by-type))
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents-by-type))
+                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide-ei-tunnusta documents-by-type))
                                                (map #(get-maalampokaivo % application) (:maalampokaivo documents-by-type))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
@@ -237,7 +239,7 @@
   "Transforms application mongodb-document to canonical model."
   [application lang]
   (let [application (tools/unwrapped application)
-        link-permit-data (first (:linkPermitData application))
+        link-permits (:linkPermitData application)
         documents-by-type (documents-by-type-without-blanks application)
         toimenpiteet (get-operations documents-by-type application)
         operation-name (-> application :primaryOperation :name)
@@ -261,9 +263,9 @@
                       :asianTiedot (get-asian-tiedot documents-by-type)
                       :lisatiedot (get-lisatiedot documents-by-type lang)
                       :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}}}}
-        canonical (if link-permit-data
+        canonical (if (not-empty link-permits)
                     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
-                      (get-viitelupatieto link-permit-data))
+                              (map get-viitelupatieto link-permits))
                     canonical)
         canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
                             (= operation-name "suunnittelijan-nimeaminen")
@@ -337,9 +339,10 @@
                                                                                      building-canonical)
                                                                 building-canonical (util/assoc-when
                                                                                     building-canonical
-                                                                                    :muuTunnustieto (map (fn [{:keys [tag id]}]
-                                                                                                           {:MuuTunnus {:tunnus tag :sovellus id}})
-                                                                                                         (:tags building))
+                                                                                    :muuTunnustieto (when-let [op-id (:operationId building)]
+                                                                                                      (list {:MuuTunnus
+                                                                                                             {:tunnus op-id
+                                                                                                              :sovellus "toimenpideId"}}))
                                                                                     :rakennuksenSelite (:description building)) ; v2.2.0
                                                                 ]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3

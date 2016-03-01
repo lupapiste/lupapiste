@@ -22,8 +22,11 @@ LUPAPISTE.ModalDialogModel = function () {
   });
   self.closeOnClick = ko.observable();
 
+  var timerId;
+
   self.showDialog.subscribe(function(show) {
-    _.delay(function(show) {
+    clearTimeout(timerId);
+    timerId = _.delay(function(show) {
       self.dialogVisible(show);
       // wait until inner component is rendered and refresh dialog content height
       setTimeout(function() {

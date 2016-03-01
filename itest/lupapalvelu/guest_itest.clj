@@ -15,8 +15,9 @@
   (fixture/apply-fixture "minimal")
 
   (facts "Organization guest authorities"
-         (let [admin (usr/with-org-auth (usr/get-user {:username "sipoo"}))
-               veikko "veikko.viranomainen@tampere.fi"]
+         (let [admin  (usr/with-org-auth (usr/get-user {:username "sipoo"}))
+               veikko "veikko.viranomainen@tampere.fi"
+               foo    "foo@bar.com"]
            (fact "Resolve Veikko"
                  (guest/resolve-guest-authority-candidate admin veikko)
                  => {:firstName "Veikko" :lastName "Viranomainen" :hasAccess false})
@@ -29,7 +30,7 @@
            (fact "No guest authorities"
                  (guest/organization-guest-authorities "753-R") => nil)
            (fact "Veikko as a new guest authority"
-                 (guest/update-guest-authority-organization admin veikko "Veikko Viranomainen" "Dude")
+                 (guest/update-guest-authority-organization admin veikko "Veikko" "Viranomainen" "Dude")
                  (guest/organization-guest-authorities "753-R") => [{:name "Veikko Viranomainen"
                                                                      :email veikko
                                                                      :description "Dude"}])
@@ -42,14 +43,22 @@
                                               {:organization "753-R"})=> itest/fail?)
 
            (fact "Update Veikko"
-                 (guest/update-guest-authority-organization admin veikko "Veikko The Man" "Boss")
+                 (guest/update-guest-authority-organization admin veikko "Veikko" "The Man" "Boss")
                  (guest/organization-guest-authorities "753-R") => [{:name "Veikko The Man"
                                                                      :email veikko
                                                                      :description "Boss"}])
-           (fact "Remove guest authority"
-                 (guest/update-guest-authority-organization admin "foo@bar.com" "Foo Bar" "Foo")
+           (fact "Guest authority invite creates new user if needed"
+                 (usr/get-user-by-email foo) => falsey
+                 (guest/update-guest-authority-organization admin foo "Foo" "Bar" "Foo")
                  (count (guest/organization-guest-authorities "753-R")) => 2
-                 (guest/remove-guest-authority-organization admin "foo@bar.com")
+                 (usr/get-user-by-email foo) => (contains {:enabled false,
+                                                           :firstName "Foo"
+                                                           :lastName "Bar"
+                                                           :email foo
+                                                           :username foo
+                                                           :role "authority"}))
+           (fact "Remove guest authority"
+                 (guest/remove-guest-authority-organization admin foo)
                  (guest/organization-guest-authorities "753-R") => [{:name "Veikko The Man"
                                                                      :email veikko
                                                                      :description "Boss"}])))

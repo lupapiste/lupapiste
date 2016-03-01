@@ -4,12 +4,48 @@
             [midje.util :refer [testable-privates]]
             [sade.strings :refer [encode-filename]]
             [sade.env :as env]
+            [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.attachment-metadata :refer :all]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as user]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.generators :as gen]
+            [clojure.test :refer [is]]
+            [schema.core :as sc]
+            [sade.schemas :as ssc]
+            [sade.schema-generators :as ssg]))
+
+(testable-privates lupapalvelu.attachment
+                   attachment-file-ids
+                   version-number
+                   latest-version-after-removing-file
+                   make-version
+                   build-version-updates)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
+
+(defspec make-attachement-spec
+  (prop/for-all [attachment-id           ssg/object-id
+                 now                     ssg/timestamp
+                 target                  (ssg/generator Target)
+                 required?               gen/boolean
+                 requested-by-authority? gen/boolean
+                 locked?                 gen/boolean
+                 application-state       (gen/elements states/all-states)
+                 operation               (ssg/generator Operation)
+                 attachment-type         (ssg/generator Type)
+                 metadata                (ssg/generator  {sc/Str sc/Str})
+                 ;; Optional parameters
+                 contents                (ssg/generator (sc/maybe sc/Str))
+                 read-only?              (ssg/generator (sc/maybe sc/Bool))
+                 source                  (ssg/generator (sc/maybe Source))]
+                (let [validation-error (->> (make-attachment now target required? requested-by-authority? locked? application-state operation attachment-type metadata attachment-id contents read-only? source)
+                                            (sc/check Attachment))]
+                  (nil? validation-error))))
 
 (facts "Test file name encoding"
   (fact (encode-filename nil)                                 => nil)
@@ -30,10 +66,6 @@
   (fact (parse-attachment-type nil)        => nil))
 
 (def test-attachments [{:id "1", :latestVersion {:version {:major 9, :minor 7}}}])
-
-(facts "Test attachment-latest-version"
-  (fact (attachment-latest-version test-attachments "1")    => {:major 9, :minor 7})
-  (fact (attachment-latest-version test-attachments "none") => nil?))
 
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
@@ -58,14 +90,17 @@
                                     :versions []}
                                    {:id :attachment2
                                     :versions [{:version { :major 1 :minor 0 }
-                                                :fileId :file1}
+                                                :fileId :file1
+                                                :originalFileId :originalFileId1}
                                                {:version { :major 1 :minor 1 }
-                                                :fileId :file2}]}]}
-        attachments (:attachments application)]
-    (latest-version-after-removing-file attachments :attachment2 :file1) => {:version { :major 1 :minor 1}
-                                                                             :fileId :file2}
+                                                :fileId :file2
+                                                :originalFileId :originalFileId2}]}]}
+        attachment (last (:attachments application))]
+    (latest-version-after-removing-file attachment :file1) => {:version {:major 1 :minor 1}
+                                                               :fileId :file2
+                                                               :originalFileId :originalFileId2}
 
-    (attachment-file-ids application :attachment2) => [:file1 :file2]
+    (attachment-file-ids attachment) => (just #{:file1 :originalFileId1 :file2 :originalFileId2})
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
@@ -121,21 +156,6 @@
   (facts "create-sent-timestamp-update-statements"
     (create-sent-timestamp-update-statements attachments ["12" "23"] 123) => {"attachments.1.sent" 123
                                                                               "attachments.2.sent" 123}))
-
-(let [attachments [{:id 1 :versions [{:fileId "11", :version {:major 1, :minor 1}}
-                                     {:fileId "21", :version {:major 2, :minor 1}}]}
-                   {:id 2 :versions [{:fileId "12", :version {:major 1, :minor 2}}
-                                     {:fileId "22", :version {:major 2, :minor 2}}]}]]
-
-  (facts "get attachment version by file id"
-    (get-version-by-file-id (first attachments) "11") => {:fileId "11", :version {:major 1, :minor 1}}
-    (get-version-by-file-id (first attachments) "21") => {:fileId "21", :version {:major 2, :minor 1}}
-    (get-version-by-file-id (first attachments) "10") => nil)
-
-  (facts "get attachment version number by file id"
-    (get-version-number {:attachments attachments} 2 "12") => {:major 1, :minor 2}
-    (get-version-number {:attachments attachments} 1 "11") => {:major 1, :minor 1}
-    (get-version-number {:attachments attachments} 0 "12") => nil))
 
 (fact "attachment type IDs are unique"
   (let [known-duplicates (set (conj attachment-types-osapuoli
@@ -245,3 +265,91 @@
       (public-attachment? jluokka-public) => true
       (public-attachment? both-public) => true
       (public-attachment? only-julkisuusluokka) => true)))
+
+
+(defspec make-version-new-attachment 20
+  (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
+                 file-id         (ssg/generator ssc/ObjectIdStr)
+                 archivability   (ssg/generator (sc/maybe {:archivable sc/Bool 
+                                                           :archivabilityError (apply sc/enum archivability-errors) 
+                                                           :missing-fonts [sc/Str]}))
+                 general-options (ssg/generator {:filename sc/Str 
+                                                :content-type sc/Str 
+                                                :size sc/Int 
+                                                :now ssc/Timestamp 
+                                                :user user/SummaryUser 
+                                                :stamped (sc/maybe sc/Bool)})]
+                (let [options (merge {:file-id file-id :original-file-id file-id} archivability general-options)
+                      version (make-version attachment options)]
+                  (and (not (nil? (get-in version [:version :minor])))
+                       (not (nil? (get-in version [:version :major])))
+                       (= (:fileId version)         file-id)
+                       (= (:originalFileId version) file-id)
+                       (= (:created version) (:now options))
+                       (= (:user version) (:user options))
+                       (= (:filename version) (:filename options))
+                       (= (:contentType version) (:content-type options))
+                       (= (:size version) (:size options))
+                       (= (:stamped version) (:stamped options))
+                       (= (:archivable version) (:archivable options))
+                       (= (:archivabilityError version) (:archivabilityError options))
+                       (= (:missing-fonts version) (:missing-fonts options))))))
+
+(defspec make-version-update-existing 20
+  (prop/for-all [[attachment options] (gen/fmap (fn [[att ver fids opt]] [(-> (update att :versions assoc 0 (assoc ver :originalFileId (first fids)))
+                                                                              (assoc :latestVersion (assoc ver :originalFileId (first fids))))
+                                                                          (assoc opt :file-id (last fids) :original-file-id (first fids))])
+                                                (gen/tuple (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
+                                                           (ssg/generator Version)
+                                                           (gen/vector-distinct ssg/object-id {:num-elements 2})
+                                                           (ssg/generator {:filename sc/Str
+                                                                           :content-type sc/Str 
+                                                                           :size sc/Int 
+                                                                           :now ssc/Timestamp 
+                                                                           :user user/SummaryUser})))]
+                (let [version (make-version attachment options)]
+                  (and (= (:version version) (get-in attachment [:latestVersion :version]))
+                       (= (:fileId version) (:file-id options))
+                       (= (:originalFileId version) (:original-file-id options))
+                       (= (:created version) (:now options))
+                       (= (:user version) (:user options))
+                       (= (:filename version) (:filename options))
+                       (= (:contentType version) (:content-type options))
+                       (= (:size version) (:size options))))))
+
+(defspec build-version-updates-new-attachment 20
+  (prop/for-all [application    (ssg/generator {:state sc/Keyword})
+                 attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
+                 version-model  (ssg/generator Version)
+                 options        (ssg/generator {:now ssc/Timestamp 
+                                                :target (sc/maybe Target)
+                                                :user user/SummaryUser 
+                                                :stamped (sc/maybe sc/Bool)
+                                                :comment? sc/Bool
+                                                :comment-text sc/Str})]
+                (let [updates (build-version-updates application attachment version-model options)]
+                  (and (= (get-in updates [$addToSet :attachments.$.auth :role]) (if (:stamped options) :stamper :uploader))
+                       (= (get-in updates [$set :modified] (:now options)))
+                       (= (get-in updates [$set :attachments.$.modified] (:now options)))
+                       (= (get-in updates [$set :attachments.$.state] (:state options)))
+                       (if (:target options)
+                         (= (get-in updates [$set :attachments.$.target] (:target options)))
+                         (not (contains? (get updates $set) :attachments.$.target)))
+                       (= (get-in updates [$set :attachments.$.latestVersion] version-model))
+                       (= (get-in updates [$set "attachments.$.versions.0"] version-model))))))
+
+(defspec build-version-updates-update-existing-version 20
+  (prop/for-all [application    (ssg/generator {:state sc/Keyword})
+                 [attachment version-model] (gen/fmap (fn [[att fids]] 
+                                                        (let [ver (assoc (get-in att [:versions 1]) :originalFileId (first fids))]
+                                                          [(-> (assoc-in att [:versions 1] ver)
+                                                               (assoc :latestVersion ver))
+                                                           ver]))
+                                                      (gen/tuple (ssg/generator Attachment {Version   nil 
+                                                                                            [Version] (gen/vector-distinct (ssg/generator Version) {:min-elements 3})})
+                                                                 (gen/vector-distinct ssg/object-id {:num-elements 2})))
+                 options (ssg/generator {:now ssc/Timestamp 
+                                         :user user/SummaryUser})]
+                (let [updates (build-version-updates application attachment version-model options)]
+                  (and (not (contains? (get updates $set) :attachments.$.latestVersion))
+                       (= (get-in updates [$set "attachments.$.versions.1"] version-model))))))

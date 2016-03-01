@@ -7,14 +7,15 @@
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [clojure.java.io :as io]
-            [lupapalvelu.attachment]
+            [lupapalvelu.attachment :as att]
             [ring.util.codec :as codec]
             [lupapalvelu.action :as action]
             [monger.operators :refer :all]
             [taoensso.timbre :refer [info error warn]]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [clj-time.format :as f])
+            [clj-time.format :as f]
+            [lupapalvelu.application-meta-fields :as amf])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -111,6 +112,18 @@
        (remove nil?)
        (first)))
 
+(defn- get-paatospvm [{:keys [verdicts]}]
+  (let [ts (->> verdicts
+                (map (fn [{:keys [paatokset]}]
+                       (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
+                (flatten)
+                (remove nil?)
+                (sort)
+                (last))]
+    (println ts)
+    (when ts
+      (->iso-8601-date (c/from-long ts)))))
+
 (defn- get-usages [{:keys [documents]} op-id]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
         id-to-usage (into {} (map (fn [d] {(get-in d [:schema-info :op :id])
@@ -130,10 +143,11 @@
   [{:keys [id propertyId applicant address organization municipality location location-wgs84] :as application}
    user
    & [attachment]]
-  (let [s2-metadata (or (:metadata attachment) (:metadata application))
-        base-metadata {:type                  (if attachment (make-attachment-type attachment) :application)
+  (let [s2-metadata (-> (or (:metadata attachment) (:metadata application))
+                        (assoc :tila :arkistoitu))
+        base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
-                       :buildingIds           (remove nil? (map :buildingId (:buildings application)))
+                       :buildingIds           (remove nil? (map :localId (:buildings application)))
                        :nationalBuildingIds   (remove nil? (map :nationalId (:buildings application)))
                        :propertyId            propertyId
                        :applicant             applicant
@@ -148,7 +162,7 @@
                        :location-wgs84        location-wgs84
                        :kuntalupatunnukset    (map :kuntalupatunnus (:verdicts application))
                        :lupapvm               (get-verdict-date application :lainvoimainen)
-                       :paatospvm             (get-verdict-date application :anto)
+                       :paatospvm             (get-paatospvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (:authority application) [:username :firstName :lastName])
@@ -157,7 +171,8 @@
                                                 (get-usages application (get-in attachment [:op :id]))
                                                 (get-usages application nil))
                        :kieli                 "fi"
-                       :versio                (if attachment (make-version-number attachment) "1.0")}]
+                       :versio                (if attachment (make-version-number attachment) "1.0")
+                       :suunnittelijat        (:_designerIndex (amf/designers-index application))}]
     (cond-> base-metadata
             (:contents attachment) (conj {:contents (:contents attachment)})
             (:size attachment) (conj {:size (:size attachment)})
@@ -173,6 +188,6 @@
             metadata (generate-archive-metadata application user)]
         (upload-and-set-state (str id "-application") application-file "application/pdf" metadata application created set-application-state)))
     (doseq [attachment selected-attachments]
-      (let [{:keys [content content-type]} (lupapalvelu.attachment/get-attachment-file (get-in attachment [:latestVersion :fileId]))
+      (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
             metadata (generate-archive-metadata application user attachment)]
         (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state)))))

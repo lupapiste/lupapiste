@@ -1,3 +1,4 @@
+// jshint supernew:true
 LUPAPISTE.Screenmessage = new (function () {
   "use strict";
   var self = this;

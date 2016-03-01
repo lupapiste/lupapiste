@@ -5,7 +5,9 @@
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer [unauthorized?]]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.actions-api :as ca]))
+            [lupapalvelu.actions-api :as ca]
+            ;; ensure all actions are registered by requiring server ns
+            [lupapalvelu.server]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 
@@ -43,7 +45,9 @@
                           :preview-attachment
                           :document
                           :mark-seen
-                          :authority-notice}
+                          :get-building-info-from-wfs
+                          :authority-notice
+                          :application-guests}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)
@@ -81,6 +85,7 @@
                            :application :validate-doc :fetch-validation-errors :document
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
+                           :get-building-info-from-wfs
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
                            :application-guests}]

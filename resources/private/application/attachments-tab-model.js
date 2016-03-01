@@ -203,7 +203,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
     hub.send("start-marking-verdict-attachments", {application: self.appModel});
   };
 
-  self.attachmentTemplatesModel = new function() {
+  function AttachmentTemplatesModel() {
     var templateModel = this;
 
     templateModel.ok = function(ids) {
@@ -238,7 +238,8 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
       LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
       return templateModel;
     };
-  }();
+  }
+  self.attachmentTemplatesModel = new AttachmentTemplatesModel();
 
   hub.subscribe("op-description-changed", function(e) {
     var opid = e["op-id"];

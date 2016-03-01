@@ -8,7 +8,9 @@ var docgen = (function () {
       other.parent().css("visibility", select.val() === "other" ? "visible" : "hidden");
     }
     function initSelectWithOther(i, e) { updateOther($(e)); }
-    function selectWithOtherChanged() { updateOther($(this)); }
+    function selectWithOtherChanged(event) {
+      updateOther($(event.target));
+    }
 
     var isDisabled = options && options.disabled;
 
@@ -24,10 +26,6 @@ var docgen = (function () {
       docModel.triggerEvents();
 
       docgenDiv.append(docModel.element);
-
-      if (doc.validationErrors) {
-        docModel.showValidationResults(doc.validationErrors);
-      }
 
       if (schema.info.repeating && !schema.info["no-repeat-button"] && !isDisabled && authorizationModel.ok("create-doc")) {
         var icon = $("<i>", {"class": "lupicon-circle-plus"});

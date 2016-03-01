@@ -68,6 +68,7 @@ Veikko from Tampere can give statement
   Select From List By Value  statement-type-select  ehdoilla
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Puoltaa ehdoilla
   [Teardown]  logout
 
@@ -95,11 +96,13 @@ Olli gives two statements
   Input text  statement-text  freedom!
   Wait until  Select From List By Value  statement-type-select  puoltaa
   Wait and click  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-2']  Puoltaa
   Open statement  3
   Input text  statement-text  freedom again!
   Wait until  Select From List By Value  statement-type-select  puoltaa
   Wait and click  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-3']  Puoltaa
 
 Olli requests reply for statement
@@ -112,6 +115,7 @@ Olli requests reply for statement
 
 Olli requests reply for another statement
   Open statement  3
+  Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
   Wait until  Element should be visible  statement-submit
   Input text  statement-reply-covering-note  please reply also this statement
   Wait and click  statement-submit
@@ -120,7 +124,7 @@ Olli requests reply for another statement
 Olli goes back to statement and sees reply as draft
   Open statement  2
   Wait until  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-statement']
-  Element should not be visible  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
+  Wait until  Element should not be visible  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply']
   Wait until element contains  statement-reply-draft-is-not-visible-info  Vastine tulee
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-statement']
@@ -142,17 +146,19 @@ Veikkos statement is not replyable
 Mikko writes reply for Olli's statement
   Wait and click  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//a[@data-test-id='open-statement-reply-2']
   Wait until  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-statement']
+  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-reply']
   Element should not be visible  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
-  Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply']
-  Wait until  Element should be visible  statement-nothing-to-add
+  Element should be visible  statement-nothing-to-add
   Click element  statement-nothing-to-add
   Checkbox should be selected  statement-nothing-to-add
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-2']  Vastine annettu
 
 Mikko writes reply for another Olli's statement
-  Wait and click  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//a[@data-test-id='open-statement-reply-3']
+  Open statement  3
+  Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply']
   Wait until  Element should be visible  statement-nothing-to-add
   Click element  statement-nothing-to-add
   Checkbox should be selected  statement-nothing-to-add
@@ -161,6 +167,7 @@ Mikko writes reply for another Olli's statement
   Wait until  Input text  statement-reply-text  this is my reply
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-reply-state-3']  Vastine annettu
   [Teardown]  logout
 
