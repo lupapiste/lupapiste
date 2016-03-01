@@ -119,11 +119,15 @@ Lupapiste käynnistyy komennolla:
 
 Sovellus on ajossa osoitteessa http://localhost:8000.
 
-Klikkaa oikean reunan Development palkissa "Apply minimal" linkkiä.
+Klikkaa oikean reunan Development-palkissa "Apply minimal" linkkiä.
 Tämä alustaa tietokantaan muutamia käyttäjiä ja organisaatioita (kts. _minimal.clj_). Voit kirjautua
 sisään esimerkiksi hakijatunnuksella pena/pena tai viranomaistunnuksella sonja/sonja.
 
-Hakemuksen voi luoda samaisesta Development
+Kirjautumisen jälkeen voit luoda hakemuksia ja neuvontapyyntöjä Tee hakemus- ja
+Kysy neuvoa -painikkeilla. Voit myös käyttää Development-palkin linkkejä luodaksesi
+hakemuksia yhdellä klikkauksella.
+
+Palvelun käyttäjäohje löytyy osoitteessa https://www.lupapiste.fi/ohjeet/.
 
 ## Lähdekoodin hakemistorakenne
 
