@@ -498,8 +498,6 @@ TODO
 * KRYSP (miten keskustellaan taustajärjestelmien kanssa)
 * Asianhallinta
 
-## Tilat ja tilakone
-
 ## Tietokanta
 
 Ks. [database.md](database.md)

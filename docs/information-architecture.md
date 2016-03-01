@@ -138,3 +138,50 @@ Hienosäätöä:
   organisaatiossa "oikea" viranomainen. Toisaalta,
   vierailijaviranomaisen ei tarvitse välttämättä olla viranomainen
   (authority) lainkaan.
+
+## Hakemuksen tila
+
+Hakemuksen mahdolliset tilat riippuvat sen päätoimenpiteestä ja onko kyseessä
+lupahakemus vai neuvontapyyntö.
+
+Tilat ohjaavat mitä toimintoja hakemukselle voi tehdä. Käsittelyn edetessä osa
+hakemuksen tiedoista lukittuu.
+
+Oletustilasiirtymät on kuvattu seuraavassa kaaviossa:
+
+![](states/default-application-state-graph.png)
+
+Hanke alkaa Luonnos-tilasta (*draft*), josta se etenee ensimmäisen kommentin
+lisäämisen myötä Näkyy viranomaiselle (*open*)-tilaan. Viranomainen näkee luonnokset
+työjonollaan, muttei pääse muokkaamaan niitä ennen Näkyy viranomaiselle -tilaa.
+Viranomaiskäyttäjien luomat hakemukset syntyvät suoraan Näkyy viranomaiselle -tilaan.
+
+Kun hakija jättää hakemuksen vireille, tilaksi vaihtuu Vireillä (*submitted*).
+Valmisteilla ja vireillä olevat hakemukset näkyvät viranomaisella. Vireilletulon
+yhteydessä hakemuksesta tallennetaan tietokantaan kopio. Kopiosta muodostetaan
+myöhemmin PDF-tuloste, joka lähetetään kunnan taustajärjestelmään.
+
+Kun viranomainen siirtää hakemuksen taustajärjestelmään, tilaksi muuttuu
+Käsittelyssä (*sent*). Tässä tilassa hakemusta ei pääsääntöisesti voi muokata
+Lupapisteessä. Jos hakemusta on korjattava, hakemukseen voi pyytää täydennyksiä ja
+tilaksi vaihtuu Täydennettävä (*complementNeeded*). Kun päätös annetaan, tilaksi
+vaihtuu Päätös annettu (*verdictGiven*). Tämän jälkeen hakemuksen voi ilmoittaa
+aloitetuksi (Rakennustyöt aloitettu, *constructionStarted*) ja sitten valmiiksi
+(Valmistunut, *closed*).
+
+Jos hakemus peruutetaan, sen tilaksi tulee Peruutettu (*canceled*) ja se poistuu
+viranomaisen työjonosta. Myös viranomainen voi peruuttaa hakemuksen, jos hän toteaa
+että lupahakemus on aiheeton. Viranomaisen on syötettävä Lupapisteeseen peruuttamisen syy.
+
+Työnjohtajan nimeämisissä mahdolliset tilat riippuvat lisäksi siitä, onko kyseessä
+hakemus vai ilmoitus.
+
+![Työnjohtajahakemus](states/tj-hakemus-state-graph.png)
+
+![Työnjohtajailmoitus](states/tj-ilmoitus-state-graph.png)
+
+Neuvontapyynnöillä on kaksi tilaa, avoin ja vastattu. Lisäksi neuvontapyynnön voi peruuttaa.
+
+![](states/default-inforequest-state-graph.png)
+
+Jos neuvontapyynnön muuttaa lupahakemukseksi, tilaksi tulee Näkyy viranomaiselle.
