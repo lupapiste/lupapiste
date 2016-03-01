@@ -243,11 +243,11 @@ omat HTML-sovellussivut ja nihin liittyvät yhteenpaketoidut JavaScript- ja
 CSS-resurssit. lupapalvelu.web nimiavaruudessa määritellään kullekin resurssille
 pääsyrajaus, eli mikä käyttäjärooli vaaditaan.
 
-Resurssien kompositio määritellään [web.clj](../src/lupapalvelu/components.ui_components.clj)
+Resurssien kompositio määritellään [ui_components.clj](../src/lupapalvelu/components/ui_components.clj)
 -tiedostossa. Kutakin käyttäjien perusroolia vastaa oma komponentti,
 jonka `:depends` vektoriin määritellään komponentit, joista tämä paketoitava resurssi koostuu.
 
-Jokaista komponenttia vastaa alihakemisto [resource/private:ssa](../ resource/private).
+Jokaista komponenttia vastaa alihakemisto [resources/private:ssa](../resources/private).
 `:js`, `:css` ja `:html` avaimilla määritellään lista tiedostonimiä, joiden
 tulee löytyä komponentin hakemistosta. Hakemiston nimen voi myös ylikirjoittaa
 `:name` avaimen avulla.
