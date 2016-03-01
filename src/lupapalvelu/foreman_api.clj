@@ -163,6 +163,6 @@
         apps-linking-to-us (filter #(= (:type ((keyword id) %)) "linkpermit") app-link-resp)
         foreman-application-links (filter #(= (:apptype (first (:link %)) "tyonjohtajan-nimeaminen")) apps-linking-to-us)
         foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
-        applications (mongo/select :applications {:_id {$in foreman-application-ids}})
-        mapped-applications (map (fn [app] (foreman/foreman-application-info app)) applications)]
+        applications (mongo/select :applications {:_id {$in foreman-application-ids}} [:id :state :auth :documents])
+        mapped-applications (map foreman/foreman-application-info applications)]
     (ok :applications (sort-by :id mapped-applications))))
