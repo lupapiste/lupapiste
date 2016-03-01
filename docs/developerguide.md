@@ -12,7 +12,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
     - [Compass](http://compass-style.org/): `gem install compass`
     - [Node.js](https://nodejs.org)
     - [Bless](http://blesscss.com): `npm install bless -g`
-- Python 2.x ja Robot Framework selaintestausta varten
+- Python 2.x ja [Robot Framework](http://robotframework.org/) selaintestausta varten
   - `pip install robotframework`
   - `pip install robotframework-selenium2library`
   - IE:llä ajettavia testejä varten ajuri osoitteesta  http://selenium-release.storage.googleapis.com/index.html
@@ -125,6 +125,26 @@ sisään esimerkiksi hakijatunnuksella pena/pena tai viranomaistunnuksella sonja
 
 Hakemuksen voi luoda samaisesta Development
 
+## Lähdekoodin hakemistorakenne
+
+Koodi on jaoteltu seuraavasti:
+
+Hakmisto        | Selitys
+--------------  |----------
+src             | Palvelinpään sovelluskoodi
+src/lupapalvelu | Erityisesti Lupapisteeseen liittyvä palvelinpään sovelluskoodi
+src/sade        | Palvelinpään sovelluskoodi, jota on hyödynnetty muissa SADe-hankkeen projekteissa
+resources       | Selainpään sovelluskoodi
+dev-resources   | Kehitys- ja testausaikaiset aputiedostot
+dev-src         | Kehitysaikainen apulähdekoodi
+test            | Palvelinpään yksikkötestit
+itest           | Palvelinpään integraatiotestit
+stest           | Palvelinpään systeemitestit
+test-utils      | Palvelinpään testien jaettu koodi
+robot           | Selainpään end-to-end-testi
+
+Palvelinpään päätiedosto, josta ohjelmiston suoritus käynnistyy, on
+src/lupapalvelu/main.clj.
 
 ## Tyylikäytännöt
 
@@ -187,9 +207,18 @@ Ks. [tietomalli](information-architecture.md)
 
 # Arkkitehtuuri yleiskuvaus
 
-Asiointisovellus on toteutettu HTML5 Single-page application-pohjaisesti. Käyttöliittymäkerros kutsuu taustapalvelua, joka edelleen lukee ja muokkaa tietokannan tietoja. Järjestelmä tietosisältö muodostuu hakemuksista, niiden lomaketiedoista ja liitetiedostoista sekä käyttäjistä. Rakenteisen tiedon osalta pääroolissa ovat hakemuksen lomaketiedot, joten sovelluksen käyttöön on valittu dokumenttitietokanta, johon monimuotoiset lomakkeet on helppo mallintaa.
+Asiointisovellus on toteutettu HTML5 Single-page application-pohjaisesti.
+Käyttöliittymäkerros kutsuu taustapalvelua, joka edelleen lukee ja muokkaa
+tietokannan tietoja. Järjestelmä tietosisältö muodostuu hakemuksista, niiden
+lomaketiedoista ja liitetiedostoista sekä käyttäjistä. Rakenteisen tiedon osalta
+pääroolissa ovat hakemuksen lomaketiedot, joten sovelluksen käyttöön on valittu
+dokumenttitietokanta, johon monimuotoiset lomakkeet on helppo mallintaa.
 
-Sovellus on toteutettu Command Query Responsibility Segregation periaatteiden mukaisesti. Commandeja käytetään komentojen suorittamiseen (tiedon muokkaamiseen) ja Queryjä käytetään tiedon kyselemiseen. Frontendistä kutsutaan backendin tarjoamia JSON rajapintoja (*/api/command/<nimi>* (POST metodi) ja */api/query/<nimi>* (GET metodi)).
+Sovellus on toteutettu Command Query Responsibility Segregation periaatteiden
+mukaisesti. Commandeja käytetään komentojen suorittamiseen (tiedon muokkaamiseen) ja
+Queryjä käytetään tiedon kyselemiseen. Frontendistä kutsutaan backendin tarjoamia
+JSON rajapintoja (*/api/command/<nimi>* (POST metodi) ja */api/query/<nimi>*
+(GET metodi)).
 
 ## Keskeisimmät teknologiat
 
@@ -206,8 +235,9 @@ Backend:
 ## Yleistä
 
 - SPA initial startup
-- Kommunikointi backendiin
-  - Query and Command
+
+## Kommunikointi palvelinpäähän
+ajax.js, query & command
 
 ## Uusien näkymien toteutusarkkitehtuuri
 
@@ -377,8 +407,6 @@ hub.send("indicator-icon", {style: "negative"});
 
 ## Globaalit objektit
 - Ajax
-- Hub
-- User feedback on success and error event
 - Localizations
 - Lupapiste Map
 - lupapisteApp
