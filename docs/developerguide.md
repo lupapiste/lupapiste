@@ -129,19 +129,21 @@ Hakemuksen voi luoda samaisesta Development
 
 Koodi on jaoteltu seuraavasti:
 
-Hakmisto        | Selitys
---------------  |----------
-src             | Palvelinpään sovelluskoodi
-src/lupapalvelu | Erityisesti Lupapisteeseen liittyvä palvelinpään sovelluskoodi
-src/sade        | Palvelinpään sovelluskoodi, jota on hyödynnetty muissa SADe-hankkeen projekteissa
-resources       | Selainpään sovelluskoodi
-dev-resources   | Kehitys- ja testausaikaiset aputiedostot
-dev-src         | Kehitysaikainen apulähdekoodi
-test            | Palvelinpään yksikkötestit
-itest           | Palvelinpään integraatiotestit
-stest           | Palvelinpään systeemitestit
-test-utils      | Palvelinpään testien jaettu koodi
-robot           | Selainpään end-to-end-testi
+Hakmisto          | Selitys
+--------------    |----------
+src               | Palvelinpään sovelluskoodi
+src/lupapalvelu   | Erityisesti Lupapisteeseen liittyvä palvelinpään sovelluskoodi
+src/sade          | Palvelinpään sovelluskoodi, jota on hyödynnetty muissa SADe-hankkeen projekteissa
+resources         | Staattiset resurssit
+resources/public  | Resurssit, jotka palvellaan automaattesesti palvelimen juuripolussa
+resources/private | Selainpään sovelluskoodi
+dev-resources     | Kehitys- ja testausaikaiset aputiedostot
+dev-src           | Kehitysaikainen apulähdekoodi
+test              | Palvelinpään yksikkötestit
+itest             | Palvelinpään integraatiotestit
+stest             | Palvelinpään systeemitestit
+test-utils        | Palvelinpään testien jaettu koodi
+robot             | Selainpään end-to-end-testi
 
 Palvelinpään päätiedosto, josta ohjelmiston suoritus käynnistyy, on
 src/lupapalvelu/main.clj.
@@ -232,12 +234,41 @@ Backend:
 - [MongoDB](http://docs.mongodb.org/)
 
 # Frontend arkkitehtuuri
-## Yleistä
 
-- SPA initial startup
+## Single Page kompositio
 
-## Kommunikointi palvelinpäähän
-ajax.js, query & command
+[web.clj](../src/lupapalvelu/web.clj)-tiedostossa määritellään rajapinnat,
+jotka tarjoilevat kullekin [käyttäroolille](information-architecture.md#käyttäjä)
+omat HTML-sovellussivut ja nihin liittyvät yhteenpaketoidut JavaScript- ja
+CSS-resurssit. lupapalvelu.web nimiavaruudessa määritellään kullekin resurssille
+pääsyrajaus, eli mikä käyttäjärooli vaaditaan.
+
+Resurssien kompositio määritellään [web.clj](../src/lupapalvelu/components.ui_components.clj)
+-tiedostossa. Kutakin käyttäjien perusroolia vastaa oma komponentti,
+jonka `:depends` vektoriin määritellään komponentit, joista tämä paketoitava resurssi koostuu.
+
+Jokaista komponenttia vastaa alihakemisto [resource/private:ssa](../ resource/private).
+`:js`, `:css` ja `:html` avaimilla määritellään lista tiedostonimiä, joiden
+tulee löytyä komponentin hakemistosta. Hakemiston nimen voi myös ylikirjoittaa
+`:name` avaimen avulla.
+
+`ui-components`-niminen komponentti ja alihakemisto käsitellään erityisesti:
+hakemiston kaikki tiedostot tulevat automaattisesti mukaan tähän komponenttiin.
+_Huom:_ jotta uusi tiedosto tulee mukaan kehitysympäristössä,
+lupapalvelu.components.ui-components nimiavaruus on ladattava uudelleen REPL:issä.
+(Vaihtoehtoinen, raskaampa tapa saada muutokset voimaan on käynnistää palvelu uudelleen.)
+
+Termi "ui-komponentti" voi viitata joko ui_components.clj:n määrityksiin,
+resource/private/ui-components alla oleviin automaattisesti ladattaviin
+komponenttiehin tai joissain yhteyksissa KnockoutJS-komponentteihin.
+
+## Näkymien reititys
+
+TODO
+
+## Kommunikointi selaimesta palvelinpäähän
+
+Kaikki verkkopyynnöt tulee tehdä [ajax](../resources/private/init/ajax.js)-palvelun kautta. Tämä keskittää virhekäsittelyä ja Cross Site Request Forgery -estomekanismin.
 
 ## Uusien näkymien toteutusarkkitehtuuri
 
@@ -406,7 +437,6 @@ hub.send("indicator-icon", {style: "negative"});
 
 
 ## Globaalit objektit
-- Ajax
 - Localizations
 - Lupapiste Map
 - lupapisteApp
@@ -582,3 +612,4 @@ Tarkastuslista:
    tiedostoon ja tiedosto käännetty compassilla
 
 ## UI komponentit (ui_components.clj, auto-skannatut tiedostot ui-components hakemistossa)
+
