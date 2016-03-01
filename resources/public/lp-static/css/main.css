@@ -1,4 +1,5 @@
-@import url('main-blessed1.css?z=1456750358448');
+@import url('main-blessed1.css?z=1456835979668');
+
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
 .scroll-73em {
@@ -1409,11 +1410,10 @@ ul.tabs {
 
 /* line 70, ../../../private/common-html/sass/partials/_help.scss */
 .page-info {
-  width: 60%;
   margin: 12px 0;
 }
 
-/* line 76, ../../../private/common-html/sass/partials/_help.scss */
+/* line 75, ../../../private/common-html/sass/partials/_help.scss */
 .help-adjacent-title {
   margin-top: 0 !important;
   line-height: normal;
