@@ -2,7 +2,7 @@
   (:require [sade.core :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            sade.http))
+            [sade.http :as http]))
 
 (testable-privates sade.http merge-to-defaults)
 
@@ -29,3 +29,8 @@
 
 (fact "uneven number of options is not allowed"
   (merge-to-defaults :a :b 2) => (throws IllegalArgumentException "uneven number of options"))
+
+(fact "evil headers are filtered"
+  (http/secure-headers {:headers {"cookie" 1 "Set-Cookie" 1 "server" 1 "Host" 1
+                                  "connection" 1 "X-Powered-By" "LOL PHP"
+                                  "User-Agent" "007"}}) => {:headers {"User-Agent" "007"}})
