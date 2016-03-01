@@ -16,12 +16,11 @@
              data-bind="component: {name: 'text-field',
                                     params: {value: newEmail,
                                              id: 'newEmail',
-                                             disable: disable,
                                              lLabel: 'userinfo.new-email'}}"></div>
 
         <div class="col-1" style="padding-top: 24px">
           <button data-bind="click: save,
-                             disable: disable,
+                             disable: processing,
                              enable: ok,
                              css: {waiting: pending}" class="positive"
                   data-test-id="change-email">

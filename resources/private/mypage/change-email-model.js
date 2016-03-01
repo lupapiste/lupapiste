@@ -6,10 +6,11 @@ LUPAPISTE.ChangeEmailModel = function(params) {
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
   self.proceed = ko.observable(false);
+  self.email = params.data.email;
 
   self.authorized = _.partial(params.authorization.ok, "change-email-init");
   self.ok = ko.pureComputed(function() {
-    return self.newEmail() && self.validated.isValid() && self.newEmail() !== params.data.email() && self.authorized() && !self.processing();
+    return self.newEmail() && self.validated.isValid() && self.newEmail() !== self.email() && self.authorized() && !self.processing();
   });
 
   self.save = function() {
@@ -28,7 +29,7 @@ LUPAPISTE.ChangeEmailModel = function(params) {
   // Parameters for the parent component:
   var superParams = {ltitle: params.ltitle,
                      accordionContentTemplate: "change-email-template",
-                     accordionContentTemplateData: _.merge(params.data, _.pick(self, ["newEmail", "authorized", "proceed", "processing", "pending", "ok", "save"]))};
+                     accordionContentTemplateData: self};
   ko.utils.extend(self, new LUPAPISTE.AccordionModel(superParams));
 
   // Initialize new email with current value
