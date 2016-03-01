@@ -147,9 +147,11 @@ LUPAPISTE.ForemanModel = function() {
 
     self.application(application);
 
-    _.defer(function() {
-      loadForemanApplications(application.id);
-    });
+    if (self.isVisible()) {
+      _.defer(function() {
+        loadForemanApplications(application.id);
+      });
+    }
   };
 
   self.inviteForeman = function(taskId) {
