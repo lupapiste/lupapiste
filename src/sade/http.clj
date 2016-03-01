@@ -31,9 +31,14 @@
 (defn put [uri & options]
   (logged-call http/put uri (apply merge-to-defaults options)))
 
+(def blacklisted #"^((set-)?cookie|server|host|connection|x-.+|access-control-.+)")
+
+(defn dissoc-blacklisted [m]
+  (into {} (remove #(re-matches blacklisted (ss/lower-case (first %))) m)))
+
 (defn secure-headers [request-or-response]
   (if (contains? request-or-response :headers)
-    (update request-or-response :headers dissoc "cookie" "set-cookie" "server" "host" "connection")
+    (update request-or-response :headers dissoc-blacklisted)
     request-or-response))
 
 (defn client-ip [request]
