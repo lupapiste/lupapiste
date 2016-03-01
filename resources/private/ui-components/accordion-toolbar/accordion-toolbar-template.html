@@ -70,7 +70,7 @@
         <span data-bind="ltext: 'document.approve'"></span>
       </button>
       <!-- ko if: showIdentifierEditors -->
-      <div class="identifier-editors container-bubble" data-bind="event: {keydown: closeEditors}">
+      <div class="identifier-editors container-bubble" data-test-id="identifier-editors" data-bind="event: {keydown: closeEditors}">
         <!-- ko if: identifierField -->
         <div class="inline-col identifier-component"
             data-bind="component: {name: 'document-identifier',

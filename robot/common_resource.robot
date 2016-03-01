@@ -471,6 +471,11 @@ Element should not be visible by test id
 # The following do not take data-test-id as argument
 #
 
+Get identifiers closed
+  [Arguments]  ${docId}
+  ${identifiersClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-id='${docId}']//div[@data-test-id='identifier-editors']
+  [Return]  ${identifiersClosed}
+
 Primary operation is
   [Arguments]  ${opId}
   Element should be visible  xpath=//span[@data-test-primary-operation-id="${opId}"]
@@ -479,8 +484,10 @@ Primary operation is
 Edit operation description
   [Arguments]  ${doc}  ${text}  ${idx}=1
   Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
+  ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
+  ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
-  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=op-description-editor-${doc}]
   Input text by test id  op-description-editor-${doc}  ${text}
   # Close the input
@@ -496,8 +503,9 @@ Input building identifier
   [Arguments]  ${doc}  ${text}  ${idx}=1
   Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
   ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
+  ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
-  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
   Input text by test id  ${docId}-identifier-input  ${text}
   # Close the input
