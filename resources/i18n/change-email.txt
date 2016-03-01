@@ -17,7 +17,7 @@
 "change-email.init-header" "fi" "Sähköpostiosoitteen vaihto vaatii tunnistautumisen"
 "change-email.init-header" "sv" "Ändring av e-postadress kräver identifiering"
 "change-email.init-info" "fi" "Klikkaa \"Tunnistaudu\"-nappia jatkaaksesi tunnistautumispalveluun. Tarvitset tätä varten henkilökohtaiset pankkitunnuksesi tai mobiilivarmenteen."
-"change-email.init-info" "sv" "Klicka på knappen \”Identifiering\” för att fortsätta till identifieringstjänsten. För detta behöver du dina personliga bankkoder eller ett mobilcertifikat."
+"change-email.init-info" "sv" "Klicka på knappen \"Identifiering\" för att fortsätta till identifieringstjänsten. För detta behöver du dina personliga bankkoder eller ett mobilcertifikat."
 "change-email.header" "fi" "Sähköpostiosoitteen vaihto"
 "change-email.header" "sv" "Ändring av e-postadress"
 "change-email.processing" "fi" "Vaihdetaan sähköpostiosoitetta..."
