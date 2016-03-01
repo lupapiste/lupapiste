@@ -217,11 +217,14 @@
         foreman-app-id3      (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should be visible
         foreman-app-id4      (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "B") ; -> should *NOT* be visible
         foreman-app-id5      (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "A") ; -> should be visible
+        foreman-app-canceled (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "A") ; -> should NOT be visible
 
         base-foreman-app-id  (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "B")] ;for calling history
 
+    (command mikko :cancel-application :id foreman-app-canceled) => ok?
+
     (facts "reduced"
-      (fact "reduced history should contain reduced history"
+      (fact "reduced history should contain reduced history (excluding canceled application)"
         (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
               history-ids (map :foremanAppId (:projects reduced-history))]
           history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)

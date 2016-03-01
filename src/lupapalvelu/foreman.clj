@@ -36,6 +36,7 @@
                        foreman-hetu)]
     (when-not (ss/blank? foreman-hetu)
       (mongo/select :applications {"primaryOperation.name" "tyonjohtajan-nimeaminen-v2"
+                                   :state {$nin ["canceled"]}
                                    :documents {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
                                                            "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
 
