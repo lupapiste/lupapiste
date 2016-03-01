@@ -44,12 +44,8 @@ Mikko previews file
 Version number is 1.0
   Wait until  Element text should be  //section[@id="attachment"]//span[@data-bind="version: $data.version"]  1.0
 
-Rotation buttons are visible
-  Xpath Should Match X Times  //section[@id="attachment"]//div[@data-test-id="pdf-rotation-buttons"]//button  3
-  Element should be visible   //section[@id="attachment"]//div[@data-test-id="pdf-rotation-buttons"]//button
-
-Click the first rotate button
-  Click element  //section[@id="attachment"]//div[@data-test-id="pdf-rotation-buttons"]//button
+Mikko adds new version
+  Add attachment version  ${PDF_TESTFILE_PATH3}
 
 Version number is 2.0
   Wait until  Element text should be  //section[@id="attachment"]//span[@data-bind="version: $data.version"]  2.0
