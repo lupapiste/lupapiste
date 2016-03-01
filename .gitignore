@@ -38,6 +38,7 @@ checkouts
 # Temp
 temp
 .cache
+*.tmp
 
 # VCS
 *.orig
