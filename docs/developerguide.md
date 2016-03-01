@@ -252,6 +252,10 @@ Jokaista komponenttia vastaa alihakemisto [resources/private:ssa](../resources/p
 tulee löytyä komponentin hakemistosta. Hakemiston nimen voi myös ylikirjoittaa
 `:name` avaimen avulla.
 
+HTML-tiedostoista poimitaan pelkät nav ja footer elementit sekä section class=page,
+div class=notification ja script class=ko-template -elementit
+(ks. [singlepage/parse-html-resource](../src/lupapalvelu/singlepage.clj)).
+
 `ui-components`-niminen komponentti ja alihakemisto käsitellään erityisesti:
 hakemiston kaikki tiedostot tulevat automaattisesti mukaan tähän komponenttiin.
 _Huom:_ jotta uusi tiedosto tulee mukaan kehitysympäristössä,
@@ -264,11 +268,30 @@ komponenttiehin tai joissain yhteyksissa KnockoutJS-komponentteihin.
 
 ## Näkymien reititys
 
-TODO
+Näkymä valitaan sen perusteella, mikä ankkuri eli niin sanottu hash-bang sovelluksen
+osoitteessa on. Sovellus asettaa näkyville elementin, jonka ID:tä tämä vastaa.
+Esim. http://localhost:8000/app/fi/authority#!/application/LP-753-2016-00001
+osoiteessa näytetään nimeämiskäytännön mukaisesti
+[application.html]( ../resources/private/application/application.html)
+tiedostossa oleva elementti:
+
+    <section class="page" id="application">
+
+Samassa application-hakemistossa oleva application.js sisältää logiikan,
+joka suoritetaan kun application-näkymä avataan:
+
+    hub.onPageLoad("application", _.partial(initPage, "application"));
+
+Näkymän avautuessa siis kutsutaan initPage-funktiota "application" -parametrilla sekä
+hub.js:n välittämällä eventillä.
+
+Vastaavasti koodissa voi kuunnelle siirtymistä pois näkymästä
+`hub.onPageUnload("sivun id", function(event){})` koukun avulla.
 
 ## Kommunikointi selaimesta palvelinpäähän
 
-Kaikki verkkopyynnöt tulee tehdä [ajax](../resources/private/init/ajax.js)-palvelun kautta. Tämä keskittää virhekäsittelyä ja Cross Site Request Forgery -estomekanismin.
+Kaikki verkkopyynnöt tulee tehdä [ajax](../resources/private/init/ajax.js)-palvelun kautta.
+Tämä keskittää virhekäsittelyä ja Cross Site Request Forgery -estomekanismin.
 
 ## Uusien näkymien toteutusarkkitehtuuri
 
