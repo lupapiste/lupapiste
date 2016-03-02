@@ -477,8 +477,8 @@
                         (when v
                           (if (or (= (keyword type) :group) (= (keyword type) :table))
                             [k (if repeating
-                                 (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
-                                 (doc-walk body current-path))]
+                                 (into {} (map (fn [i] [i (doc-walk body (conj current-path i))]) (keys v)))
+                                 (doc-walk (conj body {:name :validationResult}) current-path))]
                             [k v])))))
                   schema-body)))]
       (let [path (vec initial-path)
