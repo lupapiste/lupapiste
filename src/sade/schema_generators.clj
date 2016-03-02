@@ -1,7 +1,10 @@
 (ns sade.schema-generators
   (:require [sade.schemas :as ssc]
+            [sade.validators :as sv]
             [schema.core :as sc]
             [schema.experimental.generators :as sg]
+            [clj-time.format :as ctf]
+            [clj-time.coerce :as ctc]
             [clojure.string :as s]
             [clojure.test.check.generators :as gen]))
 
@@ -88,7 +91,15 @@
 
 (register-generator ssc/FinnishOVTid finnish-ovt)
 
-(def hetu (gen/elements ["060666-9435" "251280-9857" "290272-950J" "010800A9602"])) ;; TODO: A real hetu generator
+(def ddMMyy-formatter (ctf/formatter "ddMMyy"))
+(def hetu (gen/fmap (fn [[day n]] (let [date (->> (* 86400000 day) ; day in milliseconds
+                                                  (ctc/from-long)
+                                                  (ctf/unparse ddMMyy-formatter))
+                                        end  (format "9%02d" n)
+                                        checksum  (sv/hetu-checksum (str date \- end))]
+                                    (str date \- end checksum)))
+                    (gen/tuple (gen/fmap #(mod % 36524) gen/large-integer)
+                               (gen/fmap #(mod % 100) gen/int))))
 
 (register-generator ssc/Hetu hetu)
 
