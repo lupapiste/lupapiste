@@ -41,7 +41,7 @@ LUPAPISTE.MunicipalityMapsMapModel = function( params ) {
     var caps = findLayerCapabilities( layerId );
     if( caps ) {
       var box = _.find( caps.BoundingBox, {crs: PROJECTION});
-      return box ? box.extent : null;
+      return util.getIn(box, ["extent", 0]) ? box.extent : null;
     }
   }
 

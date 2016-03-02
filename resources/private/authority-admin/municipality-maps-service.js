@@ -85,27 +85,26 @@ LUPAPISTE.MunicipalityMapsService = function() {
     if( server && server.url ) {
       error( false );
       waiting( true );
-      $.get( PROXY,
-             {request: "GetCapabilities",
-              service: "wms"},
-             function( data ) {
-               error( false );
-               var parsedCaps = null;
-               try {
-                 parsedCaps = parseCapabilities( data );
-               } catch( e ) {
-                 // Received data was not capabilities.
-                 error( "bad-data" );
-
-               } finally {
-                 capabilities( parsedCaps );
-               }
-             },
-             "text") // Text works both for xml and text responses.
-      .fail( function() {
-        error( "error" );
-      })
-      .always( _.partial( waiting, false ));
+      ajax.get(PROXY).param("request", "GetCapabilities").param("service", "wms")
+        .success(function( data ) {
+           error( false );
+           var parsedCaps = null;
+           try {
+             parsedCaps = parseCapabilities( data );
+           } catch( e ) {
+             // Received data was not capabilities.
+             error( "bad-data" );
+             window.error("Unable to parse municipality map capabilities: " + e);
+           } finally {
+             capabilities( parsedCaps );
+           }
+         })
+        .fail(function() {
+          error( "error" );
+        })
+        .complete(_.partial(waiting, false))
+        .dataType("text")  // Text works both for xml and text responses.
+        .call();
     }
   });
 
