@@ -54,8 +54,6 @@ var docgen = (function () {
 
                     $(self).before(newDocModel.element);
                     $(".sticky", newDocModel.element).Stickyfill();
-
-                    newDocModel.showValidationResults(data.document.validationErrors);
                   })
                   .call();
               })
