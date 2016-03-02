@@ -143,6 +143,14 @@
 ;; Element validation (:validator key in schema)
 ;;
 
+(defn- resolve-element-loc-key [info element path]
+  (if (:i18nkey element)
+    (:i18nkey element)
+    (-> (str (ss/join "." (cons (-> info :document :locKey) (map name path)))
+             (when (= :select (:type element)) "._group_label"))y
+        (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
+        (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
+
 (declare find-by-name)
 
 (defn good-postal-code?
@@ -167,6 +175,18 @@
        :element  (assoc (find-by-name (:body element) [:postinumero]) :locKey "postinumero")
        :document (:document info)
        :result   [:warn "bad-postal-code"]})))
+
+(defmethod validate-element :some-checked
+  [info data path element]
+  (let [checkboxes (->> (:body element)
+                        (filter (comp #{:checkbox} :type))
+                        (map :name)
+                        (map keyword))]
+    (when-not (some (tools/unwrapped data) checkboxes)
+      {:path     (mapv keyword path)
+       :element  (assoc element :locKey (resolve-element-loc-key info element path))
+       :document (:document info)
+       :result   [:tip "illegal-value:required"]})))
 
 (defn inspect-repeating-for-duplicate-rows [data inspected-fields]
   (when (every? (comp number? read-string name key) data)
@@ -211,16 +231,6 @@
             (find-by-name (:body elem) (rest ks))
             elem))
         (find-by-name (:body elem) ks)))))
-
-(defn- resolve-element-loc-key [info element path]
-  (if (:i18nkey element)
-    (:i18nkey element)
-    (->
-      (str
-        (ss/join "." (concat [(-> info :document :locKey)] (map name path)))
-        (when (= :select (:type element)) "._group_label"))
-      (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
-      (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
 (defn- ->validation-result [info data path element result]
   (when result

@@ -93,14 +93,14 @@
             {:name "olemassaOlevaToiminta"}]}
     {:name "keraystoiminnan-jarjestaja"
      :type :group
-     :required true
+     :validator :some-checked
      :body [{:name "kunnanKerays" :type :checkbox}
             {:name "tuottajanKerays" :type :checkbox}
             {:name "muuKerays" :type :checkbox}
             {:name "muuKeraysValue" :type :string}]}
     {:name "jatteen-vastuullinen"
      :type :group
-     :required true
+     :validator :some-checked
      :body [{:name "kunnanJate" :type :checkbox}
             {:name "tuottajanJate" :type :checkbox}
             {:name "muuJate" :type :checkbox}
