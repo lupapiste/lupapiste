@@ -17,6 +17,7 @@
            :type :group
            :removable false
            :repeating false
+           :approvable true
            :order 60}
     :body hankkeen-kuvaus-kayttolupa}])
 
@@ -59,6 +60,7 @@
            :type :group
            :removable false
            :repeating false
+           :approvable true
            :order 60}
     :body hankkeen-kuvaus-kaivulupa}
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
@@ -66,6 +68,7 @@
            :type :party
            :removable false
            :repeating false
+           :approvable true
            :accordion-fields hakija-accordion-paths
            :order 61}
     :body tyomaasta-vastaava}
@@ -74,6 +77,7 @@
            :type :party
            :removable false
            :repeating false
+           :approvable true
            :order 62
            :accordion-fields hakija-accordion-paths
            :subtype :maksaja}
@@ -82,12 +86,14 @@
            :type :group
            :removable false
            :repeating false
+           :approvable true
            :order 63}
     :body tyo-aika}
    {:info {:name "tyo-aika-for-jatkoaika"                                  ;; (alkuPvm /) loppuPvm
            :type :group
            :removable false
            :repeating false
+           :approvable true
            :order 63}
     :body tyo-aika-for-jatkoaika}
    {:info {:name "hankkeen-kuvaus-jatkoaika"

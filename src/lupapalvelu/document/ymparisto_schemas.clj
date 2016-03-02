@@ -362,30 +362,38 @@
 (defschemas
   1
   [{:info {:name "meluilmoitus"
+           :approvable true
            :order 50}
     :body meluilmoitus}
    {:info {:name "pima"
+           :approvable true
            :order 51}
     :body pima}
    {:info {:name "ymp-ilm-kesto-mini"
+           :approvable true
            :order 60}
     :body kesto-mini}
    {:info {:name "ymp-ilm-kesto"
+           :approvable true
            :order 60}
     :body kesto}
    {:info {:name "ottamismaara"
+           :approvable true
            :order 50}
     :body ottamismaara}
    {:info {:name "ottamis-suunnitelma"
+           :approvable true
            :order 51}
     :body ottamis-suunnitelma}
    {:info {:name "maa-ainesluvan-omistaja"
+           :approvable true
            :i18name "osapuoli"
            :order 3
            :type :party
            :accordion-fields hakija-accordion-paths}
     :body party}
    {:info {:name "ottamis-suunnitelman-laatija"
+           :approvable true
            :i18name "osapuoli"
            :order 4
            :type :party
@@ -402,10 +410,12 @@
            :accordion-fields hakija-accordion-paths}
      :body maksaja}
    {:info {:name "yl-hankkeen-kuvaus"
+           :approvable true
            :order 1}
     :body [kuvaus
            {:name "peruste" :type :text :max-len 4000 :required true :layout :full-width}]}
    {:info {:name "maa-aineslupa-kuvaus"
+           :approvable true
            :order 1}
     :body [kuvaus]}
    {:info {:name "luonnonmuistomerkin-rauhoittaminen"
@@ -417,11 +427,14 @@
            :order 100}
     :body kaytostapoistetun-sailion-jattaminen-maaperaan}
    {:info {:name "ilmoitus-poik-tilanteesta"
+           :approvable true
            :order 1}
     :body ilmoitus-poikkeuksellisesta-tilanteesta}
-   {:info {:name "jatteen-kerays"}
+   {:info {:name "jatteen-kerays"
+           :approvable true}
     :body jatteen-keraystoiminta-ilmoitus}
-   {:info {:name "koeluontoinen-toiminta"}
+   {:info {:name "koeluontoinen-toiminta"
+           :approvable true}
     :body (body
             koeluontoinen-toiminta
             (map #(assoc % :required true) kesto-mini))}
@@ -433,11 +446,13 @@
            :approvable true}
     :body maa-ainesten-kotitarveotto}
    {:info {:name "yl-maatalous-hankkeen-kuvaus"
+           :approvable true
            :order 1}
     :body [kuvaus
            {:name "tilatunnus" :type :string}]}
    {:info {:name "lannan-varastointi"
-           :section-help "lannan-varastointi-kuvaus.help"}
+           :section-help "lannan-varastointi-kuvaus.help"
+           :approvable true}
     :body lannan-varastointi-ilmoitus}
 
    {:info {:name "paatoksen-toimitus"

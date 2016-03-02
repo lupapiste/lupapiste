@@ -6,6 +6,7 @@
 (def rakennushanke {:info {:name "rakennushanke"
                            :order 50
                            :removable true
+                           :approvable true
                            :deny-removing-last-document true
                            :repeating false}
                     :body [{:name "kaytettykerrosala" :type :group
@@ -34,6 +35,7 @@
                                    {:name "kokonaisala" :type "string" :subtype :number :unit "m2" :size "s"}]}]})
 
 (def suunnittelutarveratkaisun-lisaosa {:info {:name "suunnittelutarveratkaisun-lisaosa"
+                                               :approvable true
                                                :order 52}
                                         :body [{:name "kaavoituksen_ja_alueiden_tilanne":type :group :layout :vertical
                                                 :body [{:name "asemakaavaluonnos" :type :checkbox}
