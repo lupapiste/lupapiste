@@ -224,15 +224,15 @@
 
 (defn post-process-app [app user]
   (->> app
+       ensure-operations
+       enrich-primary-operation-with-metadata
        attachment/post-process-attachments
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        process-foreman-v2
        (process-documents-and-tasks user)
-       location->object
-       ensure-operations
-       enrich-primary-operation-with-metadata))
+       location->object))
 
 ;;
 ;; Application creation
