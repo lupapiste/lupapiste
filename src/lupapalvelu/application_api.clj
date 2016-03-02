@@ -339,11 +339,26 @@
             (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
             ))
 
+(notifications/defemail
+  :inforequest-invite
+  {:template      "open-inforequest-invite.html"
+   :subject-key   "applications.inforequest"
+   :show-municipality-in-subject true
+   :recipients-fn (fn [{application :application}]
+                    (let [organization (organization/get-organization (:organization application))
+                          emails (get-in organization [:notifications :submit-notification-emails])]
+                      (map (fn [e] {:email e, :role "authority"}) emails)))
+   :model-fn (fn [{application :application} _ recipient]
+               {:link-fi (notifications/get-application-link application nil "fi" recipient)
+                :link-sv (notifications/get-application-link application nil "sv" recipient)
+                :info-fi (str (env/value :host) "/ohjeet")
+                :info-sv (str (env/value :host) "/ohjeet")})})
+
 
 (defcommand create-application
   {:parameters       [:operation :x :y :address :propertyId]
    :user-roles       #{:applicant :authority}
-   :notified         true                                   ; OIR
+   :notified         true                                   ; info requests (also oir)
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial action/property-id-parameters [:propertyId])
                       coord/validate-x coord/validate-y
@@ -351,8 +366,11 @@
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
   (let [created-application (a/do-create-application command)]
     (a/insert-application created-application)
-    (when (and (boolean infoRequest) (:openInfoRequest created-application))
-      (open-inforequest/new-open-inforequest! created-application))
+    (when (boolean infoRequest)
+      ; Notify organization about new inforequest
+      (if (:openInfoRequest created-application)
+        (open-inforequest/new-open-inforequest! created-application)
+        (notifications/notify! :inforequest-invite {:application created-application})))
     (try
       (autofill-rakennuspaikka created-application created)
       (catch java.io.IOException e
