@@ -47,6 +47,11 @@ LUPAPISTE.AccordionService = function() {
     self.identifierFields(identifiers); // set the fields for each document
   };
 
+  self.addDocument = function(doc) {
+    var docForAccordion = createDocumentModel(doc);
+    self.documents.push(docForAccordion);
+  };
+
   self.getOperation = function(docId) {
     return util.getIn(_.find(self.documents(), {docId: docId}), ["operation"]);
   };

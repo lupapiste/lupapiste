@@ -47,6 +47,8 @@ var docgen = (function () {
                     var newDoc = data.document;
                     newDoc.schema = newDocSchema;
 
+                    lupapisteApp.services.accordionService.addDocument(newDoc);
+
                     var newDocModel = new DocModel(newDocSchema, newDoc, application, authorizationModel);
                     newDocModel.triggerEvents();
 
