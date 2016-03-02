@@ -162,10 +162,16 @@
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))
 
-(defn- process-documents-and-tasks [user {authority :authority :as application}]
-  (let [mask-person-ids (person-id-masker-for-user user application)
-        disabled-flag   (partial enrich-single-doc-disabled-flag user)
-        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids (partial validate application))]
+(defn process-document-or-task [user {authority :authority :as application} doc]
+  (let [mask-person-ids (person-id-masker-for-user user application)]
+    (->> doc
+         (validate application)
+         mask-person-ids
+         schemas/with-current-schema-info
+         (enrich-single-doc-disabled-flag user))))
+
+(defn- process-documents-and-tasks [user application]
+  (let [mapper (partial process-document-or-task user application)]
     (-> application
       (update :documents (partial map mapper))
       (update :tasks (partial map mapper)))))
