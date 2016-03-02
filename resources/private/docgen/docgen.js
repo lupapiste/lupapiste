@@ -44,13 +44,16 @@ var docgen = (function () {
                 // The new document might contain some default values, get them from backend
                 ajax.query("document", {id: application.id, doc: newDocId, collection: docModel.getCollection()})
                   .success(function(data) {
-                    var newDoc = new DocModel(newDocSchema, data.document, application, authorizationModel);
-                    newDoc.triggerEvents();
+                    var newDoc = data.document;
+                    newDoc.schema = newDocSchema;
 
-                    $(self).before(newDoc.element);
-                    $(".sticky", newDoc.element).Stickyfill();
+                    lupapisteApp.services.accordionService.addDocument(newDoc);
 
-                    newDoc.showValidationResults(data.document.validationErrors);
+                    var newDocModel = new DocModel(newDocSchema, newDoc, application, authorizationModel);
+                    newDocModel.triggerEvents();
+
+                    $(self).before(newDocModel.element);
+                    $(".sticky", newDocModel.element).Stickyfill();
                   })
                   .call();
               })

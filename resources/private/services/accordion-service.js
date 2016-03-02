@@ -18,29 +18,38 @@ LUPAPISTE.AccordionService = function() {
     }
   });
 
-  self.documents = ko.observable();
+  self.documents = ko.observableArray();
   self.identifierFields = ko.observableArray([]);
 
-  self.setDocuments = function(docs) {
-    self.documents(_.map(docs, function(doc) {
-      var fields = doc.schema.info["accordion-fields"];
-      var data = _.reduce(fields, function(result, path) {
-        return _.set(result, path.join("."), ko.observable(util.getIn(doc.data, path.concat("value"))));
-      }, {});
-      return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: data, accordionPaths: fields};
-    }));
 
+  function createDocumentModel(doc) {
+    var fields = doc.schema.info["accordion-fields"];
+    var data = _.reduce(fields, function(result, path) {
+      return _.set(result, path.join("."), ko.observable(util.getIn(doc.data, path.concat("value"))));
+    }, {});
+    return {docId: doc.id, operation: ko.mapping.fromJS(doc["schema-info"].op), schema: doc.schema, data: data, accordionPaths: fields};
+  }
+
+  function createDocumentIdentifierModel(doc) {
+    var subSchema = _.find(doc.schema.body, "identifier");
+    var key = _.get(subSchema, "name");
+    return {docId: doc.id, schema: subSchema, key: key, value: ko.observable(util.getIn(doc, ["data", key, "value"]))};
+  }
+
+  self.setDocuments = function(docs) {
+    self.documents(_.map(docs, createDocumentModel));
     var identifiers = _(docs)
       .filter(function(doc) {
         return _.find(doc.schema.body, "identifier"); // finds first
       })
-      .map(function(doc) {
-        var subSchema = _.find(doc.schema.body, "identifier");
-        var key = _.get(subSchema, "name");
-        return {docId: doc.id, schema: subSchema, key: key, value: ko.observable(util.getIn(doc, ["data", key, "value"]))};
-      })
+      .map(createDocumentIdentifierModel)
       .value();
     self.identifierFields(identifiers); // set the fields for each document
+  };
+
+  self.addDocument = function(doc) {
+    var docForAccordion = createDocumentModel(doc);
+    self.documents.push(docForAccordion);
   };
 
   self.getOperation = function(docId) {

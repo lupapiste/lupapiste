@@ -1,5 +1,5 @@
 (ns lupapalvelu.application
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warnf error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
@@ -162,10 +162,27 @@
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))
 
-(defn- process-documents-and-tasks [user {authority :authority :as application}]
+(defn- populate-operation-info [operations {info :schema-info :as doc}]
+  (if (:op info)
+    (if-let [operation (util/find-first #(= (:id %) (get-in info [:op :id])) operations)]
+      (assoc-in doc [:schema-info :op] operation)
+      (do
+        (warnf "Couldn't find operation %s for doc %s " (get-in info [:op :id]) (:id doc))
+        doc))
+    doc))
+
+(defn process-document-or-task [user {authority :authority :as application} doc]
   (let [mask-person-ids (person-id-masker-for-user user application)
-        disabled-flag   (partial enrich-single-doc-disabled-flag user)
-        mapper          (comp disabled-flag schemas/with-current-schema-info mask-person-ids (partial validate application))]
+        operations      (get-operations application)]
+    (->> doc
+         (validate application)
+         (populate-operation-info operations)
+         mask-person-ids
+         schemas/with-current-schema-info
+         (enrich-single-doc-disabled-flag user))))
+
+(defn- process-documents-and-tasks [user application]
+  (let [mapper (partial process-document-or-task user application)]
     (-> application
       (update :documents (partial map mapper))
       (update :tasks (partial map mapper)))))
@@ -207,15 +224,15 @@
 
 (defn post-process-app [app user]
   (->> app
+       ensure-operations
+       enrich-primary-operation-with-metadata
        attachment/post-process-attachments
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys
        process-foreman-v2
        (process-documents-and-tasks user)
-       location->object
-       ensure-operations
-       enrich-primary-operation-with-metadata))
+       location->object))
 
 ;;
 ;; Application creation
