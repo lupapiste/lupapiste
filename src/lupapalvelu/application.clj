@@ -1,5 +1,5 @@
 (ns lupapalvelu.application
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warnf error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clojure.string :as s]
@@ -162,10 +162,21 @@
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))
 
+(defn- populate-operation-info [operations {info :schema-info :as doc}]
+  (if (:op info)
+    (if-let [operation (util/find-first #(= (:id %) (get-in info [:op :id])) operations)]
+      (assoc-in doc [:schema-info :op] operation)
+      (do
+        (warnf "Couldn't find operation %s for doc %s " (get-in info [:op :id]) (:id doc))
+        doc))
+    doc))
+
 (defn process-document-or-task [user {authority :authority :as application} doc]
-  (let [mask-person-ids (person-id-masker-for-user user application)]
+  (let [mask-person-ids (person-id-masker-for-user user application)
+        operations      (get-operations application)]
     (->> doc
          (validate application)
+         (populate-operation-info operations)
          mask-person-ids
          schemas/with-current-schema-info
          (enrich-single-doc-disabled-flag user))))

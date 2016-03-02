@@ -108,23 +108,12 @@ var repository = (function() {
         doc.schema.info = _.merge(schemaInfo, doc.schema.info);
       }
 
-      function setOperation(application, doc) {
-        var schemaInfo = doc["schema-info"];
-        if (schemaInfo.op) {
-          var op = _.findWhere(application.allOperations, {id: schemaInfo.op.id});
-          if (op) {
-            schemaInfo.op = op;
-          }
-        }
-      }
-
       if (application) {
         if (application.id === currentlyLoadingId) {
           currentlyLoadingId = null;
           application.allOperations = getAllOperations(application);
 
           _.each(application.documents || [], function(doc) {
-            setOperation(application, doc);
             setSchema(doc);
           });
 
