@@ -34,9 +34,9 @@
    :input-validators [doc-persistence/validate-collection]
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles}
-  [{:keys [application]}]
+  [{:keys [application user]}]
   (if-let [document (doc-persistence/by-id application collection doc)]
-    (ok :document (assoc document :validationErrors (model/validate application document)))
+    (ok :document (application/process-document-or-task user application document))
     (fail :error.document-not-found)))
 
 ;;
