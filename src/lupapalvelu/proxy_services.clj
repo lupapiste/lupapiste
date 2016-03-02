@@ -295,7 +295,7 @@
   [request]
   (if-let [org-id (user/authority-admins-organization-id (user/current-user request))]
     (if-let [response (org/query-organization-map-server org-id (:params request) (:headers request))]
-      response
+      (update response :headers select-keys ["Content-Type" "Cache-Control" "Pragma" "Date"])
       (resp/status 503 "Service temporarily unavailable"))
     (resp/status 400 "Bad Request")))
 ;
@@ -354,6 +354,6 @@
                "plan-urls-by-point" (no-cache (secure plan-urls-by-point-proxy))
                "general-plan-urls-by-point" (no-cache (secure general-plan-urls-by-point-proxy))
                "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))
-               "organization-map-server" (no-cache (secure organization-map-server))
+               "organization-map-server" (secure organization-map-server)
                "trimble-kaavamaaraykset-by-point" (no-cache (secure trimble-kaavamaaraykset-by-point-proxy))})
 
