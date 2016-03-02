@@ -147,7 +147,7 @@
   (if (:i18nkey element)
     (:i18nkey element)
     (-> (str (ss/join "." (cons (-> info :document :locKey) (map name path)))
-             (when (= :select (:type element)) "._group_label"))y
+             (when (= :select (:type element)) "._group_label"))
         (ss/replace #"\.+\d+\." ".")  ;; removes numbers in the middle:  "a.1.b" => "a.b"
         (ss/replace #"\.+" "."))))    ;; removes multiple dots: "a..b" => "a.b"
 
