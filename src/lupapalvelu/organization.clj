@@ -392,11 +392,11 @@
               ; with same feature names
               ;
               ; Cheatsheet to understand naming conventions in Geotools (from http://docs.geotools.org/latest/userguide/tutorial/feature/csv2shp.html):
-              ; Java	| GeoSpatial
+              ; Java  | GeoSpatial
               ; --------------
-              ; Object	Feature
-              ; Class	  FeatureType
-              ; Field	  Attribute
+              ; Object  Feature
+              ; Class   FeatureType
+              ; Field   Attribute
               
               (let [feature-type        (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
                     name-property       (or ; try to get name of feature from these properties
