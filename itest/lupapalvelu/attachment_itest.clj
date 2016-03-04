@@ -39,14 +39,14 @@
                     (:required a) => true
                     (:notNeeded a) => false
                     (:requestedByAuthority a) => false)
-            (:attachments application)) => truthy
+                  (:attachments application)) => truthy
           )))
 
     (let [resp (command veikko
-                 :create-attachments
-                 :id application-id
-                 :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
-                                   {:type-group "paapiirustus" :type-id "pohjapiirros"}])
+                        :create-attachments
+                        :id application-id
+                        :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
+                                          {:type-group "paapiirustus" :type-id "pohjapiirros"}])
           attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"
@@ -57,19 +57,19 @@
 
       (fact "attachment has been saved to application"
         (get-attachment-by-id veikko application-id (first attachment-ids)) => (contains
-                                                                                 {:type {:type-group "paapiirustus" :type-id "asemapiirros"}
-                                                                                  :state "requires_user_action"
+                                                                                 {:type                 {:type-group "paapiirustus" :type-id "asemapiirros"}
+                                                                                  :state                "requires_user_action"
                                                                                   :requestedByAuthority true
-                                                                                  :versions []})
+                                                                                  :versions             []})
         (get-attachment-by-id veikko application-id (second attachment-ids)) => (contains
-                                                                                  {:type {:type-group "paapiirustus" :type-id "pohjapiirros"}
-                                                                                   :state "requires_user_action"
+                                                                                  {:type                 {:type-group "paapiirustus" :type-id "pohjapiirros"}
+                                                                                   :state                "requires_user_action"
                                                                                    :requestedByAuthority true
-                                                                                   :versions []}))
+                                                                                   :versions             []}))
 
       (fact "uploading files"
         (let [application (query-application pena application-id)
-              _           (upload-attachment-to-all-placeholders pena application)
+              _ (upload-attachment-to-all-placeholders pena application)
               application (query-application pena application-id)]
 
           (facts "Each attachment has Pena's auth"
@@ -82,9 +82,9 @@
             (let [resp (raw pena "download-all-attachments" :id application-id)]
               resp => http200?
               (get-in resp [:headers "content-disposition"]) => "attachment;filename=\"liitteet.zip\"")
-              (fact "p\u00e5 svenska"
-                (get-in (raw pena "download-all-attachments" :id application-id :lang "sv") [:headers "content-disposition"])
-                => "attachment;filename=\"bilagor.zip\""))
+            (fact "p\u00e5 svenska"
+              (get-in (raw pena "download-all-attachments" :id application-id :lang "sv") [:headers "content-disposition"])
+              => "attachment;filename=\"bilagor.zip\""))
 
           (fact "pdf export"
             (raw pena "pdf-export" :id application-id) => http200?)
@@ -102,7 +102,7 @@
               (raw nil "download-attachment" :attachment-id file-id) => http401?)
 
             (fact "download-attachment as pena should be possible"
-              (raw pena  "download-attachment" :attachment-id file-id) => http200?))))
+              (raw pena "download-attachment" :attachment-id file-id) => http200?))))
 
       (fact "Veikko can approve attachment"
         (approve-attachment application-id (first attachment-ids)))
@@ -244,6 +244,45 @@
             (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
             (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?))
           ))))
+
+(facts* "Signing signs corrrect attachments"
+  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+        _ (comment-application pena application-id true) => ok? ; visible to Veikko
+        application (query-application pena application-id)
+        old-attachment (-> application :attachments last)
+        old-id         (:id old-attachment)
+        _ (upload-attachment-to-all-placeholders pena application)
+        _ (count (:attachments application)) => 4
+        resp       (command veikko
+                            :create-attachments
+                            :id application-id
+                            :attachmentTypes [{:type-group "muut" :type-id "muu"}
+                                              {:type-group "paapiirustus" :type-id "pohjapiirros"}]) => ok?
+        attachment-ids (:attachmentIds resp)
+        hidden-id (first attachment-ids)
+        visible-id (second attachment-ids)
+        _ (upload-attachment veikko application-id {:id hidden-id :type {:type-group "muut" :type-id "muu"}} true)
+        _ (upload-attachment pena   application-id {:id visible-id :type {:type-group "paapiirustus" :type-id "pohjapiirros"}} true)
+        _ (command veikko :set-attachment-visibility
+                   :id application-id
+                   :attachmentId hidden-id
+                   :value "viranomainen") => ok?
+        ]
+
+    (fact "error if user doesn't have access to requested attachment ids"
+      (command pena :sign-attachments :id application-id :attachmentIds [hidden-id] :password "pena") => (partial expected-failure? "error.unknown-attachment"))
+    (fact "Signing works if some of the attachments are hidden for user"
+      (command pena :sign-attachments :id application-id :attachmentIds [old-id visible-id] :password "pena") => ok?
+      (let [{attachments :attachments} (query-application veikko application-id)
+            hidden      (util/find-first #(= (:id %) hidden-id) attachments)
+            visible     (util/find-first #(= (:id %) visible-id) attachments)
+            old     (util/find-first #(= (:id %) old-id) attachments)]
+        (fact "Hidden doesn't have signatures"
+          (count (:signatures hidden)) => 0)
+        (fact "Only visible and old have signatures"
+          (map :id (filter #(seq (:signatures %)) attachments)) => (just [visible-id old-id] :in-any-order)
+          (count (:signatures visible)) => 1
+          (count (:signatures old)) => 1)))))
 
 (facts* "Post-verdict attachments"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")

@@ -537,25 +537,28 @@
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (user/get-user-with-password (:username u) password)
-     (let [attachments (attachment/get-attachments-infos application attachmentIds)
-           signature {:user (user/summary u)
-                      :created (:created command)}
-           updates (reduce (fn [m {attachment-id :id {version :version file-id :fileId} :latestVersion}]
-                             (merge m (mongo/generate-array-updates
-                                        :attachments
-                                        (:attachments application)
-                                        #(= (:id %) attachment-id)
-                                        :signatures (assoc signature :version version :fileId file-id))))
-                     {} attachments)]
-
-       ; Indexes are calculated on the fly so there is a small change of
-       ; a concurrency issue.
-       ; FIXME should implement optimistic locking
-       (update-application command {$push updates}))
-     (do
-       ; Throttle giving information about incorrect password
-       (Thread/sleep 2000)
-       (fail :error.password)))))
+      ; check, if user has access to (at least one of) the requested attachmentIds
+      (if-let [attachments (seq (attachment/get-attachments-infos application attachmentIds))]
+        ; OK, get all attachments of application so indices are correct
+        (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
+              signature {:user (user/summary u)
+                         :created (:created command)}
+              updates (reduce (fn [m {attachment-id :id {version :version file-id :fileId} :latestVersion}]
+                                (merge m (mongo/generate-array-updates
+                                           :attachments
+                                           all-attachments
+                                           #(= (:id %) attachment-id)
+                                           :signatures (assoc signature :version version :fileId file-id))))
+                              {} attachments)]
+          ; Indexes are calculated on the fly so there is a small change of
+          ; a concurrency issue.
+          ; FIXME should implement optimistic locking
+          (update-application command {$push updates}))
+        (fail :error.unknown-attachment))
+      (do
+        ; Throttle giving information about incorrect password
+        (Thread/sleep 2000)
+        (fail :error.password)))))
 
 ;;
 ;; Attachment metadata
