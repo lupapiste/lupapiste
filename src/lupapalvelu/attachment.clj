@@ -345,7 +345,7 @@
        (last)))
 
 (defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts]}]
-  (let [version-number (or (->> (:versions attachment) 
+  (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
                                 last
                                 :version)
@@ -376,9 +376,9 @@
                                :id (:id  attachment)}
                               (select-keys version-model [:version :fileId :filename]))]
     (util/deep-merge
-     (when comment? 
+     (when comment?
        (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
-     (when target 
+     (when target
        {$set {:attachments.$.target target}})
      (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
        {$set {:attachments.$.latestVersion version-model}})
@@ -405,13 +405,13 @@
       (let [latest-version (get-in attachment [:latestVersion :version])
             version-model  (make-version attachment options)]
         ; Check return value and try again with new version number
-        (if (pos? (update-application 
+        (if (pos? (update-application
                    (application->command application)
                    {:attachments {$elemMatch {:id attachment-id
                                               :latestVersion.version.fileId (:fileId latest-version)}}}
                    (build-version-updates application attachment version-model options)
                    true))
-          (do 
+          (do
             (remove-old-files! attachment version-model)
             (assoc version-model :id attachment-id))
           (do
@@ -590,10 +590,13 @@
     (output-attachment preview-id false attachment-fn)))
 
 (defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
-  (if (and libreoffice-client/enabled? (= (keyword type-group) :muut) (= (keyword type-id) :paatosote))
+  (if (and libreoffice-client/enabled?
+           (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
+           (= (keyword type-group) :muut)
+           (= (keyword type-id) :paatosote))
     (libreoffice-client/convert-to-pdfa filename content)
     (do
-      (info "Danger: Libreoffice conversion feature disabled.")
+      (info "Danger: Libreoffice PDF/A conversion feature disabled.")
       {:filename filename :content content})))
 
 (defn- upload-file!
