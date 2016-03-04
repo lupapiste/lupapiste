@@ -5,9 +5,6 @@ LUPAPISTE.CreateScopeModel = function(params) {
 
   self.params = params;
   self.organization = params.organization;
-  self.permitTypes = _.filter(params.permitTypes, function (pt) {
-    return !_.contains(oldPermitTypes, pt);
-  });
 
   // Use the first municipapity in scope, or try to guess by organizations id (should it follow the convention)
   var municipalityNumber = util.getIn(params.organization, ["scope", 0, "municipality"], _.first(_.words(self.organization.id(), /-/)));
@@ -20,10 +17,6 @@ LUPAPISTE.CreateScopeModel = function(params) {
                               .value();
   self.municipalities = ko.observableArray(mappedMunicipalities);
 
-  self.permitTypeLoc = function(data) {
-    return data + " - " + loc(data);
-  };
-
   self.permitType = ko.observable();
   self.municipality = ko.observable(_.find(self.municipalities(), {id: municipalityNumber}));
   self.applicationEnabled = ko.observable(false);
@@ -32,6 +25,17 @@ LUPAPISTE.CreateScopeModel = function(params) {
   self.openInfoRequestEmail = ko.observable("");
   self.opening = ko.observable();
 
+  self.permitTypes = ko.pureComputed(function() {
+    var muni  = self.municipality().id;
+    return _.filter(params.permitTypes, function (pt) {
+      // for municipality, show only permitTypes that don't exists in a scope (permitType, municipality pair must be unique)
+      return muni ? !_.find(ko.toJS(params.organization.scope()), {"permitType": pt, "municipality": muni}) : true;
+    });
+  });
+
+  self.permitTypeLoc = function(data) {
+    return data + " - " + loc(data);
+  };
 
   self.saveScope = function() {
     var openingMills = null;
