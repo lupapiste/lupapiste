@@ -137,10 +137,13 @@
      (mongo/select-one :applications {$and [query-id-part query-user-part]})
      user)))
 
-(defn get-application-no-access-checking [query-or-id]
-  {:pre [query-or-id]}
-  (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
-    (mongo/select-one :applications query)))
+(defn get-application-no-access-checking
+  ([query-or-id]
+   {:pre [query-or-id]}
+   (get-application-no-access-checking query-or-id {}))
+  ([query-or-id projection]
+   (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
+     (mongo/select-one :applications query projection))))
 
 ;;
 ;; authorization
