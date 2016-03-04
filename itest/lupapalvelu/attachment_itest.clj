@@ -284,6 +284,7 @@
           (count (:signatures visible)) => 1
           (count (:signatures old)) => 1)))))
 
+(facts* "Post-verdict attachments"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         application (query-application pena application-id)
         _ (upload-attachment-to-all-placeholders pena application)
