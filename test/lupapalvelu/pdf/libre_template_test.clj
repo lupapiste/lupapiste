@@ -55,44 +55,15 @@
          (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
          (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})
 
+       (fact {:midje/description (str "common-field-map ")}
+             (common-field-map application1 :fi) => {"FIELD001" "Käsittelyprosessin tiedot", "FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "Järvenpää", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteistötunnus", "FIELD005B" "(Tyhjä)", "FIELD006A" "Hakemus jätetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus:", "FIELD007B" "", "FIELD008A" "Käsittelijä", "FIELD008B" "(Tyhjä)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" "", "Footer1" "Sivu"})
+
+       (fact {:midje/description (str "history rows ")}
+             (build-xml-history application1) => "<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nValmisteilla\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nValmisteilla\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n{:foo :bar} :attachment Great attachment 1\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nKäsittelyssä\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n30.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nKäsittelyssä\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n{:foo :bar} :attachment Great attachment 2\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.02.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n")
+
        (doseq [lang i18n/languages]
-
-         (fact {:midje/description (str "common-field-map " (name lang))}
-               (common-field-map application1 :fi) => {"FIELD001" "Käsittelyprosessin tiedot", "FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "Järvenpää", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteistötunnus", "FIELD005B" "(Tyhjä)", "FIELD006A" "Hakemus jätetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus:", "FIELD007B" "", "FIELD008A" "Käsittelijä", "FIELD008B" "(Tyhjä)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" ""})
-
-         (fact {:midje/description (str "history rows " (name lang))}
-               (build-xml-history application1) => "<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nValmisteilla\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n28.03.2013\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nValmisteilla\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n{:foo :bar} :attachment Great attachment 1\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n28.03.2013\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nKäsittelyssä\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n09.04.2013\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nKäsittelyssä\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n{:foo :bar} :attachment Great attachment 2\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n09.04.2013\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n")
-
-         (fact {:midje/description (str "history libre document " (name lang))}
-                 (let [tmp-file (File/createTempFile (str "history-" (name lang) "-") ".fodt")]
-                   (write-history-libre-doc application1 lang tmp-file) => [{:action    "Valmisteilla"
-                                                                             :start     100
-                                                                             :user      "Testaaja Testi"
-                                                                             :documents [{:type     :hakemus
-                                                                                          :category :document
-                                                                                          :ts       100
-                                                                                          :user     "Testaaja Testi"}
-                                                                                         {:type     {:foo :bar}
-                                                                                          :category :attachment
-                                                                                          :version  1
-                                                                                          :ts       200
-                                                                                          :user     "Testaaja Testi"
-                                                                                          :contents "Great attachment"}]}
-                                                                            {:action    "K\u00e4sittelyss\u00e4"
-                                                                             :start     250
-                                                                             :user      "Testaaja Testi"
-                                                                             :documents [{:type     {:foo :qaz}
-                                                                                          :category :attachment
-                                                                                          :version  1
-                                                                                          :ts       300
-                                                                                          :user     "Testaaja Testi"
-                                                                                          :contents nil}
-                                                                                         {:type     {:foo :bar}
-                                                                                          :category :attachment
-                                                                                          :version  2
-                                                                                          :ts       500
-                                                                                          :user     "Testaaja Testi"
-                                                                                          :contents "Great attachment"}]}]
-                   )))
-
-       )
+         (fact {:midje/description (str "history libre document - TODO: " (name lang))}
+               (let [tmp-file (File/createTempFile (str "history-" (name lang) "-") ".fodt")]
+                 (write-history-libre-doc application1 lang tmp-file)
+                 ;;TODO: read the doc
+                 ) => (str "a"))))

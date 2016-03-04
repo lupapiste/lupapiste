@@ -79,6 +79,7 @@
 
 (defn common-field-map [application lang]
   {"Footer1" (localized-text lang "application.export.page")
+   ;;TODO: FOOTERDATE FOOTERTIME FOOTERPAGE
    "FIELD001"  (localized-text lang "caseFile.heading")
    "FIELD002"  (xml-escape (:address application))
 
