@@ -79,16 +79,18 @@
 (def attachment-states #{:ok :requires_user_action :requires_authority_action})
 
 (def- attachment-types-by-permit-type-unevaluated
-  {:R 'attachment-types/Rakennusluvat
-   :P 'attachment-types/Rakennusluvat
-   :YA 'attachment-types/YleistenAlueidenLuvat
-   :YI 'attachment-types/Ymparistoilmoitukset
-   :YL 'attachment-types/Ymparistolupa
-   :YM 'attachment-types/MuutYmparistoluvat
-   :VVVL 'attachment-types/Ymparistoilmoitukset
-   :MAL 'attachment-types/Maa-ainesluvat
-   :MM 'attachment-types/Kiinteistotoimitus
-   :KT 'attachment-types/Kiinteistotoimitus})
+  (cond-> {:R    'attachment-types/Rakennusluvat
+           :P    'attachment-types/Rakennusluvat
+           :YA   'attachment-types/YleistenAlueidenLuvat
+           :YI   'attachment-types/Ymparistoilmoitukset
+           :YL   'attachment-types/Ymparistolupa
+           :YM   'attachment-types/MuutYmparistoluvat
+           :VVVL 'attachment-types/Ymparistoilmoitukset
+           :MAL  'attachment-types/Maa-ainesluvat
+           :MM   'attachment-types/Kiinteistotoimitus
+           :KT   'attachment-types/Kiinteistotoimitus}
+    (env/feature? :updated-attachments) (merge {:R 'attachment-types/Rakennusluvat-v2
+                                                :P 'attachment-types/Rakennusluvat-v2})))
 
 (def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
@@ -99,7 +101,13 @@
                                            {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
                                            {:type-id :energiatodistus    :type-group :muut}
                                            {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
-                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}})
+                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}
+                                           {:type-id :pohjapiirustus     :type-group :paapiirustus}
+                                           {:type-id :leikkauspiirustus  :type-group :paapiirustus}
+                                           {:type-id :julkisivupiirustus :type-group :paapiirustus}
+                                           {:type-id :muu_paapiirustus   :type-group :paapiirustus}
+                                           {:type-id :energiatodistus    :type-group :energiatodistus}
+                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}})
 
 (def all-attachment-type-ids
   (->> (vals attachment-types-by-permit-type)
