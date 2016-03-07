@@ -167,7 +167,8 @@
         extra-updates (trigger-fn updated-app)
         op-id         (get-in document [:schema-info :op :id])
         removable-attachment-ids (when op-id
-                                   (empty-op-attachments-ids (:attachments application) op-id))]
+                                   (empty-op-attachments-ids (:attachments application) op-id))
+        all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))]
     (when-not document (fail! :error.document-not-found))
     (update-application command
       (util/deep-merge
@@ -181,7 +182,7 @@
                  (when op-id
                    (mongo/generate-array-updates
                      :attachments
-                     (:attachments application)
+                     all-attachments
                      #(= (:id (:op %)) op-id)
                      :op nil)))}))
     (when (seq removable-attachment-ids)

@@ -599,7 +599,8 @@
                           (error "setting verdict attachments, overlapping ids in: " selectedAttachmentIds unSelectedAttachmentIds)
                           (fail :error.select-verdict-attachments.overlapping-ids)))]}
   [{:keys [application created] :as command}]
-  (let [updates-fn  (fn [ids k v] (mongo/generate-array-updates :attachments (:attachments application) #((set ids) (:id %)) k v))]
+  (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
+        updates-fn      (fn [ids k v] (mongo/generate-array-updates :attachments all-attachments #((set ids) (:id %)) k v))]
     (when (or (seq selectedAttachmentIds) (seq unSelectedAttachmentIds))
       (update-application command {$set (merge
                                           (when (seq selectedAttachmentIds)
