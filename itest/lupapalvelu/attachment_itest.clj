@@ -32,7 +32,7 @@
         (fact "counting all attachments"
           (count (:attachments application)) => 4)
         (fact "only pohjapiirros is related to operation 'kerrostalo-rivitalo'"
-          (map :type (get-attachments-by-operation application op-id)) => [{:type-group "paapiirustus" :type-id "pohjapiirros"}])
+          (map :type (get-attachments-by-operation application op-id)) => [{:type-group "paapiirustus" :type-id "pohjapiirustus"}])
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
           (every? (fn [a]
                     (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
@@ -46,7 +46,7 @@
                         :create-attachments
                         :id application-id
                         :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
-                                          {:type-group "paapiirustus" :type-id "pohjapiirros"}])
+                                          {:type-group "paapiirustus" :type-id "pohjapiirustus"}])
           attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"
@@ -62,7 +62,7 @@
                                                                                   :requestedByAuthority true
                                                                                   :versions             []})
         (get-attachment-by-id veikko application-id (second attachment-ids)) => (contains
-                                                                                  {:type                 {:type-group "paapiirustus" :type-id "pohjapiirros"}
+                                                                                  {:type                 {:type-group "paapiirustus" :type-id "pohjapiirustus"}
                                                                                    :state                "requires_user_action"
                                                                                    :requestedByAuthority true
                                                                                    :versions             []}))
@@ -257,12 +257,12 @@
                             :create-attachments
                             :id application-id
                             :attachmentTypes [{:type-group "muut" :type-id "muu"}
-                                              {:type-group "paapiirustus" :type-id "pohjapiirros"}]) => ok?
+                                              {:type-group "paapiirustus" :type-id "pohjapiirustus"}]) => ok?
         attachment-ids (:attachmentIds resp)
         hidden-id (first attachment-ids)
         visible-id (second attachment-ids)
         _ (upload-attachment veikko application-id {:id hidden-id :type {:type-group "muut" :type-id "muu"}} true)
-        _ (upload-attachment pena   application-id {:id visible-id :type {:type-group "paapiirustus" :type-id "pohjapiirros"}} true)
+        _ (upload-attachment pena   application-id {:id visible-id :type {:type-group "paapiirustus" :type-id "pohjapiirustus"}} true)
         _ (command veikko :set-attachment-visibility
                    :id application-id
                    :attachmentId hidden-id
@@ -297,7 +297,7 @@
     (fact "Uploading versions to pre-verdict attachment is not possible"
       (upload-attachment pena application-id attachment1 false :filename "dev-resources/test-pdf.pdf"))
     (fact "Uploading new post-verdict attachment is possible"
-      (upload-attachment pena application-id {:id "" :type {:type-group "muut" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
+      (upload-attachment pena application-id {:id "" :type {:type-group "selvitykset" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
 
     (count (:attachments (query-application pena application-id))) => 6))
 
@@ -533,13 +533,13 @@
 
     (fact "Veikko uploads attachment for parties"
       (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                  :type-id "naapurien_suostumukset"}} true) => true)
+                                                                  :type-id "naapurin_suostumus"}} true) => true)
 
     (let [{attachments :attachments} (query-application veikko application-id)
           veikko-att-id (:id (last attachments))
           _ (command veikko :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "asiakas-ja-viranomainen") => ok?
           _ (upload-attachment pena application-id {:id veikko-att-id :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                             :type-id "naapurien_suostumukset"}} true) => true
+                                                                             :type-id "naapurin_suostumus"}} true) => true
           mikko-app (query-application mikko application-id)
           latest-attachment (last (:attachments mikko-app))]
       (fact "Mikko sees Veikko's/Pena's attachment"
