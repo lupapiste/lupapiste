@@ -7,6 +7,7 @@
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
+            [sade.env :as env]
             [lupapalvelu.document.attachments-canonical :as attachments-canon]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical
@@ -373,7 +374,11 @@
                            begin-of-link
                            attachment-target]
   (let [attachments (filter #(= attachment-target (:target %)) (:attachments application))
-        poytakirja  (some #(when (=  {:type-group "muut", :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %) ) %) attachments)
+        poytakirja  
+        (some #(when (=  {:type-group (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut"), 
+                          :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %))
+                 %)
+              attachments)
         attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
         canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments-wo-pk :title (:title application)}
