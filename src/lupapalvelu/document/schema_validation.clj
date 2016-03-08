@@ -251,13 +251,3 @@
 (defn validate-elem-schema [elem-schema]
   (sc/check Element elem-schema))
 
-(comment
-
-  (require '[lupapalvelu.document.schemas :as ds])
-
-  (sc/check [Element] ds/maalampokaivo-rakennelma)
-
-  (->> (zipmap (keys (get-in (ds/get-all-schemas) [1])) (sc/check [Doc] (vals (get-in (ds/get-all-schemas) [1]))))
-       (remove (comp nil? val)))
-
-)
