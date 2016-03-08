@@ -76,6 +76,10 @@
           (opt :case)         (sc/enum :lower :upper)
           (opt :max-len)      (sc/eq 1)})) ;; TODO: Is this really necessary?
 
+(defschema Digit
+  (merge GenString
+         {:subtype            (sc/eq :digit)}))
+
 (defschema Tel
   (merge GenString
          {:subtype            (sc/eq :tel)}))
@@ -144,6 +148,7 @@
 (defschema Str 
   (sc/conditional (subtype-pred :number)           Num
                   (subtype-pred :decimal)          Decimal
+                  (subtype-pred :digit)            Digit
                   (subtype-pred :letter)           Letter
                   (subtype-pred :tel)              Tel
                   (subtype-pred :email)            Email
