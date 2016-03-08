@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.schemas
   (:require [clojure.set :as set]
             [lupapalvelu.document.tools :refer :all]
+            [lupapalvelu.document.schema-validation :as schema-validation]
             [lupapiste-commons.usage-types :as usages]))
 
 
@@ -60,8 +61,10 @@
 (def immutable-keys (set/difference info-keys updateable-keys) )
 
 (defn defschema [version data]
-  (let [schema-name (name (get-in data [:info :name]))]
+  (let [schema-name       (name (get-in data [:info :name]))
+        validation-result (schema-validation/validate-doc-schema data)]
     (assert (every? info-keys (keys (:info data))))
+    (assert (nil? validation-result) (format "Document schema validation failed. Doc: %s, Error: %s" schema-name validation-result))
     (swap! registered-schemas
       assoc-in
       [version schema-name]

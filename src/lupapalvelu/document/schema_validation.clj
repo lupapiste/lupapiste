@@ -225,8 +225,8 @@
                   :else              Input))
 
 (defschema Doc
-  {:info {:name                              sc/Str     ;;
-          :version                           sc/Int     ;;
+  {:info {:name                              sc/Str
+          (opt :version)                     sc/Int
           (opt :type)                        sc/Keyword ;; TODO: enum type ?
           (opt :subtype)                     sc/Keyword ;; 
           (opt :i18name)                     sc/Str     ;; root localization (inherited by childs)
