@@ -104,11 +104,12 @@
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)
-        task-type (-> task :schema-info :name)]
+        task-type (-> task :schema-info :name)
+        all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))]
     (when-not (#{"task-katselmus" "task-katselmus-ya"} task-type) (fail! :error.invalid-task-type))
     (when (ss/blank? (get-in task [:data :katselmuksenLaji :value])) (fail! :error.missing-parameters))
     (let [sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
-          set-statement (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+          set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
       (set-state command taskId :sent (when (seq set-statement) {$set set-statement})))))
 
 (defquery task-types-for-application

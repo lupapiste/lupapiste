@@ -66,11 +66,12 @@
     (if (organization/krysp-integration? organization (permit/permit-type application))
       (or
         (application/validate-link-permits application)
-        (let [sent-file-ids (if jatkoaika-app?
-                              (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
-                              (let [submitted-application (mongo/by-id :submitted-applications id)]
-                                (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
-              attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
+        (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
+              sent-file-ids   (if jatkoaika-app?
+                                (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
+                                (let [submitted-application (mongo/by-id :submitted-applications id)]
+                                  (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
+              attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
           (do-rest-fn attachments-updates)))
       ;; Integration details not defined for the organization -> let the approve command pass
       (do-rest-fn nil))))
@@ -137,7 +138,8 @@
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
-  (let [attachments-wo-sent-timestamp (filter
+  (let [all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
+        attachments-wo-sent-timestamp (filter
                                         #(and
                                           (-> % :versions count pos?)
                                           (or
@@ -145,11 +147,11 @@
                                             (> (-> % :versions last :created) (:sent %)))
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
-                                        (:attachments application))]
+                                        all-attachments)]
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [organization  (organization/get-organization (:organization application))
             sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang organization)
-            data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)
+            data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
             transfer      (get-transfer-item :exported-to-backing-system command attachments-wo-sent-timestamp)]
         (update-application command {$push {:transfers transfer}
                                      $set data-argument})
@@ -273,12 +275,13 @@
                                        :type "kuntalupatunnus"})
                       application)
         submitted-application (mongo/by-id :submitted-applications id)
+        all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
 
         app-updates {:modified created, :authority (if (domain/assigned? application) (:authority application) (user/summary user))}
         organization (organization/get-organization (:organization application))
         indicator-updates (application/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
-        attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})
+        attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
                         (util/deep-merge
@@ -310,7 +313,8 @@
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
-  (let [attachments-wo-sent-timestamp (filter
+  (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
+        attachments-wo-sent-timestamp (filter
                                         #(and
                                           (-> % :versions count pos?)
                                           (or
@@ -318,13 +322,13 @@
                                             (> (-> % :versions last :created) (:sent %)))
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
-                                        (:attachments application))
+                                        all-attachments)
         transfer (get-transfer-item :exported-to-asianhallinta command attachments-wo-sent-timestamp)]
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [application (meta-fields/enrich-with-link-permit-data application)
             application (update-kuntalupatunnus application)
             sent-file-ids (ah/save-as-asianhallinta-asian-taydennys application attachments-wo-sent-timestamp lang)
-            data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+            data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
         (update-application command {$push {:transfers transfer}
                                      $set data-argument})
         (ok))
