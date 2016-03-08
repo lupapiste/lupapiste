@@ -29,10 +29,10 @@
                                            {:name "muu muutosty\u00f6"}
                                            {:name "k\u00e4ytt\u00f6tarkoitusmuutos"}
                                            {:name "loma-asunnon muuttaminen vakituiseksi"}]}
-                                   {:name "huoneistoja" :type "string" :subtype :number :size "s"}
-                                   {:name "kerroksia" :type "string" :subtype :number :size "s"}
-                                   {:name "kerrosala" :type "string" :subtype :number :unit "m2" :size "s"}
-                                   {:name "kokonaisala" :type "string" :subtype :number :unit "m2" :size "s"}]}]})
+                                   {:name "huoneistoja" :type :string :subtype :number :size "s"}
+                                   {:name "kerroksia" :type :string :subtype :number :size "s"}
+                                   {:name "kerrosala" :type :string :subtype :number :unit "m2" :size "s"}
+                                   {:name "kokonaisala" :type :string :subtype :number :unit "m2" :size "s"}]}]})
 
 (def suunnittelutarveratkaisun-lisaosa {:info {:name "suunnittelutarveratkaisun-lisaosa"
                                                :approvable true

@@ -127,7 +127,7 @@
                    {:name "oljylammistyslaitteiston-uusiminen"}]}
            {:name "muu-syy" :type :string}
            {:name "kaytosta-poistamisen-ajankohta" :type :date :required true}
-           {:name "kaytosta-poiston-jalkeen" :type :group :layout :horizontal :required true
+           {:name "kaytosta-poiston-jalkeen" :type :group :layout :horizontal
             :body [{:name "tyhjennetty" :type :checkbox}
                    {:name "puhdistettu" :type :checkbox}
                    {:name "tarkastettu" :type :checkbox}]}
@@ -202,15 +202,15 @@
             {:name "jatkuu-vuoteen" :type :string :subtype :number :required true}]}
     {:name "kotitarveoton-maarat"
      :type :group
-     :body [{:name "kokonaismaara" :type :string :size "m" :subtype :decimal :unit :k-m3 :required true}
+     :body [{:name "kokonaismaara" :type :string :size "m" :subtype :decimal :unit "k-m3" :required true}
             {:name "maaran-jakautuminen"
              :type :group
-             :body [{:name "kalliokivi" :type :string :size "s" :subtype :decimal :unit :k-m3}
-                    {:name "sora-ja-hiekka" :type :string :size "s" :subtype :decimal :unit :k-m3}
-                    {:name "siltti-ja-savi" :type :string :size "s" :subtype :decimal :unit :k-m3}
-                    {:name "moreeni" :type :string :size "s" :subtype :decimal :unit :k-m3}
-                    {:name "eloperainen-maalaji" :type :string :size "s" :subtype :decimal :unit :k-m3}
-                    {:name "muu" :type :string :size "m" :unit :k-m3}]}]}))
+             :body [{:name "kalliokivi" :type :string :size "s" :subtype :decimal :unit "k-m3"}
+                    {:name "sora-ja-hiekka" :type :string :size "s" :subtype :decimal :unit "k-m3"}
+                    {:name "siltti-ja-savi" :type :string :size "s" :subtype :decimal :unit "k-m3"}
+                    {:name "moreeni" :type :string :size "s" :subtype :decimal :unit "k-m3"}
+                    {:name "eloperainen-maalaji" :type :string :size "s" :subtype :decimal :unit "k-m3"}
+                    {:name "muu" :type :string :size "m" :unit "k-m3"}]}]}))
 
 (def ilmoitus-poikkeuksellisesta-tilanteesta
   (body
@@ -255,7 +255,7 @@
                                         :body [{:name "tapa"
                                                 :type :select
                                                 :required true
-                                                :layout "full-width"
+                                                :layout :full-width
                                                 :body [{:name "poikkeaminenVarastointitilavuudesta"}
                                                        {:name "muuLannanKaukovarastointi"}]}]}
 
@@ -437,7 +437,7 @@
            :approvable true}
     :body (body
             koeluontoinen-toiminta
-            (map #(assoc % :required true) kesto-mini))}
+            (update-in kesto-mini [0 :body] (fn [body] (map #(assoc % :required true) body))))}
    {:info {:name "maastoliikennelaki-kilpailut-ja-harjoitukset"
            :approvable true
            :order 1}

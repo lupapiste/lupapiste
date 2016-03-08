@@ -41,7 +41,7 @@
   (let [schemas (get-schemas schema-version)]
     (assert schemas)
     (->> schemas
-      (map #(when (= "hakija" (-> % val :info :subtype))
+      (map #(when (= :hakija (-> % val :info :subtype))
               (-> % val :info :name)))
       (filter identity)
       set)))
@@ -587,7 +587,6 @@
 (def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
                                               :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                               :type :group
-                                              :required false
                                               :listen [:filterByCode]
                                               :layout :vertical
                                               :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}
@@ -1393,20 +1392,20 @@
 (defschemas
   1
   [{:info {:name "hankkeen-kuvaus-minimum"
-           :subtype "hankkeen-kuvaus"
+           :subtype :hankkeen-kuvaus
            :approvable true
            :order 1}
     :body [kuvaus]}
 
    {:info {:name "hankkeen-kuvaus"
-           :subtype "hankkeen-kuvaus"
+           :subtype :hankkeen-kuvaus
            :approvable true
            :order 1}
     :body [kuvaus
            {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]} ; Longest value in Helsinki production data
 
    {:info {:name "hankkeen-kuvaus-rakennuslupa" ;; TODO: -> hankkeen-kuvaus, LPK-1448
-           :subtype "hankkeen-kuvaus"
+           :subtype :hankkeen-kuvaus
            :i18name "hankkeen-kuvaus"
            :approvable true
            :order 1}
@@ -1487,7 +1486,7 @@
            :deny-removing-last-document true
            :approvable true
            :type :party
-           :subtype "hakija"
+           :subtype :hakija
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
@@ -1504,7 +1503,7 @@
            :deny-removing-last-document true
            :approvable true
            :type :party
-           :subtype "hakija"
+           :subtype :hakija
            :group-help "hakija.group.help"
            :section-help "party.section.help"
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
@@ -1520,7 +1519,7 @@
            :deny-removing-last-document true
            :approvable true
            :type :party
-           :subtype "hakija"
+           :subtype :hakija
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
@@ -1536,7 +1535,7 @@
            :deny-removing-last-document true
            :approvable true
            :type :party
-           :subtype "hakija"
+           :subtype :hakija
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
@@ -1552,7 +1551,7 @@
            :deny-removing-last-document true
            :approvable true
            :type :party
-           :subtype "hakija"
+           :subtype :hakija
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
