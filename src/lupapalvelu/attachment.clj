@@ -89,8 +89,9 @@
            :MAL  'attachment-types/Maa-ainesluvat
            :MM   'attachment-types/Kiinteistotoimitus
            :KT   'attachment-types/Kiinteistotoimitus}
-    (env/feature? :updated-attachments) (merge {:R 'attachment-types/Rakennusluvat-v2
-                                                :P 'attachment-types/Rakennusluvat-v2})))
+    (env/feature? :updated-attachments) (merge {:R  'attachment-types/Rakennusluvat-v2
+                                                :P  'attachment-types/Rakennusluvat-v2
+                                                :YA 'attachment-types/YleistenAlueidenLuvat-v2})))
 
 (def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 

@@ -72,3 +72,6 @@
    {:type-group :rakennuspaikan_hallinta :type-id :jaljennos_myonnetyista_lainhuudoista}    {:type-group :rakennuspaikan_hallinta :type-id :todistus_hallintaoikeudesta},
    {:type-group :rakennuspaikan_hallinta :type-id :jaljennos_perunkirjasta}    {:type-group :rakennuspaikan_hallinta :type-id :todistus_hallintaoikeudesta},
    {:type-group :rakennuspaikan_hallinta :type-id :jaljennos_vuokrasopimuksesta}    {:type-group :rakennuspaikan_hallinta :type-id :todistus_hallintaoikeudesta}})
+
+(def osapuoli-attachment-mapping
+  {{:type-group :osapuolet :type-id :paa_ja_rakennussuunnittelijan_tiedot}    {:type-group :osapuolet :type-id :suunnittelijan_tiedot}})
