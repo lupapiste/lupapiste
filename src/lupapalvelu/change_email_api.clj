@@ -34,8 +34,7 @@
                       (->> (com/find-company-admins company-id) (remove #(= (:id %) (:id user))) (cons user))
                       [user]))
    :model-fn (fn [{:keys [user data]} conf recipient]
-               {:name (:firstName recipient) :old-email (:email user) :new-email (:new-email data)}
-               )})
+               {:name (:firstName recipient) :old-email (:email user) :new-email (:new-email data)})})
 
 (defn- init-email-change [user new-email]
   (let [token-id (token/make-token :change-email user {:new-email new-email} :auto-consume false :ttl ttl/change-email-token-ttl)
@@ -53,7 +52,7 @@
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :pre-checks [(fn [{user :user} _] (when-not (has-person-id? user) (warn "UNAUTHZ" user) (fail :error.unauthorized)))]
+   :pre-checks [(fn [{user :user} _] (when-not (has-person-id? user) (fail :error.unauthorized)))]
    :description "Starts the workflow for changing user password"}
   [{user :user}]
   (let [email (usr/canonize-email email)]
