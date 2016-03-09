@@ -7067,29 +7067,31 @@ select.dropdown {
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown:disabled {
   border-color: #dddddd;
+  background-image: url("/lp-static/img/lupicon-chevron-down-gray187.png");
   background-color: #f6f6f6;
 }
-/* line 1407, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1408, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown:focus {
+  background-image: url("/lp-static/img/lupicon-chevron-down-orange-light.png");
   border-color: #fbc732;
 }
 
-/* line 1413, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1415, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown::-ms-expand {
   display: none;
 }
 
-/* line 1417, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1419, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown.mandatory {
   border-color: #f39129;
 }
 
-/* line 1421, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1423, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown--full-width {
   min-width: 100%;
 }
 
-/* line 1426, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1428, ../../../private/common-html/sass/partials/_forms.scss */
 .no-wrap-whitespace {
   white-space: nowrap;
 }

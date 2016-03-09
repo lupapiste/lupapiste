@@ -1401,10 +1401,12 @@ select.dropdown {
   &:disabled {
     border-color: $input-disabled-border-color;
     background: {
-    color: $gray246;
+      image: url( "/lp-static/img/lupicon-chevron-down-gray187.png");
+      color: $gray246;
   }
   }
   &:focus {
+    background-image: url( "/lp-static/img/lupicon-chevron-down-orange-light.png");
     border-color: $input-focus-border-color;
   }
 }
