@@ -128,9 +128,7 @@
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}}
-             :uberjar  {:main lupapalvelu.main
-                        :jar-exclusions [#"gems/.*"]
-                        :uberjar-exclusions [#"gems/.*"]}
+             :uberjar  {:main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
