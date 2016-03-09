@@ -1,7 +1,6 @@
 LUPAPISTE.CreateScopeModel = function(params) {
   "use strict";
   var self = this;
-  var oldPermitTypes = ko.toJS(_.pluck(params.organization.scope(), "permitType"));
 
   self.params = params;
   self.organization = params.organization;
