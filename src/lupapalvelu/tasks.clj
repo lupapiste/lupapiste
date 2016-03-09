@@ -15,6 +15,17 @@
 
 (def- task-name-max-len 80)
 
+(def task-types ["muu katselmus"
+                 "muu tarkastus"
+                 "aloituskokous"
+                 "rakennuksen paikan merkitseminen"
+                 "rakennuksen paikan tarkastaminen"
+                 "pohjakatselmus"
+                 "rakennekatselmus"
+                 "l\u00f4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+                 "osittainen loppukatselmus"
+                 "loppukatselmus"
+                 "ei tiedossa"])
 
 (def- katselmuksenLaji
   {:name "katselmuksenLaji"
@@ -22,17 +33,7 @@
    :required true
    :whitelist {:roles [:authority] :otherwise :disabled}
    :default "muu katselmus"
-   :body [{:name "muu katselmus"}
-          {:name "muu tarkastus"}
-          {:name "aloituskokous"}
-          {:name "rakennuksen paikan merkitseminen"}
-          {:name "rakennuksen paikan tarkastaminen"}
-          {:name "pohjakatselmus"}
-          {:name "rakennekatselmus"}
-          {:name "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"}
-          {:name "osittainen loppukatselmus"}
-          {:name "loppukatselmus"}
-          {:name "ei tiedossa"}]})
+   :body (mapv (partial hash-map :name) task-types)})
 
 (def- katselmuksenLaji-ya
   (assoc katselmuksenLaji :body [{:name "Aloituskatselmus"}
