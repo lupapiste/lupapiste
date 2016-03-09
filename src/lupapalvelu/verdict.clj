@@ -73,7 +73,7 @@
 (def Timestamp sc/Num) ;; TODO: Some timestamps are casted as double during mongo export
 
 (defschema Katselmus
-  {:katselmuksenLaji (apply sc/enum "8" "105" "14" "21" "47" "107" "106" "53" "12" "13" "24" "38" "43" "104" "55" "54" "23" "52" tasks/task-types) ;; TODO: cleanup numeric values
+  {:katselmuksenLaji (sc/if util/num-string? ssc/NatString (apply sc/enum tasks/task-types)) ;; TODO: cleanup numeric values
    (sc/optional-key :tarkastuksenTaiKatselmuksenNimi) sc/Str})
 
 (defschema Maarays
@@ -86,14 +86,6 @@
   "Schema for status"
   (sc/if integer? ssc/Nat ssc/NatString))
 
-(defschema Pykala
-  "Schema for section with whole variation of representations"
-  (sc/conditional integer?                                           ssc/Nat
-                  ss/blank?                                          ssc/BlankStr
-                  (every-pred string? (partial re-matches #"^\d+$")) ssc/NatString
-                  (every-pred string? (partial re-matches #"^$.*"))  ssc/Section
-                  string?                                            sc/Str))
-
 (defschema Liite
   {:kuvaus sc/Str
    :tyyppi sc/Str})
@@ -105,7 +97,7 @@
    (sc/optional-key :urlHash)         sc/Str
    (sc/optional-key :paatos)          (sc/maybe sc/Str)
    (sc/optional-key :paatospvm)       (sc/maybe Timestamp)
-   (sc/optional-key :pykala)          (sc/maybe Pykala)
+   (sc/optional-key :pykala)          (sc/maybe sc/Str)
    (sc/optional-key :liite)           Liite})
 
 (defschema Tyonjohtajatieto

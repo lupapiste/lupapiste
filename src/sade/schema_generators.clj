@@ -48,10 +48,6 @@
 
 (register-generator ssc/Nat gen/nat)
 
-(def section (gen/fmap (partial str "§ ") gen/nat))
-
-(register-generator ssc/Section section)
-
 (def int-string (gen/fmap str gen/int))
 
 (register-generator ssc/IntString int-string)

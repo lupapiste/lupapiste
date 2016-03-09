@@ -44,10 +44,6 @@
   "A schema for natural number integer"
   (sc/constrained sc/Int (comp not neg?) "Natural number"))
 
-(defschema Section
-  "A schema for section number string"
-  (sc/constrained sc/Str (partial re-matches #"§ \d+") "Section string"))
-
 (sc/defschema IntString
   "A schema for string containing single integer"
   (sc/constrained sc/Str (partial re-matches #"^-?\d+$") "Integer string"))
