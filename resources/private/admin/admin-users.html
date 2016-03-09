@@ -10,6 +10,9 @@
           <button class="btn-primary"
                   data-bind="click: authorityAdminUsers.addAdmin,
                              ltext: 'add.authorityAdmin'"></button>
+          <button class="btn-primary"
+                  data-bind="click: restApiUsers.addRestUser,
+                             ltext: 'add.rest-api-user'"></button>
 
           <div id="add-authority-admin-user-to-organization-dialog" class="window autosized">
             <div class="dialog-header">
@@ -56,6 +59,58 @@
                     <div data-bind="text: createdUserUsername"></div>
                     <a href="#" data-bind="text: createdUserlinkFi, attr: {href: createdUserlinkFi}"></a><br/>
                     <a href="#" data-bind="text: createdUserlinkSv, attr: {href: createdUserlinkSv}"></a>
+                  </p>
+                </div>
+                <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close"></button>
+              </div>
+            </div>
+          </div>
+
+          <div id="add-rest-api-user-to-organization-dialog" class="window autosized">
+            <div class="dialog-header">
+              <p data-bind="ltext: 'admin.add-rest-user.dialog.title'"></p>
+              <p class="dialog-close close lupicon-remove"></p>
+            </div>
+            <div class="dialog-content" data-bind="with: restApiUsers">
+              <div data-bind="visible: phase() === 1">
+                <form>
+                  <div>
+                    <label data-bind="ltext: 'admin.add-dialog.organization-code'" class="form-label" for="admin.rest-api.add.organizationCode"></label>
+                    <input class="form-input" data-bind="textInput: organizationCode"
+                           id="admin.rest-api.add.organizationCode" type="text"/>
+                  </div>
+
+                  <div>
+                    <label data-bind="ltext: 'userinfo.username'" class="form-label" for="admin.rest-api.add.username"></label>
+                    <input class="form-input" data-bind="textInput: username"
+                           id="admin.rest-api.add.username" type="text" readonly/>
+                  </div>
+
+                  <div>
+                    <label data-bind="ltext: 'admin.restapi.userinfo.firstName'" class="form-label" for="admin.rest-api.add.firstName"></label>
+                    <input class="form-input" data-bind="textInput: firstName"
+                           id="admin.rest-api.add.firstName" type="text"/>
+                  </div>
+
+                   <div>
+                     <label data-bind="ltext: 'userinfo.lastName'" class="form-label" for="admin.rest-api.add.lastName"></label>
+                     <input class="form-input" data-bind="textInput: lastName"
+                            id="admin.rest-api.add.lastName" type="text"/>
+                   </div>
+
+                  <button data-bind="click: next, enable: userDetailsOk, ltext: 'admin.add-dialog.continue'"
+                          class="positive btn-dialog"></button>
+                </form>
+              </div>
+              <div data-bind="visible: phase() === 2">
+                <h2 data-bind="visible: searching, ltext: 'admin.add-dialog.searching'"></h2>
+                <div data-bind="visible: userAdded">
+                  <h2 data-bind="ltext: 'admin.add-rest-user.dialog.userAdded'"></h2>
+                  <p>
+                    <div data-bind="ltext: 'admin.add-rest-user.dialog.username'"></div>
+                    <div data-bind="text: createdUserUsername"></div>
+                    <div data-bind="ltext: 'admin.add-rest-user.dialog.password'"></div>
+                    <pre href="#" data-bind="text: createdPw"></pre>
                   </p>
                 </div>
                 <button data-bind="enable: !searching(), ltext: 'ok'" class="positive btn-dialog close"></button>

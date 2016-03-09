@@ -151,6 +151,18 @@
   [{user-data :data caller :user}]
   (do-create-user user-data caller))
 
+(defcommand create-rest-api-user
+  {:description "Creates REST API user for organization. Admin only."
+   :parameters [username]
+   :input-validators [(partial action/string-parameters [:username])]
+   :user-roles #{:admin}}
+  [{user-data :data caller :user :as command}]
+  (let [rest-user-email (str username "@example.com")
+        user-data       (assoc user-data :email rest-user-email)]
+    (if-not (usr/get-user-by-email rest-user-email)
+      (ok :user (usr/create-rest-user user-data))
+      (fail :email-in-use))))
+
 ;;
 ;; ==============================================================================
 ;; Updating user data:
