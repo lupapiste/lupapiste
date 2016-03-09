@@ -22,7 +22,7 @@
                  "rakennuksen paikan tarkastaminen"
                  "pohjakatselmus"
                  "rakennekatselmus"
-                 "l\u00f4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
+                 "l\u00e4mp\u00f6-, vesi- ja ilmanvaihtolaitteiden katselmus"
                  "osittainen loppukatselmus"
                  "loppukatselmus"
                  "ei tiedossa"])
