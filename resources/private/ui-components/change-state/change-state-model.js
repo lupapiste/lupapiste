@@ -3,6 +3,8 @@ LUPAPISTE.ChangeStateModel = function() {
   "use strict";
   var self = this;
 
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
+
   self.states = ["extinct", "constructionStarted",
                  "inUse", "closed", "appealed"];
 
@@ -10,12 +12,12 @@ LUPAPISTE.ChangeStateModel = function() {
     return loc( "state." + state );
   };
 
-  // When the value is changed the application is reloaded. The value
-  // never represents the application's current value so the computed
-  // always returns undefined.
-  self.changeState = ko.computed( {
-    read: _.noop,
-    write: function( newState ) {
+  self.selectedState = ko.observable();
+
+
+  // When the value is changed the application is reloaded.
+  self.changeState = self.disposedComputed( function() {
+    var newState = self.selectedState();
       if( _.includes( self.states, newState ) ) {
         var appId = lupapisteApp.models.application.id();
         ajax.command ( "change-application-state",
@@ -23,9 +25,11 @@ LUPAPISTE.ChangeStateModel = function() {
                        id: appId})
         .success ( function() {
           repository.load( appId );
+          // Reset the observable. Otherwise the select could show
+          // wrong state if the application is changed.
+          self.selectedState( "");
         })
         .call ();
       }
-    }
-  });
+    });
 };
