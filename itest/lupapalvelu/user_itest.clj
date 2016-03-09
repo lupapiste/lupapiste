@@ -81,8 +81,7 @@
          (lupapalvelu.mongo/create-id) => "123456"]
         (fact "id, username and password is returned"
           (let [saved-user (user/create-rest-user user)]
-            saved-user => (just {:id       "123456"
-                                 :username "foobar"
+            saved-user => (just {:username "foobar"
                                  :password "salainen"} :in-any-order))))
       (fact "User is saved as rest api user"
         (:role (user/get-user-by-email (:email user))) => "rest-api"))))
