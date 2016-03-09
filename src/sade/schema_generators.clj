@@ -46,6 +46,12 @@
 
 ;; Custom static schema generators
 
+(register-generator ssc/Nat gen/nat)
+
+(def section (gen/fmap (partial str "§ ") gen/nat))
+
+(register-generator ssc/Section section)
+
 (def single-hex (gen/elements (concat (map str (range 10)) (map (comp str char) (range (int \a) (inc (int \f)))))))
 
 (def single-number-int (gen/elements (range 10)))

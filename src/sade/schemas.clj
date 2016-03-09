@@ -1,7 +1,7 @@
 (ns sade.schemas
   (:require [sade.util :as util]
             [sade.validators :as validators]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [schema.coerce :as coerce]))
 
 ;;
@@ -40,35 +40,43 @@
 ;; Schemas
 ;;
 
-(sc/defschema BlankStr
+(defschema Nat 
+  "A schema for natural number integer"
+  (sc/constrained sc/Int (comp not neg?) "Natural number"))
+
+(defschema Section
+  "A schema for section number string"
+  (sc/constrained sc/Str (partial re-matches #"§ \d+") "Section string"))
+
+(defschema BlankStr
   "A schema for empty or nil valued string"
   (sc/if string? (sc/pred empty? "Not empty") (sc/pred nil? "Not nil")))
 
-(sc/defschema Email
+(defschema Email
   "A simple schema for email"
   (sc/constrained sc/Str (every-pred validators/valid-email? (max-length-constraint 255)) "Not valid email"))
 
-(sc/defschema Timestamp
+(defschema Timestamp
   "A schema for timestamp"
   (sc/pred (every-pred integer?) "Not valid timestamp"))
 
-(sc/defschema Zipcode
+(defschema Zipcode
   "A schema for finnish zipcode"
   (sc/pred validators/finnish-zip? "Not valid finnish zipcode"))
 
-(sc/defschema FinnishY
+(defschema FinnishY
   (sc/pred validators/finnish-y? "Not valid Y code"))
 
-(sc/defschema FinnishOVTid
+(defschema FinnishOVTid
   (sc/pred validators/finnish-ovt? "Not valid finnish OVT id"))
 
-(sc/defschema Hetu
+(defschema Hetu
   (sc/pred validators/valid-hetu? "Not valid hetu"))
 
-(sc/defschema ObjectIdStr
+(defschema ObjectIdStr
   (sc/pred (partial validators/matches? #"^[0-9a-f]{24}$") "ObjectId hex string"))
 
-(sc/defschema IpAddress
+(defschema IpAddress
   (sc/pred validators/ip-address? "Not valid IP address"))
 
 ;; Dynamic schema constructors
