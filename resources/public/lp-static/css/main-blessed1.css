@@ -6872,9 +6872,9 @@ div.alleYli-radioGroup {
 }
 /* line 1317, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1317, ../../../private/common-html/sass/partials/_forms.scss */
@@ -7044,6 +7044,54 @@ div.alleYli-radioGroup {
 .identifier-editors label.required:after {
   content: "*";
   display: inline;
+}
+
+/* line 1375, ../../../private/common-html/sass/partials/_forms.scss */
+select.dropdown {
+  color: #333333;
+  border: 1px solid #bbbbbb;
+  border-radius: 0 0 0 0;
+  padding-left: 12px;
+  padding-right: 12px;
+  height: 40px;
+  background-image: url("/lp-static/img/lupicon-chevron-down-orange-dark.png");
+  background-position: right 17px center;
+  background-repeat: no-repeat;
+  background-color: white;
+  -webkit-appearance: none;
+  -webkit-user-select: none;
+  -moz-appearance: none;
+  appearance: none;
+  overflow: hidden;
+}
+/* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
+select.dropdown:disabled {
+  border-color: #dddddd;
+  background-color: #f6f6f6;
+}
+/* line 1407, ../../../private/common-html/sass/partials/_forms.scss */
+select.dropdown:focus {
+  border-color: #fbc732;
+}
+
+/* line 1413, ../../../private/common-html/sass/partials/_forms.scss */
+select.dropdown::-ms-expand {
+  display: none;
+}
+
+/* line 1417, ../../../private/common-html/sass/partials/_forms.scss */
+select.dropdown.mandatory {
+  border-color: #f39129;
+}
+
+/* line 1421, ../../../private/common-html/sass/partials/_forms.scss */
+select.dropdown--full-width {
+  min-width: 100%;
+}
+
+/* line 1426, ../../../private/common-html/sass/partials/_forms.scss */
+.no-wrap-whitespace {
+  white-space: nowrap;
 }
 
 /* line 4, ../../../private/common-html/sass/partials/_tables.scss */
@@ -7881,47 +7929,5 @@ table.attachments-template-table td.attachment-version-info {
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
 .scroll-65em {
   max-height: 65em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-66em {
-  max-height: 66em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-67em {
-  max-height: 67em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-68em {
-  max-height: 68em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-69em {
-  max-height: 69em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-70em {
-  max-height: 70em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-71em {
-  max-height: 71em;
-  overflow-y: auto;
-}
-
-/* line 188, ../../../private/common-html/sass/partials/_tables.scss */
-.scroll-72em {
-  max-height: 72em;
   overflow-y: auto;
 }

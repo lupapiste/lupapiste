@@ -461,3 +461,16 @@
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
 
+(defn valid-new-state
+  "Input validator for change-application-state command. Only subset
+  of all states are supported for explicit state changes."
+  [{{new-state :state} :data}]
+  (when-not (#{:extinct :constructionStarted :inUse :closed :appealed} (keyword new-state))
+            (fail :error.illegal-state :parameters new-state)))
+
+(defn valid-permit-types
+  "Prechecker for permit types. permit-types is a set of permit type
+  keywords (e.g. :R)."
+  [permit-types _ application]
+  (when-not (permit-types (keyword (:permitType application)))
+    (fail :error.unsupported-permit-type)))

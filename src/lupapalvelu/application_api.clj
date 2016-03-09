@@ -455,6 +455,17 @@
            (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
 
+(defcommand change-application-state
+  {:description      "Changes application state. Only the subset of the states is supported."
+   :parameters       [state]
+   :user-roles       #{:authority}
+   :states           states/all-states
+   :input-validators [a/valid-new-state]
+   :pre-checks       [(partial a/valid-permit-types #{:R})]}
+  [{:keys [user] :as command}]
+  (update-application command
+                      (a/state-transition-update (keyword state) (now) user)))
+
 ;;
 ;; Link permits
 ;;

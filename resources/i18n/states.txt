@@ -1,0 +1,6 @@
+"state.application" "fi" "Hakemuksen tila:"
+"state.extinct" "fi" "Rauennut"
+"state.constructionStarted" "fi" "Rakennustyöt aloitettu"
+"state.inUse" "fi" "Käyttöönotettu"
+"state.closed" "fi" "Valmistunut"
+"state.appealed" "fi" "Muutoksenhaussa"

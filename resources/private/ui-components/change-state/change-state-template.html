@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container">
+      <script type="text/x-jquery-tmpl" id="change-state-template">
+        <p class="no-wrap-whitespace"
+           data-bind="ltext: 'state.application'"></p>
+        <select class="dropdown dropdown--full-width"
+                data-bind="options: states,
+                           optionsText: stateText,
+                           value: changeState,
+                           optionsCaption: loc( 'choose')"></select>
+      </script>
+    </section>
+  </body>
+</html>

@@ -2138,6 +2138,7 @@
 "error.illegal-role" "sv" "Okänd roll"
 "error.illegal-shapefile" "fi" "Vain pakattu zip-tiedosto on sallittu. Ole hyvä ja toimita alueet zip-tiedoston sisällä."
 "error.illegal-shapefile" "sv" "Endast zip-packade dokument godkänns. Var så god och leverera områdena inom ett zip-dokument."
+"error.illegal-state" "fi" "Hakemusta ei voi siirtää annettuun tilaan."
 "error.illegal-subtype" "fi" "Tuntematon tietotyyppi"
 "error.illegal-subtype" "sv" "Okänd uppgiftstyp"
 "error.illegal-tel" "fi" "Puhelinnumeron muoto on väärä"
