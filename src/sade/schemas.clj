@@ -48,6 +48,14 @@
   "A schema for section number string"
   (sc/constrained sc/Str (partial re-matches #"§ \d+") "Section string"))
 
+(sc/defschema IntString
+  "A schema for string containing single integer"
+  (sc/constrained sc/Str (partial re-matches #"^-?\d+$") "Integer string"))
+
+(sc/defschema NatString
+  "A schema for string containing natural number"
+  (sc/constrained sc/Str (partial re-matches #"^\d+$") "Natural number string"))
+
 (defschema BlankStr
   "A schema for empty or nil valued string"
   (sc/if string? (sc/pred empty? "Not empty") (sc/pred nil? "Not nil")))
