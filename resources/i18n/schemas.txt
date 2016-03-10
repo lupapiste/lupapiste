@@ -396,6 +396,8 @@
 "kaupunkikuvatoimenpide._group_label" "sv" "Stadsbildsåtgärd"
 "kaupunkikuvatoimenpide.tunnus" "fi" "Rakennelman tunnus"
 "kaupunkikuvatoimenpide.tunnus" "sv" "Konstruktionens beteckning"
+"kaupunkikuvatoimenpide-ei-tunnusta._group_label" "fi" "Rakennelman tunnus"
+"kaupunkikuvatoimenpide-ei-tunnusta._group_label" "sv" "Konstruktionens beteckning"
 "kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan._group_label" "fi" "Käytöstäpoistetun öljy- tai kemikaalisäiliön jättäminen maaperään"
 "kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan._group_label" "sv" "Kvarlämnande i jorden av olje- eller kemikaliecistern som tagits ur bruk"
 "kaytostapoistetun-sailion-jattaminen-maaperaan.maahan-jattamisen-perustelut._group_label" "fi" "Maahan jättämisen perustelut"
