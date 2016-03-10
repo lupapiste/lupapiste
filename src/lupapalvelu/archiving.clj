@@ -133,6 +133,14 @@
            (vals id-to-usage))
          (remove nil?))))
 
+(defn- get-building-ids [bldg-key {:keys [buildings]} op-id]
+  ;; Only some building lists contain operation ids at all
+  (->> (if-let [filtered-bldgs (and op-id (seq (filter #(= op-id (:operationId %)) buildings)))]
+         filtered-bldgs
+         buildings)
+       (map bldg-key)
+       (remove nil?)))
+
 (defn- make-version-number [{{{:keys [major minor]} :version} :latestVersion}]
   (str major "." minor))
 
@@ -147,8 +155,8 @@
                         (assoc :tila :arkistoitu))
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
-                       :buildingIds           (remove nil? (map :localId (:buildings application)))
-                       :nationalBuildingIds   (remove nil? (map :nationalId (:buildings application)))
+                       :buildingIds           (get-building-ids :localId application (get-in attachment [:op :id]))
+                       :nationalBuildingIds   (get-building-ids :nationalId application (get-in attachment [:op :id]))
                        :propertyId            propertyId
                        :applicant             applicant
                        :operations            (if (:op attachment)
