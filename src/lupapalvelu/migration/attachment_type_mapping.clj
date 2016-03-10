@@ -15,7 +15,7 @@
    {:type-group :muut :type-id :yhteistilat}    {:type-group :selvitykset :type-id :yhteistilat},
    {:type-group :muut :type-id :energiataloudellinen_selvitys}    {:type-group :selvitykset :type-id :energiataloudellinen_selvitys},
    {:type-group :muut :type-id :energiatodistus}    {:type-group :selvitykset :type-id :energiatodistus},
-   {:type-group :muut :type-id :haittaaineet}    {:type-group :selvitykset :type-id :haittaaineet},
+   {:type-group :muut :type-id :haittaaineet}    {:type-group :selvitykset :type-id :haittaaineselvitys},
    {:type-group :muut :type-id :kokoontumishuoneisto}    {:type-group :selvitykset :type-id :kokoontumishuoneisto},
    {:type-group :muut :type-id :liikkumis_ja_esteettomyysselvitys}    {:type-group :selvitykset :type-id :liikkumis_ja_esteettomyysselvitys},
    {:type-group :muut :type-id :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta}    {:type-group :selvitykset :type-id :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta},
