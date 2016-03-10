@@ -1,5 +1,7 @@
 (ns lupapalvelu.appeal
-  (:require [sade.schemas :as ssc]
+  (:require [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer :all]
+            [sade.schemas :as ssc]
             [schema.core :refer [defschema] :as sc]))
 
 (defschema Appeal
@@ -10,3 +12,15 @@
                    :lastName   sc/Str}  ;;
    :made          ssc/Timestamp         ;; Date of appeal made - defined manually by authority
    :created       ssc/Timestamp})
+
+(defn create-appeal [paatos-id appellant made now]
+  {:id        (mongo/create-id)
+   :paatos-id paatos-id
+   :appellant appellant
+   :made      made
+   :created   now})
+
+(defn new-appeal-mongo-updates [paatos-id appellant made now]
+  (when-let [appeal (->> (create-appeal paatos-id appellant made now)
+                         (sc/check Appeal))]
+    {$push {:appeals appeal}}))
