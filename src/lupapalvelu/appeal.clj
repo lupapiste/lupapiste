@@ -3,8 +3,10 @@
             [schema.core :refer [defschema] :as sc]))
 
 (defschema Appeal
-  {:id            ssc/ObjectIdStr
-   :paatos-id     ssc/ObjectIdStr
-   :appellant     {:firstName  sc/Str
-                   :lastName   sc/Str}
-   :made          ssc/Timestamp})
+  "Schema for a verdict appeal."
+  {:id            ssc/ObjectIdStr       ;; 
+   :paatos-id     ssc/ObjectIdStr       ;; Refers to verdicts.paatokset.id
+   :appellant     {:firstName  sc/Str   ;; Person who made the appeal
+                   :lastName   sc/Str}  ;;
+   :made          ssc/Timestamp         ;; Date of appeal made - defined manually by authority
+   :created       ssc/Timestamp})
