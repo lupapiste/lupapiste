@@ -9,7 +9,7 @@
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
-            [sade.util :as util]
+            [sade.util :refer [fn->>] :as util]
             [sade.xml :as xml]
             [sade.env :as env]
             [lupapalvelu.action :as action]
@@ -205,14 +205,11 @@
   {:pre [application]}
   (when (:paatokset verdict)
     (let [verdict-id (mongo/create-id)]
-      (->
-        (assoc verdict :id verdict-id, :timestamp timestamp)
-        (update-in [:paatokset]
-          (fn [paatokset]
-            (filter seq
-              (map (fn [paatos]
-                     (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))
-                paatokset))))))))
+      (-> (assoc verdict :id verdict-id, :timestamp timestamp)
+          (update :paatokset
+                  (fn->> (map #(update % :poytakirjat (partial map (partial get-poytakirja application user timestamp verdict-id))))
+                         (map #(assoc % :id (mongo/create-id)))
+                         (filter seq)))))))
 
 (defn- get-verdicts-with-attachments [application user timestamp xml reader]
   (->> (krysp-reader/->verdicts xml reader)
@@ -233,8 +230,7 @@
                   (when-not has-old-verdict-tasks {:tasks tasks})
                   (when extras-reader (extras-reader app-xml application)))}
           (when-not (states/post-verdict-states (keyword (:state application)))
-            (application/state-transition-update (sm/verdict-given-state application) created user))
-          )))))
+            (application/state-transition-update (sm/verdict-given-state application) created user)))))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
