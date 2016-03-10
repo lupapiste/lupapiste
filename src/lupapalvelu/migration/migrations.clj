@@ -1866,6 +1866,11 @@
             0
             (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1}))))
 
+(defmigration add-id-for-verdicts-paatokset
+  (update-applications-array :verdicts
+                             (fn [verdict] (update verdict :paatokset (fn [paatokset] (map #(assoc % :id (mongo/create-id)) paatokset))))
+                             {:verdicts.paatokset.0 {$exists true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

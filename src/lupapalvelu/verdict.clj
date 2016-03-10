@@ -106,7 +106,8 @@
     [(sc/if string? sc/Str {:VaadittuTyonjohtaja {:tyonjohtajaLaji sc/Str}})]))
 
 (defschema Paatos
-  {:poytakirjat                      [Poytakirja]
+  {:id                               ssc/ObjectIdStr
+   :poytakirjat                      [Poytakirja]
    (sc/optional-key :lupamaaraykset) {(sc/optional-key :maaraykset)                     [Maarays]
                                       (sc/optional-key :vaaditutKatselmukset)           [Katselmus]
                                       (sc/optional-key :vaaditutErityissuunnitelmat)    [sc/Str]
