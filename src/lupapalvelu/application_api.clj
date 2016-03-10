@@ -461,7 +461,7 @@
    :user-roles       #{:authority}
    :states           states/all-states
    :input-validators [a/valid-new-state]
-   :pre-checks       [(partial a/valid-permit-types #{:R})]}
+   :pre-checks       [(partial a/valid-permit-types {:R :all :P :all})]}
   [{:keys [user] :as command}]
   (update-application command
                       (a/state-transition-update (keyword state) (now) user)))

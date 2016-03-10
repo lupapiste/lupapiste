@@ -20,5 +20,5 @@
   checkbox visibility. The option is available only for R and P permit
   types."
    :user-roles #{:applicant :authority}
-   :pre-checks [(partial a/valid-permit-types #{:R :P})]}
+   :pre-checks [(partial a/valid-permit-types {:R [] :P :all})]}
   [_])

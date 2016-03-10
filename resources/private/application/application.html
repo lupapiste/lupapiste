@@ -34,7 +34,9 @@
                             <div class="application-summary-table">
                               <!-- Change state (only for authority) -->
                               <!-- ko if: $root.authorization.ok( "change-application-state" ) -->
-                              <div data-bind="component: 'change-state'"></div>
+                              <div data-bind="component: {
+                                              name: 'change-state',
+                                              params: {id: $root.application.id(), state: $root.application.state()}}"></div>
                               <!-- /ko -->
                               <!-- Property ID: -->
                               <div>

@@ -469,8 +469,20 @@
             (fail :error.illegal-state :parameters new-state)))
 
 (defn valid-permit-types
-  "Prechecker for permit types. permit-types is a set of permit type
-  keywords (e.g. :R)."
-  [permit-types _ application]
-  (when-not (permit-types (keyword (:permitType application)))
-    (fail :error.unsupported-permit-type)))
+  "Prechecker for permit types. permit-types is a map of of
+  permit-types and supported subtypes. Some examples:
+
+  {:R [] :P :all} -> R applications without subtypes and Ps with any
+  subtype are valid.
+
+  {:R [\"tyonjohtaja-hakemus\"]} -> Only Rs with tyonjohtaja-hakemus
+  subtype are valid."
+  [permit-types _ {:keys [permitType permitSubtype]}]
+  (let [app-type (keyword permitType)
+        types    (set (keys permit-types))
+        subs     (get permit-types app-type)]
+    (when-not (and subs
+                   (or (= subs :all)
+                       (and (empty? subs) (ss/blank? permitSubtype))
+                       ((set subs) permitSubtype)))
+      (fail :error.unsupported-permit-type))))

@@ -58,7 +58,8 @@
     {:submitted    [:sent :canceled]
      :sent         [:foremanVerdictGiven :complementNeeded :canceled]
      :complementNeeded [:sent :canceled]
-     :foremanVerdictGiven []}))
+     :foremanVerdictGiven [:appealed :canceled]
+     :appealed [:foremanVerdictGiven :canceled]}))
 
 ; TODO draft versions this forward
 
