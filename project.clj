@@ -105,7 +105,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.56"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.5"]
+                 [lupapiste/commons "0.7.8"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -128,9 +128,7 @@
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}}
-             :uberjar  {:main lupapalvelu.main
-                        :jar-exclusions [#"gems/.*"]
-                        :uberjar-exclusions [#"gems/.*"]}
+             :uberjar  {:main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]

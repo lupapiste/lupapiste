@@ -473,6 +473,22 @@
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
 
+(defn create-rest-user
+  "Creates and inserts new rest-api user to database, returns username and password to frontend.
+   Only for Solita admin"
+  [user-data]
+  (let [pw        (security/random-password)
+        user-data (merge user-data
+                         {:enabled true
+                          :role "rest-api"
+                          :orgAuthz {(:organization user-data) ["authority"]}
+                          :password pw})
+        user (-> (create-new-user-entity user-data)
+                 (assoc :id (mongo/create-id)))]
+    (mongo/insert :users user)
+    {:username (:username user)
+     :password pw}))
+
 (defn get-or-create-user-by-email [email current-user]
   (let [email (canonize-email email)]
     (or

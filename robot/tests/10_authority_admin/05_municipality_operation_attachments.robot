@@ -7,17 +7,17 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-New applications have Asemapiirros, Pohjapiiros and no Rasitustodistus
+New applications have Asemapiirros, Pohjapiirustus and no Rasitustodistus
   Mikko logs in
   Create application the fast way  Latokuja 1, Sipoo  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
   Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-pre-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros
-  Attachment template is visible  paapiirustus.pohjapiirros
+  Attachment template is visible  paapiirustus.pohjapiirustus
   Attachment template is not visible  rakennuspaikan_hallinta.rasitustodistus
   Logout
 
-Admin removes Pohjapiirros template and adds Rasitustodistus template
+Admin removes Pohjapiirustus template and adds Rasitustodistus template
   Sipoo logs in
   Go to page  attachments
   # Open dialog
@@ -31,21 +31,21 @@ Admin removes Pohjapiirros template and adds Rasitustodistus template
   Click element  xpath=//div[@id='dialog-edit-attachments']//button[@data-loc='selectm.add']
   Wait until  Element should be visible  xpath=//select[@data-test-id='selectm-target-list']//option[contains(text(),'Rasitustodistus')]
   # Remove Pohjapiirros
-  Click element  xpath=//div[@id='dialog-edit-attachments']//select[@class='selectm-target']//option[contains(text(),'Pohjapiirros')]
+  Click element  xpath=//div[@id='dialog-edit-attachments']//select[@class='selectm-target']//option[contains(text(),'Pohjapiirustus')]
   Click element  xpath=//div[@id='dialog-edit-attachments']//button[@data-loc='selectm.remove']
-  Wait until  Element should not be visible  xpath=//select[@data-test-id='selectm-target-list']//option[contains(text(),'Pohjapiirros')]
+  Wait until  Element should not be visible  xpath=//select[@data-test-id='selectm-target-list']//option[contains(text(),'Pohjapiirustus')]
   # Save
   Click element  xpath=//div[@id='dialog-edit-attachments']//button[@data-loc='selectm.ok']
   Wait until  Element should not be visible  xpath=//div[@id='dialog-edit-attachments']
   Logout
 
-Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirros
+Now new applications have Asemapiirros and Rasitustodistus, but no Pohjapiirustus
   Mikko logs in
   Create application the fast way  Latokuja 1, Sipoo  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
   Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-pre-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros
-  Attachment template is not visible  paapiirustus.pohjapiirros
+  Attachment template is not visible  paapiirustus.pohjapiirustus
   Attachment template is visible  rakennuspaikan_hallinta.rasitustodistus
 
 

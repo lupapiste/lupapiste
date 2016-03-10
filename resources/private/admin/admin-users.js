@@ -128,9 +128,79 @@
 
   var authorityAdminUsers = new AuthorityAdminUsers();
 
+  function RestApiUsers() {
+    var self = this;
+
+    self.organizationCode = ko.observable();
+    self.phase = ko.observable(0);
+    self.firstName = ko.observable();
+    self.lastName = ko.observable("Taustaj\u00E4rjestelm\u00E4");
+    self.username = ko.pureComputed(function() {
+      return util.lowerCase(self.firstName()) + "-backend";
+    });
+    self.userDetailsOk = ko.computed(function() {
+        var firstNameOk = self.firstName();
+        var lastNameOk = self.lastName();
+        var organizationCodeOk = self.organizationCode();
+        var usernameOk = self.username();
+        return organizationCodeOk && usernameOk && firstNameOk && lastNameOk;
+    });
+
+    self.searching = ko.observable();
+    self.userAdded = ko.observable();
+
+    self.createdUserUsername = ko.observable();
+    self.createdPw = ko.observable();
+
+    self.clean = function() {
+      return self
+        .phase(1)
+        .organizationCode("")
+        .firstName("")
+        .lastName("Taustaj\u00E4rjestelm\u00E4")
+        .searching(false)
+        .userAdded(false)
+        .createdPw("")
+        .createdUserUsername("");
+    };
+
+    self.dialog = function() {
+      if (!self._dialog) {
+        self._dialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
+        self._dialog.createMask();
+      }
+      return self._dialog;
+    };
+
+    self.addRestUser = function() {
+      self.clean().dialog().open("#add-rest-api-user-to-organization-dialog");
+    };
+
+    self.next = function() {
+      self.searching(true).phase(2);
+      ajax
+        .command("create-rest-api-user",
+                 {username: self.username(),
+                  organization: self.organizationCode(),
+                  firstName: self.firstName(),
+                  lastName: self.lastName()})
+        .pending(self.searching)
+        .success(function(r) {
+          self.createdUserUsername(r.user.username);
+          self.createdPw(r.user.password);
+          self.userAdded(true);
+          usersList.redraw();
+        })
+        .call();
+    };
+  }
+
+  var restApiUsers = new RestApiUsers();
+
   $(function() {
     $("#addAuthAdmin").applyBindings({
-      authorityAdminUsers: authorityAdminUsers
+      authorityAdminUsers: authorityAdminUsers,
+      restApiUsers: restApiUsers
     });
   });
 

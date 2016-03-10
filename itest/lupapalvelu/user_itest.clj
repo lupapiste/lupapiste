@@ -65,3 +65,23 @@
            (user/throttle-login? "bar") => true
            (user/clear-logins "bar") => true
            (user/throttle-login? "bar") => false))))
+
+
+
+(facts "Rest api creation"
+  (mongo/with-db db-name
+    (let [user {:username     "foobar"
+                :organization "123-A"
+                :email        "foobar@example.com"
+                :firstName    "Testi"
+                :lastName     "Testaaja"}]
+      (against-background
+        [(lupapalvelu.security/random-password) => "salainen"
+         (lupapalvelu.security/get-hash "salainen") => "tosisalainen"
+         (lupapalvelu.mongo/create-id) => "123456"]
+        (fact "id, username and password is returned"
+          (let [saved-user (user/create-rest-user user)]
+            saved-user => (just {:username "foobar"
+                                 :password "salainen"} :in-any-order))))
+      (fact "User is saved as rest api user"
+        (:role (user/get-user-by-email (:email user))) => "rest-api"))))

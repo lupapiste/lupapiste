@@ -1,0 +1,6 @@
+"admin.add-rest-user.dialog.title" "fi" "Lisää kuntakohtainen rajapinnan tunnus (Facta paperiluvat)"
+"admin.restapi.userinfo.firstName" "fi" "Etunimi (kunnan nimi)"
+"admin.add-rest-user.dialog.userAdded" "fi" "Rajapintatunnus paperilupia varten luotu onnistuneesti"
+"admin.add-rest-user.dialog.username" "fi" "Käyttäjätunnus"
+"admin.add-rest-user.dialog.password" "fi" "Salasana"
+"add.rest-api-user" "fi" "Lisää rajapintatunnus (paperilupa)"
