@@ -1,0 +1,2 @@
+(ns lupapalvelu.municipality-itest)
+

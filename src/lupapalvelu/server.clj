@@ -49,6 +49,7 @@
             [lupapalvelu.integrations-api]
             [lupapalvelu.construction-api]
             [lupapalvelu.asianhallinta-config-api]
+            [lupapalvelu.municipality-api]
             [lupapalvelu.perf-mon-api]
             [lupapalvelu.property-api]
             [lupapalvelu.user-notification-api]
