@@ -73,7 +73,7 @@
 (def Timestamp sc/Num) ;; TODO: Some timestamps are casted as double during mongo export
 
 (defschema Katselmus
-  {:katselmuksenLaji (sc/if util/num-string? ssc/NatString (apply sc/enum tasks/task-types)) ;; TODO: cleanup numeric values
+  {:katselmuksenLaji (sc/if ss/numeric? ssc/NatString (apply sc/enum tasks/task-types)) ;; TODO: cleanup numeric values
    (sc/optional-key :tarkastuksenTaiKatselmuksenNimi) sc/Str})
 
 (defschema Maarays
