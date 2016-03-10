@@ -13,6 +13,42 @@
                        :tosFunction  "10 03 00 01"
                        :created      100
                        :applicant "Testaaja Testi"
+                       :statements [{:person {:text "Pelastusviranomainen"
+                                              :name "Pia Nyman"}
+                                     :requested 302
+                                     :given 500
+                                     :status "ehdoilla"
+                                     :text "Lausunto liitteenä"
+                                     :state "given"}
+                                    {:person {:text "Rakennussuunnittelu"
+                                              :name "Sampo Sälevaara"}
+                                     :requested 301
+                                     :given nil
+                                     :status nil
+                                     :state "requested"}]
+                       :neighbors  [{:propertyId "111"
+                                    :owner {:type "luonnollinen"
+                                            :name "Joku naapurin nimi"}
+                                    :id "112"
+                                    :status [{:state "open"
+                                              :created 600}
+                                             {:state "mark-done"
+                                              :user  {:firstName "Etu" :lastName "Suku"}
+                                              :created 500}]}]
+                       :tasks      [{:data {}
+                                     :state "requires_user_action"
+                                     :taskname "rakennuksen paikan tarkastaminen"
+                                     :schema-info {:name "task-katselmus"
+                                                   :version 1}
+                                     :closed nil
+                                     :created 300
+                                     :duedate nil
+                                     :assignee  {:lastName  "Suku"
+                                                 :firstName  "Etu"
+                                                 :id 1111}
+                                     :source nil
+                                     :id  "2222"}
+                                    ]
                        :attachments  [{:type     {:foo :bar}
                                        :versions [{:version 1
                                                    :created 200
@@ -60,12 +96,19 @@
                                                               :ts       300
                                                               :user "Testaaja Testi"
                                                               :contents nil}
+                                                             {:category :request-review, :ts 300, :type "rakennuksen paikan tarkastaminen", :user "Suku Etu"}
+                                                             {:category :request-statement, :ts 301, :type "Rakennussuunnittelu", :user ""}
+                                                             {:category :request-statement, :ts 302, :type "Pelastusviranomainen", :user ""}
                                                              {:type     {:foo :bar}
                                                               :category :attachment
                                                               :version  2
                                                               :ts       500
                                                               :user "Testaaja Testi"
-                                                              :contents "Great attachment"}]}]
+                                                              :contents "Great attachment"}
+                                                             {:type "Joku naapurin nimi"
+                                                              :category :request-neighbor
+                                                              :ts 600
+                                                              :user " "}]}]
       (provided
         (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})))

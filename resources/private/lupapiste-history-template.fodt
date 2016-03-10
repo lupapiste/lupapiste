@@ -554,7 +554,7 @@
  <office:master-styles>
   <style:master-page style:name="Standard" style:page-layout-name="pm1">
    <style:footer>
-    <text:p text:style-name="P1"><text:date style:data-style-name="N37" text:date-value="2016-02-23T10:26:49.331465070" text:fixed="true">23.02.16</text:date> <text:time style:data-style-name="N41" text:time-value="2016-02-23T10:27:47.602676991" text:fixed="true">10:27:48</text:time> <text:span text:style-name="T1">Footer1 </text:span><text:page-number text:select-page="current">1</text:page-number> / <text:page-count>1</text:page-count></text:p>
+    <text:p text:style-name="P1"><text:span text:style-name="T1">FOOTER_DATE</text:span> <text:span text:style-name="T1">FOOTER_PAGE </text:span><text:page-number text:select-page="current">1</text:page-number> / <text:page-count>1</text:page-count></text:p>
    </style:footer>
   </style:master-page>
  </office:master-styles>
