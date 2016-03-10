@@ -92,7 +92,7 @@
 
 (defschema Poytakirja
   {(sc/optional-key :paatoksentekija) (sc/maybe sc/Str)
-   (sc/optional-key :paatoskoodi)     (apply sc/enum nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/päätös (muu kuin rlk)" "11" verdict-codes)
+   (sc/optional-key :paatoskoodi)     (apply sc/enum nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11" verdict-codes)
    (sc/optional-key :status)          (sc/maybe Status)
    (sc/optional-key :urlHash)         sc/Str
    (sc/optional-key :paatos)          (sc/maybe sc/Str)
@@ -111,7 +111,7 @@
    (sc/optional-key :lupamaaraykset) {(sc/optional-key :maaraykset)                     [Maarays]
                                       (sc/optional-key :vaaditutKatselmukset)           [Katselmus]
                                       (sc/optional-key :vaaditutErityissuunnitelmat)    [sc/Str]
-                                      (sc/optional-key :vaaditutTyonjohtajat)           sc/Str ;; comma concatenated array string
+                                      (sc/optional-key :vaaditutTyonjohtajat)           sc/Str
                                       (sc/optional-key :vaadittuTyonjohtajatieto)       Tyonjohtajatieto
                                       (sc/optional-key :muutMaaraykset)                 [(sc/maybe sc/Str)]
                                       (sc/optional-key :autopaikkojaEnintaan)           ssc/Nat
