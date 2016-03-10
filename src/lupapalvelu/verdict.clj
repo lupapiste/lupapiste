@@ -9,6 +9,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as xml]
+            [sade.env :as env]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -55,7 +56,8 @@
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
-                   attachment-type    {:type-group "muut" :type-id "paatosote"}
+                   attachment-type    {:type-group (if (env/feature? :updated-attachments) "paatoksenteko" "muut"), 
+                                       :type-id "paatosote"}
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.

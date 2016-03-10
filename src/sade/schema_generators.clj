@@ -122,7 +122,7 @@
 
 (defn fixed-length-string [len]
   (gen/fmap s/join
-            (gen/vector gen/char len)))
+            (gen/vector gen/char-ascii len)))
 
 (register-generator ssc/fixed-length-string fixed-length-string)
 
@@ -134,13 +134,13 @@
 
 (defn max-length-string [max-len]
   (gen/fmap s/join
-            (gen/vector gen/char 0 max-len)))
+            (gen/vector gen/char-ascii 0 max-len)))
 
 (register-generator ssc/max-length-string max-length-string)
 
 (defn min-max-length-string [min-len max-len]
   (gen/fmap s/join
-            (gen/vector gen/char min-len max-len)))
+            (gen/vector gen/char-ascii min-len max-len)))
 
 (register-generator ssc/min-max-length-string min-max-length-string)
 

@@ -23,10 +23,11 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.property :as p]
-            [sade.validators :as v]
-            [sade.util :as util]
             [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.validators :as v]
             [sade.coordinate :as coord]
             [sade.schemas :as ssc]
             [swiss.arrows :refer [-<>>]]))
@@ -308,7 +309,9 @@
 (defn make-application-id [municipality]
   (let [year (str (year (local-now)))
         sequence-name (str "applications-" municipality "-" year)
-        counter (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+        counter (if (env/feature? :prefixed-id)
+                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
+                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (str "LP-" municipality "-" year "-" counter)))
 
 (defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]

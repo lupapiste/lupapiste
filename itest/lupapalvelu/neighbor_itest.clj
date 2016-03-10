@@ -128,11 +128,11 @@
                                 ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"   "040-2345678"]]) => ok?
 
         (fact "Pena adds second paapiirrustus and set's it not public"
-          (upload-attachment pena application-id {:id "" :type {:type-group "paapiirustus" :type-id "pohjapiirros"}} true) => true
+          (upload-attachment pena application-id {:id "" :type {:type-group "paapiirustus" :type-id "pohjapiirustus"}} true) => true
           (let [{attachments :attachments} (query-application pena application-id)
                 new-att (last attachments)]
-            (fact "now two pohjapiirroses exist"
-              (count (filter (fn-> :type :type-id (= "pohjapiirros")) attachments)) => 2)
+            (fact "now two pohjapiirustus attachemnts exist"
+              (count (filter (fn-> :type :type-id (= "pohjapiirustus")) attachments)) => 2)
             (get-in new-att [:type :type-group]) => "paapiirustus"
             (command pena :set-attachment-visibility :id application-id :attachmentId (:id new-att) :value "viranomainen") => ok?))
 
@@ -207,7 +207,7 @@
 
           (fact "only one pohjapiirustus, as non-public is filtered"
             (->> (:attachments application)
-              (filter (fn-> :type :type-id (= "pohjapiirros")))
+              (filter (fn-> :type :type-id (= "pohjapiirustus")))
               count) => 1)
 
           (let [file-id (->> application :attachments first :latestVersion :fileId)]

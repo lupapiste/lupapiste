@@ -120,7 +120,7 @@ var util = (function($) {
   function getFeatureName(feature) {
     for(var key in feature.properties) { // properties to lower case
       if (key.toLowerCase() === "nimi") {
-        return feature.properties[key];
+        return feature.properties[key].toString();
       }
     }
     return undefined;

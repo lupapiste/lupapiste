@@ -1,7 +1,7 @@
 (ns lupapalvelu.organization
   (:import [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.geojson.feature FeatureJSON]
-           [org.geotools.feature.simple SimpleFeatureBuilder]
+           [org.geotools.feature.simple SimpleFeatureBuilder SimpleFeatureTypeBuilder]
            [org.geotools.geojson.geom GeometryJSON]
            [org.geotools.geometry.jts JTS]
            [org.geotools.referencing CRS]
@@ -9,7 +9,7 @@
            [org.opengis.feature.simple SimpleFeature]
            [java.util ArrayList])
 
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf fatal]]
             [clojure.string :as s]
             [clojure.walk :as walk]
             [monger.operators :refer :all]
@@ -390,18 +390,41 @@
               ; Atm we assume only CRS EPSG:3067 is used.
               ; Always give feature the same id if names match, so that search filters continue to work after reloading shp file
               ; with same feature names
+              ;
+              ; Cheatsheet to understand naming conventions in Geotools (from http://docs.geotools.org/latest/userguide/tutorial/feature/csv2shp.html):
+              ; Java  | GeoSpatial
+              ; --------------
+              ; Object  Feature
+              ; Class   FeatureType
+              ; Field   Attribute
+              
               (let [feature-type        (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
-                    name-property       (.getProperty feature "nimi")
-                    name-property       (if-not name-property
+                    name-property       (or ; try to get name of feature from these properties
+                                          (.getProperty feature "nimi")
                                           (.getProperty feature "NIMI")
-                                          name-property)
+                                          (.getProperty feature "Nimi")
+                                          (.getProperty feature "name")
+                                          (.getProperty feature "NAME")
+                                          (.getProperty feature "Name")
+                                          (.getProperty feature "id")
+                                          (.getProperty feature "ID")
+                                          (.getProperty feature "Id"))
+
                     feature-name        (when name-property
                                           (.getValue name-property))
                     id                  (if (contains? map-of-existing-areas feature-name)
                                           (get map-of-existing-areas feature-name)
                                           (mongo/create-id))
-                    builder             (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
-                    _                   (.init builder feature) ; init builder with original feature
+
+                    type-builder        (doto (SimpleFeatureTypeBuilder.) ; FeatureType builder, 'nimi' property
+                                          (.init  feature-type) ; Init with existing subtyped feature (correct CRS, no attributes)
+                                          (.add "nimi" (.getClass String))) ; Add the attribute we are interested in
+                    new-feature-type    (.buildFeatureType type-builder)
+
+                    builder             (SimpleFeatureBuilder. new-feature-type) ; new FeatureBuilder with changed crs and new attribute
+                    builder             (doto builder
+                                          (.init feature) ; init builder with original feature
+                                          (.set "nimi" feature-name)) ; ensure 'nimi' property exists
                     transformed-feature (.buildFeature builder id)]
                 (.add list transformed-feature)))
             (when (.hasNext iterator)

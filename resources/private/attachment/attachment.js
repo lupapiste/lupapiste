@@ -422,7 +422,13 @@ var attachment = (function() {
 
     var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
     if (!attachment) {
+      pageutil.hideAjaxWait();
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
+      hub.send("show-dialog", {ltitle: "error.attachment-not-found",
+                               size: "small",
+                               component: "ok-dialog",
+                               componentParams: {ltext: "error.attachment-not-found.desc",
+                                                 okFn: _.partial(applicationModel.open, "attachments")}});
       return;
     }
 

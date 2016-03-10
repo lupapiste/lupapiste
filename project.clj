@@ -105,20 +105,19 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.56"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.0"]
+                 [lupapiste/commons "0.7.7"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
                  [lupapiste/openpdf "1.0.2"]
                  ; Wrapper for clj-pdf for PDF/A document generation
-                 [lupapiste/pdfa-generator "1.0.1"]
-                 ]
+                 [lupapiste/pdfa-generator "1.0.1"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.5"]
-                                  [pdfboxing "0.1.5"]
-                                  [org.apache.pdfbox/pdfbox "1.8.11" :exclusions [commons-logging]]]
+                                  [lupapiste/pdfboxing "0.2.0"]
+]
                    :plugins [[lein-midje "3.1.1"]
                              [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
@@ -129,9 +128,7 @@
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}}
-             :uberjar  {:main lupapalvelu.main
-                        :jar-exclusions [#"gems/.*"]
-                        :uberjar-exclusions [#"gems/.*"]}
+             :uberjar  {:main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]

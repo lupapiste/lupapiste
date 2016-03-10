@@ -15,6 +15,7 @@
 (defn- convert-to-pdfa-request [filename content]
   (http/post url
              {:as        :stream
+              :throw-exceptions false
               :multipart [{:name      filename
                            :part-name "file"
                            :mime-type (mime/mime-type (mime/sanitize-filename filename))

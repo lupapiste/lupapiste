@@ -8,6 +8,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application-api]
             [lupapalvelu.document.schemas :as schemas]))
 
 
@@ -51,10 +52,10 @@
 
 (facts "Add operation allowed"
        (let [not-allowed-for #{;; R-operations, adding not allowed
-                               :raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen 
-                               :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen 
+                               :raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen
+                               :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen
                                ;; KT-operations, adding not allowed
-                               :rajankaynti 
+                               :rajankaynti
                                ;; YL-operations, adding not allowed
                                :pima
                                ;; YM-operations, adding not allowed
