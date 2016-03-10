@@ -147,6 +147,7 @@
   [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
            :type :group
            :removable false
+           :approvable true
            :repeating false
            :order 64}
     :body mainostus-tai-viitoitus-tapahtuma-valinta}])
@@ -160,6 +161,7 @@
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
            :removable false
+           :approvable true
            :repeating false
            :order 65}
     :body hankkeen-kuvaus-sijoituslupa}])
