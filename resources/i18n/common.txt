@@ -1786,7 +1786,7 @@
 "caseFile.actionDate" "sv" "Skedets inledningsdatum"
 "caseFile.documentDate" "fi" "Aloitus- tai toimituspäivämäärä"
 "caseFile.documentDate" "sv" "Start- eller inlämningsdatum"
-"caseFile.heading" "fi" "Käsittelyprosessin tiedot"
+"caseFile.heading" "fi" "Käsittelyprosessi"
 "caseFile.heading" "sv" "Uppgifter om behandlingsprocessen"
 "choose" "fi" "Valitse…"
 "choose" "sv" "Välj…"
