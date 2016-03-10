@@ -179,7 +179,6 @@
          (validate application)
          (populate-operation-info operations)
          mask-person-ids
-         schemas/with-current-schema-info
          (enrich-single-doc-disabled-flag user))))
 
 (defn- process-documents-and-tasks [user application]
