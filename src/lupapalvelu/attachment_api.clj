@@ -432,7 +432,7 @@
 
 (defn- stamp-attachment! [stamp file-info {:keys [application user now] :as context}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
-        options (assoc (select-keys context [:x-margin :y-margin :transparency]) :page :first)
+        options (select-keys context [:x-margin :y-margin :transparency :page])
         file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
     (with-open [out (io/output-stream file)]
@@ -483,8 +483,10 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
+  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo buildingId kuntalupatunnus section]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
+                      (partial action/number-parameters [:xMargin :yMargin])
+                      (partial action/non-blank-parameters [:page])]
    :user-roles #{:authority}
    :states     (conj states/post-submitted-states :submitted)
    :description "Stamps all attachments of given application"}
@@ -503,6 +505,7 @@
                :now      (:created command)
                :x-margin (->long xMargin)
                :y-margin (->long yMargin)
+               :page     (keyword page)
                :transparency (->long (or transparency 0))
                :info-fields [(str buildingId)
                              (str kuntalupatunnus)
