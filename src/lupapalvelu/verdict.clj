@@ -92,7 +92,7 @@
 
 (defschema Poytakirja
   {(sc/optional-key :paatoksentekija) (sc/maybe sc/Str)
-   (sc/optional-key :paatoskoodi)     (apply sc/enum nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11" verdict-codes)
+   (sc/optional-key :paatoskoodi)     (sc/maybe sc/Str) ;; (apply sc/enum verdict-codes), data contains invalid values: nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11" 
    (sc/optional-key :status)          (sc/maybe Status)
    (sc/optional-key :urlHash)         sc/Str
    (sc/optional-key :paatos)          (sc/maybe sc/Str)
