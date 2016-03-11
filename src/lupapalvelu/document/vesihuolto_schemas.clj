@@ -24,7 +24,7 @@
                                                         {:name "Lomarakennus"}
                                                         {:name "Asuinrakennus"}
                                                         {:name "ei tiedossa"}]}
-                                                {:name "rakennusvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s"}
+                                                {:name "rakennusvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size :s}
                                                 {:name "vapautus" :type :checkbox}
                                                 {:name "kohteenVarustelutaso" :type :group
                                                  :body [{:name "Suihku" :type :checkbox}
@@ -52,7 +52,7 @@
     :body [{:name "hulevedet" :type :select :sortBy :displayname :other-key "johdetaanMuualle"
             :body [{:name "ojaan"}
                    {:name "imeytetaan"}]}
-           {:name "johdetaanMuualle" :type :string :size "l"}]}
+           {:name "johdetaanMuualle" :type :string :size :l}]}
    {:info {:name "talousvedet"
            :approvable false
            :order 4
@@ -62,7 +62,7 @@
             :body [{:name "Vesihuoltolaitoksen vesijohdosta"}
                    {:name "Kiinteist\u00f6n rengaskaivosta"}
                    {:name "Kiinteist\u00f6n porakaivosta"}]}
-           {:name "muualta" :type :string :size "l"}
+           {:name "muualta" :type :string :size :l}
            {:name "johdatus" :type :select :sortBy :displayname
             :body [{:name "kannetaan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "pumpataan kaivosta tai vesist\u00f6st\u00e4"}

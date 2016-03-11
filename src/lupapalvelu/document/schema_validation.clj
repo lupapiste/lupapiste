@@ -6,7 +6,7 @@
 (defn type-pred [& types] (comp (set types) :type))
 (defn subtype-pred [& subtypes] (comp (set subtypes) :subtype))
 
-(def input-sizes ["t" "s" "m" "l" "xl"])
+(def input-sizes [:t :s :m :l :xl])
 
 (defschema GenInput
   "General leaf element schema. Base element for input elements."

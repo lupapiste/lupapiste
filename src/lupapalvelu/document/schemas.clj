@@ -181,13 +181,13 @@
 
 (def tunnus {:name "tunnus" :type :string :required true :hidden true :max-len 3 :identifier true})
 
-(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size "xl" :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
+(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size :xl :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
                            {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true}
                            {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
-(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :size "xl" :i18nkey "rakennusnro" :required true}
+(def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :size :xl :i18nkey "rakennusnro" :required true}
                                 {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true}
                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
@@ -198,8 +198,8 @@
                      :validator :address
                      :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true}
-                            {:name "postinumero" :type :string :size "s" :required true :dummy-test :postal-code}
-                            {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}
+                            {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code}
+                            {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size :m :required true}
                             country]}])
 
 (def simple-osoite-maksaja [{:name "osoite"
@@ -208,8 +208,8 @@
                              :validator :address
                              :blacklist [turvakielto]
                              :body [{:name "katu" :type :string :subtype :vrk-address :required true}
-                                    {:name "postinumero" :type :string :size "s" :required true :dummy-test :postal-code}
-                                    {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}
+                                    {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code}
+                                    {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size :m :required true}
                                     country]}])
 
 (def rakennuksen-osoite [{:name "osoite"
@@ -219,12 +219,12 @@
                                  {:name "lahiosoite" :type :string}
                                  {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
                                  {:name "osoitenumero2" :type :string}
-                                 {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s" :hidden true :readonly true}
-                                 {:name "jakokirjain2" :type :string :size "s" :hidden true :readonly true}
-                                 {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s" :hidden true :readonly true}
-                                 {:name "huoneisto" :type :string :size "s" :hidden true :readonly true}
-                                 {:name "postinumero" :type :string :size "s" :dummy-test :postal-code}
-                                 {:name "postitoimipaikannimi" :type :string :size "m"}
+                                 {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :s :hidden true :readonly true}
+                                 {:name "jakokirjain2" :type :string :size :s :hidden true :readonly true}
+                                 {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :s :hidden true :readonly true}
+                                 {:name "huoneisto" :type :string :size :s :hidden true :readonly true}
+                                 {:name "postinumero" :type :string :size :s :dummy-test :postal-code}
+                                 {:name "postitoimipaikannimi" :type :string :size :m}
                                  country]}])
 
 (def yhteystiedot [{:name "yhteystiedot"
@@ -283,7 +283,7 @@
 (def yhteyshenkilo
   (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet-with-vain-sahkoinen-asiointi]))
 
-(def yritys-minimal [{:name "yritysnimi" :type :string :required true :size "l"}
+(def yritys-minimal [{:name "yritysnimi" :type :string :required true :size :l}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
 
 (def yritys (body
@@ -338,7 +338,7 @@
                           {:name "valittajaTunnus"
                            :type :select
                            :i18nkey "osapuoli.yritys.verkkolaskutustieto.valittajaTunnus"
-                           :size "l"
+                           :size :l
                            :body e-invoice-operators}])
 
 (def yritys-with-verkkolaskutustieto (body
@@ -462,11 +462,11 @@
 
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
-               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
+               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size :s :required true}
                {:name "fise" :type :string :required false}
-               {:name "fiseKelpoisuus" :type :select :sortBy :displayname :i18nkey "fisekelpoisuus" :size "l" :required false :body fise-kelpoisuus-lajit}
+               {:name "fiseKelpoisuus" :type :select :sortBy :displayname :i18nkey "fisekelpoisuus" :size :l :required false :body fise-kelpoisuus-lajit}
                patevyysluokka
-               {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
+               {:name "kokemus" :type :string :subtype :number :min-len 1 :max-len 2 :size :s :required false}
                {:name "patevyys" :type :string :required false}])
 
 (def designer-basic (body
@@ -548,18 +548,18 @@
 (def patevyys-tyonjohtaja [koulutusvalinta
                            {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                            patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
-                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
-                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
-                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
+                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size :s :required true}
+                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size :s :required true}
+                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size :s :required true}
                            {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
 (def patevyys-tyonjohtaja-v2 [koulutusvalinta
                               {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
-                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
-                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
-                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}])
+                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size :s :required true}
+                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size :s :required true}
+                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size :s :required true}])
 
 (def sijaisuus-tyonjohtaja [{:name "sijaistus" :i18nkey "tyonjohtaja.sijaistus._group_label"
                              :type :group
@@ -606,22 +606,22 @@
 
 (def tyonjohtaja-hanketieto {:name "tyonjohtajaHanketieto" :type :group
                              :body [{:name "taysiaikainenOsaaikainen" :type :radioGroup :body [{:name "taysiaikainen"} {:name "osaaikainen"}] :default "taysiaikainen"}
-                                    {:name "hankeKesto" :type :string :size "s" :unit :kuukautta :subtype :number :min 0 :max 9999999}
-                                    {:name "kaytettavaAika" :type :string :size "s" :unit :tuntiaviikko :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
-                                    {:name "kayntienMaara" :type :string :size "s" :unit :kpl :subtype :number :min 0 :max 9999999}]})
+                                    {:name "hankeKesto" :type :string :size :s :unit :kuukautta :subtype :number :min 0 :max 9999999}
+                                    {:name "kaytettavaAika" :type :string :size :s :unit :tuntiaviikko :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
+                                    {:name "kayntienMaara" :type :string :size :s :unit :kpl :subtype :number :min 0 :max 9999999}]})
 
-(def hanke-row [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
-                {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
-                {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
-                {:name "kokonaisala" :type :string :subtype :decimal :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
-                {:name "vaihe" :type :select :size "t" :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe" :valueAllowUnset false
+(def hanke-row [{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
+                {:name "katuosoite" :type :string :size :m :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
+                {:name "rakennustoimenpide" :type :string :size :l :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
+                {:name "kokonaisala" :type :string :subtype :decimal :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
+                {:name "vaihe" :type :select :size :t :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe" :valueAllowUnset false
                  :body [{:name "R" :i18nkey "muutHankkeet.R"}
                         {:name "A" :i18nkey "muutHankkeet.A"}
                         {:name "K" :i18nkey "muutHankkeet.K"}]}
-                {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.3kk"}
-                {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.6kk"}
-                {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.9kk"}
-                {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.12kk"}
+                {:name "3kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.3kk"}
+                {:name "6kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.6kk"}
+                {:name "9kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.9kk"}
+                {:name "12kk" :type :string :subtype :number  :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.12kk"}
                 {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-checkbox :whitelist {:roles [:none]
                                                                                                                                                 :otherwise :disabled}}])
 
@@ -664,26 +664,26 @@
                  :henkilo-body henkilo-maksaja)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :size "s" :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
+(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})
 
-(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :size "s" :label false :i18nkey "huoneistot.huoneistoTyyppi" :listen [:muutostapaChanged]
+(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.huoneistoTyyppi" :listen [:muutostapaChanged]
                    :body [{:name "asuinhuoneisto"}
                           {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
-                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "t" :label false :i18nkey "huoneistot.porras" :listen [:muutostapaChanged]}
-                   {:name "huoneistonumero" :type :string :subtype :number :min 0 :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
-                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged]}
-                   {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku" :listen [:muutostapaChanged]}
-                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size "s" :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
+                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :t :label false :i18nkey "huoneistot.porras" :listen [:muutostapaChanged]}
+                   {:name "huoneistonumero" :type :string :subtype :number :min 0 :min-len 1 :max-len 3 :size :s :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
+                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :t :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged]}
+                   {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size :t :label false :i18nkey "huoneistot.huoneluku" :listen [:muutostapaChanged]}
+                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size :s :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
                     :body [{:name "keittio"}
                            {:name "keittokomero"}
                            {:name "keittotila"}
                            {:name "tupakeittio"}
                            {:name "ei tiedossa" :i18nkey "huoneistot.keittionTyyppi.eiTiedossa"}]}
-                   {:name "huoneistoala" :type :string :subtype :decimal :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala" :listen [:muutostapaChanged]}
+                   {:name "huoneistoala" :type :string :subtype :decimal :size :s :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala" :listen [:muutostapaChanged]}
                    {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin" :listen [:muutostapaChanged]}
                    {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin" :listen [:muutostapaChanged]}
                    {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin" :listen [:muutostapaChanged]}
@@ -730,7 +730,7 @@
                          {:name "m2"}
                          {:name "m3"}]})
 
-(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-string :min 0 :max 9999999 :size "s"})
+(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-string :min 0 :max 9999999 :size :s})
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
                                  jateyksikko
@@ -822,17 +822,17 @@
                      :body [{:name "liiketaloudellinen"}
                             {:name "muu"}
                             {:name "ei tiedossa"}]}
-                    {:name "kayttotarkoitus" :type :select :sortBy :displayname :size "l"
+                    {:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l
                      :body usages/rakennuksen-kayttotarkoitus}]})
 
 (def mitat {:name "mitat"
             :type :group
-            :body [{:name "tilavuus" :type :string :size "s" :unit :m3 :subtype :number :min 0 :max 9999999}
-                   {:name "kerrosala" :type :string :size "s" :unit :m2 :subtype :number :min 0 :max 9999999}
-                   {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit :m2 :subtype :number :min 1 :max 9999999}
-                   {:name "kokonaisala" :type :string :size "s" :unit :m2 :subtype :number :min 0 :max 9999999}
-                   {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
-                   {:name "kellarinpinta-ala" :type :string :size "s" :unit :m2 :subtype :number :min 0 :max 9999999}]})
+            :body [{:name "tilavuus" :type :string :size :s :unit :m3 :subtype :number :min 0 :max 9999999}
+                   {:name "kerrosala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}
+                   {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}
+                   {:name "kokonaisala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}
+                   {:name "kerrosluku" :type :string :size :s :subtype :number :min 0 :max 50}
+                   {:name "kellarinpinta-ala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}]})
 
 (def mitat-muutos (merge mitat
                     {:group-help "mitat-muutos.help"
@@ -899,8 +899,8 @@
                        {:name "koneellinenilmastointiKytkin" :type :checkbox}
                        {:name "lamminvesiKytkin" :type :checkbox}
                        {:name "aurinkopaneeliKytkin" :type :checkbox}
-                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit :kpl}
-                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size "s" :unit :hengelle}
+                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size :s :unit :kpl}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size :s :unit :hengelle}
                        {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"
@@ -913,7 +913,7 @@
                               {:name "E"}
                               {:name "F"}
                               {:name "G"}]}
-                      {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
+                      {:name "energiatehokkuusluku" :type :string :size :s :subtype :number}
                       {:name "energiatehokkuusluvunYksikko" :type :select, :sortBy :displayname, :default "kWh/m2"
                        :body [{:name "kWh/m2"}
                               {:name "kWh/brm2/vuosi"}]}
@@ -968,9 +968,9 @@
 (defn etaisyys-row [name min-default]
   {:name name
    :type :group
-   :body [{:name "minimietaisyys" :type :string :size "s" :unit :m :readonly true :default min-default :required true}
+   :body [{:name "minimietaisyys" :type :string :size :s :unit :m :readonly true :default min-default :required true}
           alle-yli-radiogroup
-          {:name "huomautukset" :type :string :size "l"}]})
+          {:name "huomautukset" :type :string :size :l}]})
 
 (def maalampokaivon-etaisyydet {:name "kaivo-etaisyydet"
                                 :i18nkey "kaivo-etaisyydet"
@@ -1001,7 +1001,7 @@
                                   :i18nkey "rakennelman-kayttotarkoitus"
                                   :body (mapv #(hash-map :i18nkey (str "rakennelman-kayttotarkoitus." %) :name %) rakennelman-kayttotarkoitukset)})
 
-(def rakennelma (body {:name "kokonaisala" :type :string :size "s" :unit :m2 :subtype :number}
+(def rakennelma (body {:name "kokonaisala" :type :string :size :s :unit :m2 :subtype :number}
                       rakennelman-kayttotarkoitus
                       kuvaus))
 (def maisematyo (body kuvaus))
@@ -1011,7 +1011,7 @@
                              :repeating true
                              :approvable true
                              :body (body building-parties
-                                     [{:name "omistajalaji" :type :select :sortBy :displayname :other-key "muu-omistajalaji" :required true :size "l"
+                                     [{:name "omistajalaji" :type :select :sortBy :displayname :other-key "muu-omistajalaji" :required true :size :l
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                               {:name "asunto-oy tai asunto-osuuskunta"}
@@ -1105,12 +1105,12 @@
                      :body [{:name "perusparannuskytkin" :type :checkbox}
                             {:name "mitat"
                              :type :group
-                             :body [{:name "tilavuus" :type :string :size "s" :unit :m3 :subtype :number :min -9999999 :max 9999999}
-                                    {:name "kerrosala" :type :string :size "s" :unit :m2 :subtype :number :min -9999999 :max 9999999}
-                                    {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit :m2 :subtype :number :min -9999999 :max 9999999}
-                                    {:name "kokonaisala" :type :string :size "s" :unit :m2 :subtype :number :min -9999999 :max 9999999}
+                             :body [{:name "tilavuus" :type :string :size :s :unit :m3 :subtype :number :min -9999999 :max 9999999}
+                                    {:name "kerrosala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
+                                    {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
+                                    {:name "kokonaisala" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                     {:name "huoneistoala" :type :group :repeating true :removable true
-                                     :body [{:name "pintaAla" :type :string :size "s" :unit :m2 :subtype :number :min -9999999 :max 9999999}
+                                     :body [{:name "pintaAla" :type :string :size :s :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                             {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname
                                              :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
                                                     {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
@@ -1142,8 +1142,8 @@
 (def rakennuspaikka [{:name "kiinteisto"
                       :type :group
                       :uicomponent :propertyGroup
-                      :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
-                             ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
+                      :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s}
+                             ;{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                              {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
                              {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
                              {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
@@ -1174,10 +1174,10 @@
 (def lisakohde-rakennuspaikka [{:name "kiinteisto"
                                 :type :group
                                 :uicomponent :propertyGroup
-                                :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size "s"}
+                                :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s}
                                        ; Please channge yhteystiedot-api/application-property-owners if kiinteistoTunnus path changes
                                        {:name "kiinteistoTunnus" :type :string :hidden true}
-                                       ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
+                                       ;{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                                        {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
                                        {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
                                        {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
