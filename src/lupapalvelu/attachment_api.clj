@@ -432,7 +432,7 @@
 
 (defn- stamp-attachment! [stamp file-info {:keys [application user now] :as context}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
-        options (select-keys context [:x-margin :y-margin :transparency])
+        options (assoc (select-keys context [:x-margin :y-margin :transparency]) :page :first)
         file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
     (with-open [out (io/output-stream file)]

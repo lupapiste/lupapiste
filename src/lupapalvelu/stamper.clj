@@ -192,8 +192,11 @@
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
     (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)]
-      (doseq [i (range (.getNumberOfPages reader))]
-        (stamp-pdf-page (inc i) stamp options reader stamper)))))
+      (case (:page options)
+        :all   (doseq [i (range (.getNumberOfPages reader))]
+                 (stamp-pdf-page (inc i) stamp options reader stamper))
+        :last  (stamp-pdf-page (.getNumberOfPages reader) stamp options reader stamper)
+        :first (stamp-pdf-page 1 stamp options reader stamper)))))
 
 ;;
 ;; Stamp raster image:
