@@ -9,7 +9,7 @@
 (def hankkeen-kuvaus-kayttolupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "varattava-pinta-ala" :type :string :subtype :number :unit "m2" :min-len 1 :max-len 5 :size "s"}))
+    {:name "varattava-pinta-ala" :type :string :subtype :number :unit :m2 :min-len 1 :max-len 5 :size :s}))
 
 (defschemas
   1
@@ -29,7 +29,7 @@
 (def hankkeen-kuvaus-kaivulupa
   (body
     hankkeen-kuvaus-kayttolupa
-    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))   ;; sijoituslupaviitetietoType
+    {:name "sijoitusLuvanTunniste" :type :string :size :l}))   ;; sijoituslupaviitetietoType
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
@@ -109,7 +109,7 @@
 (def tapahtuman-tiedot
   (body
     {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}  ;; lupakohtainenLisatietoType
-    {:name "tapahtumapaikka" :type :string :size "l"}                        ;; lupaAsianKuvaus
+    {:name "tapahtumapaikka" :type :string :size :l}                        ;; lupaAsianKuvaus
     {:name "tapahtuma-aika-alkaa-pvm" :type :date}                           ;; alkuPvm
     {:name "tapahtuma-aika-paattyy-pvm" :type :date}))                       ;; loppuPvm
 
@@ -147,6 +147,7 @@
   [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
            :type :group
            :removable false
+           :approvable true
            :repeating false
            :order 64}
     :body mainostus-tai-viitoitus-tapahtuma-valinta}])
@@ -160,6 +161,7 @@
   1
   [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
            :removable false
+           :approvable true
            :repeating false
            :order 65}
     :body hankkeen-kuvaus-sijoituslupa}])
@@ -183,7 +185,7 @@
            :body []}
           {:name "tyonTyyppi"
            :type :group
-           :body [{:name "muu" :type :string :size "s"}]}
+           :body [{:name "muu" :type :string :size :s}]}
           {:name "tyoaika"
            :type :group
            :body [#_{:name "alkaa-pvm" :type :date}

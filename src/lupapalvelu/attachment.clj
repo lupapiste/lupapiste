@@ -427,7 +427,7 @@
             (errorf
               "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
               attachment-id retry-limit)
-            (let [application (mongo/by-id :applications (:id application))
+            (let [application (mongo/by-id :applications (:id application) [:attachments :state])
                   attachment  (get-attachment-info application attachment-id)]
               (set-attachment-version! application attachment options (dec retry-limit))))))
       (do
@@ -475,7 +475,7 @@
   [application {:keys [attachment-id attachment-type op created user target locked required contents read-only source] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? user))
-        find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id}))]
+        find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id} [:attachments]))]
     (cond
       (ss/blank? attachment-id) (create-attachment! application attachment-type op created target locked required requested-by-authority? nil contents read-only source)
       @find-application-delay   (get-attachment-info @find-application-delay attachment-id)

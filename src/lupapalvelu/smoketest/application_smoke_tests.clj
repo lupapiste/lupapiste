@@ -40,9 +40,13 @@
 (def coerce-attachment (ssc/json-coercer att/Attachment))
 
 (defn validate-attachment-against-schema [{id :id :as attachment}]
-  (let [coercion-result (coerce-attachment attachment)]
+  (let [{{{type-id :type-id type-group :type-group} :type} :error :as coercion-result} (coerce-attachment attachment)]
     (when (instance? schema.utils.ErrorContainer coercion-result)
-      {:attachment-id id :error "Not valid attachment" :coercion-result coercion-result})))
+      {:attachment-id id
+       :error "Not valid attachment"
+       :coercion-result  (cond-> coercion-result ; truncate long enum prints from type-group and type-id by taking only value
+                           type-group (update-in [:error :type :type-group] #(list 'invalid-type-group (.value %)))
+                           type-id    (update-in [:error :type :type-id]    #(list 'invalid-type-id (.value %))))})))
 
 (defn validate-attachments [{attachments :attachments id :id}]
   (->> attachments

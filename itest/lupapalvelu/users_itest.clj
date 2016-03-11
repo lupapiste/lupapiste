@@ -2,6 +2,8 @@
   (:require [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]))
 
+(apply-remote-minimal)
+
 (defn all-in-role? [role]
   (fn [users]
     (->> users
