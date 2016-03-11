@@ -10,7 +10,7 @@
                            :deny-removing-last-document true
                            :repeating false}
                     :body [{:name "kaytettykerrosala" :type :group
-                            :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
+                            :body [{:name "pintaAla" :type :string :size "s" :unit :m2 :subtype :number}
                                    {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname :size "l"
                                     :body usages/rakennuksen-kayttotarkoitus}]}
                            {:name "toimenpiteet"
@@ -31,8 +31,8 @@
                                            {:name "loma-asunnon muuttaminen vakituiseksi"}]}
                                    {:name "huoneistoja" :type :string :subtype :number :size "s"}
                                    {:name "kerroksia" :type :string :subtype :number :size "s"}
-                                   {:name "kerrosala" :type :string :subtype :number :unit "m2" :size "s"}
-                                   {:name "kokonaisala" :type :string :subtype :number :unit "m2" :size "s"}]}]})
+                                   {:name "kerrosala" :type :string :subtype :number :unit :m2 :size "s"}
+                                   {:name "kokonaisala" :type :string :subtype :number :unit :m2 :size "s"}]}]})
 
 (def suunnittelutarveratkaisun-lisaosa {:info {:name "suunnittelutarveratkaisun-lisaosa"
                                                :approvable true
@@ -46,11 +46,11 @@
                                                        {:name "viemarijohto" :type :checkbox}]}
 
                                                {:name "vaikutukset_yhdyskuntakehykselle":type :group :layout :vertical
-                                                :body [{:name "etaisyys_alakouluun" :type :string :subtype :number :unit "km" :size "s"}
-                                                       {:name "etaisyys_ylakouluun" :type :string :subtype :number :unit "km" :size "s"}
-                                                       {:name "etaisyys_kauppaan" :type :string :subtype :number :unit "km" :size "s"}
-                                                       {:name "etaisyys_paivakotiin" :type :string :subtype :number :unit "km" :size "s"}
-                                                       {:name "etaisyys_kuntakeskuksen_palveluihin" :type :string :subtype :number :unit "km" :size "s"}
+                                                :body [{:name "etaisyys_alakouluun" :type :string :subtype :number :unit :km :size "s"}
+                                                       {:name "etaisyys_ylakouluun" :type :string :subtype :number :unit :km :size "s"}
+                                                       {:name "etaisyys_kauppaan" :type :string :subtype :number :unit :km :size "s"}
+                                                       {:name "etaisyys_paivakotiin" :type :string :subtype :number :unit :km :size "s"}
+                                                       {:name "etaisyys_kuntakeskuksen_palveluihin" :type :string :subtype :number :unit :km :size "s"}
                                                        {:name "turvallinen_polkupyoratie_kouluun" :type :checkbox}
                                                        {:name "muita_vaikutuksia" :type :text :max-len 4000 :layout :full-width}]}
 
@@ -71,7 +71,7 @@
                                                        {:name "ulkoilu_ja_virkistysaluetta_varattu" :type :checkbox}]}
 
                                                {:name "muut_vaikutukset":type :group :layout :vertical
-                                                :body [{:name "etaisyys_viemariverkosta"  :type :string :subtype :number :unit "m" :size "s"}
+                                                :body [{:name "etaisyys_viemariverkosta"  :type :string :subtype :number :unit :m :size "s"}
                                                        {:name "liitytaanko_viemariverkostoon" :type :checkbox}
                                                        {:name "pohjavesialuetta" :type :checkbox}]}
 

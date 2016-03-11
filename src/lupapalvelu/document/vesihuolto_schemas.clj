@@ -7,8 +7,8 @@
                                  :body [
                                         {:name "tilanNimi" :type :string :readonly true}
                                         {:name "rekisterointipvm" :type :string :readonly true}
-                                        {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                                        {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}])
+                                        {:name "maapintaala" :type :string :readonly true :unit :hehtaaria}
+                                        {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria}]}])
 
 (def vesihuolto-kiinteisto {:info {:name "vesihuolto-kiinteisto"
                                    :approvable true

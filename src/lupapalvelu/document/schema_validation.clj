@@ -50,15 +50,15 @@
   "String type without subtype"
   (merge GenString
          {(opt :dummy-test)   sc/Keyword
-          (opt :identifier)   sc/Bool ;; TODO: should be a subtype?
-          (opt :unit)         sc/Str  ;; TODO: should have numeric subtype?
+          (opt :identifier)   sc/Bool     ;; TODO: should be a subtype?
+          (opt :unit)         sc/Keyword  ;; TODO: should have numeric subtype?
           }))
 
 (defschema Num
   "Integer string type"
   (merge GenString
          {:subtype            (sc/eq :number)
-          (opt :unit)         (sc/enum "m" "m2" "m3" "km" "k-m3" "hehtaaria" "kuukautta" "tuntiaviikko" "kpl" "hengelle")
+          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :hehtaaria :y :kuukautta :tuntiaviikko :kpl :hengelle)
           (opt :min)          sc/Int
           (opt :max)          sc/Int}))
 
@@ -66,7 +66,7 @@
   "Numeric string type"
   (merge GenString
          {:subtype            (sc/eq :decimal)
-          (opt :unit)         (sc/enum "m" "m2" "m3" "km" "k-m3" "hehtaaria" "kuukautta" "tuntiaviikko")
+          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :hehtaaria :y :kuukautta :tuntiaviikko)
           (opt :min)          sc/Int
           (opt :max)          sc/Int}))
 

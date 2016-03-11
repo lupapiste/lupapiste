@@ -606,9 +606,9 @@
 
 (def tyonjohtaja-hanketieto {:name "tyonjohtajaHanketieto" :type :group
                              :body [{:name "taysiaikainenOsaaikainen" :type :radioGroup :body [{:name "taysiaikainen"} {:name "osaaikainen"}] :default "taysiaikainen"}
-                                    {:name "hankeKesto" :type :string :size "s" :unit "kuukautta" :subtype :number :min 0 :max 9999999}
-                                    {:name "kaytettavaAika" :type :string :size "s" :unit "tuntiaviikko" :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
-                                    {:name "kayntienMaara" :type :string :size "s" :unit "kpl" :subtype :number :min 0 :max 9999999}]})
+                                    {:name "hankeKesto" :type :string :size "s" :unit :kuukautta :subtype :number :min 0 :max 9999999}
+                                    {:name "kaytettavaAika" :type :string :size "s" :unit :tuntiaviikko :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
+                                    {:name "kayntienMaara" :type :string :size "s" :unit :kpl :subtype :number :min 0 :max 9999999}]})
 
 (def hanke-row [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                 {:name "katuosoite" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
@@ -827,12 +827,12 @@
 
 (def mitat {:name "mitat"
             :type :group
-            :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 0 :max 9999999}
-                   {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}
-                   {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                   {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}
+            :body [{:name "tilavuus" :type :string :size "s" :unit :m3 :subtype :number :min 0 :max 9999999}
+                   {:name "kerrosala" :type :string :size "s" :unit :m2 :subtype :number :min 0 :max 9999999}
+                   {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit :m2 :subtype :number :min 1 :max 9999999}
+                   {:name "kokonaisala" :type :string :size "s" :unit :m2 :subtype :number :min 0 :max 9999999}
                    {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
-                   {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 0 :max 9999999}]})
+                   {:name "kellarinpinta-ala" :type :string :size "s" :unit :m2 :subtype :number :min 0 :max 9999999}]})
 
 (def mitat-muutos (merge mitat
                     {:group-help "mitat-muutos.help"
@@ -899,8 +899,8 @@
                        {:name "koneellinenilmastointiKytkin" :type :checkbox}
                        {:name "lamminvesiKytkin" :type :checkbox}
                        {:name "aurinkopaneeliKytkin" :type :checkbox}
-                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
-                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size "s" :unit "hengelle"}
+                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit :kpl}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size "s" :unit :hengelle}
                        {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
 
 (def luokitus {:name "luokitus"
@@ -968,7 +968,7 @@
 (defn etaisyys-row [name min-default]
   {:name name
    :type :group
-   :body [{:name "minimietaisyys" :type :string :size "s" :unit "m" :readonly true :default min-default :required true}
+   :body [{:name "minimietaisyys" :type :string :size "s" :unit :m :readonly true :default min-default :required true}
           alle-yli-radiogroup
           {:name "huomautukset" :type :string :size "l"}]})
 
@@ -1001,7 +1001,7 @@
                                   :i18nkey "rakennelman-kayttotarkoitus"
                                   :body (mapv #(hash-map :i18nkey (str "rakennelman-kayttotarkoitus." %) :name %) rakennelman-kayttotarkoitukset)})
 
-(def rakennelma (body {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
+(def rakennelma (body {:name "kokonaisala" :type :string :size "s" :unit :m2 :subtype :number}
                       rakennelman-kayttotarkoitus
                       kuvaus))
 (def maisematyo (body kuvaus))
@@ -1105,12 +1105,12 @@
                      :body [{:name "perusparannuskytkin" :type :checkbox}
                             {:name "mitat"
                              :type :group
-                             :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min -9999999 :max 9999999}
-                                    {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min -9999999 :max 9999999}
-                                    {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit "m2" :subtype :number :min -9999999 :max 9999999}
-                                    {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min -9999999 :max 9999999}
+                             :body [{:name "tilavuus" :type :string :size "s" :unit :m3 :subtype :number :min -9999999 :max 9999999}
+                                    {:name "kerrosala" :type :string :size "s" :unit :m2 :subtype :number :min -9999999 :max 9999999}
+                                    {:name "rakennusoikeudellinenKerrosala" :type :string :size "s" :unit :m2 :subtype :number :min -9999999 :max 9999999}
+                                    {:name "kokonaisala" :type :string :size "s" :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                     {:name "huoneistoala" :type :group :repeating true :removable true
-                                     :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min -9999999 :max 9999999}
+                                     :body [{:name "pintaAla" :type :string :size "s" :unit :m2 :subtype :number :min -9999999 :max 9999999}
                                             {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname
                                              :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
                                                     {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
@@ -1146,8 +1146,8 @@
                              ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                              {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
                              {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
-                             {:name "maapintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
-                             {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
+                             {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
+                             {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
                              {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-checkbox}]}
                      {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                       :body [{:name "oma"}
@@ -1180,8 +1180,8 @@
                                        ;{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
                                        {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
                                        {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
-                                       {:name "maapintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
-                                       {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria" :uicomponent :docgen-string}
+                                       {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
+                                       {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
                                        {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-checkbox}]}
                                {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                                 :body [{:name "oma"}
