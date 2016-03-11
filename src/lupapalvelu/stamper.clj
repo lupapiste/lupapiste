@@ -108,7 +108,8 @@
         (fs/delete tmp-file-name)
         nil))))
 
-(defn stamp [stamp file-id out x-margin y-margin transparency]
+(defn stamp [stamp file-id out {:keys [x-margin y-margin transparency] :as options}]
+  {:pre [(number? x-margin) (number? y-margin) (number? transparency)]}
   (try
     (let [{content-type :content-type :as attachment} (mongo/download file-id)]
       (with-open [in ((:content attachment))]
