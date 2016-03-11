@@ -70,20 +70,21 @@
                     "ilmoitus merkitty tiedoksi"
                     "ei tiedossa"]) ;; TODO: Strange values - not valid KRYSP
 
-(def Timestamp sc/Num) ;; TODO: Some timestamps are casted as double during mongo export
+(def Timestamp sc/Num) ;; Some timestamps are casted as double during mongo export
 
 (defschema Katselmus
   {:katselmuksenLaji (sc/if ss/numeric? ssc/NatString (apply sc/enum tasks/task-types)) ;; TODO: cleanup numeric values
    (sc/optional-key :tarkastuksenTaiKatselmuksenNimi) sc/Str})
 
 (defschema Maarays
+  "Schema for additional requirements for verdict."
   {(sc/optional-key :sisalto)       sc/Str
    (sc/optional-key :maaraysPvm)    ssc/Timestamp
    (sc/optional-key :maaraysaika)   Timestamp
    (sc/optional-key :toteutusHetki) ssc/Timestamp})
 
 (defschema Status
-  "Schema for status"
+  "Schema for verdict status"
   (sc/if integer? ssc/Nat ssc/NatString))
 
 (defschema Liite
@@ -91,6 +92,7 @@
    :tyyppi sc/Str})
 
 (defschema Poytakirja
+  "Schema for verdict record."
   {(sc/optional-key :paatoksentekija) (sc/maybe sc/Str)
    (sc/optional-key :paatoskoodi)     (sc/maybe sc/Str) ;; (apply sc/enum verdict-codes), data contains invalid values: nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11" 
    (sc/optional-key :status)          (sc/maybe Status)
@@ -101,6 +103,7 @@
    (sc/optional-key :liite)           Liite})
 
 (defschema Paatos
+  "Schema for single verdict fetched from backing system."
   {:id                               ssc/ObjectIdStr
    :poytakirjat                      [Poytakirja]
    (sc/optional-key :lupamaaraykset) {(sc/optional-key :maaraykset)                     [Maarays]
@@ -133,6 +136,7 @@
    :user    usr/SummaryUser})
 
 (defschema Verdict
+  "Schema for verdict wrapper for verdicts with same kuntalupatunnus."
   {:id                           ssc/ObjectIdStr
    :kuntalupatunnus              (sc/maybe sc/Str)
    :timestamp                    (sc/maybe ssc/Timestamp)
