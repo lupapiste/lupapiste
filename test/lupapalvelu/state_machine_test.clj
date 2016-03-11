@@ -55,6 +55,6 @@
   (application-state-seq {:permitType "R"}) => [:draft :open :submitted :sent :verdictGiven :constructionStarted :inUse :closed]
   (application-state-seq {:infoRequest true}) => [:info :answered]
 
-  (application-state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => [:draft :open :submitted :sent :foremanVerdictGiven]
+  (application-state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => [:draft :open :submitted :sent :foremanVerdictGiven :canceled]
   (application-state-seq {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
               :permitSubtype "tyonjohtaja-ilmoitus"}) => [:draft :open :submitted :acknowledged])
