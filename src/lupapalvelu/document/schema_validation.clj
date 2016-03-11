@@ -22,6 +22,7 @@
    (opt :size)        (apply sc/enum input-sizes) ;; Element size (default ?)
    (opt :readonly)    sc/Bool        ;; Element is readonly
    (opt :required)    sc/Bool        ;; Required field
+   (opt :approvable)  sc/Bool        ;; 
    (opt :codes)       [sc/Keyword]   ;; 
    (opt :validator)   sc/Keyword     ;; Specific validator key for element (see model/validate-element)
    (opt :whitelist)   {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
