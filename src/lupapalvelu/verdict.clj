@@ -68,7 +68,7 @@
                     "asia poistettu esityslistalta"
                     "asia pantu p\u00f6yd\u00e4lle kokouksessa"
                     "ilmoitus merkitty tiedoksi"
-                    "ei tiedossa"]) ;; TODO: Strange values - not valid KRYSP
+                    "ei tiedossa"])
 
 (def Timestamp sc/Num) ;; Some timestamps are casted as double during mongo export
 
