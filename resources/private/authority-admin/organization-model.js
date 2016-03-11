@@ -100,7 +100,7 @@ LUPAPISTE.OrganizationModel = function () {
   ko.computed(function() {
     var emails = self.submitNotificationEmails();
     if (self.initialized) {
-      ajax.command("set-organization-submit-notification-email", {emails: emails})
+      ajax.command("set-organization-state-notification-email", {emails: emails})
         .success(_.partial(self.submitNotificationEmailsIndicator, {type: "saved"}))
         .error(_.partial(self.submitNotificationEmailsIndicator, {type: "err"}))
         .call();

@@ -284,7 +284,8 @@
                      {$exists true}
                      org-id)
      :documents {$elemMatch {:data.availableMaterials {$exists true }
-                             :data.contact {$nin ["" nil]}}}})
+                             :data.contact {$nin ["" nil]}}}}
+    [:documents])
    ;; 2. Create materials, contact, modified map.
    (map (fn [{docs :documents}]
           (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")

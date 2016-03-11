@@ -8,6 +8,7 @@
             [sade.env :as env]
             [lupapalvelu.attachment-accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
@@ -133,9 +134,10 @@
         query-user-part (if include-canceled-apps?
                           (update-in (application-query-for user) [:state $nin] #(difference (set %) #{"canceled"}))
                           (application-query-for user))]
-   (filter-application-content-for
-     (mongo/select-one :applications {$and [query-id-part query-user-part]})
-     user)))
+
+    (some-> (mongo/select-one :applications {$and [query-id-part query-user-part]})
+            (update :documents (partial map schemas/with-current-schema-info))
+            (filter-application-content-for user))))
 
 (defn get-application-no-access-checking
   ([query-or-id]
@@ -143,7 +145,8 @@
    (get-application-no-access-checking query-or-id {}))
   ([query-or-id projection]
    (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
-     (mongo/select-one :applications query projection))))
+     (some-> (mongo/select-one :applications query projection)
+             (update :documents (partial map schemas/with-current-schema-info))))))
 
 ;;
 ;; authorization

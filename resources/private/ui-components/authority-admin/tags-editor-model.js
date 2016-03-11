@@ -83,34 +83,43 @@ LUPAPISTE.TagsEditorModel = function() {
       self.tags.remove(item);
     };
 
-    ajax
-      .query("remove-tag-ok", {tagId: item.id})
-      .onError("warning.tags.removing-from-applications", function(data) {
-        var applications = _.pluck(data.applications, "id");
-        var dialogTextPrefix = loc("tags.removing-from-applications.prefix", item.label());
+    if (item.id) {
+      ajax
+        .query("remove-tag-ok", {tagId: item.id})
+        .onError("warning.tags.removing-from-applications", function(data) {
+          var applications = _.pluck(data.applications, "id");
+          var dialogTextPrefix = loc("tags.removing-from-applications.prefix", item.label());
 
-        var dialogBody = _.reduce(applications, function(resultStr, idStr) {
-          return resultStr + "<div><i>" + idStr + "</i></div>";
-        }, "<div class='spacerM'>");
-        dialogBody = dialogBody + "</div>";
+          var dialogBody = _.reduce(applications, function(resultStr, idStr) {
+            return resultStr + "<div><i>" + idStr + "</i></div>";
+          }, "<div class='spacerM'>");
+          dialogBody = dialogBody + "</div>";
 
-        var dialogTextSuffix = loc("tags.removing-from-applications.suffix");
+          var dialogTextSuffix = loc("tags.removing-from-applications.suffix");
 
-        hub.send("show-dialog",
-                 {ltitle: "tags.deleting",
-                  size: "medium",
-                  component: "yes-no-dialog",
-                  componentParams: {text: dialogTextPrefix + dialogBody + dialogTextSuffix,
-                                    yesFn: removeFn}});
-      })
-      .success(function() {
-        hub.send("show-dialog",
-                 {ltitle: "tags.deleting",
-                  size: "medium",
-                  component: "yes-no-dialog",
-                  componentParams: {text: loc("tags.deleting.confirmation", item.label()), yesFn: removeFn}});
-      })
-      .call();
+          hub.send("show-dialog",
+                   {ltitle: "tags.deleting",
+                    size: "medium",
+                    component: "yes-no-dialog",
+                    componentParams: {text: dialogTextPrefix + dialogBody + dialogTextSuffix,
+                                      yesFn: removeFn}});
+        })
+        .success(function() {
+          hub.send("show-dialog",
+                   {ltitle: "tags.deleting",
+                    size: "medium",
+                    component: "yes-no-dialog",
+                    componentParams: {text: loc("tags.deleting.confirmation", item.label()), yesFn: removeFn}});
+        })
+        .call();
+      } else { // no ID
+        item.edit(false);
+        item.dispose();
+        saveSubscription.dispose();
+        self.tags.remove(item);
+        onSave();
+      }
+
   };
 
   self.editTag = function(item) {

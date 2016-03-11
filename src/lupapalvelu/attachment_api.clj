@@ -195,8 +195,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts 
-                 attachment-not-readOnly 
+   :pre-checks  [a/validate-authority-in-drafts
+                 attachment-not-readOnly
                  attachment-not-required
                  attachment-editable-by-application-state]}
   [{:keys [application user]}]
@@ -214,7 +214,7 @@
                  attachment-not-readOnly
                  attachment-editable-by-application-state]}
   [{:keys [application user]}]
-  
+
   (if (and (attachment/file-id-in-application? application attachmentId fileId)
            (attachment/file-id-in-application? application attachmentId originalFileId))
     (attachment/delete-attachment-version! application attachmentId fileId originalFileId)
@@ -430,12 +430,13 @@
            :attachment-id (:id attachment))))
 
 
-(defn- stamp-attachment! [stamp file-info {:keys [application user now x-margin y-margin transparency]}]
+(defn- stamp-attachment! [stamp file-info {:keys [application user now] :as context}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
+        options (select-keys context [:x-margin :y-margin :transparency :page])
         file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)]
     (with-open [out (io/output-stream file)]
-      (stamper/stamp stamp fileId out x-margin y-margin transparency))
+      (stamper/stamp stamp fileId out options))
     (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))]
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
@@ -482,8 +483,10 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
+  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo buildingId kuntalupatunnus section]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
+                      (partial action/number-parameters [:xMargin :yMargin])
+                      (partial action/non-blank-parameters [:page])]
    :user-roles #{:authority}
    :states     (conj states/post-submitted-states :submitted)
    :description "Stamps all attachments of given application"}
@@ -502,6 +505,7 @@
                :now      (:created command)
                :x-margin (->long xMargin)
                :y-margin (->long yMargin)
+               :page     (keyword page)
                :transparency (->long (or transparency 0))
                :info-fields [(str buildingId)
                              (str kuntalupatunnus)
