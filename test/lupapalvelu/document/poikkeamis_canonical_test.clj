@@ -14,7 +14,7 @@
 (def- hakija {:id "523844e1da063788effc1c58"
               :created 1379419361123
               :schema-info {:approvable true
-                            :subtype "hakija"
+                            :subtype :hakija
                             :name "hakija"
                             :removable true
                             :repeating true
@@ -108,7 +108,7 @@
                              :repeating true
                              :version 1
                              :type "party"
-                             :subtype "maksaja"
+                             :subtype :maksaja
                              :order 6}
                :data {:_selected {:value "yritys"}
                       :laskuviite {:value "LVI99997"}
