@@ -1,7 +1,6 @@
 (ns lupapalvelu.pdf.libreoffice-template
   (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [lupapalvelu.tiedonohjaus :as toj]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as converter]
             [sade.util :as util]
             [sade.property :as p]
             [lupapalvelu.domain :as domain]
@@ -42,7 +41,7 @@
        (localize lang "attachmentType" (get-in data [:type :type-group]) (get-in data [:type :type-id]))
        (:type data))
      " " (:contents data)
-     " " (:version data))
+     " " (get-in data [:version :major]) "."(get-in data [:version :minor])  )
    (or (util/to-local-date (:ts data)) "-")
    (:user data)])
 
@@ -124,12 +123,6 @@
     (with-open [rdr (reader template)]
       (doseq [line (line-seq rdr)]
         (.write wrtr (formatted-line line data))))))
-
-(defn pdfa-from-template [template-file data]
-  (let [tmp-file (File/createTempFile "template-" ".fodt")]
-    (debug "created temp file: " (.getAbsolutePath tmp-file))
-    (create-libre-doc template-file data tmp-file)
-    (converter/convert-to-pdfa (.getName tmp-file) (input-stream tmp-file))))
 
 (defn write-history-libre-doc [application lang file]
   (create-libre-doc (resource HISTORY-TEMPLATE) (assoc (common-field-map application lang)

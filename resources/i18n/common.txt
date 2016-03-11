@@ -1787,7 +1787,7 @@
 "caseFile.documentDate" "fi" "Kirjauspäivä"
 "caseFile.documentDate" "sv" "Start- eller inlämningsdatum"
 "caseFile.heading" "fi" "Käsittelyprosessi"
-"caseFile.heading" "sv" "Uppgifter om behandlingsprocessen"
+"caseFile.heading" "sv" "Behandlingsprocessen"
 "choose" "fi" "Valitse…"
 "choose" "sv" "Välj…"
 "close" "fi" "Sulje"

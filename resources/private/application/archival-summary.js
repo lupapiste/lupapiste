@@ -128,8 +128,8 @@
   };
 
   var collectMainDocuments = function(application) {
-    return [{documentNameKey: "caseFile.heading", metadata: application.metadata, id: application.id() + "-process"},
-            {documentNameKey: "applications.application", metadata: application.metadata, id: application.id() + "-application"}];
+    return [{documentNameKey: "applications.application", metadata: application.metadata, id: application.id() + "-application", previewAction: "pdf-export"},
+            {documentNameKey: "caseFile.heading", metadata: application.metadata, id: application.id() + "-process", previewAction: "pdfa-casefile"}];
   };
 
   var model = function(params) {
