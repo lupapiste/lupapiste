@@ -512,7 +512,7 @@
                                 (select-keys [:password :crypto-iv])) => {:password ""})))))))
 
 (doseq [[command-name config-key] [[:set-organization-neighbor-order-email :neighbor-order-emails]
-                                   [:set-organization-submit-notification-email :submit-notification-emails]]]
+                                   [:set-organization-state-notification-email :submit-notification-emails]]]
   (facts {:midje/description (name command-name)}
     (fact "Emails are not set in fixture"
       (let [resp (query sipoo :organization-by-user)]
