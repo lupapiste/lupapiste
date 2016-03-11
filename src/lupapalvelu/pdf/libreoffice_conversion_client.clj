@@ -44,4 +44,4 @@
   (let [filename (str (localize lang "caseFile.heading") ".fodt")
         tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
     (write-history-libre-doc application lang tmp-file)
-    (convert-to-pdfa filename (io/input-stream tmp-file))))
+    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))

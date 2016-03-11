@@ -190,7 +190,8 @@
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'esikatselu'"></div>
               <div class="contents preview-image">
-                <a data-bind="attr: {href: '/api/raw/pdf-export?lang=fi&id=' + $root.application.id()}" target="_blank">
+              <div data-bind="ltext: "></div>
+                <a data-bind="attr: {href: '/api/raw/' + previewAction + '?lang=fi&id=' + $root.application.id()}" target="_blank">
                   <span data-bind="ltext: 'attachment.pdf'"></span>
                 </a>
               </div>
