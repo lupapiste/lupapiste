@@ -100,11 +100,6 @@
    (sc/optional-key :pykala)          (sc/maybe sc/Str)
    (sc/optional-key :liite)           Liite})
 
-(defschema Tyonjohtajatieto
-  (sc/if map? 
-    {:VaadittuTyonjohtaja {:tyonjohtajaLaji sc/Str}}
-    [(sc/if string? sc/Str {:VaadittuTyonjohtaja {:tyonjohtajaLaji sc/Str}})]))
-
 (defschema Paatos
   {:id                               ssc/ObjectIdStr
    :poytakirjat                      [Poytakirja]
@@ -112,7 +107,7 @@
                                       (sc/optional-key :vaaditutKatselmukset)           [Katselmus]
                                       (sc/optional-key :vaaditutErityissuunnitelmat)    [sc/Str]
                                       (sc/optional-key :vaaditutTyonjohtajat)           sc/Str
-                                      (sc/optional-key :vaadittuTyonjohtajatieto)       Tyonjohtajatieto
+                                      (sc/optional-key :vaadittuTyonjohtajatieto)       [sc/Str]
                                       (sc/optional-key :muutMaaraykset)                 [(sc/maybe sc/Str)]
                                       (sc/optional-key :autopaikkojaEnintaan)           ssc/Nat
                                       (sc/optional-key :autopaikkojaVahintaan)          ssc/Nat
