@@ -42,10 +42,10 @@
   (let [schemas (get-schemas schema-version)]
     (assert schemas)
     (->> schemas
-      (map #(when (= :hakija (-> % val :info :subtype))
-              (-> % val :info :name)))
-      (filter identity)
-      set)))
+         (map #(when (= :hakija (-> % val :info :subtype keyword))
+                 (-> % val :info :name)))
+         (filter identity)
+         set)))
 
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
