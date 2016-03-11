@@ -26,19 +26,25 @@
 (defn- localized-text [lang value]
   (if (nil? value) "" (xml-escape (localize lang value))))
 
-(defn- col2-data [data lang]
+(defn- build-xml-history-row [data lang]
   ;(debug "row data:" data)
-  (str
-    (condp = (:category data)
-      :attachment (str "Liite:\n  " (localize lang "attachmentType" (get-in data [:type :type-group]) (get-in data [:type :type-id])))
-      :document (localize lang "application.applicationSummary")
-      :request-statement (str "Lausuntopyyntö:\n  " (:type data))
-      :request-neighbor (str "Naapurinkuulemispyyntö:\n  " (:type data))
-      :request-review (str "Katselmointivaatimus:\n  " (:type data))
-      :review (str "Katselmointi kirjaus:\n  " (:type data))
-      "")
-    " " (:contents data)
-    " " (:version data)))
+  [""
+   (condp = (:category data)
+     :attachment (localize lang "document")
+     :document (localize lang "application.applicationSummary")
+     :request-statement (localize lang "email.title.statement-request")
+     :request-neighbor (localize lang "email.title.neighbor")
+     :request-review (localize lang "caseFile.action.review-request")
+     :review (localize lang "caseFile.action.review")
+     "")
+   (str
+     (if (= (:category data) :attachment)
+       (localize lang "attachmentType" (get-in data [:type :type-group]) (get-in data [:type :type-id]))
+       (:type data))
+     " " (:contents data)
+     " " (:version data))
+   (or (util/to-local-date (:ts data)) "-")
+   (:user data)])
 
 (defn- build-xml-history-child-rows [action docs lang]
   ;  (debug " docs: " (with-out-str (clojure.pprint/pprint docs)))
@@ -48,10 +54,7 @@
       ;(debug " doc-attn: " doc-attn)
       (if (nil? doc-attn)
         result
-        (recur others (conj result (xml-table-row action
-                                                  (col2-data doc-attn lang)
-                                                  (or (util/to-local-date (:ts doc-attn)) "-")
-                                                  (:user doc-attn))))))))
+        (recur others (conj result (apply xml-table-row (build-xml-history-row doc-attn lang))))))))
 
 (defn- build-xml-history-rows [application lang]
   (let [data (toj/generate-case-file-data application)]
@@ -60,7 +63,7 @@
            result []]
       (let [[history & older] data-in
             new-result (-> result
-                           (conj (xml-table-row (:action history) "" (or (util/to-local-date (:start history)) "-") (:user history)))
+                           (conj (xml-table-row (:action history) "" "" (or (util/to-local-date (:start history)) "-") (:user history)))
                            (into (build-xml-history-child-rows " " (:documents history) lang)))]
         (if (nil? older)
           new-result
@@ -129,4 +132,10 @@
     (converter/convert-to-pdfa (.getName tmp-file) (input-stream tmp-file))))
 
 (defn write-history-libre-doc [application lang file]
-  (create-libre-doc (resource HISTORY-TEMPLATE) (assoc (common-field-map application lang) "HISTORY_ROWS_PLACEHOLDER" (build-xml-history application lang)) file))
+  (create-libre-doc (resource HISTORY-TEMPLATE) (assoc (common-field-map application lang)
+                                                  "COLTITLE1" (localize lang "caseFile.action")
+                                                  "COLTITLE2" (localize lang "applications.operation")
+                                                  "COLTITLE3" (localize lang "document")
+                                                  "COLTITLE4" (localize lang "caseFile.action")
+                                                  "COLTITLE5" (localize lang "lisaaja")
+                                                  "HISTORY_ROWS_PLACEHOLDER" (build-xml-history application lang)) file))
