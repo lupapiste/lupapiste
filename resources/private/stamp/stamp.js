@@ -12,6 +12,7 @@ var stamping = (function() {
       organization: null,
       xMargin: ko.observable("10"),
       yMargin: ko.observable("85"),
+      page: ko.observable("first"),
       transparency: ko.observable(),
       extraInfo: ko.observable(""),
       buildingId: ko.observable(""),

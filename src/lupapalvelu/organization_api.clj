@@ -376,9 +376,9 @@
     (o/update-organization organization-id {$set {:notifications.neighbor-order-emails addresses}})
     (ok)))
 
-(defcommand set-organization-submit-notification-email
+(defcommand set-organization-state-notification-email
   {:parameters [emails]
-   :description "When application is submitted, send notification to these email addresses"
+   :description "When application is submitted or inforequest received, send notification to these email addresses"
    :user-roles #{:authorityAdmin}
    :input-validators email-list-validators}
   [{user :user}]

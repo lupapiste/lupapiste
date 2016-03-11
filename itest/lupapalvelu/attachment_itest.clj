@@ -192,11 +192,11 @@
                 (:to email) => (contains pena-email)))
 
             (fact "Delete version"
-              (command veikko 
-                       :delete-attachment-version 
+              (command veikko
+                       :delete-attachment-version
                        :id application-id
-                       :attachmentId (:id versioned-attachment) 
-                       :fileId (get-in updated-attachment [:latestVersion :fileId]) 
+                       :attachmentId (:id versioned-attachment)
+                       :fileId (get-in updated-attachment [:latestVersion :fileId])
                        :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
               (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
                 (get-in ver-del-attachment [:latestVersion :version :major]) => 1
@@ -208,7 +208,7 @@
 
       (let [versioned-attachment (first (:attachments (query-application pena application-id)))]
         (fact "Pena upload new version"
-          (upload-attachment pena application-id versioned-attachment true)) 
+          (upload-attachment pena application-id versioned-attachment true))
         (fact "Pena signs the attachment version"
           (command pena :sign-attachments :id application-id :attachmentIds [(:id versioned-attachment)] :password "pena") => ok?)
         (let [signed-attachment (get-attachment-by-id pena application-id (:id versioned-attachment))]
@@ -216,27 +216,27 @@
           (fact "Pena has only one auth entry, although has many versions uploaded"
             (count (filter #(= (-> % :user :id) (id-for-key pena)) (:versions signed-attachment))) => 2
             (count (filter #(= (:id %) (id-for-key pena)) (:auth signed-attachment))) => 1)
-          
+
           (fact "Attachment is signed"
             (count (:signatures signed-attachment)) => 1)
 
           (fact "Delete version and its signature"
-            (command veikko 
-                       :delete-attachment-version 
+            (command veikko
+                       :delete-attachment-version
                        :id application-id
-                       :attachmentId (:id versioned-attachment) 
-                       :fileId (get-in signed-attachment [:latestVersion :fileId]) 
+                       :attachmentId (:id versioned-attachment)
+                       :fileId (get-in signed-attachment [:latestVersion :fileId])
                        :originalFileId (get-in signed-attachment [:latestVersion :originalFileId]))=> ok?
                      (fact (count (:signatures (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 0))
 
           (fact "Deleting the last version clears attachment auth"
                 (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
                   (count (:versions attachment )) => 1
-                  (command veikko 
-                       :delete-attachment-version 
+                  (command veikko
+                       :delete-attachment-version
                        :id application-id
-                       :attachmentId (:id attachment) 
-                       :fileId (get-in attachment [:latestVersion :fileId]) 
+                       :attachmentId (:id attachment)
+                       :fileId (get-in attachment [:latestVersion :fileId])
                        :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?)
                 (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment))) => empty?)
 
@@ -338,18 +338,18 @@
     (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
 
     (let [v1 (-> (get-attachment-by-id sonja application-id attachment-id)
-                 :versions 
+                 :versions
                  first)]
       (fact "fileID is set" (:fileId v1) => truthy)
       (fact "fileID is set" (:originalFileId v1) => truthy)
       (fact "File is original before rotation" (:fileId v1) => (:originalFileId v1))
 
       (fact "version number is set" (:version v1) => {:major 0 :minor 1})
-      
+
       (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
-      
+
       (let [v2 (->> (get-attachment-by-id sonja application-id  attachment-id)
-                    :versions 
+                    :versions
                     first)]
         (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
         (fact "Original file is the same" (:originalFileId v1) => (:originalFileId v1))
@@ -357,9 +357,9 @@
         (fact "version number is not changed" (:version v1) => {:major 0 :minor 1})
 
         (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
-        
+
         (let [v3 (->> (get-attachment-by-id sonja application-id  attachment-id)
-                      :versions 
+                      :versions
                       first)]
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
@@ -388,6 +388,7 @@
                               :files [(:id attachment)]
                               :xMargin 0
                               :yMargin 0
+                              :page "first"
                               :extraInfo ""
                               :buildingId ""
                               :kuntalupatunnus ""
@@ -434,6 +435,7 @@
                               :files [(:id attachment)]
                               :xMargin 0
                               :yMargin 0
+                              :page "all"
                               :extraInfo ""
                               :buildingId ""
                               :kuntalupatunnus ""

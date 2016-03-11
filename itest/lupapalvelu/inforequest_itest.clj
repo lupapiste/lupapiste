@@ -13,6 +13,9 @@
 
     resp => ok?
 
+    (fact "no emails were sent, because organization doesn't have notification emails in use"
+      (last-email) => nil?)
+
     (fact "inforequest was created with message"
       (let [application (query-application pena id)]
         application => (in-state? "info")
@@ -59,6 +62,17 @@
       (command pena :cancel-inforequest :id application-id) => ok?
       (fact "Sonja is also allowed to cancel inforequest"
         (allowed? :cancel-inforequest :id application-id)))))
+
+(facts "Inforequest notification email"
+  (last-email) ; clear box
+
+  (command sipoo :set-organization-state-notification-email :emails "testi@example.com") => ok?
+
+  (create-app pena :messages ["hello"] :infoRequest true :propertyId sipoo-property-id) => ok?
+  (let [email (last-email)]
+    (fact "Organization get's notification email"
+      (:to email) => (contains "testi@example.com")
+      (:subject email) => (contains "Sipoo"))))
 
 (facts "Open inforequest"
   ; Reset emails
