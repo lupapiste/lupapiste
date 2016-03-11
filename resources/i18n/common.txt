@@ -102,6 +102,8 @@
 "answered.title" "sv" "Besvarad"
 "appealed" "fi" "Valitettu"
 "appealed" "sv" "Överklagat"
+"appealed.title" "fi" ""
+"appealed.title" "sv" ""
 "applicant" "fi" "Hakija"
 "applicant" "sv" "Sökande"
 "application.addInvite" "fi" "Lisää valtuutus"

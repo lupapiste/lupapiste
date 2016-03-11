@@ -299,7 +299,7 @@ $app-gray-darkest: $gray187;
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box  {
+          .inUse-box, .closed-box  {
             display: inline-block;
           }
         }

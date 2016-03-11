@@ -469,8 +469,8 @@
                       (a/state-transition-update (keyword state) (now) user)))
 
 (defquery change-application-state-targets
-  {:description "List of possible target states for change-application
-  state transitions."
+  {:description "List of possible target states for
+  change-application-state transitions."
    :user-roles  #{:authority}
    :pre-checks  [a/valid-permit-types-for-state-change]
    :states      states/post-verdict-states}

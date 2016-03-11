@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1457690268650');
+@import url('main-blessed1.css?z=1457691287251');
 
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
@@ -3896,7 +3896,7 @@ span.icon_clear:before {
   display: none;
 }
 /* line 302, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info .state-indication div.inUse .verdictGiven-box, .application_summary .application_summary_info .state-indication div.inUse .constructionStarted-box, .application_summary .application_summary_info .state-indication div.inUse .inUse-box, .application_summary .application_summary_info .state-indication div.inUse .closed-box {
+.application_summary .application_summary_info .state-indication div.inUse .inUse-box, .application_summary .application_summary_info .state-indication div.inUse .closed-box {
   display: inline-block;
 }
 /* line 307, ../../../private/common-html/sass/views/_application.scss */
