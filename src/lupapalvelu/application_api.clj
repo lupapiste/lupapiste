@@ -341,7 +341,7 @@
 
 (notifications/defemail
   :inforequest-invite
-  {:template      "open-inforequest-invite.html"
+  {:template      "inforequest-invite.html"
    :subject-key   "applications.inforequest"
    :show-municipality-in-subject true
    :recipients-fn (fn [{application :application}]
