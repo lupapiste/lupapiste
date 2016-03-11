@@ -282,13 +282,10 @@ $app-gray-darkest: $gray187;
           .constructionStarted-box {
             @include active-state;
           }
-          .verdictGiven-box {
-            @include past-state;
-          }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
+          .verdictGiven-box, .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, .constructionStarted-box, .inUse-box .closed-box  {
+          .constructionStarted-box, .inUse-box, .closed-box  {
             display: inline-block;
           }
         }
@@ -297,7 +294,7 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box, .constructionStarted-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
@@ -311,12 +308,12 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box, .constructionStarted-box, .inUse-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box  {
+          .closed-box  {
             display: inline-block;
           }
         }
@@ -325,12 +322,12 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, onHold-box  {
+          .onHold-box  {
             display: inline-block;
           }
         }
@@ -339,12 +336,12 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, appealed-box  {
+          .verdictGiven-box, .appealed-box  {
             display: inline-block;
           }
         }
@@ -353,12 +350,12 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, extinct-box  {
+          .extinct-box  {
             display: inline-block;
           }
         }
