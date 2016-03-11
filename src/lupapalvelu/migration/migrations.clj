@@ -1866,6 +1866,23 @@
             0
             (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1}))))
 
+(defmigration add-id-for-verdicts-paatokset
+  (update-applications-array :verdicts
+                             (fn [verdict] (update verdict :paatokset (fn [paatokset] (map #(assoc % :id (mongo/create-id)) paatokset))))
+                             {:verdicts.paatokset.0 {$exists true}}))
+
+(defmigration clean-vaadittuTyonjohtajatieto-in-verdicts
+  (update-applications-array :verdicts
+                             (fn [verdict] 
+                               (update verdict :paatokset
+                                          (fn [paatokset] (map (fn [paatos]
+                                                                 (update-in paatos [:lupamaaraykset :vaadittuTyonjohtajatieto] 
+                                                                            (fn [tj] (cond (map? tj)    [(get-in tj [:VaadittuTyonjohtaja :tyonjohtajaLaji])]
+                                                                                           (vector? tj) (map #(or (get-in % [:VaadittuTyonjohtaja :tyonjohtajaLaji]) %) tj)
+                                                                                           :else        tj))))
+                                                               paatokset))))
+                             {:verdicts.paatokset.lupamaaraykset.vaadittuTyonjohtajatieto {$type 3}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
@@ -1873,4 +1890,3 @@
 ;;     (doseq [collection [:applications :submitted-applications] ...)
 ;;  but use the "update-applications-array" function existing in this namespace.
 ;; *******************
-

@@ -101,12 +101,14 @@
 (defn statement-request-reminder []
   (let [timestamp-now (now)
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
-        apps (mongo/select :applications {:state {$in ["open" "submitted"]}
-                                          :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
-                                                                   :given nil
-                                                                   $or [{:reminder-sent {$exists false}}
-                                                                        {:reminder-sent nil}
-                                                                        {:reminder-sent (older-than timestamp-1-week-ago)}]}}})]
+        apps (mongo/select :applications
+                           {:state {$in ["open" "submitted"]}
+                            :statements {$elemMatch {:requested (older-than timestamp-1-week-ago)
+                                                     :given nil
+                                                     $or [{:reminder-sent {$exists false}}
+                                                          {:reminder-sent nil}
+                                                          {:reminder-sent (older-than timestamp-1-week-ago)}]}}}
+                           [:statements :state :modified :infoRequest :title :address :municipality])]
     (doseq [app apps
             statement (:statements app)
             :let [requested (:requested statement)
@@ -130,13 +132,15 @@
 (defn statement-reminder-due-date []
   (let [timestamp-now (now)
         timestamp-1-week-ago (util/get-timestamp-ago :week 1)
-        apps (mongo/select :applications {:state {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
-                                          :statements {$elemMatch {:given nil
-                                                                   $and [{:dueDate {$exists true}}
-                                                                         {:dueDate (older-than timestamp-now)}]
-                                                                   $or [{:duedate-reminder-sent {$exists false}}
-                                                                        {:duedate-reminder-sent nil}
-                                                                        {:duedate-reminder-sent (older-than timestamp-1-week-ago)}]}}})]
+        apps (mongo/select :applications
+                           {:state {$nin (map name (clojure.set/union states/post-verdict-states states/terminal-states))}
+                            :statements {$elemMatch {:given nil
+                                                     $and [{:dueDate {$exists true}}
+                                                           {:dueDate (older-than timestamp-now)}]
+                                                     $or [{:duedate-reminder-sent {$exists false}}
+                                                          {:duedate-reminder-sent nil}
+                                                          {:duedate-reminder-sent (older-than timestamp-1-week-ago)}]}}}
+                           [:statements :state :modified :infoRequest :title :address :municipality])]
     (doseq [app apps
             statement (:statements app)
             :let [due-date (:dueDate statement)
@@ -164,7 +168,7 @@
                                                          {:reminder-sent nil}
                                                          {:reminder-sent (older-than timestamp-1-week-ago)}]})]
     (doseq [oir oirs]
-      (let [application (mongo/by-id :applications (:application-id oir))]
+      (let [application (mongo/by-id :applications (:application-id oir) [:state :modified :title :address :municipality])]
         (when (= "info" (:state application))
           (notifications/notify! :reminder-open-inforequest {:application application
                                                              :data {:email (:email oir)
@@ -177,10 +181,12 @@
 ;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
 (defn neighbor-reminder []
   (let [timestamp-1-week-ago (util/get-timestamp-ago :week 1)
-        apps (mongo/select :applications {:state {$in ["open" "submitted"]}
-                                          :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
-                                                                               {:created (older-than timestamp-1-week-ago)}
-                                                                               ]}}})]
+        apps (mongo/select :applications
+                           {:state {$in ["open" "submitted"]}
+                            :neighbors.status {$elemMatch {$and [{:state {$in ["email-sent"]}}
+                                                                 {:created (older-than timestamp-1-week-ago)}
+                                                                 ]}}}
+                           [:neighbors :state :modified :title :address :municipality])]
     (doseq [app apps
             neighbor (:neighbors app)
             :let [statuses (:status neighbor)]]
@@ -211,11 +217,13 @@
 ;; "YA hakemus: Hakemukselle merkitty tyoaika umpeutuu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn ya-work-time-is-expiring-reminder []
   (let [timestamp-1-week-in-future (util/get-timestamp-from-now :week 1)
-        apps (mongo/select :applications {:permitType "YA"
-                                          :state {$in ["verdictGiven" "constructionStarted"]}
-                                          ;; Cannot compare timestamp directly against date string here (e.g against "08.10.2015"). Must do it in function body.
-                                          :documents {$elemMatch {:schema-info.name "tyoaika"}}
-                                          :work-time-expiring-reminder-sent {$exists false}})]
+        apps (mongo/select :applications
+                           {:permitType "YA"
+                            :state {$in ["verdictGiven" "constructionStarted"]}
+                            ;; Cannot compare timestamp directly against date string here (e.g against "08.10.2015"). Must do it in function body.
+                            :documents {$elemMatch {:schema-info.name "tyoaika"}}
+                            :work-time-expiring-reminder-sent {$exists false}}
+                           [:documents :auth :state :modified :title :address :municipality :infoRequest])]
     (doseq [app apps
             :let [tyoaika-doc (some
                                 (fn [doc]
@@ -238,11 +246,13 @@
 ;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
   (let [timestamp-1-month-ago (util/get-timestamp-ago :month 1)
-        apps (mongo/select :applications {:state {$in ["open" "submitted"]}
-                                          :modified (older-than timestamp-1-month-ago)
-                                          $or [{:reminder-sent {$exists false}}
-                                               {:reminder-sent nil}
-                                               {:reminder-sent (older-than timestamp-1-month-ago)}]})]
+        apps (mongo/select :applications
+                           {:state {$in ["open" "submitted"]}
+                            :modified (older-than timestamp-1-month-ago)
+                            $or [{:reminder-sent {$exists false}}
+                                 {:reminder-sent nil}
+                                 {:reminder-sent (older-than timestamp-1-month-ago)}]}
+                           [:auth :state :modified :title :address :municipality :infoRequest])]
     (doseq [app apps]
       (notifications/notify! :reminder-application-state {:application app
                                                           :user (get-app-owner app)})

@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1456835979668');
+@import url('main-blessed1.css?z=1457597725943');
 
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
@@ -1553,7 +1553,7 @@ ul.tabs {
   top: 38px;
   z-index: 1000;
   width: inherit;
-  max-height: 400px;
+  max-height: 800px;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: auto;
