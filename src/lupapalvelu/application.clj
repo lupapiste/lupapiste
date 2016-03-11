@@ -22,6 +22,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as state-machine]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.property :as p]
@@ -464,12 +465,20 @@
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
 
+(defn change-application-state-targets
+  "Namesake query implementation."
+  [{:keys [state] :as application}]
+  (let [state (keyword state)
+        graph (state-machine/state-graph application)
+        [verdict-state] (filter #{:foremanVerdictGiven :verdictGiven} (keys graph))
+        target (if (= state :appealed) :appealed verdict-state)]
+    (set (cons state (remove #{:canceled} (target graph))))))
+
 (defn valid-new-state
-  "Input validator for change-application-state command. Only subset
-  of all states are supported for explicit state changes."
-  [{{new-state :state} :data}]
-  (when-not (#{:extinct :constructionStarted :inUse :closed :appealed} (keyword new-state))
-            (fail :error.illegal-state :parameters new-state)))
+  "Pre-check for change-application-state command."
+  [{{new-state :state} :data} application]
+  (when-not (or (nil? new-state) ((change-application-state-targets application) (keyword new-state)))
+    (fail :error.illegal-state :parameters new-state)))
 
 (defn valid-permit-types
   "Prechecker for permit types. permit-types is a map of of
@@ -479,13 +488,28 @@
   subtype are valid.
 
   {:R [\"tyonjohtaja-hakemus\"]} -> Only Rs with tyonjohtaja-hakemus
-  subtype are valid."
+  subtype are valid.
+
+  {:R [\"tyonjohtaja-hakemus\" :empty]} -> Only Rs with tyonjohtaja-hakemus
+  subtype or no subtype are valid."
   [permit-types _ {:keys [permitType permitSubtype]}]
   (let [app-type (keyword permitType)
         types    (set (keys permit-types))
         subs     (get permit-types app-type)]
     (when-not (and subs
                    (or (= subs :all)
-                       (and (empty? subs) (ss/blank? permitSubtype))
+                       (and (ss/blank? permitSubtype)
+                            (or (empty? subs)
+                                ((set subs) :empty)))
                        ((set subs) permitSubtype)))
       (fail :error.unsupported-permit-type))))
+
+(defn valid-permit-types-for-state-change
+  "Convenience pre-checker."
+  [_ application]
+  (valid-permit-types {:R   ["tyonjohtaja-hakemus" :empty]
+                       :P   :all
+                       :YA  []
+                       :YL  []
+                       :YM  []
+                       :VVL []} _ application))

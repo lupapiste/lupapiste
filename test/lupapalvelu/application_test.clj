@@ -87,3 +87,23 @@
     (state-transition-update :open 1 pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
     (state-transition-update :submitted 2 pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
     (state-transition-update :verdictGiven 3 pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}}))
+
+(fact "Valid permit types pre-checker"
+      (let [error {:ok false :text "error.unsupported-permit-type"}
+            m1 {:R [] :P :all}
+            m2 {:R ["tyonjohtaja-hakemus"] :P :all}
+            m3 {:R ["tyonjohtaja-hakemus" :empty]}]
+        (valid-permit-types m1 nil {:permitType "R"}) => nil
+        (valid-permit-types m1 nil {:permitType "P"}) => nil
+        (valid-permit-types m1 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => error
+        (valid-permit-types m1 nil {:permitType "P" :permitSubtype "foo"}) => nil
+        (valid-permit-types m2 nil {:permitType "R"}) => error
+        (valid-permit-types m2 nil {:permitType "P"}) => nil
+        (valid-permit-types m2 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
+        (valid-permit-types m2 nil {:permitType "R" :permitSubtype "foobar"}) => error
+        (valid-permit-types m2 nil {:permitType "P" :permitSubtype "foo"}) => nil
+        (valid-permit-types m3 nil {:permitType "R"}) => nil
+        (valid-permit-types m3 nil {:permitType "P"}) => error
+        (valid-permit-types m3 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
+        (valid-permit-types m3 nil {:permitType "R" :permitSubtype "foobar"}) => error
+        (valid-permit-types m3 nil {:permitType "P" :permitSubtype "foo"}) => error))

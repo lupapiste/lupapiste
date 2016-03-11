@@ -4961,3 +4961,5 @@
 "attachment.archivability" "sv" "Filen lämpar sig för permanent lagring"
 "attachment.downloadOriginalVersion.info" "fi" "Tiedostoa on käännetty,"
 "attachment.downloadOriginalVersion.link" "fi" "lataa alkuperäinen versio."
+"state.application" "fi" "Hakemuksen tila:"
+"state.application" "sv" "Ansökans status:"

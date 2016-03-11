@@ -213,7 +213,7 @@ $app-gray-darkest: $gray187;
           }
         }
 
-        .constructionStarted-box, .inUse-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box, .final-box, .extinct-box, .onHold-box  {
+        .constructionStarted-box, .inUse-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box, .final-box, .extinct-box, .onHold-box, .appealed-box  {
           display: none;
         }
         &.draft {
@@ -331,6 +331,20 @@ $app-gray-darkest: $gray187;
             display: none;
           }
           .verdictGiven-box, onHold-box  {
+            display: inline-block;
+          }
+        }
+        &.appealed {
+          .appealed-box {
+            @include active-state;
+          }
+          .verdictGiven-box {
+            @include past-state;
+          }
+          .draft-box, .open-box, .submitted-box, .sent-box   {
+            display: none;
+          }
+          .verdictGiven-box, appealed-box  {
             display: inline-block;
           }
         }

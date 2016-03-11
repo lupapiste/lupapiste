@@ -8,26 +8,39 @@ LUPAPISTE.ChangeStateModel = function( params) {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
-  self.states = ["extinct", "constructionStarted",
-                 "inUse", "closed", "appealed"];
+  self.states = ko.observableArray();
 
   self.stateText = function( state ) {
-    return loc( "state." + state );
+    return loc( state );
   };
 
   self.selectedState = ko.observable( params.state );
 
+  function fetchStates() {
+    var backup = self.selectedState();
+    ajax.query( "change-application-state-targets", {id: params.id})
+    .success( function( res ) {
+      self.states( res.states );
+      self.selectedState( backup );
+    })
+    .call();
+  }
+
   // When the value is changed the application is reloaded.
   self.changeState = self.disposedComputed( function() {
     var newState = self.selectedState();
-    if( _.includes( self.states, newState ) ) {
+    if( newState && newState !== params.state
+                 && _.includes( self.states.peek(), newState ) ) {
       ajax.command( "change-application-state",
                     {state: newState,
                      id: params.id})
       .success ( function() {
-        repository.load( params.id );
+        repository.load( params.id, null, null, true );
       })
       .call();
     }
   });
+
+  // Initialization
+  fetchStates();
 };

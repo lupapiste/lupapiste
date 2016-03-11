@@ -456,15 +456,26 @@
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
-  {:description      "Changes application state. Only the subset of the states is supported."
+  {:description      "Changes application state. The tranistions happen
+  between post-verdict (excluding verdict given)states. In addition,
+  the transition from appealed to a verdict given state is supported."
    :parameters       [state]
+   :input-validators [(partial action/non-blank-parameters [:state])]
    :user-roles       #{:authority}
-   :states           states/all-states
-   :input-validators [a/valid-new-state]
-   :pre-checks       [(partial a/valid-permit-types {:R :all :P :all})]}
+   :states           states/post-verdict-states
+   :pre-checks       [a/valid-permit-types-for-state-change a/valid-new-state]}
   [{:keys [user] :as command}]
   (update-application command
                       (a/state-transition-update (keyword state) (now) user)))
+
+(defquery change-application-state-targets
+  {:description "List of possible target states for change-application
+  state transitions."
+   :user-roles  #{:authority}
+   :pre-checks  [a/valid-permit-types-for-state-change]
+   :states      states/post-verdict-states}
+  [{application :application}]
+  (ok :states (a/change-application-state-targets application)))
 
 ;;
 ;; Link permits
