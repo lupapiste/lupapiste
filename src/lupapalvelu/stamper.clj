@@ -88,22 +88,22 @@
 
 (declare stamp-pdf stamp-image)
 
-(defn- stamp-stream [stamp content-type in out x-margin y-margin transparency]
+(defn- stamp-stream [stamp content-type in out options]
   (cond
-    (= content-type "application/pdf")      (do (stamp-pdf stamp in out x-margin y-margin transparency) nil)
-    (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out x-margin y-margin transparency) nil)
+    (= content-type "application/pdf")      (do (stamp-pdf stamp in out options) nil)
+    (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out options) nil)
     :else                                   nil))
 
 (def- tmp (str (System/getProperty "java.io.tmpdir") env/file-separator))
 
-(defn- retry-stamping [stamp-graphic file-id out x-margin y-margin transparency]
+(defn- retry-stamping [stamp-graphic file-id out options]
   (let [tmp-file-name (str tmp file-id "-" (now) ".pdf")]
     (debugf "Redownloading file %s from DB and running `pdftk - output %s`" file-id tmp-file-name)
     (try
       (with-open [in ((:content (mongo/download file-id)))]
         (pdftk/create-pdftk-file in tmp-file-name))
       (with-open [in (io/input-stream tmp-file-name)]
-        (stamp-stream stamp-graphic "application/pdf" in out x-margin y-margin transparency))
+        (stamp-stream stamp-graphic "application/pdf" in out options))
       (finally
         (fs/delete tmp-file-name)
         nil))))
@@ -113,10 +113,10 @@
   (try
     (let [{content-type :content-type :as attachment} (mongo/download file-id)]
       (with-open [in ((:content attachment))]
-        (stamp-stream stamp content-type in out x-margin y-margin transparency)))
+        (stamp-stream stamp content-type in out options)))
     (catch InvalidPdfException e
       (info (str "Retry stamping because: " (.getMessage e)))
-      (retry-stamping stamp file-id out x-margin y-margin transparency))))
+      (retry-stamping stamp file-id out options))))
 
 ;;
 ;; Stamp PDF:
@@ -170,10 +170,14 @@
 (defn- stamp-pdf-page
   "Stamp a page. Mutates given Java objects!
    Page numbers start from 1."
-  [page-number ^com.lowagie.text.Image stamp x-margin y-margin ^PdfReader reader ^PdfStamper stamper ^PdfGState gstate]
+  [page-number ^com.lowagie.text.Image stamp {:keys [x-margin y-margin transparency]} ^PdfReader reader ^PdfStamper stamper]
   {:pre [(pos? page-number)]}
   (let [stamp-width (.getPlainWidth stamp)
         stamp-height (.getPlainHeight stamp)
+        opacity (transparency->opacity transparency)
+        gstate (doto (PdfGState.)
+                 (.setFillOpacity opacity)
+                 (.setStrokeOpacity opacity))
         page-box (.getPageSize reader page-number)
         crop-box (.getCropBox reader page-number)
         rotation (.getPageRotation reader page-number)
@@ -184,16 +188,12 @@
       (.addImage stamp stamp-width 0 0 stamp-height x y)
       (.restoreState))))
 
-(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
+(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out options]
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
-    (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)
-          opacity (transparency->opacity transparency)
-          gstate (doto (PdfGState.)
-                   (.setFillOpacity opacity)
-                   (.setStrokeOpacity opacity))]
+    (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)]
       (doseq [i (range (.getNumberOfPages reader))]
-        (stamp-pdf-page (inc i) stamp x-margin y-margin reader stamper gstate)))))
+        (stamp-pdf-page (inc i) stamp options reader stamper)))))
 
 ;;
 ;; Stamp raster image:
@@ -201,7 +201,7 @@
 
 (declare read-image write-image add-stamp mm->p)
 
-(defn- stamp-image [stamp-image content-type in out x-margin y-margin transparency]
+(defn- stamp-image [stamp-image content-type in out {:keys [x-margin y-margin]}]
   (doto (read-image in)
     (add-stamp stamp-image x-margin y-margin)
     (write-image (second (s/split content-type #"/")) out)))
