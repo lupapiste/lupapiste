@@ -35,21 +35,20 @@
 
 (defonce unfinished-uploads (atom {}))
 
-(defn- build-url [id]
+(defn- upload-file [id is-or-file content-type metadata]
   (let [host (env/value :arkisto :host)
         app-id (env/value :arkisto :app-id)
         app-key (env/value :arkisto :app-key)
-        encoded-id (codec/url-encode id)]
-    (str host "/documents/" encoded-id "?app-id=" app-id "&app-key=" app-key)))
-
-(defn- upload-file [id is-or-file content-type metadata]
-  (http/put (build-url id) {:multipart        [{:name      "metadata"
-                                                :mime-type "application/json"
-                                                :encoding  "UTF-8"
-                                                :content   (json/generate-string metadata)}
-                                               {:name      "file"
-                                                :content   is-or-file
-                                                :mime-type content-type}]}))
+        encoded-id (codec/url-encode id)
+        url (str host "/documents/" encoded-id)]
+    (http/put url {:basic-auth [app-id app-key]
+                   :multipart  [{:name      "metadata"
+                                 :mime-type "application/json"
+                                 :encoding  "UTF-8"
+                                 :content   (json/generate-string metadata)}
+                                {:name      "file"
+                                 :content   is-or-file
+                                 :mime-type content-type}]})))
 
 (defn- set-attachment-state [application now id]
   (action/update-application
