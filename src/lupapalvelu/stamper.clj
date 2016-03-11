@@ -166,27 +166,33 @@
       page-rotation sides page-size max-x min-y x y)
     [x y]))
 
+(defn- stamp-pdf-page
+  "Stamp a page. Mutates given Java objects!
+   Page numbers start from 1."
+  [page-number ^com.lowagie.text.Image stamp x-margin y-margin ^PdfReader reader ^PdfStamper stamper ^PdfGState gstate]
+  {:pre [(pos? page-number)]}
+  (let [stamp-width (.getPlainWidth stamp)
+        stamp-height (.getPlainHeight stamp)
+        page-box (.getPageSize reader page-number)
+        crop-box (.getCropBox reader page-number)
+        rotation (.getPageRotation reader page-number)
+        [x y] (calculate-x-y page-box crop-box rotation stamp-width x-margin y-margin)]
+    (doto (.getOverContent stamper page-number)
+      (.saveState)
+      (.setGState gstate)
+      (.addImage stamp stamp-width 0 0 stamp-height x y)
+      (.restoreState))))
+
 (defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
     (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)
-          stamp-width (.getPlainWidth stamp)
-          stamp-height (.getPlainHeight stamp)
           opacity (transparency->opacity transparency)
           gstate (doto (PdfGState.)
                    (.setFillOpacity opacity)
                    (.setStrokeOpacity opacity))]
       (doseq [i (range (.getNumberOfPages reader))]
-        (let [page (inc i)
-              page-box (.getPageSize reader page)
-              crop-box (.getCropBox reader page)
-              rotation (.getPageRotation reader page)
-              [x y] (calculate-x-y page-box crop-box rotation stamp-width x-margin y-margin)]
-          (doto (.getOverContent stamper page)
-            (.saveState)
-            (.setGState gstate)
-            (.addImage stamp stamp-width 0 0 stamp-height x y)
-            (.restoreState)))))))
+        (stamp-pdf-page (inc i) stamp x-margin y-margin reader stamper gstate)))))
 
 ;;
 ;; Stamp raster image:
