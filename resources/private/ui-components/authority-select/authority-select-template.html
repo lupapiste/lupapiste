@@ -5,7 +5,7 @@
     <script type="text/x-jquery-tmpl" id="authority-select-template">
       <p data-bind="ltext: 'application.assignee'"></p>
       <!-- ko if: canEdit -->
-      <select id="assignee-select"
+      <select data-test-id="assignee-select"
               class="dropdown dropdown--full-width"
               data-bind="disable: pending,
                          value: assigneeId,
@@ -17,6 +17,7 @@
       <!-- /ko -->
       <!-- ko ifnot: canEdit -->
       <span data-bind="text: fullName( oldAssignee )"
+            data-test-id="assignee-span"
             class="application_summary_text"></span>
       <!-- /ko -->
     </script>

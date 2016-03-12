@@ -56,7 +56,9 @@ LUPAPISTE.AuthoritySelectModel = function() {
       ajax.command("assign-application", {id: appId(), assigneeId: assigneeId})
         .processing(self.pending)
         .success(function() {
-          repository.load(appId, self.pending, null, false);
+          // Full reload is needed. For example, hetus are shown
+          // unmasked to the assigned authority.
+          repository.load(appId(), self.pending);
         })
         .call();
     }
