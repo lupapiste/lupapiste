@@ -1237,8 +1237,8 @@ Application assignee select empty
 
 Assign application to
   [Arguments]  ${to}
-  Wait test id visible  assignee-select
-  Select From List By Label  jquery=[data-test-id=assignee-select]  ${to}
+  Wait Until  Element Should Be Visible  jquery=[data-test-id=assignee-select]:visible
+  Select From List By Label  jquery=[data-test-id=assignee-select]:visible  ${to}
 
 Application assignee select is
   [Arguments]  ${authority}
@@ -1248,5 +1248,5 @@ Application assignee select is
 
 Application assignee span is
   [Arguments]  ${authority}
-  Wait test id visible  assignee-span
-  Element Text Should Be  jquery=[data-test-id=assignee-span]  ${authority}
+  Wait Until  Element should be visible  jquery=[data-test-id=assignee-span]:visible
+  Element Text Should Be  jquery=[data-test-id=assignee-span]:visible  ${authority}

@@ -15,7 +15,7 @@ Mikko creates two new inforequests
   Set Suite Variable  ${propertyId}  753-416-25-30
   Create inforequest the fast way  ${inforequest-handling}  360603.153  6734222.95  ${propertyId}  kerrostalo-rivitalo  Jiihaa
   Create inforequest the fast way  ${inforequest-cancelling}  360603.153  6734222.95  ${propertyId}  kerrostalo-rivitalo  Jiihaa
-  Logout
+  [Teardown]  Logout
 
 Sonja sees comment indicator on applications list
   Sonja logs in
@@ -24,12 +24,7 @@ Sonja sees comment indicator on applications list
 Authority assigns an inforequest to herself
   Inforequest is not assigned  ${inforequest-handling}
   Open inforequest  ${inforequest-handling}  ${propertyId}
-  Click link  inforequest-assignee-edit
-  Wait Until  Element should be visible  assignee-select
-  Wait Until  Select From List  assignee-select  Sibbo Sonja
-  Click enabled by test id  modal-dialog-submit-button
-  Wait Until  Element should not be visible  assignee-select
-  Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
+  Assign application to  Sibbo Sonja
 
 Comment indicator is no longer visible (LPK-454)
   Go to page  applications
@@ -38,7 +33,7 @@ Comment indicator is no longer visible (LPK-454)
 
 Sonja is marked as authority
   Inforequest is assigned to  ${inforequest-handling}  Sibbo Sonja
-  Logout
+  [Teardown]  Logout
 
 Mikko sees Sonja as authority
   Mikko logs in
@@ -46,8 +41,16 @@ Mikko sees Sonja as authority
 
 Mikko should be able to cancel the inforequest but not mark it as answered
   Open inforequest  ${inforequest-handling}  ${propertyId}
+
   Element should not be visible  //*[@data-test-id='inforequest-mark-answered']
   Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
+
+Mikko sees that inforequest is assigned to Sonja
+  Application assignee span is  Sibbo Sonja
+
+... even after reload
+  Reload page
+  Application assignee span is  Sibbo Sonja
 
 Mikko should be able to add attachment
   Element should be visible  //*[@data-test-id='add-inforequest-attachment']
