@@ -20,7 +20,6 @@ jQuery(document).ready(function() {
     {name: "construction-waste-report", synchronous: true},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
-    {name: "authority-select-dialog"},
     {name: "base-autocomplete", model: "autocomplete-base-model"},
     {name: "autocomplete"},
     {name: "export-attachments"},
