@@ -3,14 +3,22 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="authority-select-template">
-<p data-bind="ltext: 'application.assignee'"></p>
-<span class="application_summary_text">
-  <span data-bind="fullName: authority"></span>
-     <a data-bind="click: edit, visible: authorization.ok('assign-application'), attr: {id: kind + '-assignee-edit'}"
-     class="link-btn">
-     <i class="lupicon-pen"></i>
-     <span data-bind="ltext: 'choose'"></span></a>
-</span>
+      <p data-bind="ltext: 'application.assignee'"></p>
+      <!-- ko if: canEdit -->
+      <select id="assignee-select"
+              class="dropdown dropdown--full-width"
+              data-bind="disable: pending,
+                         value: assigneeId,
+                         options: authorities,
+                         optionsText: fullName,
+                         optionsValue: 'id',
+                         optionsCaption: loc('choose'),
+                         valueAllowUnset: true"></select>
+      <!-- /ko -->
+      <!-- ko ifnot: canEdit -->
+      <span data-bind="text: fullName( oldAssignee )"
+            class="application_summary_text"></span>
+      <!-- /ko -->
     </script>
   </section>
 </body>

@@ -68,9 +68,7 @@
                               </div>
 
                               <!-- Authorities: -->
-                              <!-- ko if: $root.authorization.ok('assign-application') -->
-                              <div data-bind="component: {name: 'authority-select', params: {kind: 'application'}}"></div>
-                              <!-- /ko -->
+                              <div data-bind="component: 'authority-select'"></div>
 
                               <!-- Operations: -->
                               <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
