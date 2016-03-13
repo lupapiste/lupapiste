@@ -72,8 +72,8 @@ LUPAPISTE.SidePanelService = function() {
   }).extend({rateLimit: 100});
 
   // refresh conversation when page changes
-  ko.computed(function() {
-    var page = self.currentPage();
+  function refresh(pageChange) {
+    var page = pageChange.pageId;
     if (page) {
       var type = pageutil.getPage();
       commentRoles = ["applicant", "authority"];
@@ -94,7 +94,9 @@ LUPAPISTE.SidePanelService = function() {
           break;
       }
     }
-  }).extend({throttle: 100});
+  }
+
+  hub.subscribe("page-load", refresh);
 
   // Fetch authorities when application changes
   ko.computed(function() {
