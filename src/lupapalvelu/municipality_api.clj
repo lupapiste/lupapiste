@@ -1,7 +1,7 @@
 (ns lupapalvelu.municipality-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [sade.core :refer :all]
-            [lupapalvelu.organization :as o]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.action :refer [defquery non-blank-parameters]]))
 
 (defquery municipality-borders
@@ -35,6 +35,6 @@ municipality"}
    :input-validators [(partial non-blank-parameters [:municipality])]
    :user-roles #{:anonymous}}
   [_]
-  (let [organizations (o/get-organizations {:scope.municipality municipality})
+  (let [organizations (org/get-organizations {:scope.municipality municipality})
         active-map (first (active-municipalities-from-organizations organizations))]
       (ok (select-keys active-map [:applications :infoRequests :opening]))))
