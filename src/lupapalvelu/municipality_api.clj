@@ -38,9 +38,3 @@ municipality"}
   (let [organizations (o/get-organizations {:scope.municipality municipality})
         active-map (first (active-municipalities-from-organizations organizations))]
       (ok (select-keys active-map [:applications :infoRequests :opening]))))
-
-
-(defn municipality-active-test [municipality]
-  (let [organizations (o/get-organizations {:scope.municipality municipality})
-        active-map (first (active-municipalities-from-organizations organizations))]
-      (ok (select-keys active-map [:applications :infoRequests :opening]))))
