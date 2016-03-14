@@ -41,7 +41,9 @@
        (localize lang "attachmentType" (get-in data [:type :type-group]) (get-in data [:type :type-id]))
        (:type data))
      " " (:contents data)
-     " " (get-in data [:version :major]) "."(get-in data [:version :minor])  )
+     (if (get-in data [:version :major])
+       (str ", v. " (get-in data [:version :major]) "." (get-in data [:version :minor]))
+       ""))
    (or (util/to-local-date (:ts data)) "-")
    (:user data)])
 
