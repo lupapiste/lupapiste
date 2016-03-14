@@ -20,7 +20,6 @@ jQuery(document).ready(function() {
     {name: "construction-waste-report", synchronous: true},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
-    {name: "authority-select-dialog"},
     {name: "base-autocomplete", model: "autocomplete-base-model"},
     {name: "autocomplete"},
     {name: "export-attachments"},
@@ -109,7 +108,8 @@ jQuery(document).ready(function() {
     {name: "person-invite"},
     {name: "company-invite-bubble"},
     {name: "operation-editor"},
-    {name: "document-identifier"}
+    {name: "document-identifier"},
+    {name: "change-state"}
 ];
 
   _.forEach(components, function(component) {

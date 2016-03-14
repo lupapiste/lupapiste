@@ -3,7 +3,7 @@ LUPAPISTE.GuestAuthoritiesModel = function() {
   var self = this;
   self.guests = ko.observableArray();
 
-self.canEdit = function() {
+  self.canEdit = function() {
     return lupapisteApp.models.globalAuthModel.ok( "update-user-organization" );
   };
 

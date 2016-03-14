@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [errorf warn]]
             [schema.core :as sc]
             [sade.core :refer [fail]]
+            [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.states :as states]))
 
@@ -238,3 +239,37 @@
         (when-not (valid-permit-types (permit-type application))
           (fail :error.invalid-permit-type :permit-type validator-permit-types))
         (fail :error.invalid-application-parameter)))))
+
+(defn valid-permit-types
+  "Prechecker for permit types. permit-types is a map of of
+  permit-types and supported subtypes. Some examples:
+
+  {:R [] :P :all} -> R applications without subtypes and Ps with any
+  subtype are valid.
+
+  {:R [\"tyonjohtaja-hakemus\"]} -> Only Rs with tyonjohtaja-hakemus
+  subtype are valid.
+
+  {:R [\"tyonjohtaja-hakemus\" :empty]} -> Only Rs with tyonjohtaja-hakemus
+  subtype or no subtype are valid."
+  [permit-types _ {:keys [permitType permitSubtype]}]
+  (let [app-type (keyword permitType)
+        types    (set (keys permit-types))
+        subs     (get permit-types app-type)]
+    (when-not (and subs
+                   (or (= subs :all)
+                       (and (ss/blank? permitSubtype)
+                            (or (empty? subs)
+                                ((set subs) :empty)))
+                       ((set subs) permitSubtype)))
+      (fail :error.unsupported-permit-type))))
+
+(defn valid-permit-types-for-state-change
+  "Convenience pre-checker."
+  [_ application]
+  (valid-permit-types {:R   ["tyonjohtaja-hakemus" :empty]
+                       :P   :all
+                       :YA  []
+                       :YL  []
+                       :YM  []
+                       :VVL []} _ application))

@@ -370,7 +370,7 @@
       ; Notify organization about new inforequest
       (if (:openInfoRequest created-application)
         (open-inforequest/new-open-inforequest! created-application)
-        (notifications/notify! :inforequest-invite {:application created-application})))
+        #_(notifications/notify! :inforequest-invite {:application created-application}))) ; FIXME, LPK-1506 email change
     (try
       (autofill-rakennuspaikka created-application created)
       (catch java.io.IOException e
@@ -472,6 +472,28 @@
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
            (catch Exception e (error e "KTJ data was not updated."))))
     (fail :error.property-in-other-muinicipality)))
+
+(defcommand change-application-state
+  {:description      "Changes application state. The tranistions happen
+  between post-verdict (excluding verdict given)states. In addition,
+  the transition from appealed to a verdict given state is supported."
+   :parameters       [state]
+   :input-validators [(partial action/non-blank-parameters [:state])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states
+   :pre-checks       [permit/valid-permit-types-for-state-change a/valid-new-state]}
+  [{:keys [user] :as command}]
+  (update-application command
+                      (a/state-transition-update (keyword state) (now) user)))
+
+(defquery change-application-state-targets
+  {:description "List of possible target states for
+  change-application-state transitions."
+   :user-roles  #{:authority}
+   :pre-checks  [permit/valid-permit-types-for-state-change]
+   :states      states/post-verdict-states}
+  [{application :application}]
+  (ok :states (a/change-application-state-targets application)))
 
 ;;
 ;; Link permits

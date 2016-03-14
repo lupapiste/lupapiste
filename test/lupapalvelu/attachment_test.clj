@@ -187,7 +187,7 @@
     (fact "Meta: collected all types"
       (set (map second attachment-group-type-paths)) => all-attachment-type-ids)
 
-    (doseq [lang ["fi" #_"sv"]
+    (doseq [lang ["fi" "sv"]
             path attachment-group-type-paths
             :let [i18n-path (cons :attachmentType path)
                   args (map name (cons lang i18n-path))
@@ -196,7 +196,7 @@
       (fact {:midje/description (str lang " " (s/join "." (rest args)))}
         (apply i18n/has-term? args) => true)
 
-      #_(fact {:midje/description (str lang " " (s/join "." (rest info-args)))}
+      (fact {:midje/description (str lang " " (s/join "." (rest info-args)))}
         (apply i18n/has-term? info-args) => true))))
 
 

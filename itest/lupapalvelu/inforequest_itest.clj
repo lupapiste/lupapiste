@@ -63,7 +63,7 @@
       (fact "Sonja is also allowed to cancel inforequest"
         (allowed? :cancel-inforequest :id application-id)))))
 
-(facts "Inforequest notification email"
+#_(facts "Inforequest notification email"
   (last-email) ; clear box
 
   (command sipoo :set-organization-state-notification-email :emails "testi@example.com") => ok?

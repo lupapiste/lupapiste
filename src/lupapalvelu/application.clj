@@ -22,6 +22,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as state-machine]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.property :as p]
@@ -463,3 +464,18 @@
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
 
+(defn change-application-state-targets
+  "Namesake query implementation."
+  [{:keys [state] :as application}]
+  (let [state (keyword state)
+        graph (state-machine/state-graph application)
+        [verdict-state] (filter #{:foremanVerdictGiven :verdictGiven} (keys graph))
+        target (if (= state :appealed) :appealed verdict-state)]
+    (set (cons state (remove #{:canceled} (target graph))))))
+
+(defn valid-new-state
+  "Pre-check for change-application-state command."
+  [{{new-state :state} :data} application]
+  (when-not (or (nil? new-state)
+                ((change-application-state-targets application) (keyword new-state)))
+    (fail :error.illegal-state)))
