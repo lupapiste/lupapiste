@@ -19,11 +19,11 @@ LUPAPISTE.AreaFilterService = function(applicationFiltersService) {
     ko.utils.arrayPushAll(self.selected,
       _(self.data())
         .map("areas")
-        .pluck("features")
+        .map("features")
         .flatten()
         .filter(function(feature) {
           if (savedFilter()) {
-            return  _.contains(savedFilter(), feature.id);
+            return  _.includes(savedFilter(), feature.id);
           }
         })
         .map(function(feature) {

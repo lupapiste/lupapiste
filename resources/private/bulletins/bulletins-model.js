@@ -32,7 +32,7 @@ LUPAPISTE.BulletinsModel = function(params) {
   });
 
   hub.onPageLoad("bulletin", function(e) {
-    self.bulletinId(_.first(e.pagePath));
+    self.bulletinId(_.head(e.pagePath));
     self.page(e.pageId);
     self.pagePath(e.pagePath);
     window.lupapisteApp.setTitle("Julkipano");

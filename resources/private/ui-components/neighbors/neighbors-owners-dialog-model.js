@@ -61,7 +61,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
 
   self.propertyIdFound = function(resp) {
     var applicationPropertyId = lupapisteApp.models.application.propertyId();
-    var propertyIds = _.isArray(resp) && resp.length > 0 ? _.pluck(resp, "kiinttunnus") : null;
+    var propertyIds = _.isArray(resp) && resp.length > 0 ? _.map(resp, "kiinttunnus") : null;
     if (propertyIds) {
       var filteredPropertyIds = _.filter(propertyIds, function(p) {return p !== applicationPropertyId;});
       return self.propertyIds(filteredPropertyIds).status(self.statusSearchOwners).beginUpdateRequest().searchOwnersByPropertyIds(filteredPropertyIds);
@@ -111,7 +111,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.addSelectedOwners = function() {
-    var selected = _(self.ownersGroups()).pluck("owners").flatten()
+    var selected = _(self.ownersGroups()).map("owners").flatten()
                        .filter(function(o) {return o.selected();}).value();
 
     var applicationId = lupapisteApp.models.application.id();

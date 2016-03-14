@@ -43,12 +43,12 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     }
 
     return { searchText: self.searchFieldDelayed(),
-             tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
-             organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
-             operations: _.pluck(operations, "id"),
-             handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
+             tags: _.map(lupapisteApp.services.tagFilterService.selected(), "id"),
+             organizations: _.map(lupapisteApp.services.organizationFilterService.selected(), "id"),
+             operations: _.map(operations, "id"),
+             handlers: _.map(lupapisteApp.services.handlerFilterService.selected(), "id"),
              applicationType: self.applicationType(),
-             areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
+             areas: _.map(lupapisteApp.services.areaFilterService.selected(), "id"),
              limit: self.limit(),
              sort: ko.mapping.toJS(self.sort),
              skip: self.skip() };

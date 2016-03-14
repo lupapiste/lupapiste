@@ -15,13 +15,13 @@ LUPAPISTE.HandlerFilterService = function(applicationFiltersService) {
   var usersInSameOrganizations = ko.observable();
 
   ko.computed(function() {
-    if (savedFilter() && _.contains(savedFilter(), "no-authority")) {
+    if (savedFilter() && _.includes(savedFilter(), "no-authority")) {
       self.selected([self.noAuthority]);
     } else {
       self.selected(_.filter(usersInSameOrganizations(),
         function (user) {
           if (savedFilter()) {
-            return _.contains(savedFilter(), user.id);
+            return _.includes(savedFilter(), user.id);
           }
         }));
     }

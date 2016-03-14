@@ -59,7 +59,7 @@
       var missing = [];
 
       _.each(propertyIds, function(p) {
-        if (!_.contains(processedIds, p)) {
+        if (!_.includes(processedIds, p)) {
           if (borderCache[p]) {
             _.each(borderCache[p], function(wkt) {found.push(wkt);});
           } else {
@@ -75,9 +75,9 @@
         ajax.datatables("property-borders", {propertyIds: missing})
           .success(function(resp) {
             _.each(_.groupBy(resp.wkts, "kiinttunnus"), function(m,k) {
-              borderCache[k] = _.pluck(m, "wkt");
+              borderCache[k] = _.map(m, "wkt");
             });
-            self.map.drawDrawings(_.pluck(resp.wkts, "wkt"), {}, drawingStyle);
+            self.map.drawDrawings(_.map(resp.wkts, "wkt"), {}, drawingStyle);
           })
           .processing(processing)
           .call();
@@ -106,7 +106,7 @@
       self.neighbors(neighbors).neighborId(null);
 
       self.getApplicationWKT = self.draw([application.propertyId], applicationDrawStyle, self.applicationAreaLoading);
-      self.getNeighbourWKT = self.draw(_.pluck(neighbors, "propertyId"), neighbourDrawStyle, self.neighborAreasLoading);
+      self.getNeighbourWKT = self.draw(_.map(neighbors, "propertyId"), neighbourDrawStyle, self.neighborAreasLoading);
     };
 
     function openEditDialog(params) {

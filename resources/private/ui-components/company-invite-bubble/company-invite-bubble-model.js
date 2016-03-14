@@ -21,7 +21,7 @@ LUPAPISTE.CompanyInviteBubbleModel = function( params ) {
     var parts = self.query().toLowerCase().split( /[ .,]+/ );
     return _( companies())
            .filter( function( com ) {
-             return _.every( parts, _.partial( _.contains, com.label.toLowerCase()));
+             return _.every( parts, _.partial( _.includes, com.label.toLowerCase()));
            })
            .value();
   });

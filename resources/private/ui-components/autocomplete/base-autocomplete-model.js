@@ -36,7 +36,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
 
   subscriptions.push(self.selectedOptions.subscribe(function(val) {
     if (params.selectedOption && !pauseUpdatingOption) {
-      params.selectedOption(_.first(val));
+      params.selectedOption(_.head(val));
     }
   }));
   // end TODO

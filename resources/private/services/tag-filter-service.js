@@ -18,7 +18,7 @@ LUPAPISTE.TagFilterService = function(tagsService, applicationFiltersService) {
         .flatten()
         .filter(function(tag) {
           if (savedFilter()) {
-            return  _.contains(savedFilter(), tag.id);
+            return  _.includes(savedFilter(), tag.id);
           }
         })
         .value());

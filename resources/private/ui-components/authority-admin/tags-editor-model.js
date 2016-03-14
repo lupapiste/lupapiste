@@ -87,7 +87,7 @@ LUPAPISTE.TagsEditorModel = function() {
       ajax
         .query("remove-tag-ok", {tagId: item.id})
         .onError("warning.tags.removing-from-applications", function(data) {
-          var applications = _.pluck(data.applications, "id");
+          var applications = _.map(data.applications, "id");
           var dialogTextPrefix = loc("tags.removing-from-applications.prefix", item.label());
 
           var dialogBody = _.reduce(applications, function(resultStr, idStr) {

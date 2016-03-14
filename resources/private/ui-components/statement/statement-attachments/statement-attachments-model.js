@@ -23,7 +23,7 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
           var comments = _.filter(util.getIn(application, ["comments"]), function(comment) {
             return comment.target.id === attachment.id;
           });
-          return _.extend({comment: _.first(comments).text}, attachment);
+          return _.extend({comment: _.head(comments).text}, attachment);
         })
         .value()
     );

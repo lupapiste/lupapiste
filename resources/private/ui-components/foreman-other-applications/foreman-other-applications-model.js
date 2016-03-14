@@ -36,7 +36,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   });
 
   self.subSchemasAutoupdated = _.map(self.subSchemas, function(schema) {
-    var readonly = _.contains(LUPAPISTE.config.foremanReadonlyFields, schema.name);
+    var readonly = _.includes(LUPAPISTE.config.foremanReadonlyFields, schema.name);
     var uicomponent = readonly && schema.locPrefix && schema.uicomponent === "docgen-string" ? "docgen-localized-string" : schema.uicomponent;
     return _.extend({}, schema, {
       uicomponent: uicomponent,

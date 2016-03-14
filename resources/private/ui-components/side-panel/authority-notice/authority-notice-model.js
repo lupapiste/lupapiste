@@ -35,7 +35,7 @@ LUPAPISTE.AuthorityNoticeModel = function(params) {
 
   self.disposedSubscribe(self.tags, function(val) {
     if (updatingObservables) { return; }
-    self.sendEvent("SidePanelService", "TagsChanged", {tags: _.pluck(val, "id")});
+    self.sendEvent("SidePanelService", "TagsChanged", {tags: _.map(val, "id")});
   });
 
   // Show when any of the values have been processed

@@ -6,7 +6,7 @@
 
   function filtered(page, message) {
     var pageFilter = /^(resource:\/|Unknown script code|https:\/\/[a-z1-9]+\.checkpoint\.com\/)/;
-    return pageFilter.test(page) || _.include(message, "NPObject");
+    return pageFilter.test(page) || _.includes(message, "NPObject");
   }
 
   var levelName = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"];

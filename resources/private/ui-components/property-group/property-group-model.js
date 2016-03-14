@@ -30,9 +30,9 @@ LUPAPISTE.PropertyGroupModel = function(params) {
     return schema.name === "maaraalaTunnus";
   });
 
-  self.maaraalaSchema = _.first(_.first(partitionedSchemas));
+  self.maaraalaSchema = _.head(_.head(partitionedSchemas));
   self.otherSchemas = _(partitionedSchemas)
-    .rest()
+    .tail()
     .flatten()
     .reject("hidden")
     .value();

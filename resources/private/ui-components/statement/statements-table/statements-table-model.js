@@ -16,7 +16,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
         statementIdsWithAttachments.push(target.id);
       }
     });
-    return _.unique(statementIdsWithAttachments);
+    return _.uniq(statementIdsWithAttachments);
   });
 
   self.hasAttachment = function(statement) {
@@ -24,12 +24,12 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.isGiven = function(statement) {
-    return _.contains(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
+    return _.includes(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
   };
 
   var isAuthorityOrStatementOwner = function(statement) {
     var currentUser = lupapisteApp.models.currentUser;
-    return _.contains(util.getIn(currentUser, ["orgAuthz", self.application.organization()]), "authority")
+    return _.includes(util.getIn(currentUser, ["orgAuthz", self.application.organization()]), "authority")
       || util.getIn(statement, ["person", "userId"]) === currentUser.id();
   };
 
@@ -51,15 +51,15 @@ LUPAPISTE.StatementsTableModel = function(params) {
   });
 
   self.isReplyable = function(statement) {
-    return _.contains(["replyable"], util.getIn(statement, ["state"]));
+    return _.includes(["replyable"], util.getIn(statement, ["state"]));
   };
 
   self.showReplyState = function(statement) {
     var user = lupapisteApp.models.currentUser;
     if (self.application.userHasRole(user, "owner")) {
-      return _.contains(["replied"], util.getIn(statement, ["state"]));
+      return _.includes(["replied"], util.getIn(statement, ["state"]));
     } else {
-      return _.contains(["replyable", "replied"], util.getIn(statement, ["state"]));
+      return _.includes(["replyable", "replied"], util.getIn(statement, ["state"]));
     }
   };
 
