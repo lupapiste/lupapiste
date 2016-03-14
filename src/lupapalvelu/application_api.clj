@@ -370,7 +370,7 @@
       ; Notify organization about new inforequest
       (if (:openInfoRequest created-application)
         (open-inforequest/new-open-inforequest! created-application)
-        (notifications/notify! :inforequest-invite {:application created-application})))
+        #_(notifications/notify! :inforequest-invite {:application created-application}))) ; FIXME, LPK-1506 email change
     (try
       (autofill-rakennuspaikka created-application created)
       (catch java.io.IOException e
