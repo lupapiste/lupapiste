@@ -129,6 +129,6 @@
                                                   "COLTITLE1" (localize lang "caseFile.action")
                                                   "COLTITLE2" (localize lang "applications.operation")
                                                   "COLTITLE3" (localize lang "document")
-                                                  "COLTITLE4" (localize lang "caseFile.documentDate"
+                                                  "COLTITLE4" (localize lang "caseFile.documentDate")
                                                   "COLTITLE5" (localize lang "lisaaja")
                                                   "HISTORY_ROWS_PLACEHOLDER" (build-xml-history application lang)) file))
