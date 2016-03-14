@@ -3,7 +3,8 @@
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defcommand update-application defquery] :as action]
-            [lupapalvelu.application :as a]))
+            [lupapalvelu.application :as a]
+            [lupapalvelu.permit :as permit]))
 
 (defcommand set-municipality-hears-neighbors
   {:parameters [:id enabled]
@@ -15,14 +16,10 @@
   (update-application command {$set {"options.municipalityHearsNeighbors" enabled}})
   (ok))
 
-(defn- permit-type-supported [_ application]
-  (when-not (contains? #{"P" "R"} (:permitType application))
-    (fail :error.unsupported-permit-type)))
-
 (defquery municipality-hears-neighbors-visible
   {:description "Pseudo query for Municipality hears neighbors
   checkbox visibility. The option is available only for R and P permit
   types."
    :user-roles #{:applicant :authority}
-   :pre-checks [permit-type-supported]}
+   :pre-checks [(partial permit/valid-permit-types {:R [] :P :all})]}
   [_])

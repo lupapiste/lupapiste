@@ -51,9 +51,9 @@
               <span data-bind="text: id" data-test-id="inforequest-application-id" class="application_summary_text"></span>
             </div>
 
-            <!-- ko if: $root.authorization.ok('assign-application') -->
-            <div data-bind="component: {name: 'authority-select', params: {kind: 'inforequest'}}"></div>
-            <!-- /ko -->
+            <!-- Authority -->
+            <div data-bind="component: 'authority-select'"></div>
+
           </div>
           <div class="application-map-container">
             <div id="inforequest-map" class="map map-large" style="width: 320px; height: 280px;"></div>

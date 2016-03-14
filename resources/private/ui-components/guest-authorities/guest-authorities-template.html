@@ -53,7 +53,10 @@
                        data-bind="value: dialogData.email,
                                   css: {'form-input--error': dialogData.error}"
                        type="text"/>
-              <i data-bind="visible: dialogData.waitingEmail" class="spin lupicon-refresh"></i>
+                <div class="spin-container"
+                     data-bind="visible: dialogData.waitingEmail">
+                  <i class="spin lupicon-refresh"></i>
+                </div>
               </div>
               <label data-bind="ltext: 'userinfo.firstName'"
                      class="form-label"></label>

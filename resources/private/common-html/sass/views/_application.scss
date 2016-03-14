@@ -213,7 +213,7 @@ $app-gray-darkest: $gray187;
           }
         }
 
-        .constructionStarted-box, .inUse-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box, .final-box, .extinct-box, .onHold-box  {
+        .constructionStarted-box, .inUse-box, .closed-box, .complementNeeded-box, .verdictGiven-box, .foremanVerdictGiven-box, acknowledged-box, .canceled-box, .final-box, .extinct-box, .onHold-box, .appealed-box  {
           display: none;
         }
         &.draft {
@@ -282,13 +282,10 @@ $app-gray-darkest: $gray187;
           .constructionStarted-box {
             @include active-state;
           }
-          .verdictGiven-box {
-            @include past-state;
-          }
-          .draft-box, .open-box, .submitted-box, .sent-box   {
+          .verdictGiven-box, .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, .constructionStarted-box, .inUse-box .closed-box  {
+          .constructionStarted-box, .inUse-box, .closed-box  {
             display: inline-block;
           }
         }
@@ -297,12 +294,12 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box, .constructionStarted-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box  {
+          .inUse-box, .closed-box  {
             display: inline-block;
           }
         }
@@ -311,12 +308,12 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box, .constructionStarted-box, .inUse-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, .constructionStarted-box, .inUse-box, .closed-box  {
+          .closed-box  {
             display: inline-block;
           }
         }
@@ -325,12 +322,26 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, onHold-box  {
+          .onHold-box  {
+            display: inline-block;
+          }
+        }
+        &.appealed {
+          .appealed-box {
+            @include active-state;
+          }
+          .verdictGiven-box {
+            display: none;
+          }
+          .draft-box, .open-box, .submitted-box, .sent-box   {
+            display: none;
+          }
+          .verdictGiven-box, .appealed-box  {
             display: inline-block;
           }
         }
@@ -339,12 +350,12 @@ $app-gray-darkest: $gray187;
             @include active-state;
           }
           .verdictGiven-box {
-            @include past-state;
+            display: none;
           }
           .draft-box, .open-box, .submitted-box, .sent-box   {
             display: none;
           }
-          .verdictGiven-box, extinct-box  {
+          .extinct-box  {
             display: inline-block;
           }
         }
@@ -413,6 +424,7 @@ $app-gray-darkest: $gray187;
 }
 
 .application-summary-table {
+  margin-top: $marginS;
   display: table;
   border-collapse: collapse;
   width: 100%;

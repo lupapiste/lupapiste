@@ -32,6 +32,12 @@
                                 <p data-bind="lhtml: 'application.invite.help'"></p>
                             </div>
                             <div class="application-summary-table">
+                              <!-- Change state (only for authority) -->
+                              <!-- ko if: $root.authorization.ok( "change-application-state" ) -->
+                              <div data-bind="component: {
+                                              name: 'change-state',
+                                              params: {id: $root.application.id(), state: $root.application.state()}}"></div>
+                              <!-- /ko -->
                               <!-- Property ID: -->
                               <div>
                                 <p data-bind="ltext: 'application.property'"></p>
@@ -62,9 +68,7 @@
                               </div>
 
                               <!-- Authorities: -->
-                              <!-- ko if: $root.authorization.ok('assign-application') -->
-                              <div data-bind="component: {name: 'authority-select', params: {kind: 'application'}}"></div>
-                              <!-- /ko -->
+                              <div data-bind="component: 'authority-select'"></div>
 
                               <!-- Operations: -->
                               <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
@@ -92,7 +96,8 @@
                               <div>
                                 <p data-bind="ltext: 'application.permitSubtypes'"></p>
                                 <span class="application_summary_text">
-                                  <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
+                                  <select class="dropdown"
+                                          data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
                                                      enable: $root.authorization.ok('change-permit-sub-type'),
                                                      optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
                                           id="permitSubtypeSelect">
