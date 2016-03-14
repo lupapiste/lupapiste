@@ -227,3 +227,32 @@
                    :metadata new-metadata}}))
         (doseq [attachment attachments]
           (mark-attachment-final! application modified-ts attachment))))))
+
+(defn- retention-key [{{:keys [pituus arkistointi]} :sailytysaika}]
+  (let [kw-a (keyword arkistointi)]
+    (cond
+      (= :ikuisesti kw-a) Integer/MAX_VALUE
+      (= :toistaiseksi kw-a) (- Integer/MAX_VALUE 1)
+      (= (keyword "m\u00E4\u00E4r\u00E4ajan") kw-a) pituus)))
+
+(defn- comp-sa [sailytysaika]
+  (dissoc sailytysaika :perustelu))
+
+(defn calculate-process-metadata [original-process-metadata application-metadata attachments]
+  (let [metadatas (conj (map :metadata attachments) application-metadata)
+        {max-retention :sailytysaika} (last (sort-by retention-key metadatas))]
+    (if-not (= (comp-sa (:sailytysaika original-process-metadata)) (comp-sa max-retention))
+      (assoc original-process-metadata :sailytysaika max-retention)
+      original-process-metadata)))
+
+(defn update-process-retention-period
+  "Update retention period of the process report to match the longest retention time of any document
+   as per SAHKE2 operative system sertification requirement 6.3"
+  [app-id modified-ts]
+  (let [{:keys [metadata attachments processMetadata] :as application} (domain/get-application-no-access-checking app-id)
+        new-process-md (calculate-process-metadata processMetadata metadata attachments)]
+    (when-not (= processMetadata new-process-md)
+      (action/update-application
+        (action/application->command application)
+        {$set {:modified modified-ts
+               :processMetadata new-process-md}}))))
