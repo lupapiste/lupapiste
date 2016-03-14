@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [sade.core :refer :all]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.action :refer [defquery]]))
+            [lupapalvelu.action :refer [defquery non-blank-parameters]]))
 
 (defquery municipality-borders
   {:user-roles #{:anonymous}
@@ -13,7 +13,7 @@
 (defn municipality-name [lang id]
   (lupapalvelu.i18n/localize lang :municipality id))
 
-(defn active-municipalities-internal [organizations]
+(defn active-municipalities-from-organizations [organizations]
   (for [[muni-id scopes]
         (group-by :municipality (flatten (map (partial :scope) organizations)))
         ]
@@ -28,4 +28,19 @@
   {:user-roles #{:anonymous}
    :description "Return applications, info requests, and openings by
 municipality"}
-  (ok :municipalities (active-municipalities-internal (o/get-organizations))))
+  (ok :municipalities (active-municipalities-from-organizations (o/get-organizations))))
+
+(defquery municipality-active
+  {:parameters [municipality]
+   :input-validators [(partial non-blank-parameters [:municipality])]
+   :user-roles #{:anonymous}}
+  [_]
+  (let [organizations (o/get-organizations {:scope.municipality municipality})
+        active-map (first (active-municipalities-from-organizations organizations))]
+      (ok (select-keys active-map [:applications :infoRequests :opening]))))
+
+
+(defn municipality-active-test [municipality]
+  (let [organizations (o/get-organizations {:scope.municipality municipality})
+        active-map (first (active-municipalities-from-organizations organizations))]
+      (ok (select-keys active-map [:applications :infoRequests :opening]))))
