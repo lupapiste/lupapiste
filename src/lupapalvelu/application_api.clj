@@ -481,7 +481,7 @@
    :input-validators [(partial action/non-blank-parameters [:state])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
-   :pre-checks       [a/valid-permit-types-for-state-change a/valid-new-state]}
+   :pre-checks       [permit/valid-permit-types-for-state-change a/valid-new-state]}
   [{:keys [user] :as command}]
   (update-application command
                       (a/state-transition-update (keyword state) (now) user)))
@@ -490,7 +490,7 @@
   {:description "List of possible target states for
   change-application-state transitions."
    :user-roles  #{:authority}
-   :pre-checks  [a/valid-permit-types-for-state-change]
+   :pre-checks  [permit/valid-permit-types-for-state-change]
    :states      states/post-verdict-states}
   [{application :application}]
   (ok :states (a/change-application-state-targets application)))

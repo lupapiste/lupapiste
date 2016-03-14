@@ -52,7 +52,8 @@ LUPAPISTE.AuthoritySelectModel = function() {
   self.disposedComputed( function() {
     var assigneeId = self.assigneeId() || "";
     var oldId = self.oldAssignee().id || "";
-    if ( self.canEdit() && appId() && assigneeId !== oldId) {
+    if( _.size( self.authorities()) && self.canEdit()
+         && appId() && assigneeId !== oldId) {
       ajax.command("assign-application", {id: appId(), assigneeId: assigneeId})
         .processing(self.pending)
         .success(function() {

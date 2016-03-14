@@ -5,6 +5,7 @@
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
@@ -93,17 +94,17 @@
             m1 {:R [] :P :all}
             m2 {:R ["tyonjohtaja-hakemus"] :P :all}
             m3 {:R ["tyonjohtaja-hakemus" :empty]}]
-        (valid-permit-types m1 nil {:permitType "R"}) => nil
-        (valid-permit-types m1 nil {:permitType "P"}) => nil
-        (valid-permit-types m1 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => error
-        (valid-permit-types m1 nil {:permitType "P" :permitSubtype "foo"}) => nil
-        (valid-permit-types m2 nil {:permitType "R"}) => error
-        (valid-permit-types m2 nil {:permitType "P"}) => nil
-        (valid-permit-types m2 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
-        (valid-permit-types m2 nil {:permitType "R" :permitSubtype "foobar"}) => error
-        (valid-permit-types m2 nil {:permitType "P" :permitSubtype "foo"}) => nil
-        (valid-permit-types m3 nil {:permitType "R"}) => nil
-        (valid-permit-types m3 nil {:permitType "P"}) => error
-        (valid-permit-types m3 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
-        (valid-permit-types m3 nil {:permitType "R" :permitSubtype "foobar"}) => error
-        (valid-permit-types m3 nil {:permitType "P" :permitSubtype "foo"}) => error))
+        (permit/valid-permit-types m1 nil {:permitType "R"}) => nil
+        (permit/valid-permit-types m1 nil {:permitType "P"}) => nil
+        (permit/valid-permit-types m1 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => error
+        (permit/valid-permit-types m1 nil {:permitType "P" :permitSubtype "foo"}) => nil
+        (permit/valid-permit-types m2 nil {:permitType "R"}) => error
+        (permit/valid-permit-types m2 nil {:permitType "P"}) => nil
+        (permit/valid-permit-types m2 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
+        (permit/valid-permit-types m2 nil {:permitType "R" :permitSubtype "foobar"}) => error
+        (permit/valid-permit-types m2 nil {:permitType "P" :permitSubtype "foo"}) => nil
+        (permit/valid-permit-types m3 nil {:permitType "R"}) => nil
+        (permit/valid-permit-types m3 nil {:permitType "P"}) => error
+        (permit/valid-permit-types m3 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
+        (permit/valid-permit-types m3 nil {:permitType "R" :permitSubtype "foobar"}) => error
+        (permit/valid-permit-types m3 nil {:permitType "P" :permitSubtype "foo"}) => error))

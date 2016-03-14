@@ -3,7 +3,8 @@
             [monger.operators :refer :all]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defcommand update-application defquery] :as action]
-            [lupapalvelu.application :as a]))
+            [lupapalvelu.application :as a]
+            [lupapalvelu.permit :as permit]))
 
 (defcommand set-municipality-hears-neighbors
   {:parameters [:id enabled]
@@ -20,5 +21,5 @@
   checkbox visibility. The option is available only for R and P permit
   types."
    :user-roles #{:applicant :authority}
-   :pre-checks [(partial a/valid-permit-types {:R [] :P :all})]}
+   :pre-checks [(partial permit/valid-permit-types {:R [] :P :all})]}
   [_])

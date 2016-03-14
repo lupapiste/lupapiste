@@ -11,10 +11,7 @@ Mikko wants to build Pytinki
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Pytinki${secs}
-  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
-
-Mikko submits application & goes for lunch
-  Submit application
+  Create application with state  ${appname}  753-416-25-30  kerrostalo-rivitalo  submitted
   [Teardown]  logout
 
 Sonja logs in
