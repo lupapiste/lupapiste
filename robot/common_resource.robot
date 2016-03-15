@@ -1240,6 +1240,10 @@ Assign application to
   Wait Until  Element Should Be Visible  jquery=[data-test-id=assignee-select]:visible
   Select From List By Label  jquery=[data-test-id=assignee-select]:visible  ${to}
 
+Assign application to nobody
+  Wait Until  Element Should Be Visible  jquery=[data-test-id=assignee-select]:visible
+  Select From List By Index  jquery=[data-test-id=assignee-select]:visible  0
+
 Application assignee select is
   [Arguments]  ${authority}
   Wait test id visible  assignee-select

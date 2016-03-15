@@ -12,170 +12,213 @@
     (let [application {:organization "753-R"
                        :tosFunction  "10 03 00 01"
                        :created      100
-                       :applicant "Testaaja Testi"
+                       :applicant    "Testaaja Testi"
+                       :statements   [{:person    {:text "Pelastusviranomainen"
+                                                   :name "Pia Nyman"}
+                                       :requested 302
+                                       :given     500
+                                       :status    "ehdoilla"
+                                       :text      "Lausunto liitteen\u00e4"
+                                       :state     "given"}
+                                      {:person    {:text "Rakennussuunnittelu"
+                                                   :name "Sampo S\u00e4levaara"}
+                                       :requested 301
+                                       :given     nil
+                                       :status    nil
+                                       :state     "requested"}]
+                       :neighbors    [{:propertyId "111"
+                                       :owner      {:type "luonnollinen"
+                                                    :name "Joku naapurin nimi"}
+                                       :id         "112"
+                                       :status     [{:state   "open"
+                                                     :created 600}
+                                                    {:state   "mark-done"
+                                                     :user    {:firstName "Etu" :lastName "Suku"}
+                                                     :created 500}]}]
+                       :tasks        [{:data        {}
+                                       :state       "requires_user_action"
+                                       :taskname    "rakennuksen paikan tarkastaminen"
+                                       :schema-info {:name    "task-katselmus"
+                                                     :version 1}
+                                       :closed      nil
+                                       :created     300
+                                       :duedate     nil
+                                       :assignee    {:lastName  "Suku"
+                                                     :firstName "Etu"
+                                                     :id        1111}
+                                       :source      nil
+                                       :id          "2222"}
+                                      ]
                        :attachments  [{:type     {:foo :bar}
                                        :versions [{:version 1
                                                    :created 200
-                                                   :user {:firstName "Testi"
-                                                          :lastName "Testaaja"}}
+                                                   :user    {:firstName "Testi"
+                                                             :lastName  "Testaaja"}}
                                                   {:version 2
                                                    :created 500
-                                                   :user {:firstName "Testi"
-                                                          :lastName "Testaaja"}}]
-                                       :user {:firstName "Testi"
-                                              :lastName "Testaaja"}
+                                                   :user    {:firstName "Testi"
+                                                             :lastName  "Testaaja"}}]
+                                       :user     {:firstName "Testi"
+                                                  :lastName  "Testaaja"}
                                        :contents "Great attachment"}
                                       {:type     {:foo :qaz}
                                        :versions [{:version 1
                                                    :created 300
-                                                   :user {:firstName "Testi"
-                                                          :lastName "Testaaja"}}]}]
+                                                   :user    {:firstName "Testi"
+                                                             :lastName  "Testaaja"}}]}]
                        :history      [{:state "draft"
-                                       :ts 100
-                                       :user {:firstName "Testi"
-                                              :lastName "Testaaja"}}
+                                       :ts    100
+                                       :user  {:firstName "Testi"
+                                               :lastName  "Testaaja"}}
                                       {:state "open"
-                                       :ts 250
-                                       :user {:firstName "Testi"
-                                              :lastName "Testaaja"}}]}]
+                                       :ts    250
+                                       :user  {:firstName "Testi"
+                                               :lastName  "Testaaja"}}]}]
       (generate-case-file-data application) => [{:action    "Valmisteilla"
                                                  :start     100
-                                                 :user "Testaaja Testi"
+                                                 :user      "Testaaja Testi"
                                                  :documents [{:type     :hakemus
                                                               :category :document
                                                               :ts       100
-                                                              :user "Testaaja Testi"}
+                                                              :user     "Testaaja Testi"}
                                                              {:type     {:foo :bar}
                                                               :category :attachment
                                                               :version  1
                                                               :ts       200
-                                                              :user "Testaaja Testi"
+                                                              :user     "Testaaja Testi"
                                                               :contents "Great attachment"}]}
                                                 {:action    "K\u00e4sittelyss\u00e4"
                                                  :start     250
-                                                 :user "Testaaja Testi"
+                                                 :user      "Testaaja Testi"
                                                  :documents [{:type     {:foo :qaz}
                                                               :category :attachment
                                                               :version  1
                                                               :ts       300
-                                                              :user "Testaaja Testi"
+                                                              :user     "Testaaja Testi"
                                                               :contents nil}
+                                                             {:category :request-review, :ts 300, :type "rakennuksen paikan tarkastaminen", :user "Suku Etu"}
+                                                             {:category :request-statement, :ts 301, :type "Rakennussuunnittelu", :user ""}
+                                                             {:category :request-statement, :ts 302, :type "Pelastusviranomainen", :user ""}
                                                              {:type     {:foo :bar}
                                                               :category :attachment
                                                               :version  2
                                                               :ts       500
-                                                              :user "Testaaja Testi"
-                                                              :contents "Great attachment"}]}]
+                                                              :user     "Testaaja Testi"
+                                                              :contents "Great attachment"}
+                                                             {:type     "Joku naapurin nimi"
+                                                              :category :request-neighbor
+                                                              :ts       600
+                                                              :user     " "}]}]
       (provided
         (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})))
 
   (fact "application and attachment state (tila) is changed correctly"
-    (let [metadata {:tila :luonnos
-                    :salassapitoaika 5
-                    :nakyvyys :julkinen
-                    :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                   :pituus 10
-                                   :perustelu "foo"}
-                    :myyntipalvelu false
-                    :suojaustaso :ei-luokiteltu
-                    :kayttajaryhma :viranomaisryhma
-                    :kieli :fi
-                    :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
-                    :salassapitoperuste "peruste"
-                    :henkilotiedot :sisaltaa
-                    :julkisuusluokka :salainen
+    (let [metadata {:tila                :luonnos
+                    :salassapitoaika     5
+                    :nakyvyys            :julkinen
+                    :sailytysaika        {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                          :pituus      10
+                                          :perustelu   "foo"}
+                    :myyntipalvelu       false
+                    :suojaustaso         :ei-luokiteltu
+                    :kayttajaryhma       :viranomaisryhma
+                    :kieli               :fi
+                    :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                    :salassapitoperuste  "peruste"
+                    :henkilotiedot       :sisaltaa
+                    :julkisuusluokka     :salainen
                     :kayttajaryhmakuvaus :muokkausoikeus}
           application {:id           1000
                        :organization "753-R"
                        :metadata     metadata
                        :attachments  [{:id 1 :metadata metadata}
                                       {:id 2 :metadata metadata}]
-                       :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
+                       :verdicts     [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
           command (action/application->command application)]
       (mark-app-and-attachments-final! 1000 12345678) => nil
       (provided
         (domain/get-application-no-access-checking 1000) => application
 
-        (action/update-application command {$set {:modified      12345678
-                                                  :metadata {:tila :valmis
-                                                             :salassapitoaika 5
-                                                             :nakyvyys :julkinen
-                                                             :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                                                            :pituus 10
-                                                                            :perustelu "foo"
-                                                                            :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
-                                                             :myyntipalvelu false
-                                                             :suojaustaso :ei-luokiteltu
+        (action/update-application command {$set {:modified 12345678
+                                                  :metadata {:tila                :valmis
+                                                             :salassapitoaika     5
+                                                             :nakyvyys            :julkinen
+                                                             :sailytysaika        {:arkistointi          (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                   :pituus               10
+                                                                                   :perustelu            "foo"
+                                                                                   :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                             :myyntipalvelu       false
+                                                             :suojaustaso         :ei-luokiteltu
                                                              :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
-                                                             :kayttajaryhma :viranomaisryhma
-                                                             :kieli :fi
-                                                             :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
-                                                             :salassapitoperuste "peruste"
-                                                             :henkilotiedot :sisaltaa
-                                                             :julkisuusluokka :salainen
+                                                             :kayttajaryhma       :viranomaisryhma
+                                                             :kieli               :fi
+                                                             :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                                                             :salassapitoperuste  "peruste"
+                                                             :henkilotiedot       :sisaltaa
+                                                             :julkisuusluokka     :salainen
                                                              :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil
         (action/update-application command
                                    {:attachments.id 1}
-                                   {$set {:modified                    12345678
-                                          :attachments.$.metadata {:tila :valmis
-                                                                   :salassapitoaika 5
-                                                                   :nakyvyys :julkinen
-                                                                   :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                                                                  :pituus 10
-                                                                                  :perustelu "foo"
-                                                                                  :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
-                                                                   :myyntipalvelu false
-                                                                   :suojaustaso :ei-luokiteltu
+                                   {$set {:modified               12345678
+                                          :attachments.$.metadata {:tila                :valmis
+                                                                   :salassapitoaika     5
+                                                                   :nakyvyys            :julkinen
+                                                                   :sailytysaika        {:arkistointi          (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                         :pituus               10
+                                                                                         :perustelu            "foo"
+                                                                                         :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                   :myyntipalvelu       false
+                                                                   :suojaustaso         :ei-luokiteltu
                                                                    :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
-                                                                   :kayttajaryhma :viranomaisryhma
-                                                                   :kieli :fi
-                                                                   :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
-                                                                   :salassapitoperuste "peruste"
-                                                                   :henkilotiedot :sisaltaa
-                                                                   :julkisuusluokka :salainen
+                                                                   :kayttajaryhma       :viranomaisryhma
+                                                                   :kieli               :fi
+                                                                   :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                                                                   :salassapitoperuste  "peruste"
+                                                                   :henkilotiedot       :sisaltaa
+                                                                   :julkisuusluokka     :salainen
                                                                    :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil
         (action/update-application command
                                    {:attachments.id 2}
-                                   {$set {:modified                    12345678
-                                          :attachments.$.metadata {:tila :valmis
-                                                                   :salassapitoaika 5
-                                                                   :nakyvyys :julkinen
-                                                                   :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                                                                  :pituus 10
-                                                                                  :perustelu "foo"
-                                                                                  :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
-                                                                   :myyntipalvelu false
-                                                                   :suojaustaso :ei-luokiteltu
+                                   {$set {:modified               12345678
+                                          :attachments.$.metadata {:tila                :valmis
+                                                                   :salassapitoaika     5
+                                                                   :nakyvyys            :julkinen
+                                                                   :sailytysaika        {:arkistointi          (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                         :pituus               10
+                                                                                         :perustelu            "foo"
+                                                                                         :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                   :myyntipalvelu       false
+                                                                   :suojaustaso         :ei-luokiteltu
                                                                    :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
-                                                                   :kayttajaryhma :viranomaisryhma
-                                                                   :kieli :fi
-                                                                   :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
-                                                                   :salassapitoperuste "peruste"
-                                                                   :henkilotiedot :sisaltaa
-                                                                   :julkisuusluokka :salainen
+                                                                   :kayttajaryhma       :viranomaisryhma
+                                                                   :kieli               :fi
+                                                                   :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                                                                   :salassapitoperuste  "peruste"
+                                                                   :henkilotiedot       :sisaltaa
+                                                                   :julkisuusluokka     :salainen
                                                                    :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil)))
 
   (fact "attachment state (tila) is changed correctly"
     (let [application {:id           1000
                        :organization "753-R"
                        :metadata     {:tila "luonnos"}
-                       :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
+                       :verdicts     [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
                        :attachments  [{:id 1 :metadata {:tila "luonnos"}}
-                                      {:id 2 :metadata {:tila :luonnos
-                                                        :salassapitoaika 5
-                                                        :nakyvyys :julkinen
-                                                        :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                                                       :pituus 10
-                                                                       :perustelu "foo"}
-                                                        :myyntipalvelu false
-                                                        :suojaustaso :ei-luokiteltu
-                                                        :kayttajaryhma :viranomaisryhma
-                                                        :kieli :fi
-                                                        :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
-                                                        :salassapitoperuste "peruste"
-                                                        :henkilotiedot :sisaltaa
-                                                        :julkisuusluokka :salainen
+                                      {:id 2 :metadata {:tila                :luonnos
+                                                        :salassapitoaika     5
+                                                        :nakyvyys            :julkinen
+                                                        :sailytysaika        {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                              :pituus      10
+                                                                              :perustelu   "foo"}
+                                                        :myyntipalvelu       false
+                                                        :suojaustaso         :ei-luokiteltu
+                                                        :kayttajaryhma       :viranomaisryhma
+                                                        :kieli               :fi
+                                                        :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                                                        :salassapitoperuste  "peruste"
+                                                        :henkilotiedot       :sisaltaa
+                                                        :julkisuusluokka     :salainen
                                                         :kayttajaryhmakuvaus :muokkausoikeus}}]}
           now 12345678
           attachment-id 2]
@@ -184,63 +227,108 @@
         (action/update-application (action/application->command application)
                                    {:attachments.id attachment-id}
                                    {$set {:modified               now
-                                          :attachments.$.metadata {:tila :valmis
-                                                                   :salassapitoaika 5
-                                                                   :nakyvyys :julkinen
-                                                                   :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                                                                  :pituus 10
-                                                                                  :perustelu "foo"
-                                                                                  :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
-                                                                   :myyntipalvelu false
-                                                                   :suojaustaso :ei-luokiteltu
+                                          :attachments.$.metadata {:tila                :valmis
+                                                                   :salassapitoaika     5
+                                                                   :nakyvyys            :julkinen
+                                                                   :sailytysaika        {:arkistointi          (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                         :pituus               10
+                                                                                         :perustelu            "foo"
+                                                                                         :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                   :myyntipalvelu       false
+                                                                   :suojaustaso         :ei-luokiteltu
                                                                    :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
-                                                                   :kayttajaryhma :viranomaisryhma
-                                                                   :kieli :fi
-                                                                   :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
-                                                                   :salassapitoperuste "peruste"
-                                                                   :henkilotiedot :sisaltaa
-                                                                   :julkisuusluokka :salainen
+                                                                   :kayttajaryhma       :viranomaisryhma
+                                                                   :kieli               :fi
+                                                                   :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                                                                   :salassapitoperuste  "peruste"
+                                                                   :henkilotiedot       :sisaltaa
+                                                                   :julkisuusluokka     :salainen
                                                                    :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil)))
 
   (fact "document metadata is updated correctly"
     (let [application {:id           1000
                        :organization "753-R"
-                       :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
-                       :metadata     {:tila "valmis"
+                       :verdicts     [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
+                       :metadata     {:tila     "valmis"
                                       :nakyvyys "julkinen"}}]
       (document-with-updated-metadata application "753-R" "10" application "hakemus") => {:id           1000
                                                                                           :organization "753-R"
-                                                                                          :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
-                                                                                          :metadata {:tila :valmis
-                                                                                                     :salassapitoaika 5
-                                                                                                     :nakyvyys :julkinen
-                                                                                                     :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                                                                                                    :pituus 10
-                                                                                                                    :perustelu "foo"
-                                                                                                                    :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
-                                                                                                     :myyntipalvelu false
-                                                                                                     :suojaustaso :ei-luokiteltu
-                                                                                                     :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
-                                                                                                     :kayttajaryhma :viranomaisryhma
-                                                                                                     :kieli :fi
-                                                                                                     :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
-                                                                                                     :salassapitoperuste "peruste"
-                                                                                                     :henkilotiedot :sisaltaa
-                                                                                                     :julkisuusluokka :salainen
-                                                                                                     :kayttajaryhmakuvaus :muokkausoikeus}}
+                                                                                          :verdicts     [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]
+                                                                                          :metadata     {:tila                :valmis
+                                                                                                         :salassapitoaika     5
+                                                                                                         :nakyvyys            :julkinen
+                                                                                                         :sailytysaika        {:arkistointi          (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                                                               :pituus               10
+                                                                                                                               :perustelu            "foo"
+                                                                                                                               :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                                                         :myyntipalvelu       false
+                                                                                                         :suojaustaso         :ei-luokiteltu
+                                                                                                         :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                                                                                         :kayttajaryhma       :viranomaisryhma
+                                                                                                         :kieli               :fi
+                                                                                                         :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                                                                                                         :salassapitoperuste  "peruste"
+                                                                                                         :henkilotiedot       :sisaltaa
+                                                                                                         :julkisuusluokka     :salainen
+                                                                                                         :kayttajaryhmakuvaus :muokkausoikeus}}
       (provided
-        (metadata-for-document "753-R" "10" "hakemus") => {:tila :luonnos
-                                                           :salassapitoaika 5
-                                                           :nakyvyys :julkinen
-                                                           :sailytysaika {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                                                          :pituus 10
-                                                                          :perustelu "foo"}
-                                                           :myyntipalvelu false
-                                                           :suojaustaso :ei-luokiteltu
-                                                           :kayttajaryhma :viranomaisryhma
-                                                           :kieli :fi
-                                                           :turvallisuusluokka :ei-turvallisuusluokkaluokiteltu
-                                                           :salassapitoperuste "peruste"
-                                                           :henkilotiedot :sisaltaa
-                                                           :julkisuusluokka :salainen
-                                                           :kayttajaryhmakuvaus :muokkausoikeus}))))
+        (metadata-for-document "753-R" "10" "hakemus") => {:tila                :luonnos
+                                                           :salassapitoaika     5
+                                                           :nakyvyys            :julkinen
+                                                           :sailytysaika        {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                 :pituus      10
+                                                                                 :perustelu   "foo"}
+                                                           :myyntipalvelu       false
+                                                           :suojaustaso         :ei-luokiteltu
+                                                           :kayttajaryhma       :viranomaisryhma
+                                                           :kieli               :fi
+                                                           :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                                                           :salassapitoperuste  "peruste"
+                                                           :henkilotiedot       :sisaltaa
+                                                           :julkisuusluokka     :salainen
+                                                           :kayttajaryhmakuvaus :muokkausoikeus})))
+
+  (fact "process metadata retention is calculated based on longest document retention"
+    (let [metadata {:tila            :valmis
+                    :nakyvyys        :julkinen
+                    :sailytysaika    {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                      :pituus      10
+                                      :perustelu   "foo"}
+                    :myyntipalvelu   false
+                    :kieli           :fi
+                    :henkilotiedot   :sisaltaa
+                    :julkisuusluokka :julkinen}
+          process-metadata (assoc metadata :sailytysaika {:arkistointi :ei :perustelu "foobar"})
+          attachments [{:id 1 :metadata (assoc metadata :sailytysaika {:arkistointi :ikuisesti
+                                                                       :perustelu   "barfoo"})}
+                       {:id 2 :metadata (assoc-in metadata [:sailytysaika :pituus] 5)}]
+          attachments2 [{:id 2 :metadata (assoc-in metadata [:sailytysaika :pituus] 5)}]
+          process-metadata2 (assoc metadata :sailytysaika {:arkistointi :ikuisesti :perustelu "perustelu-does-not-matter-in-compare"})]
+
+      (calculate-process-metadata process-metadata metadata attachments) => {:tila            :valmis
+                                                                             :nakyvyys        :julkinen
+                                                                             :sailytysaika    {:arkistointi :ikuisesti
+                                                                                               :perustelu   "barfoo"}
+                                                                             :myyntipalvelu   false
+                                                                             :kieli           :fi
+                                                                             :henkilotiedot   :sisaltaa
+                                                                             :julkisuusluokka :julkinen}
+
+      (calculate-process-metadata process-metadata metadata attachments2) => {:tila            :valmis
+                                                                              :nakyvyys        :julkinen
+                                                                              :sailytysaika    {:arkistointi (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                                :pituus      10
+                                                                                                :perustelu   "foo"}
+                                                                              :myyntipalvelu   false
+                                                                              :kieli           :fi
+                                                                              :henkilotiedot   :sisaltaa
+                                                                              :julkisuusluokka :julkinen}
+
+      (calculate-process-metadata process-metadata2 metadata attachments) => {:tila            :valmis
+                                                                              :nakyvyys        :julkinen
+                                                                              :sailytysaika    {:arkistointi :ikuisesti
+                                                                                                :perustelu   "perustelu-does-not-matter-in-compare"}
+                                                                              :myyntipalvelu   false
+                                                                              :kieli           :fi
+                                                                              :henkilotiedot   :sisaltaa
+                                                                              :julkisuusluokka :julkinen})))
