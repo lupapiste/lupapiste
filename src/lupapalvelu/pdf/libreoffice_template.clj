@@ -79,7 +79,7 @@
     (i18n/localize lang "application.export.empty")))
 
 (defn- get-operations [{:keys [primaryOperation secondaryOperations]}]
-  (clojure.string/join ", " (map (fn [[op c]] (str (if (> c 1) (str c " \u00D7 ")) (loc "operations" op)))
+  (clojure.string/join ", " (map (fn [[op c]] (str (if (> c 1) (str c " \u00D7 ")) (i18n/loc "operations" op)))
                                  (frequencies (map :name (remove nil? (conj (seq secondaryOperations) primaryOperation)))))))
 
 (defn common-field-map [application lang]
