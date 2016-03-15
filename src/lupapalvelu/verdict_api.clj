@@ -69,7 +69,9 @@
 
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
+  (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
+                         ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
+                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))]
     (let [app-xml (normalize-special-verdict application app-xml)
           organization (organization/get-organization (:organization application))
           validator-fn (permit/get-verdict-validator (permit/permit-type application))
