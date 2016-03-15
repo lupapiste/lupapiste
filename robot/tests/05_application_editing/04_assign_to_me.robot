@@ -99,8 +99,38 @@ Mikko sees that application is assigned to Sonja
   Application assignee span is  Sibbo Sonja
   [Teardown]  Logout
 
+Sonja logs in and clears authority
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Assign application to nobody
+  Reload page
+  Application assignee select empty
+
+Sonja assigns application to Ronja
+  Assign application to  Sibbo Ronja
+  [Teardown]  Logout
+
+Sipoo admin logs in and removes Ronja
+  Sipoo logs in
+  Wait Until  Element should be visible  jquery=div.users-table tr[data-user-email='ronja.sibbo@sipoo.fi']
+  Click Element  jquery=tr[data-user-email='ronja.sibbo@sipoo.fi'] a[data-op=removeFromOrg]
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should not be visible  jquery=tr[data-user-email='ronja.sibbo@sipoo.fi']
+  [Teardown]  Logout
+
+Sonja logs in and sees Ronja still assigned
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Application assignee select is  Sibbo Ronja
+  Element Should Be Disabled  jquery=option[value=777777777777777777000024]
+
+Sonja assigns application to herself
+  Assign application to  Sibbo Sonja
+  Reload Page
+  Application assignee select is  Sibbo Sonja
+  Page Should Not Contain  jquery=option[value=777777777777777777000024]
+
 # LUPA-791
 Sonja cancels the application
-  Sonja logs in
   Open application  ${appname}  ${propertyId}
   Close current application as authority
