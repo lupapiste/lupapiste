@@ -47,13 +47,14 @@
     (if code-valid?
       (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode application) (:attachments application))
             {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode application "hakemus")
-            process-metadata (t/metadata-for-process orgId functionCode)]
+            process-metadata (t/calculate-process-metadata (t/metadata-for-process orgId functionCode) updated-metadata updated-attachments)]
         (action/update-application command
                                    {$set {:modified created
                                           :tosFunction functionCode
                                           :metadata updated-metadata
                                           :processMetadata process-metadata
-                                          :attachments updated-attachments}}))
+                                          :attachments updated-attachments}})
+        (ok))
       (fail "Invalid TOS function code"))))
 
 (def schema-to-input-type-map
@@ -116,6 +117,7 @@
           updated-child (update-document-metadata child metadata user-roles application)
           updated-children (-> (remove #(= % child) (type application)) (conj updated-child))]
       (action/update-application command {$set {:modified created type updated-children}})
+      (t/update-process-retention-period (:id application) created)
       (ok {:metadata (:metadata updated-child)}))
     (fail "error.child.id")))
 
@@ -131,7 +133,7 @@
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
    :states states/all-but-draft-or-terminal}
-  [command]
+  [{:keys [application created] :as command}]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
 (defcommand store-tos-metadata-for-application
@@ -145,6 +147,7 @@
         {processed-metadata :metadata} (update-document-metadata application metadata user-roles application)]
     (action/update-application command {$set {:modified created
                                               :metadata processed-metadata}})
+    (t/update-process-retention-period (:id application) created)
     (ok {:metadata processed-metadata})))
 
 (defcommand store-tos-metadata-for-process
@@ -155,7 +158,8 @@
    :states states/all-but-draft-or-terminal}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
-        processed-metadata (process-case-file-metadata (:processMetadata application) metadata user-roles)]
+        processed-metadata (-> (process-case-file-metadata (:processMetadata application) metadata user-roles)
+                               (t/calculate-process-metadata (:metadata application) (:attachments application)))]
     (action/update-application command {$set {:modified created
                                               :processMetadata processed-metadata}})
     (ok {:metadata processed-metadata})))

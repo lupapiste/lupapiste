@@ -322,6 +322,7 @@
      (application->command application)
       {$set {:modified now}
        $push {:attachments attachment}})
+    (tos/update-process-retention-period (:id application) now)
     attachment))
 
 (defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
@@ -332,6 +333,7 @@
       (application->command application)
       {$set {:modified now}
        $push {:attachments {$each attachments}}})
+    (tos/update-process-retention-period (:id application) now)
     (map :id attachments)))
 
 (defn- delete-attachment-file-and-preview! [file-id]

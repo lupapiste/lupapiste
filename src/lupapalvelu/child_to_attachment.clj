@@ -48,12 +48,12 @@
      :missing-fonts []
      :source {:type type :id id}}))
 
-(defn get-child-attachment-id [app child-type id]
+(defn- get-child-attachment-id [app child-type id]
   (let [attachment (filter #(= {:type (name child-type) :id id} (:source %)) (:attachments app))
         attachment-id (:id (first attachment))]
     attachment-id))
 
-(defn generate-attachment-from-children [user app child-type id lang]
+(defn- generate-attachment-from-children [user app child-type id lang]
   "Builds attachment and return attachment data as map"
   (trace "   generate-attachment-from-children lang=" (name lang) ", type=" (name child-type) ", id=" id ",org: " (:organization app) ", child: " (get-child app child-type id))
   (let [pdf-file (File/createTempFile (str "pdf-export-" (name lang) "-" (name child-type) "-") ".pdf")
