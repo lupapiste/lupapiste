@@ -242,7 +242,7 @@
 (defn calculate-process-metadata [original-process-metadata application-metadata attachments]
   (let [metadatas (conj (map :metadata attachments) application-metadata)
         {max-retention :sailytysaika} (last (sort-by retention-key metadatas))]
-    (if-not (= (comp-sa (:sailytysaika original-process-metadata)) (comp-sa max-retention))
+    (if (and max-retention (not= (comp-sa (:sailytysaika original-process-metadata)) (comp-sa max-retention)))
       (assoc original-process-metadata :sailytysaika max-retention)
       original-process-metadata)))
 

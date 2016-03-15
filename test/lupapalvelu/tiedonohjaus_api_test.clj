@@ -32,7 +32,8 @@
       (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "55 55 55 55"}]))
 
   (fact "attachment metadata is updated correctly"
-    (let [command {:application {:organization "753-R"
+    (let [command {:application {:id 1
+                                 :organization "753-R"
                                  :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
                                                                   "henkilotiedot"   "sisaltaa"
                                                                   "sailytysaika"    {"arkistointi" "ei"
@@ -68,10 +69,12 @@
                                                                                                              :myyntipalvelu   false
                                                                                                              :nakyvyys        :julkinen
                                                                                                              :tila            :luonnos
-                                                                                                             :kieli           :fi}}]}}) => nil)))
+                                                                                                             :kieli           :fi}}]}}) => nil
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
 
   (fact "user with insufficient rights cannot update retention metadata"
-    (let [command {:application {:organization "753-R"
+    (let [command {:application {:id 1
+                                 :organization "753-R"
                                  :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
                                                                   "henkilotiedot"   "sisaltaa"
                                                                   "sailytysaika"    {"arkistointi" "ikuisesti"
@@ -109,7 +112,9 @@
                                                                                                              :nakyvyys        :julkinen
                                                                                                              :tila            :luonnos
 
-                                                                                                             :kieli           :fi}}]}}) => nil)))
+                                                                                                             :kieli           :fi}}]}}) => nil
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
+
   (fact "process metadata is updated correctly"
     (let [command {:application {:organization    "753-R"
                                  :processMetadata {}
@@ -155,7 +160,8 @@
                     "kieli" "fi"
                     "turvallisuusluokka" "ei-turvallisuusluokkaluokiteltu"
                     "salassapitoperuste" "peruste"}
-          command {:application {:organization "753-R"
+          command {:application {:id 1
+                                 :organization "753-R"
                                  :attachments  [{:id 1 :metadata metadata}]
                                  ;; Verdict date 2016-1-29
                                  :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
@@ -202,7 +208,8 @@
                                                                                                   :salassapitoperuste "peruste"
                                                                                                   :henkilotiedot :sisaltaa
                                                                                                   :julkisuusluokka :salainen
-                                                                                                  :kayttajaryhmakuvaus :muokkausoikeus}}]}}) => nil)))
+                                                                                                  :kayttajaryhmakuvaus :muokkausoikeus}}]}}) => nil
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
 
   (fact "retention and security end dates are not set when they are not required"
     (let [metadata {"julkisuusluokka" "julkinen"
@@ -212,7 +219,8 @@
                     "myyntipalvelu"   false
                     "nakyvyys"        "julkinen"
                     "kieli" "fi"}
-          command {:application {:organization "753-R"
+          command {:application {:id 1
+                                 :organization "753-R"
                                  :attachments  [{:id 1 :metadata metadata}]
                                  ;; Verdict date 2016-1-29
                                  :verdicts [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
@@ -241,4 +249,5 @@
                                                                                                                  :perustelu "foo"}
                                                                                                   :myyntipalvelu false
                                                                                                   :kieli :fi
-                                                                                                  :henkilotiedot :sisaltaa}}]}}) => nil))))
+                                                                                                  :henkilotiedot :sisaltaa}}]}}) => nil
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil))))
