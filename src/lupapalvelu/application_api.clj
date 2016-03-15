@@ -346,7 +346,7 @@
    :show-municipality-in-subject true
    :recipients-fn (fn [{application :application}]
                     (let [organization (organization/get-organization (:organization application))
-                          emails (get-in organization [:notifications :submit-notification-emails])]
+                          emails (get-in organization [:notifications :inforequest-notification-emails])]
                       (map (fn [e] {:email e, :role "authority"}) emails)))
    :model-fn (fn [{application :application} _ recipient]
                {:link-fi (notifications/get-application-link application nil "fi" recipient)
@@ -370,7 +370,7 @@
       ; Notify organization about new inforequest
       (if (:openInfoRequest created-application)
         (open-inforequest/new-open-inforequest! created-application)
-        #_(notifications/notify! :inforequest-invite {:application created-application}))) ; FIXME, LPK-1506 email change
+        (notifications/notify! :inforequest-invite {:application created-application})))
     (try
       (autofill-rakennuspaikka created-application created)
       (catch java.io.IOException e

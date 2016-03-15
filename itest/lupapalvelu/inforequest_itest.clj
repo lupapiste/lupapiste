@@ -63,10 +63,10 @@
       (fact "Sonja is also allowed to cancel inforequest"
         (allowed? :cancel-inforequest :id application-id)))))
 
-#_(facts "Inforequest notification email"
+(facts "Inforequest notification email"
   (last-email) ; clear box
 
-  (command sipoo :set-organization-state-notification-email :emails "testi@example.com") => ok?
+  (command sipoo :set-organization-inforequest-notification-email :emails "testi@example.com") => ok?
 
   (create-app pena :messages ["hello"] :infoRequest true :propertyId sipoo-property-id) => ok?
   (let [email (last-email)]
