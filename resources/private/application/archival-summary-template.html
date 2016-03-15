@@ -183,7 +183,8 @@
             <div data-bind="if: !_.isEmpty($data.metadata)">
               <div data-bind="component: {name: 'metadata-editor',
                                           params: {metadata: metadata, application: $root.application,
-                                          saveCallback: function(){$data.showAdditionalControls(false);}}}"></div>
+                                                   saveCallback: function(){$data.showAdditionalControls(false);},
+                                                   caseFile: $data.id.indexOf('case-file') !== -1 }}"></div>
             </div>
           </div>
           <div class="left">
