@@ -190,7 +190,6 @@
         all-docs (sort-by :ts (concat documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))]
     (map (fn [[{:keys [state ts user]} next]]
            (let [api-response (toimenpide-for-state (:organization application) (:tosFunction application) state)
-                 ;; TODO: Muutospyyntö state not in toj
                  action-name (or (:name api-response) "Ei asetettu tiedonohjaussuunnitelmassa")]
              {:action    action-name
               :start     ts

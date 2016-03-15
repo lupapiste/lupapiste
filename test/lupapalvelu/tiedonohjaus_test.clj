@@ -18,10 +18,10 @@
                                        :requested 302
                                        :given     500
                                        :status    "ehdoilla"
-                                       :text      "Lausunto liitteenä"
+                                       :text      "Lausunto liitteen\u00e4"
                                        :state     "given"}
                                       {:person    {:text "Rakennussuunnittelu"
-                                                   :name "Sampo Sälevaara"}
+                                                   :name "Sampo S\u00e4levaara"}
                                        :requested 301
                                        :given     nil
                                        :status    nil
