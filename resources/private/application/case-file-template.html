@@ -9,6 +9,7 @@
       <thead>
       <tr>
         <th data-bind="ltext: 'caseFile.action'"></th>
+        <th data-bind="ltext: 'applications.operation'"></th>
         <th data-bind="ltext: 'document'"></th>
         <th data-bind="ltext: 'caseFile.documentDate'"></th>
         <th data-bind="ltext: 'lisaaja'"></th>
@@ -18,6 +19,7 @@
       <tr>
         <td data-bind="text: action"></td>
         <td></td>
+        <td></td>
         <td data-bind="dateString: start"></td>
         <td data-bind="text: user"></td>
       </tr>
@@ -25,7 +27,15 @@
       <tr>
         <td></td>
         <td>
-          <div data-bind="if: category == 'document'"><span data-bind="ltext: type"></span></div>
+          <div data-bind="if: category == 'document'"><span data-bind="ltext: 'application.applicationSummary'"></span></div>
+          <div data-bind="if: category == 'attachment'"><span data-bind="ltext: 'document'"></span></div>
+          <div data-bind="if: category == 'request-statement'"><span data-bind="ltext: 'caseFile.operation.statement.request'"></span></div>
+          <div data-bind="if: category == 'request-neighbor'"><span data-bind="ltext: 'caseFile.operation.neighbor.request'"></span></div>
+          <div data-bind="if: category == 'request-review'"><span data-bind="ltext: 'caseFile.operation.review.request'"></span></div>
+          <div data-bind="if: category == 'review'"><span data-bind="ltext: 'caseFile.operation.review'"></span></div>
+        </td>
+        <td>
+          <div data-bind="ifnot: category == 'attachment'"><span data-bind="text: type"></span></div>
           <div data-bind="if: category == 'attachment'">
             <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span><span data-bind="if: contents">, <span data-bind="text: contents"></span></span>, v. <span data-bind="version: version"></span>
           </div>

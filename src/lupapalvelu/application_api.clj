@@ -346,7 +346,7 @@
    :show-municipality-in-subject true
    :recipients-fn (fn [{application :application}]
                     (let [organization (organization/get-organization (:organization application))
-                          emails (get-in organization [:notifications :submit-notification-emails])]
+                          emails (get-in organization [:notifications :inforequest-notification-emails])]
                       (map (fn [e] {:email e, :role "authority"}) emails)))
    :model-fn (fn [{application :application} _ recipient]
                {:link-fi (notifications/get-application-link application nil "fi" recipient)
