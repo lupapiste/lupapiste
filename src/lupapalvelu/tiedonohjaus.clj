@@ -176,7 +176,7 @@
               (if-let [held (get-in task [:data :katselmus :pitoPvm :modified])]
               (conj acc {:type     (:taskname task)
                          :category :review
-                         :ts       held  ;; TODO: What timestamp should this use ?
+                         :ts       held
                          :user     (full-name (:assignee task))})
               acc)) [] (:tasks application)))
 

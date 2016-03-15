@@ -29,10 +29,10 @@
         <td>
           <div data-bind="if: category == 'document'"><span data-bind="ltext: 'application.applicationSummary'"></span></div>
           <div data-bind="if: category == 'attachment'"><span data-bind="ltext: 'document'"></span></div>
-          <div data-bind="if: category == 'request-statement'"><span data-bind="ltext: 'email.title.statement-request'"></span></div>
-          <div data-bind="if: category == 'request-neighbor'"><span data-bind="ltext: 'email.title.neighbor'"></span></div>
-          <div data-bind="if: category == 'request-review'"><span data-bind="ltext: 'caseFile.action.review-request'"></span></div>
-          <div data-bind="if: category == 'review'"><span data-bind="ltext: 'caseFile.action.review'"></span></div>
+          <div data-bind="if: category == 'request-statement'"><span data-bind="ltext: 'caseFile.operation.statement.request'"></span></div>
+          <div data-bind="if: category == 'request-neighbor'"><span data-bind="ltext: 'caseFile.operation.neighbor.request'"></span></div>
+          <div data-bind="if: category == 'request-review'"><span data-bind="ltext: 'caseFile.operation.review.request'"></span></div>
+          <div data-bind="if: category == 'review'"><span data-bind="ltext: 'caseFile.operation.review'"></span></div>
         </td>
         <td>
           <div data-bind="ifnot: category == 'attachment'"><span data-bind="text: type"></span></div>
