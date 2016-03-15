@@ -327,6 +327,9 @@
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
         classification {:permitType permit-type, :primaryOperation op}
+        attachments (when-not info-request? (make-attachments created op organization state tos-function))
+        metadata (tos/metadata-for-document (:id organization) tos-function "hakemus")
+        process-metadata (tos/calculate-process-metadata (tos/metadata-for-process (:id organization) tos-function) metadata attachments)
         application (merge domain/application-skeleton
                       classification
                       {:id                  id
@@ -352,10 +355,10 @@
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
                        :schema-version      (schemas/get-latest-schema-version)
                        :tosFunction         tos-function
-                       :metadata            (tos/metadata-for-document (:id organization) tos-function "hakemus")
-                       :processMetadata     (tos/metadata-for-process (:id organization) tos-function)})]
+                       :metadata            metadata
+                       :processMetadata     process-metadata})]
     (merge application (when-not info-request?
-                         {:attachments (make-attachments created op organization state tos-function)
+                         {:attachments attachments
                           :documents   (make-documents user created op application manual-schema-datas)}))))
 
 (defn do-create-application
