@@ -43,12 +43,13 @@
                    {:email (user/canonize-email email)
                     :address (select-keys params [:street :city :zip])})}))
 
-(defn- params->new-neighbor [params]
+(defn- params->new-neighbor [params user]
   (merge
     (params->neighbor params)
     {:id (mongo/create-id)
      :status [{:state :open
-               :created (now)}]}))
+               :created (now)
+               :user user}]}))
 
 (defn- valid-neighbor? [m]
   (and (map? m) (every? #(or (string? %) (nil? %)) (vals m)) (v/kiinteistotunnus? (:propertyId m))))
@@ -61,7 +62,7 @@
                           (fail :error.invalid-type)))]
    :states states/all-application-states-but-draft-or-terminal}
   [command]
-  (let [new-neighbor (params->new-neighbor (:data command))]
+  (let [new-neighbor (params->new-neighbor (:data command) (:user command))]
     (update-application command {$push {:neighbors new-neighbor}})
     (ok :neighborId (:id new-neighbor))))
 
@@ -71,7 +72,7 @@
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [command]
-  (let [new-neighbors (map params->new-neighbor owners)]
+  (let [new-neighbors (map (fn [data] (params->new-neighbor data (:user command))) owners)]
     (update-application command {$push {:neighbors {$each new-neighbors}}})
     (ok)))
 

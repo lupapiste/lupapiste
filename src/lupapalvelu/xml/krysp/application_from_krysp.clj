@@ -11,11 +11,21 @@
   [{:keys [permitType]}]
   (permit/get-application-xml-getter permitType))
 
-(defn get-application-xml [{:keys [id permitType] :as application} search-type & [raw?]]
+(defn- get-app-xml [{:keys [permitType organization] :as application} id search-type & [raw?]]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
     (if-let [fetch-fn (fetch-fetch-fn application)]
       (fetch-fn url credentials id search-type raw?)
       (do
-        (error "No fetch function for" permitType (:organization application))
+        (error "No fetch function for" permitType organization)
         (fail! :error.unknown)))
     (fail! :error.no-legacy-available)))
+
+(defn get-application-xml [{:keys [id organization permitType] :as application} search-type & [raw?]]
+  (get-app-xml application id search-type raw?))
+
+(defn get-application-xml-by-application-id [{:keys [id organization permitType] :as application} & [raw?]]
+  (get-app-xml application id :application-id raw?))
+
+(defn get-application-xml-by-backend-id [{:keys [organization permitType] :as application} backend-id & [raw?]]
+  (when backend-id
+    (get-app-xml application backend-id :kuntalupatunnus raw?)))

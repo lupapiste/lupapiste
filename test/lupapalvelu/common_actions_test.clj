@@ -45,6 +45,7 @@
                           :preview-attachment
                           :document
                           :mark-seen
+                          :pdfa-casefile
                           :get-building-info-from-wfs
                           :authority-notice
                           :application-guests}
@@ -86,6 +87,7 @@
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                            :get-building-info-from-wfs
+                           :pdfa-casefile
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
                            :application-guests}]

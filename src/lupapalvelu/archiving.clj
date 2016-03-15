@@ -167,7 +167,7 @@
                        :municipality          municipality
                        :location-etrs-tm35fin location
                        :location-wgs84        location-wgs84
-                       :kuntalupatunnukset    (map :kuntalupatunnus (:verdicts application))
+                       :kuntalupatunnukset    (remove nil? (map :kuntalupatunnus (:verdicts application)))
                        :lupapvm               (get-verdict-date application :lainvoimainen)
                        :paatospvm             (get-paatospvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
