@@ -23,6 +23,12 @@ LUPAPISTE.ComponentBaseModel = function() {
     return computed;
   };
 
+  self.disposedPureComputed = function(fn) {
+    var computed = ko.pureComputed(fn);
+    koSubscriptions.push(computed);
+    return computed;
+  };
+
   self.dispose = function() {
     while(hubSubscriptions.length !== 0) {
       hub.unsubscribe(hubSubscriptions.pop());

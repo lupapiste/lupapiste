@@ -5,9 +5,11 @@
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application-api]
             [lupapalvelu.document.schemas :as schemas]))
 
 
@@ -51,10 +53,10 @@
 
 (facts "Add operation allowed"
        (let [not-allowed-for #{;; R-operations, adding not allowed
-                               :raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen 
-                               :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen 
+                               :raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen
+                               :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen
                                ;; KT-operations, adding not allowed
-                               :rajankaynti 
+                               :rajankaynti
                                ;; YL-operations, adding not allowed
                                :pima
                                ;; YM-operations, adding not allowed
@@ -86,3 +88,23 @@
     (state-transition-update :open 1 pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
     (state-transition-update :submitted 2 pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
     (state-transition-update :verdictGiven 3 pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}}))
+
+(fact "Valid permit types pre-checker"
+      (let [error {:ok false :text "error.unsupported-permit-type"}
+            m1 {:R [] :P :all}
+            m2 {:R ["tyonjohtaja-hakemus"] :P :all}
+            m3 {:R ["tyonjohtaja-hakemus" :empty]}]
+        (permit/valid-permit-types m1 nil {:permitType "R"}) => nil
+        (permit/valid-permit-types m1 nil {:permitType "P"}) => nil
+        (permit/valid-permit-types m1 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => error
+        (permit/valid-permit-types m1 nil {:permitType "P" :permitSubtype "foo"}) => nil
+        (permit/valid-permit-types m2 nil {:permitType "R"}) => error
+        (permit/valid-permit-types m2 nil {:permitType "P"}) => nil
+        (permit/valid-permit-types m2 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
+        (permit/valid-permit-types m2 nil {:permitType "R" :permitSubtype "foobar"}) => error
+        (permit/valid-permit-types m2 nil {:permitType "P" :permitSubtype "foo"}) => nil
+        (permit/valid-permit-types m3 nil {:permitType "R"}) => nil
+        (permit/valid-permit-types m3 nil {:permitType "P"}) => error
+        (permit/valid-permit-types m3 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
+        (permit/valid-permit-types m3 nil {:permitType "R" :permitSubtype "foobar"}) => error
+        (permit/valid-permit-types m3 nil {:permitType "P" :permitSubtype "foo"}) => error))

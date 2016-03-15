@@ -340,7 +340,7 @@
 
 (defspec build-version-updates-update-existing-version 20
   (prop/for-all [application    (ssg/generator {:state sc/Keyword})
-                 [attachment version-model] (gen/fmap (fn [[att fids]] 
+                 [attachment version-model] (gen/fmap (fn [[att fids]]
                                                         (let [ver (assoc (get-in att [:versions 1]) :originalFileId (first fids))]
                                                           [(-> (assoc-in att [:versions 1] ver)
                                                                (assoc :latestVersion ver))

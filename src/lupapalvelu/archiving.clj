@@ -35,21 +35,20 @@
 
 (defonce unfinished-uploads (atom {}))
 
-(defn- build-url [id]
+(defn- upload-file [id is-or-file content-type metadata]
   (let [host (env/value :arkisto :host)
         app-id (env/value :arkisto :app-id)
         app-key (env/value :arkisto :app-key)
-        encoded-id (codec/url-encode id)]
-    (str host "/documents/" encoded-id "?app-id=" app-id "&app-key=" app-key)))
-
-(defn- upload-file [id is-or-file content-type metadata]
-  (http/put (build-url id) {:multipart        [{:name      "metadata"
-                                                :mime-type "application/json"
-                                                :encoding  "UTF-8"
-                                                :content   (json/generate-string metadata)}
-                                               {:name      "file"
-                                                :content   is-or-file
-                                                :mime-type content-type}]}))
+        encoded-id (codec/url-encode id)
+        url (str host "/documents/" encoded-id)]
+    (http/put url {:basic-auth [app-id app-key]
+                   :multipart  [{:name      "metadata"
+                                 :mime-type "application/json"
+                                 :encoding  "UTF-8"
+                                 :content   (json/generate-string metadata)}
+                                {:name      "file"
+                                 :content   is-or-file
+                                 :mime-type content-type}]})))
 
 (defn- set-attachment-state [application now id]
   (action/update-application
@@ -133,6 +132,14 @@
            (vals id-to-usage))
          (remove nil?))))
 
+(defn- get-building-ids [bldg-key {:keys [buildings]} op-id]
+  ;; Only some building lists contain operation ids at all
+  (->> (if-let [filtered-bldgs (and op-id (seq (filter #(= op-id (:operationId %)) buildings)))]
+         filtered-bldgs
+         buildings)
+       (map bldg-key)
+       (remove nil?)))
+
 (defn- make-version-number [{{{:keys [major minor]} :version} :latestVersion}]
   (str major "." minor))
 
@@ -147,8 +154,8 @@
                         (assoc :tila :arkistoitu))
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
-                       :buildingIds           (remove nil? (map :localId (:buildings application)))
-                       :nationalBuildingIds   (remove nil? (map :nationalId (:buildings application)))
+                       :buildingIds           (get-building-ids :localId application (get-in attachment [:op :id]))
+                       :nationalBuildingIds   (get-building-ids :nationalId application (get-in attachment [:op :id]))
                        :propertyId            propertyId
                        :applicant             applicant
                        :operations            (if (:op attachment)
@@ -160,7 +167,7 @@
                        :municipality          municipality
                        :location-etrs-tm35fin location
                        :location-wgs84        location-wgs84
-                       :kuntalupatunnukset    (map :kuntalupatunnus (:verdicts application))
+                       :kuntalupatunnukset    (remove nil? (map :kuntalupatunnus (:verdicts application)))
                        :lupapvm               (get-verdict-date application :lainvoimainen)
                        :paatospvm             (get-paatospvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)

@@ -79,16 +79,19 @@
 (def attachment-states #{:ok :requires_user_action :requires_authority_action})
 
 (def- attachment-types-by-permit-type-unevaluated
-  {:R 'attachment-types/Rakennusluvat
-   :P 'attachment-types/Rakennusluvat
-   :YA 'attachment-types/YleistenAlueidenLuvat
-   :YI 'attachment-types/Ymparistoilmoitukset
-   :YL 'attachment-types/Ymparistolupa
-   :YM 'attachment-types/MuutYmparistoluvat
-   :VVVL 'attachment-types/Ymparistoilmoitukset
-   :MAL 'attachment-types/Maa-ainesluvat
-   :MM 'attachment-types/Kiinteistotoimitus
-   :KT 'attachment-types/Kiinteistotoimitus})
+  (cond-> {:R    'attachment-types/Rakennusluvat
+           :P    'attachment-types/Rakennusluvat
+           :YA   'attachment-types/YleistenAlueidenLuvat
+           :YI   'attachment-types/Ymparistoilmoitukset
+           :YL   'attachment-types/Ymparistolupa
+           :YM   'attachment-types/MuutYmparistoluvat
+           :VVVL 'attachment-types/Ymparistoilmoitukset
+           :MAL  'attachment-types/Maa-ainesluvat
+           :MM   'attachment-types/Kiinteistotoimitus
+           :KT   'attachment-types/Kiinteistotoimitus}
+    (env/feature? :updated-attachments) (merge {:R  'attachment-types/Rakennusluvat-v2
+                                                :P  'attachment-types/Rakennusluvat-v2
+                                                :YA 'attachment-types/YleistenAlueidenLuvat-v2})))
 
 (def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 
@@ -99,7 +102,13 @@
                                            {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
                                            {:type-id :energiatodistus    :type-group :muut}
                                            {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
-                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}})
+                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}
+                                           {:type-id :pohjapiirustus     :type-group :paapiirustus}
+                                           {:type-id :leikkauspiirustus  :type-group :paapiirustus}
+                                           {:type-id :julkisivupiirustus :type-group :paapiirustus}
+                                           {:type-id :muu_paapiirustus   :type-group :paapiirustus}
+                                           {:type-id :energiatodistus    :type-group :energiatodistus}
+                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}})
 
 (def all-attachment-type-ids
   (->> (vals attachment-types-by-permit-type)
@@ -313,6 +322,7 @@
      (application->command application)
       {$set {:modified now}
        $push {:attachments attachment}})
+    (tos/update-process-retention-period (:id application) now)
     attachment))
 
 (defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
@@ -323,6 +333,7 @@
       (application->command application)
       {$set {:modified now}
        $push {:attachments {$each attachments}}})
+    (tos/update-process-retention-period (:id application) now)
     (map :id attachments)))
 
 (defn- delete-attachment-file-and-preview! [file-id]
@@ -345,7 +356,7 @@
        (last)))
 
 (defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts]}]
-  (let [version-number (or (->> (:versions attachment) 
+  (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
                                 last
                                 :version)
@@ -376,9 +387,9 @@
                                :id (:id  attachment)}
                               (select-keys version-model [:version :fileId :filename]))]
     (util/deep-merge
-     (when comment? 
+     (when comment?
        (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
-     (when target 
+     (when target
        {$set {:attachments.$.target target}})
      (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
        {$set {:attachments.$.latestVersion version-model}})
@@ -405,20 +416,20 @@
       (let [latest-version (get-in attachment [:latestVersion :version])
             version-model  (make-version attachment options)]
         ; Check return value and try again with new version number
-        (if (pos? (update-application 
+        (if (pos? (update-application
                    (application->command application)
                    {:attachments {$elemMatch {:id attachment-id
                                               :latestVersion.version.fileId (:fileId latest-version)}}}
                    (build-version-updates application attachment version-model options)
                    true))
-          (do 
+          (do
             (remove-old-files! attachment version-model)
             (assoc version-model :id attachment-id))
           (do
             (errorf
               "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
               attachment-id retry-limit)
-            (let [application (mongo/by-id :applications (:id application))
+            (let [application (mongo/by-id :applications (:id application) [:attachments :state])
                   attachment  (get-attachment-info application attachment-id)]
               (set-attachment-version! application attachment options (dec retry-limit))))))
       (do
@@ -466,7 +477,7 @@
   [application {:keys [attachment-id attachment-type op created user target locked required contents read-only source] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? user))
-        find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id}))]
+        find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id} [:attachments]))]
     (cond
       (ss/blank? attachment-id) (create-attachment! application attachment-type op created target locked required requested-by-authority? nil contents read-only source)
       @find-application-delay   (get-attachment-info @find-application-delay attachment-id)
@@ -590,10 +601,13 @@
     (output-attachment preview-id false attachment-fn)))
 
 (defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
-  (if (and libreoffice-client/enabled? (= (keyword type-group) :muut) (= (keyword type-id) :paatosote))
+  (if (and libreoffice-client/enabled?
+           (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
+           (= (keyword type-group) :muut)
+           (= (keyword type-id) :paatosote))
     (libreoffice-client/convert-to-pdfa filename content)
     (do
-      (info "Danger: Libreoffice conversion feature disabled.")
+      (info "Danger: Libreoffice PDF/A conversion feature disabled.")
       {:filename filename :content content})))
 
 (defn- upload-file!

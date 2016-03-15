@@ -58,7 +58,8 @@
     {:submitted    [:sent :canceled]
      :sent         [:foremanVerdictGiven :complementNeeded :canceled]
      :complementNeeded [:sent :canceled]
-     :foremanVerdictGiven []}))
+     :foremanVerdictGiven [:canceled :appealed]
+     :appealed [:foremanVerdictGiven :canceled]}))
 
 ; TODO draft versions this forward
 
@@ -69,7 +70,7 @@
     (select-keys default-application-state-graph [:draft :open :submitted :complementNeeded :canceled])
     {:sent [:verdictGiven :complementNeeded :canceled]
      :verdictGiven [:final :appealed :canceled]
-     :appealed     [:complementNeeded :verdictGiven :final :canceled] ; Valitettu
+     :appealed     [:verdictGiven :final :canceled] ; Valitettu
      :final        [] ; Lain voimainen
      }))
 

@@ -2,6 +2,7 @@
   (:require [sade.http :as http]
             [sade.env :as env]
             [clojure.core.memoize :as memo]
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [lupapalvelu.organization :as o]
             [lupapalvelu.action :as action]
             [monger.operators :refer :all]
@@ -17,7 +18,7 @@
   (if (:permanent-archive-enabled (o/get-organization organization-id))
     (try
       (let [url (build-url "/tiedonohjaus/api/org/" organization-id "/asiat")
-            response (http/get url {:as :json
+            response (http/get url {:as               :json
                                     :throw-exceptions false})]
         (if (= 200 (:status response))
           (:body response)
@@ -35,7 +36,7 @@
     (try
       (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)
             url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/document/" doc-id)
-            response (http/get url {:as :json
+            response (http/get url {:as               :json
                                     :throw-exceptions false})]
         (if (= 200 (:status response))
           (:body response)
@@ -52,7 +53,7 @@
   (if (and organization tos-function)
     (try
       (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function)
-            response (http/get url {:as :json
+            response (http/get url {:as               :json
                                     :throw-exceptions false})]
         (if (= 200 (:status response))
           (:body response)
@@ -67,12 +68,12 @@
 
 (defn- paatospvm-plus-years [verdicts years]
   (when-let [paatos-ts (->> verdicts
-                       (map (fn [{:keys [paatokset]}]
-                              (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
-                       (flatten)
-                       (remove nil?)
-                       (sort)
-                       (last))]
+                            (map (fn [{:keys [paatokset]}]
+                                   (map (fn [pt] (map :paatospvm (:poytakirjat pt))) paatokset)))
+                            (flatten)
+                            (remove nil?)
+                            (sort)
+                            (last))]
     (-> (c/from-long paatos-ts)
         (t/plus (t/years years))
         (.toDate))))
@@ -108,7 +109,7 @@
   (if (and organization tos-function state)
     (try
       (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/toimenpide-for-state/" state)
-            response (http/get url {:as :json
+            response (http/get url {:as               :json
                                     :throw-exceptions false})]
         (if (= 200 (:status response))
           (:body response)
@@ -119,47 +120,84 @@
 
 (def toimenpide-for-state
   (memo/ttl get-tos-toimenpide-for-application-state-from-toj
-    :ttl/threshold 10000))
+            :ttl/threshold 10000))
 
 (defn- full-name [{:keys [lastName firstName]}]
   (str lastName " " firstName))
 
 (defn- get-documents-from-application [application]
-  [{:type :hakemus
+  [{:type     :hakemus
     :category :document
-    :ts (:created application)
-    :user (:applicant application)}])
+    :ts       (:created application)
+    :user     (:applicant application)}])
 
 (defn- get-attachments-from-application [application]
   (reduce (fn [acc attachment]
             (if-let [versions (seq (:versions attachment))]
               (->> versions
                    (map (fn [ver]
-                          {:type (:type attachment)
+                          {:type     (:type attachment)
                            :category :attachment
-                           :version (:version ver)
-                           :ts (:created ver)
+                           :version  (:version ver)
+                           :ts       (:created ver)
                            :contents (:contents attachment)
-                           :user (full-name (:user ver))}))
-                  (concat acc))
+                           :user     (full-name (:user ver))}))
+                   (concat acc))
               acc))
-    []
-    (:attachments application)))
+          []
+          (:attachments application)))
+
+(defn- get-statement-requests-from-application [application]
+  (map (fn [stm]
+         {:type     (get-in stm [:person :text])
+          :category :request-statement
+          :ts       (:requested stm)
+          :user     (str "" (:name stm))}) (:statements application)))
+
+(defn- get-neighbour-requests-from-application [application]
+  (map (fn [req] (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
+           {:type     (get-in req [:owner :name])
+            :category :request-neighbor
+            :ts       (:created status)
+            :user     (full-name (:user status))})) (:neighbors application)))
+
+(defn- get-review-requests-from-application [application]
+  (reduce (fn [acc task]
+            (if (= "task-katselmus" (name (get-in task [:schema-info :name])))
+              (conj acc {:type     (:taskname task)
+                         :category :request-review
+                         :ts       (:created task)
+                         :user     (full-name (:assignee task))})
+              acc)) [] (:tasks application)))
+
+
+(defn- get-held-reviews-from-application [application]
+  (reduce (fn [acc task]
+              (if-let [held (get-in task [:data :katselmus :pitoPvm :modified])]
+              (conj acc {:type     (:taskname task)
+                         :category :review
+                         :ts       held
+                         :user     (full-name (:assignee task))})
+              acc)) [] (:tasks application)))
 
 (defn generate-case-file-data [application]
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
-        all-docs (sort-by :ts (concat documents attachments))]
+        statement-reqs (get-statement-requests-from-application application)
+        neighbors-reqs (get-neighbour-requests-from-application application)
+        review-reqs (get-review-requests-from-application application)
+        reviews-held (get-held-reviews-from-application application)
+        all-docs (sort-by :ts (concat documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))]
     (map (fn [[{:keys [state ts user]} next]]
            (let [api-response (toimenpide-for-state (:organization application) (:tosFunction application) state)
                  action-name (or (:name api-response) "Ei asetettu tiedonohjaussuunnitelmassa")]
-             {:action action-name
-              :start ts
-              :user (full-name user)
+             {:action    action-name
+              :start     ts
+              :user      (full-name user)
               :documents (filter (fn [{doc-ts :ts}]
                                    (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
-                           all-docs)}))
-      (partition 2 1 nil (:history application)))))
+                                 all-docs)}))
+         (partition 2 1 nil (:history application)))))
 
 (defn- document-metadata-final-state [metadata verdicts]
   (-> (assoc metadata :tila :valmis)
@@ -175,7 +213,7 @@
           (action/update-application
             (action/application->command application)
             {:attachments.id id}
-            {$set {:modified now
+            {$set {:modified               now
                    :attachments.$.metadata new-metadata}}))))))
 
 (defn mark-app-and-attachments-final! [app-id modified-ts]
@@ -189,3 +227,32 @@
                    :metadata new-metadata}}))
         (doseq [attachment attachments]
           (mark-attachment-final! application modified-ts attachment))))))
+
+(defn- retention-key [{{:keys [pituus arkistointi]} :sailytysaika}]
+  (let [kw-a (keyword arkistointi)]
+    (cond
+      (= :ikuisesti kw-a) Integer/MAX_VALUE
+      (= :toistaiseksi kw-a) (- Integer/MAX_VALUE 1)
+      (= (keyword "m\u00E4\u00E4r\u00E4ajan") kw-a) pituus)))
+
+(defn- comp-sa [sailytysaika]
+  (dissoc sailytysaika :perustelu))
+
+(defn calculate-process-metadata [original-process-metadata application-metadata attachments]
+  (let [metadatas (conj (map :metadata attachments) application-metadata)
+        {max-retention :sailytysaika} (last (sort-by retention-key metadatas))]
+    (if (and max-retention (not= (comp-sa (:sailytysaika original-process-metadata)) (comp-sa max-retention)))
+      (assoc original-process-metadata :sailytysaika max-retention)
+      original-process-metadata)))
+
+(defn update-process-retention-period
+  "Update retention period of the process report to match the longest retention time of any document
+   as per SAHKE2 operative system sertification requirement 6.3"
+  [app-id modified-ts]
+  (let [{:keys [metadata attachments processMetadata] :as application} (domain/get-application-no-access-checking app-id)
+        new-process-md (calculate-process-metadata processMetadata metadata attachments)]
+    (when-not (= processMetadata new-process-md)
+      (action/update-application
+        (action/application->command application)
+        {$set {:modified modified-ts
+               :processMetadata new-process-md}}))))

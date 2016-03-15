@@ -16,3 +16,7 @@
 "application.approve.statement-not-requested" "sv" "Denna ansökan saknar ett utlåtande"
 "application.approve.statement-not-requested-warning-text" "fi" "Hakemuksella on ainakin yksi antamaton lausunto. Kun hakemus siirretään käsittelyyn, lausuntoa ei voi enää antaa. Haluatko varmasti siirtää hakemuksen käsittelyyn?"
 "application.approve.statement-not-requested-warning-text" "sv" "Ansökan saknar minst ett utlåtande. När ansökningen överförs till beredning kan utlåtande inte längre avges. Är du säker på att du vill överföra denna ansökan till beredning?"
+"error.attachment-not-found" "fi" "Liitettä ei löydy"
+"error.attachment-not-found" "sv" "Bilaga hittades inte"
+"error.attachment-not-found.desc" "fi" "Liite on poistettu tai sen näkyvyyttä rajattu."
+"error.attachment-not-found.desc" "sv" "Bilagan har tagits bort eller dess synlighet begränsats."

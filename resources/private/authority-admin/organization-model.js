@@ -107,6 +107,18 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
+  self.infoRequestNotificationEmails = ko.observable("");
+  self.infoRequestNotificationEmailsIndicator = ko.observable().extend({notify: "always"});
+  ko.computed(function() {
+    var emails = self.infoRequestNotificationEmails();
+    if (self.initialized) {
+      ajax.command("set-organization-inforequest-notification-email", {emails: emails})
+        .success(_.partial(self.infoRequestNotificationEmailsIndicator, {type: "saved"}))
+        .error(_.partial(self.infoRequestNotificationEmailsIndicator, {type: "err"}))
+        .call();
+    }
+  });
+
   self.init = function(data) {
     var organization = data.organization;
     self.organizationId(organization.id);

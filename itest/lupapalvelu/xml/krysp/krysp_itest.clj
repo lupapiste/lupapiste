@@ -362,7 +362,10 @@
       (populate-task application task-id apikey) => ok?
 
       (upload-attachment-to-target apikey application-id nil true task-id "task")
-      (upload-attachment-to-target apikey application-id nil true task-id "task" "muut.katselmuksen_tai_tarkastuksen_poytakirja")
+      (upload-attachment-to-target apikey application-id nil true task-id "task" 
+                                   (if (env/feature? :updated-attachments) 
+                                     "katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja" 
+                                     "muut.katselmuksen_tai_tarkastuksen_poytakirja"))
 
       (doseq [attachment (:attachments (query-application apikey application-id))]
         (fact "sent timestamp not set"

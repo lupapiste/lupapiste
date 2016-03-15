@@ -9,7 +9,7 @@
   (initial-state default-inforequest-state-graph) => :info)
 
 (fact "all-next-states"
-  (all-next-states full-application-state-graph :verdictGiven) => #{:verdictGiven :constructionStarted :closed :canceled :extinct :inUse :onHold})
+  (all-next-states full-application-state-graph :verdictGiven) => #{:verdictGiven :constructionStarted :closed :canceled :extinct :inUse :onHold :appealed})
 
 (fact "post-submitted-states"
   post-submitted-states => (contains #{:sent :complementNeeded :verdictGiven :constructionStarted :closed})
@@ -31,4 +31,4 @@
                               :appealed :final})
 
 (fact "terminal states"
-  terminal-states => #{:answered :canceled :closed :final :extinct :registered :acknowledged :foremanVerdictGiven})
+  terminal-states => #{:answered :canceled :closed :final :extinct :registered :acknowledged})

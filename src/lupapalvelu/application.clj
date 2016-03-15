@@ -22,11 +22,13 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
+            [lupapalvelu.state-machine :as state-machine]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.property :as p]
-            [sade.validators :as v]
-            [sade.util :as util]
             [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.validators :as v]
             [sade.coordinate :as coord]
             [sade.schemas :as ssc]
             [swiss.arrows :refer [-<>>]]))
@@ -178,7 +180,6 @@
          (validate application)
          (populate-operation-info operations)
          mask-person-ids
-         schemas/with-current-schema-info
          (enrich-single-doc-disabled-flag user))))
 
 (defn- process-documents-and-tasks [user application]
@@ -308,7 +309,9 @@
 (defn make-application-id [municipality]
   (let [year (str (year (local-now)))
         sequence-name (str "applications-" municipality "-" year)
-        counter (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+        counter (if (env/feature? :prefixed-id)
+                  (format "9%04d" (mongo/get-next-sequence-value sequence-name))
+                  (format "%05d"  (mongo/get-next-sequence-value sequence-name)))]
     (str "LP-" municipality "-" year "-" counter)))
 
 (defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
@@ -324,6 +327,9 @@
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
         classification {:permitType permit-type, :primaryOperation op}
+        attachments (when-not info-request? (make-attachments created op organization state tos-function))
+        metadata (tos/metadata-for-document (:id organization) tos-function "hakemus")
+        process-metadata (tos/calculate-process-metadata (tos/metadata-for-process (:id organization) tos-function) metadata attachments)
         application (merge domain/application-skeleton
                       classification
                       {:id                  id
@@ -349,10 +355,10 @@
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
                        :schema-version      (schemas/get-latest-schema-version)
                        :tosFunction         tos-function
-                       :metadata            (tos/metadata-for-document (:id organization) tos-function "hakemus")
-                       :processMetadata     (tos/metadata-for-process (:id organization) tos-function)})]
+                       :metadata            metadata
+                       :processMetadata     process-metadata})]
     (merge application (when-not info-request?
-                         {:attachments (make-attachments created op organization state tos-function)
+                         {:attachments attachments
                           :documents   (make-documents user created op application manual-schema-datas)}))))
 
 (defn do-create-application
@@ -461,3 +467,18 @@
           (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
    $push {:history (history-entry to-state timestamp user)}})
 
+(defn change-application-state-targets
+  "Namesake query implementation."
+  [{:keys [state] :as application}]
+  (let [state (keyword state)
+        graph (state-machine/state-graph application)
+        [verdict-state] (filter #{:foremanVerdictGiven :verdictGiven} (keys graph))
+        target (if (= state :appealed) :appealed verdict-state)]
+    (set (cons state (remove #{:canceled} (target graph))))))
+
+(defn valid-new-state
+  "Pre-check for change-application-state command."
+  [{{new-state :state} :data} application]
+  (when-not (or (nil? new-state)
+                ((change-application-state-targets application) (keyword new-state)))
+    (fail :error.illegal-state)))

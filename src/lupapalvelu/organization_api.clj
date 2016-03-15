@@ -387,6 +387,17 @@
     (o/update-organization organization-id {$set {:notifications.submit-notification-emails addresses}})
     (ok)))
 
+(defcommand set-organization-inforequest-notification-email
+  {:parameters [emails]
+   :description "When inforequest is received to organization, send notification to these email addresses"
+   :user-roles #{:authorityAdmin}
+   :input-validators email-list-validators}
+  [{user :user}]
+  (let [addresses (when-not (ss/blank? emails) (split-emails emails))
+        organization-id (user/authority-admins-organization-id user)]
+    (o/update-organization organization-id {$set {:notifications.inforequest-notification-emails addresses}})
+    (ok)))
+
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}
   [{user :user}]

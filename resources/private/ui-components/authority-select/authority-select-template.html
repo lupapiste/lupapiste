@@ -1,17 +1,22 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="authority-select-template">
-<p data-bind="ltext: 'application.assignee'"></p>
-<span class="application_summary_text">
-  <span data-bind="fullName: authority"></span>
-     <a data-bind="click: edit, visible: authorization.ok('assign-application'), attr: {id: kind + '-assignee-edit'}"
-     class="link-btn">
-     <i class="lupicon-pen"></i>
-     <span data-bind="ltext: 'choose'"></span></a>
-</span>
-    </script>
-  </section>
-</body>
-</html>
+<script class="ko-template"
+        type="text/x-jquery-tmpl"
+        id="authority-select-template">
+  <p data-bind="ltext: 'application.assignee'"></p>
+  <!-- ko if: canEdit -->
+  <select data-test-id="assignee-select"
+          class="dropdown dropdown--full-width"
+          data-bind="disable: pending,
+                     value: assigneeId,
+                     options: authorities,
+                     optionsText: fullName,
+                     optionsValue: 'id',
+                     optionsCaption: loc('choose'),
+                     valueAllowUnset: true,
+                     optionsAfterRender: disableAuthorities"></select>
+  <!-- /ko -->
+  <!-- ko ifnot: canEdit -->
+  <span data-bind="text: fullName( oldAssignee )"
+        data-test-id="assignee-span"
+        class="application_summary_text"></span>
+  <!-- /ko -->
+</script>

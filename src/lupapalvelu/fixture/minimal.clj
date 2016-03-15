@@ -579,13 +579,13 @@
                                {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                 :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
-                                                                      [:paapiirustus :pohjapiirros]
+                                                                      [:paapiirustus :pohjapiirustus]
                                                                       [:hakija :valtakirja]
-                                                                      [:muut :vaestonsuojasuunnitelma]]
-                                                :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
+                                                                      [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]]
+                                                :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirustus]
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
-                                                                           [:muut :vaestonsuojasuunnitelma]
-                                                                           [:muut :valaistussuunnitelma]]
+                                                                           [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
+                                                                           [:suunnitelmat :valaistussuunnitelma]]
                                                 :poikkeamis [[:paapiirustus :asemapiirros]]
                                                 :meluilmoitus [[:kartat :kartta-melun-ja-tarinan-leviamisesta]
                                                                [:muut :muu]]
@@ -700,13 +700,13 @@
                                {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                 :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
-                                                                      [:paapiirustus :pohjapiirros]
+                                                                      [:paapiirustus :pohjapiirustus]
                                                                       [:hakija :valtakirja]
-                                                                      [:muut :vaestonsuojasuunnitelma]]
-                                                :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
+                                                                      [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]]
+                                                :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirustus]
                                                                            [:hakija :ote_kauppa_ja_yhdistysrekisterista]
-                                                                           [:muut :vaestonsuojasuunnitelma]
-                                                                           [:muut :valaistussuunnitelma]]}
+                                                                           [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]
+                                                                           [:suunnitelmat :valaistussuunnitelma]]}
                        :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}

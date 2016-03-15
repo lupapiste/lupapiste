@@ -26,7 +26,7 @@ Person ID is fully masked
 # LUPA-23
 Mikko could add an operation
   It is possible to add operation
-  Logout
+  [Teardown]  Logout
 
 Sonja sees comment indicator on applications list
   Sonja logs in
@@ -34,7 +34,7 @@ Sonja sees comment indicator on applications list
 
 Application is not assigned
   Open application  ${appname}  ${propertyId}
-  Wait Until  Application is assigned to  ${EMPTY}
+  Wait Until  Application assignee select empty
 
 Sonja sees Mikko's person ID masked
   Open tab  parties
@@ -49,14 +49,10 @@ Sonja resets indicators
   Wait until  Element should not be visible  applicationUnseenComments
 
 Sonja assign application to herself
-  Click link  application-assignee-edit
-  Wait Until  Element should be visible  assignee-select
-  Wait Until  Select From List  assignee-select  Sibbo Sonja
-  Click enabled by test id  modal-dialog-submit-button
-  Wait Until  Element should not be visible  assignee-select
+  Assign application to  Sibbo Sonja
 
 Assignee has changed
-  Wait Until  Application is assigned to  Sibbo Sonja
+  Wait Until  Application assignee select is  Sibbo Sonja
 
 Sonja checks property owners
   Click enabled by test id  application-property-owners-btn
@@ -67,6 +63,7 @@ Sonja checks property owners
 Sonja sees Mikko's full person ID
   Open tab  parties
   Open accordions  parties
+  Scroll to  input[data-docgen-path='henkilo.henkilotiedot.hetu']
   Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-9988
 
 # LUPA-23
@@ -75,7 +72,7 @@ Sonja could add an operation
 
 Sonja adds a comment
   Add comment  Looking good!
-  Logout
+  [Teardown]  Logout
 
 # LUPA-463
 Open latest email
@@ -93,19 +90,47 @@ Application is shown after login
   # Manual login because 'Mikko logs in' checks a different landing page
   User logs in  mikko@example.com  mikko123  Mikko Intonen
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
-  Logout
+
+Mikko sees that application is assigned to Sonja
+  Application assignee span is  Sibbo Sonja
+
+... even after a page reload
+  Reload page
+  Application assignee span is  Sibbo Sonja
+  [Teardown]  Logout
+
+Sonja logs in and clears authority
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Assign application to nobody
+  Reload page
+  Application assignee select empty
+
+Sonja assigns application to Ronja
+  Assign application to  Sibbo Ronja
+  [Teardown]  Logout
+
+Sipoo admin logs in and removes Ronja
+  Sipoo logs in
+  Wait Until  Element should be visible  jquery=div.users-table tr[data-user-email='ronja.sibbo@sipoo.fi']
+  Click Element  jquery=tr[data-user-email='ronja.sibbo@sipoo.fi'] a[data-op=removeFromOrg]
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should not be visible  jquery=tr[data-user-email='ronja.sibbo@sipoo.fi']
+  [Teardown]  Logout
+
+Sonja logs in and sees Ronja still assigned
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Application assignee select is  Sibbo Ronja
+  Element Should Be Disabled  jquery=option[value=777777777777777777000024]
+
+Sonja assigns application to herself
+  Assign application to  Sibbo Sonja
+  Reload Page
+  Application assignee select is  Sibbo Sonja
+  Page Should Not Contain  jquery=option[value=777777777777777777000024]
 
 # LUPA-791
 Sonja cancels the application
-  Sonja logs in
   Open application  ${appname}  ${propertyId}
   Close current application as authority
-
-
-*** Keywords ***
-
-Application is assigned to
-  [Arguments]  ${to}
-  ${path} =   Set Variable  xpath=//span[@class='application_summary_text']/span[@data-bind='fullName: authority']
-  Wait until  Element should be visible  ${path}
-  Wait until  Element text should be  ${path}  ${to}

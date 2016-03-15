@@ -32,7 +32,7 @@
         (fact "counting all attachments"
           (count (:attachments application)) => 4)
         (fact "only pohjapiirros is related to operation 'kerrostalo-rivitalo'"
-          (map :type (get-attachments-by-operation application op-id)) => [{:type-group "paapiirustus" :type-id "pohjapiirros"}])
+          (map :type (get-attachments-by-operation application op-id)) => [{:type-group "paapiirustus" :type-id "pohjapiirustus"}])
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
           (every? (fn [a]
                     (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
@@ -46,7 +46,7 @@
                         :create-attachments
                         :id application-id
                         :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
-                                          {:type-group "paapiirustus" :type-id "pohjapiirros"}])
+                                          {:type-group "paapiirustus" :type-id "pohjapiirustus"}])
           attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"
@@ -62,7 +62,7 @@
                                                                                   :requestedByAuthority true
                                                                                   :versions             []})
         (get-attachment-by-id veikko application-id (second attachment-ids)) => (contains
-                                                                                  {:type                 {:type-group "paapiirustus" :type-id "pohjapiirros"}
+                                                                                  {:type                 {:type-group "paapiirustus" :type-id "pohjapiirustus"}
                                                                                    :state                "requires_user_action"
                                                                                    :requestedByAuthority true
                                                                                    :versions             []}))
@@ -192,11 +192,11 @@
                 (:to email) => (contains pena-email)))
 
             (fact "Delete version"
-              (command veikko 
-                       :delete-attachment-version 
+              (command veikko
+                       :delete-attachment-version
                        :id application-id
-                       :attachmentId (:id versioned-attachment) 
-                       :fileId (get-in updated-attachment [:latestVersion :fileId]) 
+                       :attachmentId (:id versioned-attachment)
+                       :fileId (get-in updated-attachment [:latestVersion :fileId])
                        :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
               (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
                 (get-in ver-del-attachment [:latestVersion :version :major]) => 1
@@ -208,7 +208,7 @@
 
       (let [versioned-attachment (first (:attachments (query-application pena application-id)))]
         (fact "Pena upload new version"
-          (upload-attachment pena application-id versioned-attachment true)) 
+          (upload-attachment pena application-id versioned-attachment true))
         (fact "Pena signs the attachment version"
           (command pena :sign-attachments :id application-id :attachmentIds [(:id versioned-attachment)] :password "pena") => ok?)
         (let [signed-attachment (get-attachment-by-id pena application-id (:id versioned-attachment))]
@@ -216,27 +216,27 @@
           (fact "Pena has only one auth entry, although has many versions uploaded"
             (count (filter #(= (-> % :user :id) (id-for-key pena)) (:versions signed-attachment))) => 2
             (count (filter #(= (:id %) (id-for-key pena)) (:auth signed-attachment))) => 1)
-          
+
           (fact "Attachment is signed"
             (count (:signatures signed-attachment)) => 1)
 
           (fact "Delete version and its signature"
-            (command veikko 
-                       :delete-attachment-version 
+            (command veikko
+                       :delete-attachment-version
                        :id application-id
-                       :attachmentId (:id versioned-attachment) 
-                       :fileId (get-in signed-attachment [:latestVersion :fileId]) 
+                       :attachmentId (:id versioned-attachment)
+                       :fileId (get-in signed-attachment [:latestVersion :fileId])
                        :originalFileId (get-in signed-attachment [:latestVersion :originalFileId]))=> ok?
                      (fact (count (:signatures (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 0))
 
           (fact "Deleting the last version clears attachment auth"
                 (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
                   (count (:versions attachment )) => 1
-                  (command veikko 
-                       :delete-attachment-version 
+                  (command veikko
+                       :delete-attachment-version
                        :id application-id
-                       :attachmentId (:id attachment) 
-                       :fileId (get-in attachment [:latestVersion :fileId]) 
+                       :attachmentId (:id attachment)
+                       :fileId (get-in attachment [:latestVersion :fileId])
                        :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?)
                 (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment))) => empty?)
 
@@ -257,12 +257,12 @@
                             :create-attachments
                             :id application-id
                             :attachmentTypes [{:type-group "muut" :type-id "muu"}
-                                              {:type-group "paapiirustus" :type-id "pohjapiirros"}]) => ok?
+                                              {:type-group "paapiirustus" :type-id "pohjapiirustus"}]) => ok?
         attachment-ids (:attachmentIds resp)
         hidden-id (first attachment-ids)
         visible-id (second attachment-ids)
         _ (upload-attachment veikko application-id {:id hidden-id :type {:type-group "muut" :type-id "muu"}} true)
-        _ (upload-attachment pena   application-id {:id visible-id :type {:type-group "paapiirustus" :type-id "pohjapiirros"}} true)
+        _ (upload-attachment pena   application-id {:id visible-id :type {:type-group "paapiirustus" :type-id "pohjapiirustus"}} true)
         _ (command veikko :set-attachment-visibility
                    :id application-id
                    :attachmentId hidden-id
@@ -297,7 +297,7 @@
     (fact "Uploading versions to pre-verdict attachment is not possible"
       (upload-attachment pena application-id attachment1 false :filename "dev-resources/test-pdf.pdf"))
     (fact "Uploading new post-verdict attachment is possible"
-      (upload-attachment pena application-id {:id "" :type {:type-group "muut" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
+      (upload-attachment pena application-id {:id "" :type {:type-group "selvitykset" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
 
     (count (:attachments (query-application pena application-id))) => 6))
 
@@ -329,6 +329,41 @@
     (fact "Can not rotate txt"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
 
+(facts "Rotate PDF - versions and files"
+  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment (first (:attachments application))
+        attachment-id (:id attachment)]
+
+    (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
+
+    (let [v1 (-> (get-attachment-by-id sonja application-id attachment-id)
+                 :versions
+                 first)]
+      (fact "fileID is set" (:fileId v1) => truthy)
+      (fact "fileID is set" (:originalFileId v1) => truthy)
+      (fact "File is original before rotation" (:fileId v1) => (:originalFileId v1))
+
+      (fact "version number is set" (:version v1) => {:major 0 :minor 1})
+
+      (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
+
+      (let [v2 (->> (get-attachment-by-id sonja application-id  attachment-id)
+                    :versions
+                    first)]
+        (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
+        (fact "Original file is the same" (:originalFileId v1) => (:originalFileId v1))
+
+        (fact "version number is not changed" (:version v1) => {:major 0 :minor 1})
+
+        (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
+
+        (let [v3 (->> (get-attachment-by-id sonja application-id  attachment-id)
+                      :versions
+                      first)]
+          (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
+          (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
+
 (defn- poll-job [id version limit]
   (when (pos? limit)
     (let [resp (query sonja :stamp-attachments-job :job-id id :version version)]
@@ -353,6 +388,7 @@
                               :files [(:id attachment)]
                               :xMargin 0
                               :yMargin 0
+                              :page "first"
                               :extraInfo ""
                               :buildingId ""
                               :kuntalupatunnus ""
@@ -399,6 +435,7 @@
                               :files [(:id attachment)]
                               :xMargin 0
                               :yMargin 0
+                              :page "all"
                               :extraInfo ""
                               :buildingId ""
                               :kuntalupatunnus ""
@@ -498,13 +535,13 @@
 
     (fact "Veikko uploads attachment for parties"
       (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                  :type-id "naapurien_suostumukset"}} true) => true)
+                                                                  :type-id "naapurin_suostumus"}} true) => true)
 
     (let [{attachments :attachments} (query-application veikko application-id)
           veikko-att-id (:id (last attachments))
           _ (command veikko :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "asiakas-ja-viranomainen") => ok?
           _ (upload-attachment pena application-id {:id veikko-att-id :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                             :type-id "naapurien_suostumukset"}} true) => true
+                                                                             :type-id "naapurin_suostumus"}} true) => true
           mikko-app (query-application mikko application-id)
           latest-attachment (last (:attachments mikko-app))]
       (fact "Mikko sees Veikko's/Pena's attachment"

@@ -1,7 +1,7 @@
 (ns sade.schemas
   (:require [sade.util :as util]
             [sade.validators :as validators]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [schema.coerce :as coerce]))
 
 ;;
@@ -40,55 +40,113 @@
 ;; Schemas
 ;;
 
-(sc/defschema BlankStr
+(defschema Nat 
+  "A schema for natural number integer"
+  (sc/constrained sc/Int (comp not neg?) "Natural number"))
+
+(defschema IntString
+  "A schema for string containing single integer"
+  (sc/constrained sc/Str (partial re-matches #"^-?\d+$") "Integer string"))
+
+(defschema NatString
+  "A schema for string containing natural number"
+  (sc/constrained sc/Str (partial re-matches #"^\d+$") "Natural number string"))
+
+(defschema DecimalString
+  "A schema for string containing decimal number"
+  (sc/constrained sc/Str (partial re-matches #"^-?\d+(.\d+)?$") "Decimal string"))
+
+(defschema Digit
+  "A schema for string containing single digit"
+  (sc/constrained sc/Str (partial re-matches #"^\d$") "Single digit string"))
+
+(defschema Letter
+  "A schema for string containing single letter"
+  (sc/constrained sc/Str (partial re-matches #"\p{L}") "Single letter"))
+
+(defschema UpperCaseLetter
+  "A schema for string containing single upper case letter"
+  (sc/constrained sc/Str (partial re-matches #"\p{Lu}") "Single upper case letter"))
+
+(defschema LowerCaseLetter
+  "A schema for string containing single lower case letter"
+  (sc/constrained sc/Str (partial re-matches #"\p{Ll}") "Single lower case letter"))
+
+(defschema Tel
+  (sc/constrained sc/Str (partial re-matches #"^\+?[\d\s-]+") "Telephone number"))
+
+(defschema Rakennusnumero
+  (sc/constrained sc/Str validators/rakennusnumero? "Finnish building number"))
+
+(defschema Rakennustunnus
+  (sc/constrained sc/Str validators/rakennustunnus? "Finnish building id"))
+
+(defschema Kiinteistotunnus
+  (sc/constrained sc/Str validators/kiinteistotunnus? "Finnish property id"))
+
+(defschema Maaraalatunnus
+  (sc/constrained sc/Str (partial re-matches validators/maara-alatunnus-pattern) "Finnish property partition id"))
+
+(defschema BlankStr
   "A schema for empty or nil valued string"
-  (sc/if string? (sc/pred empty? "Not empty") (sc/pred nil? "Not nil")))
+  (sc/if string? (sc/pred empty? "Empty string") (sc/pred nil? "Nil")))
 
-(sc/defschema Email
+(defschema Email
   "A simple schema for email"
-  (sc/constrained sc/Str (every-pred validators/valid-email? (max-length-constraint 255)) "Not valid email"))
+  (sc/constrained sc/Str (every-pred validators/valid-email? (max-length-constraint 255)) "Email"))
 
-(sc/defschema Timestamp
+(defschema Timestamp
   "A schema for timestamp"
-  (sc/pred (every-pred integer?) "Not valid timestamp"))
+  (sc/pred (every-pred integer?) "Timestamp (long)"))
 
-(sc/defschema Zipcode
-  "A schema for finnish zipcode"
-  (sc/pred validators/finnish-zip? "Not valid finnish zipcode"))
+(defschema Zipcode
+  "A schema for Finnish zipcode"
+  (sc/pred validators/finnish-zip? "Finnish zipcode"))
 
-(sc/defschema FinnishY
-  (sc/pred validators/finnish-y? "Not valid Y code"))
+(defschema FinnishY
+  (sc/pred validators/finnish-y? "Finnish company code, y-code"))
 
-(sc/defschema FinnishOVTid
-  (sc/pred validators/finnish-ovt? "Not valid finnish OVT id"))
+(defschema FinnishOVTid
+  (sc/pred validators/finnish-ovt? "Finnish OVT id"))
 
-(sc/defschema Hetu
+(defschema Hetu
   (sc/pred validators/valid-hetu? "Not valid hetu"))
 
-(sc/defschema ObjectIdStr
+(defschema ObjectIdStr
   (sc/pred (partial validators/matches? #"^[0-9a-f]{24}$") "ObjectId hex string"))
 
-(sc/defschema IpAddress
-  (sc/pred validators/ip-address? "Not valid IP address"))
+(defschema IpAddress
+  (sc/pred validators/ip-address? "IP address"))
 
+;;
 ;; Dynamic schema constructors
+;;
 
 (defdynamicschema fixed-length-string [len]
   (sc/constrained sc/Str (fixed-length-constraint len)
-                  (str "Not valid string with fixed length of " len)))
+                  (str "String, fixed length of " len)))
 
 (defdynamicschema min-length-string [min-len]
   (sc/constrained sc/Str (min-length-constraint min-len)
-                  (str "Not valid string with minimum length of " min-len)))
+                  (str "String, minimum length of " min-len)))
 
 (defdynamicschema max-length-string [max-len]
   (sc/constrained sc/Str (max-length-constraint max-len)
-                  (str "Not valid string with maximum length of " max-len)))
+                  (str "String, maximum length of " max-len)))
 
 (defdynamicschema min-max-length-string [min-len max-len]
   (sc/constrained sc/Str (every-pred (min-length-constraint min-len) (max-length-constraint max-len))
-                  (str "Not valid string with length of [" min-len "-" max-len "]")))
+                  (str "String, min-max bounded length of [" min-len "-" max-len "]")))
 
 (defdynamicschema min-length-hex-string [min-len]
   (sc/constrained sc/Str (every-pred (min-length-constraint min-len) validators/hex-string?)
-                  (str "Not valid hex-string with minimum length of " min-len)))
+                  (str "Hex-string, minimum length of " min-len)))
+
+(defdynamicschema min-max-valued-integer-string [min max]
+  (sc/constrained IntString (every-pred #(if min (<= min (util/->int %)) true) #(if max (>= (util/->int %)) true))
+                  (format "Min max valued integer string with values [%d-%d]" min max)))
+
+(defdynamicschema min-max-valued-decimal-string [min max]
+  (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= (util/->double %)) true))
+                  (format "Min max valued decimal string with values [%d-%d]" min max)))
+

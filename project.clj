@@ -6,67 +6,118 @@
                  [org.clojure/tools.nrepl "0.2.12"]
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
-                 [commons-fileupload "1.3.1"] ; The latest version - ring requires 1.3
+                 [org.clojure/core.memoize "0.5.8"]
+
+                 ; Web frameworks
                  [ring "1.4.0"]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
-                 [bultitude "0.2.8"] ; noir requires 0.2.0
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
+
+                 ; Namespace finder library
+                 [bultitude "0.2.8"] ; noir requires 0.2.0
+
+                 ; MongoDB driver
                  [com.novemberain/monger "3.0.2"]
+
+                 ; Logging
                  [com.taoensso/timbre "4.0.2"]
                  [org.slf4j/slf4j-log4j12 "1.7.16"]
+
+                 ; markup processing
                  [enlive "1.1.6"]
+                 [endophile "0.1.2" :exclusions [hiccup]]
+                 [de.ubercode.clostache/clostache "1.4.0"]
+                 [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
+                 [org.freemarker/freemarker "2.3.23"]
+
+                 ; Encryption and secure hashing
                  [org.jasypt/jasypt "1.9.2"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
-                 [cheshire "5.5.0"]
-                 [clj-http "2.0.1" :exclusions [commons-codec]]
-                 [camel-snake-kebab "0.1.2"]
                  [org.bouncycastle/bcprov-jdk15on "1.52"]
                  [pandect "0.3.0" :exclusions [org.bouncycastle/bcprov-jdk15on]]
-                 [clj-time "0.11.0"]
-                 [org.apache.commons/commons-lang3 "3.4"] ; Already a dependency but required explicitly
+
+                 ; JSON
+                 [cheshire "5.5.0"]
+
+                 ; HTTP client
+                 [clj-http "2.0.1" :exclusions [commons-codec]]
+
+                 ; Email client
+                 [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
+
+                 ; Apache Commons
+                 [org.apache.commons/commons-lang3 "3.4"]
                  [commons-io/commons-io "2.4"]
                  [commons-codec/commons-codec "1.10"]
-                 [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
-                 [de.ubercode.clostache/clostache "1.4.0"]
-                 [endophile "0.1.2" :exclusions [hiccup]]
-                 [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
+
+                 ; Joda time wrapper
+                 [clj-time "0.11.0"]
+
+                 ; String case manipulation
+                 [camel-snake-kebab "0.1.2"]
+
+                 ; Collection of arrow macros
                  [swiss-arrows "1.0.0"]
+
+                 ; File system lib
                  [me.raynes/fs "1.4.6" :exclusions [org.apache.commons/commons-compress]] ; later version required by pantomime -> tika
+
+                 ; Enhanced try and throw
+                 [slingshot "0.12.2"]
+
+                 ; A Clojure(Script) library for declarative data description and validation
+                 [prismatic/schema "1.0.4"]
+
+                 ; MIME type resolution
+                 [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
+
+                 ; RSS
+                 [clj-rss "0.2.3"]
+
+                 ; Image processing
+                 [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
+                 [com.google.zxing/javase "2.2"] ; QR codes
+                 [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
+
+                 ; MS Office document processing
                  [ontodev/excel "0.2.3" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
                  [org.apache.poi/poi-ooxml "3.11"]
-                 [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
-                 [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [slingshot "0.12.2"]
-                 [com.google.zxing/javase "2.2"]
-                 [prismatic/schema "1.0.4"]
-                 [cljts "0.3.0-20150228.035522-2" :exclusions [xerces/xercesImpl]]
-                 [org.freemarker/freemarker  "2.3.23"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.5"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.5" :exclusions [com.lowagie/itext]]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.5"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.5" :exclusions [org.freemarker/freemarker]]
-                 [org.clojure/core.memoize "0.5.8"]
-                 [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
+
+                 ; JavaScript and CSS compression
+                 [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
+
+                 ;; Geo location libs
+                 ; WKT parser
+                 [cljts "0.3.0-20150228.035522-2" :exclusions [xerces/xercesImpl]]
+                 ; Coordinate conversions, shape file handling etc.
                  [org.geotools/gt-main "12.4"]
                  [org.geotools/gt-shapefile "12.4"]
                  [org.geotools/gt-geojson "12.4"]
                  [org.geotools/gt-referencing "12.4"]
                  [org.geotools/gt-epsg-wkt "12.4"]
-                 [org.clojure/data.json "0.2.6"]
-                 [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
+
+                 ;; Lupapiste libraries
+                 ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.56"]
-                 [lupapiste/commons "0.7.0"]
+                 ; Shared domain code (https://github.com/lupapiste/commons)
+                 [lupapiste/commons "0.7.12"]
+                 ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
+                 ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
                  [lupapiste/openpdf "1.0.2"]
-                 [lupapiste/pdfa-generator "1.0.1"]
-                 [clj-rss "0.2.3"]]
+                 ; Wrapper for clj-pdf for PDF/A document generation
+                 [lupapiste/pdfa-generator "1.0.1"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.5"]
-                                  [pdfboxing "0.1.5"]
-                                  [org.apache.pdfbox/pdfbox "1.8.11" :exclusions [commons-logging]]]
+                                  [lupapiste/pdfboxing "0.2.0"]
+]
                    :plugins [[lein-midje "3.1.1"]
                              [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
@@ -77,9 +128,7 @@
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
                               :test-paths []}}
-             :uberjar  {:main lupapalvelu.main
-                        :jar-exclusions [#"gems/.*"]
-                        :uberjar-exclusions [#"gems/.*"]}
+             :uberjar  {:main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]

@@ -20,6 +20,7 @@
             [lupapalvelu.operations :as op]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
+            [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
             [sade.env :as env]
             [sade.excel-reader :as er]
             [sade.coordinate :as coord]))
@@ -1815,6 +1816,73 @@
                         (let [applications (mongo/select collection {:documents.schema-info.subtype "suunnittelija"} {:documents 1})]
                           (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
 
+
+(when (env/feature? :updated-attachments)
+
+  (defn update-attachment-type [mapping type-key attachment]
+    (let [type (->> (type-key attachment) (map (fn [kv-pair] (mapv keyword kv-pair))) (into {}))]
+      (assoc attachment type-key (get mapping type type))))
+
+  (defmigration application-attachment-type-update
+    (update-applications-array :attachments
+                               (partial update-attachment-type attachment-type-mapping/attachment-mapping :type)
+                               {:permitType  {$in ["R" "P"]}
+                                :attachments {$gt {$size 0}}}))
+
+  (defmigration application-ya-osapuoli-attachment-type-update
+    (update-applications-array :attachments
+                               (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :type)
+                               {:permitType  {$in ["YA"]}
+                                :attachments {$gt {$size 0}}}))
+
+  (defmigration update-user-attachments
+    (reduce (fn [cnt user] (+ cnt (mongo/update-n :users {:_id (:id user)}
+                                                  {$set {:attachments (->> (:attachments user)
+                                                                           (map (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :attachment-type)))}})))
+            0
+            (mongo/select :users {:attachments {$gt {$size 0}}} {:attachments 1})))
+
+  (def r-or-p-operation? (->> (filter (comp #{"R" "P"} :permit-type val) op/operations) keys set))
+  (def ya-operation? (->> op/ya-operations keys set))
+  
+  (defn update-operations-attachment-type [mapping [type-group type-id]]
+    (let [{new-group :type-group new-id :type-id} (-> {:type-group (keyword type-group) :type-id (keyword type-id)}
+                                                      attachment-type-mapping/attachment-mapping)]
+      (if (and new-group new-id)
+        [new-group  new-id]
+        [type-group type-id])))
+  
+  (defn update-operations-attachments-types [mapping operation-pred [operation attachment-types]]
+    (if (operation-pred (keyword operation))
+      [operation (map (partial update-operations-attachment-type mapping) attachment-types)]
+      [operation attachment-types]))
+
+  (defmigration organization-operation-attachments-type-update
+    (reduce (fn [cnt org] (+ cnt (mongo/update-n :organizations {:_id (:id org)}
+                                                 {$set {:operations-attachments (->> (:operations-attachments org) 
+                                                                                     (map (partial update-operations-attachments-types attachment-type-mapping/attachment-mapping r-or-p-operation?))
+                                                                                     (map (partial update-operations-attachments-types attachment-type-mapping/osapuoli-attachment-mapping ya-operation?))
+                                                                                     (into {}))}})))
+            0
+            (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1}))))
+
+(defmigration add-id-for-verdicts-paatokset
+  (update-applications-array :verdicts
+                             (fn [verdict] (update verdict :paatokset (fn [paatokset] (map #(assoc % :id (mongo/create-id)) paatokset))))
+                             {:verdicts.paatokset.0 {$exists true}}))
+
+(defmigration clean-vaadittuTyonjohtajatieto-in-verdicts
+  (update-applications-array :verdicts
+                             (fn [verdict] 
+                               (update verdict :paatokset
+                                          (fn [paatokset] (map (fn [paatos]
+                                                                 (update-in paatos [:lupamaaraykset :vaadittuTyonjohtajatieto] 
+                                                                            (fn [tj] (cond (map? tj)    [(get-in tj [:VaadittuTyonjohtaja :tyonjohtajaLaji])]
+                                                                                           (vector? tj) (map #(or (get-in % [:VaadittuTyonjohtaja :tyonjohtajaLaji]) %) tj)
+                                                                                           :else        tj))))
+                                                               paatokset))))
+                             {:verdicts.paatokset.lupamaaraykset.vaadittuTyonjohtajatieto {$type 3}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
@@ -1822,4 +1890,3 @@
 ;;     (doseq [collection [:applications :submitted-applications] ...)
 ;;  but use the "update-applications-array" function existing in this namespace.
 ;; *******************
-

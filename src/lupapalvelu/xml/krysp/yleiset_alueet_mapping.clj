@@ -319,30 +319,17 @@
         attachment-target {:type "task" :id (:id katselmus)}
 
         attachments (filter #(= attachment-target (:target %)) (:attachments application))
-        poytakirja  (some
-                      #(when (= {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"} (:type %)) %)
-                      attachments)
-        attachments-wo-pk (filter #(not= (:id %) (:id poytakirja)) attachments)
         canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
-                                                        {:attachments attachments-wo-pk :title (:title application)}
+                                                        {:attachments attachments :title (:title application)}
                                                         begin-of-link attachment-target))
-        canonical-pk-liite (first (attachments-canon/get-attachments-as-canonical
-                                     {:attachments [poytakirja] :title (:title application)}
-                                     begin-of-link attachment-target))
-        canonical-pk (:Liite canonical-pk-liite)
-
-        all-canonical-attachments (seq (filter identity (conj canonical-attachments canonical-pk-liite)))
+        
+        all-canonical-attachments (seq (filter identity canonical-attachments))
 
         canonical-without-attachments (ya-canonical/katselmus-canonical application katselmus lang user)
         canonical (-> canonical-without-attachments
                     (#(if (seq canonical-attachments)
                       (assoc-in % [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto] canonical-attachments)
-                      %))
-                    (#(if poytakirja
-                        (-> %
-                            (assoc-in [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
-                            (assoc-in [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :katselmustieto :Katselmus :liitetieto :liite] canonical-pk))
-                       %)))
+                      %)))
 
         xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]

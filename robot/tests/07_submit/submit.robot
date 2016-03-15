@@ -51,8 +51,8 @@ Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as e
   Xpath Should Match X Times  //table[@data-test-id='attachments-template-table']//td[contains(@class, 'attachment-not-needed')]//input  4
   Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-hakija-valtakirja']
   Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-asemapiirros']
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-muut-vaestonsuojasuunnitelma']
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-pohjapiirros']
+  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-pelastusviranomaiselle_esitettavat_suunnitelmat-vaestonsuojasuunnitelma']
+  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-pohjapiirustus']
 
 Mikko can not submit application because there are "missing required" items on the requiredFieldSummary tab
   Open tab  requiredFieldSummary

@@ -22,7 +22,7 @@
         <h3 data-bind="ltext: 'footer.conversation.title'"></h3>
         <span data-bind="ltext: 'footer.conversation.desc'"></span><br />
       <!-- ko if: _.includes(sidePanelPages, lupapisteApp.models.rootVMO && lupapisteApp.models.rootVMO.currentPage()) -->
-        <a onclick="window.parent.hub.send('show-conversation-panel');return false;" href="#" data-bind="ltext: 'footer.open.conversation'"></a>
+        <a onclick="window.parent.hub.send('side-panel::show-conversation');return false;" href="#" data-bind="ltext: 'footer.open.conversation'"></a>
       <!-- /ko -->
       </div>
       <div class="footer-box">

@@ -22,7 +22,7 @@
    :subject-key    "applications.inforequest"
    :model-fn       base-email-model})
 
-(notifications/defemail :open-inforequest-invite (assoc base-email-conf :template "open-inforequest-invite.html"))
+(notifications/defemail :open-inforequest-invite (assoc base-email-conf :template "inforequest-invite.html"))
 (notifications/defemail :open-inforequest-commented (assoc base-email-conf :template "new-comment.md"))
 
 (defn notify-on-comment [{application :application user :user data :data} _]

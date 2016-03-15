@@ -1371,3 +1371,60 @@ $max-columns: 12;
   }
 }
 
+// Dropdown menus.
+select.dropdown {
+  color: $gray51;
+  border: 1px solid $gray187;
+  border-radius: 0 0 0 0;
+  padding: {
+    left: 12px;
+    right: 12px;
+
+  }
+  height: 40px;
+  background: {
+    image: url( "/lp-static/img/lupicon-chevron-down-orange-dark.png");
+    // The position is is covered by the system down arrow in IE9.
+    // This is relatively graceful degradation, since the system
+    // arrows cannot be removed in IE9.
+    position: right 17px center;
+    repeat: no-repeat;
+    color: white;
+  }
+
+  -webkit-appearance: none;
+  -webkit-user-select: none;
+  -moz-appearance: none;
+
+  appearance: none;
+  overflow: hidden;
+  &:disabled {
+    border-color: $input-disabled-border-color;
+    background: {
+      image: url( "/lp-static/img/lupicon-chevron-down-gray187.png");
+      color: $gray246;
+  }
+  }
+  &:focus {
+    background-image: url( "/lp-static/img/lupicon-chevron-down-orange-light.png");
+    border-color: $input-focus-border-color;
+  }
+}
+
+// Remove system arrow on IE10 and later.
+select.dropdown::-ms-expand {
+  display: none;
+}
+
+select.dropdown.mandatory {
+  border-color: $input-required-border-color;
+}
+
+select.dropdown--full-width {
+  min-width: 100%;
+}
+
+
+.no-wrap-whitespace {
+  white-space: nowrap;
+}

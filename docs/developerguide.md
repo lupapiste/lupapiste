@@ -119,29 +119,35 @@ Lupapiste käynnistyy komennolla:
 
 Sovellus on ajossa osoitteessa http://localhost:8000.
 
-Klikkaa oikean reunan Development palkissa "Apply minimal" linkkiä.
+Klikkaa oikean reunan Development-palkissa "Apply minimal" linkkiä.
 Tämä alustaa tietokantaan muutamia käyttäjiä ja organisaatioita (kts. _minimal.clj_). Voit kirjautua
 sisään esimerkiksi hakijatunnuksella pena/pena tai viranomaistunnuksella sonja/sonja.
 
-Hakemuksen voi luoda samaisesta Development
+Kirjautumisen jälkeen voit luoda hakemuksia ja neuvontapyyntöjä Tee hakemus- ja
+Kysy neuvoa -painikkeilla. Voit myös käyttää Development-palkin linkkejä luodaksesi
+hakemuksia yhdellä klikkauksella.
+
+Palvelun käyttäjäohje löytyy osoitteessa https://www.lupapiste.fi/ohjeet/.
 
 ## Lähdekoodin hakemistorakenne
 
 Koodi on jaoteltu seuraavasti:
 
-Hakmisto        | Selitys
---------------  |----------
-src             | Palvelinpään sovelluskoodi
-src/lupapalvelu | Erityisesti Lupapisteeseen liittyvä palvelinpään sovelluskoodi
-src/sade        | Palvelinpään sovelluskoodi, jota on hyödynnetty muissa SADe-hankkeen projekteissa
-resources       | Selainpään sovelluskoodi
-dev-resources   | Kehitys- ja testausaikaiset aputiedostot
-dev-src         | Kehitysaikainen apulähdekoodi
-test            | Palvelinpään yksikkötestit
-itest           | Palvelinpään integraatiotestit
-stest           | Palvelinpään systeemitestit
-test-utils      | Palvelinpään testien jaettu koodi
-robot           | Selainpään end-to-end-testi
+Hakmisto          | Selitys
+--------------    |----------
+src               | Palvelinpään sovelluskoodi
+src/lupapalvelu   | Erityisesti Lupapisteeseen liittyvä palvelinpään sovelluskoodi
+src/sade          | Palvelinpään sovelluskoodi, jota on hyödynnetty muissa SADe-hankkeen projekteissa
+resources         | Staattiset resurssit
+resources/public  | Resurssit, jotka palvellaan automaattesesti palvelimen juuripolussa
+resources/private | Selainpään sovelluskoodi
+dev-resources     | Kehitys- ja testausaikaiset aputiedostot
+dev-src           | Kehitysaikainen apulähdekoodi
+test              | Palvelinpään yksikkötestit
+itest             | Palvelinpään integraatiotestit
+stest             | Palvelinpään systeemitestit
+test-utils        | Palvelinpään testien jaettu koodi
+robot             | Selainpään end-to-end-testi
 
 Palvelinpään päätiedosto, josta ohjelmiston suoritus käynnistyy, on
 src/lupapalvelu/main.clj.
@@ -232,12 +238,64 @@ Backend:
 - [MongoDB](http://docs.mongodb.org/)
 
 # Frontend arkkitehtuuri
-## Yleistä
 
-- SPA initial startup
+## Single Page kompositio
 
-## Kommunikointi palvelinpäähän
-ajax.js, query & command
+[web.clj](../src/lupapalvelu/web.clj)-tiedostossa määritellään rajapinnat,
+jotka tarjoilevat kullekin [käyttäroolille](information-architecture.md#käyttäjä)
+omat HTML-sovellussivut ja nihin liittyvät yhteenpaketoidut JavaScript- ja
+CSS-resurssit. lupapalvelu.web nimiavaruudessa määritellään kullekin resurssille
+pääsyrajaus, eli mikä käyttäjärooli vaaditaan.
+
+Resurssien kompositio määritellään [ui_components.clj](../src/lupapalvelu/components/ui_components.clj)
+-tiedostossa. Kutakin käyttäjien perusroolia vastaa oma komponentti,
+jonka `:depends` vektoriin määritellään komponentit, joista tämä paketoitava resurssi koostuu.
+
+Jokaista komponenttia vastaa alihakemisto [resources/private:ssa](../resources/private).
+`:js`, `:css` ja `:html` avaimilla määritellään lista tiedostonimiä, joiden
+tulee löytyä komponentin hakemistosta. Hakemiston nimen voi myös ylikirjoittaa
+`:name` avaimen avulla.
+
+HTML-tiedostoista poimitaan pelkät nav ja footer elementit sekä section class=page,
+div class=notification ja script class=ko-template -elementit
+(ks. [singlepage/parse-html-resource](../src/lupapalvelu/singlepage.clj)).
+
+`ui-components`-niminen komponentti ja alihakemisto käsitellään erityisesti:
+hakemiston kaikki tiedostot tulevat automaattisesti mukaan tähän komponenttiin.
+_Huom:_ jotta uusi tiedosto tulee mukaan kehitysympäristössä,
+lupapalvelu.components.ui-components nimiavaruus on ladattava uudelleen REPL:issä.
+(Vaihtoehtoinen, raskaampa tapa saada muutokset voimaan on käynnistää palvelu uudelleen.)
+
+Termi "ui-komponentti" voi viitata joko ui_components.clj:n määrityksiin,
+resource/private/ui-components alla oleviin automaattisesti ladattaviin
+komponenttiehin tai joissain yhteyksissa KnockoutJS-komponentteihin.
+
+## Näkymien reititys
+
+Näkymä valitaan sen perusteella, mikä ankkuri eli niin sanottu hash-bang sovelluksen
+osoitteessa on. Sovellus asettaa näkyville elementin, jonka ID:tä tämä vastaa.
+Esim. http://localhost:8000/app/fi/authority#!/application/LP-753-2016-00001
+osoiteessa näytetään nimeämiskäytännön mukaisesti
+[application.html](../resources/private/application/application.html)
+-tiedostossa oleva elementti:
+
+    <section class="page" id="application">
+
+Samassa application-hakemistossa oleva application.js sisältää logiikan,
+joka suoritetaan kun application-näkymä avataan:
+
+    hub.onPageLoad("application", _.partial(initPage, "application"));
+
+Näkymän avautuessa siis kutsutaan initPage-funktiota "application" -parametrilla sekä
+hub.js:n välittämällä eventillä.
+
+Vastaavasti koodissa voi kuunnelle siirtymistä pois näkymästä
+`hub.onPageUnload("sivun id", function(event){})` koukun avulla.
+
+## Kommunikointi selaimesta palvelinpäähän
+
+Kaikki verkkopyynnöt tulee tehdä [ajax](../resources/private/init/ajax.js)-palvelun kautta.
+Tämä keskittää virhekäsittelyä ja Cross Site Request Forgery -estomekanismin.
 
 ## Uusien näkymien toteutusarkkitehtuuri
 
@@ -406,7 +464,6 @@ hub.send("indicator-icon", {style: "negative"});
 
 
 ## Globaalit objektit
-- Ajax
 - Localizations
 - Lupapiste Map
 - lupapisteApp
@@ -582,3 +639,4 @@ Tarkastuslista:
    tiedostoon ja tiedosto käännetty compassilla
 
 ## UI komponentit (ui_components.clj, auto-skannatut tiedostot ui-components hakemistossa)
+

@@ -861,6 +861,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var myModel = model[name] || {};
     var partsDiv = document.createElement("div");
     var div = document.createElement("div");
+    var validationResult = getValidationResult(model, subSchema.name);
 
     appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
@@ -875,8 +876,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                     path: path,
         remove: resolveRemoveOptions( subSchema, path) }));
     }
-
-    var label = makeLabel(subSchema, "group", myPath, true);
+    var label = makeLabel(subSchema, "group", myPath, true, validationResult);
     div.appendChild(label);
 
     var groupHelpText = makeGroupHelpTextSpan(subSchema);
