@@ -155,10 +155,12 @@
           :user     (str "" (:name stm))}) (:statements application)))
 
 (defn- get-neighbour-requests-from-application [application]
-  (map (fn [req] {:type     (get-in req [:owner :name])
-                  :category :request-neighbor
-                  :ts       (:created (first (filterv #(= "open" (name (:state %))) (:status req))))
-                  :user     (full-name (:user req))}) (:neighbors application)))
+  (map (fn [req] (debug " neighbor: " req)
+         (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
+           {:type     (get-in req [:owner :name])
+            :category :request-neighbor
+            :ts       (:created status)
+            :user     (full-name (:user status))})) (:neighbors application)))
 
 (defn- get-review-requests-from-application [application]
   (reduce (fn [acc task]
@@ -184,6 +186,7 @@
         attachments (get-attachments-from-application application)
         statement-reqs (get-statement-requests-from-application application)
         neighbors-reqs (get-neighbour-requests-from-application application)
+        _ (debug "neghbors req:"  (with-out-str (clojure.pprint/pprint neighbors-reqs)))
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
         all-docs (sort-by :ts (concat documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))]
