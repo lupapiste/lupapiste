@@ -11,7 +11,8 @@
                      optionsText: fullName,
                      optionsValue: 'id',
                      optionsCaption: loc('choose'),
-                     valueAllowUnset: true"></select>
+                     valueAllowUnset: true,
+                     optionsAfterRender: disableAuthorities"></select>
   <!-- /ko -->
   <!-- ko ifnot: canEdit -->
   <span data-bind="text: fullName( oldAssignee )"
