@@ -4,17 +4,16 @@
             [sade.util :as util]
             [sade.property :as p]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :refer [with-lang loc localize]]
-            [clojure.xml :refer [emit-element]]
-            [clojure.java.io :refer [writer reader resource input-stream]])
-  (:import (java.io File)))
-(def HISTORY-TEMPLATE "private/lupapiste-history-template.fodt")
+            [lupapalvelu.i18n :as i18n]
+            [clojure.xml :as xml]
+            [clojure.java.io :as io]))
+(def history-template-file "private/lupapiste-history-template.fodt")
 
 (defn- xml-escape [text]
   (clojure.string/escape (str text) {\< "&lt;", \> "&gt;", \& "&amp;"}))
 
 (defn xml-table-row [& cols]
-  (with-out-str (emit-element {:tag     :table:table-row
+  (with-out-str (xml/emit-element {:tag     :table:table-row
                                :content (map (fn [val] {:tag :table:table-cell :attrs {:office:value-type "string"} :content
                                                              (map (fn [p] {:tag :text:p :content [(xml-escape p)]})
                                                                   (clojure.string/split val #"\n"))}) cols)})))
@@ -23,22 +22,22 @@
   (clojure.string/replace line field (str value)))
 
 (defn- localized-text [lang value]
-  (if (nil? value) "" (xml-escape (localize lang value))))
+  (if (nil? value) "" (xml-escape (i18n/localize lang value))))
 
 (defn- build-xml-history-row [data lang]
   ;(debug "row data:" data)
   [""
-   (condp = (:category data)
-     :attachment (localize lang "document")
-     :document (localize lang "application.applicationSummary")
-     :request-statement (localize lang "email.title.statement-request")
-     :request-neighbor (localize lang "email.title.neighbor")
-     :request-review (localize lang "caseFile.action.review-request")
-     :review (localize lang "caseFile.action.review")
+   (case (:category data)
+     :attachment (i18n/localize lang "document")
+     :document (i18n/localize lang "application.applicationSummary")
+     :request-statement (i18n/localize lang "email.title.statement-request")
+     :request-neighbor (i18n/localize lang "email.title.neighbor")
+     :request-review (i18n/localize lang "caseFile.action.review-request")
+     :review (i18n/localize lang "caseFile.action.review")
      "")
    (str
      (if (= (:category data) :attachment)
-       (localize lang "attachmentType" (get-in data [:type :type-group]) (get-in data [:type :type-id]))
+       (i18n/localize lang "attachmentType" (get-in data [:type :type-group]) (get-in data [:type :type-id]))
        (:type data))
      " " (:contents data)
      (if (get-in data [:version :major])
@@ -77,7 +76,7 @@
   (if (and (:authority application)
            (domain/assigned? application))
     (str (:lastName authority) " " (:firstName authority))
-    (localize lang "application.export.empty")))
+    (i18n/localize lang "application.export.empty")))
 
 (defn- get-operations [{:keys [primaryOperation secondaryOperations]}]
   (clojure.string/join ", " (map (fn [[op c]] (str (if (> c 1) (str c " \u00D7 ")) (loc "operations" op)))
@@ -97,7 +96,7 @@
    "FIELD004B"   (localized-text lang (:state application))
 
    "FIELD005A"   (localized-text lang "kiinteisto.kiinteisto.kiinteistotunnus")
-   "FIELD005B"   (xml-escape (if (nil? (:propertyId application)) (localize lang "application.export.empty") (p/to-human-readable-property-id (:propertyId application))))
+   "FIELD005B"   (xml-escape (if (nil? (:propertyId application)) (i18n/localize lang "application.export.empty") (p/to-human-readable-property-id (:propertyId application))))
 
    "FIELD006A"   (localized-text lang "submitted")
    "FIELD006B"   (xml-escape (or (util/to-local-date (:submitted application)) "-"))
@@ -121,16 +120,16 @@
   (reduce (fn [s [k v]] (if (clojure.string/includes? s k) (replace-text s k v) s)) line data))
 
 (defn create-libre-doc [template data file]
-  (with-open [wrtr (writer file :encoding "UTF-8" :append true)]
-    (with-open [rdr (reader template)]
+  (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]
+    (with-open [rdr (io/reader template)]
       (doseq [line (line-seq rdr)]
         (.write wrtr (formatted-line line data))))))
 
 (defn write-history-libre-doc [application lang file]
-  (create-libre-doc (resource HISTORY-TEMPLATE) (assoc (common-field-map application lang)
-                                                  "COLTITLE1" (localize lang "caseFile.action")
-                                                  "COLTITLE2" (localize lang "applications.operation")
-                                                  "COLTITLE3" (localize lang "document")
-                                                  "COLTITLE4" (localize lang "caseFile.documentDate")
-                                                  "COLTITLE5" (localize lang "lisaaja")
+  (create-libre-doc (io/resource history-template-file) (assoc (common-field-map application lang)
+                                                  "COLTITLE1" (i18n/localize lang "caseFile.action")
+                                                  "COLTITLE2" (i18n/localize lang "applications.operation")
+                                                  "COLTITLE3" (i18n/localize lang "document")
+                                                  "COLTITLE4" (i18n/localize lang "caseFile.documentDate")
+                                                  "COLTITLE5" (i18n/localize lang "lisaaja")
                                                   "HISTORY_ROWS_PLACEHOLDER" (build-xml-history application lang)) file))

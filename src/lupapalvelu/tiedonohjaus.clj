@@ -155,8 +155,7 @@
           :user     (str "" (:name stm))}) (:statements application)))
 
 (defn- get-neighbour-requests-from-application [application]
-  (map (fn [req] (debug " neighbor: " req)
-         (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
+  (map (fn [req] (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
            {:type     (get-in req [:owner :name])
             :category :request-neighbor
             :ts       (:created status)
@@ -166,9 +165,9 @@
   (reduce (fn [acc task]
             (if (= "task-katselmus" (name (get-in task [:schema-info :name])))
               (conj acc {:type     (:taskname task)
-                           :category :request-review
-                           :ts       (:created task)
-                           :user      (full-name (:assignee task))})
+                         :category :request-review
+                         :ts       (:created task)
+                         :user     (full-name (:assignee task))})
               acc)) [] (:tasks application)))
 
 
@@ -178,7 +177,7 @@
               (conj acc {:type     (:taskname task)
                          :category :review
                          :ts       held  ;; TODO: What timestamp should this use ?
-                         :user      (full-name (:assignee task))})
+                         :user     (full-name (:assignee task))})
               acc)) [] (:tasks application)))
 
 (defn generate-case-file-data [application]
@@ -186,7 +185,6 @@
         attachments (get-attachments-from-application application)
         statement-reqs (get-statement-requests-from-application application)
         neighbors-reqs (get-neighbour-requests-from-application application)
-        _ (debug "neghbors req:"  (with-out-str (clojure.pprint/pprint neighbors-reqs)))
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
         all-docs (sort-by :ts (concat documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))]
