@@ -1,6 +1,7 @@
 (ns sade.schema-generators
   (:require [sade.schemas :as ssc]
             [sade.validators :as sv]
+            [sade.util :refer [fn-> fn->>] :as util]
             [schema.core :as sc]
             [schema.experimental.generators :as sg]
             [clj-time.format :as ctf]
@@ -66,6 +67,32 @@
 
 (def not-blank-string (gen/such-that (comp not s/blank?) gen/string))
 
+(def nat-string (gen/fmap str gen/nat))
+
+(register-generator ssc/NatString nat-string)
+
+(register-generator ssc/Nat gen/nat)
+
+(def int-string (gen/fmap str gen/int))
+
+(register-generator ssc/IntString int-string)
+
+(def digit (gen/fmap str single-number-int))
+
+(register-generator ssc/Digit digit)
+
+(def letter (gen/fmap str gen/char-alpha))
+
+(register-generator ssc/Letter letter)
+
+(def upper-case-letter (gen/fmap s/upper-case letter))
+
+(register-generator ssc/UpperCaseLetter upper-case-letter)
+
+(def lower-case-letter (gen/fmap s/lower-case letter))
+
+(register-generator ssc/LowerCaseLetter lower-case-letter)
+
 (def email (gen/such-that (ssc/max-length-constraint 255)
                           (gen/fmap (fn [[name domain]] (str name "@" domain ".com"))
                                     (gen/tuple (gen/not-empty gen/string-alphanumeric)
@@ -77,6 +104,24 @@
                          gen/large-integer))
 
 (register-generator ssc/Timestamp timestamp)
+
+(def rakennusnumero (gen/fmap (partial apply str) (gen/vector single-number-int 3)))
+
+(register-generator ssc/Rakennusnumero rakennusnumero)
+
+(def kiinteistotunnus (gen/fmap (partial apply str) (gen/vector single-number-int 9)))
+
+(register-generator ssc/Kiinteistotunnus kiinteistotunnus)
+
+(def rakennustunnus (gen/fmap (fn->> (cons 1) (apply str) (#(str % (sv/vrk-checksum (read-string %)))))
+                              (gen/vector single-number-int 8)))
+
+(register-generator ssc/Rakennustunnus rakennustunnus)
+
+(def maaraalatunnus (gen/fmap (partial format "%04d") ; (partial format "M%04d")
+                              (gen/fmap #(+ 1 (rem % 9999)) gen/pos-int)))
+
+(register-generator ssc/Maaraalatunnus maaraalatunnus)
 
 (def finnish-zipcode (gen/fmap s/join
                                (gen/vector single-number-int 5)))
@@ -160,4 +205,36 @@
                        (gen/vector single-hex %))))
 
 (register-generator ssc/min-length-hex-string min-length-hex-string)
+
+(defn- min-max-value 
+  "Wrapper for numeric generators that bounds min and/or max values.
+  Values are shrinking towards zero."
+  [numeric-gen min-val max-val]
+  {:pre [(gen/generator? numeric-gen)
+         (or (nil? min-val) (number? min-val)) 
+         (or (nil? min-val) (number? min-val)) 
+         (or (nil? min-val) (nil? max-val) (< min-val max-val))]}
+  (let [less?    (if min-val (fn [v] (> min-val v)) (constantly false))
+        greater? (if max-val (fn [v] (< max-val v)) (constantly false))
+        maxgen   (when (and min-val max-val) (max (Math/abs min-val) (Math/abs max-val)))
+        bias     (cond (less? 0)    min-val
+                       (greater? 0) max-val
+                       :else        0)]
+    (gen/fmap (fn->> (+ bias)
+                     (#(loop [v %] (cond (less? v)    (recur (- (* 2 min-val) v)) 
+                                         (greater? v) (recur (- (* 2 max-val) v))
+                                         :else        v))))
+              (if maxgen
+                (gen/such-that #(>= maxgen (Math/abs %)) numeric-gen)
+                numeric-gen))))
+
+(defn min-max-valued-integer-string [min max]
+  (gen/fmap str (min-max-value gen/int min max)))
+
+(register-generator ssc/min-max-valued-integer-string min-max-valued-integer-string)
+
+(defn min-max-valued-decimal-string [min max]
+  (gen/fmap (partial format "%f") (min-max-value gen/double min max)))
+
+(register-generator ssc/min-max-valued-decimal-string min-max-valued-decimal-string)
 
