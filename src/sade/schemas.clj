@@ -85,7 +85,7 @@
   (sc/constrained sc/Str validators/kiinteistotunnus? "Finnish property id"))
 
 (defschema Maaraalatunnus
-  (sc/constrained sc/Str (partial matches? validators/maara-alatunnus-pattern) "Finnish property partition id"))
+  (sc/constrained sc/Str (partial re-matches validators/maara-alatunnus-pattern) "Finnish property partition id"))
 
 (defschema BlankStr
   "A schema for empty or nil valued string"
