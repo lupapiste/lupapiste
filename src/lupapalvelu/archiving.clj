@@ -15,7 +15,8 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [lupapalvelu.application-meta-fields :as amf])
+            [lupapalvelu.application-meta-fields :as amf]
+            [clojure.string :as string])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -42,6 +43,7 @@
         encoded-id (codec/url-encode id)
         url (str host "/documents/" encoded-id)]
     (http/put url {:basic-auth [app-id app-key]
+                   :throw-exceptions false
                    :multipart  [{:name      "metadata"
                                  :mime-type "application/json"
                                  :encoding  "UTF-8"
@@ -71,13 +73,16 @@
         (.submit
           upload-threadpool
           (fn []
-            (try
-              (upload-file id is-or-file content-type metadata)
-              (state-update-fn application now id)
-              (info "Archived attachment id" id "from application" app-id)
-              (catch Exception e
-                (error e)
-                (error "Failed to archive attachment id" id "from application" app-id)))
+            (let [{:keys [status body]} (upload-file id is-or-file content-type metadata)]
+              (if (= 200 status)
+                (do
+                  (state-update-fn application now id)
+                  (info "Archived attachment id" id "from application" app-id))
+                (do
+                  (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
+                  (when (and (= status 409) (string/includes? body "already exists"))
+                    (info "Response indicates that" id "is already in archive. Updating state.")
+                    (state-update-fn application now id)))))
             (when (instance? File is-or-file)
               (io/delete-file is-or-file :silently))
             (swap! unfinished-uploads update app-id disj id))))
