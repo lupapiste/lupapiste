@@ -254,6 +254,17 @@ var util = (function($) {
     }
   }
 
+  // Shows OK dialog, with text (loc key) from respose
+  // To define click handler for "OK" button, give options object looking like following:
+  // {componentParams: {okFn: your-callback-function-here}}
+  function showErrorDialog(response, options) {
+    var defaultParams = {ltitle: "error.dialog.title",
+                         size: "medium",
+                         component: "ok-dialog",
+                         componentParams: {ltext: response.text}};
+    hub.send("show-dialog", _.merge(defaultParams, options));
+  }
+
   function createSortableColumn(index, text, opts) {
     index = index || "";
     text = text || "";
@@ -386,6 +397,7 @@ var util = (function($) {
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
     showSavedIndicator: showSavedIndicator,
+    showErrorDialog: showErrorDialog,
     isNonNegative: isNonNegative,
     createSortableColumn: createSortableColumn,
     elementInViewport: elementInViewport,
