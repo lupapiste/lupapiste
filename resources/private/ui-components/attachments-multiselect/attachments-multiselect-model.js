@@ -12,11 +12,12 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
 
   function enhanceAttachment(a) {
     a.selected = ko.observable(a.selected === undefined ? false : a.selected);
+    return a;
   }
 
   // Group sorting differs from attachment page
   function mapAttachmentGroup(group) {
-    group.attachments = _(group.attachments).each(enhanceAttachment).value();
+    group.attachments = _(group.attachments).map(enhanceAttachment).value();
     return {
       attachments: group.attachments,
       groupName: group.groupName,
