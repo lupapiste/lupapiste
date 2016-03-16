@@ -45,6 +45,9 @@
                  :userAttachmentTypes   (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales      attachment-scales
                  :attachmentSizes       attachment-sizes
+                 :verdictAttachmentType (if (env/feature? :updated-attachments)
+                                          "paatoksenteko.paatosote"
+                                          "muut:paatosote")
                  :accountTypes          company/account-types
                  :eInvoiceOperators     schemas/e-invoice-operators
                  :postVerdictStates     states/post-verdict-states
