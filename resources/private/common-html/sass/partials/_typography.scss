@@ -1,4 +1,7 @@
-@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
+// Note: The fonts are loaded in the template.html.
+// Earlier @import approach resulted in a peculiar hard to trace rendering bug,
+//where some texts were invisible until hard reload, window size change or zooming.
+
 $font-body: 'Source Sans Pro', sans-serif;
 $font-heading: 'Source Sans Pro', sans-serif;
 $font-size-body: 15px;
