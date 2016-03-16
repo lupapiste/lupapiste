@@ -15,7 +15,8 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clj-time.format :as f]
-            [lupapalvelu.application-meta-fields :as amf])
+            [lupapalvelu.application-meta-fields :as amf]
+            [clojure.string :as string])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -33,8 +34,6 @@
 
 (defonce upload-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
 
-(defonce unfinished-uploads (atom {}))
-
 (defn- upload-file [id is-or-file content-type metadata]
   (let [host (env/value :arkisto :host)
         app-id (env/value :arkisto :app-id)
@@ -42,6 +41,7 @@
         encoded-id (codec/url-encode id)
         url (str host "/documents/" encoded-id)]
     (http/put url {:basic-auth [app-id app-key]
+                   :throw-exceptions false
                    :multipart  [{:name      "metadata"
                                  :mime-type "application/json"
                                  :encoding  "UTF-8"
@@ -50,37 +50,39 @@
                                  :content   is-or-file
                                  :mime-type content-type}]})))
 
-(defn- set-attachment-state [application now id]
+(defn- set-attachment-state [next-state application now id]
   (action/update-application
     (action/application->command application)
     {:attachments.id id}
     {$set {:modified now
            :attachments.$.modified now
-           :attachments.$.metadata.tila :arkistoitu}}))
+           :attachments.$.metadata.tila next-state}}))
 
-(defn- set-application-state [application now _]
+(defn- set-application-state [next-state application now _]
   (action/update-application
     (action/application->command application)
     {$set {:modified now
-           :metadata.tila :arkistoitu}}))
+           :metadata.tila next-state}}))
 
 (defn- upload-and-set-state [id is-or-file content-type metadata {app-id :id :as application} now state-update-fn]
   (info "Trying to archive attachment id" id "from application" app-id)
-  (if-not (get-in @unfinished-uploads [app-id id])
-    (do (swap! unfinished-uploads update app-id #(conj (or % #{}) id))
+  (if-not (#{:arkistoidaan :arkistoitu} (:tila metadata))
+    (do (state-update-fn :arkistoidaan application now id)
         (.submit
           upload-threadpool
           (fn []
-            (try
-              (upload-file id is-or-file content-type metadata)
-              (state-update-fn application now id)
-              (info "Archived attachment id" id "from application" app-id)
-              (catch Exception e
-                (error e)
-                (error "Failed to archive attachment id" id "from application" app-id)))
+            (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
+              (if (= 200 status)
+                (do
+                  (state-update-fn :arkistoitu application now id)
+                  (info "Archived attachment id" id "from application" app-id))
+                (do
+                  (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
+                  (when (and (= status 409) (string/includes? body "already exists"))
+                    (info "Response indicates that" id "is already in archive. Updating state.")
+                    (state-update-fn :arkistoitu application now id)))))
             (when (instance? File is-or-file)
-              (io/delete-file is-or-file :silently))
-            (swap! unfinished-uploads update app-id disj id))))
+              (io/delete-file is-or-file :silently)))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
@@ -150,8 +152,7 @@
   [{:keys [id propertyId applicant address organization municipality location location-wgs84] :as application}
    user
    & [attachment]]
-  (let [s2-metadata (-> (or (:metadata attachment) (:metadata application))
-                        (assoc :tila :arkistoitu))
+  (let [s2-metadata (or (:metadata attachment) (:metadata application))
         base-metadata {:type                  (if attachment (make-attachment-type attachment) :hakemus)
                        :applicationId         id
                        :buildingIds           (get-building-ids :localId application (get-in attachment [:op :id]))

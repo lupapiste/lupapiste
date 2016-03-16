@@ -225,11 +225,18 @@
 
     var updateState = function(docs, stateMap) {
       _.forEach(docs, function(doc) {
-        var newState = stateMap[ko.unwrap(doc.id)];
+        var id = ko.unwrap(doc.id);
+        var newState = stateMap[id];
         if (newState) {
           doc.metadata().tila(newState);
           if (newState === "arkistoitu") {
             doc.sendToArchive(false);
+          }
+          if (newState !== "arkistoidaan") {
+            self.archivingInProgressIds.remove(id);
+          }
+          if (newState === "arkistoidaan" && !_.includes(self.archivingInProgressIds(), id)) {
+            self.archivingInProgressIds.push(id);
           }
         }
       });
@@ -251,20 +258,23 @@
     };
 
     var pollArchiveStatus = function() {
-      ajax.query("archive-upload-pending", {id: ko.unwrap(params.application.id)})
-        .success(function(data) {
-          var finished = _.difference(self.archivingInProgressIds(), data.unfinished);
-          if (finished.length > 0) {
-            pollChangedState(finished);
-          }
-          self.archivingInProgressIds(data.unfinished);
-          if (data.unfinished.length > 0) {
-            window.setTimeout(pollArchiveStatus, 1000);
-          }
-        })
-        .call();
+      pollChangedState(self.archivingInProgressIds());
+      if (!_.isEmpty(self.archivingInProgressIds())) {
+        window.setTimeout(pollArchiveStatus, 2000);
+      }
     };
-    pollArchiveStatus();
+
+    var getId = function(doc) {
+      return ko.unwrap(doc.id);
+    };
+
+    var allIds = _.concat(
+      _.map(mainDocuments(), getId),
+      _.map(archivedPreAttachments(), getId),
+      _.map(archivedPostAttachments(), getId)
+    );
+
+    pollChangedState(allIds);
 
     self.archiveSelected = function() {
       var attachmentIds = _.map(_.filter(self.attachments(), isSelectedForArchive), function(attachment) {
@@ -275,7 +285,7 @@
       if (archiveApplication) {
         self.archivingInProgressIds.push(mainDocuments()[0].id);
       }
-      window.setTimeout(pollArchiveStatus, 1000);
+      window.setTimeout(pollArchiveStatus, 3000);
       ajax
         .command("archive-documents",
           {
@@ -288,7 +298,6 @@
         })
         .call();
     };
-
   };
 
   ko.components.register("archival-summary", {
