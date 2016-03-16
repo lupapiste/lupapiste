@@ -308,8 +308,9 @@
   [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
   (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
-  (let [metadata (tos/metadata-for-document organization tosFunction type)]
+(defn- default-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
+  (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
+                     (tos/update-end-dates verdicts))]
     (if (seq metadata)
       metadata
       {:nakyvyys :julkinen})))
