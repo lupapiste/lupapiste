@@ -4,10 +4,11 @@ Documentation   Application gets verdict
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables       ../../common_variables.py
+Variables       ../06_attachments/variables.py
 
 *** Test Cases ***
 
-Mikko want to build Olutteltta
+Mikko wants to build Olutteltta
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Olutteltta${secs}
@@ -44,6 +45,8 @@ Sonja creates verdict with adds comment
   Title Should Be  ${appname} - Lupapiste
   Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
   Comment verdict  Myönnetään...
+  Add attachment  verdict  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}
+  Wait test id visible  targetted-attachments-table
 
 Add katselmus
   Create task  task-katselmus  Lopullinen loppukatselmus

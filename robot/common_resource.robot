@@ -643,6 +643,7 @@ Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
   Run Keyword If  '${kind}' == 'application'  Select attachment operation option from dropdown  attachmentsAdd
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
+  Run Keyword If  '${kind}' == 'verdict'  Click enabled by test id  add-targetted-attachment
 
   Wait until  Element should be visible  upload-dialog
 
