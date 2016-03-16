@@ -2,8 +2,8 @@
   (:require [clojure.java.io :as io]
             [taoensso.timbre :refer [error info]])
   (:import [javax.imageio ImageIO]
-           (javax.imageio.stream FileImageInputStream)
-           (com.sun.media.imageio.plugins.tiff BaselineTIFFTagSet)))
+           [javax.imageio.stream FileImageInputStream]
+           [com.github.jaiimageio.plugins.tiff BaselineTIFFTagSet]))
 
 (def allowed-tag-numbers
   (-> (->> (BaselineTIFFTagSet/getInstance)
