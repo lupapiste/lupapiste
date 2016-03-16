@@ -29,10 +29,16 @@
 
 (defn convert-to-pdfa [filename content]
   (try
-    (let [response (convert-to-pdfa-request filename content)]
-      {:filename   (str (FilenameUtils/removeExtension filename) ".pdf")
-       :content    (:body response)
-       :archivable true})
+    (let [{:keys [status body]} (convert-to-pdfa-request filename content)]
+      (if (= status 200)
+        {:filename   (str (FilenameUtils/removeExtension filename) ".pdf")
+         :content    body
+         :archivable true}
+        (do
+          (error "libreoffice conversion error: response status is" status " with body: " body)
+          {:filename           filename
+           :content            content
+           :archivabilityError :libre-conversion-error})))
 
     (catch Exception e
       (error "libreoffice conversion error: " (.getMessage e))
