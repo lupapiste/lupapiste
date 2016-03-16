@@ -481,7 +481,9 @@
    :input-validators [(partial action/non-blank-parameters [:state])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
-   :pre-checks       [permit/valid-permit-types-for-state-change a/valid-new-state]}
+   :pre-checks       [permit/valid-permit-types-for-state-change a/valid-new-state]
+   :notified         true
+   :on-success       (notify :application-state-change)}
   [{:keys [user] :as command}]
   (update-application command
                       (a/state-transition-update (keyword state) (now) user)))
