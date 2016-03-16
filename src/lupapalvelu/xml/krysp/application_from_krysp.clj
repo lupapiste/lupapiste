@@ -23,6 +23,6 @@
 (defn get-application-xml-by-application-id [{:keys [id organization permitType] :as application} & [raw?]]
   (get-application-xml application id :application-id raw?))
 
-(defn get-application-xml-by-backend-id [{:keys [organization permitType] :as application} backend-id & [raw?]]
+(defn get-application-xml-by-backend-id [{:keys [id organization permitType] :as application} backend-id & [raw?]]
   (when backend-id
     (get-application-xml application backend-id :kuntalupatunnus raw?)))
