@@ -29,7 +29,7 @@
    :user-roles #{:admin}}
   [_]
   (if-let [organization (organization/resolve-organization municipality permitType)]  ;; this also validates the permit-type
-    (let [dummy-application {:permitType permitType :organization (:id organization)}]
+    (let [dummy-application {:id "" :permitType permitType :organization (:id organization)}]
       {:status 200
        :body (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus true)
        :headers {"Content-Type" "application/xml;charset=UTF-8"

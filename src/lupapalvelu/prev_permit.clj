@@ -150,7 +150,7 @@
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus]} :data :as command}]
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
-        dummy-application {:permitType permit-type :organization organizationId}
+        dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         validator-fn      (permit/get-verdict-validator permit-type)
