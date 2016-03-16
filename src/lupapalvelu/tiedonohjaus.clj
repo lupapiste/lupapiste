@@ -90,7 +90,7 @@
   (let [retention-end (retention-end-date metadata verdicts)
         security-end (security-end-date metadata verdicts)]
     (cond-> (-> (util/dissoc-in metadata [:sailytysaika :retention-period-end])
-                (dissoc :secrecy-period-end))
+                (dissoc :security-period-end))
             retention-end (assoc-in [:sailytysaika :retention-period-end] retention-end)
             security-end (assoc :security-period-end security-end))))
 

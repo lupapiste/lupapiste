@@ -20,7 +20,7 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
 
   var initialQuery = true;
 
-  self.fetchComments = function() {
+  self.fetchComments = function() { // this is called from infinite-scroll component
     var bulletinId = util.getIn(self, ["bulletin", "id"]);
     var versionId = util.getIn(self, ["bulletinVersion", "id"]);
     self.sendEvent("publishBulletinService", "fetchBulletinComments", {bulletinId: bulletinId,
@@ -82,4 +82,6 @@ LUPAPISTE.BulletinCommentsModel = function(params) {
   self.commentIndex = function(index) {
     return self.asc() ? index + 1 : self.totalComments() - index;
   };
+
+  self.fetchComments(); // initial fetch
 };

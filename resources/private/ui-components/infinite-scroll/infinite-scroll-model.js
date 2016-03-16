@@ -2,6 +2,8 @@ LUPAPISTE.InfiniteScrollModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   self.id = params.id || util.randomElementId("infinite-scroll");
   self.waiting = ko.observable(false);
   self.load = params.load || ko.observable(false);
@@ -13,7 +15,7 @@ LUPAPISTE.InfiniteScrollModel = function(params) {
 
   // always refresh waypoint when load parameter triggers event i.e. something was loaded
   // therefore load parameter must trigger always even if the value stays the same
-  ko.computed(function() {
+  self.disposedComputed(function() {
     var load = self.load();
     if (waypoint) {
       waypoint.context.refresh();

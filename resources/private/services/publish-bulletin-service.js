@@ -8,7 +8,7 @@ LUPAPISTE.PublishBulletinService = function() {
 
   self.comments = ko.observable([]);
 
-  self.commentsLeft = ko.observable(true);
+  self.commentsLeft = ko.observable(0);
 
   self.totalComments = ko.observable();
 
