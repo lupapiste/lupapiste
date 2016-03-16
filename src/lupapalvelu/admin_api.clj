@@ -15,7 +15,7 @@
   [_]
   (if-let [application (domain/get-application-no-access-checking applicationId)]
     {:status 200
-     :body (krysp-fetch/get-application-xml application :application-id true)
+     :body (krysp-fetch/get-application-xml-by-application-id application true)
      :headers {"Content-Type" "application/xml;charset=UTF-8"
                "Content-Disposition" (format "attachment;filename=\"%s-%s.xml\"" applicationId (now))
                "Cache-Control" "no-cache"}}
@@ -29,9 +29,9 @@
    :user-roles #{:admin}}
   [_]
   (if-let [organization (organization/resolve-organization municipality permitType)]  ;; this also validates the permit-type
-    (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization (:id organization)}]
+    (let [dummy-application {:permitType permitType :organization (:id organization)}]
       {:status 200
-       :body (krysp-fetch/get-application-xml dummy-application :kuntalupatunnus true)
+       :body (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus true)
        :headers {"Content-Type" "application/xml;charset=UTF-8"
                  "Content-Disposition" (format "attachment;filename=\"%s-%s-%s.xml\"" municipality permitType (now))
                  "Cache-Control" "no-cache"}})

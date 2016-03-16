@@ -78,8 +78,9 @@
           (meta-fields/enrich-with-link-permit-data irrelevant) => (assoc-in tj-app [:documents 0 :data :yhteystiedot :email :value] "teppo@example.com")))
 
       (against-background ; some fixed values so we can test verdict fetching process
-        (krysp-fetch/get-application-xml anything anything) => nil
-        (krysp-fetch/get-application-xml link-app :application-id) => xml
+        (krysp-fetch/get-application-xml-by-application-id anything) => nil
+        (krysp-fetch/get-application-xml-by-backend-id anything anything) => nil
+        (krysp-fetch/get-application-xml-by-application-id link-app) => xml
         (organization/resolve-organization "753" "R") => {:krysp {:R {:version "2.1.8"}}}
         (meta-fields/enrich-with-link-permit-data irrelevant) => tj-app
         (application/get-link-permit-app irrelevant) => link-app
