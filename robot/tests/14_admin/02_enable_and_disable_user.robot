@@ -39,3 +39,5 @@ Solita admin enables Ronjas account
 Ronja can login again
   Login  ronja  sonja
   User should be logged in  Ronja Sibbo
+  Go to  ${LOGIN_URL}
+  [Teardown]  Logout
