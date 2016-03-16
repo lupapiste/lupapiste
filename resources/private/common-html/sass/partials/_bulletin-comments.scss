@@ -24,6 +24,9 @@
   .bulletin-comment__body {
     padding: $marginS $marginM;
     clear: both;
+    pre {
+      white-space: pre-wrap;
+    }
   }
   .bulletin-comment__attachments {
     margin-bottom: $marginS;
