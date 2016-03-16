@@ -22,16 +22,6 @@
     (archiving/send-to-archive command (set attachmentIds) archiveApplication)
     (ok)))
 
-(defquery archive-upload-pending
-  {:parameters       [:id]
-   :input-validators [(partial non-blank-parameters [:id])]
-   :user-roles       #{:authority}
-   :states           states/post-verdict-states
-   :feature          :arkistointi}
-  [{:keys [application user] :as command}]
-  (when (contains? (get-in user [:orgAuthz (keyword (:organization application))]) :archivist)
-    (ok :unfinished (get @archiving/unfinished-uploads (:id application) #{}))))
-
 (defcommand document-states
   {:parameters       [:id documentIds]
    :input-validators [(partial non-blank-parameters [:id])
