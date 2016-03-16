@@ -70,6 +70,9 @@ LUPAPISTE.ApplicationBulletinsService = function() {
           self.bulletin(res.bulletin);
         }
       })
+      .error(_.partialRight(util.showErrorDialog,
+                            {size: "small",
+                             componentParams: {okFn: _.partial(pageutil.openPage, "bulletins")}}))
       .call();
   }
 
