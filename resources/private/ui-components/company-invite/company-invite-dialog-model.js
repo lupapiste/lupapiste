@@ -51,7 +51,7 @@ LUPAPISTE.CompanyInviteDialogModel = function() {
       var q = self.query() || "";
       var filteredData = _.filter(self.companies(), function(item) {
         return _.reduce(q.split(" "), function(result, word) {
-          return _.contains(item.label.toUpperCase(), word.toUpperCase()) && result;
+          return _.includes(item.label.toUpperCase(), word.toUpperCase()) && result;
         }, true);
       });
       return filteredData;

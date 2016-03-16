@@ -88,7 +88,7 @@
   var getForbiddenFields = function(schema, roles) {
     var naughtyFields = [];
     _.forEach(schema, function (attribute) {
-      if (attribute["require-role"] && !_.contains(roles, attribute["require-role"])) {
+      if (attribute["require-role"] && !_.includes(roles, attribute["require-role"])) {
         naughtyFields.push(attribute.type);
       }
     });

@@ -15,7 +15,7 @@ LUPAPISTE.AutocompleteApplicationTagsModel = function(params) {
     return _(organizationTags)
       .filter(function(tag) {
         return _.reduce(q.split(" "), function(result, word) {
-          return !_.some(self.selected(), tag) && tag.label && _.contains(tag.label.toUpperCase(), word.toUpperCase()) && result;
+          return !_.some(self.selected(), tag) && tag.label && _.includes(tag.label.toUpperCase(), word.toUpperCase()) && result;
         }, true);
       })
       .sortBy("label")

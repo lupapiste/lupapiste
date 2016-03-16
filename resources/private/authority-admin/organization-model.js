@@ -73,7 +73,7 @@ LUPAPISTE.OrganizationModel = function () {
 
   self.validateVerdictGivenDateVisible = ko.pureComputed(function() {
     var types = self.permitTypes();
-    return _.contains(types, "R") || _.contains(types, "P");
+    return _.includes(types, "R") || _.includes(types, "P");
   });
 
   function toAttachments(attachments) {
@@ -216,7 +216,7 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.allowedRoles(organization.allowedRoles);
 
-    self.permitTypes(_(organization.scope).pluck("permitType").uniq().value());
+    self.permitTypes(_(organization.scope).map("permitType").uniq().value());
 
     self.initialized = true;
   };

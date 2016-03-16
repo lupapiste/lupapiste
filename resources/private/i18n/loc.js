@@ -64,7 +64,7 @@ var loc;
   function resolveLang() {
     var langFromDocument = resolveLangFromDocument();
     var lang = langFromDocument ? langFromDocument : resolveLangFromUrl();
-    return _.contains(loc.supported, lang) ? lang : loc.defaultLanguage;
+    return _.includes(loc.supported, lang) ? lang : loc.defaultLanguage;
   }
 
   loc.currentLanguage = resolveLang();
@@ -103,7 +103,7 @@ var loc;
 
   hub.subscribe("change-lang", function(e) {
     var lang = e.lang;
-    if (_.contains(loc.supported, lang)) {
+    if (_.includes(loc.supported, lang)) {
       var url = location.href.replace("/app/" + loc.currentLanguage + "/", "/app/" + lang + "/");
       window.location = url;
     }

@@ -32,7 +32,7 @@ LUPAPISTE.StatementEditModel = function(params) {
   });
 
   self.isDraft = ko.pureComputed(function() {
-    return _.contains(["requested", "draft"], util.getIn(self.data, ["state"]));
+    return _.includes(["requested", "draft"], util.getIn(self.data, ["state"]));
   });
 
   self.showStatement = ko.pureComputed(function() {

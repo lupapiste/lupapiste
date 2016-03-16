@@ -183,7 +183,7 @@ LUPAPISTE.DocumentDataService = function(params) {
       schema: schema,
       model: _(schema.body).map(function(subSchema) {
         return [subSchema.name, createDataModel(subSchema, rawModel && rawModel[subSchema.name], path.concat(subSchema.name))];
-      }).zipObject().value()
+      }).fromPairs().value()
     };
   }
 
@@ -202,11 +202,11 @@ LUPAPISTE.DocumentDataService = function(params) {
   //
 
   function isRepeating(schema) {
-    return schema.repeating && !_.contains(["document" ,"party", "location"], schema.type);
+    return schema.repeating && !_.includes(["document" ,"party", "location"], schema.type);
   }
 
   function isGroupType(schema) {
-    return _.contains(["group", "table", "location", "document", "party"], schema.type);
+    return _.includes(["group", "table", "location", "document", "party"], schema.type);
   }
 
   function createDataModel(schema, rawModel, path) {
@@ -243,7 +243,7 @@ LUPAPISTE.DocumentDataService = function(params) {
       } else if (_.isArray(dataModel)) {
         return _(dataModel)
           .map(function(rep) { return [rep.index, rep.model]; })
-          .zipObject()
+          .fromPairs()
           .mapValues(recur)
           .value();
 

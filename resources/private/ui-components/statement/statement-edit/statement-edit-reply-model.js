@@ -28,11 +28,11 @@ LUPAPISTE.StatementEditReplyModel = function(params) {
   });
 
   self.isDraft = ko.pureComputed(function() {
-    return _.contains(["replyable"], util.getIn(self.data, ["state"]));
+    return _.includes(["replyable"], util.getIn(self.data, ["state"]));
   });
 
   self.replyVisible = ko.computed(function() {
-    return _.contains(["replied"], util.getIn(self.data, ["state"])) || self.authModel.ok(commands.submit);
+    return _.includes(["replied"], util.getIn(self.data, ["state"])) || self.authModel.ok(commands.submit);
   });
 
   var textSubscription = self.text.subscribe(function(value) {

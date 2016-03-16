@@ -84,10 +84,12 @@ Mikko returns to application right away
 
 Attachment is needed
   [Tags]  attachments
+  Scroll to  td.attachment-not-needed input
   Checkbox Should Not Be Selected  jquery=td.attachment-not-needed input
 
 Mikko checks Not needed for the attachment
   [Tags]  attachments
+  Scroll to  td.attachment-not-needed input
   Select checkbox  jquery=td.attachment-not-needed input
   Sleep  0.5s
   Wait for jQuery
@@ -95,6 +97,8 @@ Mikko checks Not needed for the attachment
 Not needed should be checked after reload
   [Tags]  attachments
   Reload Page
+  Wait Until Page Contains  ${propertyId}
+  Scroll to  td.attachment-not-needed input
   Wait Until  Element should be visible  jquery=td.attachment-not-needed input
   Checkbox Should Be Selected  jquery=td.attachment-not-needed input
 

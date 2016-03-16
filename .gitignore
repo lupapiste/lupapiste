@@ -64,3 +64,4 @@ user.properties
 /TAGS
 *.pandoc
 /docs/developerguide.html
+node_modules

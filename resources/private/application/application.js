@@ -395,7 +395,7 @@
         .call();
     },
     statusCompleted: function(neighbor) {
-      return _.contains(["mark-done", "response-given-ok", "response-given-comments"], _.last(neighbor.status()).state());
+      return _.includes(["mark-done", "response-given-ok", "response-given-comments"], _.last(neighbor.status()).state());
     },
     showStatus: function(neighbor) {
       neighborStatusModel.init(neighbor).open();

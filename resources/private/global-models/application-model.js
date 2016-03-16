@@ -82,7 +82,7 @@ LUPAPISTE.ApplicationModel = function() {
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);
   self.stateSeq = ko.observable([]);
-  self.currentStateInSeq = ko.pureComputed(function() {return _.contains(self.stateSeq(), self.state());});
+  self.currentStateInSeq = ko.pureComputed(function() {return _.includes(self.stateSeq(), self.state());});
   self.inPostSubmittedState = ko.observable(false); // TODO: remove
   self.vendorBackendId = ko.observable(); // TODO: remove
   self.applicantPhone = ko.observable();
@@ -268,7 +268,7 @@ LUPAPISTE.ApplicationModel = function() {
       }
       var auth = r[i.id()] || (i.roles = [], i);
       var role = i.role();
-      if (!_.contains(auth.roles, role)) {
+      if (!_.includes(auth.roles, role)) {
         auth.roles.push(role);
       }
       r[i.id()] = auth;
@@ -424,8 +424,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.userHasRole = function(userModel, role) {
     return _(util.getIn(self.roles()))
       .filter(function(r) { return r.id() === util.getIn(userModel, ["id"]); })
-      .invoke("role")
-      .contains(role);
+      .invokeMap("role")
+      .includes(role);
   };
 
   self.canSubscribe = function(model) {

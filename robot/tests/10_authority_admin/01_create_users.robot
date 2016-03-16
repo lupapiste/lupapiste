@@ -71,6 +71,7 @@ Create user
   Run Keyword Unless  '${role}' == 'Lukuoikeus'  Unselect Checkbox  ${reader}
 
   Click enabled by test id  authadmin-add-authority-continue
+  Wait test id visible  authadmin-add-authority-ok
   Click enabled by test id  authadmin-add-authority-ok
   Wait Until  Element Should Not Be Visible  add-user-to-organization-dialog
   Wait Until  Page Should Contain  ${email}

@@ -8,7 +8,7 @@ var util = (function($) {
   function zp(e) { return zeropad.apply(null, e); }
 
   function fluentify(api, context) {
-    return _.reduce(_.pairs(api),
+    return _.reduce(_.toPairs(api),
                     function(m, pair) {
                       var k = pair[0],
                           f = pair[1];
@@ -114,7 +114,7 @@ var util = (function($) {
     if (_.isUndefined(value) || _.isNull(value)) {
       return defaultValue;
     }
-    return _.isEmpty(ks) ? value : getIn(value[_.first(ks)], _.rest(ks), defaultValue);
+    return _.isEmpty(ks) ? value : getIn(value[_.head(ks)], _.tail(ks), defaultValue);
   }
 
   function getFeatureName(feature) {
@@ -241,7 +241,7 @@ var util = (function($) {
       return _.reduce(options.query.split(" "), function(result, word) {
         var dataForLabel = ko.unwrap(item[options.label]);
         var isSelected = _.isArray(options.selected) ? _.some(options.selected, item) : options.selected === item;
-        return !isSelected && dataForLabel !== undefined && _.contains(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
+        return !isSelected && dataForLabel !== undefined && _.includes(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }
@@ -326,7 +326,7 @@ var util = (function($) {
         return task.source && task.source.type === "verdict" && task.source.id === verdict.id;
       });
 
-      var lupamaaraukset = _(verdict.paatokset || []).pluck("lupamaaraykset").filter().value();
+      var lupamaaraukset = _(verdict.paatokset || []).map("lupamaaraykset").filter().value();
 
       if (lupamaaraukset.length === 0 && myTasks.length > 0) {
         var katselmukset = tasksDataBySchemaName(myTasks, "task-katselmus", function(task) {

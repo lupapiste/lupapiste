@@ -52,7 +52,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   });
 
   self.currentStateInSeq = ko.pureComputed(function() {
-    return _.contains(self.bulletin().stateSeq, self.bulletin().bulletinState);
+    return _.includes(self.bulletin().stateSeq, self.bulletin().bulletinState);
   });
 
   self.showVerdictsTab = ko.pureComputed(function() {
@@ -105,7 +105,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
       var features = _.map(featureParams, function (f) {return f + "=" + featuresEnabled;}).join("&");
       var params = ["build=" + LUPAPISTE.config.build,
                     "id=" + self.bulletin().id,
-                    "coord=" + _.first(self.bulletin().location) + "_" + _.last(self.bulletin().location),
+                    "coord=" + _.head(self.bulletin().location) + "_" + _.last(self.bulletin().location),
                     "zoomLevel=12",
                     "lang=" + loc.getCurrentLanguage(),
                     "municipality=" + self.bulletin().municipality,
@@ -119,7 +119,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
   var hubId = hub.subscribe("oskari-map-initialized", function() {
     if( self.bulletin() && _.every( self.bulletin().location, _.isNumber )) {
       var location = self.bulletin().location;
-      var x = _.first(location);
+      var x = _.head(location);
       var y = _.last(location);
       hub.send("oskari-center-map", {
         data:  [{location: {x: x, y: y}, iconUrl: "/lp-static/img/map-marker-orange.png"}],

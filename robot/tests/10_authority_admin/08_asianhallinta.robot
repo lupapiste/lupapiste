@@ -21,5 +21,6 @@ Asianhallinta is enabled in minimal with version 1.1
   List selection should be  xpath=//section[@data-test-id="asianhallinta"]//select[@data-test-id="select-asianhallinta-version"]  1.1
 
 Unchecking checkbox results in instant save
+  Scroll to test id  enable-asianhallinta
   Unselect checkbox  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
   Positive indicator should be visible

@@ -22,14 +22,14 @@
 
   var getPreAttachments = function(attachments) {
     return _.filter(attachments, function(attachment) {
-      return !_.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
+      return !_.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
         attachment.latestVersion;
     });
   };
 
   var getPostAttachments = function(attachments) {
     return _.filter(attachments, function(attachment) {
-      return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
+      return _.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
           attachment.latestVersion;
     });
   };
@@ -58,7 +58,7 @@
       if (group === generalAttachmentsStr) {
         return new GroupModel(group, null, attachments);
       } else {
-        var att = _.first(attachments);
+        var att = _.head(attachments);
         return new GroupModel(ko.unwrap(att.op.name), ko.unwrap(att.op.description), attachments);
       }
     });
@@ -66,7 +66,7 @@
       if ( group.groupName === generalAttachmentsStr ) {
         return -1;
       } else {
-        return (_.first(group.attachments())).op.created();
+        return (_.head(group.attachments())).op.created();
       }
     });
   };

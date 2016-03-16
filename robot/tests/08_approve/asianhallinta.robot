@@ -77,8 +77,9 @@ Kuopio admin sets asianhallinta disabled
   Kuopio logs in
   Go to page  backends
   Wait until  Element should be visible  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
+  Scroll to  input[data-test-id=enable-asianhallinta]
   Unselect checkbox  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
-  Logout
+  [Teardown]  Logout
 
 Velho logs in to check if he can move application to asianhallinta
   Velho logs in
@@ -90,8 +91,9 @@ Kuopio admin enabled asianhallinta again
   Kuopio logs in
   Go to page  backends
   Wait until  Element should be visible  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
+  Scroll to  input[data-test-id=enable-asianhallinta]
   Select checkbox  xpath=//section[@data-test-id="asianhallinta"]//input[@data-test-id="enable-asianhallinta"]
-  Logout
+  [Teardown]  Logout
 
 Velho logs in, sets Mikko as maksaja and moves application to asianhallinta
   Velho logs in

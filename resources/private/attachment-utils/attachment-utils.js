@@ -73,7 +73,7 @@ var attachmentUtils = (function() {
       if ( group === generalAttachmentsStr ) {
         return new GroupModel(group, null, attachments, editable); // group = attachments.general
       } else { // group == op.id
-        var att = _.first(attachments);
+        var att = _.head(attachments);
         return new GroupModel(att.op.name, att.op.description, attachments, editable);
       }
     });
@@ -81,20 +81,20 @@ var attachmentUtils = (function() {
       if ( group.groupName === generalAttachmentsStr ) {
         return -1;
       } else {
-        return (_.first(group.attachments)).op.created;
+        return (_.head(group.attachments)).op.created;
       }
     });
   }
 
   function getPreAttachments(source) {
     return _.filter(source, function(attachment) {
-          return !_.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
+          return !_.includes(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
       });
   }
 
   function getPostAttachments(source) {
     return _.filter(source, function(attachment) {
-          return _.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
+          return _.includes(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
       });
   }
 

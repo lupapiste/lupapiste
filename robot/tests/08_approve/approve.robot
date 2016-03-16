@@ -239,12 +239,12 @@ Sonja group rejected
 Click reject
   [Arguments]  ${name}
   Wait Until  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
-  Click by test id  reject-doc-${name}
+  Scroll and click test id  reject-doc-${name}
 
 Click approve
   [Arguments]  ${name}
   Wait Until  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
-  Click by test id  approve-doc-${name}
+  Scroll and click test id  approve-doc-${name}
 
 Approve accordion
   [Arguments]  ${name}

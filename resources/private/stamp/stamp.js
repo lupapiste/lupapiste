@@ -52,7 +52,7 @@ var stamping = (function() {
       var pykala = util.getIn(verdict, ["paatokset", 0, "poytakirjat", 0, "pykala"]);
 
       if (pykala) {
-        model.stampFields.section(_.contains(pykala, "\u00a7") ? pykala : "\u00a7 " + pykala);
+        model.stampFields.section(_.includes(pykala, "\u00a7") ? pykala : "\u00a7 " + pykala);
       } else {
         model.stampFields.section("\u00a7");
       }

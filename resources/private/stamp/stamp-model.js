@@ -14,7 +14,7 @@ LUPAPISTE.StampModel = function(params) {
       ct = a.latestVersion.contentType;
     }
 
-    return !allVersionsStamped(a.versions) && _.contains(LUPAPISTE.config.stampableMimes, ct);
+    return !allVersionsStamped(a.versions) && _.includes(LUPAPISTE.config.stampableMimes, ct);
   }
 
   function enhanceAttachment(a) {
@@ -49,14 +49,14 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   function getSelectedAttachments(files) {
-    return _(files).pluck("attachments").flatten()
+    return _(files).map("attachments").flatten()
       .filter(function(f) {
           return f.selected();
       }).value();
   }
 
   function eachSelected(files) {
-    return _(files).pluck("attachments").flatten().every(function(f) {
+    return _(files).map("attachments").flatten().every(function(f) {
       return f.selected();
     });
   }
@@ -77,7 +77,7 @@ LUPAPISTE.StampModel = function(params) {
 
   // group by post/pre verdict attachments
   var grouped = _.groupBy(self.filteredFiles, function(a) {
-    return _.contains(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
+    return _.includes(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
   });
 
   // group attachments by operation
@@ -224,8 +224,8 @@ LUPAPISTE.StampModel = function(params) {
 
   function selectAllFiles(value) {
     if ( self.status() < self.statusStarting ) {
-      _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
-      _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
+      _(self.preFiles()).map("attachments").flatten().each(function(f) { f.selected(value); }).value();
+      _(self.postFiles()).map("attachments").flatten().each(function(f) { f.selected(value); }).value();
     }
   }
 
