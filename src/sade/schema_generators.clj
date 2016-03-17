@@ -206,22 +206,33 @@
 
 (register-generator ssc/min-length-hex-string min-length-hex-string)
 
-(defn- min-max-value 
-  "Wrapper for numeric generators that bounds min and/or max values.
-  Values are shrinking towards zero."
+(defn- min-max-value
+  "Wraps a numeric generator with min and/or max bounds.
+  This function provides a way to bypass a problem with numeric
+  generator and gen/such-that function. If such-that does not
+  allow small values as possible outcome of a generator, it easily
+  ends up producing an error:
+  'Couldn't satisfy such-that predicate after 10 tries.'.
+  Values are still shrinking towards zero."
   [numeric-gen min-val max-val]
   {:pre [(gen/generator? numeric-gen)
-         (or (nil? min-val) (number? min-val)) 
-         (or (nil? min-val) (number? min-val)) 
+         (or (nil? min-val) (number? min-val))
+         (or (nil? max-val) (number? max-val))
          (or (nil? min-val) (nil? max-val) (< min-val max-val))]}
   (let [less?    (if min-val (fn [v] (> min-val v)) (constantly false))
         greater? (if max-val (fn [v] (< max-val v)) (constantly false))
-        maxgen   (when (and min-val max-val) (max (Math/abs min-val) (Math/abs max-val)))
         bias     (cond (less? 0)    min-val
                        (greater? 0) max-val
-                       :else        0)]
+                       :else        0)
+        maxgen   (when (and min-val max-val)
+                   (-> (- (max (Math/abs min-val) (Math/abs max-val))
+                          (Math/abs bias))
+                       (#(* (Math/ceil (/ 15 %)) %))))] ;; Magical 15 seems to work with gen/int + such-that
+    ;; Initial value is generated so that 0 is in the range of possible values
+    ;; since numeric generator values are shrinking towards zero by default.
+    ;; Limiting maximum value ensures fast convergence in the loop function.
     (gen/fmap (fn->> (+ bias)
-                     (#(loop [v %] (cond (less? v)    (recur (- (* 2 min-val) v)) 
+                     (#(loop [v %] (cond (less? v)    (recur (- (* 2 min-val) v))
                                          (greater? v) (recur (- (* 2 max-val) v))
                                          :else        v))))
               (if maxgen
@@ -237,4 +248,3 @@
   (gen/fmap (partial format "%f") (min-max-value gen/double min max)))
 
 (register-generator ssc/min-max-valued-decimal-string min-max-valued-decimal-string)
-
