@@ -164,13 +164,14 @@
     (when-let [next-state (sm/verdict-given-state application)]
       (let [doc-updates (doc-transformations/get-state-transition-updates command next-state)]
         (update-application command
+                            {:verdicts {$elemMatch {:id id}}}
                             (util/deep-merge
-                             (:mongo-query doc-updates)
-                             {:verdicts {$elemMatch {:id id}}})
-                            (util/deep-merge
-                             (:mongo-updates doc-updates)
                              (application/state-transition-update next-state timestamp (:user command))
                              {$set {:verdicts.$.draft false}}))
+        (when (seq doc-updates)
+          (update-application command
+                              (:mongo-query doc-updates)
+                              (:mongo-updates doc-updates)))
         (t/mark-app-and-attachments-final! (:id application) timestamp)
         (ok)))
     (fail :error.no-verdict-municipality-id)))
