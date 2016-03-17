@@ -303,8 +303,14 @@
        (redirect-to-frontpage lang)))))
 
 (defn- ->hashbang [s]
-  (when (and s (= -1 (.indexOf s ":")))
-    (->> (s/replace-first s "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
+  (let [hash (cond
+               (string? s) s
+               (sequential? s) (last s))
+        sanitized-hash (some-> hash
+                               (s/replace-first "%21" "!")
+                               (ss/replace #"\.+/" ""))]
+    (when (util/relative-local-url? sanitized-hash)
+      (second (re-matches #"^[#!/]{0,3}(.*)" sanitized-hash)))))
 
 (defn- save-hashbang-on-client [theme]
   (resp/set-headers {"Cache-Control" "no-cache", "Last-Modified" (util/to-RFC1123-datetime 0)}

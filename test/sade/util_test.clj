@@ -246,7 +246,10 @@
   (relative-local-url? "http://localhost") => false
   (relative-local-url? "//localhost") => false
   (relative-local-url? "/localhost") => true
-  (relative-local-url? "../localhost") => true)
+  (relative-local-url? "../localhost") => true
+  (relative-local-url? "!/applications/") => true
+  (relative-local-url? "#!/applications/") => true
+  (relative-local-url? "/../../../app/fi/admin") => true)
 
 (facts "version-is-greater-or-equal"
   (fact "source (evaluated) version"
