@@ -13,6 +13,10 @@ LUPAPISTE.ComponentBaseModel = function() {
     hubSubscriptions.push(hub.subscribe(service + "::" + event, fn));
   };
 
+  self.addHubListener = function( event, fn ) {
+    hubSubscriptions.push(hub.subscribe( event, fn ));
+  };
+
   self.disposedSubscribe = function(observable, fn) {
     koSubscriptions.push(observable.subscribe(fn));
   };

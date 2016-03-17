@@ -68,7 +68,9 @@
                               </div>
 
                               <!-- Authorities: -->
-                              <div data-bind="component: 'authority-select'"></div>
+                              <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' -->
+                              <div data-bind="component: {name: 'authority-select'}"></div>
+                              <!-- /ko -->
 
                               <!-- Operations: -->
                               <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
