@@ -20,3 +20,5 @@
 "error.attachment-not-found" "sv" "Bilaga hittades inte"
 "error.attachment-not-found.desc" "fi" "Liite on poistettu tai sen näkyvyyttä rajattu."
 "error.attachment-not-found.desc" "sv" "Bilagan har tagits bort eller dess synlighet begränsats."
+"error.verdict-not-found" "fi" "Päätöstä ei löytynyt"
+"error.verdict-not-found" "sv" ""

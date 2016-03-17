@@ -5,14 +5,15 @@
             [schema.core :refer [defschema] :as sc]
             [sade.util :as util]))
 
+(def appeal-types
+  "appeal = Valitus, rectification = Oikaisuvaatimus"
+  ["appeal" "rectification"])
+
 (defschema Appeal
   "Schema for a verdict appeal."
   {:id                         ssc/ObjectIdStr
    :target-verdict             ssc/ObjectIdStr         ;; refers to verdicts.paatokset.id
-   :type                       (sc/enum
-                                 "appeal"              ;; Valitus
-                                 "rectification"       ;; Oikasuvaatimus
-                                 )
+   :type                       (apply sc/enum appeal-types)
    :appellant                  sc/Str                  ;; Name of the person who made the appeal
    :made                       ssc/Timestamp           ;; Date of appeal made - defined manually by authority
    (sc/optional-key :text)     sc/Str                  ;; Optional description
@@ -33,3 +34,8 @@
   (when-let [appeal (->> (create-appeal target-verdict-id type appellant made text)
                          (sc/check Appeal))]
     {$push {:appeals appeal}}))
+
+(defn input-validator
+  "Input validator for appeal commands. Parameter is command from action pipeline."
+  [{{:keys [targetId type appellant made]} :data}]
+  nil)
