@@ -52,7 +52,9 @@
             </div>
 
             <!-- Authority -->
+            <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest' -->
             <div data-bind="component: 'authority-select'"></div>
+            <!-- /ko -->
 
           </div>
           <div class="application-map-container">
