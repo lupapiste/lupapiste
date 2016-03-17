@@ -2,20 +2,16 @@
 LUPAPISTE.AuthoritySelectModel = function() {
   "use strict";
   var self = this;
-
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
-  // Application id can be thought as a link to the application
-  // changes. By unwrapping it in the computeds below, we
-  // make sure that the authority information is in sync with
-  // the current actual application.
-  var appId = self.disposedPureComputed( function() {
+  function appId() {
     return lupapisteApp.models.application.id();
-  });
+  }
 
   self.canEdit = self.disposedPureComputed( function() {
     return lupapisteApp.models.applicationAuthModel.ok( "assign-application");
   });
+
 
   // The latest selected value. The initial value NaN denotes
   // case where user has not made a new selection.
@@ -23,7 +19,7 @@ LUPAPISTE.AuthoritySelectModel = function() {
 
   self.oldAssignee = self.disposedComputed( function() {
     var old = appId()
-            ? ko.mapping.toJS( lupapisteApp.models.application.authority())
+          ? ko.mapping.toJS( lupapisteApp.models.application.authority())
           : {};
     // Old assignee change overrides the latest.
     latest = NaN;
@@ -40,7 +36,7 @@ LUPAPISTE.AuthoritySelectModel = function() {
     return obj.lastName + " " + obj.firstName;
   };
 
-  self.disposedComputed( function() {
+  function fetchAuthorities() {
     if( appId() && self.canEdit() ) {
       ajax.query("application-authorities", {id: appId()})
         .success(function(res) {
@@ -59,8 +55,9 @@ LUPAPISTE.AuthoritySelectModel = function() {
         .pending(self.pending)
         .call();
     }
-  });
+  }
 
+  self.addHubListener( "application-model-updated", fetchAuthorities);
 
   self.disableAuthorities = function( option, item ) {
     if( item ) {
@@ -69,7 +66,6 @@ LUPAPISTE.AuthoritySelectModel = function() {
       ko.applyBindingsToNode( option, {disable: item.disabled }, item );
     }
   };
-
 
   // The reader function is outside the assigneeId computed,
   // so it can be easily used from the write function.
