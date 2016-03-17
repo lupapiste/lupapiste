@@ -11,16 +11,20 @@
   {:id                         ssc/ObjectIdStr  ;; 
    :target-verdict             ssc/ObjectIdStr  ;; refers to verdicts.paatokset.id
    :giver                      sc/Str           ;; Name for board or court which gave the verdict
-   :made                       ssc/Timestamp})  ;; Date of appeal verdict given - defined manually by authority
+   :made                       ssc/Timestamp    ;; Date of appeal made - defined manually by authority
+   :created                    ssc/Timestamp    ;; Entry creation time
+   })
 
-(defn create-appeal-verdict [target-verdict-id giver made]
+(defn create-appeal-verdict [target-verdict-id giver made created]
   {:id             (mongo/create-id)
    :target-verdict target-verdict-id
    :giver          giver
-   :made           made})
+   :made           made
+   :created        created})
 
 (defn new-appeal-verdict-mongo-updates
-  [target-verdict-id giver made]
-  (when-let [appeal-verdict (create-appeal-verdict target-verdict-id giver made)]
+  "Returns $push mongo update map of appeal verdict to :appealVerdicts property"
+  [target-verdict-id giver made now]
+  (when-let [appeal-verdict (create-appeal-verdict target-verdict-id giver made now)]
     {$push {:appealVerdicts appeal-verdict}}))
 
