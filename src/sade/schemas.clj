@@ -1,8 +1,10 @@
 (ns sade.schemas
   (:require [sade.util :as util]
             [sade.validators :as validators]
+            [clj-time.format :as ctf]
             [schema.core :refer [defschema] :as sc]
-            [schema.coerce :as coerce]))
+            [schema.coerce :as coerce])
+  (:import  [org.joda.time IllegalFieldValueException]))
 
 ;;
 ;; Util
@@ -121,6 +123,12 @@
 ;;
 ;; Dynamic schema constructors
 ;;
+
+(defdynamicschema date-string [format]
+  (let [formatter (ctf/formatter format)]
+    (sc/constrained sc/Str #(try (ctf/parse formatter %) 
+                                 (catch IllegalFieldValueException e false))
+                    (str "Date string " format))))
 
 (defdynamicschema fixed-length-string [len]
   (sc/constrained sc/Str (fixed-length-constraint len)

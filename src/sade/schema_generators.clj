@@ -175,6 +175,19 @@
 
 ;; Dynamic schema generator constructors
 
+(defn date-string
+  "Creates a generator that generates a date string of any a date 1.1.1970 +/- 50 years.
+  Date string formatting is compatible with Joda Time date format (eg. dd.MM.yyyy)"
+  [format]
+  (let [formatter (ctf/formatter format)]
+    (gen/fmap (fn->> (#(rem % 18262))
+                     (* 86400000)
+                     (ctc/from-long)
+                     (ctf/unparse formatter))
+              gen/large-integer)))
+
+(register-generator ssc/date-string date-string)
+
 (defn fixed-length-string [len]
   (gen/fmap s/join
             (gen/vector gen/char-ascii len)))
