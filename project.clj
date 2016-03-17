@@ -76,7 +76,8 @@
                  [clj-rss "0.2.3"]
 
                  ; Image processing
-                 [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
+                 [com.github.jai-imageio/jai-imageio-core "1.3.1"]
+                 [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
                  [com.google.zxing/javase "2.2"] ; QR codes
                  [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
 
