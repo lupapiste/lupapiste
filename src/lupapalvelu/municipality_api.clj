@@ -28,7 +28,7 @@
   {:user-roles #{:anonymous}
    :description "Return applications, info requests, and openings by
 municipality"}
-  (ok :municipalities (active-municipalities-from-organizations (o/get-organizations))))
+  (ok :municipalities (active-municipalities-from-organizations (org/get-organizations))))
 
 (defquery municipality-active
   {:parameters [municipality]
