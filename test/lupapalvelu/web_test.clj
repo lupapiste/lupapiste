@@ -23,6 +23,8 @@
   (->hashbang [])                => nil
   (->hashbang [nil])             => nil
   (->hashbang "http://foo")      => nil
+  (->hashbang 1234)              => nil
+  (->hashbang {:foo "bar"})      => nil
   (->hashbang "foo")             => "foo"
   (->hashbang "/foo")            => "foo"
   (->hashbang "!/foo")           => "foo"
