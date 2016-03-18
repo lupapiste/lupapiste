@@ -2,7 +2,6 @@
 
 Documentation   Authority admin creates users
 Suite Setup     Apply minimal fixture now
-Suite Teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
@@ -39,6 +38,8 @@ Hessu activates account via email
 
 Hessu can login
   User logs in  hessu.kesa@example.com  hessu123  Hessu Kesa
+  [Teardown]  Logout
+
 
 *** Keywords ***
 
