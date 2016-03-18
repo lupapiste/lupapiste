@@ -2,6 +2,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
+            [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.util :as util]))
 
@@ -31,3 +32,12 @@
     (when-not (sc/check AppealVerdict appeal-verdict)
       {$push {:appealVerdicts appeal-verdict}})))
 
+(defn input-validator
+  "Input validator for appeal-verdict commands. Validates command parameter against Appeal schema."
+  [{{:keys [targetId giver made text]} :data}]
+  (when (sc/check (dissoc AppealVerdict :id)
+                  (util/strip-nils {:target-verdict targetId
+                                    :giver giver
+                                    :made made
+                                    :text text}))
+    (fail :error.invalid-appeal-verdict)))

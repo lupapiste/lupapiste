@@ -8,10 +8,16 @@
             [lupapalvelu.mongo :as mongo]))
 
 (defn- verdict-exists
-  "Input validator to validate that for selected verdictId a verdict exists"
+  "Pre-check to validate that for selected verdictId a verdict exists"
   [{{verdictId :targetId} :data} {:keys [verdicts]}]
   (when-not (util/find-first #(= verdictId (:id %)) verdicts)
     (fail :error.verdict-not-found)))
+
+(defn- appeal-exists
+  "Pre-check to validate that at least one appeal exists before appeal verdict can be created"
+  [_ {:keys [appeals]}]
+  (when (zero? (count appeals))
+    (fail :error.appeals-not-found)))
 
 (defcommand create-appeal
   {:parameters          [id targetId type appellant made]
@@ -27,6 +33,22 @@
       command
       updates)
     (fail :error.invalid-appeal)))
+
+(defcommand create-appeal-verdict
+  {:parameters          [id targetId giver made]
+   :optional-parameters [text]
+   :user-roles          #{:authority}
+   :states              states/post-verdict-states
+   :input-validators    [appeal-verdict/input-validator
+                         (partial action/number-parameters [:made])]
+   :pre-checks          [verdict-exists
+                         appeal-exists]}
+  [command]
+  (if-let [updates (appeal-verdict/new-appeal-verdict-mongo-updates targetId giver made text)]
+    (action/update-application
+      command
+      updates)
+    (fail :error.invalid-appeal-verdict)))
 
 (defquery appeals
   {:parameters [id]
