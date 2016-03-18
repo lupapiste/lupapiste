@@ -22,7 +22,7 @@ Teppo logs in and creates some applications
   Create inforequest the fast way  create-info  360603.153  6734222.95  753-423-2-40  kerrostalo-rivitalo  init-comment
   Create application with state  notice-1-${secs}  753-423-2-41  kerrostalo-rivitalo  ${draft}
   Create application with state  notice-2-${secs}  753-423-2-42  kerrostalo-rivitalo  ${open}
-  Create application with state  notice-3-${secs}  753-423-2-43  kerrostalo-rivitalo  ${answered}
+  Create inforequest with state  notice-3-${secs}  753-423-2-43  kerrostalo-rivitalo  ${answered}
   Create application with state  notice-4-${secs}  753-423-2-44  kerrostalo-rivitalo  ${submitted}
   Create application with state  notice-5-${secs}  753-423-2-45  kerrostalo-rivitalo  ${sent}
   Create application with state  notice-6-${secs}  753-423-2-46  kerrostalo-rivitalo  ${complementNeeded}

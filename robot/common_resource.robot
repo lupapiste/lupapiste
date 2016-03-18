@@ -545,6 +545,12 @@ Create inforequest the fast way
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
   Kill dev-box
 
+Create inforequest with state
+  [Arguments]  ${address}  ${propertyId}  ${operation}  ${state}
+  Go to  ${CREATE URL}&infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&state=${state}&x=360603.153&y=6734222.95
+  Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
+  Kill dev-box
+
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${permitType}
