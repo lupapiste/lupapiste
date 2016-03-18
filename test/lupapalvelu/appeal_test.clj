@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.core :refer [now]]
+            [lupapalvelu.itest-util :refer [expected-failure?]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.appeal :refer :all]))
 
@@ -18,4 +19,4 @@
                  :text           "Some information"}]
 
     (input-validator {:data valid}) => nil
-    (keys (input-validator {:data invalid})) => (just [:type :made])))
+    (input-validator {:data invalid}) => (partial expected-failure? :error.invalid-appeal)))
