@@ -9,11 +9,13 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]))
 
-(defcommand "frontend-log"
+(def levels #{:debug :info :warn :error :fatal})
+
+(defcommand frontend-log
   {:user-roles #{:anonymous}}
   [{{:keys [level page message build]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit           1000
-        level           (-> level ss/lower-case keyword)
+        level           (get levels (-> level ss/lower-case keyword) :error)
         sanitize        (partial logging/sanitize limit)
         sanitized-page  (sanitize (or page "(unknown)"))
         user            (or (user/canonize-email email) "(anonymous)")
