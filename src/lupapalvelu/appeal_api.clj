@@ -74,20 +74,26 @@
       (:mongo-updates updates))
     (fail :error.invalid-appeal)))
 
-(defcommand create-appeal-verdict
+(defcommand upsert-appeal-verdict
   {:parameters          [id targetId giver made]
-   :optional-parameters [text]
+   :optional-parameters [text appealId]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
    :input-validators    [appeal-verdict/input-validator
                          (partial action/number-parameters [:made])]
    :pre-checks          [verdict-exists
-                         appeal-exists]}
+                         appeal-exists
+                         appeal-verdict-id-exists]}
   [command]
-  (if-let [updates (appeal-verdict/new-appeal-verdict-mongo-updates targetId giver made text)]
+  (if-let [updates (if appealId
+                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert targetId giver made text appealId)
+                              (update-appeal-data-mongo-updates :appealVerdicts appealId))
+                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert targetId giver made text)
+                              (new-appeal-data-mongo-updates :appealVerdicts)))]
     (action/update-application
       command
-      updates)
+      (:mongo-query updates)
+      (:mongo-updates updates))
     (fail :error.invalid-appeal-verdict)))
 
 

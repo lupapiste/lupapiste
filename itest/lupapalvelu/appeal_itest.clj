@@ -73,7 +73,7 @@
             (:appellant updated-target-appeal) => "Teppo")))
 
       (fact "Upsert is validated"
-        (fact "appealId must found from application"
+        (fact "appealId must be found from application"
           (command sonja :upsert-appeal :id app-id
                    :targetId vid
                    :type "rectification"
@@ -91,11 +91,12 @@
                      :made created
                      :appealId (:id test-appeal)) => (partial expected-failure? :error.invalid-appeal)))))))
 
-(facts "Creating appeal verdicts"
-  (let [{app-id :id} (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
+(facts "Upserting appeal verdicts"
+  (let [{app-id :id} (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+        created (now)]
     app-id => string?
     (fact "Can't add appeal before verdict"
-      (command sonja :create-appeal-verdict
+      (command sonja :upsert-appeal-verdict
                :id app-id
                :targetId (mongo/create-id)
                :giver "Teppo"
@@ -105,18 +106,18 @@
     (let [{vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")]
       vid => string?
       (fact "wrong verdict ID"
-        (command sonja :create-appeal-verdict
+        (command sonja :upsert-appeal-verdict
                  :id app-id
                  :targetId (mongo/create-id)
                  :giver "Teppo"
                  :made 123456
                  :text "foo") => (partial expected-failure? :error.verdict-not-found))
       (fact "an appeal must exists before creating verdict appeal"
-        (command sonja :create-appeal-verdict
+        (command sonja :upsert-appeal-verdict
                  :id app-id
                  :targetId vid
                  :giver "Teppo"
-                 :made (now)
+                 :made created
                  :text "foo") => (partial expected-failure? :error.appeals-not-found))
       (fact "first create appeal"
         (command sonja :upsert-appeal
@@ -124,21 +125,21 @@
                  :targetId vid
                  :type "rectification"
                  :appellant "Pena"
-                 :made (now)
+                 :made created
                  :text "rectification 1") => ok?)
       (fact "... then try to create invalid appeal verdict"
-        (command sonja :create-appeal-verdict
+        (command sonja :upsert-appeal-verdict
                  :id app-id
                  :targetId vid
                  :giver "Teppo"
                  :made "18.3.2016"
                  :text "verdict for rectification 1") => (partial expected-failure? :error.invalid-appeal-verdict))
       (fact "... then actually create a valid appeal verdict"
-        (command sonja :create-appeal-verdict
+        (command sonja :upsert-appeal-verdict
                  :id app-id
                  :targetId vid
                  :giver "Teppo"
-                 :made (now)
+                 :made created
                  :text "verdict for rectification 1") => ok?)
 
       (fact "appeal query is OK after giving appeal and appeal verdict"
@@ -147,4 +148,33 @@
           (keys response-data) => (just [verdictid-key])
           (count (get response-data verdictid-key)) => 2
           (:type (first (get response-data verdictid-key))) => "rectification"
-          (:type (second (get response-data verdictid-key))) => "appealVerdict")))))
+          (:type (second (get response-data verdictid-key))) => "appealVerdict"))
+
+      (fact "upsert is validated"
+        (let [appeals             (get (:data (query pena :appeals :id app-id)) (keyword vid))
+              test-appeal-verdict (second appeals)
+              appeal              (first appeals)]
+          (fact "Can't update appeal with appeal-verdict endpoint"
+            (command sonja :upsert-appeal-verdict :id app-id
+                     :targetId vid
+                     :giver "Teppo"
+                     :made created
+                     :appealId (:id appeal)) => (partial expected-failure? :error.unknown-appeal-verdict))))
+
+      (fact* "Upsert updates successfully"
+        (let [appeals-before  (get (:data (query pena :appeals :id app-id)) (keyword vid))
+              target-appeal-verdict   (second appeals-before)
+              _ (command sonja :upsert-appeal-verdict :id app-id
+                         :targetId vid
+                         :giver "Seppo"
+                         :made created
+                         :appealId (:id target-appeal-verdict)) => ok?
+              appeals-after   (get (:data (query pena :appeals :id app-id)) (keyword vid))
+              updated-target-appeal-verdict   (second appeals-after)]
+
+          (fact "Count of appeals is the same"
+            (count appeals-before) => (count appeals-after))
+
+          (fact "Appellant has been changed"
+            (:giver target-appeal-verdict) => "Teppo"
+            (:giver updated-target-appeal-verdict) => "Seppo"))))))

@@ -30,3 +30,5 @@
 "error.appeals-not-found" "sv" ""
 "error.unknown-appeal" "fi" "Valitusta ei löytynyt"
 "error.unknown-appeal" "sv" ""
+"error.unknown-appeal-verdict" "fi" "Valituspäätöstä ei löytynyt"
+"error.unknown-appeal-verdict" "sv" ""
