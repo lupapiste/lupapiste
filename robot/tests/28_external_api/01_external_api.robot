@@ -4,6 +4,7 @@ Documentation   Testing events from 3rd party JS API buttons
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Variables      ../06_attachments/variables.py
 
 *** Variables ***
 @{PERMIT_PROPERTIES}   id  location  address  municipality  applicant  type  authority  operation  permitType
@@ -60,6 +61,30 @@ Successful KRYSP generation emits LupapisteApi.integrationSent function call
   Wait until  Element text should be  xpath=//div[@id='modal-dialog']//div[@class='header']/span  LupapisteApi.integrationSent
   Permit properties should be visible in dialog
 
+Add post verdict attachment
+  Open tab  verdict
+  Fetch verdict
+
+  Open tab  attachments
+  Wait until  Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
+  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+
+  Page should not contain  Siirrä liitteet taustajärjestelmään
+
+Transfering attachments emits LupapisteApi.integrationSent function call
+  # We have 3 buttons with the same test-id, check & click the first
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id='export-attachments-to-backing-system']
+  Scroll to test id  export-attachments-to-backing-system
+  Click Element  xpath=//button[@data-test-id='export-attachments-to-backing-system']
+
+  Wait Until  Page should contain  Siirrä liitteet taustajärjestelmään
+
+  Click enabled by test id  multiselect-action-button
+  Confirm  dynamic-yes-no-confirm-dialog
+
+  Permit properties should be visible in dialog
+  Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
 
 *** Keywords ***
 
