@@ -42,8 +42,9 @@
           (!a.sent || _.last(a.versions).created > a.sent) &&
           !(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
       })
-      .each(function(a) {
+      .map(function(a) {
         a.selected = true;
+        return a;
       })
       .value();
   };
