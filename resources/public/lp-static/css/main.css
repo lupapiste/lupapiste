@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1458140221189');
+@import url('main-blessed1.css?z=1458236630736');
 
 
 /* line 188, ../../../private/common-html/sass/partials/_tables.scss */
@@ -1192,7 +1192,7 @@ ul.tabs {
 /* line 72, ../../../private/common-html/sass/partials/_bubble.scss */
 .bubble-dialog label.mandatory:after {
   content: " *";
-  color: #f39129;
+  color: #df3215;
 }
 /* line 76, ../../../private/common-html/sass/partials/_bubble.scss */
 .bubble-dialog input[type=text], .bubble-dialog textarea {

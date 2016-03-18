@@ -1,0 +1,58 @@
+<script class="ko-template"
+        type="text/x-jquery-tmpl"
+        id="verdict-appeal-bubble-template">
+  <bubble-dialog params="visible: params.visible,
+                         buttonIcon: 'lupicon-save',
+                         buttonText: 'save',
+                         waiting: params.waiting">
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <span class="col-4"
+              data-bind="ltext: 'verdict.muutoksenhaku.info'"></span>
+      </div>
+      <div class="row">
+        <div class="col-1 col--vertical">
+          <label data-bind="ltext: 'verdict.muutoksenhaku.tyyppi'"
+                 class="mandatory"></label>
+          <select class="dropdown mandatory"></select>
+        </div>
+        <div class="col-2 col--vertical">
+          <label data-bind="ltext: 'verdict.muutoksenhaku.tekijat'"
+                 class="mandatory"></label>
+          <input type="text" class="mandatory"
+                 data-bind="attr: {placeholder: loc('verdict.muutoksenhaku.tekijat.placeholder')}">
+        </div>
+        <div class="col-1 col--vertical">
+          <div data-bind="component: {name: 'date-field',
+                          params: {value: $parent.date,
+                          lLabel: 'verdict.muutoksenhaku.pvm',
+                          lPlaceholder: 'choose',
+                          required: true}}"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4 col--vertical">
+          <label data-bind="ltext: 'verdict.muutoksenhaku.extra'"></label>
+          <textarea rows="4"
+                    data-bind="attr: {placeholder: loc('verdict.muutoksenhaku.extra.placeholder')}"></textarea>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <label class="mandatory"
+                 data-bind="ltext: 'verdict.muutoksenhaku.liitteet'"></label>
+          <span data-bind="ltext: 'verdict.muutoksenhaku.liitteet.info'"></span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-4">
+          <button class="positive">
+            <i class="lupicon-circle-plus"></i>
+            <span data-bind="ltext: 'application.attachmentsAdd'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </bubble-dialog>
+</script>

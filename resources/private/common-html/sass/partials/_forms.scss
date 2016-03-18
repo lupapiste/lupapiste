@@ -1012,8 +1012,8 @@ $max-columns: 12;
   padding-left: $grid-margin;
 
   label.required:after {
-    content: "*";
-    color: $negative;
+    content: " *";
+    color: $label-required-star-color;
   }
 
   .col--vertical, .col--horizontal {
@@ -1423,7 +1423,6 @@ select.dropdown.mandatory {
 select.dropdown--full-width {
   min-width: 100%;
 }
-
 
 .no-wrap-whitespace {
   white-space: nowrap;

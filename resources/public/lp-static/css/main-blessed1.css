@@ -6005,7 +6005,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-1 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6036,7 +6036,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-2 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6067,7 +6067,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-3 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6098,7 +6098,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-4 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6129,7 +6129,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-5 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6160,7 +6160,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-6 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6191,7 +6191,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-7 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6222,7 +6222,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-8 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6253,7 +6253,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6284,7 +6284,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6315,7 +6315,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6346,7 +6346,7 @@ div.alleYli-radioGroup {
 }
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12 label.required:after {
-  content: "*";
+  content: " *";
   color: #df3215;
 }
 /* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
@@ -6871,9 +6871,9 @@ div.alleYli-radioGroup {
 }
 /* line 1317, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1317, ../../../private/common-html/sass/partials/_forms.scss */
@@ -7090,7 +7090,7 @@ select.dropdown--full-width {
   min-width: 100%;
 }
 
-/* line 1428, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1427, ../../../private/common-html/sass/partials/_forms.scss */
 .no-wrap-whitespace {
   white-space: nowrap;
 }

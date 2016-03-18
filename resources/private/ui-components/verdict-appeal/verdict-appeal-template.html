@@ -1,0 +1,17 @@
+<script class="ko-template"
+        type="text/x-jquery-tmpl"
+        id="verdict-appeal-template">
+  <h2 data-bind="ltext: 'verdict.muutoksenhaku'"></h2>
+  <div class="stacked">
+    <button class="positive"
+            data-bind="click: toggleNewBubble">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'verdict.muutoksenhaku.kirjaa'"></span>
+    </button>
+    <div class="bubble-dialog-arrow"
+         data-bind="visible: newBubbleVisible"></div>
+  </div>
+  <verdict-appeal-bubble params="visible: newBubbleVisible,
+                         waiting: waiting"></verdict-appeal-bubble>
+
+</script>

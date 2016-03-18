@@ -109,7 +109,9 @@ jQuery(document).ready(function() {
     {name: "company-invite-bubble"},
     {name: "operation-editor"},
     {name: "document-identifier"},
-    {name: "change-state"}
+    {name: "change-state"},
+    {name: "verdict-appeal"},
+    {name: "verdict-appeal-bubble"}
 ];
 
   _.forEach(components, function(component) {
