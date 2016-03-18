@@ -1,6 +1,7 @@
 (ns lupapalvelu.appeal-api
   (:require [sade.core :refer :all]
             [sade.util :as util]
+            [monger.operators :refer [$push $elemMatch $set]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.appeal :as appeal]
             [lupapalvelu.appeal-verdict :as appeal-verdict]
@@ -19,16 +20,37 @@
   (when (zero? (count appeals))
     (fail :error.appeals-not-found)))
 
-(defn- get-appeal-by-id
-  [appeal-id appeals]
-  (some #(when (= appeal-id (:id %)) %) appeals))
-
 (defn- appeal-id-exists
   "Pre-check to validate that given ID exists in application"
   [{{appeal-id :appealId} :data} {:keys [appeals]}]
   (when appeal-id ; optional parameter, could be nil in command
-    (when-not (get-appeal-by-id appeal-id appeals)
+    (when-not (util/find-by-id appeal-id appeals)
       (fail :error.unknown-appeal))))
+
+(defn- appeal-verdict-id-exists
+  "Pre-check to validate that id from parameters exist in :appealVerdicts"
+  [{{appeal-id :appealId} :data} {:keys [appealVerdicts]}]
+  (when appeal-id
+    (when-not (util/find-by-id appeal-id appealVerdicts)
+      (fail :error.unknown-appeal-verdict))))
+
+
+(defn new-appeal-data-mongo-updates
+  "Returns $push mongo update map of data to given 'collection' property.
+   Does not validate appeal-data, validation must be taken care elsewhere."
+  [collection data]
+  {:mongo-updates {$push {(keyword collection) data}}})
+
+(defn update-appeal-data-mongo-updates
+  "Generates query and updates for given update-data into given collection.
+   Query is $elemMatch to provided matching-id as 'id'.
+   Map with mongo query and updates is returned.
+   Does not validate appeal-data, validation must be taken care elsewhere."
+  [collection matching-id update-data]
+  {:mongo-query   {(keyword collection) {$elemMatch {:id matching-id}}}
+   :mongo-updates {$set (zipmap
+                          (map #(str (name collection) ".$." (name %)) (keys update-data))
+                          (vals update-data))}})
 
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"
@@ -41,7 +63,11 @@
    :pre-checks          [verdict-exists
                          appeal-id-exists]}
   [command]
-  (if-let [updates (appeal/upsert-appeal-mongo-updates targetId type appellant made text appealId)]
+  (if-let [updates (if appealId
+                     (some->> (appeal/appeal-data-for-upsert targetId type appellant made text appealId)
+                              (update-appeal-data-mongo-updates :appeals appealId))
+                     (some->> (appeal/appeal-data-for-upsert targetId type appellant made text)
+                              (new-appeal-data-mongo-updates :appeals)))]
     (action/update-application
       command
       (:mongo-query updates)
