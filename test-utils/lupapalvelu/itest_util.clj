@@ -440,7 +440,9 @@
       new-verdict-resp
       (do
        (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
-       (f apikey :publish-verdict :id application-id :verdictId verdict-id)))))
+       (assoc
+         (f apikey :publish-verdict :id application-id :verdictId verdict-id)
+         :verdict-id verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
   (apply give-verdict-with-fn command apikey application-id args))
