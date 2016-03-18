@@ -9,11 +9,13 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]))
 
+(defonce frontend-log (atom {}))
+
 (def levels #{:debug :info :warn :error :fatal})
 
 (defcommand frontend-log
   {:user-roles #{:anonymous}}
-  [{{:keys [level page message build]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
+  [{{:keys [level page message build]} :data {:keys [email]} :user {:keys [user-agent]} :web ts :created}]
   (let [limit           1000
         level           (get levels (-> level ss/lower-case keyword) :error)
         sanitize        (partial logging/sanitize limit)
@@ -25,10 +27,17 @@
                          " - CLIENT HAS EXPIRED VERSION"
                          "")
         sanitized-msg   (sanitize (str message))]
+    (when (env/dev-mode?)
+      (swap! frontend-log update level conj {:ts ts :msg sanitized-msg}))
     (logf level "FRONTEND: %s [%s] on page %s (build=%s%s): %s"
           user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)))
 
-(defquery "newest-version"
+(defquery frontend-log-entries
+  {:user-roles #{:admin}}
+  [_]
+  (ok :log @frontend-log))
+
+(defquery newest-version
   {:user-roles #{:anonymous}
    :parameters [frontendBuild]
    :input-validators [(partial action/non-blank-parameters [:frontendBuild])]}
