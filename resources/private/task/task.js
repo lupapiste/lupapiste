@@ -81,8 +81,12 @@ var taskPageController = (function() {
       .pending(pending)
       .processing(processing)
       .success(function() {
+        var permit = externalApiTools.toExternalPermit(lupapisteApp.models.application._js);
         reload();
         LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
+        if (lupapisteApp.models.application.externalApi.enabled()) {
+          hub.send("external-api::integration-sent", permit);
+        }
       })
       .error(function(e){
         reload();

@@ -4,6 +4,7 @@ Documentation   Testing events from 3rd party JS API buttons
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../18_construction/task_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Variables ***
@@ -86,9 +87,27 @@ Transfering attachments emits LupapisteApi.integrationSent function call
   Permit properties should be visible in dialog
   Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
 
+Fill review info
+  Open tab  tasks
+  Open task  Aloituskokous
+
+  Select From List  rakennus.0.rakennus.jarjestysnumero  ei tiedossa
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Input text with jQuery  .hasDatepicker:first  29.2.2016
+  Input text with jQuery  textarea[name="katselmus.huomautukset.kuvaus"]  ei
+
+  Click enabled by test id  approve-task
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
+
+Transfering task emits LupapisteApi.integrationSent function call
+  Click enabled by test id  send-task
+  Confirm  dynamic-ok-confirm-dialog
+  Permit properties should be visible in dialog
+
 *** Keywords ***
 
 Permit properties should be visible in dialog
+  Wait Until  Element Should Be Visible  modal-dialog-content-component
   :FOR  ${property}  IN  @{PERMIT_PROPERTIES}
   \  Element should contain  xpath=//div[@id='modal-dialog-content-component']//p[@class='dialog-desc']  ${property}
   Confirm notification dialog
