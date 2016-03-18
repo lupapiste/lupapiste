@@ -244,7 +244,7 @@
 "rasitetoimitus.rasitetoimitus.kayttaja" "sv" "Rätten innehas av (fastighetsbeteckning)"
 "rasitetoimitus.rasitetoimitus.antaja" "fi" "Rasitettu (kiinteistötunnus)"
 "rasitetoimitus.rasitetoimitus.antaja" "sv" "Servitutet belastar (fastighetsbeteckning)"
-"rasitetoimitus.rasitetoimitus.paattymispvm" "fi" "Päättymispäivä, jos rasite on väliaikainen"
+"rasitetoimitus.rasitetoimitus.paattymispvm" "fi" "Päättymispäivä, jos rasite on määräaikainen"
 "rasitetoimitus.rasitetoimitus.paattymispvm" "sv" "Slutdatum, om servitutet är tillfälligt"
 "rasitetoimitus.rasitetoimitus._append_label" "fi" "Lisää rasitetoimitus"
 "rasitetoimitus.rasitetoimitus._append_label" "sv" "Lägg till servitutsförrättning"
