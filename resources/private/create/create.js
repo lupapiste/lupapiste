@@ -349,7 +349,7 @@
               self.needMorePrevPermitInfo(true);
             }
           } else {
-            notify.error(loc("error.dialog.title"), loc(d.text));
+            notify.ajaxError(d);
           }
         })
         .call();

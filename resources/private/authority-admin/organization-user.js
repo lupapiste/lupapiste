@@ -64,7 +64,7 @@ LUPAPISTE.OrganizationUserModel = function(organization) {
           notify.error(loc("error.dialog.title"), loc("error.not-authority"));
         } else {
           error("Failed to add user to organization", e);
-          notify.error(loc("error.dialog.title"), loc(e.text));
+          notify.ajaxError(e);
         }
       })
       .call();

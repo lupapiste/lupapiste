@@ -19,9 +19,7 @@ var attachment = (function() {
         model.previewDisabled(false);
         return false;
       })
-      .onError("error.pre-verdict-attachment", function(e) {
-        notify.error(loc(e.text));
-      })
+      .onError("error.pre-verdict-attachment", notify.ajaxError)
       .call();
       hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachment"});
     return false;

@@ -126,13 +126,16 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   hub.onPageLoad("applications", function() {
     ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)
-    .call();
+      .onError("error.unauthorized", notify.ajaxError)
+      .pending(self.pending)
+      .call();
   });
 
   ko.computed(function() {
     ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)
+      .onError("error.unauthorized", notify.ajaxError)
       .pending(self.pending)
-    .call();
+      .call();
   }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
 };
