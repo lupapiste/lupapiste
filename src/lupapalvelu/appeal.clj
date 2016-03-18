@@ -1,6 +1,7 @@
 (ns lupapalvelu.appeal
   (:require [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
+            [sade.core :refer :all]
             [sade.schemas :as ssc]
             [schema.core :refer [defschema] :as sc]
             [sade.util :as util]))
@@ -31,15 +32,17 @@
 (defn new-appeal-mongo-updates
   "Returns $push mongo update map of appeal to :appeals property"
   [target-verdict-id type appellant made text]
-  (when-let [appeal (->> (create-appeal target-verdict-id type appellant made text)
-                         (sc/check Appeal))]
-    {$push {:appeals appeal}}))
+  (let [appeal (create-appeal target-verdict-id type appellant made text)]
+    (when-not (sc/check Appeal appeal)
+      {$push {:appeals appeal}})))
 
 (defn input-validator
   "Input validator for appeal commands. Validates command parameter against Appeal schema."
   [{{:keys [targetId type appellant made text]} :data}]
-  (sc/check (dissoc Appeal :id) (util/strip-nils {:target-verdict targetId
-                                                  :type type
-                                                  :appellant appellant
-                                                  :made made
-                                                  :text text})))
+  (when (sc/check (dissoc Appeal :id)
+                  (util/strip-nils {:target-verdict targetId
+                                    :type type
+                                    :appellant appellant
+                                    :made made
+                                    :text text}))
+    (fail :error.invalid-appeal)))

@@ -16,7 +16,7 @@
    (sc/optional-key :text)     sc/Str            ;; Optional description
    })
 
-(defn create-appeal-verdict [target-verdict-id giver made text created]
+(defn create-appeal-verdict [target-verdict-id giver made text]
   (util/strip-nils
     {:id                  (mongo/create-id)
      :target-verdict      target-verdict-id
@@ -27,6 +27,7 @@
 (defn new-appeal-verdict-mongo-updates
   "Returns $push mongo update map of appeal verdict to :appealVerdicts property"
   [target-verdict-id giver made text]
-  (when-let [appeal-verdict (create-appeal-verdict target-verdict-id giver made text)]
-    {$push {:appealVerdicts appeal-verdict}}))
+  (let [appeal-verdict (create-appeal-verdict target-verdict-id giver made text)]
+    (when-not (sc/check AppealVerdict appeal-verdict)
+      {$push {:appealVerdicts appeal-verdict}})))
 

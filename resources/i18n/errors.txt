@@ -22,3 +22,5 @@
 "error.attachment-not-found.desc" "sv" "Bilagan har tagits bort eller dess synlighet begränsats."
 "error.verdict-not-found" "fi" "Päätöstä ei löytynyt"
 "error.verdict-not-found" "sv" ""
+"error.invalid-appeal" "fi" "Virheellinen valitus"
+"error.invalid-appeal" "sv" ""
