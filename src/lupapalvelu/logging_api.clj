@@ -1,5 +1,5 @@
 (ns lupapalvelu.logging-api
-  (:require [taoensso.timbre :as timbre :refer [error errorf logf]]
+  (:require [taoensso.timbre :as timbre :refer [error errorf]]
             [noir.core :refer [defpage]]
             [sade.env :as env]
             [sade.core :refer [ok fail]]
@@ -26,11 +26,12 @@
         build-check     (if (not= sanitized-build (:build-number env/buildinfo))
                          " - CLIENT HAS EXPIRED VERSION"
                          "")
-        sanitized-msg   (sanitize (str message))]
+        sanitized-msg   (sanitize (str message))
+        formatted-msg   (format "FRONTEND: %s [%s] on page %s (build=%s%s): %s"
+                          user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)]
     (when (env/dev-mode?)
-      (swap! frontend-log update level conj {:ts ts :msg sanitized-msg}))
-    (logf level "FRONTEND: %s [%s] on page %s (build=%s%s): %s"
-          user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)))
+      (swap! frontend-log update level conj {:ts ts :msg formatted-msg}))
+    (timbre/log level formatted-msg)))
 
 (defquery frontend-log-entries
   {:user-roles #{:admin}}
