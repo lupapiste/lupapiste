@@ -35,7 +35,7 @@
 (defquery frontend-log-entries
   {:user-roles #{:admin}}
   [_]
-  (ok :log @frontend-log))
+  (ok :log (merge (zipmap levels (repeat [])) @frontend-log)))
 
 (defquery newest-version
   {:user-roles #{:anonymous}
