@@ -32,6 +32,5 @@
   {:parameters [id]
    :user-roles #{:authority :applicant}
    :states     states/post-verdict-states}
-  [command]
-  (ok :data (-> (mongo/by-id :applications id [:appeals :appealVerdicts])
-                (dissoc :id))))
+  [{application :application}]
+  (ok :data (select-keys application [:appeals :appealVerdicts])))
