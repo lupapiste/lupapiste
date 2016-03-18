@@ -189,7 +189,7 @@
 
       // Mark-seen
       if (applicationModel.infoRequest() && authorizationModel.ok("mark-seen")) {
-        ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
+        ajax.command("mark-seen", {id: app.id, type: "comments"}).error(_.noop).call();
       }
 
       // Documents
@@ -304,6 +304,7 @@
       if (tabMeta[tab] && currentId && authorizationModel.ok("mark-seen")) {
         ajax.command("mark-seen", {id: currentId, type: tabMeta[tab].type})
           .success(function() {tabMeta[tab].model(0);})
+          .error(_.noop)
           .call();
       }}, 1000);
   }

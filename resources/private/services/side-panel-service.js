@@ -119,6 +119,7 @@ LUPAPISTE.SidePanelService = function() {
           .success(function() {
             self.application.unseenComments(0);
           })
+          .error(_.noop)
           .call();
         }
       }, 1000);
