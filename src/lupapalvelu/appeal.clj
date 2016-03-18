@@ -36,6 +36,10 @@
     {$push {:appeals appeal}}))
 
 (defn input-validator
-  "Input validator for appeal commands. Parameter is command from action pipeline."
-  [{{:keys [targetId type appellant made]} :data}]
-  nil)
+  "Input validator for appeal commands. Validates command parameter against Appeal schema."
+  [{{:keys [targetId type appellant made text]} :data}]
+  (sc/check (dissoc Appeal :id) (util/strip-nils {:target-verdict targetId
+                                                  :type type
+                                                  :appellant appellant
+                                                  :made made
+                                                  :text text})))
