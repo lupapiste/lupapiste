@@ -4818,7 +4818,7 @@
 "verdict.muutoksenhaku.extra" "fi" "Lisätietoa"
 "verdict.muutoksenhaku.extra.placeholder" "fi" "Kirjoita tarvittaessa lisätietoja asiaan liittyen..."
 "verdict.muutoksenhaku.liitteet" "fi" "Liitetiedosto(t)"
-"verdict.muutoksenhaku.liitteet.info" "fi" "(Max. 1000Mt, PDF-, kuva-, Microsoft Office -, OpenOffice- tai ZIP-tiedosto)"
+"verdict.muutoksenhaku.liitteet.info" "fi" "(Max. 100Mt, PDF-, kuva-, Microsoft Office -, OpenOffice- tai ZIP-tiedosto)"
 "verdict.name" "fi" "Päätöksen antaja"
 "verdict.name" "sv" "Beslutsfattare"
 "verdict.official" "fi" "Lainvoimainen"

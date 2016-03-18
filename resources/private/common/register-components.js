@@ -111,7 +111,8 @@ jQuery(document).ready(function() {
     {name: "document-identifier"},
     {name: "change-state"},
     {name: "verdict-appeal"},
-    {name: "verdict-appeal-bubble"}
+    {name: "verdict-appeal-bubble"},
+    {name: "file-upload"}
 ];
 
   _.forEach(components, function(component) {

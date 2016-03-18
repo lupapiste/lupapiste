@@ -11,4 +11,5 @@
   lupapisteApp.services.documentDataService = new LUPAPISTE.DocumentDataService();
   lupapisteApp.services.sidePanelService = new LUPAPISTE.SidePanelService();
   lupapisteApp.services.accordionService = new LUPAPISTE.AccordionService();
+  lupapisteApp.services.fileUploadService = new LUPAPISTE.FileuploadService();
 })();

@@ -28,6 +28,7 @@
                           lLabel: 'verdict.muutoksenhaku.pvm',
                           lPlaceholder: 'choose',
                           required: true}}"></div>
+          <div class="btn negative"><i class="lupicon-warning"></i><span>Hello</span></div>
         </div>
       </div>
       <div class="row">
@@ -46,11 +47,8 @@
       </div>
 
       <div class="row">
-        <div class="col-4">
-          <button class="positive">
-            <i class="lupicon-circle-plus"></i>
-            <span data-bind="ltext: 'application.attachmentsAdd'"></span>
-          </button>
+        <div class="col-4"
+             data-bind="component: {name: 'file-upload', params: {files: $parent.files}}">
         </div>
       </div>
     </div>
