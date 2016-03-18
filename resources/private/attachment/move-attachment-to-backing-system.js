@@ -16,8 +16,12 @@
       attachmentIds: selectedAttachmentsIds
     })
     .success(function() {
-      multiSelect.model.appModel.open("attachments");
+      var permit = externalApiTools.toExternalPermit(multiSelect.model.appModel._js);
       repository.load(id);
+      multiSelect.model.appModel.open("attachments");
+      if (multiSelect.model.appModel.externalApi.enabled()) {
+        hub.send("external-api::integration-sent", permit);
+      }
     })
     .error(function() {
       notify.error(loc("error.dialog.title"), loc("application.attachmentsMoveToBackingSystem.error"));
