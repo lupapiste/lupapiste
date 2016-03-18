@@ -1232,3 +1232,17 @@ Fill test id
   Wait test id visible  ${id}
   Element Should Be Enabled  jquery=[data-test-id=${id}]
   Input text by test id  ${id}  ${text}
+
+# Frontend error log
+
+There are no frontend errors
+  Go to login page
+  SolitaAdmin logs in
+  Wait until  Click element  xpath=//a[@data-test-id='fontend-logs']
+  Wait until  Element should be visible  xpath=//section[@id='logs']
+  # Allow log to load
+  Sleep  1
+  Wait for jQuery
+  Xpath Should Match X Times  //section[@id='logs']//table[@data-test-id='fatal-log']//tbody/tr  0
+  Xpath Should Match X Times  //section[@id='logs']//table[@data-test-id='error-log']//tbody/tr  0
+  [Teardown]  Logout
