@@ -47,10 +47,10 @@
       (fact "appeal is saved to application to be viewed"
         (map :type (:appeals (query-application pena app-id))) => (just ["appeal" "rectification"]))
       (fact "appeal query is OK"
-        (let [response-data (:data (query pena :appeals :id app-id))]
-          (keys response-data) => (just [:appeals :appealVerdicts])
-          (count (:appeals response-data)) => 2
-          (count (:appealVerdicts response-data)) => 0)))))
+        (let [response-data (:data (query pena :appeals :id app-id))
+              verdictid-key (keyword vid)]
+          (keys response-data) => (just [verdictid-key])
+          (count (get response-data verdictid-key)) => 2)))))
 
 (facts "Creating appeal verdicts"
   (let [{app-id :id} (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
@@ -103,7 +103,9 @@
                  :text "verdict for rectification 1") => ok?)
 
       (fact "appeal query is OK after giving appeal and appeal verdict"
-        (let [response-data (:data (query pena :appeals :id app-id))]
-          (keys response-data) => (just [:appeals :appealVerdicts])
-          (count (:appeals response-data)) => 1
-          (count (:appealVerdicts response-data)) => 1)))))
+        (let [response-data (:data (query pena :appeals :id app-id))
+              verdictid-key (keyword vid)]
+          (keys response-data) => (just [verdictid-key])
+          (count (get response-data verdictid-key)) => 2
+          (:type (first (get response-data verdictid-key))) => "rectification"
+          (:type (second (get response-data verdictid-key))) => "appealVerdict")))))

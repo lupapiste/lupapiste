@@ -50,9 +50,29 @@
       updates)
     (fail :error.invalid-appeal-verdict)))
 
+
+(defn- process-appeal
+  "Process appeal for frontend"
+  [appeal]
+  (case (keyword (:type appeal))
+    :appealVerdict appeal
+    :appeal        appeal
+    :rectification appeal))
+
+(defn- add-attachments [{id :id :as appeal}]
+  ; get attacments for appeal here
+  appeal)
+
+
 (defquery appeals
-  {:parameters [id]
+  {:description "Query for frontend, that returns all appeals/appeal verdicts of application in pre-processed form."
+   :parameters [id]
    :user-roles #{:authority :applicant}
    :states     states/post-verdict-states}
   [{application :application}]
-  (ok :data (select-keys application [:appeals :appealVerdicts])))
+  (let [appeal-verdicts (map #(assoc % :type "appealVerdict") (:appealVerdicts application))
+        all-appeals     (concat (:appeals application) appeal-verdicts)
+        processed-appeals (->> all-appeals
+                               (map (comp add-attachments process-appeal))
+                               (sort-by :made))]
+    (ok :data (group-by :target-verdict processed-appeals))))
