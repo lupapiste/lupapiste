@@ -37,7 +37,7 @@
   (if appealId
     (let [update-data (dissoc (create-appeal target-verdict-id type appellant made text) :id)]
       (when-not (sc/check Appeal (assoc update-data :id appealId))
-        update-data))
+        (dissoc update-data :target-verdict)))
     (let [new-data (create-appeal target-verdict-id type appellant made text)]
       (when-not (sc/check Appeal new-data)
         new-data))))
