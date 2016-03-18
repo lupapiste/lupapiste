@@ -5063,6 +5063,7 @@
 "reply.confirm.body" "sv" "När svaromål har skickats kan du inte längre ändra det. Är du säker på att du vill skicka svaromål?"
 "error.startdate-before-enddate" "fi" "Alkupäivämäärä on ennen loppupäivämäärää"
 "error.startdate-before-enddate" "sv" "Startdatumet är före slutdatumet"
+"error.invalid-date" "fi" "Virheellinen päivämäärä"
 "error.service-lockdown" "fi" "Palvelu on hetkellisesti lukutilassa ylläpitotoimien vuoksi. Voit selailla hakemuksia, mutta tietojen muokkaus on tilapäisesti estetty. Pahoittelemme häiriötä!"
 "error.service-lockdown" "sv" "Tjänsten är tillfälligt i läsläge på grund av uppdateringar. Du kan granska ansökningar, men ändringar i uppgifter kan inte göras för tillfället. Vi beklagar störningen!"
 "statement.draft-is-not-visible" "fi" "Lausunto tulee näkyviin tähän, kun se on annettu."

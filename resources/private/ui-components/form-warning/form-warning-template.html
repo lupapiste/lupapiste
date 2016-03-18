@@ -1,0 +1,9 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="form-warning-template">
+  <div class="col--vertical"
+       data-bind="css: {'form-warning--active': warning}">
+    <div data-bind="template: {nodes: $componentTemplateNodes}"></div>
+    <div class="btn-base form-warning__message">
+      <i class="lupicon-warning"></i>
+      <span data-bind="ltext: warning"></span></div>
+  </div>
+</script>

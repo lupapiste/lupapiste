@@ -17,18 +17,21 @@
           <select class="dropdown mandatory"></select>
         </div>
         <div class="col-2 col--vertical">
-          <label data-bind="ltext: 'verdict.muutoksenhaku.tekijat'"
+                    <label data-bind="ltext: 'verdict.muutoksenhaku.tekijat'"
                  class="mandatory"></label>
           <input type="text" class="mandatory"
-                 data-bind="attr: {placeholder: loc('verdict.muutoksenhaku.tekijat.placeholder')}">
+                 data-bind="attr: {placeholder: loc('verdict.muutoksenhaku.tekijat.placeholder')},
+                            value: $parent.authors">
         </div>
-        <div class="col-1 col--vertical">
-          <div data-bind="component: {name: 'date-field',
-                          params: {value: $parent.date,
-                          lLabel: 'verdict.muutoksenhaku.pvm',
-                          lPlaceholder: 'choose',
-                          required: true}}"></div>
-          <div class="btn negative"><i class="lupicon-warning"></i><span>Hello</span></div>
+        <div class="col-1">
+          <form-warning params="{warning: $parent.dateWarning}">
+          <label data-bind="ltext: 'verdict.muutoksenhaku.pvm'"
+                 class="mandatory"></label>
+          <input type="text" class="mandatory"
+                 data-bind="attr: {placeholder: loc('choose')},
+                            value: $parents[1].date,
+                            datepicker: $parents[1].dummy">
+          </form-warning>
         </div>
       </div>
       <div class="row">
