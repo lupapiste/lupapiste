@@ -3,6 +3,7 @@
 Documentation  Sonja can assign application to herself
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
+Resource       assignment_resource.robot
 
 *** Test Cases ***
 
