@@ -139,7 +139,7 @@
                  :id app-id
                  :targetId vid
                  :giver "Teppo"
-                 :made created
+                 :made (+ created 1)
                  :text "verdict for rectification 1") => ok?)
 
       (fact "appeal query is OK after giving appeal and appeal verdict"
@@ -149,6 +149,18 @@
           (count (get response-data verdictid-key)) => 2
           (:type (first (get response-data verdictid-key))) => "rectification"
           (:type (second (get response-data verdictid-key))) => "appealVerdict"))
+
+      (fact "appeal can't be edited after appeal verdict is created"
+        (let [appeals (get (:data (query pena :appeals :id app-id)) (keyword vid))
+              test-appeal (first appeals)]
+          (command sonja :upsert-appeal
+                   :id app-id
+                   :targetId vid
+                   :type "rectification"
+                   :appellant "Pena"
+                   :made created
+                   :text "rectification edition"
+                   :appealId (:id test-appeal)) => (partial expected-failure? :error.appeal-verdict-already-exists)))
 
       (fact "upsert is validated"
         (let [appeals             (get (:data (query pena :appeals :id app-id)) (keyword vid))

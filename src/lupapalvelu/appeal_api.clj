@@ -34,6 +34,20 @@
     (when-not (util/find-by-id appeal-id appealVerdicts)
       (fail :error.unknown-appeal-verdict))))
 
+(defn appeal-verdicts-after-appeal?
+  [appeal appeal-verdicts]
+  {:pre [(map? appeal) (sequential? appeal-verdicts)]}
+  (not-every? (partial > (:made appeal)) (map :made appeal-verdicts)))
+
+(defn- appeal-editable?
+  "Pre-check to check that appeal can be edited."
+  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
+  (when appeal-id
+    (if-let [appeal (util/find-by-id appeal-id appeals)]
+      (when (appeal-verdicts-after-appeal? appeal appealVerdicts)
+        (fail :error.appeal-verdict-already-exists))
+      (fail :error.unknown-appeal))))
+
 
 (defn new-appeal-data-mongo-updates
   "Returns $push mongo update map of data to given 'collection' property.
@@ -61,7 +75,8 @@
    :input-validators    [appeal/input-validator
                          (partial action/number-parameters [:made])]
    :pre-checks          [verdict-exists
-                         appeal-id-exists]}
+                         appeal-id-exists
+                         appeal-editable?]}
   [command]
   (if-let [updates (if appealId
                      (some->> (appeal/appeal-data-for-upsert targetId type appellant made text appealId)

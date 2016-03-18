@@ -32,3 +32,5 @@
 "error.unknown-appeal" "sv" ""
 "error.unknown-appeal-verdict" "fi" "Valituspäätöstä ei löytynyt"
 "error.unknown-appeal-verdict" "sv" ""
+"error.appeal-verdict-already-exists" "fi" "Valitusta/oikaisuvaatimusta ei voi muokata, koska valituksen jälkeen on tullut päätös"
+"error.appeal-verdict-already-exists" "sv" ""
