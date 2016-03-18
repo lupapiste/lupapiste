@@ -28,3 +28,5 @@
 "error.invalid-appeal-verdict" "sv" ""
 "error.appeals-not-found" "fi" "Valituspäätöstä ei voi antaa, jos valituksia ei ole."
 "error.appeals-not-found" "sv" ""
+"error.unknown-appeal" "fi" "Valitusta ei löytynyt"
+"error.unknown-appeal" "sv" ""

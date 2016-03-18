@@ -19,19 +19,33 @@
   (when (zero? (count appeals))
     (fail :error.appeals-not-found)))
 
-(defcommand create-appeal
-  {:parameters          [id targetId type appellant made]
-   :optional-parameters [text]
+(defn- get-appeal-by-id
+  [appeal-id appeals]
+  (some #(when (= appeal-id (:id %)) %) appeals))
+
+(defn- appeal-id-exists
+  "Pre-check to validate that given ID exists in application"
+  [{{appeal-id :appealId} :data} {:keys [appeals]}]
+  (when appeal-id ; optional parameter, could be nil in command
+    (when-not (get-appeal-by-id appeal-id appeals)
+      (fail :error.unknown-appeal))))
+
+(defcommand upsert-appeal
+  {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"
+   :parameters          [id targetId type appellant made]
+   :optional-parameters [text appealId]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
    :input-validators    [appeal/input-validator
                          (partial action/number-parameters [:made])]
-   :pre-checks          [verdict-exists]}
-  [{app :application :as command}]
-  (if-let [updates (appeal/new-appeal-mongo-updates targetId type appellant made text)]
+   :pre-checks          [verdict-exists
+                         appeal-id-exists]}
+  [command]
+  (if-let [updates (appeal/upsert-appeal-mongo-updates targetId type appellant made text appealId)]
     (action/update-application
       command
-      updates)
+      (:mongo-query updates)
+      (:mongo-updates updates))
     (fail :error.invalid-appeal)))
 
 (defcommand create-appeal-verdict
