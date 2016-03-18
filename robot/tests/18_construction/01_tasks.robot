@@ -3,6 +3,7 @@
 Documentation   Application gets tasks based on verdict
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        task_resource.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -178,15 +179,6 @@ Create katselmus task
   Input text  create-task-name  ${taskName}
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
-
-Open task
-  [Arguments]  ${name}
-  Wait until  Element should be visible  xpath=//div[@id='application-tasks-tab']//table[@class="tasks"]//td/a[text()='${name}']
-  Scroll to  div#application-tasks-tab table.tasks
-  Wait until  Click Element  //div[@id='application-tasks-tab']//table[@class="tasks"]//td/a[text()='${name}']
-  Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
-  Wait Until  Element should be visible  taskAttachments
-  Wait until  Element should be visible  taskDocgen
 
 Set date and check
   [Arguments]  ${button}  ${span}  ${date}
