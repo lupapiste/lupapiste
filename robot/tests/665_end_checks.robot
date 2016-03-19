@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Final checks
-Resource        ../../common_resource.robot
+Resource        ../common_resource.robot
 
 *** Test Cases ***
 
