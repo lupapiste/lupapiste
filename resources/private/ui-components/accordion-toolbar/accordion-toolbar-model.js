@@ -130,7 +130,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   }
   function laterGroups() {
     var master = safeMaster();
-    return _.pickBy( groupApprovals(),
+    return _.pickByBy( groupApprovals(),
                    function( a ) {
                      return a && a.timestamp > master.timestamp;
                    } );

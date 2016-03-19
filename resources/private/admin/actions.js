@@ -15,7 +15,7 @@
         .call();
 
       ajax.get("/system/action-counters").success(function(e){
-        var uncalled = _.pick(e, function(c) {return c === 0;});
+        var uncalled = _.pickBy(e, function(c) {return c === 0;});
         var keys = _.keys(uncalled);
         self.uncalledActionsCount(keys.length);
         self.uncalledActions(keys.join(", "));

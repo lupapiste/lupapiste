@@ -66,7 +66,7 @@ LUPAPISTE.StatementService = function(params) {
       "modify-id": util.getIn(statement, ["modify-id"], ""),
       statementId: self.statementId(),
       lang: loc.getCurrentLanguage()
-    }, _.pickBy(params[tab], _.identity));
+    }, _.pickByBy(params[tab], _.identity));
   }
 
   function submit(statementId, tab) {
