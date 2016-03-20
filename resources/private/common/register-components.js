@@ -113,7 +113,10 @@ jQuery(document).ready(function() {
     {name: "verdict-appeal"},
     {name: "verdict-appeal-bubble"},
     {name: "file-upload"},
-    {name: "form-warning"}
+    {name: "form-cell"},
+    {name: "cell-text", model: "cell-model"},
+    {name: "cell-textarea", model: "cell-model"},
+    {name: "cell-date"}
 ];
 
   _.forEach(components, function(component) {

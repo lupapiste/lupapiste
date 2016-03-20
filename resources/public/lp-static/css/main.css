@@ -1,5 +1,15 @@
-@import url('main-blessed1.css?z=1458320138136');
+@import url('main-blessed1.css?z=1458475548706');
 
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
 /* line 145, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info p, .application_summary .application_summary_info .application_summary_text, .application_summary .application_summary_info ul {
   vertical-align: top;
