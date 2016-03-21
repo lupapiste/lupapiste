@@ -189,7 +189,7 @@
 (def- katselmustieto_220
   (update-in katselmustieto_215 [:child] mapping-common/update-child-element
     [:Katselmus :katselmuspoytakirja]
-    {:tag :liitetieto :child [{:tag :liite :child mapping-common/liite-children_216}]}))
+    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]}))
 
 
 (def rakennuslupa_to_krysp_212
@@ -400,7 +400,7 @@
                     (#(if poytakirja
                         (-> %
                             (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
-                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :liite] canonical-pk))
+                            (assoc-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :liitetieto :Liite] canonical-pk))
                        %)))
 
         xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
