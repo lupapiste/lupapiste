@@ -85,8 +85,8 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
   };
 
   function selectAllFiles(value) {
-    _(self.preFiles()).map("attachments").flatten().each(function(f) { f.selected(value); }).value();
-    _(self.postFiles()).map("attachments").flatten().each(function(f) { f.selected(value); }).value();
+    _(self.preFiles()).map("attachments").flatten().each(function(f) { f.selected(value); });
+    _(self.postFiles()).map("attachments").flatten().each(function(f) { f.selected(value); });
   }
 
   self.selectAll = _.partial(selectAllFiles, true);
