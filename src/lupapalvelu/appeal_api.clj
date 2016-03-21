@@ -116,11 +116,10 @@
 
 (defn- process-appeal
   "Process appeal for frontend"
-  [appeal]
+  [{:keys [appealVerdicts]} appeal]
   (case (keyword (:type appeal))
-    :appealVerdict appeal
-    :appeal        appeal
-    :rectification appeal))
+    :appealVerdict           appeal
+    (:appeal :rectification) (assoc appeal :editable (false? (appeal-verdicts-after-appeal? appeal appealVerdicts)))))
 
 (defn- add-attachments [{id :id :as appeal}]
   ; get attacments for appeal here
@@ -136,6 +135,7 @@
   (let [appeal-verdicts (map #(assoc % :type "appealVerdict") (:appealVerdicts application))
         all-appeals     (concat (:appeals application) appeal-verdicts)
         processed-appeals (->> all-appeals
-                               (map (comp add-attachments process-appeal))
+                               (map (comp add-attachments
+                                          (partial process-appeal application)))
                                (sort-by :made))]
     (ok :data (group-by :target-verdict processed-appeals))))

@@ -160,7 +160,10 @@
                    :appellant "Pena"
                    :made created
                    :text "rectification edition"
-                   :appealId (:id test-appeal)) => (partial expected-failure? :error.appeal-verdict-already-exists)))
+                   :appealId (:id test-appeal)) => (partial expected-failure? :error.appeal-verdict-already-exists)
+
+          (fact "Query has editable flag set correctly"
+            (:editable test-appeal) => false)))
 
       (fact "upsert is validated"
         (let [appeals             (get (:data (query pena :appeals :id app-id)) (keyword vid))
