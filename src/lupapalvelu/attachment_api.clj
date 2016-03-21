@@ -124,7 +124,10 @@
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? attachment-type application)
-      (attachment/update-attachment-key! command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
+      (let [metadata (-> (tiedonohjaus/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
+                         (tiedonohjaus/update-end-dates (:verdicts application)))]
+        (attachment/update-attachment-key! command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
+        (attachment/update-attachment-key! command attachmentId :metadata metadata created))
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.illegal-attachment-type)))))
@@ -304,7 +307,7 @@
                                 {:keys [attachment-id filename upload-pdfa-only] :as attachment-data}]
   (if pdfa?
     (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! application attachment-data) (fail! :error.unknown))
-          new-filename (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf" )
+          new-filename (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf")
           new-id       (or (:id attach-file-result) attachment-id)
           application  (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
           pdfa-attachment-data (assoc attachment-data
@@ -514,8 +517,8 @@
                              (if-not (ss/blank? organization)
                                organization
                                (let [org (organization/get-organization (:organization application))]
-                                 (organization/get-organization-name org)))]
-               }))))
+                                 (organization/get-organization-name org)))]}))))
+
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
