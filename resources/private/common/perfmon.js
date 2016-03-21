@@ -31,7 +31,7 @@
       return;
     }
 
-    if (!window.performance.timing.loadEventEnd) {
+    if (!window.performance.timing || !window.performance.timing.loadEventEnd) {
       setTimeout(loadTimingData, 10);
       return;
     }
@@ -40,6 +40,9 @@
       displayTimingData();
     }
 
+    // window.performance.timing to JSON conversion
+    // might be the causing "Cannot convert a Symbol value to a string"
+    // errors on Chrome 46?
     ajax.command("browser-timing", {timing: window.performance.timing, pathname: window.location.pathname})
       .error(_.noop)
       .fail(_.noop)
