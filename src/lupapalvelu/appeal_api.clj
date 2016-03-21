@@ -35,6 +35,8 @@
       (fail :error.unknown-appeal-verdict))))
 
 (defn appeal-verdicts-after-appeal?
+  "Predicate to check if appeal-verdicts have been made AFTER the given appeal in question has been made.
+   Returns true if at least one appeal-verdict has been given after the appeal."
   [appeal appeal-verdicts]
   {:pre [(map? appeal) (sequential? appeal-verdicts)]}
   (not-every? (partial > (:made appeal)) (map :made appeal-verdicts)))
