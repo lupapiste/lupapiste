@@ -1123,7 +1123,9 @@
                                                   <div data-bind="ltext: 'verdict.poytakirjat.missing'"></div>
                                                   <!-- /ko -->
                                               </div>
-                                              <div data-bind="component: 'verdict-appeal'"></div>
+                                              <!-- Muutoksenhaku -->
+                                              <div data-bind="component: {name: 'verdict-appeal',
+                                                              params: {id: verdict.id}}"></div>
                                           </div>
                                       </div>
                                   </div>

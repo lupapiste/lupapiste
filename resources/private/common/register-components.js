@@ -116,7 +116,8 @@ jQuery(document).ready(function() {
     {name: "form-cell"},
     {name: "cell-text", model: "cell-model"},
     {name: "cell-textarea", model: "cell-model"},
-    {name: "cell-date"}
+    {name: "cell-date"},
+    {name: "cell-select"},
 ];
 
   _.forEach(components, function(component) {

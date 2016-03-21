@@ -1,3 +1,6 @@
+// Cell support for date selection.
+// Params:
+//  value: initial date as Finnish format string (e.g., 21.3.2016)
 LUPAPISTE.CellDateModel = function( params ) {
   "use strict";
   var self = this;

@@ -2,6 +2,9 @@
         type="text/x-jquery-tmpl"
         id="verdict-appeal-bubble-template">
   <bubble-dialog params="visible: params.visible,
+                         okFun: okFun,
+                         initFun: initFun,
+                         okEnabled: okEnabled,
                          buttonIcon: 'lupicon-save',
                          buttonText: 'save',
                          waiting: params.waiting">
@@ -11,16 +14,21 @@
               data-bind="ltext: 'verdict.muutoksenhaku.info'"></span>
       </div>
       <div class="row">
-        <div class="col-1 col--vertical">
-          <label data-bind="ltext: 'verdict.muutoksenhaku.tyyppi'"
-                 class="mandatory"></label>
-          <select class="dropdown mandatory"></select>
+        <div class="col-1">
+          <form-cell params="{required: true,
+                             label: 'verdict.muutoksenhaku.tyyppi',
+                             cell: 'select',
+                             value: $parent.model.appealType,
+                             options: $parent.appealTypes,
+                             optionsText: 'text',
+                             optionsValue: 'id'}">
+          </form-cell>
         </div>
         <div class="col-2">
           <form-cell params="{required: true,
                              label: 'verdict.muutoksenhaku.tekijat',
                              cell: 'text',
-                             value: $parent.authors}">
+                             value: $parent.model.authors}">
           </form-cell>
         </div>
         <div class="col-1">
@@ -28,7 +36,7 @@
                              required: true,
                              label: 'verdict.muutoksenhaku.pvm',
                              cell: 'date',
-                             value: $parent.date}">
+                             value: $parent.model.date}">
           </form-cell>
         </div>
       </div>
@@ -36,7 +44,7 @@
         <div class="col-4">
           <form-cell params="{label: 'verdict.muutoksenhaku.extra',
                              cell: 'textarea',
-                             value: $parent.extra,
+                             value: $parent.model.extra,
                              attr: {placeholder: loc('verdict.muutoksenhaku.extra.placeholder'),
                              rows: 4}}">
           </form-cell>
@@ -44,7 +52,7 @@
       </div>
       <div class="row">
         <div class="col-4">
-          <label class="mandatory"
+          <label class="mandatory"!
                  data-bind="ltext: 'verdict.muutoksenhaku.liitteet'"></label>
           <span data-bind="ltext: 'verdict.muutoksenhaku.liitteet.info'"></span>
         </div>
@@ -52,7 +60,7 @@
 
       <div class="row">
         <div class="col-4"
-             data-bind="component: {name: 'file-upload', params: {files: $parent.files}}">
+             data-bind="component: {name: 'file-upload', params: {files: $parent.model.files}}">
         </div>
       </div>
     </div>

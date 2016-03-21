@@ -1,3 +1,9 @@
+// Convenint file upload mechanism that utilises the FileuploadService.
+// Params [optional]:
+//  [buttonIcon]: Icon for add button (default lupicon-circle-plus)
+//  [buttonText]: Ltext for the button ('application.attachmentsAdd')
+//  files: ObservableArray for the files.
+//  [readOnly]: If true only the file listing is shown (false).
 LUPAPISTE.FileUploadModel = function( params ) {
   "use strict";
   var self = this;
