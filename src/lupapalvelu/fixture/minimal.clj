@@ -592,7 +592,7 @@
                                                 :yl-uusi-toiminta [[:muut :muu]]
                                                 :maa-aineslupa [[:muut :muu]]
                                                 "vvvl-vesijohdosta" [[:muut :muu]]}
-                       :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.1.6"}
+                       :krysp {:R {:url local-krysp, :ftpUser "dev_sipoo", :version "2.2.0"}
                                :P {:url local-krysp :ftpUser "dev_poik_sipoo" :version "2.1.2"}
                                :YI {:url local-krysp :ftpUser "dev_ymp_sipoo" :version "2.2.1"}
                                :YL {:url local-krysp, :ftpUser "dev_ymp_sipoo", :version "2.2.1"}
