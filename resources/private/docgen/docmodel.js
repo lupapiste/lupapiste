@@ -259,6 +259,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           // "operations" list should be changed.
           repository.load(self.appId);
         })
+        .onError("error.removal-of-last-document-denied", notify.ajaxError)
         .call();
     }
 
