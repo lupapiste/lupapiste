@@ -54,12 +54,19 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
       if( appealId ) {
         message.appealId = appealId;
       }
-      _.assignWith( message, model, function( old, obs ) {
+      _.assignWith( message, model, function( old, obs, key ) {
         var v = obs();
-        return _.isArray( v ) ? _.pick( v, ["id"]) : v;
+        var result = v;
+        switch( key) {
+        case "files":
+          result = _.pick( v, ["id"]);
+          break;
+        case "date":
+          result = moment( v, "D.M.YYYY", true ).unix();
+          break;
+        }
+        return result;
       } );
-      // TODO: send message to the service.
-      // For now we just close the bubble.
       self.sendEvent( service.serviceName,
                       "upsertAppeal",
                       {message: message,
