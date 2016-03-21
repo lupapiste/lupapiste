@@ -179,6 +179,7 @@
       (fact* "Upsert updates successfully"
         (let [appeals-before  (get (:data (query pena :appeals :id app-id)) (keyword vid))
               target-appeal-verdict   (second appeals-before)
+              _ (:editable target-appeal-verdict) => true
               _ (command sonja :upsert-appeal-verdict :id app-id
                          :targetId vid
                          :giver "Seppo"
@@ -192,4 +193,23 @@
 
           (fact "Appellant has been changed"
             (:giver target-appeal-verdict) => "Teppo"
-            (:giver updated-target-appeal-verdict) => "Seppo"))))))
+            (:giver updated-target-appeal-verdict) => "Seppo")))
+
+      (fact "If new appeals have been made, old appeal-verdict can't be edited"
+        (command sonja :upsert-appeal
+                 :id app-id
+                 :targetId vid
+                 :type "appeal"
+                 :appellant "Pena again"
+                 :made (now)
+                 :text "new appeal") => ok?
+        (let [appeals (get (:data (query pena :appeals :id app-id)) (keyword vid))
+              target-appeal-verdict (second appeals)]
+          (command sonja :upsert-appeal-verdict :id app-id
+                   :targetId vid
+                   :giver "Seppo"
+                   :made created
+                   :appealId (:id target-appeal-verdict)) => (partial expected-failure? :error.appeal-already-exists)
+
+          (fact "query has editable flag set correctly"
+            (:editable target-appeal-verdict) => false))))))

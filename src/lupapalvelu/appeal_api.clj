@@ -43,6 +43,13 @@
   {:pre [(map? appeal) (sequential? appeal-verdicts)]}
   (not-every? (partial > (:made appeal)) (map :made appeal-verdicts)))
 
+(defn appeals-after-appeal-verdict?
+  "Predicate to check if appeals have been made AFTER the given appeal-verdict in question has been made.
+   Returns true if at least one appeal has been given after the appeal-verdict."
+  [appeal-verdict appeals]
+  {:pre [(map? appeal-verdict) (sequential? appeals)]}
+  (not-every? (partial > (:made appeal-verdict)) (map :made appeals)))
+
 (defn- appeal-editable?
   "Pre-check to check that appeal can be edited."
   [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
@@ -51,6 +58,15 @@
       (when (appeal-verdicts-after-appeal? appeal appealVerdicts)
         (fail :error.appeal-verdict-already-exists))
       (fail :error.unknown-appeal))))
+
+(defn- appeal-verdict-editable?
+  "Pre-check to check that appeal-verdict can be edited."
+  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
+  (when appeal-id
+    (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
+      (when (appeals-after-appeal-verdict? appeal-verdict appeals)
+        (fail :error.appeal-already-exists))
+      (fail :error.unknown-appeal-verdict))))
 
 
 (defn new-appeal-data-mongo-updates
@@ -102,7 +118,8 @@
                          (partial action/number-parameters [:made])]
    :pre-checks          [verdict-exists
                          appeal-exists
-                         appeal-verdict-id-exists]}
+                         appeal-verdict-id-exists
+                         appeal-verdict-editable?]}
   [command]
   (if-let [updates (if appealId
                      (some->> (appeal-verdict/appeal-verdict-data-for-upsert targetId giver made text appealId)
@@ -118,10 +135,10 @@
 
 (defn- process-appeal
   "Process appeal for frontend"
-  [{:keys [appealVerdicts]} appeal]
-  (case (keyword (:type appeal))
-    :appealVerdict           appeal
-    (:appeal :rectification) (assoc appeal :editable (false? (appeal-verdicts-after-appeal? appeal appealVerdicts)))))
+  [{:keys [appealVerdicts appeals]} appeal-item]
+  (case (keyword (:type appeal-item))
+    :appealVerdict           (assoc appeal-item :editable (false? (appeals-after-appeal-verdict? appeal-item appeals)))
+    (:appeal :rectification) (assoc appeal-item :editable (false? (appeal-verdicts-after-appeal? appeal-item appealVerdicts)))))
 
 (defn- add-attachments [{id :id :as appeal}]
   ; get attacments for appeal here
