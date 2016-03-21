@@ -15,8 +15,10 @@ LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
   self.model = m.model;
   self.okFun = m.okFun;
   self.initFun = m.initFun;
+  self.error = m.error;
+  self.waiting = m.waiting;
 
-  self.appealTypes = _.map(["paatos", "valitus", "oikaisuvaatimus"],
+  self.appealTypes = _.map(["appealVerdict", "appeal", "rectification"],
                            function( s ) {
                              return {text: "verdict.muutoksenhaku." + s,
                                      id: s };

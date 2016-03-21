@@ -6,6 +6,8 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
   "use strict";
   var self = this;
 
+  var service = lupapisteApp.services.verdictAppealService;
+
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   var verdictId = params.id;
@@ -19,8 +21,6 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
     self.newBubbleVisible( !self.newBubbleVisible());
   };
 
-  self.waiting = ko.observable();
-
   // The model is passed to the VerdictAppealBubbleModel
   // as a model parameter.
   self.bubbleModel = function( appealId ) {
@@ -32,6 +32,8 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
                                  : ko.observable( v );
                              });
 
+    var error = ko.observable();
+    var waiting = ko.observable();
 
     function initFun() {
       var data = _.defaults( _.find( self.appeals(), {id: appealId}),
@@ -39,9 +41,15 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
       _.each( data, function(v, k ) {
         model[k]( v );
       } );
+      error( "");
+      waiting( false );
     }
 
     function okFun() {
+      function cb( msg ) {
+        error( msg );
+        self.newBubbleVisible( Boolean( msg ));
+      }
       var message = {verdictId: verdictId};
       if( appealId ) {
         message.appealId = appealId;
@@ -52,13 +60,18 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
       } );
       // TODO: send message to the service.
       // For now we just close the bubble.
-      self.newBubbleVisible( false );
+      self.sendEvent( service.serviceName,
+                      "upsertAppeal",
+                      {message: message,
+                       callback: cb} );
     }
 
     return {
       model: model,
       initFun: initFun,
-      okFun: okFun
+      okFun: okFun,
+      error: error,
+      waiting: waiting
     };
   };
 };
