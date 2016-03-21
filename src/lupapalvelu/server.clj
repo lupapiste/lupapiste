@@ -60,7 +60,8 @@
             [lupapalvelu.file-upload-api]
             [lupapalvelu.ssokeys-api]
             [lupapalvelu.guest-api]
-            [lupapalvelu.archiving-api]))
+            [lupapalvelu.archiving-api]
+            [lupapalvelu.appeal-api]))
 
 
 

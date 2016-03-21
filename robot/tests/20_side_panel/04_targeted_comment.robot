@@ -2,7 +2,6 @@
 
 Documentation   Sonja sends comment to Ronja
 Resource        ../../common_resource.robot
-Suite Teardown  Logout
 
 *** Test Cases ***
 
@@ -38,3 +37,7 @@ Open the application
 
 Comment is visible
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
+  [Teardown]  Logout
+
+No errors so far
+  There are no frontend errors

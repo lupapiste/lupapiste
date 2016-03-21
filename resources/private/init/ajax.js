@@ -8,7 +8,7 @@ var ajax = (function($) {
 
     var defaultError = function(e) {
       error("AJAX: ERROR", self.request.url, e);
-      notify.error(loc(e.text));
+      notify.ajaxError(e);
     };
 
     self.customErrorHandlers = {};

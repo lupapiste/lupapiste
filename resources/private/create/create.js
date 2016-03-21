@@ -215,7 +215,7 @@
 
     self.autocompleteSelect = function(e, data) {
       var item = data.item;
-      _(handlers).filter(selector(item)).map(toHandler).each(invoker(item)).value();
+      _(handlers).filter(selector(item)).map(toHandler).each(invoker(item));
       return false;
     };
 
@@ -349,7 +349,7 @@
               self.needMorePrevPermitInfo(true);
             }
           } else {
-            notify.error(loc("error.dialog.title"), loc(d.text));
+            notify.ajaxError(d);
           }
         })
         .call();

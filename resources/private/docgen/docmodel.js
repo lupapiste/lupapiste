@@ -1012,9 +1012,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
             collection: self.getCollection()
           })
           .success(_.partial(repository.load, self.appId, _.noop))
-          .onError("error.no-legacy-available", function(e) {
-            notify.error(loc(e.text));
-          })
+          .onError("error.no-legacy-available", notify.ajaxError)
           .call();
         }
 
@@ -1281,7 +1279,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
               if (e.text !== "error.application-does-not-have-given-auth") {
                 error("Failed to set user to document", userId, self.docId, e);
               }
-              notify.error(loc("error.dialog.title"), loc(e.text));
+              notify.ajaxError(e);
             })
             .call();
         }

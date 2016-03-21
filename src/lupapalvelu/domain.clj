@@ -365,7 +365,9 @@
    :verdicts                 []
    :tosFunction              nil
    :metadata                 {}
-   :processMetadata          {}})
+   :processMetadata          {}
+   :appeals                  []
+   :appealVerdicts           []})
 
 (def operation-skeleton
   {:name ""
