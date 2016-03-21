@@ -17,6 +17,10 @@
    (sc/optional-key :text)     sc/Str            ;; Optional description
    })
 
+(defschema FrontendAppealVerdict
+  "Schema of AppealVerdict presentation for frontend"
+  (assoc AppealVerdict :editable sc/Bool :type (sc/eq "appealVerdict")))
+
 (defn create-appeal-verdict [target-verdict-id giver made text]
   (util/strip-nils
     {:id                  (mongo/create-id)

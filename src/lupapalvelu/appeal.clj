@@ -20,6 +20,10 @@
    (sc/optional-key :text)     sc/Str                  ;; Optional description
    })
 
+(defschema FrontendAppeal
+  "Schema for Appeal presentation for frontend queries"
+  (assoc Appeal :editable sc/Bool))
+
 (defn create-appeal [target-verdict-id type appellant made text]
   (util/strip-nils
     {:id                  (mongo/create-id)

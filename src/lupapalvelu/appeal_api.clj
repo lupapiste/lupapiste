@@ -6,7 +6,9 @@
             [lupapalvelu.appeal :as appeal]
             [lupapalvelu.appeal-verdict :as appeal-verdict]
             [lupapalvelu.states :as states]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [sade.schemas :as ssc]
+            [schema.core :as sc]))
 
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
@@ -125,12 +127,23 @@
   ; get attacments for appeal here
   appeal)
 
+(defn- validate-output-format
+  "Validate output data for frontend. Logs as ERROR in action pipeline."
+  [_ response]
+  (assert (contains? response :data))
+  (let [data (:data response)]
+    (assert (not-every? #(sc/check ssc/ObjectIdStr %) (keys data)) "Verdict IDs as ObjectID strings")
+    (doseq [appeal (flatten (vals data))] ; Validate appeals/appeal-verdicts against
+      (case (keyword (:type appeal))
+        :appealVerdict           (sc/validate appeal-verdict/FrontendAppealVerdict appeal)
+        (:appeal :rectification) (sc/validate appeal/FrontendAppeal appeal)))))
 
 (defquery appeals
   {:description "Query for frontend, that returns all appeals/appeal verdicts of application in pre-processed form."
    :parameters [id]
    :user-roles #{:authority :applicant}
-   :states     states/post-verdict-states}
+   :states     states/post-verdict-states
+   :on-success validate-output-format}
   [{application :application}]
   (let [appeal-verdicts (map #(assoc % :type "appealVerdict") (:appealVerdicts application))
         all-appeals     (concat (:appeals application) appeal-verdicts)
