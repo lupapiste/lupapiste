@@ -1,7 +1,7 @@
 (ns lupapalvelu.appeal-api
   (:require [sade.core :refer :all]
             [sade.util :as util]
-            [monger.operators :refer [$push $elemMatch $set]]
+            [monger.operators :refer [$push $pull $elemMatch $set]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.appeal :as appeal]
             [lupapalvelu.appeal-verdict :as appeal-verdict]
@@ -117,6 +117,32 @@
       (:mongo-query updates)
       (:mongo-updates updates))
     (fail :error.invalid-appeal-verdict)))
+
+(defcommand delete-appeal
+  {:parameters          [id verdictId appealId]
+   :user-roles          #{:authority}
+   :input-validators    [(partial action/string-parameters [:appealId])]
+   :states              states/post-verdict-states
+   :pre-checks          [verdict-exists
+                         appeal-id-exists
+                         appeal-editable?]}
+  [command]
+  (action/update-application
+    command
+    {$pull {:appeals {:id appealId}}}))
+
+(defcommand delete-appeal-verdict
+  {:parameters          [id verdictId appealId]
+   :user-roles          #{:authority}
+   :input-validators    [(partial action/string-parameters [:appealId])]
+   :states              states/post-verdict-states
+   :pre-checks          [verdict-exists
+                         appeal-verdict-id-exists
+                         appeal-verdict-editable?]}
+  [command]
+  (action/update-application
+    command
+    {$pull {:appealVerdicts {:id appealId}}}))
 
 
 (defn- process-appeal

@@ -315,16 +315,46 @@
       metadata
       {:nakyvyys :julkinen})))
 
-(defn- create-attachment! [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
+(defn- create-attachment-data
+  "Returns the attachment data model as map. This attachment data can be pushed to mongo."
+  [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
+  (let [metadata (default-metadata-for-attachment-type attachment-type application)]
+    (make-attachment now
+                     target
+                     required?
+                     requested-by-authority?
+                     locked?
+                     (:state application)
+                     op
+                     attachment-type
+                     metadata
+                     attachment-id
+                     contents
+                     read-only?
+                     source)))
+
+(defn- create-attachment!
+  "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
+  [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
   {:pre [(map? application)]}
-  (let [metadata (default-metadata-for-attachment-type attachment-type application)
-        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents read-only? source)]
+  (let [attachment-data (create-attachment-data application
+                                                attachment-type
+                                                op
+                                                now
+                                                target
+                                                locked?
+                                                required?
+                                                requested-by-authority?
+                                                attachment-id
+                                                contents
+                                                read-only?
+                                                source)]
     (update-application
      (application->command application)
       {$set {:modified now}
-       $push {:attachments attachment}})
+       $push {:attachments attachment-data}})
     (tos/update-process-retention-period (:id application) now)
-    attachment))
+    attachment-data))
 
 (defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
