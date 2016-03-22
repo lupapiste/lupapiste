@@ -12,7 +12,7 @@
 
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
-  [{{verdictId :targetId} :data} {:keys [verdicts]}]
+  [{{verdictId :verdictId} :data} {:keys [verdicts]}]
   (when-not (util/find-first #(= verdictId (:id %)) verdicts)
     (fail :error.verdict-not-found)))
 
@@ -41,7 +41,7 @@
   [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
   (when appeal-id
     (if-let [appeal (util/find-by-id appeal-id appeals)]
-      (when-not (util/is-latest-of? (:made appeal) (map :made appealVerdicts))
+      (when-not (util/is-latest-of? (:datestamp appeal) (map :datestamp appealVerdicts))
         (fail :error.appeal-verdict-already-exists))
       (fail :error.unknown-appeal))))
 
@@ -50,7 +50,7 @@
   [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
   (when appeal-id
     (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
-      (when-not (util/is-latest-of? (:made appeal-verdict) (map :made appeals))
+      (when-not (util/is-latest-of? (:datestamp appeal-verdict) (map :datestamp appeals))
         (fail :error.appeal-already-exists))
       (fail :error.unknown-appeal-verdict))))
 
@@ -74,20 +74,20 @@
 
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"
-   :parameters          [id targetId type appellant made]
+   :parameters          [id verdictId type appellant datestamp]
    :optional-parameters [text appealId]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
    :input-validators    [appeal/input-validator
-                         (partial action/number-parameters [:made])]
+                         (partial action/number-parameters [:datestamp])]
    :pre-checks          [verdict-exists
                          appeal-id-exists
                          appeal-editable?]}
   [command]
   (if-let [updates (if appealId
-                     (some->> (appeal/appeal-data-for-upsert targetId type appellant made text appealId)
+                     (some->> (appeal/appeal-data-for-upsert verdictId type appellant datestamp text appealId)
                               (update-appeal-data-mongo-updates :appeals appealId))
-                     (some->> (appeal/appeal-data-for-upsert targetId type appellant made text)
+                     (some->> (appeal/appeal-data-for-upsert verdictId type appellant datestamp text)
                               (new-appeal-data-mongo-updates :appeals)))]
     (action/update-application
       command
@@ -96,21 +96,21 @@
     (fail :error.invalid-appeal)))
 
 (defcommand upsert-appeal-verdict
-  {:parameters          [id targetId giver made]
+  {:parameters          [id verdictId giver datestamp]
    :optional-parameters [text appealId]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
    :input-validators    [appeal-verdict/input-validator
-                         (partial action/number-parameters [:made])]
+                         (partial action/number-parameters [:datestamp])]
    :pre-checks          [verdict-exists
                          appeal-exists
                          appeal-verdict-id-exists
                          appeal-verdict-editable?]}
   [command]
   (if-let [updates (if appealId
-                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert targetId giver made text appealId)
+                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert verdictId giver datestamp text appealId)
                               (update-appeal-data-mongo-updates :appealVerdicts appealId))
-                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert targetId giver made text)
+                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert verdictId giver datestamp text)
                               (new-appeal-data-mongo-updates :appealVerdicts)))]
     (action/update-application
       command
@@ -123,8 +123,8 @@
   "Process appeal for frontend"
   [{:keys [appealVerdicts appeals]} appeal-item]
   (case (keyword (:type appeal-item))
-    :appealVerdict           (assoc appeal-item :editable (false? (appeals-after-appeal-verdict? appeal-item appeals)))
-    (:appeal :rectification) (assoc appeal-item :editable (false? (appeal-verdicts-after-appeal? appeal-item appealVerdicts)))))
+    :appealVerdict           (assoc appeal-item :editable (util/is-latest-of? (:datestamp appeal-item) (map :datestamp appeals)))
+    (:appeal :rectification) (assoc appeal-item :editable (util/is-latest-of? (:datestamp appeal-item) (map :datestamp appealVerdicts)))))
 
 (defn- add-attachments [{id :id :as appeal}]
   ; get attacments for appeal here
@@ -153,5 +153,5 @@
         processed-appeals (->> all-appeals
                                (map (comp add-attachments
                                           (partial process-appeal application)))
-                               (sort-by :made))]
+                               (sort-by :datestamp))]
     (ok :data (group-by :target-verdict processed-appeals))))

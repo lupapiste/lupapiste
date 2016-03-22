@@ -14,10 +14,10 @@
     (fact "Can't add appeal before verdict"
       (command sonja :upsert-appeal
                :id app-id
-               :targetId (mongo/create-id)
+               :verdictId (mongo/create-id)
                :type "appeal"
                :appellant "Pena"
-               :made 123456
+               :datestamp 123456
                :text "foo") => (partial expected-failure? :error.command-illegal-state))
 
     (let [{vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")]
@@ -25,26 +25,26 @@
       (fact "wrong verdict ID"
         (command sonja :upsert-appeal
                  :id app-id
-                 :targetId (mongo/create-id)
+                 :verdictId (mongo/create-id)
                  :type "appeal"
                  :appellant "Pena"
-                 :made 123456
+                 :datestamp 123456
                  :text "foo") => (partial expected-failure? :error.verdict-not-found))
       (fact "successful appeal"
         (command sonja :upsert-appeal
                  :id app-id
-                 :targetId vid
+                 :verdictId vid
                  :type "appeal"
                  :appellant "Pena"
-                 :made created
+                 :datestamp created
                  :text "foo") => ok?)
       (fact "text is optional"
         (command sonja :upsert-appeal
                  :id app-id
-                 :targetId vid
+                 :verdictId vid
                  :type "rectification"
                  :appellant "Pena"
-                 :made created) => ok?)
+                 :datestamp created) => ok?)
       (fact "appeal is saved to application to be viewed"
         (map :type (:appeals (query-application pena app-id))) => (just ["appeal" "rectification"]))
       (fact "appeal query is OK"
@@ -57,10 +57,10 @@
         (let [appeals-before  (get (:data (query pena :appeals :id app-id)) (keyword vid))
               target-appeal   (first appeals-before)
               _ (command sonja :upsert-appeal :id app-id
-                         :targetId vid
+                         :verdictId vid
                          :type "rectification"
                          :appellant "Teppo"
-                         :made created
+                         :datestamp created
                          :appealId (:id target-appeal)) => ok?
               appeals-after   (get (:data (query pena :appeals :id app-id)) (keyword vid))
               updated-target-appeal   (first appeals-after)]
@@ -75,20 +75,20 @@
       (fact "Upsert is validated"
         (fact "appealId must be found from application"
           (command sonja :upsert-appeal :id app-id
-                   :targetId vid
+                   :verdictId vid
                    :type "rectification"
                    :appellant "Teppo"
-                   :made created
+                   :datestamp created
                    :appealId "foobar") => (partial expected-failure? :error.unknown-appeal))
 
         (let [appeals (get (:data (query pena :appeals :id app-id)) (keyword vid))
               test-appeal (first appeals)]
           (fact "Appeal must be valid when upserting"
             (command sonja :upsert-appeal :id app-id
-                     :targetId vid
+                     :verdictId vid
                      :type "trolol"
                      :appellant "Teppo"
-                     :made created
+                     :datestamp created
                      :appealId (:id test-appeal)) => (partial expected-failure? :error.invalid-appeal)))))))
 
 (facts "Upserting appeal verdicts"
@@ -98,9 +98,9 @@
     (fact "Can't add appeal before verdict"
       (command sonja :upsert-appeal-verdict
                :id app-id
-               :targetId (mongo/create-id)
+               :verdictId (mongo/create-id)
                :giver "Teppo"
-               :made 123456
+               :datestamp 123456
                :text "foo") => (partial expected-failure? :error.command-illegal-state))
 
     (let [{vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")]
@@ -108,38 +108,38 @@
       (fact "wrong verdict ID"
         (command sonja :upsert-appeal-verdict
                  :id app-id
-                 :targetId (mongo/create-id)
+                 :verdictId (mongo/create-id)
                  :giver "Teppo"
-                 :made 123456
+                 :datestamp 123456
                  :text "foo") => (partial expected-failure? :error.verdict-not-found))
       (fact "an appeal must exists before creating verdict appeal"
         (command sonja :upsert-appeal-verdict
                  :id app-id
-                 :targetId vid
+                 :verdictId vid
                  :giver "Teppo"
-                 :made created
+                 :datestamp created
                  :text "foo") => (partial expected-failure? :error.appeals-not-found))
       (fact "first create appeal"
         (command sonja :upsert-appeal
                  :id app-id
-                 :targetId vid
+                 :verdictId vid
                  :type "rectification"
                  :appellant "Pena"
-                 :made created
+                 :datestamp created
                  :text "rectification 1") => ok?)
       (fact "... then try to create invalid appeal verdict"
         (command sonja :upsert-appeal-verdict
                  :id app-id
-                 :targetId vid
+                 :verdictId vid
                  :giver "Teppo"
-                 :made "18.3.2016"
+                 :datestamp "18.3.2016"
                  :text "verdict for rectification 1") => (partial expected-failure? :error.invalid-appeal-verdict))
       (fact "... then actually create a valid appeal verdict"
         (command sonja :upsert-appeal-verdict
                  :id app-id
-                 :targetId vid
+                 :verdictId vid
                  :giver "Teppo"
-                 :made (+ created 1)
+                 :datestamp (+ created 1)
                  :text "verdict for rectification 1") => ok?)
 
       (fact "appeal query is OK after giving appeal and appeal verdict"
@@ -155,10 +155,10 @@
               test-appeal (first appeals)]
           (command sonja :upsert-appeal
                    :id app-id
-                   :targetId vid
+                   :verdictId vid
                    :type "rectification"
                    :appellant "Pena"
-                   :made created
+                   :datestamp created
                    :text "rectification edition"
                    :appealId (:id test-appeal)) => (partial expected-failure? :error.appeal-verdict-already-exists)
 
@@ -171,9 +171,9 @@
               appeal              (first appeals)]
           (fact "Can't update appeal with appeal-verdict endpoint"
             (command sonja :upsert-appeal-verdict :id app-id
-                     :targetId vid
+                     :verdictId vid
                      :giver "Teppo"
-                     :made created
+                     :datestamp created
                      :appealId (:id appeal)) => (partial expected-failure? :error.unknown-appeal-verdict))))
 
       (fact* "Upsert updates successfully"
@@ -181,9 +181,9 @@
               target-appeal-verdict   (second appeals-before)
               _ (:editable target-appeal-verdict) => true
               _ (command sonja :upsert-appeal-verdict :id app-id
-                         :targetId vid
+                         :verdictId vid
                          :giver "Seppo"
-                         :made created
+                         :datestamp created
                          :appealId (:id target-appeal-verdict)) => ok?
               appeals-after   (get (:data (query pena :appeals :id app-id)) (keyword vid))
               updated-target-appeal-verdict   (second appeals-after)]
@@ -198,17 +198,17 @@
       (fact "If new appeals have been made, old appeal-verdict can't be edited"
         (command sonja :upsert-appeal
                  :id app-id
-                 :targetId vid
+                 :verdictId vid
                  :type "appeal"
                  :appellant "Pena again"
-                 :made (now)
+                 :datestamp (now)
                  :text "new appeal") => ok?
         (let [appeals (get (:data (query pena :appeals :id app-id)) (keyword vid))
               target-appeal-verdict (second appeals)]
           (command sonja :upsert-appeal-verdict :id app-id
-                   :targetId vid
+                   :verdictId vid
                    :giver "Seppo"
-                   :made created
+                   :datestamp created
                    :appealId (:id target-appeal-verdict)) => (partial expected-failure? :error.appeal-already-exists)
 
           (fact "query has editable flag set correctly"
