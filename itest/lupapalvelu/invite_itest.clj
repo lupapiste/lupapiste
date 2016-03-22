@@ -105,9 +105,23 @@
     (fact "Teppo can not comment on Mikko's application before accepting the invite"
       (comment-application teppo application-id true) => unauthorized?)
 
+    (fact "Mikko prefils Teppo's company name"
+      (command mikko :update-doc :id application-id :doc suunnittelija-doc  :collection "documents" :updates [["yritys.yritysnimi" "Tepon saneeraus"]]) => ok?)
+
     (fact "Teppo must be able to accept Mikko's invite"
       (command teppo :approve-invite :id application-id) => ok?
       (count (:invites (query teppo :invites))) => 0)
+
+    (fact "Teppo's info is now in place"
+      (let [application  (query-application mikko application-id)
+            suunnittelija (domain/get-document-by-id application suunnittelija-doc)]
+        (get-in suunnittelija [:data :henkilotiedot :etunimi :value]) => "Teppo"
+        (get-in suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Nieminen"
+        (get-in suunnittelija [:data :osoite :katu :value]) => "Mutakatu 7"
+        (get-in suunnittelija [:data :osoite :postitoimipaikannimi :value]) => "Tampere"
+
+        (fact "Teppo does not have company in his profile, but the data was not overwriten"
+          (get-in suunnittelija [:data :yritys :yritysnimi :value]) => "Tepon saneeraus")))
 
     (fact "Teppo must be able to comment!"
       (comment-application teppo application-id true) => ok?
@@ -122,13 +136,20 @@
         (:applicant application ) => "Intonen Mikko"))
 
     (fact "Mikko sets Teppo as co-applicant"
+
       (command mikko :set-user-to-document :id application-id :documentId hakija-doc :userId teppo-id :path "henkilo") => ok?
       (fact "Teppo is now the applicant"
         (let [application  (query-application mikko application-id)
               hakija (domain/get-document-by-id application hakija-doc)]
           (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Teppo"
           (get-in hakija [:data :henkilo :userId :value]) => teppo-id
-          (:applicant application ) => "Nieminen Teppo")))
+          (:applicant application ) => "Nieminen Teppo"
+
+
+          )
+
+
+        ))
 
     (let [actions (:actions (query teppo :allowed-actions :id application-id))]
       (fact "Teppo should be able to"
