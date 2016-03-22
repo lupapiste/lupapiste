@@ -68,7 +68,7 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
         return result;
       } );
       self.sendEvent( service.serviceName,
-                      "upsertAppeal",
+                      "upsert-appeal",
                       {message: message,
                        callback: cb} );
     }

@@ -44,7 +44,7 @@ LUPAPISTE.FileUploadModel = function( params ) {
 
   if( !params.readOnly ) {
     // Trick to ensure that rendering is done before binding.
-    _.delay(bindToService, 1 );
+    _.defer(bindToService);
   }
 
   self.removeFile = function( data ) {
