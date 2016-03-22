@@ -265,3 +265,12 @@
     (version-is-greater-or-equal 2.1     {:major 2 :minor 1 :micro 5}) => (throws AssertionError)
     (version-is-greater-or-equal "2.1.4" "2.1.5")                      => (throws AssertionError)
     (version-is-greater-or-equal "2.1.4" {:major 2 :minor 1})          => (throws AssertionError)))
+
+(fact "is-latest-of?"
+  (is-latest-of? 0 [1 2 3]) => false
+  (is-latest-of? 1 [1 2 3]) => false
+  (is-latest-of? 3 [1 2 4]) => false
+  (is-latest-of? 4 [1 2 3]) => true
+
+  (is-latest-of? 2.2 [1 2 3]) => (throws AssertionError)
+  (is-latest-of? 2 nil) =>       (throws AssertionError))
