@@ -246,15 +246,22 @@
       (with-open [input-stream (io/input-stream content)]
         (store-content input-stream)))))
 
+(defn- gridfs-file-as-map [attachment]
+  (let [metadata (from-db-object (.getMetaData attachment) :true)]
+    {:content (fn [] (.getInputStream attachment))
+     :content-type (.getContentType attachment)
+     :content-length (.getLength attachment)
+     :file-name (.getFilename attachment)
+     :fileId (.getId attachment)
+     :metadata metadata
+     :application (:application metadata)}))
+
+(defn download-find-many [query]
+  (map gridfs-file-as-map (gfs/find (get-gfs) query)))
+
 (defn download-find [query]
   (when-let [attachment (gfs/find-one (get-gfs) (with-_id (remove-null-chars query)))]
-    (let [metadata (from-db-object (.getMetaData attachment) :true)]
-      {:content (fn [] (.getInputStream attachment))
-       :content-type (.getContentType attachment)
-       :content-length (.getLength attachment)
-       :file-name (.getFilename attachment)
-       :metadata metadata
-       :application (:application metadata)})))
+    (gridfs-file-as-map attachment)))
 
 (defn ^{:perfmon-exclude true} download [file-id]
   (download-find {:_id file-id}))
