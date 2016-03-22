@@ -33,7 +33,7 @@
 
 (def tyomaasta-vastaava
   (schema-body-without-element-by-name
-    (schema-body-without-element-by-name ya-party "turvakieltoKytkin")
+    (schema-body-without-element-by-name party "turvakieltoKytkin")
     "hetu"))
 
 (def yleiset-alueet-maksaja
@@ -214,3 +214,8 @@
                           {:name "painorajoitus" :type :checkbox}
                           {:name "ulottumarajoituksia" :type :checkbox}
                           {:name "tyokoneitaLiikenteenSeassa" :type :checkbox}]}]}]})
+
+
+
+
+
