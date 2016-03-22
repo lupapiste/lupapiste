@@ -15,15 +15,15 @@
   (appeal-data-for-upsert nil nil nil nil nil) => nil)
 
 (fact "Appeal input validator"
-  (let [valid {:targetId       (mongo/create-id)
+  (let [valid {:verdictId       (mongo/create-id)
                :type           "appeal"
                :appellant      "Me"
-               :made           (now)
+               :datestamp           (now)
                :text           "Some information"}
-        invalid {:targetId       (mongo/create-id)
+        invalid {:verdictId       (mongo/create-id)
                  :type           "foobar"
                  :appellant      "Me"
-                 :made           "18.3.2016"
+                 :datestamp           "18.3.2016"
                  :text           "Some information"}]
 
     (input-validator {:data valid}) => nil
@@ -34,7 +34,7 @@
         verdict-id (mongo/create-id)]
     (appeal-data-for-upsert verdict-id "appeal" "Test User" 123 nil current-id) => {:type "appeal"
                                                                                     :appellant "Test User"
-                                                                                    :made 123}
+                                                                                    :datestamp 123}
     (appeal-verdict/appeal-verdict-data-for-upsert
       verdict-id "Foo" 123 nil current-id) => {:giver "Foo"
-                                               :made 123}))
+                                               :datestamp 123}))
