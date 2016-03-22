@@ -247,34 +247,44 @@
 (defn- update-key-in-schema? [schema [update-key _]]
   (model/find-by-name schema update-key))
 
-(defn set-subject-to-document [application document subject path timestamp]
-  {:pre [(map? document) (map? subject)]}
-  (when (seq subject)
-    (let [path-arr     (if-not (ss/blank? path) (ss/split path #"\.") [])
-          schema       (schemas/get-schema (:schema-info document))
-          with-hetu    (model/has-hetu? (:body schema) path-arr)
-          person       (tools/unwrapped (case (first path-arr)
-                                          "henkilo" (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? true)
-                                          "yritys" (model/->yritys subject :with-empty-defaults? true)
-                                          (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? true)))
-          model        (if (seq path-arr)
-                         (assoc-in {:_selected (first path-arr)} (map keyword path-arr) person)
-                         person)
-          updates      (->> (tools/path-vals model)
-                            ; Path should exist in schema!
-                            (filter (partial update-key-in-schema? (:body schema))))]
-      (when-not schema (fail! :error.schema-not-found))
-      (debugf "merging user %s with best effort into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
-      (persist-model-updates application "documents" document updates timestamp))))
+(defn set-subject-to-document
+  ([application document subject path timestamp]
+    (set-subject-to-document application document subject path timestamp true))
+  ([application document subject path timestamp set-empty-values?]
+    {:pre [(map? document) (map? subject) (util/boolean? set-empty-values?)]}
+    (when (seq subject)
+      (let [path-arr     (if-not (ss/blank? path) (ss/split path #"\.") [])
+            schema       (schemas/get-schema (:schema-info document))
+            with-hetu    (model/has-hetu? (:body schema) path-arr)
+            person       (tools/unwrapped (case (first path-arr)
+                                            "henkilo" (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? set-empty-values?)
+                                            "yritys" (model/->yritys subject :with-empty-defaults? set-empty-values?)
+                                            (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? set-empty-values?)))
+            model        (if (seq path-arr)
+                           (assoc-in {:_selected (first path-arr)} (map keyword path-arr) person)
+                           person)
+            include-update (fn [path-val]
+                             (and
+                               ; Path must exist in schema!
+                               (update-key-in-schema? (:body schema) path-val)
+                               ; Optionally skip empty values
+                               (or set-empty-values? (not (ss/blank? (second path-val))))))
+            updates      (filter include-update (tools/path-vals model))]
+        (when-not schema (fail! :error.schema-not-found))
+        (debugf "merging user %s with best effort into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
+        (persist-model-updates application "documents" document updates timestamp)))))
 
-(defn do-set-user-to-document [application document-id user-id path timestamp]
-  {:pre [application document-id timestamp]}
-  (if-let [document (domain/get-document-by-id application document-id)]
-    (when-not (ss/blank? user-id)
-      (if-let [subject (user/get-user-by-id user-id)]
-        (set-subject-to-document application document subject path timestamp)
-        (fail! :error.user-not-found)))
-    (fail :error.document-not-found)))
+(defn do-set-user-to-document
+  ([application document-id user-id path timestamp]
+    (do-set-user-to-document application document-id user-id path timestamp true))
+  ([application document-id user-id path timestamp set-empty-values?]
+    {:pre [application document-id timestamp]}
+    (if-let [document (domain/get-document-by-id application document-id)]
+      (when-not (ss/blank? user-id)
+        (if-let [subject (user/get-user-by-id user-id)]
+          (set-subject-to-document application document subject path timestamp set-empty-values?)
+          (fail! :error.user-not-found)))
+      (fail :error.document-not-found))))
 
 (defn do-set-company-to-document [application document company-id path user timestamp]
   {:pre [document]}
