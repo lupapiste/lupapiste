@@ -139,7 +139,7 @@
 
 
 (defn- get-liite-for-lausunto [attachment application begin-of-link]
-  (let [type "Lausunto"
+  (let [type "lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
