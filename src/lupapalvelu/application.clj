@@ -262,9 +262,7 @@
         op-schema-name (:schema op-info)
         schema-version (:schema-version application)
         default-schema-datas (util/assoc-when {}
-                                              op-schema-name (:schema-data op-info)
-                                              "yleiset-alueet-maksaja" operations/schema-data-yritys-selected
-                                              "tyomaastaVastaava" operations/schema-data-henkilo-selected)
+                                              op-schema-name (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         make (fn [schema]
                {:pre [(:info schema)]}

@@ -659,10 +659,16 @@
                       tyonjohtajan-hyvaksynta))
 
 (def maksaja (body
-               (henkilo-yritys-select-group
-                 :yritys-body yritys-with-verkkolaskutustieto
-                 :henkilo-body henkilo-maksaja)
-               {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+              (henkilo-yritys-select-group
+               :yritys-body yritys-with-verkkolaskutustieto
+               :henkilo-body henkilo-maksaja)
+              {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+
+(def ya-maksaja (body
+                 (henkilo-yritys-select-group :default "yritys"
+                  :yritys-body yritys-with-verkkolaskutustieto
+                  :henkilo-body henkilo-maksaja)
+                 {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
                  :body [{:name "poisto"}

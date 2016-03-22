@@ -38,7 +38,7 @@
 
 (def yleiset-alueet-maksaja
   (body
-    (schema-body-without-element-by-name maksaja "turvakieltoKytkin")))
+    (schema-body-without-element-by-name ya-maksaja "turvakieltoKytkin")))
 
 (def tyo-aika
   (body
