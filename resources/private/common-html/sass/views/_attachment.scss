@@ -304,23 +304,3 @@ td.comment-text {
     font-size: 50px;
   }
 }
-
-// File upload comoponent
-
-ul.upload-files {
-  display: table;
-  list-style: none;
-  padding: {
-    bottom: .5em;
-    left: 0;
-  }
-  li {
-    display: table-row;
-    span, a {
-      display: table-cell;
-    }
-    span {
-      padding-right: 2em;
-    }
-  }
-}

@@ -1,5 +1,4 @@
 // Service for managing verdict appeals.
-//
 LUPAPISTE.VerdictAppealService = function() {
   "use strict";
   var self = this;
@@ -23,25 +22,13 @@ LUPAPISTE.VerdictAppealService = function() {
   };
 
   function upsertAppeal( event ) {
-    var appeal = event.message;
+    var appeal = _.assign( event .message,
+                           {id: lupapisteApp.models.application.id()});
     var callback = event.callback || _.noop;
-    appeal.date = moment( appeal.date, "D.M.YYYY", true).unix();
-    var isVerdict = appeal.appealType === "appealVerdict";
-    var keys = {verdictId: "targetId",
-                authors: isVerdict ? "giver" : "appellant",
-                date: "made",
-                extra: "text"
-               };
-    if( !isVerdict) {
-      keys.appealType = "type";
-    }
-    var acc = {id: lupapisteApp.models.application.id(), appealId: appeal.appealId};
 
-    ajax.command( isVerdict ? "upsert-appeal-verdict" : "upsert-appeal",
-                  _.reduce( keys, function( acc, v, k ) {
-                    acc[v] = appeal[k];
-                    return acc;
-                  }, acc))
+    ajax.command( appeal.type === "appealVerdict"
+                  ? "upsert-appeal-verdict" : "upsert-appeal",
+                  appeal)
       .success( function() {
         fetchAllAppeals();
         callback();

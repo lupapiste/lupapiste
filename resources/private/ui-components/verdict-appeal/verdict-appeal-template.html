@@ -2,9 +2,51 @@
         type="text/x-jquery-tmpl"
         id="verdict-appeal-template">
   <h2 data-bind="ltext: 'verdict.muutoksenhaku'"></h2>
+  <!-- ko if: appeals().length -->
+  <table class="appeals-table"
+         data-bind="if: appeals">
+    <thead><tr>
+        <th data-bind="ltext: 'verdict.muutoksenhaku.tyyppi'"></th>
+        <th data-bind="ltext: 'verdict.muutoksenhaku.tekijat'"></th>
+        <th data-bind="ltext: 'verdict.muutoksenhaku.pvm'"></th>
+        <th data-bind="ltext: 'verdict.attachments'"></th>
+        <th></th>
+    </tr></thead>
+    <tbody data-bind="foreach: appeals">
+      <tr>
+        <td data-bind="ltext: 'verdict.muutoksenhaku.' + appealType"></td>
+        <td data-bind="text: authors"></td>
+        <td data-bind="text: date"></td>
+        <td data-bind="foreach: files">
+          <ul class="appeals-files">
+            <li>
+              <a data-bind="download: $data"></a>
+              <span class="appeals-files__info">
+                <span data-bind="ltext: contentType"></span>
+                <span data-bind="size: size"></span>
+              </span>
+            </li>
+          </ul>
+        </td>
+        <td class="appeals-table--action">
+          <!-- ko if: editable -->
+          <a data-bind="ltext: 'verdict.muutoksenhaku.muokkaa',
+                        click: $parent.editAppeal"></a>
+          <a data-bind="ltext: 'verdict.muutoksenhaku.poista',
+                        click: $parent.deleteAppeal"></a>
+          <!-- /ko -->
+          <!-- ko ifnot: editable -->
+          <a data-bind="ltext: 'verdict.muutoksenhaku.show-extra',
+                        click: $parent.showAppealExtraInfo"></a>
+          <!-- /ko -->
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- /ko -->
   <div class="stacked">
     <button class="positive"
-            data-bind="click: toggleNewBubble">
+            data-bind="toggleClick: newBubbleVisible">
       <i class="lupicon-circle-plus"></i>
       <span data-bind="ltext: 'verdict.muutoksenhaku.kirjaa'"></span>
     </button>

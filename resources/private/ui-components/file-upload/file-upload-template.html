@@ -7,6 +7,7 @@
     <ul data-bind="foreach: files" class="upload-files">
       <li>
         <span  data-bind="text: filename"></span>
+        <span class="upload-files__size" data-bind="size: size"></span>
         <a data-bind="ltext: 'remove',
                       visible: !$parent.params.readOnly,
                       click: $parent.removeFile"></a>
