@@ -36,26 +36,12 @@
     (when-not (util/find-by-id appeal-id appealVerdicts)
       (fail :error.unknown-appeal-verdict))))
 
-(defn appeal-verdicts-after-appeal?
-  "Predicate to check if appeal-verdicts have been made AFTER the given appeal in question has been made.
-   Returns true if at least one appeal-verdict has been given after the appeal."
-  [appeal appeal-verdicts]
-  {:pre [(map? appeal) (sequential? appeal-verdicts)]}
-  (not-every? (partial > (:made appeal)) (map :made appeal-verdicts)))
-
-(defn appeals-after-appeal-verdict?
-  "Predicate to check if appeals have been made AFTER the given appeal-verdict in question has been made.
-   Returns true if at least one appeal has been given after the appeal-verdict."
-  [appeal-verdict appeals]
-  {:pre [(map? appeal-verdict) (sequential? appeals)]}
-  (not-every? (partial > (:made appeal-verdict)) (map :made appeals)))
-
 (defn- appeal-editable?
   "Pre-check to check that appeal can be edited."
   [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
   (when appeal-id
     (if-let [appeal (util/find-by-id appeal-id appeals)]
-      (when (appeal-verdicts-after-appeal? appeal appealVerdicts)
+      (when-not (util/is-latest-of? (:made appeal) (map :made appealVerdicts))
         (fail :error.appeal-verdict-already-exists))
       (fail :error.unknown-appeal))))
 
@@ -64,7 +50,7 @@
   [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
   (when appeal-id
     (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
-      (when (appeals-after-appeal-verdict? appeal-verdict appeals)
+      (when-not (util/is-latest-of? (:made appeal-verdict) (map :made appeals))
         (fail :error.appeal-already-exists))
       (fail :error.unknown-appeal-verdict))))
 

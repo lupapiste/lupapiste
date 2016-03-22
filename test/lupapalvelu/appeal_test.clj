@@ -1,11 +1,11 @@
 (ns lupapalvelu.appeal-test
+  "Unit tests for lupapalvelu.appeal, lupapalvelu.appeal-verdict, lupapalvelu.appeal-api."
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.core :refer [now]]
             [lupapalvelu.itest-util :refer [expected-failure?]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.appeal :refer :all]
-            [lupapalvelu.appeal-api :refer [appeal-verdicts-after-appeal?]]
             [lupapalvelu.appeal-verdict :as appeal-verdict]))
 
 (fact "Invalid data results in nil"
@@ -38,15 +38,3 @@
     (appeal-verdict/appeal-verdict-data-for-upsert
       verdict-id "Foo" 123 nil current-id) => {:giver "Foo"
                                                :made 123}))
-
-(fact "appeal-verdicts-after-appeal?"
-  (let [appeal {:made 2}
-        verdicts [{:made 1}]]
-    (appeal-verdicts-after-appeal? appeal verdicts) => false
-    (appeal-verdicts-after-appeal? appeal (conj verdicts {:made 0})) => false
-    (appeal-verdicts-after-appeal? appeal (conj verdicts {:made 3})) => true
-    (appeal-verdicts-after-appeal? appeal (conj verdicts {:made 2})) => true ; verdict and appeal on same day
-    (appeal-verdicts-after-appeal? appeal [])                        => false ; no verdicts
-
-    (appeal-verdicts-after-appeal? nil (conj verdicts {:made 0})) => (throws AssertionError)
-    (appeal-verdicts-after-appeal? appeal nil)                    => (throws AssertionError)))
