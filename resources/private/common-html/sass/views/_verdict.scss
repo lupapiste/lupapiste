@@ -68,4 +68,20 @@ ul.appeals-files {
       padding-right: 2em;
     }
   }
+  tr.appeals-table__note {
+    padding: {
+    left: 2em;
+    right: 2em;
+  }
+    &:active {
+      background-color: initial;
+    }
+    background-color: white;
+    td.appeals-table--extra {
+      white-space: pre-wrap;
+    }
+    td.appeals-table--no-extra {
+      color: $gray187;
+    }
+  }
 }

@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1458659805358');
+@import url('main-blessed1.css?z=1458665578907');
 
 /* line 13, ../../../private/common-html/sass/partials/_links.scss */
 .application_summary .application_summary_info .link-permit-item:hover {
@@ -2280,6 +2280,24 @@ ul.appeals-files .appeals-files__info {
 /* line 67, ../../../private/common-html/sass/views/_verdict.scss */
 .appeals-table td.appeals-table--action a {
   padding-right: 2em;
+}
+/* line 71, ../../../private/common-html/sass/views/_verdict.scss */
+.appeals-table tr.appeals-table__note {
+  padding-left: 2em;
+  padding-right: 2em;
+  background-color: white;
+}
+/* line 76, ../../../private/common-html/sass/views/_verdict.scss */
+.appeals-table tr.appeals-table__note:active {
+  background-color: initial;
+}
+/* line 80, ../../../private/common-html/sass/views/_verdict.scss */
+.appeals-table tr.appeals-table__note td.appeals-table--extra {
+  white-space: pre-wrap;
+}
+/* line 83, ../../../private/common-html/sass/views/_verdict.scss */
+.appeals-table tr.appeals-table__note td.appeals-table--no-extra {
+  color: #bbbbbb;
 }
 
 /* line 1, ../../../private/common-html/sass/views/_side_panel.scss */

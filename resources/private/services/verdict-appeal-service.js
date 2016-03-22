@@ -10,7 +10,6 @@ LUPAPISTE.VerdictAppealService = function() {
   function fetchAllAppeals() {
     ajax.query( "appeals", {id: lupapisteApp.models.application.id()})
       .success( function( res ) {
-        console.log( "fetchAllappeals:", res );
         self.allAppeals = res.data;
         hub.send( self.serviceName + "::appeals-updated");
       })

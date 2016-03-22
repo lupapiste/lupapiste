@@ -18,21 +18,25 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
 
   function appealsFromService() {
     self.appeals( _.map( service .appeals( verdictId ),
-                                                function( a ) {
-                                                  return _.assign( frontAppeal( a ),
-                                                                   {files:[
-                                                                     {id: _.uniqueId( "dummyfile"),
-                                                                      filename: "filename.pdf",
-                                                                      contentType: "application/pdf",
-                                                                      size: 123456
-                                                                     },
-                                                                   {id: _.uniqueId( "dummyfile"),
-                                                                    filename: "filename.doc",
-                                                                    contentType: "application/msword",
-                                                                    size: 88888
-                                                                   }]});
+                         function( a ) {
+                           var appeal = _.assign( frontAppeal( a ),
+                                                  {showEdit: a.editable && ko.observable(),
+                                                   showExtra: !a.editable && ko.observable()});
+
+                           // TODO: remove mock attachments after backend returns files.
+                           return _.assign( appeal,
+                                            {files:[
+                                              {id: _.uniqueId( "dummyfile"),
+                                               filename: "filename.pdf",
+                                               contentType: "application/pdf",
+                                               size: 123456
+                                              },
+                                              {id: _.uniqueId( "dummyfile"),
+                                               filename: "filename.doc",
+                                               contentType: "application/msword",
+                                               size: 88888
+                                              }]});
                                                 }));
-    console.log( "Appeals:", self.appeals());
   }
 
 
@@ -51,13 +55,13 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
     var appeal = {
       appealType: back.type,
       authors: back.appellant || back.giver,
-      date:  back.datestamp ? moment ( back.datestamp ) .format ( FMT ) : "",
+      date:  back.datestamp ? moment.unix( back.datestamp ).format ( FMT ) : "",
       extra: back.text,
       files: back.files || [],
       editable: back.editable
     };
-    if( back.appealId ) {
-      appeal.appealId = back.appealId;
+    if( back.id ) {
+      appeal.appealId = back.id;
     }
     return appeal;
   }
@@ -92,10 +96,12 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
     var waiting = ko.observable();
 
     function initFun() {
-      var data = _.defaults( _.find( self.appeals, {appealId: appealId}),
+      var data = _.defaults( _.find( self.appeals(), {appealId: appealId}),
                              frontAppeal());
       _.each( data, function(v, k ) {
-        model[k]( v );
+        if( ko.isObservable( model[k])) {
+          model[k]( v );
+        }
       } );
       error( "");
       waiting( false );
@@ -125,16 +131,7 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
     };
   };
 
-  // Appeals table operations
-  self.editAppeal = function( appeal ) {
-    console.log( "edit:", appeal );
-  };
-
   self.deleteAppeal = function( appeal ) {
     console.log( "delete:", appeal );
   };
-
-  self.showAppealExtraInfo = function( appeal ) {
-    console.log( "show:", appeal );
-  }
 };

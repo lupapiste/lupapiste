@@ -31,16 +31,34 @@
         <td class="appeals-table--action">
           <!-- ko if: editable -->
           <a data-bind="ltext: 'verdict.muutoksenhaku.muokkaa',
-                        click: $parent.editAppeal"></a>
+                        toggleClick: showEdit"></a>
           <a data-bind="ltext: 'verdict.muutoksenhaku.poista',
                         click: $parent.deleteAppeal"></a>
           <!-- /ko -->
           <!-- ko ifnot: editable -->
           <a data-bind="ltext: 'verdict.muutoksenhaku.show-extra',
-                        click: $parent.showAppealExtraInfo"></a>
+                        toggleClick: showExtra"></a>
           <!-- /ko -->
         </td>
       </tr>
+      <!-- ko if: showExtra -->
+      <tr class="appeals-table__note">
+        <td colspan="5"
+            data-bind="text: extra || loc( 'verdict.muutoksenhaku.no-extra'),
+                       css: extra ? 'appeals-table--extra' : 'appeals-table--no-extra'">
+        </td>
+      </tr>
+      <tr></tr>
+      <!-- /ko -->
+      <!-- ko if: showEdit -->
+      <tr class="appeals-table__note">
+        <td colspan="5">
+          <verdict-appeal-bubble params="visible: showEdit,
+                                         model: $parent.bubbleModel( appealId )"></verdict-appeal-bubble>
+        </td>
+      </tr>
+      <tr></tr>
+      <!-- /ko -->
     </tbody>
   </table>
   <!-- /ko -->
