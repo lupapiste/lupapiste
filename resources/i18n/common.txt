@@ -5073,6 +5073,6 @@
 "attachment.downloadOriginalVersion.info" "fi" "Tiedostoa on käännetty,"
 "attachment.downloadOriginalVersion.info" "sv" "Dokumentet är översatt,"
 "attachment.downloadOriginalVersion.link" "fi" "lataa alkuperäinen versio."
-"attachment.downloadOriginalVersion.link "sv" "ladda originalversionen."
+"attachment.downloadOriginalVersion.link" "sv" "ladda originalversionen."
 "state.application" "fi" "Hakemuksen tila:"
 "state.application" "sv" "Ansökans status:"
