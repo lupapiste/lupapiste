@@ -10,7 +10,8 @@
             [lupapiste-commons.tos-metadata-schema :as tms]
             [schema.core :as s]
             [taoensso.timbre :as timbre]
-            [lupapiste-commons.schema-utils :as schema-utils]))
+            [lupapiste-commons.schema-utils :as schema-utils]
+            [lupapalvelu.attachment-api :as aa]))
 
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
@@ -132,7 +133,8 @@
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/all-but-draft-or-terminal
+   :pre-checks [aa/attachment-not-readOnly]}
   [{:keys [application created] :as command}]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
@@ -170,3 +172,8 @@
    :states states/all-application-states}
   [{:keys [application]}]
   (ok :process (t/generate-case-file-data application)))
+
+(defquery tos-operations-enabled
+  {:user-roles #{:authority}
+   :states states/all-application-states}
+  (ok))
