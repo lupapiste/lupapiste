@@ -37,6 +37,14 @@
     (when-not (util/find-by-id appeal-id appealVerdicts)
       (fail :error.unknown-appeal-verdict))))
 
+(defn- deny-type-change
+  "Pre-check: when appeal is updated, type of appeal can't be changed"
+  [{{appeal-id :appealId type :type} :data} {:keys [appeals]}]
+  (when appeal-id
+    (when-some [appeal (util/find-by-id appeal-id appeals)]
+      (when-not (= type (:type appeal))
+        (fail :error.appeal-type-change-denied)))))
+
 (defn- appeal-editable?
   "Pre-check to check that appeal can be edited."
   [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
@@ -83,7 +91,8 @@
                          (partial action/number-parameters [:datestamp])]
    :pre-checks          [verdict-exists
                          appeal-id-exists
-                         appeal-editable?]}
+                         appeal-editable?
+                         deny-type-change]}
   [{{:keys [attachments appeals] :as app} :application :as command}]
   (let [appeal-data (appeal/appeal-data-for-upsert verdictId type appellant datestamp text appealId)]
     (if appeal-data ; if data is valid

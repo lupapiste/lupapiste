@@ -63,7 +63,7 @@
               target-appeal   (first appeals-before)
               _ (command sonja :upsert-appeal :id app-id
                          :verdictId vid
-                         :type "rectification"
+                         :type "appeal"
                          :appellant "Teppo"
                          :datestamp created
                          :appealId (:id target-appeal)
@@ -76,7 +76,16 @@
 
           (fact "Appellant has been changed"
             (:appellant target-appeal) => "Pena"
-            (:appellant updated-target-appeal) => "Teppo")))
+            (:appellant updated-target-appeal) => "Teppo")
+
+          (fact "can't change type"
+            (command sonja :upsert-appeal :id app-id
+                     :verdictId vid
+                     :type "rectification"
+                     :appellant "Teppo"
+                     :datestamp created
+                     :appealId (:id target-appeal)
+                     :fileIds []) => (partial expected-failure? :error.appeal-type-change-denied))))
 
       (fact "Upsert is validated"
         (fact "appealId must be found from application"
