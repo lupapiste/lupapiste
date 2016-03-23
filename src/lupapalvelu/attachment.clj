@@ -1,7 +1,7 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
-            [clojure.set :refer [rename-keys]]
+            [clojure.set :refer [rename-keys difference]]
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
@@ -722,3 +722,56 @@
 
 (defn post-process-attachments [application]
   (update-in application [:attachments] (partial map post-process-attachment)))
+
+(defn- attachment-type-for-appeal [appeal-type]
+  (case (keyword appeal-type)
+    :appealVerdict  {:type-group :paatoksenteko
+                     :type-id    :paatos}
+    :appeal         {:type-group :muutoksenhaku
+                     :type-id    :valitus}
+    :rectification  {:type-group :muutoksenhaku
+                     :type-id    :oikaisuvaatimus}))
+
+(defn- create-appeal-attachment-data
+  "Return attachment model for new appeal attachment. Initial version is included."
+  [{app :application now :created user :user} appeal-id appeal-type file]
+  (let [type (attachment-type-for-appeal appeal-type)
+        target {:id appeal-id
+                :type appeal-type}
+        attachment-data (create-attachment-data app type nil now target true false false)
+        version-options {:file-id (:fileId file)
+                         :original-file-id (:fileId file)
+                         :filename (:file-name file)
+                         :content-type (:content-type file)
+                         :size (:content-length file)
+                         :now now
+                         :user user
+                         :stamped false
+                         :archivable false
+                         :archivabilityError :invalid-mime-type}
+        version (make-version attachment-data version-options)]
+    (-> attachment-data
+        (assoc :versions [version])
+        (assoc :latestVersion version))))
+
+(defn appeal-attachment-updates!
+  [{{:keys [attachments] :as app} :application :as command} appeal-id appeal-type fileIds]
+  (let [old-file-ids (->> attachments
+                          (filter (fn [{{type :type} :target}]
+                                    (= type appeal-type)))
+                          (map (util/fn-> :latestVersion :fileId)))
+        new-file-ids     (difference (set fileIds) (set old-file-ids))
+        ; removed-file-ids (difference (set old-file-ids) (set fileIds))
+        file-objects    (seq (mongo/download-find-many {:_id {$in new-file-ids}}))
+        new-attachments (map
+                          (partial
+                            create-appeal-attachment-data
+                            command
+                            appeal-id
+                            appeal-type)
+                          file-objects)]
+    ; remove needed files and attachments
+    ; update application to files
+    {:mongo-updates
+     (merge (when (seq new-attachments)
+              {$push {:attachments {$each new-attachments}}}))}))

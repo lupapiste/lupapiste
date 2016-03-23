@@ -24,7 +24,9 @@
                    version-number
                    latest-version-after-removing-file
                    make-version
-                   build-version-updates)
+                   build-version-updates
+                   default-metadata-for-attachment-type
+                   create-appeal-attachment-data)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -353,3 +355,25 @@
                 (let [updates (build-version-updates application attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
                        (= (get-in updates [$set "attachments.$.versions.1"] version-model))))))
+
+
+(facts "appeal attachment updates"
+  (facts "appeal-attachment-data"
+    (let [file-id  (mongo/create-id)
+          file-obj {:content nil,
+                    :content-type "application/pdf",
+                    :content-length 123,
+                    :file-name "test-pdf.pdf",
+                    :metadata {:uploaded 12344567, :linked false},
+                    :application nil
+                    :fileId file-id}
+          command {:application {:state :verdictGiven}
+                   :created 12345
+                   :user {:id "foo" :username "tester" :role "authority" :firstName "Tester" :lastName "Testby"}}
+          result-attachment (create-appeal-attachment-data
+                              command
+                              (mongo/create-id)
+                              :appeal
+                              file-obj)]
+      (fact "Generated attachment data is valid"
+        (sc/check Attachment result-attachment) => nil))))
