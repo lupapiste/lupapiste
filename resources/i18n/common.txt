@@ -4760,6 +4760,7 @@
 "verdict.autopaikkojaVahintaan" "sv" "Parkeringsplatser minst"
 "verdict.confirmdelete" "fi" "Haluatko varmasti poistaa päätöksen ja tähän päätökseen liittyvät liitteet, valmistelumerkinnät, lupaehdot ja määräykset Lupapisteestä?"
 "verdict.confirmdelete" "sv" "Är du säker på att du vill ta bort beslutet och de bilagor, uppgifter om beredningen, tillståndsvillkor och bestämmelser som hör till detta beslut från Lupapiste?"
+"verdict.confirmfetch" "fi" "Haluatko varmasti hakea uudet päätöstiedot? Tämän jälkeen joudut kirjaamaan kaikki muutoksenhaut uudestaan."
 "verdict.confirmpublish" "fi" "Haluatko varmasti julkaista päätöksen? Toimintoa ei voi perua. Hakemuksen osapuolet saavat päätöksestä sähköposti-ilmoituksen."
 "verdict.confirmpublish" "sv" "Är du säker på att du vill publicera beslutet? Åtgärden går inte att ångra. Ansökans parter får ett e-postmeddelande om beslutet."
 "verdict.conversation" "fi" "Valmistelumerkinnät"

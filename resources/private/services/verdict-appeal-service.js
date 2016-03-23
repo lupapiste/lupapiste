@@ -60,6 +60,10 @@ LUPAPISTE.VerdictAppealService = function() {
     return lupapisteApp.models.applicationAuthModel.ok( "delete-appeal");
   };
 
+  self.hasAppeals = function() {
+    return Boolean( _.size( self.allAppeals ));
+  };
+
 
   hub.subscribe( "application-model-updated", fetchAllAppeals );
   hub.subscribe( self.serviceName + "::upsert-appeal", upsertAppeal );
