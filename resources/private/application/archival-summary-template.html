@@ -107,6 +107,7 @@
 
         <div data-bind="if: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
+            <!-- ko if: !$data.readOnly() -->
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'attachment.changeType'"></div>
               <div class="contents">
@@ -117,6 +118,7 @@
                 </select>
               </div>
             </div>
+            <!-- /ko -->
             <div data-bind="if: !_.isEmpty($data.metadata)">
               <div data-bind="component: {name: 'metadata-editor',
                                             params: {attachmentId: id, metadata: metadata, application: $root.application,
