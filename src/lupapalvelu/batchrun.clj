@@ -289,8 +289,8 @@
     (doall
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
-          (try
-            (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+          (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+            (try
               (logging/with-logging-context {:applicationId id}
                 (if-not (s/blank? url)
 
@@ -303,10 +303,13 @@
 
                   (logging/log-event :info {:run-by "Automatic verdicts checking"
                                             :event "No Krysp WFS url defined for organization"
-                                            :organization {:id organization :permit-type permitType}}))))
-            (catch Throwable t
-              (errorf "Unable to get verdict for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
-        apps))))
+                                            :organization {:id organization :permit-type permitType}})))
+              (catch Throwable t
+                ;; (errorf "Unable to get verdict for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t))
+                (logging/log-event :error {:run-by "Automatic verdicts checking"
+                                           :event "Unable to get verdict from backend"
+                                           :organization {:id organization :permit-type permitType}}))
+              ))) apps))))
 
 (defn check-for-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
