@@ -82,7 +82,7 @@
   [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
   (when appeal-id
     (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
-      (when-not (appeal-item-editable? application appeal-verdict)
+      (when-not (appeal-item-editable? application (assoc appeal-verdict :type :appealVerdict))
         (fail :error.appeal-already-exists))
       (fail :error.unknown-appeal-verdict))))
 
