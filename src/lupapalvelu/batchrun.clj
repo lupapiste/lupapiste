@@ -307,6 +307,7 @@
               (catch Throwable t
                 (logging/log-event :error {:run-by "Automatic verdicts checking"
                                            :event "Unable to get verdict from backend"
+                                           :application-id id
                                            :organization {:id organization :permit-type permitType}}))
               ))) apps))))
 
