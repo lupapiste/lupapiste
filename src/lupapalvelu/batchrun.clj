@@ -341,9 +341,13 @@
             result (try
                      (ah-verdict/process-ah-verdict zip-path ftp-user eraajo-user)
                      (catch Throwable e
-                       (error e "Error processing zip-file in asianhallinta verdict batchrun")
+                       (logging/log-event :error {:run-by "Automatic ah-verdicts checking"
+                                                  :event "Unable to process ah-verdict zip file"})
+                       ;; (error e "Error processing zip-file in asianhallinta verdict batchrun")
                        (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
+        (logging/log-event :info {:run-by "Automatic ah-verdicts checking"
+                                  :event (if ok? result  "Succesfully processed ah-verdict" "Failed to process ah-verdict") :zip-path zip-path})
         (when-not (fs/rename zip target)
           (errorf "Failed to rename %s to %s" zip-path target))))))
 
