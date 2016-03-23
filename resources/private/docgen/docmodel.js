@@ -251,14 +251,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       documentName = loc([self.schema.info.name, "_group_label"]);
     }
 
+    function onDocumentRemoved() {
+      // This causes full re-rendering, all accordions change
+      // state etc. Figure a better way to update UI.  Just the
+      // "operations" list should be changed.
+      repository.load(self.appId);
+    }
+
     function onRemovalConfirmed() {
       ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: self.getCollection() })
-        .success(function () {
-          // This causes full re-rendering, all accordions change
-          // state etc. Figure a better way to update UI.  Just the
-          // "operations" list should be changed.
-          repository.load(self.appId);
-        })
+        .success(onDocumentRemoved)
+        .onError("error.document-not-found", onDocumentRemoved)
         .onError("error.removal-of-last-document-denied", notify.ajaxError)
         .call();
     }
