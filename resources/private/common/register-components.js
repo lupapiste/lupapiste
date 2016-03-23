@@ -115,6 +115,7 @@ jQuery(document).ready(function() {
     {name: "file-upload"},
     {name: "form-cell"},
     {name: "cell-text", model: "cell-model"},
+    {name: "cell-span"},
     {name: "cell-textarea", model: "cell-model"},
     {name: "cell-date"},
     {name: "cell-select"},

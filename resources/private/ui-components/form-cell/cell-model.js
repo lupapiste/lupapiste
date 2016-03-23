@@ -3,6 +3,9 @@
 LUPAPISTE.CellModel = function( params ) {
   "use strict";
   var self = this;
+
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
+
   self.value = params.value;
   self.attributes = params.attr || {};
   self.params = _.omit( params, ["value", "attr"]);

@@ -7124,6 +7124,11 @@ select.dropdown--full-width {
   white-space: nowrap;
 }
 
+/* line 1461, ../../../private/common-html/sass/partials/_forms.scss */
+.cell-span {
+  line-height: 40px;
+}
+
 /* line 4, ../../../private/common-html/sass/partials/_tables.scss */
 table {
   width: 100%;
@@ -11637,8 +11642,4 @@ span.icon_clear:before {
 .application_summary .application_summary_info .link-permit-item {
   color: #f39129;
   text-decoration: none;
-}
-/* line 10, ../../../private/common-html/sass/partials/_links.scss */
-.application_summary .application_summary_info .link-permit-item:link, .application_summary .application_summary_info .link-permit-item:visited {
-  color: #f39129;
 }

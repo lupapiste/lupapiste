@@ -1457,3 +1457,7 @@ select.dropdown--full-width {
 .no-wrap-whitespace {
   white-space: nowrap;
 }
+
+.cell-span {
+  line-height: $btn-height;
+}

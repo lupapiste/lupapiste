@@ -1,5 +1,9 @@
-@import url('main-blessed1.css?z=1458665578907');
+@import url('main-blessed1.css?z=1458736056367');
 
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:link, .application_summary .application_summary_info .link-permit-item:visited {
+  color: #f39129;
+}
 /* line 13, ../../../private/common-html/sass/partials/_links.scss */
 .application_summary .application_summary_info .link-permit-item:hover {
   color: #f7ac2e;
@@ -2298,6 +2302,10 @@ ul.appeals-files .appeals-files__info {
 /* line 83, ../../../private/common-html/sass/views/_verdict.scss */
 .appeals-table tr.appeals-table__note td.appeals-table--no-extra {
   color: #bbbbbb;
+}
+/* line 87, ../../../private/common-html/sass/views/_verdict.scss */
+.appeals-table div.bubble-dialog {
+  border: none;
 }
 
 /* line 1, ../../../private/common-html/sass/views/_side_panel.scss */

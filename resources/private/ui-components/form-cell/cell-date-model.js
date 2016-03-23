@@ -11,7 +11,7 @@ LUPAPISTE.CellDateModel = function( params ) {
   // Dummy observable for the datepicker. Instead of this value we
   // parse the date ourselves from date. However, we make dummy a
   // call-through to the date in order to set the initial value.
-  self.dummy = ko.computed({
+  self.dummy = self.disposedComputed({
     read: function() {
       return self.value();
     },

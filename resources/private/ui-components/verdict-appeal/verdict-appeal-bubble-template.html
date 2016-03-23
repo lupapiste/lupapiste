@@ -16,13 +16,14 @@
       </div>
       <div class="row">
         <div class="col-1">
-          <form-cell params="{required: true,
+          <form-cell params="{required: !$parent.model.appealId,
                              label: 'verdict.muutoksenhaku.tyyppi',
-                             cell: 'select',
+                             cell: $parent.model.appealId ? 'span' : 'select',
                              value: $parent.model.appealType,
                              options: $parent.appealTypes,
                              optionsText: 'text',
-                             optionsValue: 'id'}">
+                             optionsValue: 'id',
+                             prefix: 'verdict.muutoksenhaku.'}">
           </form-cell>
         </div>
         <div class="col-2">

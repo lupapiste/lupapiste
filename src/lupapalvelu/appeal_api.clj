@@ -13,8 +13,9 @@
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
   [{{verdictId :verdictId} :data} {:keys [verdicts]}]
-  (when-not (util/find-first #(= verdictId (:id %)) verdicts)
-    (fail :error.verdict-not-found)))
+  (when verdictId
+    (when-not (util/find-first #(= verdictId (:id %)) verdicts)
+      (fail :error.verdict-not-found))))
 
 (defn- appeal-exists
   "Pre-check to validate that at least one appeal exists before appeal verdict can be created"
@@ -144,13 +145,19 @@
     command
     {$pull {:appealVerdicts {:id appealId}}}))
 
+(defn- latest-for-verdict?
+  [{:keys [datestamp target-verdict id]} targets]
+  (let [filtered (filter #(and (not= id (:id %)) (= target-verdict (:target-verdict %))) targets)]
+    (util/is-latest-of? datestamp (map :datestamp filtered))))
 
 (defn- process-appeal
   "Process appeal for frontend"
   [{:keys [appealVerdicts appeals]} appeal-item]
-  (case (keyword (:type appeal-item))
-    :appealVerdict           (assoc appeal-item :editable (util/is-latest-of? (:datestamp appeal-item) (map :datestamp appeals)))
-    (:appeal :rectification) (assoc appeal-item :editable (util/is-latest-of? (:datestamp appeal-item) (map :datestamp appealVerdicts)))))
+  (let [latest-verdict? (latest-for-verdict? appeal-item appealVerdicts)
+        latest-appeal? (latest-for-verdict? appeal-item appeals)]
+    (assoc appeal-item :editable (if (= (keyword (:type appeal-item)) :appealVerdict)
+                                   (and latest-verdict? latest-appeal?)
+                                   latest-verdict?))))
 
 (defn- add-attachments [{id :id :as appeal}]
   ; get attacments for appeal here

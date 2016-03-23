@@ -14,14 +14,21 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
 
   var verdictId = params.id;
 
+  self.canEdit = function( appeal ) {
+    // If appeal is not given then the check is
+    // for new appeal.
+    var flag = appeal ? appeal.editable : true;
+    return flag && service.editsAllowed();
+  };
+
   self.appeals = ko.observableArray();
 
   function appealsFromService() {
     self.appeals( _.map( service .appeals( verdictId ),
                          function( a ) {
                            var appeal = _.assign( frontAppeal( a ),
-                                                  {showEdit: a.editable && ko.observable(),
-                                                   showExtra: !a.editable && ko.observable()});
+                                                  {showEdit: ko.observable(),
+                                                   showExtra:ko.observable()});
 
                            // TODO: remove mock attachments after backend returns files.
                            return _.assign( appeal,
@@ -77,6 +84,9 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
       text: frontObj.extra,
       files: frontObj.files
     };
+    if( frontObj.appealId ) {
+      appeal.appealId = frontObj.appealId;
+    }
     var authorKey =  appeal.type === "appealVerdict" ? "giver" : "appellant";
     appeal[authorKey] = frontObj.authors;
     return appeal;
@@ -84,14 +94,16 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
 
   // The model is passed to the VerdictAppealBubbleModel
   // as a model parameter.
-  self.bubbleModel = function( appealId ) {
+  self.bubbleModel = function( bubbleVisible, appealId ) {
     var model = _.mapValues( frontAppeal(),
                              function( v ) {
                                return _.isArray( v )
                                  ? ko.observableArray( v )
                                  : ko.observable( v );
                              });
-
+    if( appealId ) {
+        model.appealId = appealId;
+    }
     var error = ko.observable();
     var waiting = ko.observable();
 
@@ -109,16 +121,14 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
 
     function okFun() {
       function cb( msg ) {
+        waiting( false );
         error( msg );
-        self.newBubbleVisible( Boolean( msg ));
+        bubbleVisible( Boolean( msg ));
       }
-      var message = backAppeal( model );
-      if( appealId ) {
-        message.appealId = appealId;
-      }
+      waiting( true );
       self.sendEvent( service.serviceName,
                       "upsert-appeal",
-                      {message: message,
+                      {message: backAppeal( model ),
                        callback: cb} );
     }
 
@@ -132,6 +142,6 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
   };
 
   self.deleteAppeal = function( appeal ) {
-    console.log( "delete:", appeal );
+    self.sendEvent( service.serviceName, "delete-appeal", {message: backAppeal(appeal)});
   };
 };
