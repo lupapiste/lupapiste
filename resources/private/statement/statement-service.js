@@ -12,8 +12,8 @@ LUPAPISTE.StatementService = function(params) {
   self.data = ko.pureComputed(function() {return statements()[self.statementId()];});
 
   self.submitAllowed = {
-    statement: ko.observable(false), 
-    reply: ko.observable(false), 
+    statement: ko.observable(false),
+    reply: ko.observable(false),
     "reply-request": ko.observable(true)};
 
   self.commands = {

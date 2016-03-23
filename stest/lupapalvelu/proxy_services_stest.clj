@@ -163,6 +163,14 @@
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Sipoo"))))
 
+(facts "address-by-point - outside Finland"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
+  (let [x 229337
+        y 7669179
+        request {:params {:x x :y y}}
+        response (address-by-point-proxy request)]
+    response => http400?))
+
 (facts "plan-urls-by-point-proxy"
 
   ;; TODO: Testaa "Liiteri"

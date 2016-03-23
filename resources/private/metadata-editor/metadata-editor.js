@@ -40,7 +40,7 @@
   };
 
   var coerceValuesToSchemaType = function(metadata, inputTypeMap, uneditableFieldMap) {
-    var uneditableFields = _.keys(_.pick(uneditableFieldMap, _.isNumber));
+    var uneditableFields = _.keys(_.pickBy(uneditableFieldMap, _.isNumber));
     return _.mapValues(_.omit(metadata, uneditableFields), function(v, k) {
       if (_.isObject(v)) {
         return coerceValuesToSchemaType(v, inputTypeMap[k], uneditableFieldMap[k]);

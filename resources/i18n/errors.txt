@@ -34,3 +34,5 @@
 "error.unknown-appeal-verdict" "sv" ""
 "error.appeal-verdict-already-exists" "fi" "Valitusta/oikaisuvaatimusta ei voi muokata, koska valituksen jälkeen on tullut päätös"
 "error.appeal-verdict-already-exists" "sv" ""
+"error.appeal-already-exists" "fi" "Valituksen päätöstä ei voi muokata, koska päätöksen jälkeen on tullut uusia valituksia/oikaisuvaatimuksia"
+"error.appeal-already-exists" "sv" ""

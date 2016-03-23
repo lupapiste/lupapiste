@@ -131,7 +131,6 @@
              liitetieto (xml/select xml [:liitetieto])
              polygon (xml/select xml [:Polygon])]
 
-
             (fact "Correctly named xml file is created" (.exists xml-file) => true)
 
             (fact "XML file is valid"
@@ -143,14 +142,14 @@
                  (fact "Application ID" id => (:id application)))
 
             (fact "kasittelija"
-                  (let [kasittelytieto (or
-                                         (xml/select1 xml [:kasittelynTilatieto])
-                                         (xml/select1 xml [:Kasittelytieto])
-                                         (xml/select1 xml [:KasittelyTieto]))
-                        etunimi (xml/get-text kasittelytieto [:kasittelija :etunimi])
-                        sukunimi (xml/get-text kasittelytieto [:kasittelija :sukunimi])]
-                       etunimi => (just #"(Sonja|Rakennustarkastaja)")
-                       sukunimi => (just #"(Sibbo|J\u00e4rvenp\u00e4\u00e4)")))
+              (let [kasittelytieto (or
+                                     (xml/select1 xml [:kasittelynTilatieto])
+                                     (xml/select1 xml [:Kasittelytieto])
+                                     (xml/select1 xml [:KasittelyTieto]))
+                    etunimi (xml/get-text kasittelytieto [:kasittelija :etunimi])
+                    sukunimi (xml/get-text kasittelytieto [:kasittelija :sukunimi])]
+                etunimi => (just #"(Sonja|Rakennustarkastaja)")
+                sukunimi => (just #"(Sibbo|J\u00e4rvenp\u00e4\u00e4)")))
 
             (fact "XML contains correct amount attachments" (count liitetieto) => expected-attachment-count)
 
@@ -311,35 +310,40 @@
                       (:state application) => "verdictGiven"))))
 
 (fact* "Katselmus is transferred to the backing system"
-       (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Katselmuskatu 17")
-             application-id (:id application)
-             _ (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
-             task-id (:taskId (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus")) => truthy]
+  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Katselmuskatu 17")
+        application-id (:id application)
+        _ (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+        task-id (:taskId (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus")) => truthy]
 
-            (upload-attachment-to-target sonja application-id nil true task-id "task")
+       (upload-attachment-to-target sonja application-id nil true task-id "task") ; Related to task
+       (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
+                                                                                      ".katselmuksen_tai_tarkastuksen_poytakirja"))
 
-            (command sonja :update-task :id application-id :doc task-id :updates [["katselmuksenLaji" "rakennekatselmus"]]) => ok?
+       (command sonja :update-task :id application-id :doc task-id :updates [["katselmuksenLaji" "rakennekatselmus"]]) => ok?
 
-            (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
-                                                                                  ["rakennus.0.rakennus.rakennusnro" "001"]
-                                                                                  ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
-                                                                                  ["rakennus.0.rakennus.kiinttun" (:propertyId application)]]) => ok?
+       (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
+                                                                             ["rakennus.0.rakennus.rakennusnro" "001"]
+                                                                             ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
+                                                                             ["rakennus.0.rakennus.kiinttun" (:propertyId application)]]) => ok?
 
-            (command sonja :send-task :id application-id :taskId task-id :lang "fi") => fail?
-            (command sonja :approve-task :id application-id :taskId task-id) => ok?
-            (command sonja :send-task :id application-id :taskId task-id :lang "fi") => ok?
+       (command sonja :send-task :id application-id :taskId task-id :lang "fi") => fail?
+       (command sonja :approve-task :id application-id :taskId task-id) => ok?
+       (command sonja :send-task :id application-id :taskId task-id :lang "fi") => ok?
 
-            (final-xml-validation
-              (query-application sonja application-id)
-              1                                             ; One attachment
-              1
-              (fn [xml]
-                  (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
-                        katselmuksenRakennus (xml/select1 xml [:katselmuksenRakennustieto :KatselmuksenRakennus])]
-                       (xml/get-text katselmuksenRakennus :rakennusnro) => "001"
-                       (xml/get-text katselmuksenRakennus :jarjestysnumero) => "1"
-                       (xml/get-text katselmuksenRakennus :kiinttun) => (:propertyId application)
-                       (xml/get-text katselmuksenRakennus :valtakunnallinenNumero) => "1234567892")))))
+       (final-xml-validation
+         (query-application sonja application-id)
+         2 ; Two attachments
+         2
+         (fn [xml]
+             (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
+                   katselmuksenRakennus (xml/select1 xml [:katselmuksenRakennustieto :KatselmuksenRakennus])
+                   liitetieto (xml/select1 katselmus [:liitetieto])]
+               (xml/get-text liitetieto :kuvaus) => "Katselmuksen p\u00f6yt\u00e4kirja"
+               (xml/get-text liitetieto ::tyyppi) => "katselmuksen_tai_tarkastuksen_poytakirja"
+               (xml/get-text katselmuksenRakennus :rakennusnro) => "001"
+               (xml/get-text katselmuksenRakennus :jarjestysnumero) => "1"
+               (xml/get-text katselmuksenRakennus :kiinttun) => (:propertyId application)
+               (xml/get-text katselmuksenRakennus :valtakunnallinenNumero) => "1234567892")))))
 
 (fact* "Fully populated katselmus is transferred to the backing system"
 
@@ -348,7 +352,7 @@
           jp-r (organization-from-minimal-by-id "186-R")]
       sipoo-r => truthy
       jp-r => truthy
-      (get-in sipoo-r [:krysp :R :version]) => "2.1.6"
+      (get-in sipoo-r [:krysp :R :version]) => "2.2.0"
       (get-in jp-r [:krysp :R :version]) => "2.1.3"))
 
   (doseq [[apikey assignee property-id] [[sonja sonja-id sipoo-property-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id]]]
@@ -362,9 +366,9 @@
       (populate-task application task-id apikey) => ok?
 
       (upload-attachment-to-target apikey application-id nil true task-id "task")
-      (upload-attachment-to-target apikey application-id nil true task-id "task" 
-                                   (if (env/feature? :updated-attachments) 
-                                     "katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja" 
+      (upload-attachment-to-target apikey application-id nil true task-id "task"
+                                   (if (env/feature? :updated-attachments)
+                                     "katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja"
                                      "muut.katselmuksen_tai_tarkastuksen_poytakirja"))
 
       (doseq [attachment (:attachments (query-application apikey application-id))]
@@ -377,11 +381,14 @@
       (let [application (query-application apikey application-id)]
         (final-xml-validation
           application
-          1                                 ; Uploaded 2 regular attachments and
-          2                                 ; the other should be katselmuspoytakirja
+          ; Uploaded 2 regular attachments,the other should be katselmuspoytakirja.
+          ; In KRYSP 2.2.0+ both are wrapped in liitetieto elements.
+          (if (= "753-R" (:organization application)) 2 1)
+          2
           (fn [xml]
             (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
-                  poytakirja-edn (-> katselmus (xml/select1 [:katselmuspoytakirja]) xml/xml->edn :katselmuspoytakirja)]
+                  poytakirja (xml/xml->edn (or (xml/select1 katselmus [:katselmuspoytakirja]) (xml/select1 katselmus [:Liite])))
+                  poytakirja-edn (or (:katselmuspoytakirja poytakirja) (:Liite poytakirja))]
 
               (validate-attachment poytakirja-edn "katselmuksen_tai_tarkastuksen_poytakirja" application)
               (fact "task name is transferred for muu katselmus type"

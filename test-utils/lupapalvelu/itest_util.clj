@@ -727,3 +727,8 @@
                {:headers {"authorization" (str "apikey=" apikey)}
                 :multipart [{:name "files[]" :content uploadfile}]
                 :throw-exceptions false})))
+
+(defn appeals-for-verdict [apikey app-id verdict-id]
+  (-> (query apikey :appeals :id app-id)
+      :data
+      (get (keyword verdict-id))))
