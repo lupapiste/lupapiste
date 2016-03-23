@@ -353,4 +353,21 @@
           (count appeals) => 1
           (count attachments) => 6
           (count appeal-attachments) => 2
-          (-> appeal-attachments second :latestVersion :fileId) => file-id-2)))))
+          (-> appeal-attachments second :latestVersion :fileId) => file-id-2))
+
+      (fact "removing first attachment from appeal"
+        (command sonja :upsert-appeal
+                 :id app-id
+                 :verdictId vid
+                 :type "appeal"
+                 :appellant "Pena"
+                 :datestamp created
+                 :text "foo"
+                 :appealId aid
+                 :fileIds [file-id-2]) => ok?
+        (let [{:keys [attachments appeals]} (query-application sonja app-id)
+              appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
+          (count appeals) => 1
+          (count attachments) => 5
+          (count appeal-attachments) => 1
+          (-> appeal-attachments first :latestVersion :fileId) => file-id-2)))))
