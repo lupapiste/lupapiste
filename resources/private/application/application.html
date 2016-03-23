@@ -929,7 +929,7 @@
                                           <span data-bind="text: $index() + 1"></span>
                                       </span>
                                   </button>
-                                  <div class="accordion_content expanded">
+                                  <div class="accordion_content expanded verdict-content">
 
                                       <div data-bind="with: $parent" style="overflow: auto;">
                                           <div class="btn-container right-align"  data-bind="if: $data.draft" >
@@ -1123,6 +1123,9 @@
                                                   <div data-bind="ltext: 'verdict.poytakirjat.missing'"></div>
                                                   <!-- /ko -->
                                               </div>
+                                              <!-- Muutoksenhaku -->
+                                              <div data-bind="component: {name: 'verdict-appeal',
+                                                              params: {id: verdict.id}}"></div>
                                           </div>
                                       </div>
                                   </div>
