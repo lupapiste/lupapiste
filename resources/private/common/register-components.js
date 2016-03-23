@@ -118,7 +118,7 @@ jQuery(document).ready(function() {
     {name: "cell-span"},
     {name: "cell-textarea", model: "cell-model"},
     {name: "cell-date"},
-    {name: "cell-select"},
+    {name: "cell-select"}
 ];
 
   _.forEach(components, function(component) {
