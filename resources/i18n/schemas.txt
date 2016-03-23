@@ -4228,6 +4228,8 @@
 "rakennuspaikka.kiinteisto.vesipintaala" "sv" "Vattenareal"
 "rakennustyo-muutostoimenpiteet._group_label" "fi" "Rakennustyön aikaiset muutostoimenpiteet"
 "rakennustyo-muutostoimenpiteet._group_label" "sv" "Ändringsåtgärder under byggnadstiden"
+"raktyo-aloit-loppuunsaat._group_label" "fi" "Jatkolupa rakennustyön aloittamiseen ja/tai loppuunsaattamiseen"
+"raktyo-aloit-loppuunsaat._group_label" "sv" "Förlängningslov för att inleda och/eller slutföra byggnadsarbetet"
 "rak-valm-tyo._group_label" "fi" "Rakentamista valmisteleva työ (puunkaato, maankaivu, louhinta)"
 "rak-valm-tyo._group_label" "sv" "Färdigställande arbete för byggande (fällning av träd, grävning, brytning)"
 "ranta-asemakaava._group_label" "fi" "Ranta-asemakaava"
