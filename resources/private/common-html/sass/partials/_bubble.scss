@@ -71,7 +71,7 @@
 
   label.mandatory:after {
     content: " *";
-    color: $input-required-border-color;
+    color: $label-required-star-color;
   }
   input[type=text], textarea {
     box-sizing: border-box;

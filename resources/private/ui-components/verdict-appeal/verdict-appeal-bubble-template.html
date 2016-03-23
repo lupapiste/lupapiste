@@ -1,0 +1,70 @@
+<script class="ko-template"
+        type="text/x-jquery-tmpl"
+        id="verdict-appeal-bubble-template">
+  <bubble-dialog params="visible: params.visible,
+                         okFun: okFun,
+                         initFun: initFun,
+                         okEnabled: okEnabled,
+                         buttonIcon: 'lupicon-save',
+                         buttonText: 'save',
+                         waiting: waiting,
+                         error: error">
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <span class="col-4"
+              data-bind="ltext: 'verdict.muutoksenhaku.info'"></span>
+      </div>
+      <div class="row">
+        <div class="col-1">
+          <form-cell params="{required: !$parent.model.appealId,
+                             label: 'verdict.muutoksenhaku.tyyppi',
+                             cell: $parent.model.appealId ? 'span' : 'select',
+                             value: $parent.model.appealType,
+                             options: $parent.appealTypes,
+                             optionsText: 'text',
+                             optionsValue: 'id',
+                             prefix: 'verdict.muutoksenhaku.'}">
+          </form-cell>
+        </div>
+        <div class="col-2">
+          <form-cell params="{required: true,
+                             label: 'verdict.muutoksenhaku.tekijat',
+                             cell: 'text',
+                             value: $parent.model.authors}">
+          </form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="{warning: $parent.dateWarning,
+                             required: true,
+                             label: 'verdict.muutoksenhaku.pvm',
+                             cell: 'date',
+                             value: $parent.model.date}">
+          </form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <form-cell params="{label: 'verdict.muutoksenhaku.extra',
+                             cell: 'textarea',
+                             value: $parent.model.extra,
+                             attr: {placeholder: loc('verdict.muutoksenhaku.extra.placeholder'),
+                             rows: 4}}">
+          </form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <label class="mandatory"!
+                 data-bind="ltext: 'verdict.muutoksenhaku.liitteet'"></label>
+          <span data-bind="ltext: 'verdict.muutoksenhaku.liitteet.info'"></span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-4"
+             data-bind="component: {name: 'file-upload', params: {files: $parent.model.files}}">
+        </div>
+      </div>
+    </div>
+  </bubble-dialog>
+</script>

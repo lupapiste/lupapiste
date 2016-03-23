@@ -1,0 +1,17 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="form-cell-template">
+  <div class="col--vertical"
+       data-bind="css: {'form-cell--warning': warning,
+                  'form-cell--required': required}">
+    <label data-bind="attr: {'for': id},
+                      css: {mandatory: isMandatory},
+                      ltext: label"></label>
+    <div data-bind="component: {name: componentName,
+                    params: componentParams}"></div>
+    <!-- ko if: warning -->
+    <div class="btn-base form-cell__message">
+      <i class="lupicon-warning"></i>
+      <span data-bind="ltext: warning"></span>
+    </div>
+    <!-- /ko -->
+  </div>
+</script>
