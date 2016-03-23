@@ -10,7 +10,8 @@
             [lupapalvelu.appeal-verdict :as appeal-verdict]
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment :as attachment]))
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.domain :as domain]))
 
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
@@ -81,7 +82,7 @@
   [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
   (when appeal-id
     (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
-      (when-not (appeal-item-editable? application appeal-verdict)
+      (when-not (appeal-item-editable? application (assoc appeal-verdict :type :appealVerdict))
         (fail :error.appeal-already-exists))
       (fail :error.unknown-appeal-verdict))))
 
@@ -106,15 +107,19 @@
 (defn- attachment-updates
   [{{:keys [attachments]} :application :as command} appeal-id appeal-type file-ids]
   (when appeal-id
-    (let [old-file-ids (->> attachments
-                            (filter (fn [{{target-id :id} :target}]
-                                      (= target-id appeal-id)))
-                            (map (util/fn-> :latestVersion :fileId)))
-          new-file-ids     (difference (set file-ids) (set old-file-ids))
+    (let [appeal-attachments  (filter
+                                (fn [{{target-id :id} :target}]
+                                  (= target-id appeal-id))
+                                attachments)
+          appeal-file-ids     (map (util/fn-> :latestVersion :fileId) appeal-attachments)
+          new-file-ids     (difference (set file-ids) (set appeal-file-ids))
           new-attachment-updates (attachment/new-appeal-attachment-updates command appeal-id appeal-type new-file-ids)
-          ;removed-file-ids (difference (set old-file-ids) (set file-ids))
-          ]
-      {:new-updates new-attachment-updates})))
+          removable-file-ids (difference (set appeal-file-ids) (set file-ids))
+          removable-attachments (filter
+                                  (fn [{versions :versions}] (some removable-file-ids (map :fileId versions)))
+                                  appeal-attachments)]
+      {:new-updates new-attachment-updates
+       :removable-attachment-ids (remove nil? (map :id removable-attachments))})))
 
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"
@@ -134,7 +139,8 @@
       (let [updates (if appealId
                       (update-appeal-data-mongo-updates :appeals appealId appeal-data)
                       (new-appeal-data-mongo-updates :appeals appeal-data))
-            {:keys [new-updates]} (attachment-updates command (or (:id appeal-data) appealId) (:type appeal-data) fileIds)]
+            {:keys [new-updates
+                    removable-attachment-ids]} (attachment-updates command (or (:id appeal-data) appealId) (:type appeal-data) fileIds)]
         ; remove needed files and attachments
         ; update application to files
         (action/update-application
@@ -142,7 +148,9 @@
           (:mongo-query updates)
           (util/deep-merge
             (:mongo-updates updates)
-            new-updates)))
+            new-updates))
+        (when (seq removable-attachment-ids)
+          (run! (partial attachment/delete-attachment! (domain/get-application-no-access-checking id)) removable-attachment-ids)))
       (fail :error.invalid-appeal))))
 
 (defcommand upsert-appeal-verdict
@@ -162,13 +170,16 @@
       (let [updates (if appealId
                       (update-appeal-data-mongo-updates :appealVerdicts appealId verdict-data)
                       (new-appeal-data-mongo-updates :appealVerdicts verdict-data))
-            {:keys [new-updates]} (attachment-updates command (or (:id verdict-data) appealId) :appealVerdict fileIds)]
+            {:keys [new-updates
+                    removable-attachment-ids]} (attachment-updates command (or (:id verdict-data) appealId) :appealVerdict fileIds)]
         (action/update-application
           command
           (:mongo-query updates)
           (util/deep-merge
             (:mongo-updates updates)
-            new-updates)))
+            new-updates))
+        (when (seq removable-attachment-ids)
+          (run! (partial attachment/delete-attachment! (domain/get-application-no-access-checking id)) removable-attachment-ids)))
       (fail :error.invalid-appeal-verdict))))
 
 (defcommand delete-appeal
