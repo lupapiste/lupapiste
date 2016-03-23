@@ -7,12 +7,13 @@
 
 (defn save-file [file]
   (let [file-id (mongo/create-id)
-        sanitized-filename (mime/sanitize-filename (:filename file))]
-    (mongo/upload file-id sanitized-filename (:content-type file) (:tempfile file) :sessionId (vetuma/session-id) :linked false)
+        sanitized-filename (mime/sanitize-filename (:filename file))
+        content-type       (mime/mime-type sanitized-filename)]
+    (mongo/upload file-id sanitized-filename content-type (:tempfile file) :sessionId (vetuma/session-id) :linked false)
     {:id file-id
      :filename sanitized-filename
      :size (:size file)
-     :contentType (:content-type file)}))
+     :contentType content-type}))
 
 (defn- two-hours-ago []
   ; Matches vetuma session TTL

@@ -90,6 +90,13 @@
 (defn ^{:perfmon-exclude true} operator? [s]
   (contains? operators s))
 
+(defn ^{:perfmon-exclude true} max-1-elem-match? [m]
+  (let [walked (walk/postwalk (fn [x]
+                                (if (map? x)
+                                  (filter (partial = $elemMatch) (concat (keys x) (flatten (vals x))))
+                                  x)) m)]
+    (<= (clojure.core/count walked) 1)))
+
 (defn ^{:perfmon-exclude true} generate-array-updates
   "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
    E.g., (generate-array-updates :attachments [true nil nil true nil] true? \"k\" \"v\")
@@ -112,12 +119,14 @@
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
+  {:pre [(max-1-elem-match? query)]}
   (let [options (-> (merge {:write-concern default-write-concern} opts) seq flatten)]
     (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
+  {:pre [(max-1-elem-match? query)]}
   (mc/update (get-db) collection (merge isolated (remove-null-chars query)) (remove-null-chars data) opts)
   nil)
 
@@ -130,7 +139,15 @@
 (defn update-by-query
   "Updates data into collection with 'multi' set to true. Returns the number of documents updated"
   [collection query data & opts]
+  {:pre [(max-1-elem-match? query)]}
   (.getN (mc/update (get-db) collection (merge isolated query) (remove-null-chars data) (apply hash-map :multi true opts))))
+
+(defn update-one-and-return
+  "Updates first document in collection matching conditions. Returns updated document or nil."
+  [collection query document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
+  {:pre [(max-1-elem-match? query)]}
+  (mc/find-and-modify (get-db) collection (remove-null-chars query) (remove-null-chars document)
+    {:return-new true :upsert upsert :remove remove :sort sort :fields fields}))
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
@@ -203,12 +220,6 @@
   "check if any"
   ([collection query]
     (mc/any? (get-db) collection (remove-null-chars query))))
-
-(defn update-one-and-return
-  "Updates first document in collection matching conditions. Returns updated document or nil."
-  [collection conditions document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
-  (mc/find-and-modify (get-db) collection (remove-null-chars conditions) (remove-null-chars document)
-    {:return-new true :upsert upsert :remove remove :sort sort :fields fields}))
 
 (defn drop-collection [collection]
   (mc/drop (get-db) collection))

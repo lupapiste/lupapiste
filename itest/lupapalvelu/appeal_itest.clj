@@ -3,7 +3,8 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [sade.core :refer [now]]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -18,7 +19,8 @@
                :type "appeal"
                :appellant "Pena"
                :datestamp 123456
-               :text "foo") => (partial expected-failure? :error.command-illegal-state))
+               :text "foo"
+               :fileIds []) => (partial expected-failure? :error.command-illegal-state))
 
     (let [{vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")]
       vid => string?
@@ -29,7 +31,8 @@
                  :type "appeal"
                  :appellant "Pena"
                  :datestamp 123456
-                 :text "foo") => (partial expected-failure? :error.verdict-not-found))
+                 :text "foo"
+                 :fileIds []) => (partial expected-failure? :error.verdict-not-found))
       (fact "successful appeal"
         (command sonja :upsert-appeal
                  :id app-id
@@ -37,14 +40,16 @@
                  :type "appeal"
                  :appellant "Pena"
                  :datestamp created
-                 :text "foo") => ok?)
+                 :text "foo"
+                 :fileIds []) => ok?)
       (fact "text is optional"
         (command sonja :upsert-appeal
                  :id app-id
                  :verdictId vid
                  :type "rectification"
                  :appellant "Pena"
-                 :datestamp created) => ok?)
+                 :datestamp created
+                 :fileIds []) => ok?)
       (fact "appeal is saved to application to be viewed"
         (map :type (:appeals (query-application pena app-id))) => (just ["appeal" "rectification"]))
       (fact "appeal query is OK"
@@ -58,10 +63,11 @@
               target-appeal   (first appeals-before)
               _ (command sonja :upsert-appeal :id app-id
                          :verdictId vid
-                         :type "rectification"
+                         :type "appeal"
                          :appellant "Teppo"
                          :datestamp created
-                         :appealId (:id target-appeal)) => ok?
+                         :appealId (:id target-appeal)
+                         :fileIds []) => ok?
               appeals-after   (appeals-for-verdict pena app-id vid)
               updated-target-appeal   (first appeals-after)]
 
@@ -70,7 +76,16 @@
 
           (fact "Appellant has been changed"
             (:appellant target-appeal) => "Pena"
-            (:appellant updated-target-appeal) => "Teppo")))
+            (:appellant updated-target-appeal) => "Teppo")
+
+          (fact "can't change type"
+            (command sonja :upsert-appeal :id app-id
+                     :verdictId vid
+                     :type "rectification"
+                     :appellant "Teppo"
+                     :datestamp created
+                     :appealId (:id target-appeal)
+                     :fileIds []) => (partial expected-failure? :error.appeal-type-change-denied))))
 
       (fact "Upsert is validated"
         (fact "appealId must be found from application"
@@ -79,7 +94,8 @@
                    :type "rectification"
                    :appellant "Teppo"
                    :datestamp created
-                   :appealId "foobar") => (partial expected-failure? :error.unknown-appeal))
+                   :appealId "foobar"
+                   :fileIds []) => (partial expected-failure? :error.unknown-appeal))
 
         (let [appeals (appeals-for-verdict pena app-id vid)
               test-appeal (first appeals)]
@@ -89,7 +105,8 @@
                      :type "trolol"
                      :appellant "Teppo"
                      :datestamp created
-                     :appealId (:id test-appeal)) => (partial expected-failure? :error.invalid-appeal))))
+                     :appealId (:id test-appeal)
+                     :fileIds []) => (partial expected-failure? :error.invalid-appeal))))
 
       (fact "Delete"
         (let [appeals       (appeals-for-verdict pena app-id vid)
@@ -122,7 +139,8 @@
                :verdictId (mongo/create-id)
                :giver "Teppo"
                :datestamp 123456
-               :text "foo") => (partial expected-failure? :error.command-illegal-state))
+               :text "foo"
+               :fileIds []) => (partial expected-failure? :error.command-illegal-state))
 
     (let [{vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")]
       vid => string?
@@ -132,14 +150,16 @@
                  :verdictId (mongo/create-id)
                  :giver "Teppo"
                  :datestamp 123456
-                 :text "foo") => (partial expected-failure? :error.verdict-not-found))
+                 :text "foo"
+                 :fileIds []) => (partial expected-failure? :error.verdict-not-found))
       (fact "an appeal must exists before creating verdict appeal"
         (command sonja :upsert-appeal-verdict
                  :id app-id
                  :verdictId vid
                  :giver "Teppo"
                  :datestamp created
-                 :text "foo") => (partial expected-failure? :error.appeals-not-found))
+                 :text "foo"
+                 :fileIds []) => (partial expected-failure? :error.appeals-not-found))
       (fact "first create appeal"
         (command sonja :upsert-appeal
                  :id app-id
@@ -147,21 +167,24 @@
                  :type "rectification"
                  :appellant "Pena"
                  :datestamp created
-                 :text "rectification 1") => ok?)
+                 :text "rectification 1"
+                 :fileIds []) => ok?)
       (fact "... then try to create invalid appeal verdict"
         (command sonja :upsert-appeal-verdict
                  :id app-id
                  :verdictId vid
                  :giver "Teppo"
                  :datestamp "18.3.2016"
-                 :text "verdict for rectification 1") => (partial expected-failure? :error.invalid-appeal-verdict))
+                 :text "verdict for rectification 1"
+                 :fileIds []) => (partial expected-failure? :error.invalid-appeal-verdict))
       (fact "... then actually create a valid appeal verdict"
         (command sonja :upsert-appeal-verdict
                  :id app-id
                  :verdictId vid
                  :giver "Teppo"
                  :datestamp (+ created 1)
-                 :text "verdict for rectification 1") => ok?)
+                 :text "verdict for rectification 1"
+                 :fileIds []) => ok?)
 
       (fact "appeal query is OK after giving appeal and appeal verdict"
         (let [response-data (:data (query pena :appeals :id app-id))
@@ -181,7 +204,8 @@
                    :appellant "Pena"
                    :datestamp created
                    :text "rectification edition"
-                   :appealId (:id test-appeal)) => (partial expected-failure? :error.appeal-verdict-already-exists)
+                   :appealId (:id test-appeal)
+                   :fileIds []) => (partial expected-failure? :error.appeal-verdict-already-exists)
 
           (fact "Query has editable flag set correctly"
             (:editable test-appeal) => false)))
@@ -195,7 +219,8 @@
                      :verdictId vid
                      :giver "Teppo"
                      :datestamp (+ created 1)
-                     :appealId (:id appeal)) => (partial expected-failure? :error.unknown-appeal-verdict))))
+                     :appealId (:id appeal)
+                     :fileIds []) => (partial expected-failure? :error.unknown-appeal-verdict))))
 
       (fact* "Upsert updates successfully"
         (let [appeals-before  (appeals-for-verdict pena app-id vid)
@@ -205,7 +230,8 @@
                          :verdictId vid
                          :giver "Seppo"
                          :datestamp (+ created 1)
-                         :appealId (:id target-appeal-verdict)) => ok?
+                         :appealId (:id target-appeal-verdict)
+                         :fileIds []) => ok?
               appeals-after   (appeals-for-verdict pena app-id vid)
               updated-target-appeal-verdict   (second appeals-after)]
 
@@ -223,7 +249,8 @@
                  :type "appeal"
                  :appellant "Pena again"
                  :datestamp (now)
-                 :text "new appeal") => ok?
+                 :text "new appeal"
+                 :fileIds []) => ok?
         (let [appeals (appeals-for-verdict pena app-id vid)
               target-appeal-verdict (second appeals)]
           (fact "upsert"
@@ -231,7 +258,8 @@
                      :verdictId vid
                      :giver "Seppo"
                      :datestamp created
-                     :appealId (:id target-appeal-verdict)) => (partial expected-failure? :error.appeal-already-exists))
+                     :appealId (:id target-appeal-verdict)
+                     :fileIds []) => (partial expected-failure? :error.appeal-already-exists))
 
           (fact "delete"
             (command sonja :delete-appeal-verdict :id app-id
@@ -273,3 +301,57 @@
           (let [appeals-after (appeals-for-verdict sonja app-id vid)]
             (count appeals-after) => 1
             (:editable (last appeals-after)) => true))))))
+
+(facts "appeals with attachments"
+  (let [{app-id :id} (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+        {:keys [attachments]} (query-application pena app-id)
+        created (now)
+        {vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")
+        resp1  (upload-file sonja "dev-resources/test-attachment.txt")
+        file-id-1 (get-in resp1 [:files 0 :id])
+        resp2  (upload-file sonja "dev-resources/invalid-pdfa.pdf")
+        file-id-2 (get-in resp2 [:files 0 :id])]
+    resp1 => ok?
+    resp2 => ok?
+    (count attachments) => 4
+
+    (fact "successful appeal"
+      (command sonja :upsert-appeal
+               :id app-id
+               :verdictId vid
+               :type "appeal"
+               :appellant "Pena"
+               :datestamp created
+               :text "foo"
+               :fileIds [file-id-1]) => ok?)
+
+    (let [{:keys [attachments appeals] :as app} (query-application sonja app-id)
+          {aid :id} (first appeals)
+          appeal-attachment (util/find-first (fn [{target :target}]
+                                               (and (= "appeal" (:type target))
+                                                    (= aid (:id target))))
+                                             attachments)]
+      (fact "new attachment has been created"
+        (count attachments) => 5
+        (-> appeal-attachment :latestVersion :fileId) => file-id-1)
+      (fact "attachment type is correct"
+        (:type appeal-attachment) => {:type-group "muutoksenhaku"
+                                      :type-id    "valitus"})
+
+      (fact "updating appeal with new attachment"
+        (command sonja :upsert-appeal
+                 :id app-id
+                 :verdictId vid
+                 :type "appeal"
+                 :appellant "Pena"
+                 :datestamp created
+                 :text "foo"
+                 :appealId aid
+                 :fileIds [file-id-1 file-id-2]) => ok?
+        (let [{:keys [attachments appeals] :as app} (query-application sonja app-id)
+              {aid :id} (first appeals)
+              appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
+          (count appeals) => 1
+          (count attachments) => 6
+          (count appeal-attachments) => 2
+          (-> appeal-attachments second :latestVersion :fileId) => file-id-2)))))

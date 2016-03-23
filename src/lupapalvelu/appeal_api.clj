@@ -8,7 +8,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
             [sade.schemas :as ssc]
-            [schema.core :as sc]))
+            [schema.core :as sc]
+            [lupapalvelu.attachment :as attachment]))
 
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
@@ -36,6 +37,14 @@
   (when appeal-id
     (when-not (util/find-by-id appeal-id appealVerdicts)
       (fail :error.unknown-appeal-verdict))))
+
+(defn- deny-type-change
+  "Pre-check: when appeal is updated, type of appeal can't be changed"
+  [{{appeal-id :appealId type :type} :data} {:keys [appeals]}]
+  (when appeal-id
+    (when-some [appeal (util/find-by-id appeal-id appeals)]
+      (when-not (= type (:type appeal))
+        (fail :error.appeal-type-change-denied)))))
 
 (defn- appeal-editable?
   "Pre-check to check that appeal can be edited."
@@ -75,7 +84,7 @@
 
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"
-   :parameters          [id verdictId type appellant datestamp]
+   :parameters          [id verdictId type appellant datestamp fileIds]
    :optional-parameters [text appealId]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
@@ -83,21 +92,25 @@
                          (partial action/number-parameters [:datestamp])]
    :pre-checks          [verdict-exists
                          appeal-id-exists
-                         appeal-editable?]}
-  [command]
-  (if-let [updates (if appealId
-                     (some->> (appeal/appeal-data-for-upsert verdictId type appellant datestamp text appealId)
-                              (update-appeal-data-mongo-updates :appeals appealId))
-                     (some->> (appeal/appeal-data-for-upsert verdictId type appellant datestamp text)
-                              (new-appeal-data-mongo-updates :appeals)))]
-    (action/update-application
-      command
-      (:mongo-query updates)
-      (:mongo-updates updates))
-    (fail :error.invalid-appeal)))
+                         appeal-editable?
+                         deny-type-change]}
+  [{{:keys [attachments appeals] :as app} :application :as command}]
+  (let [appeal-data (appeal/appeal-data-for-upsert verdictId type appellant datestamp text appealId)]
+    (if appeal-data ; if data is valid
+      (let [updates (if appealId
+                      (update-appeal-data-mongo-updates :appeals appealId appeal-data)
+                      (new-appeal-data-mongo-updates :appeals appeal-data))
+            attachment-updates (attachment/appeal-attachment-updates! command (:id appeal-data) (:type appeal-data) fileIds)]
+        (action/update-application
+          command
+          (:mongo-query updates)
+          (util/deep-merge
+            (:mongo-updates updates)
+            (:mongo-updates attachment-updates))))
+      (fail :error.invalid-appeal))))
 
 (defcommand upsert-appeal-verdict
-  {:parameters          [id verdictId giver datestamp]
+  {:parameters          [id verdictId giver datestamp fileIds]
    :optional-parameters [text appealId]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
@@ -108,16 +121,19 @@
                          appeal-verdict-id-exists
                          appeal-verdict-editable?]}
   [command]
-  (if-let [updates (if appealId
-                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert verdictId giver datestamp text appealId)
-                              (update-appeal-data-mongo-updates :appealVerdicts appealId))
-                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert verdictId giver datestamp text)
-                              (new-appeal-data-mongo-updates :appealVerdicts)))]
-    (action/update-application
-      command
-      (:mongo-query updates)
-      (:mongo-updates updates))
-    (fail :error.invalid-appeal-verdict)))
+  (let [verdict-data (appeal-verdict/appeal-verdict-data-for-upsert verdictId giver datestamp text appealId)]
+    (if verdict-data
+      (let [updates (if appealId
+                         (update-appeal-data-mongo-updates :appealVerdicts appealId verdict-data)
+                         (new-appeal-data-mongo-updates :appealVerdicts verdict-data))
+            attachment-updates (attachment/appeal-attachment-updates! command (:id verdict-data) (:type verdict-data) fileIds)]
+        (action/update-application
+          command
+          (:mongo-query updates)
+          (util/deep-merge
+            (:mongo-updates updates)
+            (:mongo-updates attachment-updates))))
+      (fail :error.invalid-appeal-verdict))))
 
 (defcommand delete-appeal
   {:parameters          [id verdictId appealId]

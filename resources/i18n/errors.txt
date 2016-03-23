@@ -36,3 +36,5 @@
 "error.appeal-verdict-already-exists" "sv" ""
 "error.appeal-already-exists" "fi" "Valituksen päätöstä ei voi muokata, koska päätöksen jälkeen on tullut uusia valituksia/oikaisuvaatimuksia"
 "error.appeal-already-exists" "sv" ""
+"error.appeal-type-change-denied" "fi" "Valituksen/oikaisuvaatimuksen tyyppiä ei voi vaihtaa"
+"error.appeal-type-change-denied" "sv" ""
