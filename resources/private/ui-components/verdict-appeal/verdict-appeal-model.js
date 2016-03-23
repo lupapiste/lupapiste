@@ -26,27 +26,13 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
   function appealsFromService() {
     self.appeals( _.map( service .appeals( verdictId ),
                          function( a ) {
-                           var appeal = _.assign( frontAppeal( a ),
-                                                  {showEdit: ko.observable(),
-                                                   showExtra:ko.observable()});
-
-                           // TODO: remove mock attachments after backend returns files.
-                           return _.assign( appeal,
-                                            {files:[
-                                              {id: _.uniqueId( "dummyfile"),
-                                               filename: "filename.pdf",
-                                               contentType: "application/pdf",
-                                               size: 123456
-                                              },
-                                              {id: _.uniqueId( "dummyfile"),
-                                               filename: "filename.doc",
-                                               contentType: "application/msword",
-                                               size: 88888
-                                              }]});
-                                                }));
+                           return _.assign( frontAppeal( a ),
+                                            {showEdit: ko.observable(),
+                                             showExtra:ko.observable()});
+                         }));
   }
 
-
+  // Initial fetch
   appealsFromService();
 
   self.addEventListener( service.serviceName, "appeals-updated", appealsFromService);
@@ -82,7 +68,7 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
       type: frontObj.appealType,
       datestamp: moment( frontObj.date, FMT, true).unix(),
       text: frontObj.extra,
-      files: frontObj.files
+      fileIds: _.map( frontObj.files, _.partialRight( _.pick, ["id"] ))
     };
     if( frontObj.appealId ) {
       appeal.appealId = frontObj.appealId;

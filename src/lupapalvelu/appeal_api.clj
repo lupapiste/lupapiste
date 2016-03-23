@@ -46,21 +46,41 @@
       (when-not (= type (:type appeal))
         (fail :error.appeal-type-change-denied)))))
 
+(defn- latest-for-verdict?
+  "True if the appeal-item (the first param) is later than any of the
+  appeal-items. The check is limited to the same verdict."
+  [{:keys [datestamp target-verdict id]} appeal-items]
+  (let [filtered (filter #(and (not= id (:id %))
+                               (= target-verdict (:target-verdict %))) appeal-items)]
+    (util/is-latest-of? datestamp (map :datestamp filtered))))
+
+(defn- appeal-item-editable?
+  "Appeal-item can be either appeal or appealVerdict. Appeal is
+  editable if it is later than the latest appealVerdict within the
+  same verdict. AppealVerdict is only editable if it is latest
+  appeal-item within the verdict."
+  [{:keys [appealVerdicts appeals]} appeal-item]
+  (let [latest-verdict? (latest-for-verdict? appeal-item appealVerdicts)
+        latest-appeal? (latest-for-verdict? appeal-item appeals)]
+    (if (= (keyword (:type appeal-item)) :appealVerdict)
+      (and latest-verdict? latest-appeal?)
+      latest-verdict?)))
+
 (defn- appeal-editable?
   "Pre-check to check that appeal can be edited."
-  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
+  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
   (when (and appeal-id appealVerdicts)
     (if-let [appeal (util/find-by-id appeal-id appeals)]
-      (when-not (util/is-latest-of? (:datestamp appeal) (map :datestamp appealVerdicts))
+      (when-not (appeal-item-editable? application appeal)
         (fail :error.appeal-verdict-already-exists))
       (fail :error.unknown-appeal))))
 
 (defn- appeal-verdict-editable?
   "Pre-check to check that appeal-verdict can be edited."
-  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
+  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
   (when appeal-id
     (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
-      (when-not (util/is-latest-of? (:datestamp appeal-verdict) (map :datestamp appeals))
+      (when-not (appeal-item-editable? application appeal-verdict)
         (fail :error.appeal-already-exists))
       (fail :error.unknown-appeal-verdict))))
 
@@ -161,19 +181,10 @@
     command
     {$pull {:appealVerdicts {:id appealId}}}))
 
-(defn- latest-for-verdict?
-  [{:keys [datestamp target-verdict id]} targets]
-  (let [filtered (filter #(and (not= id (:id %)) (= target-verdict (:target-verdict %))) targets)]
-    (util/is-latest-of? datestamp (map :datestamp filtered))))
-
 (defn- process-appeal
   "Process appeal for frontend"
-  [{:keys [appealVerdicts appeals]} appeal-item]
-  (let [latest-verdict? (latest-for-verdict? appeal-item appealVerdicts)
-        latest-appeal? (latest-for-verdict? appeal-item appeals)]
-    (assoc appeal-item :editable (if (= (keyword (:type appeal-item)) :appealVerdict)
-                                   (and latest-verdict? latest-appeal?)
-                                   latest-verdict?))))
+  [application appeal-item]
+  (assoc appeal-item :editable (appeal-item-editable? application appeal-item)))
 
 (defn- add-attachments [{id :id :as appeal}]
   ; get attacments for appeal here
