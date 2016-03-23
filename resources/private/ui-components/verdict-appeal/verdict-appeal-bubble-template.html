@@ -8,7 +8,8 @@
                          buttonIcon: 'lupicon-save',
                          buttonText: 'save',
                          waiting: waiting,
-                         error: error">
+                         error: error,
+                         prefix: test">
     <div class="form-grid form-grid--no-border">
       <div class="row">
         <span class="col-4"
@@ -23,14 +24,16 @@
                              options: $parent.appealTypes,
                              optionsText: 'text',
                              optionsValue: 'id',
-                             prefix: 'verdict.muutoksenhaku.'}">
+                             prefix: 'verdict.muutoksenhaku.',
+                             attr: {'data-test-id': 'appeal-type-' + $parent.test}}">
           </form-cell>
         </div>
         <div class="col-2">
           <form-cell params="{required: true,
                              label: 'verdict.muutoksenhaku.tekijat',
                              cell: 'text',
-                             value: $parent.model.authors}">
+                             value: $parent.model.authors,
+                             attr: {'data-test-id': 'appeal-authors-' + $parent.test}}">
           </form-cell>
         </div>
         <div class="col-1">
@@ -38,7 +41,8 @@
                              required: true,
                              label: 'verdict.muutoksenhaku.pvm',
                              cell: 'date',
-                             value: $parent.model.date}">
+                             value: $parent.model.date,
+                             attr: {'data-test-id': 'appeal-date-' + $parent.test}}">
           </form-cell>
         </div>
       </div>
@@ -47,8 +51,10 @@
           <form-cell params="{label: 'verdict.muutoksenhaku.extra',
                              cell: 'textarea',
                              value: $parent.model.extra,
-                             attr: {placeholder: loc('verdict.muutoksenhaku.extra.placeholder'),
-                             rows: 4}}">
+                             attr: {
+                             placeholder: loc('verdict.muutoksenhaku.extra.placeholder'),
+                             rows: 4,
+                             'data-test-id': 'appeal-extra-' + $parent.test}}">
           </form-cell>
         </div>
       </div>

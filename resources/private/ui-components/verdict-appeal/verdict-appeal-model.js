@@ -2,6 +2,7 @@
 // See VerdictAppealBubbleModel for the creation/edit bubble.
 // Params:
 //  id:  Verdict ID.
+//  index: Verdict index, used in data-test-ids.
 LUPAPISTE.VerdictAppealModel = function( params ) {
   "use strict";
   var self = this;
@@ -12,6 +13,7 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
   var FMT = "D.M.YYYY";
   var service = lupapisteApp.services.verdictAppealService;
 
+  self.params = params;
   var verdictId = params.id;
 
   self.canEdit = function( appeal ) {
