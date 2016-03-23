@@ -40,7 +40,7 @@
   {:parameters [:id functionCode]
    :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/pre-verdict-but-draft}
   [{:keys [application created user] :as command}]
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]

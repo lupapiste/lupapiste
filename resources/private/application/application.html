@@ -111,16 +111,16 @@
                               </div>
                               <!-- /ko -->
 
-                              <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("set-tos-function-for-application") -->
+                              <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("store-tos-metadata-for-attachment") -->
                               <div>
                                 <p data-bind="ltext: 'tos.function'"></p>
-                                <span class="application_summary_text">
-                                  <select data-bind="options: $root.tosFunctions,
-                                                     optionsText: 'name',
-                                                     optionsValue: 'code',
-                                                     value: $root.application.tosFunction,
-                                                     valueAllowUnset: true" ></select>
-                                </span>
+                                <select class="dropdown dropdown--full-width"
+                                        data-bind="options: $root.tosFunctions,
+                                                   optionsText: 'name',
+                                                   optionsValue: 'code',
+                                                   value: $root.application.tosFunction,
+                                                   valueAllowUnset: true,
+                                                   enable: $root.authorization.ok('set-tos-function-for-application')" ></select>
                               </div>
                               <!-- /ko -->
 
