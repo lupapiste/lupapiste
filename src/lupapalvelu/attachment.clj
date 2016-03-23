@@ -1,7 +1,7 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [clojure.java.io :as io]
-            [clojure.set :refer [rename-keys difference]]
+            [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
@@ -754,15 +754,10 @@
         (assoc :versions [version])
         (assoc :latestVersion version))))
 
-(defn appeal-attachment-updates!
-  [{{:keys [attachments] :as app} :application :as command} appeal-id appeal-type fileIds]
-  (let [old-file-ids (->> attachments
-                          (filter (fn [{{type :type} :target}]
-                                    (= type appeal-type)))
-                          (map (util/fn-> :latestVersion :fileId)))
-        new-file-ids     (difference (set fileIds) (set old-file-ids))
-        ; removed-file-ids (difference (set old-file-ids) (set fileIds))
-        file-objects    (seq (mongo/download-find-many {:_id {$in new-file-ids}}))
+(defn new-appeal-attachment-updates
+  "Return $push operation for attachments, with attachments created for given fileIds"
+  [command appeal-id appeal-type fileIds]
+  (let [file-objects    (seq (mongo/download-find-many {:_id {$in fileIds}}))
         new-attachments (map
                           (partial
                             create-appeal-attachment-data
@@ -770,8 +765,5 @@
                             appeal-id
                             appeal-type)
                           file-objects)]
-    ; remove needed files and attachments
-    ; update application to files
-    {:mongo-updates
-     (merge (when (seq new-attachments)
-              {$push {:attachments {$each new-attachments}}}))}))
+    (when (seq new-attachments)
+      {$push {:attachments {$each new-attachments}}})))

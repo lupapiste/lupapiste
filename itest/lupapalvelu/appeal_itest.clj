@@ -325,7 +325,7 @@
                :text "foo"
                :fileIds [file-id-1]) => ok?)
 
-    (let [{:keys [attachments appeals] :as app} (query-application sonja app-id)
+    (let [{:keys [attachments appeals]} (query-application sonja app-id)
           {aid :id} (first appeals)
           appeal-attachment (util/find-first (fn [{target :target}]
                                                (and (= "appeal" (:type target))
@@ -348,8 +348,7 @@
                  :text "foo"
                  :appealId aid
                  :fileIds [file-id-1 file-id-2]) => ok?
-        (let [{:keys [attachments appeals] :as app} (query-application sonja app-id)
-              {aid :id} (first appeals)
+        (let [{:keys [attachments appeals]} (query-application sonja app-id)
               appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
           (count appeals) => 1
           (count attachments) => 6
