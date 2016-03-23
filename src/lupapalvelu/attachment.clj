@@ -550,7 +550,7 @@
 
 (defn delete-attachment!
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-  [{:keys [attachments] :as application} attachment-id]
+  [application attachment-id]
   (info "1/3 deleting files of attachment" attachment-id)
   (run! delete-attachment-file-and-preview! (attachment-file-ids (get-attachment-info application attachment-id)))
   (info "2/3 deleted files of attachment" attachment-id)

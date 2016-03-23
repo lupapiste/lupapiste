@@ -31,7 +31,7 @@ LUPAPISTE.FileuploadService = function() {
 
     function hubSend( message, event ) {
       hub.send( self.serviceName + "::" + message,
-                _.defaults( event, {input: fileInputId}))
+                _.defaults( event, {input: fileInputId}));
     }
 
     $("#" + fileInputId).fileupload({
