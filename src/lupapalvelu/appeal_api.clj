@@ -1,14 +1,15 @@
 (ns lupapalvelu.appeal-api
-  (:require [sade.core :refer :all]
+  (:require [clojure.set :refer [difference]]
+            [sade.core :refer :all]
             [sade.util :as util]
+            [sade.schemas :as ssc]
+            [schema.core :as sc]
             [monger.operators :refer [$push $pull $elemMatch $set]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.appeal :as appeal]
             [lupapalvelu.appeal-verdict :as appeal-verdict]
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
-            [sade.schemas :as ssc]
-            [schema.core :as sc]
             [lupapalvelu.attachment :as attachment]))
 
 (defn- verdict-exists
@@ -81,6 +82,19 @@
                           (map #(str (name collection) ".$." (name %)) (keys update-data))
                           (vals update-data))}})
 
+(defn- attachment-updates
+  [{{:keys [attachments]} :application :as command} appeal-id appeal-type file-ids]
+  (when appeal-id
+    (let [old-file-ids (->> attachments
+                            (filter (fn [{{target-id :id} :target}]
+                                      (= target-id appeal-id)))
+                            (map (util/fn-> :latestVersion :fileId)))
+          new-file-ids     (difference (set file-ids) (set old-file-ids))
+          new-attachment-updates (attachment/new-appeal-attachment-updates command appeal-id appeal-type new-file-ids)
+          ;removed-file-ids (difference (set old-file-ids) (set file-ids))
+          ]
+      {:new-updates new-attachment-updates})))
+
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"
    :parameters          [id verdictId type appellant datestamp fileIds]
@@ -93,19 +107,21 @@
                          appeal-id-exists
                          appeal-editable?
                          deny-type-change]}
-  [{{:keys [attachments appeals] :as app} :application :as command}]
+  [command]
   (let [appeal-data (appeal/appeal-data-for-upsert verdictId type appellant datestamp text appealId)]
     (if appeal-data ; if data is valid
       (let [updates (if appealId
                       (update-appeal-data-mongo-updates :appeals appealId appeal-data)
                       (new-appeal-data-mongo-updates :appeals appeal-data))
-            attachment-updates (attachment/appeal-attachment-updates! command (:id appeal-data) (:type appeal-data) fileIds)]
+            {:keys [new-updates]} (attachment-updates command (or (:id appeal-data) appealId) (:type appeal-data) fileIds)]
+        ; remove needed files and attachments
+        ; update application to files
         (action/update-application
           command
           (:mongo-query updates)
           (util/deep-merge
             (:mongo-updates updates)
-            (:mongo-updates attachment-updates))))
+            new-updates)))
       (fail :error.invalid-appeal))))
 
 (defcommand upsert-appeal-verdict
@@ -123,15 +139,15 @@
   (let [verdict-data (appeal-verdict/appeal-verdict-data-for-upsert verdictId giver datestamp text appealId)]
     (if verdict-data
       (let [updates (if appealId
-                         (update-appeal-data-mongo-updates :appealVerdicts appealId verdict-data)
-                         (new-appeal-data-mongo-updates :appealVerdicts verdict-data))
-            attachment-updates (attachment/appeal-attachment-updates! command (:id verdict-data) (:type verdict-data) fileIds)]
+                      (update-appeal-data-mongo-updates :appealVerdicts appealId verdict-data)
+                      (new-appeal-data-mongo-updates :appealVerdicts verdict-data))
+            {:keys [new-updates]} (attachment-updates command (or (:id verdict-data) appealId) :appealVerdict fileIds)]
         (action/update-application
           command
           (:mongo-query updates)
           (util/deep-merge
             (:mongo-updates updates)
-            (:mongo-updates attachment-updates))))
+            new-updates)))
       (fail :error.invalid-appeal-verdict))))
 
 (defcommand delete-appeal
