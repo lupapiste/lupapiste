@@ -19,7 +19,7 @@ LUPAPISTE.VerdictAppealService = function() {
   }
 
   function command( name, params, callback ) {
-    if( self.editsAllowed ) {
+    if( self.editsAllowed() ) {
       ajax.command( name,
                     _.assign( params,
                               {id: lupapisteApp.models.application.id()}))
