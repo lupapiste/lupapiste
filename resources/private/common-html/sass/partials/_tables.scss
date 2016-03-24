@@ -103,6 +103,11 @@ table.tasks thead tr:first-child td {
   padding-left: 0
 }
 
+.tasks-content {
+  margin-top: $marginM;
+  margin-bottom: $marginM;
+}
+
 table.tasks {
   .task-state {
     width: 22px;
