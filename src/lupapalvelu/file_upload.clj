@@ -15,7 +15,8 @@
     {:id file-id
      :filename sanitized-filename
      :size (:size file)
-     :contentType content-type}))
+     :contentType content-type
+     :metadata metadata}))
 
 (defn- two-hours-ago []
   ; Matches vetuma session TTL
