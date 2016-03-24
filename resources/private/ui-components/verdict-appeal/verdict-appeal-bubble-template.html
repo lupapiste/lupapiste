@@ -25,7 +25,8 @@
                              optionsText: 'text',
                              optionsValue: 'id',
                              prefix: 'verdict.muutoksenhaku.',
-                             attr: {'data-test-id': 'appeal-type-' + $parent.test}}">
+                             attr: {'data-test-id': 'appeal-type-' + $parent.test,
+                             'data-appeal-type': $parent.model.appealType}}">
           </form-cell>
         </div>
         <div class="col-2">
@@ -68,7 +69,9 @@
 
       <div class="row">
         <div class="col-4"
-             data-bind="component: {name: 'file-upload', params: {files: $parent.model.files}}">
+             data-bind="component: {name: 'file-upload',
+                        params: {files: $parent.model.files}},
+                        attr: {'data-test-id': 'appeal-files-' + $parent.test}">
         </div>
       </div>
     </div>

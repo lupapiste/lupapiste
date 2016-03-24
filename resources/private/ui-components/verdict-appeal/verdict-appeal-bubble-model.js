@@ -21,7 +21,7 @@ LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
   self.error = m.error;
   self.waiting = m.waiting;
   self.test = "test";
-  Sif( _.isNumber(params.test) || _.isString( params.test) ) {
+  if( !_.isNull(params.test) || _.isUndefined( params.test) ) {
     self.test = ko.isObservable( params.test ) ? params.test() : params.test;
   }
 

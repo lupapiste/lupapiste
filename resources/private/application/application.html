@@ -1125,7 +1125,7 @@
                                               </div>
                                               <!-- Muutoksenhaku -->
                                               <div data-bind="component: {name: 'verdict-appeal',
-                                                              params: {id: verdict.id, test: $index()}}"></div>
+                                                              params: {id: verdict.id, test: $parentContext.$index() + '-' +$index()}}"></div>
                                           </div>
                                       </div>
                                   </div>

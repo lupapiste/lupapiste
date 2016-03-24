@@ -15,7 +15,8 @@
     </tr></thead>
     <tbody data-bind="foreach: appeals">
       <tr data-bind="attr: {'data-test-id': 'appeals-table-row-' + $index()}">
-        <td data-bind="ltext: 'verdict.muutoksenhaku.' + appealType"></td>
+        <td data-bind="ltext: 'verdict.muutoksenhaku.' + appealType,
+                       attr: {'data-appeal-type': appealType}"></td>
         <td data-bind="text: authors"></td>
         <td data-bind="text: date"></td>
         <td data-bind="foreach: files">
