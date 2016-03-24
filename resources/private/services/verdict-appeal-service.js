@@ -8,31 +8,35 @@ LUPAPISTE.VerdictAppealService = function() {
   self.allAppeals = {};
 
   function fetchAllAppeals() {
-    ajax.query( "appeals", {id: lupapisteApp.models.application.id()})
-      .success( function( res ) {
-        self.allAppeals = res.data;
-        hub.send( self.serviceName + "::appeals-updated");
-      })
-      .call();
+    if( lupapisteApp.models.applicationAuthModel.ok( "appeals")) {
+      ajax.query( "appeals", {id: lupapisteApp.models.application.id()})
+        .success( function( res ) {
+          self.allAppeals = res.data;
+          hub.send( self.serviceName + "::appeals-updated");
+        })
+        .call();
+    }
   }
 
   function command( name, params, callback ) {
-    ajax.command( name,
-                  _.assign( params,
-                            {id: lupapisteApp.models.application.id()}))
-      .success( function() {
-        hub.send( "indicator", {style: "positive"});
-        fetchAllAppeals();
-        (callback || _.noop)();
-      })
-      .error( function( res ) {
-        if( callback ) {
-          callback( res.text );
-        } else {
-          hub.send( "indicator", {style: "negative"});
-        }
-      })
-      .call();
+    if( self.editsAllowed ) {
+      ajax.command( name,
+                    _.assign( params,
+                              {id: lupapisteApp.models.application.id()}))
+        .success( function() {
+          hub.send( "indicator", {style: "positive"});
+          fetchAllAppeals();
+          (callback || _.noop)();
+        })
+        .error( function( res ) {
+          if( callback ) {
+            callback( res.text );
+          } else {
+            hub.send( "indicator", {style: "negative"});
+          }
+        })
+        .call();
+    }
   }
 
   function upsertAppeal( event ) {
