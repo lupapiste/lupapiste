@@ -164,7 +164,7 @@
     };
 
     self.modificationAllowed = ko.pureComputed(function() {
-      var tila = ko.unwrap(ko.unwrap(self.metadata)['tila']);
+      var tila = ko.unwrap(ko.unwrap(self.metadata).tila);
       return !_.includes(["arkistoitu", "arkistoidaan"], tila);
     });
 
