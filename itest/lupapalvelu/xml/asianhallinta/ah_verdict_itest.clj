@@ -225,6 +225,21 @@
   (against-background
     (lupapalvelu.application/make-application-id anything) => "LP-297-2015-00001"))
 
+(facts "batch run tests"
+       (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict error result"
+             (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
+             (provided
+              (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file "/dev/null")]
+              (ahk/process-ah-verdict anything anything anything) => (sade.core/fail "nope")
+              (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Failed to process ah-verdict", :zip-path "/dev/null"} ) => "bonk"))
+       (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict ok result"
+             (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
+             (provided
+              (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file "/dev/null")]
+              (ahk/process-ah-verdict anything anything anything) => (sade.core/ok)
+              (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Succesfully processed ah-verdict", :zip-path "/dev/null"} ) => "bonk"
+              )))
+
 (facts "unit tests"
   (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path]))]
     (fact* "Can unzip passed zipfile"
@@ -287,4 +302,3 @@
     (mongo/with-db db-name
       (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]))]
         (ahk/process-ah-verdict zip-file "sipoo" system-user) => (partial expected-failure? "error.integration.asianhallinta.unauthorized")))))
-
