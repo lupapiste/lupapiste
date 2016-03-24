@@ -250,4 +250,21 @@
                                                                                                   :myyntipalvelu false
                                                                                                   :kieli :fi
                                                                                                   :henkilotiedot :sisaltaa}}]}}) => nil
-        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil))))
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
+
+  (fact "metadata cannot be set to a read-only attachment"
+    (let [command {:application {:organization    "753-R"
+                                 :id              "ABC123"
+                                 :state           "submitted"
+                                 :attachments [{:id "5234" :readOnly true}]}
+                   :created     1000
+                   :user        {:orgAuthz      {:753-R #{:authority :archivist}}
+                                 :organizations ["753-R"]
+                                 :role          :authority}
+                   :action      "store-tos-metadata-for-attachment"
+                   :data        {:metadata {"julkisuusluokka" "julkinen"}
+                                 :id       "ABC123"
+                                 :attachmentId "5234"}}]
+      (execute command) => {:ok false
+                            :text "error.unauthorized"
+                            :desc "Read-only attachments cannot be modified."})))
