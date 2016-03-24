@@ -2,14 +2,16 @@
   (:require [monger.operators :refer :all]
             [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.mime :as mime]
-            [lupapalvelu.vetuma :as vetuma]))
+            [lupapalvelu.mime :as mime]))
 
-(defn save-file [file]
-  (let [file-id (mongo/create-id)
+(defn save-file [file & metadata]
+  (let [metadata (if (map? (first metadata))
+                   (first metadata)
+                   (apply hash-map metadata))
+        file-id (mongo/create-id)
         sanitized-filename (mime/sanitize-filename (:filename file))
         content-type       (mime/mime-type sanitized-filename)]
-    (mongo/upload file-id sanitized-filename content-type (:tempfile file) :sessionId (vetuma/session-id) :linked false)
+    (mongo/upload file-id sanitized-filename content-type (:tempfile file) metadata)
     {:id file-id
      :filename sanitized-filename
      :size (:size file)
