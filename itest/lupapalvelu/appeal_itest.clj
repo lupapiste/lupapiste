@@ -303,20 +303,20 @@
             (:editable (last appeals-after)) => true))))))
 
 (facts "appeals with attachments"
-  (let [{app-id :id} (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+  (let [{app-id :id} (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId jarvenpaa-property-id)
         {:keys [attachments]} (query-application pena app-id)
         created (now)
-        {vid :verdict-id} (give-verdict sonja app-id :verdictId "321-2016")
-        resp1  (upload-file sonja "dev-resources/test-attachment.txt")
+        {vid :verdict-id} (give-verdict raktark-jarvenpaa app-id :verdictId "321-2016")
+        resp1  (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
         file-id-1 (get-in resp1 [:files 0 :id])
-        resp2  (upload-file sonja "dev-resources/invalid-pdfa.pdf")
+        resp2  (upload-file raktark-jarvenpaa "dev-resources/invalid-pdfa.pdf")
         file-id-2 (get-in resp2 [:files 0 :id])]
     resp1 => ok?
     resp2 => ok?
-    (count attachments) => 4
+    (count attachments) => 0
 
     (fact "successful appeal"
-      (command sonja :upsert-appeal
+      (command raktark-jarvenpaa :upsert-appeal
                :id app-id
                :verdictId vid
                :type "appeal"
@@ -325,21 +325,21 @@
                :text "foo"
                :fileIds [file-id-1]) => ok?)
 
-    (let [{:keys [attachments appeals]} (query-application sonja app-id)
+    (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
           {aid :id} (first appeals)
           appeal-attachment (util/find-first (fn [{target :target}]
                                                (and (= "appeal" (:type target))
                                                     (= aid (:id target))))
                                              attachments)]
       (fact "new attachment has been created"
-        (count attachments) => 5
+        (count attachments) => 1
         (-> appeal-attachment :latestVersion :fileId) => file-id-1)
       (fact "attachment type is correct"
         (:type appeal-attachment) => {:type-group "muutoksenhaku"
                                       :type-id    "valitus"})
 
       (fact "updating appeal with new attachment"
-        (command sonja :upsert-appeal
+        (command raktark-jarvenpaa :upsert-appeal
                  :id app-id
                  :verdictId vid
                  :type "appeal"
@@ -348,15 +348,15 @@
                  :text "foo"
                  :appealId aid
                  :fileIds [file-id-1 file-id-2]) => ok?
-        (let [{:keys [attachments appeals]} (query-application sonja app-id)
+        (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
               appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
           (count appeals) => 1
-          (count attachments) => 6
+          (count attachments) => 2
           (count appeal-attachments) => 2
           (-> appeal-attachments second :latestVersion :fileId) => file-id-2))
 
       (fact "removing first attachment from appeal"
-        (command sonja :upsert-appeal
+        (command raktark-jarvenpaa :upsert-appeal
                  :id app-id
                  :verdictId vid
                  :type "appeal"
@@ -365,9 +365,9 @@
                  :text "foo"
                  :appealId aid
                  :fileIds [file-id-2]) => ok?
-        (let [{:keys [attachments appeals]} (query-application sonja app-id)
+        (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
               appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
           (count appeals) => 1
-          (count attachments) => 5
+          (count attachments) => 1
           (count appeal-attachments) => 1
           (-> appeal-attachments first :latestVersion :fileId) => file-id-2)))))
