@@ -317,6 +317,9 @@
     resp2 => ok?
     (count attachments) => 0
 
+    (fact "file not linked to application"
+      (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-1) => http404?)
+
     (fact "successful appeal"
       (command raktark-jarvenpaa :upsert-appeal
                :id app-id
@@ -339,6 +342,9 @@
       (fact "attachment type is correct"
         (:type appeal-attachment) => {:type-group "muutoksenhaku"
                                       :type-id    "valitus"})
+
+      (fact "file is linked to application"
+        (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-1) => http200?)
 
       (fact "updating appeal with new attachment"
         (command raktark-jarvenpaa :upsert-appeal
@@ -390,4 +396,7 @@
           (count attachments) => 1
           (count appeal-attachments) => 1
           (-> appeal-attachments first :latestVersion :fileId) => file-id-1
-          (count (-> appeal-attachments first :versions)) => 1)))))
+          (count (-> appeal-attachments first :versions)) => 1)
+
+        (fact "file doesn't exist"
+          (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-2) => http404?)))))
