@@ -118,7 +118,7 @@
                                 attachments)
           appeal-file-ids     (map (util/fn-> :latestVersion :fileId) appeal-attachments)
           new-file-ids     (difference (set file-ids) (set appeal-file-ids))
-          new-attachment-updates (attachment/new-appeal-attachment-updates command appeal-id appeal-type new-file-ids)
+          new-attachment-updates (attachment/new-appeal-attachment-updates! command appeal-id appeal-type new-file-ids)
           removable-file-ids (difference (set appeal-file-ids) (set file-ids))
           removable-attachments (filter
                                   (fn [{versions :versions}] (some removable-file-ids (map :fileId versions)))

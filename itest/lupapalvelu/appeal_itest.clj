@@ -4,7 +4,8 @@
             [lupapalvelu.itest-util :refer :all]
             [sade.core :refer [now]]
             [lupapalvelu.mongo :as mongo]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.env :as env]))
 
 (apply-remote-minimal)
 
@@ -309,8 +310,9 @@
         {vid :verdict-id} (give-verdict raktark-jarvenpaa app-id :verdictId "321-2016")
         resp1  (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
         file-id-1 (get-in resp1 [:files 0 :id])
-        resp2  (upload-file raktark-jarvenpaa "dev-resources/invalid-pdfa.pdf")
-        file-id-2 (get-in resp2 [:files 0 :id])]
+        resp2  (upload-file raktark-jarvenpaa "dev-resources/test-pdf.pdf")
+        file-id-2 (get-in resp2 [:files 0 :id])
+        pdfa-conversion? (string? (env/value :pdf2pdf :license-key))]
     resp1 => ok?
     resp2 => ok?
     (count attachments) => 0
@@ -349,13 +351,30 @@
                  :appealId aid
                  :fileIds [file-id-1 file-id-2]) => ok?
         (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
-              appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
+              appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)
+              {pdf-versions :versions :as pdf-attachment} (last appeal-attachments)]
           (count appeals) => 1
           (count attachments) => 2
           (count appeal-attachments) => 2
-          (-> appeal-attachments second :latestVersion :fileId) => file-id-2))
+          (if pdfa-conversion?
+            (count pdf-versions) => 2
+            (count pdf-versions) => 1)
+          (if pdfa-conversion?
+            (facts "PDF/A converted"
+              (-> pdf-attachment :latestVersion) => (contains {:version {:major 0
+                                                                         :minor 2}
+                                                               :archivable true})
+              (-> pdf-attachment :latestVersion :fileId) =not=> file-id-2
+              (-> pdf-versions first :fileId) => file-id-2
+              (-> pdf-versions first :archivabilityError) => "invalid-mime-type"
+              (-> pdf-versions first :version) => {:major 0
+                                                   :minor 1}
+              (last pdf-versions) => (-> pdf-attachment :latestVersion)
+            (facts "No PDF/A conversion"
+              (-> pdf-versions first :fileId) => file-id-2
+              (-> pdf-versions first :archivabilityError) => "invalid-mime-type")))))
 
-      (fact "removing first attachment from appeal"
+      (fact "removing second attachment from appeal"
         (command raktark-jarvenpaa :upsert-appeal
                  :id app-id
                  :verdictId vid
@@ -364,10 +383,11 @@
                  :datestamp created
                  :text "foo"
                  :appealId aid
-                 :fileIds [file-id-2]) => ok?
+                 :fileIds [file-id-1]) => ok?
         (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
               appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
           (count appeals) => 1
           (count attachments) => 1
           (count appeal-attachments) => 1
-          (-> appeal-attachments first :latestVersion :fileId) => file-id-2)))))
+          (-> appeal-attachments first :latestVersion :fileId) => file-id-1
+          (count (-> appeal-attachments first :versions)) => 1)))))

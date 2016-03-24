@@ -26,7 +26,7 @@
                    make-version
                    build-version-updates
                    default-metadata-for-attachment-type
-                   create-appeal-attachment-data)
+                   create-appeal-attachment-data!)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -370,10 +370,10 @@
           command {:application {:state :verdictGiven}
                    :created 12345
                    :user {:id "foo" :username "tester" :role "authority" :firstName "Tester" :lastName "Testby"}}
-          result-attachment (create-appeal-attachment-data
+          result-attachment (create-appeal-attachment-data!
                               command
                               (mongo/create-id)
                               :appeal
                               file-obj)]
-      (fact "Generated attachment data is valid"
+      (fact "Generated attachment data is valid (no PDF/A generation)"
         (sc/check Attachment result-attachment) => nil))))
