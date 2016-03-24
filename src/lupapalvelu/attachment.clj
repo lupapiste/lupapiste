@@ -261,6 +261,12 @@
 ;; Api
 ;;
 
+(defn link-file-to-application [app-id fileId]
+  {:pre [(string? app-id)]}
+  (mongo/update-by-id :fs.files fileId {$set {:metadata.application app-id
+                                              :metadata.linked true}}))
+
+
 (defn- by-file-ids [file-ids {versions :versions :as attachment}]
   (some (comp (set file-ids) :fileId) versions))
 
@@ -591,14 +597,14 @@
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
   [user file-id]
   (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]
+    (when-let [application (and (:application attachment-file) (get-application-as (:application attachment-file) user :include-canceled-apps? true))]
       (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
   [file-id]
   (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (get-application-no-access-checking (:application attachment-file))]
+    (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
       (when (seq application) attachment-file))))
 
 (defn output-attachment
