@@ -3,64 +3,66 @@
         id="verdict-appeal-template">
   <h2 data-bind="ltext: 'verdict.muutoksenhaku'"></h2>
   <!-- ko if: appeals().length -->
-  <table class="appeals-table"
-         data-bind="if: appeals">
-    <thead><tr>
-        <th data-bind="ltext: 'verdict.muutoksenhaku.tyyppi'"></th>
-        <th data-bind="ltext: 'verdict.muutoksenhaku.tekijat'"></th>
-        <th data-bind="ltext: 'verdict.muutoksenhaku.pvm'"></th>
-        <th data-bind="ltext: 'verdict.attachments'"></th>
-        <th></th>
-    </tr></thead>
-    <tbody data-bind="foreach: appeals">
-      <tr>
-        <td data-bind="ltext: 'verdict.muutoksenhaku.' + appealType"></td>
-        <td data-bind="text: authors"></td>
-        <td data-bind="text: date"></td>
-        <td data-bind="foreach: files">
-          <ul class="appeals-files">
-            <li>
-              <a data-bind="download: $data"></a>
-              <span class="appeals-files__info">
-                <span data-bind="ltext: contentType"></span>
-                <span data-bind="size: size"></span>
-              </span>
-            </li>
-          </ul>
-        </td>
-        <td class="appeals-table--action">
-          <!-- ko if: $parent.canEdit( $data ) -->
-          <a data-bind="ltext: 'verdict.muutoksenhaku.muokkaa',
-                        toggleClick: showEdit"></a>
-          <a data-bind="ltext: 'verdict.muutoksenhaku.poista',
-                        click: $parent.deleteAppeal"></a>
-          <!-- /ko -->
-          <!-- ko ifnot: $parent.canEdit ($data) -->
-          <a data-bind="ltext: 'verdict.muutoksenhaku.show-extra',
-                        toggleClick: showExtra"></a>
-          <!-- /ko -->
-        </td>
-      </tr>
-      <!-- ko if: showExtra -->
-      <tr class="appeals-table__note">
-        <td colspan="5"
-            data-bind="text: extra || loc( 'verdict.muutoksenhaku.no-extra'),
-                       css: extra ? 'appeals-table--extra' : 'appeals-table--no-extra'">
-        </td>
-      </tr>
-      <tr></tr>
-      <!-- /ko -->
-      <!-- ko if: showEdit -->
-      <tr class="appeals-table__note">
-        <td colspan="5">
-          <verdict-appeal-bubble params="visible: showEdit,
-                                         model: $parent.bubbleModel( showEdit, appealId )"></verdict-appeal-bubble>
-        </td>
-      </tr>
-      <tr></tr>
-      <!-- /ko -->
-    </tbody>
-  </table>
+  <div class="accordion-content-part">
+    <table class="appeals-table"
+           data-bind="if: appeals">
+      <thead><tr>
+          <th data-bind="ltext: 'verdict.muutoksenhaku.tyyppi'"></th>
+          <th data-bind="ltext: 'verdict.muutoksenhaku.tekijat'"></th>
+          <th data-bind="ltext: 'verdict.muutoksenhaku.pvm'"></th>
+          <th data-bind="ltext: 'verdict.attachments'"></th>
+          <th></th>
+      </tr></thead>
+      <tbody data-bind="foreach: appeals">
+        <tr>
+          <td data-bind="ltext: 'verdict.muutoksenhaku.' + appealType"></td>
+          <td data-bind="text: authors"></td>
+          <td data-bind="text: date"></td>
+          <td data-bind="foreach: files">
+            <ul class="appeals-files">
+              <li>
+                <a data-bind="download: $data"></a>
+                <span class="appeals-files__info">
+                  <span data-bind="ltext: contentType"></span>
+                  <span data-bind="size: size"></span>
+                </span>
+              </li>
+            </ul>
+          </td>
+          <td class="appeals-table--action">
+            <!-- ko if: $parent.canEdit( $data ) -->
+            <a data-bind="ltext: 'verdict.muutoksenhaku.muokkaa',
+                          toggleClick: showEdit"></a>
+            <a data-bind="ltext: 'verdict.muutoksenhaku.poista',
+                          click: $parent.deleteAppeal"></a>
+            <!-- /ko -->
+            <!-- ko ifnot: $parent.canEdit ($data) -->
+            <a data-bind="ltext: 'verdict.muutoksenhaku.show-extra',
+                          toggleClick: showExtra"></a>
+            <!-- /ko -->
+          </td>
+        </tr>
+        <!-- ko if: showExtra -->
+        <tr class="appeals-table__note">
+          <td colspan="5"
+              data-bind="text: extra || loc( 'verdict.muutoksenhaku.no-extra'),
+                         css: extra ? 'appeals-table--extra' : 'appeals-table--no-extra'">
+          </td>
+        </tr>
+        <tr></tr>
+        <!-- /ko -->
+        <!-- ko if: showEdit -->
+        <tr class="appeals-table__note">
+          <td colspan="5">
+            <verdict-appeal-bubble params="visible: showEdit,
+                                           model: $parent.bubbleModel( showEdit, appealId )"></verdict-appeal-bubble>
+          </td>
+        </tr>
+        <tr></tr>
+        <!-- /ko -->
+      </tbody>
+    </table>
+  </div>
   <!-- /ko -->
   <div class="stacked"
        data-bind="if: canEdit()">
