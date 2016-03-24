@@ -261,6 +261,8 @@
       pollChangedState(self.archivingInProgressIds());
       if (!_.isEmpty(self.archivingInProgressIds())) {
         window.setTimeout(pollArchiveStatus, 2000);
+      } else {
+        repository.load(ko.unwrap(params.application.id));
       }
     };
 

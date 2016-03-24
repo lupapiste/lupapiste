@@ -163,6 +163,10 @@
       self.editable(false);
     };
 
+    self.modificationAllowed = ko.pureComputed(function() {
+      var tila = ko.unwrap(ko.unwrap(self.metadata)['tila']);
+      return !_.includes(["arkistoitu", "arkistoidaan"], tila);
+    });
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap, uneditableFields);

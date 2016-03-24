@@ -7,7 +7,7 @@
       <div class="editor">
         <div class="editor-header">
           <div data-bind="ltext: 'attachment.tosMetadata'"></div>
-          <div class="edit-button-container">
+          <div class="edit-button-container" data-bind="if: modificationAllowed">
             <div class="edit-button" data-bind="click: edit, if: !editable()">
               <i class="lupicon-pen edit"></i>
             </div>
