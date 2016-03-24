@@ -348,7 +348,8 @@
                        (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
         (logging/log-event :info {:run-by "Automatic ah-verdicts checking"
-                                  :event (if ok? result  "Succesfully processed ah-verdict" "Failed to process ah-verdict") :zip-path zip-path})
+                                  :event (if (ok? result)  "Succesfully processed ah-verdict" "Failed to process ah-verdict") :zip-path zip-path})
+        ;; (println "logged ah-verdict result" (if (ok? result)  "Succesfully processed ah-verdict" "Failed to process ah-verdict"))
         (when-not (fs/rename zip target)
           (errorf "Failed to rename %s to %s" zip-path target))))))
 
