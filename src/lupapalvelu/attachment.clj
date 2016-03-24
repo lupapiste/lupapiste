@@ -738,7 +738,7 @@
   (let [type (attachment-type-for-appeal appeal-type)
         target {:id appeal-id
                 :type appeal-type}
-        attachment-data (create-attachment-data app type nil now target true false false)
+        attachment-data (create-attachment-data app type nil now target true false false nil nil true)
         version-options {:file-id (:fileId file)
                          :original-file-id (:fileId file)
                          :filename (:file-name file)
