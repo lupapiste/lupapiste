@@ -164,7 +164,7 @@
                        verdict-id)]
       (doall
        (for [att  attachments
-             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki} att
+             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
                    _ (debug "Download " url)
                    filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (try
@@ -176,7 +176,7 @@
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
                    attachment-type    {:type-group (if (env/feature? :updated-attachments) "paatoksenteko" "muut"), 
-                                       :type-id "paatosote"}
+                                       :type-id (if (= "paatos" type) "paatos" "paatosote")}
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
