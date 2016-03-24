@@ -358,22 +358,24 @@
 
 
 (facts "appeal attachment updates"
-  (facts "appeal-attachment-data"
-    (let [file-id  (mongo/create-id)
-          file-obj {:content nil,
-                    :content-type "application/pdf",
-                    :content-length 123,
-                    :file-name "test-pdf.pdf",
-                    :metadata {:uploaded 12344567, :linked false},
-                    :application nil
-                    :fileId file-id}
-          command {:application {:state :verdictGiven}
-                   :created 12345
-                   :user {:id "foo" :username "tester" :role "authority" :firstName "Tester" :lastName "Testby"}}
-          result-attachment (create-appeal-attachment-data!
-                              command
-                              (mongo/create-id)
-                              :appeal
-                              file-obj)]
-      (fact "Generated attachment data is valid (no PDF/A generation)"
-        (sc/check Attachment result-attachment) => nil))))
+  (against-background
+    [(lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false]
+    (fact "appeal-attachment-data"
+      (let [file-id  (mongo/create-id)
+            file-obj {:content nil,
+                      :content-type "application/pdf",
+                      :content-length 123,
+                      :file-name "test-pdf.pdf",
+                      :metadata {:uploaded 12344567, :linked false},
+                      :application nil
+                      :fileId file-id}
+            command {:application {:state :verdictGiven}
+                     :created 12345
+                     :user {:id "foo" :username "tester" :role "authority" :firstName "Tester" :lastName "Testby"}}
+            result-attachment (create-appeal-attachment-data!
+                                command
+                                (mongo/create-id)
+                                :appeal
+                                file-obj)]
+        (fact "Generated attachment data is valid (no PDF/A generation)"
+          (sc/check Attachment result-attachment) => nil)))))
