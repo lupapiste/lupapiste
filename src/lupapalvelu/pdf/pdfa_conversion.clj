@@ -120,10 +120,15 @@
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
     (try
       (info "Trying to convert PDF to PDF/A")
-      (let [temp-file-path (.getCanonicalPath pdf-file)
-            page-count (get-pdf-page-count temp-file-path)
-            pdf-a-file-path (or target-file-path (str temp-file-path "-pdfa.pdf"))
-            conversion-result (run-pdf-to-pdf-a-conversion temp-file-path pdf-a-file-path)]
+      (let [stream? (instance? java.io.InputStream pdf-file)
+            file-or-stream (if stream?
+                             pdf-file
+                             (.getCanonicalPath pdf-file))
+            page-count (get-pdf-page-count file-or-stream)
+            pdf-a-file-path (or target-file-path (if stream?
+                                                   (.getCanonicalPath (File/createTempFile "lupapiste-pdfa-conversion" ".pdf"))
+                                                   (str file-or-stream "-pdfa.pdf")))
+            conversion-result (run-pdf-to-pdf-a-conversion file-or-stream pdf-a-file-path)]
         (store-converted-page-count conversion-result page-count)
         (if (:pdfa? conversion-result)
           (info "Converted to PDF/A " pdf-a-file-path)

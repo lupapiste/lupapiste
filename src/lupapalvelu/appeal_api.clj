@@ -118,12 +118,13 @@
                                 attachments)
           appeal-file-ids     (map (util/fn-> :latestVersion :fileId) appeal-attachments)
           new-file-ids     (difference (set file-ids) (set appeal-file-ids))
-          new-attachment-updates (attachment/new-appeal-attachment-updates command appeal-id appeal-type new-file-ids)
+          new-attachment-updates (attachment/new-appeal-attachment-updates! command appeal-id appeal-type new-file-ids)
           removable-file-ids (difference (set appeal-file-ids) (set file-ids))
           removable-attachments (filter
                                   (fn [{versions :versions}] (some removable-file-ids (map :fileId versions)))
                                   appeal-attachments)]
       {:new-updates new-attachment-updates
+       :new-file-ids new-file-ids
        :removable-attachment-ids (remove nil? (map :id removable-attachments))})))
 
 (defn- appeal-item-update!
@@ -140,6 +141,7 @@
                   (update-appeal-data-mongo-updates collection appealId appeal-item)
                   (new-appeal-data-mongo-updates collection appeal-item))
         {:keys [new-updates
+                new-file-ids
                 removable-attachment-ids]} (attachment-updates command (or (:id appeal-item) appealId) appeal-type fileIds)]
     (action/update-application
       command
@@ -148,7 +150,10 @@
         (:mongo-updates updates)
         new-updates))
     (when (seq removable-attachment-ids)
-      (run! (partial attachment/delete-attachment! (domain/get-application-no-access-checking (:id app))) removable-attachment-ids))))
+      (run! (partial attachment/delete-attachment! (domain/get-application-no-access-checking (:id app))) removable-attachment-ids))
+    (when (seq new-file-ids)
+      ; Link files to application, as files uploaded by file-upload-api to GridFS are not associated to application initially.
+      (run! (partial attachment/link-file-to-application (:id app)) new-file-ids))))
 
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"

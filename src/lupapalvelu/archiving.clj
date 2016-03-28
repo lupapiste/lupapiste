@@ -56,7 +56,8 @@
     {:attachments.id id}
     {$set {:modified now
            :attachments.$.modified now
-           :attachments.$.metadata.tila next-state}}))
+           :attachments.$.metadata.tila next-state
+           :attachments.$.readOnly true}}))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application
