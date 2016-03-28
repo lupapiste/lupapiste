@@ -1241,6 +1241,12 @@ No such test id
   [Arguments]  ${id}
   Wait until  Element should not be visible  jquery=[data-test-id=${id}]
 
+
+Test id should contain
+  [Arguments]  ${id}  ${text}
+  Wait until  Element should contain  jquery=[data-test-id=${id}]  ${text}
+
+
 # Frontend error log
 
 There are no frontend errors

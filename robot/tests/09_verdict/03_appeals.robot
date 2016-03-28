@@ -58,8 +58,8 @@ Sonja deletes appeal
   Click by test id  delete-appeal-0-0-0
   Wait Until  Element should not be visible  jquery=table.appeals-table
 
-Sonja adds rectification
-  Add to verdict  0-0  appeal  Bob  1.4.2016
+Sonja adds appeal and rectification
+  Add to verdict  0-0  appeal  Bob  1.4.2016  I am unhappy!
   Add to verdict  0-0  rectification  Dot  1.5.2016
   Wait test id visible  edit-appeal-0-0-0
   Wait test id visible  edit-appeal-0-0-1
@@ -72,6 +72,27 @@ Sonja adds appealVerdict thus locking appeals
   Wait test id visible  show-appeal-0-0-0
   Wait test id visible  show-appeal-0-0-1
 
+Show info buttons show correct data
+  Click by test id  show-appeal-0-0-0
+  Test id should contain  info-appeal-0-0-0  I am unhappy!
+  Click by test id  show-appeal-0-0-1
+  Test id should contain  info-appeal-0-0-1  ${EMPTY}
+
+Adding appeal locks appealVerdict
+  Add to verdict  0-0  appeal  Frisket  1.7.2016
+  Scroll to test id  appeal-0-0-bubble-dialog-ok
+  No such test id  edit-appeal-0-0-2
+  Wait test id visible  show-appeal-0-0-2
+
+Making appeal date earlier than appealVerdict makes the latter editable
+  Click by test id  edit-appeal-0-0-3
+  Scroll to test id  appeal-0-0-3-bubble-dialog-ok
+  Edit date  0-0-3  1.1.2010
+  # TODO: omit after full file support
+  Add file 0-0-3
+  OK bubble 0-0-3
+  Wait test id visible  edit-appeal-0-0-3
+  Appeals row check  0-0  3  appealVerdict  Phong  1.6.2016
 
 *** Keywords ***
 
@@ -81,6 +102,8 @@ Edit authors
 
 Edit date
   [Arguments]  ${postfix}  ${date}
+  ## Disable date picker
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Fill test id  appeal-date-${postfix}  ${date}
 
 Edit extra
@@ -119,8 +142,6 @@ Add to verdict
   Textfield value should be  jquery=input[data-test-id=appeal-authors-${postfix}]  ${EMPTY}
   Edit authors  ${postfix}  ${authors}
   Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Textfield value should be  jquery=input[data-test-id=appeal-date-${postfix}]  ${EMPTY}
   Edit date  ${postfix}  ${date}
   Test id disabled  appeal-${postfix}-bubble-dialog-ok
