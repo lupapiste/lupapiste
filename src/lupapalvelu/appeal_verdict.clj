@@ -4,7 +4,8 @@
             [schema.core :refer [defschema] :as sc]
             [sade.core :refer :all]
             [sade.schemas :as ssc]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.appeal :refer [FrontendAppealFile]]))
 
 (defschema AppealVerdict
   "Schema for an appeal verdict. Appeal verdict is given for
@@ -19,7 +20,10 @@
 
 (defschema FrontendAppealVerdict
   "Schema of AppealVerdict presentation for frontend"
-  (assoc AppealVerdict :editable sc/Bool :type (sc/eq "appealVerdict")))
+  (assoc AppealVerdict
+         :editable sc/Bool
+         :type (sc/eq "appealVerdict")
+         :files [FrontendAppealFile]))
 
 (defn create-appeal-verdict [target-verdict-id giver datestamp text]
   (util/strip-nils

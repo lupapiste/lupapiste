@@ -115,6 +115,11 @@ Appeals in different verdicts do not affect each other
   Add to verdict  1-0  appeal  Megabyte  7.7.2016
   Wait test id visible  edit-appeal-1-0-0
   Wait test id visible  edit-appeal-0-0-3
+
+Verdict fetch now shows confirmation dialog
+  Scroll and click test id  fetch-verdict
+  Deny  dynamic-yes-no-confirm-dialog
+  Wait test id visible  edit-appeal-0-0-3
   [Teardown]  Logout
 
 Mikko logs in. He can see the appeals but not edit them.
