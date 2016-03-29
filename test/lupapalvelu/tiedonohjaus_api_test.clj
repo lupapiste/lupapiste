@@ -2,12 +2,10 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
-            [sade.env :as env]
             [lupapalvelu.tiedonohjaus-api :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.action :refer [execute]])
-  (:import (java.util Date)
-           (java.time LocalDate ZoneId)))
+            [lupapalvelu.action :refer [execute update-application]]
+            [lupapalvelu.tiedonohjaus :as t]))
 
 (testable-privates lupapalvelu.tiedonohjaus-api store-function-code update-application-child-metadata!)
 
@@ -20,13 +18,13 @@
       (mongo/update-by-id :organizations "753-R" {"$set" {"operations-tos-functions.vapaa-ajan-asuinrakennus" "10 03 00 01"}}) => nil))
 
   (fact "a function code can not be stored for an operation not selected by the organization"
-    (store-function-code "vapaa-ajan-asuinrakennus" "10 03 00 01" {:orgAuthz {:753-R #{:authorityAdmin}}}) => {:ok false :text "Invalid organization or operation"}
+    (store-function-code "vapaa-ajan-asuinrakennus" "10 03 00 01" {:orgAuthz {:753-R #{:authorityAdmin}}}) => {:ok false :text "error.unknown-operation"}
     (provided
       (lupapalvelu.organization/get-organization "753-R") => {:selected-operations ["foobar"]}
       (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "10 03 00 01"}]))
 
   (fact "an invalid function code can not be stored for an operation"
-    (store-function-code "vapaa-ajan-asuinrakennus" "10 03 00 01" {:orgAuthz {:753-R #{:authorityAdmin}}}) => {:ok false :text "Invalid organization or operation"}
+    (store-function-code "vapaa-ajan-asuinrakennus" "10 03 00 01" {:orgAuthz {:753-R #{:authorityAdmin}}}) => {:ok false :text "error.unknown-operation"}
     (provided
       (lupapalvelu.organization/get-organization "753-R") => {:selected-operations ["vapaa-ajan-asuinrakennus"]}
       (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "55 55 55 55"}]))
@@ -267,4 +265,40 @@
                                  :attachmentId "5234"}}]
       (execute command) => {:ok false
                             :text "error.unauthorized"
-                            :desc "Read-only attachments cannot be modified."})))
+                            :desc "Read-only attachments cannot be modified."}))
+
+  (fact "a valid function code can be set to application and it is stored in history array"
+    (let [fc "10 03 00 01"
+          application {:organization    "753-R"
+                       :id              "ABC123"
+                       :state           "submitted"
+                       :history []
+                       :attachments []}
+          command {:application application
+                   :created     1000
+                   :user        {:id            "monni"
+                                 :firstName     "Monni"
+                                 :lastName      "Tiskaa"
+                                 :orgAuthz      {:753-R #{:authority :archivist}}
+                                 :organizations ["753-R"]
+                                 :role          :authority}
+                   :action      "set-tos-function-for-application"
+                   :data        {:id       "ABC123"
+                                 :functionCode "10 03 00 01"}}]
+      (execute command) => {:ok true}
+      (provided
+        (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
+        (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
+        (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
+        (update-application command {"$set" {:modified 1000
+                                             :tosFunction fc
+                                             :metadata {:julkisuusluokka :julkinen}
+                                             :processMetadata {:julkisuusluokka :salainen}
+                                             :attachments []}
+                                     "$push" {:history {:tosFunction {:code fc
+                                                                      :text "Foobar"}
+                                                        :ts 1000
+                                                        :user {:id            "monni"
+                                                               :firstName     "Monni"
+                                                               :lastName      "Tiskaa"
+                                                               :role :authority}}}}) => nil))))

@@ -47,6 +47,10 @@
 (defn history-entry [to-state timestamp user]
   {:state to-state, :ts timestamp, :user (user/summary user)})
 
+(defn tos-history-entry [tos-function timestamp user]
+  {:pre [(map? tos-function)]}
+  {:tosFunction tos-function, :ts timestamp, :user (user/summary user)})
+
 ;;
 ;; Validators
 ;;
@@ -324,6 +328,7 @@
                 :else :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
+        tos-function-map (tos/tos-function-with-name tos-function (:id organization))
         classification {:permitType permit-type, :primaryOperation op}
         attachments (when-not info-request? (make-attachments created op organization state tos-function))
         metadata (tos/metadata-for-document (:id organization) tos-function "hakemus")
@@ -339,7 +344,8 @@
                        :openInfoRequest     open-inforequest?
                        :secondaryOperations []
                        :state               state
-                       :history             [(history-entry state created user)]
+                       :history             (cond->> [(history-entry state created user)]
+                                                     tos-function-map (concat [(tos-history-entry tos-function-map created user)]))
                        :municipality        municipality
                        :location            (->location x y)
                        :location-wgs84      (coord/convert "EPSG:3067" "WGS84" 5 (->location x y))

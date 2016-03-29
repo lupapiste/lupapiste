@@ -82,7 +82,7 @@
                                                               :ts       100
                                                               :user     "Testaaja Testi"}
                                                              {:type     {:foo :bar}
-                                                              :category :attachment
+                                                              :category :document
                                                               :version  1
                                                               :ts       200
                                                               :user     "Testaaja Testi"
@@ -91,21 +91,21 @@
                                                  :start     250
                                                  :user      "Testaaja Testi"
                                                  :documents [{:type     {:foo :qaz}
-                                                              :category :attachment
+                                                              :category :document
                                                               :version  1
                                                               :ts       300
                                                               :user     "Testaaja Testi"
                                                               :contents nil}
-                                                             {:category :request-review, :ts 300, :type "rakennuksen paikan tarkastaminen", :user "Suku Etu"}
-                                                             {:category :request-statement, :ts 301, :type "Rakennussuunnittelu", :user ""}
-                                                             {:category :request-statement, :ts 302, :type "Pelastusviranomainen", :user ""}
+                                                             {:category :request-review, :ts 300, :text "rakennuksen paikan tarkastaminen", :user "Suku Etu"}
+                                                             {:category :request-statement, :ts 301, :text "Rakennussuunnittelu", :user ""}
+                                                             {:category :request-statement, :ts 302, :text "Pelastusviranomainen", :user ""}
                                                              {:type     {:foo :bar}
-                                                              :category :attachment
+                                                              :category :document
                                                               :version  2
                                                               :ts       500
                                                               :user     "Testaaja Testi"
                                                               :contents "Great attachment"}
-                                                             {:type     "Joku naapurin nimi"
+                                                             {:text     "Joku naapurin nimi"
                                                               :category :request-neighbor
                                                               :ts       600
                                                               :user     " "}]}]

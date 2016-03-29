@@ -11219,6 +11219,11 @@ div.search i {
   display: table-cell;
 }
 
+/* line 2, ../../../private/common-html/sass/partials/_case-file.scss */
+.case-file-table .event-title {
+  font-weight: bold;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -11643,9 +11648,4 @@ span.icon_clear:before {
 /* line 137, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .link-permit {
   display: block;
-}
-/* line 141, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info .link-permit-item {
-  color: #f39129;
-  text-decoration: none;
 }
