@@ -20,9 +20,16 @@
    (sc/optional-key :text)     sc/Str                  ;; Optional description
    })
 
+(defschema FrontendAppealFile
+  "File presentation expected by the frontend from appeals query."
+  {:id          ssc/ObjectIdStr
+   :filename    sc/Str
+   :contentType sc/Str
+   :size        sc/Num})
+
 (defschema FrontendAppeal
   "Schema for Appeal presentation for frontend queries"
-  (assoc Appeal :editable sc/Bool))
+  (assoc Appeal :editable sc/Bool :files [FrontendAppealFile]))
 
 (defn create-appeal [target-verdict-id type appellant datestamp text]
   (util/strip-nils
