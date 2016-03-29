@@ -789,6 +789,13 @@ Confirm
   Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  ${modalId}
 
+Deny
+  [Arguments]  ${modalId}
+  Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-no"]
+  Focus  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-no"]
+  Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-no"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-no"]
+
 It is possible to add operation
   Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
 
