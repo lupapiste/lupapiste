@@ -70,7 +70,7 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
       type: frontObj.appealType,
       datestamp: moment( frontObj.date, FMT, true).unix(),
       text: frontObj.extra,
-      fileIds: _.map( frontObj.files, _.partialRight( _.pick, ["id"] ))
+      fileIds: _.map( frontObj.files, function( f ) { return f.id; })
     };
     if( frontObj.appealId ) {
       appeal.appealId = frontObj.appealId;
