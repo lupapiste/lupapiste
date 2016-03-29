@@ -31,6 +31,12 @@
   (memo/ttl get-tos-functions-from-toj
             :ttl/threshold 10000))
 
+(defn tos-function-with-name [tos-function-code organization]
+  (when (and tos-function-code organization)
+    (->> (available-tos-functions (name organization))
+         (filter #(= tos-function-code (:code %)))
+         (first))))
+
 (defn- get-metadata-for-document-from-toj [organization tos-function document-type]
   (if (and organization tos-function document-type)
     (try

@@ -38,3 +38,5 @@
 "error.appeal-already-exists" "sv" ""
 "error.appeal-type-change-denied" "fi" "Valituksen/oikaisuvaatimuksen tyyppiä ei voi vaihtaa"
 "error.appeal-type-change-denied" "sv" ""
+"error.invalid-tos-function" "fi" "Valittua menettelyä ei löytynyt tiedonohjaussuunnitelmasta"
+"error.invalid-tos-function" "sv" ""
