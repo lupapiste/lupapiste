@@ -10,7 +10,8 @@
         <span class="upload-files__size" data-bind="size: size"></span>
         <a data-bind="ltext: 'remove',
                       visible: !$parent.params.readOnly,
-                      click: $parent.removeFile"></a>
+                      click: $parent.removeFile,
+                      attr: {'data-test-id': 'remove-file-' + $index()}"></a>
       </li>
     </ul>
 
