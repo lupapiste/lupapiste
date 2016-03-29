@@ -5,6 +5,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.test-util :as test-util]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
+            [sade.env :as env]
             [midje.sweet :refer :all]
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [pdfboxing.text :as pdfbox]
@@ -106,7 +107,9 @@
              (fact ":contents"
                    (:contents att) => "Matti Malli")
              (fact ":attachment-type"
-                   (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"})
+               (:attachment-type att) => (if (env/feature? :updated-attachments)
+                                           {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
+                                           {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}))
              (fact ":archivable"
                    (:archivable att) => false)
              (fact ":read-only"
@@ -126,7 +129,9 @@
              (fact ":contents"
                    (:contents att) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus"))
              (fact ":attachment-type"
-                   (:attachment-type att) => {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"})
+               (:attachment-type att) => (if (env/feature? :updated-attachments)
+                                           {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
+                                           {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}))
              (fact ":archivable"
                    (:archivable att) => false)
              (fact ":read-only"
