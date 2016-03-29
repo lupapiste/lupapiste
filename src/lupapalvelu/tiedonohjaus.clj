@@ -31,6 +31,12 @@
   (memo/ttl get-tos-functions-from-toj
             :ttl/threshold 10000))
 
+(defn tos-function-with-name [tos-function-code organization]
+  (when (and tos-function-code organization)
+    (->> (available-tos-functions (name organization))
+         (filter #(= tos-function-code (:code %)))
+         (first))))
+
 (defn- get-metadata-for-document-from-toj [organization tos-function document-type]
   (if (and organization tos-function document-type)
     (try
@@ -137,7 +143,7 @@
               (->> versions
                    (map (fn [ver]
                           {:type     (:type attachment)
-                           :category :attachment
+                           :category :document
                            :version  (:version ver)
                            :ts       (:created ver)
                            :contents (:contents attachment)
@@ -149,14 +155,14 @@
 
 (defn- get-statement-requests-from-application [application]
   (map (fn [stm]
-         {:type     (get-in stm [:person :text])
+         {:text     (get-in stm [:person :text])
           :category :request-statement
           :ts       (:requested stm)
           :user     (str "" (:name stm))}) (:statements application)))
 
 (defn- get-neighbour-requests-from-application [application]
   (map (fn [req] (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
-           {:type     (get-in req [:owner :name])
+           {:text     (get-in req [:owner :name])
             :category :request-neighbor
             :ts       (:created status)
             :user     (full-name (:user status))})) (:neighbors application)))
@@ -164,7 +170,7 @@
 (defn- get-review-requests-from-application [application]
   (reduce (fn [acc task]
             (if (= "task-katselmus" (name (get-in task [:schema-info :name])))
-              (conj acc {:type     (:taskname task)
+              (conj acc {:text     (:taskname task)
                          :category :request-review
                          :ts       (:created task)
                          :user     (full-name (:assignee task))})
@@ -174,22 +180,30 @@
 (defn- get-held-reviews-from-application [application]
   (reduce (fn [acc task]
               (if-let [held (get-in task [:data :katselmus :pitoPvm :modified])]
-              (conj acc {:type     (:taskname task)
+              (conj acc {:text     (:taskname task)
                          :category :review
                          :ts       held
                          :user     (full-name (:assignee task))})
               acc)) [] (:tasks application)))
 
-(defn generate-case-file-data [application]
+(defn- tos-function-changes-from-history [history]
+  (->> (filter :tosFunction history)
+       (map #(merge % {:text (str (get-in % [:tosFunction :code]) " " (get-in % [:tosFunction :name]))
+                       :category :tos-function-change
+                       :user (full-name (:user %))}))))
+
+(defn generate-case-file-data [{:keys [history organization] :as application}]
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
         statement-reqs (get-statement-requests-from-application application)
         neighbors-reqs (get-neighbour-requests-from-application application)
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
-        all-docs (sort-by :ts (concat documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))]
+        tos-fn-changes (tos-function-changes-from-history history)
+        all-docs (sort-by :ts (concat tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
+        state-changes (filter :state history)]
     (map (fn [[{:keys [state ts user]} next]]
-           (let [api-response (toimenpide-for-state (:organization application) (:tosFunction application) state)
+           (let [api-response (toimenpide-for-state organization (:tosFunction application) state)
                  action-name (or (:name api-response) "Ei asetettu tiedonohjaussuunnitelmassa")]
              {:action    action-name
               :start     ts
@@ -197,7 +211,7 @@
               :documents (filter (fn [{doc-ts :ts}]
                                    (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
                                  all-docs)}))
-         (partition 2 1 nil (:history application)))))
+         (partition 2 1 nil state-changes))))
 
 (defn- document-metadata-final-state [metadata verdicts]
   (-> (assoc metadata :tila :valmis)

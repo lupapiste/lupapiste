@@ -38,3 +38,5 @@
 "error.appeal-already-exists" "sv" "Besvärsbeslutet kan inte ändras eftersom det kommit nya besvär/rättelseyrkanden efter beslutet"
 "error.appeal-type-change-denied" "fi" "Valituksen/oikaisuvaatimuksen tyyppiä ei voi vaihtaa"
 "error.appeal-type-change-denied" "sv" "Typ av besvär/rättelseyrkan kan inte ändras"
+"error.invalid-tos-function" "fi" "Valittua menettelyä ei löytynyt tiedonohjaussuunnitelmasta"
+"error.invalid-tos-function" "sv" ""
