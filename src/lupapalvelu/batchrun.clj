@@ -293,13 +293,19 @@
             (try
               (logging/with-logging-context {:applicationId id}
                 (if-not (s/blank? url)
-
                   (let [command (assoc (application->command app) :user eraajo-user :created (now))
                         result (verdict-api/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
-                      (notifications/notify! :application-verdict command)))
+                      (notifications/notify! :application-verdict command))
+                    (when (fail? result)
+                      (logging/log-event :error {:run-by "Automatic verdicts checking"
+                                                 :event "Failed to check verdict"
+                                                 :failure result
+                                                 :organization {:id organization :permit-type permitType}
+                                                 }))
+                    )
 
                   (logging/log-event :info {:run-by "Automatic verdicts checking"
                                             :event "No Krysp WFS url defined for organization"
