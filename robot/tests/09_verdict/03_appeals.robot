@@ -60,6 +60,12 @@ Appeal can contain multiple files
   Appeals row file check  0-0  0  ${PNG_TESTFILE_NAME}  1
   Appeals row file check  0-0  0  ${TXT_TESTFILE_NAME}  0
 
+Sonja removes the image file from appeal
+  Click by test id  edit-appeal-0-0-0
+  Click by test id  remove-file-1
+  OK bubble 0-0-0
+  Wait Until  Page should not contain  ${PNG_TESTFILE_NAME}
+
 Sonja deletes appeal
   Click by test id  delete-appeal-0-0-0
   Wait Until  Element should not be visible  jquery=table.appeals-table
@@ -94,7 +100,7 @@ Adding appeal locks appealVerdict
 
 Making appeal date earlier than appealVerdict makes the latter editable
   Click by test id  edit-appeal-0-0-3
-  Scroll to test id  add-appeal-0-0
+  Scroll to test id  appeal-0-0-3-bubble-dialog-ok
   Edit date  0-0-3  1.1.2010
   OK bubble 0-0-3
   Wait test id visible  edit-appeal-0-0-3
@@ -104,6 +110,22 @@ The first appeal cannot be appealVerdict
   Add to verdict  1-0  appealVerdict  Megabyte  29.3.2016
   Wait test id visible  appeal-1-0-bubble-dialog-error
   Cancel bubble 1-0
+
+Appeals in different verdicts do not affect each other
+  Add to verdict  1-0  appeal  Megabyte  7.7.2016
+  Wait test id visible  edit-appeal-1-0-0
+  Wait test id visible  edit-appeal-0-0-3
+  [Teardown]  Logout
+
+Mikko logs in. He can see the appeals but not edit them.
+  Mikko logs in
+  Open application  ${appname}  753-416-25-30
+  Open tab  verdict
+  Scroll to test id  show-appeal-0-0-3
+  No such test id  add-appeal-0-0
+  Wait test id visible  show-appeal-0-0-3
+  Appeals row check  0-0  3  appealVerdict  Phong  1.6.2016
+  [Teardown]  Logout
 
 *** Keywords ***
 
@@ -128,6 +150,8 @@ Add file
 
 OK bubble ${postfix}
   Scroll and click test id  appeal-${postfix}-bubble-dialog-ok
+  # DOM changes after OK, so let's wait a bit.
+  Sleep  2s
 
 Cancel bubble ${postfix}
   Scroll and click test id  appeal-${postfix}-bubble-dialog-cancel
