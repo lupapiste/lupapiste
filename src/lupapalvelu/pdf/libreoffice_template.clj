@@ -6,9 +6,10 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [clojure.xml :as xml]
-            [clojure.java.io :as io]))
-
+            [clojure.java.io :as io]
+            [clojure.string :as s]))
 (def history-template-file "private/lupapiste-history-template.fodt")
+(def history-verdict-file "private/lupapiste-verdict-template.fodt")
 
 (defn- xml-escape [text]
   (clojure.string/escape (str text) {\< "&lt;", \> "&gt;", \& "&amp;"}))
@@ -25,31 +26,29 @@
 (defn- localized-text [lang value]
   (if (nil? value) "" (xml-escape (i18n/localize lang value))))
 
-(defn- build-xml-history-row [{:keys [type text version category contents ts user]} lang]
+(defn- build-history-row [data lang]
   ;(debug "row data:" data)
   [""
+   (case (:category data)
+     :attachment (i18n/localize lang "document")
+     :document (i18n/localize lang "application.applicationSummary")
+     :request-statement (i18n/localize lang "caseFile.operation.statement.request")
+     :request-neighbor (i18n/localize lang "caseFile.operation.neighbor.request")
+     :request-review (i18n/localize lang "caseFile.operation.review.request")
+     :review (i18n/localize lang "caseFile.operation.review")
+     "")
    (str
-     (case category
-       :document (i18n/localize lang "caseFile.documentSubmitted")
-       :request-statement (i18n/localize lang "caseFile.operation.statement.request")
-       :request-neighbor (i18n/localize lang "caseFile.operation.neighbor.request")
-       :request-review (i18n/localize lang "caseFile.operation.review.request")
-       :review (i18n/localize lang "caseFile.operation.review")
-       :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
-       "")
-     ": "
-     (cond
-       text text
-       (map? type) (i18n/localize lang "attachmentType" (:type-group type) (:type-id type))
-       type (i18n/localize lang type))
-     (when contents
-       (str ", " contents))
-     (when (seq version)
-       (str ", v. " (:major version) "." (:minor version))))
-   (or (util/to-local-date ts) "-")
-   user])
+     (if (= (:category data) :attachment)
+       (i18n/localize lang "attachmentType" (get-in data [:type :type-group]) (get-in data [:type :type-id]))
+       (:type data))
+     " " (:contents data)
+     (if (get-in data [:version :major])
+       (str ", v. " (get-in data [:version :major]) "." (get-in data [:version :minor]))
+       ""))
+   (or (util/to-local-date (:ts data)) "-")
+   (:user data)])
 
-(defn- build-xml-history-child-rows [action docs lang]
+(defn- build-history-child-rows [action docs lang]
   ;  (debug " docs: " (with-out-str (clojure.pprint/pprint docs)))
   (loop [docs-in docs
          result []]
@@ -57,23 +56,23 @@
       ;(debug " doc-attn: " doc-attn)
       (if (nil? doc-attn)
         result
-        (recur others (conj result (apply xml-table-row (build-xml-history-row doc-attn lang))))))))
+        (recur others (conj result (build-history-row doc-attn lang)))))))
 
-(defn- build-xml-history-rows [application lang]
-  (let [data (toj/generate-case-file-data application lang)]
+(defn- build-history-rows [application lang]
+  (let [data (toj/generate-case-file-data application)]
     ;(debug " data: " (with-out-str (clojure.pprint/pprint data)))
     (loop [data-in data
            result []]
       (let [[history & older] data-in
             new-result (-> result
-                           (conj (xml-table-row (:action history) "" (or (util/to-local-date (:start history)) "-") (:user history)))
-                           (into (build-xml-history-child-rows " " (:documents history) lang)))]
+                           (conj [(:action history) "" "" (or (util/to-local-date (:start history)) "-") (:user history)])
+                           (into (build-history-child-rows " " (:documents history) lang)))]
         (if (nil? older)
           new-result
           (recur older new-result))))))
 
 (defn build-xml-history [application lang]
-  (clojure.string/join " " (build-xml-history-rows application lang)))
+  (clojure.string/join " " (map #(apply xml-table-row %) (build-history-rows application lang))))
 
 (defn- get-authority [lang {authority :authority :as application}]
   (if (and (:authority application)
@@ -119,19 +118,46 @@
    "FIELD011A"   (localized-text lang "selectm.source.label.edit-selected-operations")
    "FIELD011B"   (xml-escape (get-operations application))})
 
-(defn- formatted-line [line data]
-  (reduce (fn [s [k v]] (if (clojure.string/includes? s k) (replace-text s k v) s)) line data))
+(defn- write-line [line data wrtr]
+  (.write wrtr (str (reduce (fn [s [k v]] (if (s/includes? s (str ">" k "<")) (replace-text s k v) s)) line data) "\n")))
 
-(defn create-libre-doc [template data file]
+(defn- get-table-name [line] (nth (re-find #"<table:table table:name=\"(.*?)\"" line) 1))
+
+(defn- write-table! [rdr wrtr table-rows fields]
+  (doseq [line (take-while (fn [line] (not (s/includes? line "</table:table-header-rows>"))) (line-seq rdr))]
+    (write-line line fields wrtr)
+    (when-let [table-rows2 (get fields (get-table-name line))]
+      (write-table! rdr wrtr table-rows2 fields)))
+  (write-line "      </table:table-header-rows>" fields wrtr)
+  (doseq [row table-rows]
+    (.write wrtr (str (apply xml-table-row row) "\n")))
+
+  (doseq [skip-existing-rows (take-while (fn [line] (not (s/includes? line "</table:table>"))) (line-seq rdr))])
+  (write-line "</table:table>" fields wrtr))
+
+
+(defn create-libre-doc [template file fields]
   (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]
     (with-open [rdr (io/reader template)]
       (doseq [line (line-seq rdr)]
-        (.write wrtr (formatted-line line data))))))
+        (write-line line fields wrtr)
+        (when-let [table-rows (get fields (get-table-name line))]
+          (write-table! rdr wrtr table-rows fields))))))
 
-(defn export-to-file [application lang file]
-  (create-libre-doc (io/resource history-template-file) (assoc (common-field-map application lang)
-                                                          "COLTITLE1" (i18n/localize lang "caseFile.action")
-                                                          "COLTITLE2" (i18n/localize lang "caseFile.event")
-                                                          "COLTITLE3" (i18n/localize lang "caseFile.documentDate")
-                                                          "COLTITLE4" (i18n/localize lang "lisaaja")
-                                                          "HISTORY_ROWS_PLACEHOLDER" (build-xml-history application lang)) file))
+(defn write-history-libre-doc [application lang file]
+  (create-libre-doc (io/resource history-template-file) file (assoc (common-field-map application lang)
+                                                               "COLTITLE1" (i18n/localize lang "caseFile.action")
+                                                               "COLTITLE2" (i18n/localize lang "applications.operation")
+                                                               "COLTITLE3" (i18n/localize lang "document")
+                                                               "COLTITLE4" (i18n/localize lang "caseFile.documentDate")
+                                                               "COLTITLE5" (i18n/localize lang "lisaaja")
+                                                               "HISTORYTABLE" (build-history-rows application lang))))
+
+(defn write-verdict-libre-doc [application lang file]
+  (create-libre-doc (io/resource history-template-file) file (assoc (common-field-map application lang)
+                                                               "COLTITLE1" (i18n/localize lang "caseFile.action")
+                                                               "COLTITLE2" (i18n/localize lang "applications.operation")
+                                                               "COLTITLE3" (i18n/localize lang "document")
+                                                               "COLTITLE4" (i18n/localize lang "caseFile.documentDate")
+                                                               "COLTITLE5" (i18n/localize lang "lisaaja")
+                                                               )))
