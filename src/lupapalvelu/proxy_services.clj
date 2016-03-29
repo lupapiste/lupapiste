@@ -91,16 +91,17 @@
         (error e (str "Unable to resolve municipality by " x \/ y))))))
 
 (defn- respond-nls-address [features x y lang municipality-code]
-  (if (seq features)
-    (resp/json (wfs/feature-to-address-details (or lang "fi") (first features)))
-    ; Fallback: return only the municipality
-    (resp/json {:street ""
-                :number ""
-                :municipality municipality-code
-                :x (util/->double x)
-                :y (util/->double y)
-                :name {:fi (i18n/localize :fi :municipality municipality-code)
-                       :sv (i18n/localize :sv :municipality municipality-code)}})))
+  (cond
+    (seq features) (resp/json (wfs/feature-to-address-details (or lang "fi") (first features)))
+    ; Fallback: return only the municipality if code is given
+    (not (nil? municipality-code)) (resp/json {:street ""
+                                               :number ""
+                                               :municipality municipality-code
+                                               :x (util/->double x)
+                                               :y (util/->double y)
+                                               :name {:fi (i18n/localize :fi :municipality municipality-code)
+                                                      :sv (i18n/localize :sv :municipality municipality-code)}})
+    :else (resp/status 400 "Bad Request")))
 
 (defn- distance [^double x1 ^double y1 ^double x2 ^double y2]
   {:pre [(and x1 x2 y1 y2)]}

@@ -1,5 +1,5 @@
 (ns lupapalvelu.logging-api
-  (:require [taoensso.timbre :as timbre :refer [error errorf logf]]
+  (:require [taoensso.timbre :as timbre :refer [error errorf]]
             [noir.core :refer [defpage]]
             [sade.env :as env]
             [sade.core :refer [ok fail]]
@@ -9,11 +9,15 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]))
 
-(defcommand "frontend-log"
+(defonce frontend-log (atom {}))
+
+(def levels #{:debug :info :warn :error :fatal})
+
+(defcommand frontend-log
   {:user-roles #{:anonymous}}
-  [{{:keys [level page message build]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
+  [{{:keys [level page message build]} :data {:keys [email]} :user {:keys [user-agent]} :web ts :created}]
   (let [limit           1000
-        level           (-> level ss/lower-case keyword)
+        level           (get levels (-> level ss/lower-case keyword) :error)
         sanitize        (partial logging/sanitize limit)
         sanitized-page  (sanitize (or page "(unknown)"))
         user            (or (user/canonize-email email) "(anonymous)")
@@ -22,11 +26,19 @@
         build-check     (if (not= sanitized-build (:build-number env/buildinfo))
                          " - CLIENT HAS EXPIRED VERSION"
                          "")
-        sanitized-msg   (sanitize (str message))]
-    (logf level "FRONTEND: %s [%s] on page %s (build=%s%s): %s"
-          user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)))
+        sanitized-msg   (sanitize (str message))
+        formatted-msg   (format "FRONTEND: %s [%s] on page %s (build=%s%s): %s"
+                          user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)]
+    (when (env/dev-mode?)
+      (swap! frontend-log update level conj {:ts ts :msg formatted-msg}))
+    (timbre/log level formatted-msg)))
 
-(defquery "newest-version"
+(defquery frontend-log-entries
+  {:user-roles #{:admin}}
+  [_]
+  (ok :log (merge (zipmap levels (repeat [])) @frontend-log)))
+
+(defquery newest-version
   {:user-roles #{:anonymous}
    :parameters [frontendBuild]
    :input-validators [(partial action/non-blank-parameters [:frontendBuild])]}

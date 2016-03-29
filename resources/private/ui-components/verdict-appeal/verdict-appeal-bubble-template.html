@@ -1,0 +1,79 @@
+<script class="ko-template"
+        type="text/x-jquery-tmpl"
+        id="verdict-appeal-bubble-template">
+  <bubble-dialog params="visible: params.visible,
+                         okFun: okFun,
+                         initFun: initFun,
+                         okEnabled: okEnabled,
+                         buttonIcon: 'lupicon-save',
+                         buttonText: 'save',
+                         waiting: waiting,
+                         error: error,
+                         prefix: 'appeal-' + test">
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <span class="col-4"
+              data-bind="ltext: 'verdict.muutoksenhaku.info'"></span>
+      </div>
+      <div class="row">
+        <div class="col-1">
+          <form-cell params="{required: !$parent.model.appealId,
+                             label: 'verdict.muutoksenhaku.tyyppi',
+                             cell: $parent.model.appealId ? 'span' : 'select',
+                             value: $parent.model.appealType,
+                             options: $parent.appealTypes,
+                             optionsText: 'text',
+                             optionsValue: 'id',
+                             prefix: 'verdict.muutoksenhaku.',
+                             attr: {'data-test-id': 'appeal-type-' + $parent.test,
+                             'data-appeal-type': $parent.model.appealType}}">
+          </form-cell>
+        </div>
+        <div class="col-2">
+          <form-cell params="{required: true,
+                             label: 'verdict.muutoksenhaku.tekijat',
+                             cell: 'text',
+                             value: $parent.model.authors,
+                             attr: {'data-test-id': 'appeal-authors-' + $parent.test}}">
+          </form-cell>
+        </div>
+        <div class="col-1">
+          <form-cell params="{warning: $parent.dateWarning,
+                             required: true,
+                             label: 'verdict.muutoksenhaku.pvm',
+                             cell: 'date',
+                             value: $parent.model.date,
+                             attr: {'data-test-id': 'appeal-date-' + $parent.test}}">
+          </form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <form-cell params="{label: 'verdict.muutoksenhaku.extra',
+                             cell: 'textarea',
+                             value: $parent.model.extra,
+                             attr: {
+                             placeholder: loc('verdict.muutoksenhaku.extra.placeholder'),
+                             rows: 4,
+                             'data-test-id': 'appeal-extra-' + $parent.test}}">
+          </form-cell>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <label class="mandatory"!
+                 data-bind="ltext: 'verdict.muutoksenhaku.liitteet'"></label>
+          <span data-bind="ltext: 'verdict.muutoksenhaku.liitteet.info'"></span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-4"
+             data-bind="component: {name: 'file-upload',
+                        params: {files: $parent.model.files}},
+                        attr: {'data-test-id': 'appeal-files-' + $parent.test}">
+        </div>
+      </div>
+    </div>
+  </bubble-dialog>
+</script>

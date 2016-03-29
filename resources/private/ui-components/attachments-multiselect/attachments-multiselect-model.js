@@ -12,11 +12,12 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
 
   function enhanceAttachment(a) {
     a.selected = ko.observable(a.selected === undefined ? false : a.selected);
+    return a;
   }
 
   // Group sorting differs from attachment page
   function mapAttachmentGroup(group) {
-    group.attachments = _(group.attachments).each(enhanceAttachment).value();
+    group.attachments = _(group.attachments).map(enhanceAttachment).value();
     return {
       attachments: group.attachments,
       groupName: group.groupName,
@@ -31,19 +32,19 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
   }
 
   function getSelectedAttachments(files) {
-    return _(files).pluck("attachments").flatten().filter(function(f) {
+    return _(files).map("attachments").flatten().filter(function(f) {
       return f.selected();
     }).value();
   }
 
   function getNonSelectedAttachments(files) {
-    return _(files).pluck("attachments").flatten().filter(function(f) {
+    return _(files).map("attachments").flatten().filter(function(f) {
       return !f.selected();
     }).value();
   }
 
   function eachSelected(files) {
-    return _(files).pluck("attachments").flatten().every(function(f) {
+    return _(files).map("attachments").flatten().every(function(f) {
       return f.selected();
     });
   }
@@ -52,7 +53,7 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
 
   // group by post/pre verdict attachments
   var grouped = _.groupBy(self.filteredFiles, function(a) {
-    return _.contains(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
+    return _.includes(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
   });
 
   // group attachments by operation
@@ -84,8 +85,8 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
   };
 
   function selectAllFiles(value) {
-    _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
-    _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
+    _(self.preFiles()).map("attachments").flatten().each(function(f) { f.selected(value); });
+    _(self.postFiles()).map("attachments").flatten().each(function(f) { f.selected(value); });
   }
 
   self.selectAll = _.partial(selectAllFiles, true);

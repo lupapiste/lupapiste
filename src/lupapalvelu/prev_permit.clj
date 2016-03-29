@@ -150,8 +150,8 @@
 (defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus]} :data :as command}]
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
-        dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-        xml               (krysp-fetch/get-application-xml dummy-application :kuntalupatunnus)
+        dummy-application {:id "" :permitType permit-type :organization organizationId}
+        xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         validator-fn      (permit/get-verdict-validator permit-type)
         organization      (when (:municipality app-info) (organization/resolve-organization (:municipality app-info) permit-type))
@@ -185,10 +185,9 @@
           applications (mongo/select :applications
                                      {"primaryOperation.name" operation}
                                      {:id 1 :permitType 1 :verdicts 1 :organization 1 :address 1})]
-      (doseq [{:keys [id permitType verdicts organization address]} applications]
+      (doseq [{:keys [id verdicts address] :as application} applications]
         (if-let [kuntalupatunnus (get-in verdicts [0 :kuntalupatunnus])]
-          (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
-                xml (krysp-fetch/get-application-xml dummy-application :kuntalupatunnus)
+          (let [xml (krysp-fetch/get-application-xml-by-backend-id application kuntalupatunnus)
                 app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
                 correct-address (get-in app-info [:rakennuspaikka :address])]
             (if (nil? correct-address)
@@ -262,10 +261,9 @@
           applications (mongo/select :applications
                                      {"primaryOperation.name" operation}
                                      {:id 1 :permitType 1 :verdicts 1 :organization 1 :documents 1})]
-      (doseq [{:keys [id permitType verdicts organization documents] :as application} applications]
+      (doseq [{:keys [id verdicts documents] :as application} applications]
         (if-let [kuntalupatunnus (get-in verdicts [0 :kuntalupatunnus])]
-          (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
-                xml               (krysp-fetch/get-application-xml dummy-application :kuntalupatunnus)
+          (let [xml               (krysp-fetch/get-application-xml-by-backend-id application kuntalupatunnus)
                 app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)]
             (if (seq app-info)
               (let [dummy-command         (action/application->command application)

@@ -21,7 +21,7 @@
   {:user-roles #{:anonymous}
    :parameters [files]
    :input-validators [file-mime-type-accepted file-size-legal]}
-  (let [file-info {:files (pmap file-upload/save-file files)}]
+  (let [file-info {:files (pmap #(file-upload/save-file % :sessionId (vetuma/session-id) :linked false) files)}]
     (->> (assoc file-info :ok true)
          (resp/json)
          (resp/content-type "text/plain")

@@ -43,12 +43,12 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     }
 
     return { searchText: self.searchFieldDelayed(),
-             tags: _.pluck(lupapisteApp.services.tagFilterService.selected(), "id"),
-             organizations: _.pluck(lupapisteApp.services.organizationFilterService.selected(), "id"),
-             operations: _.pluck(operations, "id"),
-             handlers: _.pluck(lupapisteApp.services.handlerFilterService.selected(), "id"),
+             tags: _.map(lupapisteApp.services.tagFilterService.selected(), "id"),
+             organizations: _.map(lupapisteApp.services.organizationFilterService.selected(), "id"),
+             operations: _.map(operations, "id"),
+             handlers: _.map(lupapisteApp.services.handlerFilterService.selected(), "id"),
              applicationType: self.applicationType(),
-             areas: _.pluck(lupapisteApp.services.areaFilterService.selected(), "id"),
+             areas: _.map(lupapisteApp.services.areaFilterService.selected(), "id"),
              limit: self.limit(),
              sort: ko.mapping.toJS(self.sort),
              skip: self.skip() };
@@ -126,13 +126,16 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   hub.onPageLoad("applications", function() {
     ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)
-    .call();
+      .onError("error.unauthorized", notify.ajaxError)
+      .pending(self.pending)
+      .call();
   });
 
   ko.computed(function() {
     ajax.datatables("applications-search", searchFields())
       .success(self.onSuccess)
+      .onError("error.unauthorized", notify.ajaxError)
       .pending(self.pending)
-    .call();
+      .call();
   }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
 };

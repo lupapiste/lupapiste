@@ -14,7 +14,7 @@ LUPAPISTE.StampModel = function(params) {
       ct = a.latestVersion.contentType;
     }
 
-    return !allVersionsStamped(a.versions) && _.contains(LUPAPISTE.config.stampableMimes, ct);
+    return !allVersionsStamped(a.versions) && _.includes(LUPAPISTE.config.stampableMimes, ct);
   }
 
   function enhanceAttachment(a) {
@@ -31,10 +31,11 @@ LUPAPISTE.StampModel = function(params) {
     a.restamp = _(a.versions).last().stamped;
     a.stamped = ko.observable(a.stamped);
     a.fileId = ko.observable(a.latestVersion.fileId);
+    return a;
   }
 
   function mapAttachmentGroup(group) {
-    group.attachments = _(group.attachments).each(enhanceAttachment).value();
+    group.attachments = _(group.attachments).map(enhanceAttachment).value();
     return {
       attachments: group.attachments,
       groupName: group.groupName,
@@ -49,14 +50,14 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   function getSelectedAttachments(files) {
-    return _(files).pluck("attachments").flatten()
+    return _(files).map("attachments").flatten()
       .filter(function(f) {
           return f.selected();
       }).value();
   }
 
   function eachSelected(files) {
-    return _(files).pluck("attachments").flatten().every(function(f) {
+    return _(files).map("attachments").flatten().every(function(f) {
       return f.selected();
     });
   }
@@ -77,7 +78,7 @@ LUPAPISTE.StampModel = function(params) {
 
   // group by post/pre verdict attachments
   var grouped = _.groupBy(self.filteredFiles, function(a) {
-    return _.contains(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
+    return _.includes(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
   });
 
   // group attachments by operation
@@ -199,14 +200,15 @@ LUPAPISTE.StampModel = function(params) {
       _.each(update.value, function (data, attachmentId) {
         var newStatus = data.status;
         var fileId = data.fileId;
-        _(self.selectedFiles()).filter({id: attachmentId}).each(function(f) {
+        _(self.selectedFiles()).filter({id: attachmentId}).map(function(f) {
           f.status(newStatus);
           f.fileId(fileId);
+          return f;
         }).value();
       });
 
       if (update.status === "done") {
-        _(self.selectedFiles()).each(function(f) { f.stamped(true); }).value();
+        _(self.selectedFiles()).map(function(f) { return f.stamped(true); }).value();
         lupapisteApp.models.application.reload();
         return self.status(self.statusDone);
       }
@@ -224,8 +226,8 @@ LUPAPISTE.StampModel = function(params) {
 
   function selectAllFiles(value) {
     if ( self.status() < self.statusStarting ) {
-      _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
-      _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
+      _(self.preFiles()).map("attachments").flatten().map(function(f) { return f.selected(value); }).value();
+      _(self.postFiles()).map("attachments").flatten().map(function(f) { return f.selected(value); }).value();
     }
   }
 

@@ -241,21 +241,6 @@
    :user-roles #{:admin}}
   (ok :municipalities muni/municipality-codes))
 
-(defquery municipality-active
-  {:parameters [municipality]
-   :input-validators [(partial non-blank-parameters [:municipality])]
-   :user-roles #{:anonymous}}
-  [_]
-  (let [organizations (o/get-organizations {:scope.municipality municipality})
-        scopes (->> organizations
-                 (map :scope)
-                 flatten
-                 (filter #(= municipality (:municipality %))))]
-      (ok
-        :applications (->> scopes (filter :new-application-enabled) (map :permitType))
-        :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
-        :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
-
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]

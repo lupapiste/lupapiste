@@ -23,7 +23,7 @@ var pageutil = (function($) {
   }
 
   function subPage() {
-    return _.first(pagePath()) || undefined;
+    return _.head(pagePath()) || undefined;
   }
 
   function lastSubPage() {

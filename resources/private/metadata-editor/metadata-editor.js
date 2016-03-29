@@ -40,7 +40,7 @@
   };
 
   var coerceValuesToSchemaType = function(metadata, inputTypeMap, uneditableFieldMap) {
-    var uneditableFields = _.keys(_.pick(uneditableFieldMap, _.isNumber));
+    var uneditableFields = _.keys(_.pickBy(uneditableFieldMap, _.isNumber));
     return _.mapValues(_.omit(metadata, uneditableFields), function(v, k) {
       if (_.isObject(v)) {
         return coerceValuesToSchemaType(v, inputTypeMap[k], uneditableFieldMap[k]);
@@ -88,7 +88,7 @@
   var getForbiddenFields = function(schema, roles) {
     var naughtyFields = [];
     _.forEach(schema, function (attribute) {
-      if (attribute["require-role"] && !_.contains(roles, attribute["require-role"])) {
+      if (attribute["require-role"] && !_.includes(roles, attribute["require-role"])) {
         naughtyFields.push(attribute.type);
       }
     });
@@ -163,6 +163,10 @@
       self.editable(false);
     };
 
+    self.modificationAllowed = ko.pureComputed(function() {
+      var tila = ko.unwrap(ko.unwrap(self.metadata).tila);
+      return !_.includes(["arkistoitu", "arkistoidaan"], tila);
+    });
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap, uneditableFields);

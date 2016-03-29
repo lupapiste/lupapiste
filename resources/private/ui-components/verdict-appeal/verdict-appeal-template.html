@@ -1,0 +1,89 @@
+<script class="ko-template"
+        type="text/x-jquery-tmpl"
+        id="verdict-appeal-template">
+  <h2 data-bind="ltext: 'verdict.muutoksenhaku'"></h2>
+  <!-- ko if: appeals().length -->
+  <div class="accordion-content-part">
+    <table class="appeals-table"
+           data-bind="if: appeals,
+                      attr: {'data-test-id': 'appeals-table-' + params.test}">
+      <thead><tr>
+          <th data-bind="ltext: 'verdict.muutoksenhaku.tyyppi'"></th>
+          <th data-bind="ltext: 'verdict.muutoksenhaku.tekijat'"></th>
+          <th data-bind="ltext: 'verdict.muutoksenhaku.pvm'"></th>
+          <th data-bind="ltext: 'verdict.attachments'"></th>
+          <th></th>
+      </tr></thead>
+      <tbody data-bind="foreach: appeals">
+        <tr data-bind="attr: {'data-test-id': 'appeals-table-row-' + $index()}">
+          <td data-bind="ltext: 'verdict.muutoksenhaku.' + appealType,
+                         attr: {'data-appeal-type': appealType}"></td>
+          <td data-bind="text: authors"></td>
+          <td data-bind="text: date"></td>
+          <td>
+            <ul class="appeals-files"
+                data-bind="foreach: files">
+              <li data-bind="attr: {'data-test-id': 'appeals-files-' + $index()}">
+                <a data-bind="download: $data"></a>
+                  <span data-bind="ltext: contentType"></span>
+                  <span class="appeals-files__size" data-bind="size: size"></span>
+              </li>
+            </ul>
+          </td>
+          <td class="appeals-table--action">
+            <!-- ko if: $parent.canEdit( $data ) -->
+            <a data-bind="ltext: 'verdict.muutoksenhaku.muokkaa',
+                          toggleClick: showEdit,
+                          attr: {'data-test-id': 'edit-appeal-' + $parent.params.test + '-' + $index()}"></a>
+            <a data-bind="ltext: 'verdict.muutoksenhaku.poista',
+                          click: $parent.deleteAppeal,
+                          attr: {'data-test-id': 'delete-appeal-' + $parent.params.test + '-' + $index()}"></a>
+            <!-- /ko -->
+            <!-- ko ifnot: $parent.canEdit ($data) -->
+            <a data-bind="ltext: 'verdict.muutoksenhaku.show-extra',
+                          toggleClick: showExtra,
+                          attr: {'data-test-id': 'show-appeal-' + $parent.params.test + '-' + $index()}"></a>
+            <!-- /ko -->
+          </td>
+        </tr>
+        <!-- ko if: showExtra -->
+        <tr class="appeals-table__note">
+          <td colspan="5"
+              data-bind="text: extra || loc( 'verdict.muutoksenhaku.no-extra'),
+                         css: extra ? 'appeals-table--extra' : 'appeals-table--no-extra',
+                         attr: {'data-test-id': 'info-appeal-' + $parent.params.test + '-' + $index()}">
+          </td>
+        </tr>
+        <tr></tr>
+        <!-- /ko -->
+        <!-- ko if: showEdit -->
+        <tr class="appeals-table__note">
+          <td colspan="5">
+            <verdict-appeal-bubble params="visible: showEdit,
+                                           model: $parent.bubbleModel( showEdit, appealId ),
+                                           test: $parent.params.test + '-' + $index()">
+            </verdict-appeal-bubble>
+          </td>
+        </tr>
+        <tr></tr>
+        <!-- /ko -->
+      </tbody>
+    </table>
+  </div>
+  <!-- /ko -->
+  <div class="stacked"
+       data-bind="if: canEdit()">
+    <button class="positive"
+            data-bind="toggleClick: newBubbleVisible,
+                       attr: {'data-test-id': 'add-appeal-' + params.test}">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'verdict.muutoksenhaku.kirjaa'"></span>
+    </button>
+    <div class="bubble-dialog-arrow"
+         data-bind="visible: newBubbleVisible"></div>
+  </div>
+  <verdict-appeal-bubble params="visible: newBubbleVisible,
+                                 model: bubbleModel( newBubbleVisible ),
+                                 test: params.test"></verdict-appeal-bubble>
+
+</script>

@@ -115,18 +115,18 @@
 (def- operation-tree-for-Y
   ["Ymp\u00e4rist\u00f6luvat"
    (filterv identity
-    [["ymparistonsuojelulain-mukaiset-ilmoitukset" 
+    [["ymparistonsuojelulain-mukaiset-ilmoitukset"
        [["Meluilmoitus" :meluilmoitus] ; permit/YI
          ["koeluontoinen-toiminta" :koeluontoinen-toiminta] ; permit/YM
          ["ilmoitus-poikkeuksellisesta-tilanteesta" :ilmoitus-poikkeuksellisesta-tilanteesta]]] ; permit/YM
- 
+
       ; permit/YM
       ["maatalouden-ilmoitukset"
        [["lannan-varastointi" :lannan-varastointi]]]
 
       ; permit/YL
       ["Pima" :pima]
- 
+
       ; permit/YM
       ["kunnan-ympmaarayksista-poikkeaminen"
        [["kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan" :kaytostapoistetun-oljy-tai-kemikaalisailion-jattaminen-maaperaan]]]
@@ -134,7 +134,7 @@
       ["maa-ainekset"
        [["maa-ainesten_ottaminen" :maa-aineslupa] ; permit/MAL
         ["maa-ainesten-kotitarveotto" :maa-ainesten-kotitarveotto]]] ; permit/YM
-          
+
       ; permit/YL
       ["ympariston-pilaantumisen-vaara"
        [["uusi-toiminta" :yl-uusi-toiminta]
@@ -147,15 +147,15 @@
         ["viemarista" :vvvl-viemarista]
         ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
         ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]
-     
+
      ; permit/YM
       ["jatelain-mukaiset-ilmoitukset"
        [["jatteen-keraystoiminta" :jatteen-keraystoiminta]]]
-     
+
       ; permit/YM
       ["luonnonsuojelulain-mukaiset-ilmoitukset"
        [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]]]
-     
+
       ; permit/YM
       ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]])])
 
@@ -185,9 +185,6 @@
       ~@[operation-tree-for-KT
          operation-tree-for-MM]]))
 
-
-(def schema-data-yritys-selected  [[["_selected"] "yritys"]])
-(def schema-data-henkilo-selected [[["_selected"] "henkilo"]])
 
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
@@ -232,7 +229,6 @@
 (def- ya-katulupa-general {:schema "tyomaastaVastaava"
                            :permit-type permit/YA
                            :applicant-doc-schema applicant-doc-schema-name-YA
-                           :schema-data schema-data-henkilo-selected
                            :required (conj common-yleiset-alueet-schemas
                                        "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
                                        "tyoaika")

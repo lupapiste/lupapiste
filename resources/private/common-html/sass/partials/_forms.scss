@@ -1012,8 +1012,8 @@ $max-columns: 12;
   padding-left: $grid-margin;
 
   label.required:after {
-    content: "*";
-    color: $negative;
+    content: " *";
+    color: $label-required-star-color;
   }
 
   .col--vertical, .col--horizontal {
@@ -1311,6 +1311,36 @@ $max-columns: 12;
   }
 }
 
+// Support for form-cell component wrapper.
+// The component's use cases and visuals
+// are similar to error-message, but it
+// is laid out differently and encompasses
+// the input as well.
+.form-cell__message {
+  background-color: $negative;
+  color: white;
+  display: none;
+  width: 100%;
+}
+
+.form-cell--warning {
+  input, select {
+    border: 1px solid $negative !important;
+    color: $negative !important;
+    margin-bottom: 0 !important;
+  }
+  .form-cell__message {
+    display: inline-block;
+  }
+}
+.form-cell--required {
+  input, select {
+    border: 1px solid $orange-dark !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+
 @for $i from 1 through $max-columns {
   .form-grid.form-grid--columns-#{$i} > .row {
     @for $j from 1 through $i {
@@ -1424,7 +1454,10 @@ select.dropdown--full-width {
   min-width: 100%;
 }
 
-
 .no-wrap-whitespace {
   white-space: nowrap;
+}
+
+.cell-span {
+  line-height: $btn-height;
 }

@@ -24,7 +24,9 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [lupapiste-commons.preview :as preview])
+            [lupapiste-commons.preview :as preview]
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
+            [lupapalvelu.tiff-validation :as tiff-validation])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -248,8 +250,22 @@
         (println "\t\t" type))))))
 
 ;;
+;; Utils
+;;
+
+(defn filename-for-pdfa [filename]
+  {:pre [(string? filename)]}
+  (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf"))
+
+;;
 ;; Api
 ;;
+
+(defn link-file-to-application [app-id fileId]
+  {:pre [(string? app-id)]}
+  (mongo/update-by-id :fs.files fileId {$set {:metadata.application app-id
+                                              :metadata.linked true}}))
+
 
 (defn- by-file-ids [file-ids {versions :versions :as attachment}]
   (some (comp (set file-ids) :fileId) versions))
@@ -308,22 +324,53 @@
   [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
   (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
-  (let [metadata (tos/metadata-for-document organization tosFunction type)]
+(defn- default-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
+  (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
+                     (tos/update-end-dates verdicts))]
     (if (seq metadata)
       metadata
       {:nakyvyys :julkinen})))
 
-(defn- create-attachment! [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
+(defn- create-attachment-data
+  "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
+  [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
+  (let [metadata (default-metadata-for-attachment-type attachment-type application)]
+    (make-attachment now
+                     target
+                     required?
+                     requested-by-authority?
+                     locked?
+                     (:state application)
+                     op
+                     attachment-type
+                     metadata
+                     attachment-id
+                     contents
+                     read-only?
+                     source)))
+
+(defn- create-attachment!
+  "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
+  [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
   {:pre [(map? application)]}
-  (let [metadata (default-metadata-for-attachment-type attachment-type application)
-        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id contents read-only? source)]
+  (let [attachment-data (create-attachment-data application
+                                                attachment-type
+                                                op
+                                                now
+                                                target
+                                                locked?
+                                                required?
+                                                requested-by-authority?
+                                                attachment-id
+                                                contents
+                                                read-only?
+                                                source)]
     (update-application
      (application->command application)
       {$set {:modified now}
-       $push {:attachments attachment}})
+       $push {:attachments attachment-data}})
     (tos/update-process-retention-period (:id application) now)
-    attachment))
+    attachment-data))
 
 (defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
@@ -519,7 +566,7 @@
 
 (defn delete-attachment!
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-  [{:keys [attachments] :as application} attachment-id]
+  [application attachment-id]
   (info "1/3 deleting files of attachment" attachment-id)
   (run! delete-attachment-file-and-preview! (attachment-file-ids (get-attachment-info application attachment-id)))
   (info "2/3 deleted files of attachment" attachment-id)
@@ -550,14 +597,14 @@
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
   [user file-id]
   (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (get-application-as (:application attachment-file) user :include-canceled-apps? true)]
+    (when-let [application (and (:application attachment-file) (get-application-as (:application attachment-file) user :include-canceled-apps? true))]
       (when (and (seq application) (access/can-access-attachment-file? user file-id application)) attachment-file))))
 
 (defn get-attachment-file!
   "Returns the attachment file without access checking, otherwise nil."
   [file-id]
   (when-let [attachment-file (mongo/download file-id)]
-    (when-let [application (get-application-no-access-checking (:application attachment-file))]
+    (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
       (when (seq application) attachment-file))))
 
 (defn output-attachment
@@ -691,3 +738,109 @@
 
 (defn post-process-attachments [application]
   (update-in application [:attachments] (partial map post-process-attachment)))
+
+(defn- attachment-type-for-appeal [appeal-type]
+  (case (keyword appeal-type)
+    :appealVerdict  {:type-group :paatoksenteko
+                     :type-id    :paatos}
+    :appeal         {:type-group :muutoksenhaku
+                     :type-id    :valitus}
+    :rectification  {:type-group :muutoksenhaku
+                     :type-id    :oikaisuvaatimus}))
+
+(defn save-pdfa-file!
+  "Save PDF/A file from pdf-conversion processing result to mongo gridfs.
+   Returns map with archivability flags (archivable, missing-fonts, archivability error)
+   and if valid PDF/A, fileId, filename and content-type of the uploaded file."
+  [{app-id :id} {:keys [pdfa? output-file missing-fonts]} filename content-type]
+  (if pdfa?
+    (let [pdfa-file-id  (mongo/create-id)
+          pdfa-filename (filename-for-pdfa filename)
+          filesize      (.length output-file)]
+      (mongo/upload pdfa-file-id pdfa-filename content-type output-file :application app-id)
+      {:archivable true
+       :archivabilityError nil
+       :fileId pdfa-file-id
+       :file-name pdfa-filename
+       :content-type content-type
+       :content-length filesize})
+    {:archivable false :missing-fonts (or missing-fonts []) :archivabilityError :invalid-pdfa}))
+
+(defn archivability-steps!
+  "If file is PDF or TIFF, returns map to indicate if file is archivable.
+   If not PDF/TIFF nor required by organization, returns nil.
+   In case of PDF, PDF/A conversion is made if needed, and new converted file uploaded to mongo.
+   If PDF/A conversion was made, additional :fileId, :filename, :content-type and :content-length keys are returned."
+  [{application :application} {:keys [content-type content file-name]}]
+  (case (name content-type)
+    "application/pdf" (when (pdf-conversion/pdf-a-required? (:organization application))
+                        (let [processing-result (pdf-conversion/convert-to-pdf-a (content))] ; content is a function from mongo.clj
+                          (if (:already-valid-pdfa? processing-result)
+                            {:archivable true :archivabilityError nil :already-valid true}
+                            (save-pdfa-file! application processing-result file-name content-type))))
+    "image/tiff"      (let [valid? (tiff-validation/valid-tiff? content)]
+                        {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)})
+    nil))
+
+(def- initial-archive-options {:archivable false :archivabilityError :invalid-mime-type})
+
+(defn- version-options
+  "Returns version options for subject (a file). This is NOT final version model (see make-version)."
+  [subject pdfa-result now user]
+  (merge {:file-id          (:fileId subject)
+          :original-file-id (:fileId subject)
+          :filename         (:file-name subject)
+          :content-type     (:content-type subject)
+          :size             (:content-length subject)
+          :now now
+          :user user
+          :stamped false}
+         (select-keys pdfa-result [:archivable :archivabilityError :missing-fonts])))
+
+(defn- appeal-attachment-versions-options
+  "Create options maps for needed versions. Created version(s) are returned in vector."
+  [{now :created user :user} pdfa-result original-file]
+  (if-not (nil? pdfa-result) ; nil if content-type is not regarded as archivable
+    (if (:already-valid pdfa-result)
+      [(version-options original-file pdfa-result now user)]
+      (let [initial-versions-options [(version-options original-file ; initial version without archive results
+                                                       (merge pdfa-result initial-archive-options)
+                                                       now
+                                                       user)]]
+        (if (contains? pdfa-result :fileId) ; if PDF/A file was uploaded to mongo
+          (conj initial-versions-options (version-options pdfa-result pdfa-result now user)) ; add PDF/A version
+          [(version-options original-file pdfa-result now user)]))) ; just return original file, with pdfa conversion result merged
+    [(version-options original-file initial-archive-options now user)]))
+
+(defn- create-appeal-attachment-data!
+  "Return attachment model for new appeal attachment with version(s) included.
+   If PDF, converts to PDF/A (if applicable) and thus creates a new file to GridFS as side effect."
+  [{app :application now :created user :user :as command} appeal-id appeal-type file]
+  (let [type                 (attachment-type-for-appeal appeal-type)
+        target               {:id appeal-id
+                              :type appeal-type}
+        attachment-data      (create-attachment-data app type nil now target true false false nil nil true)
+        archivability-result (archivability-steps! command file)
+        versions-options     (appeal-attachment-versions-options command archivability-result file)]
+    (reduce (fn [attachment version-options] ; reduce attachment over versions, thus version number gets incremented correctly
+              (let [version (make-version attachment version-options)]
+                (-> attachment
+                    (update :versions conj version)
+                    (assoc :latestVersion version))))
+            attachment-data
+            versions-options)))
+
+(defn new-appeal-attachment-updates!
+  "Return $push operation for attachments, with attachments created for given fileIds.
+   As a side effect, creates converted PDF/A version to mongo for PDF files (if applicable)."
+  [command appeal-id appeal-type fileIds]
+  (let [file-objects    (seq (mongo/download-find-many {:_id {$in fileIds}}))
+        new-attachments (map
+                          (partial
+                            create-appeal-attachment-data!
+                            command
+                            appeal-id
+                            appeal-type)
+                          file-objects)]
+    (when (seq new-attachments)
+      {$push {:attachments {$each new-attachments}}})))

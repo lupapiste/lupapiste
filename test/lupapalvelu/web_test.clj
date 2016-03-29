@@ -20,12 +20,19 @@
 
 (facts "facts about hashbang parsing"
   (->hashbang nil)               => nil
+  (->hashbang [])                => nil
+  (->hashbang [nil])             => nil
   (->hashbang "http://foo")      => nil
+  (->hashbang 1234)              => nil
+  (->hashbang {:foo "bar"})      => nil
   (->hashbang "foo")             => "foo"
   (->hashbang "/foo")            => "foo"
   (->hashbang "!/foo")           => "foo"
   (->hashbang "%21/foo")         => "foo"
-  (->hashbang "#!/foo")          => "foo")
+  (->hashbang "#!/foo")          => "foo"
+  (->hashbang "/../../foo")      => "foo"
+  (->hashbang "/../../#!foo")    => "foo"
+  (->hashbang ["#!/foo" "#!/bar"]) => "bar")
 
 (fact {:a 1 :b 2}
   => (and (contains {:a 1})

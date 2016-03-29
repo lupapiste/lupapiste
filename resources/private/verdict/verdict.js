@@ -155,7 +155,7 @@ LUPAPISTE.verdictPageController = (function($) {
 
   var verdictModel = new VerdictEditModel();
   var authorizationModel = lupapisteApp.models.applicationAuthModel;
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.paatosote");
+  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, LUPAPISTE.config.verdictAttachmentType);
   var createTaskController = LUPAPISTE.createTaskController;
   var authorities = ko.observableArray([]);
 

@@ -82,7 +82,7 @@ var users = (function($) {
         .reduce(function(m, p) { m[p.name] = p.value; return m; }, {});
       ajax
         .datatables("users-for-datatables", {params: params})
-        .success(_.compose(callback, self.processResults))
+        .success(_.flowRight(callback, self.processResults))
         .call();
     };
 

@@ -5,7 +5,7 @@
     if (c.accountType === "custom") {
       return c.customAccountLimit ? c.customAccountLimit : 0;
     } else {
-      return _.findWhere(LUPAPISTE.config.accountTypes, {name: c.accountType}).limit;
+      return _.find(LUPAPISTE.config.accountTypes, {name: c.accountType}).limit;
     }
   }
 

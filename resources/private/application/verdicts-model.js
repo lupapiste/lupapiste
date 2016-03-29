@@ -96,21 +96,31 @@ LUPAPISTE.VerdictsModel = function() {
   };
 
   self.checkVerdict = function(bindings){
-    var applicationId = getApplicationId(bindings);
-    ajax.command("check-for-verdict", {id: applicationId})
-    .processing(self.processing)
-    .pending(self.pending)
-    .success(function(d) {
-      var content = loc("verdict.verdicts-found-from-backend", d.verdictCount, d.taskCount);
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), content);
-      pageutil.showAjaxWait();
-      repository.load(applicationId);
-    })
-    .error(function(d) {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), loc(d.text));
-    })
-    .call();
-    hub.send("track-click", {category:"Application", label: "", event:"chechForVerdict"});
+    function doCheckVerdict() {
+      var applicationId = getApplicationId(bindings);
+      ajax.command("check-for-verdict", {id: applicationId})
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function(d) {
+          var content = loc("verdict.verdicts-found-from-backend", d.verdictCount, d.taskCount);
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), content);
+          pageutil.showAjaxWait();
+          repository.load(applicationId);
+        })
+        .error(function(d) {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), loc(d.text));
+        })
+        .call();
+      hub.send("track-click", {category:"Application", label: "", event:"chechForVerdict"});
+    }
+    if( lupapisteApp.services.verdictAppealService.hasAppeals()) {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"),
+                                             loc("verdict.confirmfetch"),
+                                             {title: loc("yes"),
+                                              fn: doCheckVerdict});
+    } else {
+      doCheckVerdict();
+    }
   };
 
   self.verdictSigningModel = new LUPAPISTE.VerdictSigningModel("#dialog-sign-verdict");

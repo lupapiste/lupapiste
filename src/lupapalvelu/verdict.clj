@@ -164,7 +164,7 @@
                        verdict-id)]
       (doall
        (for [att  attachments
-             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki} att
+             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
                    _ (debug "Download " url)
                    filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (try
@@ -176,7 +176,7 @@
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
                    attachment-type    {:type-group (if (env/feature? :updated-attachments) "paatoksenteko" "muut"), 
-                                       :type-id "paatosote"}
+                                       :type-id (if (= "paatos" type) "paatos" "paatosote")}
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
@@ -265,7 +265,7 @@
             (util/version-is-greater-or-equal krysp-version {:major 2 :minor 1 :micro 8}))
       (let [application (meta-fields/enrich-with-link-permit-data application)
             link-permit (application/get-link-permit-app application)
-            link-permit-xml (krysp-fetch/get-application-xml link-permit :application-id)
+            link-permit-xml (krysp-fetch/get-application-xml-by-application-id link-permit)
             osapuoli-type (cond
                             (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"
                             (= "suunnittelijan-nimeaminen" application-op-name) "suunnittelija")

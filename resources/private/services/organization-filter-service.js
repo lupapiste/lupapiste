@@ -28,7 +28,7 @@ LUPAPISTE.OrganizationFilterService = function(applicationFiltersService) {
     ko.utils.arrayPushAll(self.selected,
       _.filter(self.data(), function(org) {
         if (savedFilter()) {
-          return  _.contains(savedFilter(), org.id);
+          return  _.includes(savedFilter(), org.id);
         }
       }));
   });

@@ -33,7 +33,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (path.length === 1) {
         return val;
       }
-      return self.getMeta( _.rest( path ), val );
+      return self.getMeta( _.tail( path ), val );
     }
   };
 
@@ -238,7 +238,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.approvalTestId = function( path, verb ) {
-    return self.testId( [verb, "doc", _.first( path) || self.schemaName].join ( "-" ));
+    return self.testId( [verb, "doc", _.head( path) || self.schemaName].join ( "-" ));
   };
 
   self.removeDocument = function() {
@@ -251,14 +251,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       documentName = loc([self.schema.info.name, "_group_label"]);
     }
 
+    function onDocumentRemoved() {
+      // This causes full re-rendering, all accordions change
+      // state etc. Figure a better way to update UI.  Just the
+      // "operations" list should be changed.
+      repository.load(self.appId);
+    }
+
     function onRemovalConfirmed() {
       ajax.command("remove-doc", { id: self.appId, docId: self.docId, collection: self.getCollection() })
-        .success(function () {
-          // This causes full re-rendering, all accordions change
-          // state etc. Figure a better way to update UI.  Just the
-          // "operations" list should be changed.
-          repository.load(self.appId);
-        })
+        .success(onDocumentRemoved)
+        .onError("error.document-not-found", onDocumentRemoved)
         .onError("error.removal-of-last-document-denied", notify.ajaxError)
         .call();
     }
@@ -530,7 +533,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     var supportedInputSubtypes = ["email", "time"];
-    var inputType = _.contains(supportedInputSubtypes, subSchema.subtype) ? subSchema.subtype : "text";
+    var inputType = _.includes(supportedInputSubtypes, subSchema.subtype) ? subSchema.subtype : "text";
 
     var input = makeInput(inputType, myPath, model, subSchema, validationResult);
     setMaxLen(input, subSchema);
@@ -614,7 +617,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function isSubSchemaWhitelisted(schema) {
-    return util.getIn(schema, ["whitelist", "otherwise"]) === "disabled" && !_.contains(util.getIn(schema, ["whitelist", "roles"]), lupapisteApp.models.currentUser.role());
+    return util.getIn(schema, ["whitelist", "otherwise"]) === "disabled" && !_.includes(util.getIn(schema, ["whitelist", "roles"]), lupapisteApp.models.currentUser.role());
   }
 
   function buildText(subSchema, model, path) {
@@ -942,7 +945,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (model[subSchema.name] && model[subSchema.name].value) {
       myModel = model[subSchema.name].value;
     } else {
-      myModel = _.first(subSchema.body).name;
+      myModel = _.head(subSchema.body).name;
     }
 
     var partsDiv = document.createElement("div");
@@ -1013,9 +1016,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
             collection: self.getCollection()
           })
           .success(_.partial(repository.load, self.appId, _.noop))
-          .onError("error.no-legacy-available", function(e) {
-            notify.error(loc(e.text));
-          })
+          .onError("error.no-legacy-available", notify.ajaxError)
           .call();
         }
 
@@ -1282,7 +1283,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
               if (e.text !== "error.application-does-not-have-given-auth") {
                 error("Failed to set user to document", userId, self.docId, e);
               }
-              notify.error(loc("error.dialog.title"), loc(e.text));
+              notify.ajaxError(e);
             })
             .call();
         }
@@ -1455,7 +1456,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function build(subSchema, model, path, partOfChoice) {
     // Do not create hidden whitelisted elements
     var whitelistedRoles = util.getIn(subSchema, ["whitelist", "roles"]);
-    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.contains(whitelistedRoles, lupapisteApp.models.currentUser.role());
+    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.includes(whitelistedRoles, lupapisteApp.models.currentUser.role());
     var schemaLeafHidden = util.getIn(model, [subSchema.name, "whitelist"]) === "hidden";
 
     if (subSchema.hidden || schemaLeafHidden || schemaBranchHidden) {
@@ -1681,7 +1682,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (selectOneOf.length) {
       // Show current selection or the first of the group
-      var myModel = _.first(selectOneOf);
+      var myModel = _.head(selectOneOf);
       if (model[docvars.SELECT_ONE_OF_GROUP_KEY]) {
         myModel = model[docvars.SELECT_ONE_OF_GROUP_KEY].value;
       }

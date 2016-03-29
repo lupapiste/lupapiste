@@ -76,7 +76,7 @@
                  [clj-rss "0.2.3"]
 
                  ; Image processing
-                 [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
+                 [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
                  [com.google.zxing/javase "2.2"] ; QR codes
                  [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
@@ -104,9 +104,9 @@
 
                  ;; Lupapiste libraries
                  ; Oskari map (https://github.com/lupapiste/oskari)
-                 [lupapiste/oskari "0.9.56"]
+                 [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.12"]
+                 [lupapiste/commons "0.7.17"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)

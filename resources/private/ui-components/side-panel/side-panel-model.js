@@ -57,8 +57,8 @@ LUPAPISTE.SidePanelModel = function(params) {
   var pages = ["applications", "application", "attachment", "statement", "neighbors", "verdict"];
 
   self.disposedComputed(function() {
-    self.showSidePanel(_.contains(_.without(pages, "applications"), ko.unwrap(self.currentPage)));
-    self.enableSidePanel(self.application && _.contains(pages, ko.unwrap(self.currentPage)));
+    self.showSidePanel(_.includes(_.without(pages, "applications"), ko.unwrap(self.currentPage)));
+    self.enableSidePanel(self.application && _.includes(pages, ko.unwrap(self.currentPage)));
   });
 
   self.addEventListener("side-panel", "show-conversation", function() {

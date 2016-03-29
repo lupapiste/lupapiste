@@ -440,7 +440,9 @@
       new-verdict-resp
       (do
        (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
-       (f apikey :publish-verdict :id application-id :verdictId verdict-id)))))
+       (assoc
+         (f apikey :publish-verdict :id application-id :verdictId verdict-id)
+         :verdict-id verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
   (apply give-verdict-with-fn command apikey application-id args))
@@ -612,6 +614,20 @@
       (when-not aloitusoikeus?
         (sign-attachment apikey id (:id first-attachment) password)))))
 
+;; File upload
+
+(defn upload-file
+  "Upload file to raw upload-file endpoint."
+  [apikey filename]
+  (let [uploadfile  (io/file filename)
+        uri         (str (server-address) "/api/raw/upload-file")]
+    (:body
+      (decode-response
+        (http-post uri
+                   {:headers {"authorization" (str "apikey=" apikey)}
+                    :multipart [{:name "files[]" :content uploadfile}]
+                    :throw-exceptions false})))))
+
 ;; statements
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
@@ -725,3 +741,8 @@
                {:headers {"authorization" (str "apikey=" apikey)}
                 :multipart [{:name "files[]" :content uploadfile}]
                 :throw-exceptions false})))
+
+(defn appeals-for-verdict [apikey app-id verdict-id]
+  (-> (query apikey :appeals :id app-id)
+      :data
+      (get (keyword verdict-id))))

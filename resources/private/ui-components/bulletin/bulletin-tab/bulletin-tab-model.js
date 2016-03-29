@@ -26,7 +26,7 @@ LUPAPISTE.BulletinTabModel = function(params) {
     self.bulletinVersion(data);
   };
 
-  ko.computed(function() {
+  self.disposedComputed(function() {
     var id = self.appId();
     if(id) {
       self.sendEvent("publishBulletinService", "fetchBulletinVersions", {bulletinId: id});

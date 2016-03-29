@@ -111,16 +111,16 @@
                               </div>
                               <!-- /ko -->
 
-                              <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("set-tos-function-for-application") -->
+                              <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("tos-operations-enabled") -->
                               <div>
                                 <p data-bind="ltext: 'tos.function'"></p>
-                                <span class="application_summary_text">
-                                  <select data-bind="options: $root.tosFunctions,
-                                                     optionsText: 'name',
-                                                     optionsValue: 'code',
-                                                     value: $root.application.tosFunction,
-                                                     valueAllowUnset: true" ></select>
-                                </span>
+                                <select class="dropdown dropdown--full-width"
+                                        data-bind="options: $root.tosFunctions,
+                                                   optionsText: 'name',
+                                                   optionsValue: 'code',
+                                                   value: $root.application.tosFunction,
+                                                   valueAllowUnset: true,
+                                                   enable: $root.authorization.ok('set-tos-function-for-application')" ></select>
                               </div>
                               <!-- /ko -->
 
@@ -347,7 +347,7 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-                            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complementNeeded'], state()),
+                            <li data-bind="if: _.includes(['draft', 'open', 'submitted', 'complementNeeded'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
                                    class="link-btn">
@@ -360,7 +360,7 @@
                                     <span data-bind="if: unseenStatements">
                                         <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-                            <li data-bind="ifnot: _.contains(['draft', 'open'], state()),
+                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
                                 <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
                                    class="link-btn">
@@ -929,7 +929,7 @@
                                           <span data-bind="text: $index() + 1"></span>
                                       </span>
                                   </button>
-                                  <div class="accordion_content expanded">
+                                  <div class="accordion_content expanded verdict-content">
 
                                       <div data-bind="with: $parent" style="overflow: auto;">
                                           <div class="btn-container right-align"  data-bind="if: $data.draft" >
@@ -1123,6 +1123,9 @@
                                                   <div data-bind="ltext: 'verdict.poytakirjat.missing'"></div>
                                                   <!-- /ko -->
                                               </div>
+                                              <!-- Muutoksenhaku -->
+                                              <div data-bind="component: {name: 'verdict-appeal',
+                                                              params: {id: verdict.id, test: $parentContext.$index() + '-' +$index()}}"></div>
                                           </div>
                                       </div>
                                   </div>
@@ -1236,7 +1239,7 @@
                         </div>
 
                         <!-- YA: Info about construction started and construction ready occasions -->
-                        <div data-bind="if: $root.authorization.ok('inform-construction-started') || _.contains(['constructionStarted', 'closed'], $data.state())">
+                        <div data-bind="if: $root.authorization.ok('inform-construction-started') || _.includes(['constructionStarted', 'closed'], $data.state())">
                             <table>
                                 <thead>
                                     <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
@@ -1299,7 +1302,7 @@
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
                         <!-- /ko -->
 
-                        <div>
+                        <div class="tasks-content">
                             <div data-bind="foreach: taskGroups">
                                 <h2 data-bind="text: name" style="padding-top:1em"></h2>
                                 <div class="stacked legends">

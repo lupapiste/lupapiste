@@ -19,9 +19,7 @@ var attachment = (function() {
         model.previewDisabled(false);
         return false;
       })
-      .onError("error.pre-verdict-attachment", function(e) {
-        notify.error(loc(e.text));
-      })
+      .onError("error.pre-verdict-attachment", notify.ajaxError)
       .call();
       hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachment"});
     return false;
@@ -67,7 +65,7 @@ var attachment = (function() {
     size:                         ko.observable(),
     sizes:                        ko.observableArray(LUPAPISTE.config.attachmentSizes),
     isVerdictAttachment:          ko.observable(),
-    visibility:                   ko.observable(_.first(LUPAPISTE.config.attachmentVisibilities)),
+    visibility:                   ko.observable(_.head(LUPAPISTE.config.attachmentVisibilities)),
     subscriptions:                [],
     showAttachmentVersionHistory: ko.observable(),
     showHelp:                     ko.observable(false),
@@ -253,8 +251,8 @@ var attachment = (function() {
   });
 
   model.editable = ko.computed(function() {
-    return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.application.state)) ?
-             lupapisteApp.models.currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
+    return _.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.application.state)) ?
+             lupapisteApp.models.currentUser.isAuthority() || _.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
              true;
   });
 
@@ -315,7 +313,7 @@ var attachment = (function() {
 
     model.subscriptions.push(model.selectedOperationId.subscribe(function(id) {
       if (!model.operation() || id !== model.operation().id) {
-        var op = _.findWhere(model.selectableOperations(), {id: id});
+        var op = _.find(model.selectableOperations(), {id: id});
         op = op || null;
         saveLabelInformation("operation", {meta: {op: op}});
       }
@@ -451,7 +449,7 @@ var attachment = (function() {
     model.scale(attachment.scale);
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
-    model.visibility(attachment.metadata ? attachment.metadata.nakyvyys : _.first(LUPAPISTE.config.attachmentVisibilities));
+    model.visibility(attachment.metadata ? attachment.metadata.nakyvyys : _.head(LUPAPISTE.config.attachmentVisibilities));
     model.applicationState(attachment.applicationState);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
     model.metadata(attachment.metadata);

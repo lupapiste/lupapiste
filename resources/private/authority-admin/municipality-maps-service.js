@@ -196,14 +196,16 @@ LUPAPISTE.MunicipalityMapsService = function() {
   // The details are set by municipality-maps-server
   // component.
   function updateServerDetails( details ) {
-    ajax.command( "update-map-server-details",
-                  details)
-    .pending( waiting )
-    .complete( function( res ) {
-      var body = res.responseJSON;
-      error( !body.ok ? false : "error" );
-      serverDetails( details );
-      util.showSavedIndicator(body);
+    ajax.command("update-map-server-details", details)
+    .pending(waiting)
+    .onError("error.invalid.url", function(e) {
+      error("error");
+      notify.ajaxError(e);
+    })
+    .success(function(resp) {
+      error(false);
+      serverDetails(details);
+      util.showSavedIndicator(resp);
     })
     .call();
   }

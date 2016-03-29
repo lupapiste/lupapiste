@@ -422,7 +422,7 @@
           updated-op (:primaryOperation updated-app)]
       (fact "description is set" (:description updated-op) => test-desc))))
 
-(facts "Changinging application location"
+(facts "Changing application location"
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
         application    (query-application pena application-id)]
 
@@ -460,8 +460,9 @@
                          :unsubscribe-notifications :subscribe-notifications :assign-application :neighbor-add
                          :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
                          :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
-                         :set-company-to-document :set-user-to-document :set-current-user-to-document :approve-application
-                         :submit-application :create-foreman-application}
+                         :set-company-to-document :set-user-to-document :set-current-user-to-document
+                         :approve-application :submit-application :create-foreman-application
+                         :change-application-state :change-application-state-targets}
         user (find-user-from-minimal-by-apikey sonja)]
     app => map?
     (doseq [command (ca/foreach-action {} user {} app)
@@ -488,3 +489,23 @@
       (:name secondary-op) => "kerrostalo-rivitalo"
       (:name primary-op) => "varasto-tms")))
 
+(facts "Changing application state after verdict"
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+        application    (query-application pena application-id)]
+
+    ; applicant submits and authority gives verdict
+    (command pena :submit-application :id application-id)
+    (command sonja :check-for-verdict :id application-id)
+
+    (fact "Sonja changes application state to constructionStarted"
+          (command sonja :change-application-state :id application-id :state "constructionStarted") => ok?
+          (:state (query-application sonja application-id)) => "constructionStarted")
+    (fact "verdictGiven is not included in the target states"
+          (let [res (query sonja :change-application-state-targets :id application-id)
+                states (set (:states res))]
+            (states "verdictGiven") => nil
+            (command sonja :change-application-state :id application-id :state "verdicGiven") => fail?))
+    (fact "Change state to appeal. verdictGiven is possible next state"
+          (command sonja :change-application-state :id application-id :state "appealed") => ok?
+          (-> (query sonja :change-application-state-targets :id application-id) :states set (contains? "verdictGiven")) => true
+          (command sonja :change-application-state :id application-id :state "verdictGiven") => ok?)))

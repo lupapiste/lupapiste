@@ -245,6 +245,16 @@
     }
   };
 
+  // Makes <a> element a download link for given file.
+  // The file must have id and filename properties.
+  ko.bindingHandlers.download = {
+    update: function( element, valueAccessor) {
+      var file = ko.utils.unwrapObservable(valueAccessor());
+      $(element).attr( "href", "/api/raw/download-attachment?attachment-id=" + file.id);
+      $(element).text( file.filename);
+    }
+  };
+
   ko.bindingHandlers.version = {
     update: function(element, valueAccessor) {
       var verValue = ko.utils.unwrapObservable(valueAccessor());

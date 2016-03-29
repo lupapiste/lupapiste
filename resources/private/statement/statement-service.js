@@ -12,8 +12,8 @@ LUPAPISTE.StatementService = function(params) {
   self.data = ko.pureComputed(function() {return statements()[self.statementId()];});
 
   self.submitAllowed = {
-    statement: ko.observable(false), 
-    reply: ko.observable(false), 
+    statement: ko.observable(false),
+    reply: ko.observable(false),
     "reply-request": ko.observable(true)};
 
   self.commands = {
@@ -43,7 +43,7 @@ LUPAPISTE.StatementService = function(params) {
                    nothingToAdd: null }
         }, statement))];
       })
-      .zipObject()
+      .fromPairs()
       .value());
   });
 
@@ -66,7 +66,7 @@ LUPAPISTE.StatementService = function(params) {
       "modify-id": util.getIn(statement, ["modify-id"], ""),
       statementId: self.statementId(),
       lang: loc.getCurrentLanguage()
-    }, _.pick(params[tab], _.identity));
+    }, _.pickBy(params[tab], _.identity));
   }
 
   function submit(statementId, tab) {

@@ -6,6 +6,7 @@ var invites = (function() {
       .success(function(d) {
         callback(d);
       })
+      .onError("error.unauthorized", _.noop)
       .call();
   }
 

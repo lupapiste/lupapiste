@@ -52,10 +52,10 @@
              (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defn- attachment-not-readOnly [{{attachmentId :attachmentId} :data} application]
+(defn attachment-not-readOnly [{{attachmentId :attachmentId} :data} application]
   (when (-> (attachment/get-attachment-info application attachmentId) :readOnly true?)
     (fail :error.unauthorized
-          :desc "Readonly attachments cannot be removed.")))
+          :desc "Read-only attachments cannot be modified.")))
 
 (defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user} application]
   (when (and (-> (attachment/get-attachment-info application attachmentId) :required true?)
@@ -119,12 +119,15 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state]}
+   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? attachment-type application)
-      (attachment/update-attachment-key! command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
+      (let [metadata (-> (tiedonohjaus/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
+                         (tiedonohjaus/update-end-dates (:verdicts application)))]
+        (attachment/update-attachment-key! command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
+        (attachment/update-attachment-key! command attachmentId :metadata metadata created))
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.illegal-attachment-type)))))
@@ -286,7 +289,8 @@
    attachment-editable-by-application-state
    validate-attachment-type
    a/validate-authority-in-drafts
-   attachment-id-is-present-in-application-or-not-set])
+   attachment-id-is-present-in-application-or-not-set
+   attachment-not-readOnly])
 
 (def- base-upload-options
   {:comment-text nil
@@ -304,7 +308,7 @@
                                 {:keys [attachment-id filename upload-pdfa-only] :as attachment-data}]
   (if pdfa?
     (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! application attachment-data) (fail! :error.unknown))
-          new-filename (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf" )
+          new-filename (attachment/filename-for-pdfa filename)
           new-id       (or (:id attach-file-result) attachment-id)
           application  (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
           pdfa-attachment-data (assoc attachment-data
@@ -514,8 +518,8 @@
                              (if-not (ss/blank? organization)
                                organization
                                (let [org (organization/get-organization (:organization application))]
-                                 (organization/get-organization-name org)))]
-               }))))
+                                 (organization/get-organization-name org)))]}))))
+
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
@@ -575,7 +579,7 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state]}
+   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
   ; FIXME yhdella updatella!
   (doseq [[k v] meta]
@@ -587,7 +591,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
-   :states     #{:draft :open :submitted}
+   :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key! command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
@@ -601,7 +605,8 @@
                       (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
                         (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))
                           (error "setting verdict attachments, overlapping ids in: " selectedAttachmentIds unSelectedAttachmentIds)
-                          (fail :error.select-verdict-attachments.overlapping-ids)))]}
+                          (fail :error.select-verdict-attachments.overlapping-ids)))]
+   :pre-checks [attachment-not-readOnly]}
   [{:keys [application created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
         updates-fn      (fn [ids k v] (mongo/generate-array-updates :attachments all-attachments #((set ids) (:id %)) k v))]
@@ -625,7 +630,8 @@
                           (when-let [{versions :versions} (util/find-first #(= (:id %) attachment-id) attachments)]
                             (when (empty? versions)
                               (fail :error.attachment.no-versions)))))
-                      access/has-attachment-auth]
+                      access/has-attachment-auth
+                      attachment-not-readOnly]
    :states           (lupapalvelu.states/all-application-states-but lupapalvelu.states/terminal-states)}
   [command]
   (update-application command

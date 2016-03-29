@@ -21,7 +21,7 @@ var repository = (function() {
   }
 
   function calculateAttachmentStateIndicators(attachment, application) {
-    var auths = _(application.auth).filter(function(a) {return _.contains(LUPAPISTE.config.writerRoles, a.role);}).pluck("id").value();
+    var auths = _(application.auth).filter(function(a) {return _.includes(LUPAPISTE.config.writerRoles, a.role);}).map("id").value();
 
     attachment.signed = false;
     var lastSignature = _.last(attachment.signatures || []);
@@ -37,10 +37,10 @@ var repository = (function() {
           return v.version.major !== lastSignature.version.major || v.version.minor !== lastSignature.version.minor;
         })
         // Drop current, signed versions
-        .rest()
+        .tail()
         // Keep new versions added by applicants
         .filter(function(v) {
-          return v.user.role === "applicant" ||  _.contains(auths, v.user.id);
+          return v.user.role === "applicant" ||  _.includes(auths, v.user.id);
         })
         .value();
       attachment.signed = signedVersion && unsignedVersions.length === 0;
@@ -50,7 +50,7 @@ var repository = (function() {
     attachment.sentDateString = "-";
     if (attachment.sent) {
       // TODO check if sent to KRYSP afterwards (not yet in transfers log)
-      if (!_.isEmpty(_.where(application.transfers, {type: "attachments-to-asianhallinta"}))) {
+      if (!_.isEmpty(_.filter(application.transfers, {type: "attachments-to-asianhallinta"}))) {
         attachment.isSentToAsianhallinta = true;
       }
       attachment.isSent = true;
@@ -62,7 +62,7 @@ var repository = (function() {
 
   function setAttachmentOperation(operations, attachment) {
     if (attachment.op) {
-      var op = _.findWhere(operations, {id: attachment.op.id});
+      var op = _.find(operations, {id: attachment.op.id});
       if (op) {
         attachment.op = op;
       } else {
@@ -174,7 +174,7 @@ var repository = (function() {
       throw "f is not a function: f=" + f;
     }
     hub.subscribe("application-loaded", function(e) {
-      if (_.contains(pages, pageutil.getPage())) {
+      if (_.includes(pages, pageutil.getPage())) {
         //TODO: passing details as 2nd param due to application.js hack (details contains the municipality persons)
         f(e.applicationDetails.application, e.applicationDetails);
       }

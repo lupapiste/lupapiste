@@ -45,6 +45,9 @@
                  :userAttachmentTypes   (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales      attachment-scales
                  :attachmentSizes       attachment-sizes
+                 :verdictAttachmentType (if (env/feature? :updated-attachments)
+                                          "paatoksenteko.paatosote"
+                                          "muut.paatosote")
                  :accountTypes          company/account-types
                  :eInvoiceOperators     schemas/e-invoice-operators
                  :postVerdictStates     states/post-verdict-states
@@ -168,7 +171,8 @@
                    "document-data-service.js"
                    "fileupload-service.js"
                    "side-panel-service.js"
-                   "accordion-service.js"]}
+                   "accordion-service.js"
+                   "verdict-appeal-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -369,11 +373,11 @@
                :js ["admin.js"]}
    :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer :ui-components]
                :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
-                    "create-scope-model.js"]
+                    "create-scope-model.js" "logs.js"]
                :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html" "sso-keys.html"
                       "screenmessages-list.html" "notifications.html"
-                      "create-scope-template.html"]}
+                      "create-scope-template.html" "logs.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 

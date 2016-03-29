@@ -440,3 +440,10 @@
            (fail! :error.unzipping-error)))))
     target-dir))
 
+(defn is-latest-of?
+  "Compares timestamp ts to given timestamps.
+   Returns true if ts is greater than all given timestamps, false if even one of them is greater (or equal)"
+  [ts timestamps]
+  {:pre [(integer? ts) (and (sequential? timestamps) (every? integer? timestamps))]}
+  (every? (partial > ts) timestamps))
+

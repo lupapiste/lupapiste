@@ -39,8 +39,9 @@
 
   function filterAttachments(attachments) {
     return _(attachments)
-      .each(function(a) {
+      .map(function(a) {
         a.selected = a.forPrinting ? a.forPrinting : false;
+        return a;
       })
       .value();
   }

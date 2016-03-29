@@ -27,7 +27,7 @@ LUPAPISTE.ForemanModel = function() {
   self.linkedForemanApps = ko.observableArray();
   self.selectableForemen = ko.pureComputed(function() {
     return _.filter(self.foremanApplications(), function(app) {
-      return !_.contains(self.linkedForemanApps(), app.id);
+      return !_.includes(self.linkedForemanApps(), app.id);
     });
   });
 
@@ -61,7 +61,7 @@ LUPAPISTE.ForemanModel = function() {
                     "firstName":   firstname,
                     "lastName":    lastname,
                     "name":        name,
-                    "statusName":  app.state === "acknowledged" || _.contains(LUPAPISTE.config.postVerdictStates, app.state) ? "ok" : "new",
+                    "statusName":  app.state === "acknowledged" || _.includes(LUPAPISTE.config.postVerdictStates, app.state) ? "ok" : "new",
                     "displayRole": name ? loc(["osapuoli.tyonjohtaja.kuntaRoolikoodi", name]) : ""};
 
         data.displayName = ko.pureComputed(function() {
@@ -84,7 +84,7 @@ LUPAPISTE.ForemanModel = function() {
     }
 
     function loadForemanTasks() {
-      var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
+      var foremanTasks = _.filter(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
       var foremen = [];
       var asiointitunnukset = [];
 
@@ -98,7 +98,7 @@ LUPAPISTE.ForemanModel = function() {
       self.linkedForemanApps(asiointitunnukset);
       _.forEach(foremanTasks, function(task) {
         var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
-        var linkedForemanApp = _.findWhere(self.foremanApplications(), { "id": asiointitunnus});
+        var linkedForemanApp = _.find(self.foremanApplications(), { "id": asiointitunnus});
 
         var data = { "name": task.taskname,
                      "taskId": task.id,
@@ -109,7 +109,7 @@ LUPAPISTE.ForemanModel = function() {
                      "indicator": ko.observable()};
 
         data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
-          return !_.contains(asiointitunnukset, app.id) || app.id === asiointitunnus;
+          return !_.includes(asiointitunnukset, app.id) || app.id === asiointitunnus;
         }));
 
         data.selectedForeman.subscribe(function(val) {

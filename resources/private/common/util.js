@@ -8,7 +8,7 @@ var util = (function($) {
   function zp(e) { return zeropad.apply(null, e); }
 
   function fluentify(api, context) {
-    return _.reduce(_.pairs(api),
+    return _.reduce(_.toPairs(api),
                     function(m, pair) {
                       var k = pair[0],
                           f = pair[1];
@@ -114,7 +114,7 @@ var util = (function($) {
     if (_.isUndefined(value) || _.isNull(value)) {
       return defaultValue;
     }
-    return _.isEmpty(ks) ? value : getIn(value[_.first(ks)], _.rest(ks), defaultValue);
+    return _.isEmpty(ks) ? value : getIn(value[_.head(ks)], _.tail(ks), defaultValue);
   }
 
   function getFeatureName(feature) {
@@ -241,7 +241,7 @@ var util = (function($) {
       return _.reduce(options.query.split(" "), function(result, word) {
         var dataForLabel = ko.unwrap(item[options.label]);
         var isSelected = _.isArray(options.selected) ? _.some(options.selected, item) : options.selected === item;
-        return !isSelected && dataForLabel !== undefined && _.contains(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
+        return !isSelected && dataForLabel !== undefined && _.includes(dataForLabel.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
   }
@@ -252,6 +252,17 @@ var util = (function($) {
     } else {
       hub.send("indicator", {style: "negative", message: response.text});
     }
+  }
+
+  // Shows OK dialog, with text (loc key) from respose
+  // To define click handler for "OK" button, give options object looking like following:
+  // {componentParams: {okFn: your-callback-function-here}}
+  function showErrorDialog(response, options) {
+    var defaultParams = {ltitle: "error.dialog.title",
+                         size: "medium",
+                         component: "ok-dialog",
+                         componentParams: {ltext: response.text}};
+    hub.send("show-dialog", _.merge(defaultParams, options));
   }
 
   function createSortableColumn(index, text, opts) {
@@ -326,7 +337,7 @@ var util = (function($) {
         return task.source && task.source.type === "verdict" && task.source.id === verdict.id;
       });
 
-      var lupamaaraukset = _(verdict.paatokset || []).pluck("lupamaaraykset").filter().value();
+      var lupamaaraukset = _(verdict.paatokset || []).map("lupamaaraykset").filter().value();
 
       if (lupamaaraukset.length === 0 && myTasks.length > 0) {
         var katselmukset = tasksDataBySchemaName(myTasks, "task-katselmus", function(task) {
@@ -386,6 +397,7 @@ var util = (function($) {
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
     showSavedIndicator: showSavedIndicator,
+    showErrorDialog: showErrorDialog,
     isNonNegative: isNonNegative,
     createSortableColumn: createSortableColumn,
     elementInViewport: elementInViewport,
