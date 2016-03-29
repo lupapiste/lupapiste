@@ -67,10 +67,20 @@ ul.upload-files {
 
 ul.appeals-files {
   list-style: none;
+  display: table;
   padding-left: 0;
-  .appeals-files__info {
-    padding-left: 1em;
-    font-style: italic;
+  li {
+    display: table-row;
+    a, span {
+      display: table-cell;
+    }
+    span {
+      font-style: italic;
+      padding-left: 1em;
+    }
+    span.appeals-files__size {
+      text-align: right;
+    }
   }
 }
 

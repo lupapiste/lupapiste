@@ -2,6 +2,9 @@
 // The function is very lightweight since the actual
 // model data is passed in parameters and the UI details
 // are handled by form-cells and file-upload component.
+// Params:
+//   visible: visibility observable
+//   test: postfix for test-ids.
 LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
   "use strict";
   var self = this;
@@ -17,6 +20,10 @@ LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
   self.initFun = m.initFun;
   self.error = m.error;
   self.waiting = m.waiting;
+  self.test = "test";
+  if( !_.isNull(params.test) || _.isUndefined( params.test) ) {
+    self.test = ko.isObservable( params.test ) ? params.test() : params.test;
+  }
 
   self.appealTypes = _.map(["appealVerdict","appeal", "rectification"],
                            function( s ) {
