@@ -1,5 +1,5 @@
 (ns lupapalvelu.appeal-api
-  (:require [clojure.set :refer [difference]]
+  (:require [clojure.set :refer [difference rename-keys]]
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.schemas :as ssc]
@@ -22,9 +22,10 @@
 
 (defn- appeal-exists
   "Pre-check to validate that at least one appeal exists before appeal verdict can be created"
-  [_ {:keys [appeals]}]
-  (when (zero? (count appeals))
-    (fail :error.appeals-not-found)))
+  [{{:keys [verdictId]} :data} {:keys [appeals]}]
+  (when verdictId
+    (when (zero? (count (filter #(= verdictId (:target-verdict %)) appeals)))
+     (fail :error.appeals-not-found))))
 
 (defn- appeal-id-exists
   "Pre-check to validate that given ID exists in application"
@@ -221,9 +222,12 @@
   [application appeal-item]
   (assoc appeal-item :editable (appeal-item-editable? application appeal-item)))
 
-(defn- add-attachments [{id :id :as appeal}]
-  ; get attacments for appeal here
-  appeal)
+(defn- add-attachments [{:keys [attachments]} {id :id :as appeal}]
+  (->> (filter #(= id (get-in % [:target :id])) attachments)
+       (map :latestVersion)
+       (map #(select-keys % [:fileId :filename :contentType :size]))
+       (map #(rename-keys % {:fileId :id}))
+       (assoc appeal :files)))
 
 (defn- validate-output-format
   "Validate output data for frontend. Logs as ERROR in action pipeline."
@@ -246,7 +250,7 @@
   (let [appeal-verdicts (map #(assoc % :type "appealVerdict") (:appealVerdicts application))
         all-appeals     (concat (:appeals application) appeal-verdicts)
         processed-appeals (->> all-appeals
-                               (map (comp add-attachments
+                               (map (comp (partial add-attachments application)
                                           (partial process-appeal application)))
                                (sort-by :datestamp))]
     (ok :data (group-by :target-verdict processed-appeals))))

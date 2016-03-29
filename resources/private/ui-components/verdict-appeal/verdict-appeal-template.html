@@ -20,14 +20,13 @@
                          attr: {'data-appeal-type': appealType}"></td>
           <td data-bind="text: authors"></td>
           <td data-bind="text: date"></td>
-          <td data-bind="foreach: files">
-            <ul class="appeals-files">
-              <li>
+          <td>
+            <ul class="appeals-files"
+                data-bind="foreach: files">
+              <li data-bind="attr: {'data-test-id': 'appeals-files-' + $index()}">
                 <a data-bind="download: $data"></a>
-                <span class="appeals-files__info">
                   <span data-bind="ltext: contentType"></span>
-                  <span data-bind="size: size"></span>
-                </span>
+                  <span class="appeals-files__size" data-bind="size: size"></span>
               </li>
             </ul>
           </td>

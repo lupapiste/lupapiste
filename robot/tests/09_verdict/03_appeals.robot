@@ -40,8 +40,6 @@ Sonja edits appeal
   Check appeal bubble  0-0-0  appeal  Veijo  01.04.2016  Hello world
   Edit authors  0-0-0  Liisa
   Edit date  0-0-0  5.5.2015
-  # TODO: omit after full file support
-  Add file 0-0-0
   OK bubble 0-0-0
   Appeals row check  0-0  0  appeal  Liisa  5.5.2015
 
@@ -49,10 +47,18 @@ Invalid date should show warning
   Click by test id  edit-appeal-0-0-0
   Edit date  0-0-0  33.88.99999
   Element should be visible  jquery=div.bubble-dialog .form-cell__message .lupicon-warning
+  Test id disabled  appeal-0-0-0-bubble-dialog-ok
   Edit date  0-0-0  12.4.2011
   Element should not be visible  jquery=div.bubble-dialog .form-cell__message .lupicon-warning
   Cancel bubble 0-0-0
   Appeals row check  0-0  0  appeal  Liisa  5.5.2015
+
+Appeal can contain multiple files
+  Click by test id  edit-appeal-0-0-0
+  Add file  0-0-0  ${PNG_TESTFILE_PATH}
+  OK bubble 0-0-0
+  Appeals row file check  0-0  0  ${PNG_TESTFILE_NAME}  1
+  Appeals row file check  0-0  0  ${TXT_TESTFILE_NAME}  0
 
 Sonja deletes appeal
   Click by test id  delete-appeal-0-0-0
@@ -66,33 +72,38 @@ Sonja adds appeal and rectification
 
 Sonja adds appealVerdict thus locking appeals
   Add to verdict  0-0  appealVerdict  Phong  1.6.2016
-  Scroll to test id  appeal-0-0-bubble-dialog-ok
+  Scroll to test id  add-appeal-0-0
   No such test id  edit-appeal-0-0-0
   No such test id  edit-appeal-0-0-1
   Wait test id visible  show-appeal-0-0-0
   Wait test id visible  show-appeal-0-0-1
 
 Show info buttons show correct data
+  Scroll to test id  add-appeal-0-0
   Click by test id  show-appeal-0-0-0
   Test id should contain  info-appeal-0-0-0  I am unhappy!
   Click by test id  show-appeal-0-0-1
-  Test id should contain  info-appeal-0-0-1  ${EMPTY}
+  Test id should contain  info-appeal-0-0-1  Ei lisätietoja.
+
 
 Adding appeal locks appealVerdict
   Add to verdict  0-0  appeal  Frisket  1.7.2016
-  Scroll to test id  appeal-0-0-bubble-dialog-ok
+  Scroll to test id  add-appeal-0-0
   No such test id  edit-appeal-0-0-2
   Wait test id visible  show-appeal-0-0-2
 
 Making appeal date earlier than appealVerdict makes the latter editable
   Click by test id  edit-appeal-0-0-3
-  Scroll to test id  appeal-0-0-3-bubble-dialog-ok
+  Scroll to test id  add-appeal-0-0
   Edit date  0-0-3  1.1.2010
-  # TODO: omit after full file support
-  Add file 0-0-3
   OK bubble 0-0-3
   Wait test id visible  edit-appeal-0-0-3
   Appeals row check  0-0  3  appealVerdict  Phong  1.6.2016
+
+The first appeal cannot be appealVerdict
+  Add to verdict  1-0  appealVerdict  Megabyte  29.3.2016
+  Wait test id visible  appeal-1-0-bubble-dialog-error
+  Cancel bubble 1-0
 
 *** Keywords ***
 
@@ -110,9 +121,10 @@ Edit extra
   [Arguments]  ${postfix}  ${extra}
   Fill test id  appeal-extra-${postfix}  ${extra}
 
-Add file ${postfix}
+Add file
+  [Arguments]  ${postfix}  ${path}=${TXT_TESTFILE_PATH}
   Execute JavaScript  $('div[data-test-id=appeal-files-${postfix}] input[type=file]').attr("class", "")
-  Choose File  jquery=div[data-test-id=appeal-files-${postfix}] input[type=file]  ${TXT_TESTFILE_PATH}
+  Choose File  jquery=div[data-test-id=appeal-files-${postfix}] input[type=file]  ${path}
 
 OK bubble ${postfix}
   Scroll and click test id  appeal-${postfix}-bubble-dialog-ok
@@ -125,7 +137,6 @@ Check appeal bubble
   Scroll to test id  appeal-${postfix}-bubble-dialog-ok
   Element should be visible  jquery=span[data-test-id=appeal-type-${postfix}][data-appeal-type=${appealType}]
   Textfield value should be  jquery=input[data-test-id=appeal-authors-${postfix}]  ${authors}
-  Test id disabled  appeal-${postfix}-bubble-dialog-ok
   ## Disable date picker
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Textfield value should be  jquery=input[data-test-id=appeal-date-${postfix}]  ${date}
@@ -148,7 +159,7 @@ Add to verdict
   Textarea value should be  jquery=textarea[data-test-id=appeal-extra-${postfix}]  ${EMPTY}
   Edit extra  ${postfix}  ${extra}
   Test id disabled  appeal-${postfix}-bubble-dialog-ok
-  Add file ${postfix}
+  Add file  ${postfix}
   Ok bubble ${postfix}
 
 Set Row Selector
@@ -161,3 +172,8 @@ Appeals row check
   Wait Until  Element Should Be Visible  ${selector} td[data-appeal-type=${appealType}]
   Wait Until  Element should contain  ${selector}  ${authors}
   Wait Until  Element should contain  ${selector}  ${date}
+
+Appeals row file check
+  [Arguments]  ${postfix}  ${row}  ${filename}  ${index}=0
+  Set Row Selector  ${postfix}  ${row}
+  Wait Until  Element should contain  ${selector} li[data-test-id=appeals-files-${index}] a  ${filename}
