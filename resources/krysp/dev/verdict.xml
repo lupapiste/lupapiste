@@ -237,7 +237,7 @@
             <yht:pykala>1</yht:pykala>
             <yht:liite>
               <yht:kuvaus>kuvaus 1</yht:kuvaus>
-              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-verdict.pdf</yht:linkkiliitteeseen>
               <yht:muokkausHetki>2013-09-01T12:00:00</yht:muokkausHetki>
               <yht:versionumero>1</yht:versionumero>
               <yht:tekija>
@@ -247,7 +247,7 @@
                   </yht:nimi>
                 </yht:henkilo>
               </yht:tekija>
-              <yht:tyyppi>tyyppi 1</yht:tyyppi>
+              <yht:tyyppi>paatos</yht:tyyppi>
               <yht:metatietotieto>
                 <yht:metatieto>
                   <yht:metatietoArvo>arvo</yht:metatietoArvo>
