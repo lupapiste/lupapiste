@@ -23,6 +23,27 @@
                    :applicant    "Testaaja Testi"
                    :address      "Korpikuusen kannon alla 6"
                    :municipality "186"
+                   :verdicts     [{:timestamp       1454562242169
+                                   :kuntalupatunnus " 20160043 "
+                                   :paatokset       [{:paivamaarat    {:anto          1454544000000
+                                                                       :voimassaHetki 1613520000000
+                                                                       :aloitettava   1550448000000}
+
+                                                      :lupamaaraykset {:maaraykset               [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viemärisuunnitelma"}]
+                                                                       :vaaditutTyonjohtajat     "Vastaava työnjohtaja"
+                                                                       :vaadittuTyonjohtajatieto ["Vastaava työnjohtaja"]
+                                                                       :vaaditutKatselmukset     [{:tarkastuksenTaiKatselmuksenNimi "* KVV-tarkastus" :katselmuksenLaji " muu katselmus "}
+                                                                                                  {:tarkastuksenTaiKatselmuksenNimi " * Sähkötarkastus " :katselmuksenLaji " muu katselmus "}
+                                                                                                  {:tarkastuksenTaiKatselmuksenNimi " * Rakennetarkastus " :katselmuksenLaji " muu katselmus "}
+                                                                                                  {:katselmuksenLaji " loppukatselmus "}
+                                                                                                  {:tarkastuksenTaiKatselmuksenNimi " Aloitusilmoitus " :katselmuksenLaji " muu katselmus "}]}
+
+                                                      :poytakirjat    [{:urlHash         "4196f10a7fef9bec325dc567f1b87fbcd10163ce"
+                                                                        :status          "1"
+                                                                        :paatoksentekija "Tytti Mäntyoja"
+                                                                        :pykala          31
+                                                                        :paatospvm       1454284800000
+                                                                        :paatoskoodi     "myönnetty"}]}]}]
                    :statements   [{:person    {:text "Pelastusviranomainen"
                                                :name "Pia Nyman"}
                                    :requested date-02012016
@@ -105,7 +126,20 @@
        (doseq [lang i18n/languages]
          (fact {:midje/description (str "history libre document: " (name lang))}
                (let [tmp-file (File/createTempFile (str "history-" (name lang) "-") ".fodt")]
+                 (debug "writing file: " (.getAbsolutePath tmp-file))
                  (write-history-libre-doc application1 lang tmp-file)
+                 (let [res (nth (s/split (slurp tmp-file) #"\r?\n") 960)]
+                   #_(.delete tmp-file)
+                   res)) => (localize lang "caseFile.operation.review.request"))))
+
+#_(facts "Verdict export "
+       (fact {:midje/description (str "common-field-map ")}
+             (common-field-map application1 :fi) => {"FIELD001" "K\u00e4sittelyprosessi", "FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "J\u00e4rvenp\u00e4\u00e4", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteist\u00f6tunnus", "FIELD005B" "(Tyhj\u00e4)", "FIELD006A" "Hakemus j\u00e4tetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus", "FIELD007B" "", "FIELD008A" "K\u00e4sittelij\u00e4", "FIELD008B" "(Tyhj\u00e4)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" "", "FOOTER_PAGE" "Sivu", "FOOTER_DATE" (util/to-local-date (System/currentTimeMillis))})
+
+       (doseq [lang i18n/languages]
+         (fact {:midje/description (str " history libre document: " (name lang))}
+               (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+                 (write-verdict-libre-doc application1 lang tmp-file)
                  (let [res (nth (s/split (slurp tmp-file) #"\r?\n") 116)]
                    (.delete tmp-file)
                    res)) => (localize lang "caseFile.operation.review.request"))))
