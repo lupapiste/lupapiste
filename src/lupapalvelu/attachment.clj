@@ -648,14 +648,14 @@
     (output-attachment preview-id false attachment-fn)))
 
 (defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
+  (when-not libreoffice-client/enabled?
+    (info "Danger: Libreoffice PDF/A conversion feature disabled."))
   (if (and libreoffice-client/enabled?
            (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
-           (= (keyword type-group) :muut)
+           (or (= (keyword type-group) :paatoksenteko) (= (keyword type-group) :muut))
            (= (keyword type-id) :paatosote))
     (libreoffice-client/convert-to-pdfa filename content)
-    (do
-      (info "Danger: Libreoffice PDF/A conversion feature disabled.")
-      {:filename filename :content content})))
+    {:filename filename :content content}))
 
 (defn- upload-file!
   "Converts file to PDF/A, if required by attachment type,  uploads the file to MongoDB
