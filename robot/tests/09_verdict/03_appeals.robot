@@ -34,6 +34,11 @@ Sonja adds appeal to the first verdict
   Add to verdict  0-0  appeal  Veijo  1.4.2016  Hello world
   Appeals row check  0-0  0  appeal  Veijo  1.4.2016
 
+The appeal is visible on the Attachments tab
+  Open tab  attachments
+  Element should be visible  jquery=#attachment-row-muutoksenhaku-valitus
+  Open tab  verdict
+
 Sonja edits appeal
   Wait test id visible  edit-appeal-0-0-0
   Click by test id  edit-appeal-0-0-0
@@ -60,15 +65,32 @@ Appeal can contain multiple files
   Appeals row file check  0-0  0  ${PNG_TESTFILE_NAME}  1
   Appeals row file check  0-0  0  ${TXT_TESTFILE_NAME}  0
 
+Both files are shown in the Attachments tab
+  Open tab  attachments
+  Page should contain  ${PNG_TESTFILE_NAME}
+  Page should contain  ${TXT_TESTFILE_NAME}
+  Open tab  verdict
+
 Sonja removes the image file from appeal
   Click by test id  edit-appeal-0-0-0
   Click by test id  remove-file-1
   OK bubble 0-0-0
   Wait Until  Page should not contain  ${PNG_TESTFILE_NAME}
 
+The image file has also been removed from the Attachments tab
+  Open tab  attachments
+  Page should not contain  ${PNG_TESTFILE_NAME}
+  Page should contain  ${TXT_TESTFILE_NAME}
+  Open tab  verdict
+
 Sonja deletes appeal
   Click by test id  delete-appeal-0-0-0
   Wait Until  Element should not be visible  jquery=table.appeals-table
+
+No appeal attachments
+  Open tab  attachments
+  Page should not contain  ${TXT_TESTFILE_NAME}
+  Open tab  verdict
 
 Sonja adds appeal and rectification
   Add to verdict  0-0  appeal  Bob  1.4.2016  I am unhappy!
@@ -84,13 +106,20 @@ Sonja adds appealVerdict thus locking appeals
   Wait test id visible  show-appeal-0-0-0
   Wait test id visible  show-appeal-0-0-1
 
+Every appeal type is shown in the Attachments tab
+  Open tab  attachments
+  Element should be visible  jquery=#attachment-row-muutoksenhaku-valitus
+  Element should be visible  jquery=#attachment-row-muutoksenhaku-oikaisuvaatimus
+  # There is a verdict and an appealVerdict
+  Xpath should match X times  //tr[@id='attachment-row-paatoksenteko-paatos']  2
+  Open tab  verdict
+
 Show info buttons show correct data
   Scroll to test id  add-appeal-0-0
   Click by test id  show-appeal-0-0-0
   Test id should contain  info-appeal-0-0-0  I am unhappy!
   Click by test id  show-appeal-0-0-1
   Test id should contain  info-appeal-0-0-1  Ei lisätietoja.
-
 
 Adding appeal locks appealVerdict
   Add to verdict  0-0  appeal  Frisket  1.7.2016
@@ -120,6 +149,16 @@ Verdict fetch now shows confirmation dialog
   Scroll and click test id  fetch-verdict
   Deny  dynamic-yes-no-confirm-dialog
   Wait test id visible  edit-appeal-0-0-3
+
+Sonja creates and submits application for building Meishuguan
+  ${secs} =  Get Time  epoch
+  Set test variable  ${meishuguan}  Meishuguan${secs}
+  Create application with state  ${meishuguan}  753-416-88-88  kerrostalo-rivitalo  submitted
+  Open application  ${meishuguan}  753-416-88-88
+
+Fetching verdict for Meishuguan should not show confirmation
+  Open tab  verdict
+  Fetch verdict
   [Teardown]  Logout
 
 Mikko logs in. He can see the appeals but not edit them.
@@ -131,6 +170,32 @@ Mikko logs in. He can see the appeals but not edit them.
   Wait test id visible  show-appeal-0-0-3
   Appeals row check  0-0  3  appealVerdict  Phong  1.6.2016
   [Teardown]  Logout
+
+Sonja logs in and deletes the first verdict.
+  Sonja logs in
+  Open application  ${appname}  753-416-25-30
+  Open tab  verdict
+  Click element  jquery=[data-test-id=delete-verdict-from-listing]:first
+  Confirm  dynamic-yes-no-confirm-dialog
+  Appeals row check  0-0  0  appeal  Megabyte  7.7.2016
+
+There is only one appeal in the Attachments tab
+  Open tab  attachments
+  Xpath should match X times  //tr[@id='attachment-row-muutoksenhaku-valitus']  1
+  Open tab  verdict
+
+Fetching new verdicts will nuke appeals
+  Scroll and click test id  fetch-verdict
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should not be visible  jquery=table.appeals-table
+
+There are no appeals attachments in the Attachments tab
+  Open tab  attachments
+  Element should not be visible  jquery=#attachment-row-muutoksenhaku-valitus
+  Element should not be visible  jquery=#attachment-row-muutoksenhaku-oikaisuvaatimus
+  Xpath should match X times  //tr[@id='attachment-row-paatoksenteko-paatos']  1
+  [Teardown]  Logout
+
 
 *** Keywords ***
 
