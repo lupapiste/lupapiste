@@ -15,6 +15,8 @@ LUPAPISTE.VerdictAppealService = function() {
           hub.send( self.serviceName + "::appeals-updated");
         })
         .call();
+    } else {
+      self.allAppeals = {};
     }
   }
 
@@ -25,8 +27,12 @@ LUPAPISTE.VerdictAppealService = function() {
                               {id: lupapisteApp.models.application.id()}))
         .success( function() {
           hub.send( "indicator", {style: "positive"});
-          fetchAllAppeals();
-          (callback || _.noop)();
+          repository.load( lupapisteApp.models.application.id(),
+                           null,
+                           _.wrap( "", callback || _.noop),
+                           true );
+          // fetchAllAppeals();
+          // (callback || _.noop)();
         })
         .error( function( res ) {
           if( callback ) {

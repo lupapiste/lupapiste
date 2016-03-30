@@ -5,7 +5,7 @@
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.util :as util]
-            [lupapalvelu.appeal :refer [FrontendAppealFile]]))
+            [lupapalvelu.appeal-common :refer [FrontendAppealFile]]))
 
 (defschema AppealVerdict
   "Schema for an appeal verdict. Appeal verdict is given for

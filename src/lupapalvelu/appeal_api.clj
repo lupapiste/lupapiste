@@ -8,6 +8,7 @@
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.appeal :as appeal]
             [lupapalvelu.appeal-verdict :as appeal-verdict]
+            [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
@@ -200,9 +201,7 @@
                          appeal-id-exists
                          appeal-editable?]}
   [command]
-  (action/update-application
-    command
-    {$pull {:appeals {:id appealId}}}))
+  (appeal-common/delete-by-id command appealId))
 
 (defcommand delete-appeal-verdict
   {:parameters          [id verdictId appealId]
@@ -213,9 +212,7 @@
                          appeal-verdict-id-exists
                          appeal-verdict-editable?]}
   [command]
-  (action/update-application
-    command
-    {$pull {:appealVerdicts {:id appealId}}}))
+  (appeal-common/delete-by-id command appealId))
 
 (defn- process-appeal
   "Process appeal for frontend"

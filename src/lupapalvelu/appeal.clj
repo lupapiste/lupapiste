@@ -4,7 +4,8 @@
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [schema.core :refer [defschema] :as sc]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.appeal-common :refer [FrontendAppealFile]]))
 
 (def appeal-types
   "appeal = Valitus, rectification = Oikaisuvaatimus"
@@ -19,13 +20,6 @@
    :datestamp                  ssc/Timestamp           ;; Date of appeal made - defined manually by authority
    (sc/optional-key :text)     sc/Str                  ;; Optional description
    })
-
-(defschema FrontendAppealFile
-  "File presentation expected by the frontend from appeals query."
-  {:id          ssc/ObjectIdStr
-   :filename    sc/Str
-   :contentType sc/Str
-   :size        sc/Num})
 
 (defschema FrontendAppeal
   "Schema for Appeal presentation for frontend queries"

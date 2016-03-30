@@ -25,7 +25,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.building-reader :as building-reader]))
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
+            [lupapalvelu.appeal-common :as appeal-common]))
 
 ;;
 ;; KRYSP verdicts
@@ -52,6 +53,7 @@
 (defn save-verdicts-from-xml
   "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
   [{:keys [application] :as command} app-xml]
+  (appeal-common/delete-all command)
   (let [updates (verdict/find-verdicts-from-xml command app-xml)]
     (when updates
       (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
@@ -209,6 +211,7 @@
       (update-application command updates)
       (doseq [{attachment-id :id} attachments]
         (attachment/delete-attachment! application attachment-id))
+      (appeal-common/delete-by-verdict command verdictId)
       (when step-back?
         (notifications/notify! :application-state-change command)))))
 
