@@ -147,6 +147,13 @@
    (sc/optional-key :signatures) [Signature]
    (sc/optional-key :metadata)   (sc/eq nil)})
 
+(defn verdict-attachment-type
+  ([application] (verdict-attachment-type application "paatosote"))
+  ([{permit-type :permitType :as application} type]
+   (if (and (#{:P :R} (keyword permit-type)) (env/feature? :updated-attachments))
+     {:type-group "paatoksenteko" :type-id type}
+     {:type-group "muut" :type-id type})))
+
 (defn- get-poytakirja
   "At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
@@ -175,8 +182,7 @@
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
-                   attachment-type    {:type-group (if (env/feature? :updated-attachments) "paatoksenteko" "muut"), 
-                                       :type-id (if (= "paatos" type) "paatos" "paatosote")}
+                   attachment-type    (verdict-attachment-type application (if (= "paatos" type) "paatos" "paatosote"))
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
