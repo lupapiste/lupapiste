@@ -23,9 +23,13 @@
                    :applicant    "Testaaja Testi"
                    :address      "Korpikuusen kannon alla 6"
                    :municipality "186"
-                   :verdicts     [{:timestamp       1454562242169
-                                   :kuntalupatunnus " 20160043 "
-                                   :paatokset       [{:paivamaarat    {:anto          1454544000000
+                   :verdicts     [{:id              "a1"
+                                   :timestamp       1454562242169
+                                   :kuntalupatunnus "20160043"
+                                   :sopimus false
+                                   :paatokset       [{:id "a2"
+                                                      :paivamaarat    {:anto          1454544000000
+                                                                       :lainvoimainen 1454544000000
                                                                        :voimassaHetki 1613520000000
                                                                        :aloitettava   1550448000000}
 
@@ -94,9 +98,9 @@
                                    :contents "Great attachment"}
                                   {:type     {:type-group "muut" :type-id "paatosote"}
                                    :versions [{::version {:major 1 :minor 0}
-                                               :created date-03012016
-                                               :user    {:firstName "Testi"
-                                                         :lastName  "Testaaja"}}]}]
+                                               :created  date-03012016
+                                               :user     {:firstName "Testi"
+                                                          :lastName  "Testaaja"}}]}]
                    :history      [{:state "draft"
                                    :ts    date-01012016
                                    :user  {:firstName "Testi"
@@ -106,40 +110,39 @@
                                    :user  {:firstName "Testi"
                                            :lastName  "Testaaja"}}]})
 
+(fact {:midje/description (str "Libre Template common-field-map ")}
+      (common-field-map application1 :fi) => {"FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "J\u00e4rvenp\u00e4\u00e4", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteist\u00f6tunnus", "FIELD005B" "(Tyhj\u00e4)", "FIELD006A" "Hakemus j\u00e4tetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus", "FIELD007B" "", "FIELD008A" "K\u00e4sittelij\u00e4", "FIELD008B" "(Tyhj\u00e4)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" "", "FOOTER_PAGE" "Sivu", "FOOTER_DATE" (util/to-local-date (System/currentTimeMillis))})
 
 #_(facts "History export"
        (fact "Single row"
-         (-> (xml-table-row "a" "b" "c" "d")
-             (s/replace "\r\n" "\n")) => "<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\na\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nb\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nc\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nd\n</text:p>\n</table:table-cell>\n</table:table-row>\n")
+             (-> (xml-table-row "a" "b" "c" "d")
+                 (s/replace "\r\n" "\n")) => "<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\na\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nb\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nc\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nd\n</text:p>\n</table:table-cell>\n</table:table-row>\n")
 
   (background
     (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
     (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})
 
-  (fact {:midje/description (str "common-field-map ")}
-    (common-field-map application1 :fi) => {"FIELD001" "K\u00e4sittelyprosessi", "FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "J\u00e4rvenp\u00e4\u00e4", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteist\u00f6tunnus", "FIELD005B" "(Tyhj\u00e4)", "FIELD006A" "Hakemus j\u00e4tetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus", "FIELD007B" "", "FIELD008A" "K\u00e4sittelij\u00e4", "FIELD008B" "(Tyhj\u00e4)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" "", "FOOTER_PAGE" "Sivu", "FOOTER_DATE" (util/to-local-date (System/currentTimeMillis))})
-
        (fact {:midje/description (str "history rows ")}
-         (-> (build-xml-history application1 :fi)
-             (s/replace "\r\n" "\n")) => "<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nValmisteilla\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsemapiirros Great attachment, v. 1.0\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nLausuntopyynt\u00f6 tehty\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nPelastusviranomainen \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nNaapurin kuuleminen tehty\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nJoku naapurin nimi \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n \n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nVaatimus\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nrakennuksen paikan tarkastaminen \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nSuku Etu\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nK\u00e4sittelyss\u00e4\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n30.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsemapiirros Great attachment, v. 2.0\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.02.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nP\u00e4\u00e4t\u00f6sote \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.03.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nLausuntopyynt\u00f6 tehty\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nRakennussuunnittelu \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.03.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n</table:table-row>\n")
+             (-> (build-xml-history application1 :fi)
+                 (s/replace "\r\n" "\n")) => "<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nValmisteilla\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsemapiirros Great attachment, v. 1.0\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nLausuntopyynt\u00f6 tehty\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nPelastusviranomainen \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nNaapurin kuuleminen tehty\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nJoku naapurin nimi \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n \n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nVaatimus\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nrakennuksen paikan tarkastaminen \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nSuku Etu\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nK\u00e4sittelyss\u00e4\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n30.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsemapiirros Great attachment, v. 2.0\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.02.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nP\u00e4\u00e4t\u00f6sote \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.03.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nLausuntopyynt\u00f6 tehty\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nRakennussuunnittelu \n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.03.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n</table:table-row>\n")
 
        (doseq [lang i18n/languages]
          (fact {:midje/description (str "history libre document: " (name lang))}
                (let [tmp-file (File/createTempFile (str "history-" (name lang) "-") ".fodt")]
                  (debug "writing file: " (.getAbsolutePath tmp-file))
                  (write-history-libre-doc application1 lang tmp-file)
-                 (let [res (nth (s/split (slurp tmp-file) #"\r?\n") 960)]
-                   #_(.delete tmp-file)
-                   res)) => (localize lang "caseFile.operation.review.request"))))
-
-#_(facts "Verdict export "
-       (fact {:midje/description (str "common-field-map ")}
-             (common-field-map application1 :fi) => {"FIELD001" "K\u00e4sittelyprosessi", "FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "J\u00e4rvenp\u00e4\u00e4", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteist\u00f6tunnus", "FIELD005B" "(Tyhj\u00e4)", "FIELD006A" "Hakemus j\u00e4tetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus", "FIELD007B" "", "FIELD008A" "K\u00e4sittelij\u00e4", "FIELD008B" "(Tyhj\u00e4)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" "", "FOOTER_PAGE" "Sivu", "FOOTER_DATE" (util/to-local-date (System/currentTimeMillis))})
-
-       (doseq [lang i18n/languages]
-         (fact {:midje/description (str " history libre document: " (name lang))}
-               (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
-                 (write-verdict-libre-doc application1 lang tmp-file)
-                 (let [res (nth (s/split (slurp tmp-file) #"\r?\n") 116)]
+                 (let [res (s/split (slurp tmp-file) #"\r?\n")]
                    (.delete tmp-file)
-                   res)) => (localize lang "caseFile.operation.review.request"))))
+                   (nth res 960))) => (localize lang "caseFile.operation.review.request"))))
+
+(facts "Verdict export "
+       (doseq [lang i18n/languages]
+               (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+                 (write-verdict-libre-doc application1 "a1" "a2" lang tmp-file)
+                 (let [pos 1095
+                       res (s/split (slurp tmp-file) #"\r?\n")]
+                   #_(.delete tmp-file)
+                   (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
+                   (fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043" ) ))
+
+                   ))))
