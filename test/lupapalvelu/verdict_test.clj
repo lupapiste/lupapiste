@@ -115,3 +115,19 @@
   (let [xml (verdict-xml-with-foreman-designer-verdicts example-application example-meaningful-tj-krysp)]
     (fact "paatostieto is injected before lisatiedot"
           (keys (cr/all-of xml [:RakennusvalvontaAsia])) => (just [:paatostieto :lisatiedot :asianTiedot]))))
+
+(facts verdict-attachment-type
+  (fact "R"
+    (verdict-attachment-type {:permitType "R"}) => {:type-group "paatoksenteko" :type-id "paatosote"})
+  (fact "P"
+    (verdict-attachment-type {:permitType "P"}) => {:type-group "paatoksenteko" :type-id "paatosote"})
+  (fact "YA"
+    (verdict-attachment-type {:permitType "YA"}) => {:type-group "muut" :type-id "paatosote"})
+  (fact "YI"
+    (verdict-attachment-type {:permitType "YI"}) => {:type-group "muut" :type-id "paatosote"})
+  (fact "VVVL"
+    (verdict-attachment-type {:permitType "VVVL"}) => {:type-group "muut" :type-id "paatosote"})
+  (fact "R - with type"
+    (verdict-attachment-type {:permitType "R"} anything) => {:type-group "paatoksenteko" :type-id anything})
+  (fact "YA - with type"
+    (verdict-attachment-type {:permitType "YA"} anything) => {:type-group "muut" :type-id anything}))

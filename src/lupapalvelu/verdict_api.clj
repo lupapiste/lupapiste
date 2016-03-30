@@ -90,6 +90,13 @@
 
 (def give-verdict-states (clojure.set/union #{:submitted :complementNeeded :sent} states/verdict-given-states))
 
+(defquery verdict-attachment-type
+  {:parameters       [:id]
+   :states           states/all-states
+   :user-roles       #{:authority}}
+  [{:keys [application]}]
+  (ok :attachmentType (verdict/verdict-attachment-type application)))
+
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
                  If the command is run more than once, existing verdicts are
