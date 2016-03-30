@@ -66,7 +66,7 @@
            result []]
       (let [[history & older] data-in
             new-result (-> result
-                           (conj (xml-table-row (:action history) "" "" (or (util/to-local-date (:start history)) "-") (:user history)))
+                           (conj (xml-table-row (:action history) "" (or (util/to-local-date (:start history)) "-") (:user history)))
                            (into (build-xml-history-child-rows " " (:documents history) lang)))]
         (if (nil? older)
           new-result
