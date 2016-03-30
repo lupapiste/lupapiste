@@ -234,7 +234,7 @@
   [_ response]
   (assert (contains? response :data))
   (let [data (:data response)]
-    (assert (not-every? #(sc/check ssc/ObjectIdStr %) (keys data)) "Verdict IDs as ObjectID strings")
+    (assert (or (empty? data) (not-every? #(sc/check ssc/ObjectIdStr %) (keys data))) "Verdict IDs as ObjectID strings")
     (doseq [appeal (flatten (vals data))] ; Validate appeals/appeal-verdicts against
       (case (keyword (:type appeal))
         :appealVerdict           (sc/validate appeal-verdict/FrontendAppealVerdict appeal)
