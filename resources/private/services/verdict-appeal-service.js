@@ -15,6 +15,8 @@ LUPAPISTE.VerdictAppealService = function() {
           hub.send( self.serviceName + "::appeals-updated");
         })
         .call();
+    } else {
+      self.allAppeals = {};
     }
   }
 
@@ -25,8 +27,13 @@ LUPAPISTE.VerdictAppealService = function() {
                               {id: lupapisteApp.models.application.id()}))
         .success( function() {
           hub.send( "indicator", {style: "positive"});
-          fetchAllAppeals();
-          (callback || _.noop)();
+          // Repository load will trigger "application-model-updated"
+          // event, which in turn results in a new fetchAllAppeals
+          // call
+          repository.load( lupapisteApp.models.application.id(),
+                           null,
+                           _.wrap( "", callback || _.noop),
+                           true );
         })
         .error( function( res ) {
           if( callback ) {
