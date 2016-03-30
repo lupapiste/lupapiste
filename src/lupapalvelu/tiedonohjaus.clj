@@ -9,7 +9,8 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [sade.util :as util]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -192,7 +193,7 @@
                        :category :tos-function-change
                        :user (full-name (:user %))}))))
 
-(defn generate-case-file-data [{:keys [history organization] :as application}]
+(defn generate-case-file-data [{:keys [history organization] :as application} lang]
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
         statement-reqs (get-statement-requests-from-application application)
@@ -204,7 +205,10 @@
         state-changes (filter :state history)]
     (map (fn [[{:keys [state ts user]} next]]
            (let [api-response (toimenpide-for-state organization (:tosFunction application) state)
-                 action-name (or (:name api-response) "Ei asetettu tiedonohjaussuunnitelmassa")]
+                 action-name (cond
+                               (:name api-response) (:name api-response)
+                               (= state "complementNeeded") (i18n/localize lang "caseFile.complementNeeded")
+                               :else (i18n/localize lang "caseFile.stateNotSet"))]
              {:action    action-name
               :start     ts
               :user      (full-name user)
