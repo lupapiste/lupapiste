@@ -168,11 +168,12 @@
     (ok {:metadata processed-metadata})))
 
 (defquery case-file-data
-  {:parameters [:id]
+  {:parameters [:id lang]
+   :input-validators [(partial action/non-blank-parameters [:lang])]
    :user-roles #{:authority}
    :states states/all-application-states}
   [{:keys [application]}]
-  (ok :process (t/generate-case-file-data application)))
+  (ok :process (t/generate-case-file-data application lang)))
 
 (defquery tos-operations-enabled
   {:user-roles #{:authority}

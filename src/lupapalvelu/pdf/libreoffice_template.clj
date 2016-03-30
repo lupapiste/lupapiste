@@ -60,7 +60,7 @@
         (recur others (conj result (apply xml-table-row (build-xml-history-row doc-attn lang))))))))
 
 (defn- build-xml-history-rows [application lang]
-  (let [data (toj/generate-case-file-data application)]
+  (let [data (toj/generate-case-file-data application lang)]
     ;(debug " data: " (with-out-str (clojure.pprint/pprint data)))
     (loop [data-in data
            result []]
