@@ -27,12 +27,13 @@ LUPAPISTE.VerdictAppealService = function() {
                               {id: lupapisteApp.models.application.id()}))
         .success( function() {
           hub.send( "indicator", {style: "positive"});
+          // Repository load will trigger "application-model-updated"
+          // event, which in turn results in a new fetchAllAppeals
+          // call
           repository.load( lupapisteApp.models.application.id(),
                            null,
                            _.wrap( "", callback || _.noop),
                            true );
-          // fetchAllAppeals();
-          // (callback || _.noop)();
         })
         .error( function( res ) {
           if( callback ) {
