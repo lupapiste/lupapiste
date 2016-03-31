@@ -5,7 +5,8 @@
             [sade.env :as env]
             [lupapalvelu.tiedonohjaus :refer :all]
             [lupapalvelu.action :as action]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]))
 
 (facts "about tiedonohjaus utils"
   (fact "case file report data is generated from application"
@@ -73,7 +74,11 @@
                                       {:state "open"
                                        :ts    250
                                        :user  {:firstName "Testi"
-                                               :lastName  "Testaaja"}}]}]
+                                               :lastName  "Testaaja"}}
+                                      {:state "complementNeeded"
+                                       :ts 4000
+                                       :user {:firstName "Heikki"
+                                              :lastName "Hepokatti"}}]}]
       (generate-case-file-data application :fi) => [{:action    "Valmisteilla"
                                                      :start     100
                                                      :user      "Testaaja Testi"
@@ -102,16 +107,21 @@
                                                                  {:type     {:foo :bar}
                                                                   :category :document
                                                                   :version  2
-                                                                  :ts       500
+                                                              '    :ts       500
                                                                   :user     "Testaaja Testi"
                                                                   :contents "Great attachment"}
                                                                  {:text     "Joku naapurin nimi"
                                                                   :category :request-neighbor
                                                                   :ts       600
-                                                                  :user     " "}]}]
+                                                                  :user     " "}]}
+                                                    {:action (i18n/localize :fi "caseFile.complementNeeded")
+                                                     :start 4000
+                                                     :user "Hepokatti Heikki"
+                                                     :documents []}]
       (provided
         (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
-        (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})))
+        (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"}
+        (toimenpide-for-state "753-R" "10 03 00 01" "complementNeeded") => {})))
 
   (fact "application and attachment state (tila) is changed correctly"
     (let [metadata {:tila                :luonnos
