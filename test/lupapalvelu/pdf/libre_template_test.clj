@@ -138,8 +138,9 @@
 (facts "Verdict export "
        (doseq [lang i18n/languages]
                (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+                 (debug "writing file: " (.getAbsolutePath tmp-file))
                  (write-verdict-libre-doc application1 "a1" "a2" lang tmp-file)
-                 (let [pos 1095
+                 (let [pos 1060
                        res (s/split (slurp tmp-file) #"\r?\n")]
                    #_(.delete tmp-file)
                    (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
