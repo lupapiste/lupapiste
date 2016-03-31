@@ -53,10 +53,10 @@
    :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application user]}]
   (if application
-    (let [{org-id :organization :as app} (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
+    (let [app (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
       (ok :application (a/post-process-app app user)
           :authorities (if (user/authority? user)
-                         (map #(select-keys % [:id :firstName :lastName]) (user/find-authorized-users-in-org org-id "authority"))
+                         (map #(select-keys % [:id :firstName :lastName]) (a/application-org-authz-users app "authority"))
                          [])
           :permitSubtypes (a/resolve-valid-subtypes app)))
     (fail :error.not-found)))
@@ -65,9 +65,15 @@
   {:user-roles #{:authority}
    :states     (states/all-states-but :draft)
    :parameters [:id]}
-  [{{org-id :organization} :application}]
-  (let [authorities (user/find-authorized-users-in-org org-id "authority")]
-    (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
+  [{app :application}]
+  (ok :authorities (a/application-org-authz-users app "authority")))
+
+(defquery application-commenters
+  {:user-roles #{:authority}
+   :states     (states/all-states-but :draft)
+   :parameters [:id]}
+  [{app :application}]
+  (ok :authorities (a/application-org-authz-users app "authority" "commenter")))
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
@@ -120,8 +126,8 @@
                           (fail "error.user.not.found")))]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
-  [{created :created {org-id :organization} :application :as command}]
-  (let [assignee (util/find-by-id assigneeId (user/find-authorized-users-in-org org-id "authority"))]
+  [{created :created app :application :as command}]
+  (let [assignee (util/find-by-id assigneeId (a/application-org-authz-users app "authority"))]
     (if (or assignee (ss/blank? assigneeId))
       (update-application command
                           {$set {:modified  created
