@@ -45,13 +45,6 @@
 (defn operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
-
-(defn find-authorities-in-applications-organization [app]
-  (mongo/select :users
-                {(str "orgAuthz." (:organization app)) "authority", :enabled true}
-                user/summary-keys
-                (array-map :lastName 1, :firstName 1)))
-
 (defquery application
   {:parameters       [:id]
    :states           states/all-states
@@ -60,10 +53,10 @@
    :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application user]}]
   (if application
-    (let [app (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
+    (let [{org-id :organization :as app} (assoc application :allowedAttachmentTypes (attachment/get-attachment-types-for-application application))]
       (ok :application (a/post-process-app app user)
           :authorities (if (user/authority? user)
-                         (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
+                         (map #(select-keys % [:id :firstName :lastName]) (user/find-authorized-users-in-org org-id "authority"))
                          [])
           :permitSubtypes (a/resolve-valid-subtypes app)))
     (fail :error.not-found)))
@@ -72,8 +65,8 @@
   {:user-roles #{:authority}
    :states     (states/all-states-but :draft)
    :parameters [:id]}
-  [{application :application}]
-  (let [authorities (find-authorities-in-applications-organization application)]
+  [{{org-id :organization} :application}]
+  (let [authorities (user/find-authorized-users-in-org org-id "authority")]
     (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
 
 (defn- autofill-rakennuspaikka [application time]
@@ -127,8 +120,8 @@
                           (fail "error.user.not.found")))]
    :user-roles #{:authority}
    :states     (states/all-states-but :draft :canceled)}
-  [{:keys [user created application] :as command}]
-  (let [assignee (util/find-by-id assigneeId (find-authorities-in-applications-organization application))]
+  [{created :created {org-id :organization} :application :as command}]
+  (let [assignee (util/find-by-id assigneeId (user/find-authorized-users-in-org org-id "authority"))]
     (if (or assignee (ss/blank? assigneeId))
       (update-application command
                           {$set {:modified  created
