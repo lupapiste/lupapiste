@@ -486,3 +486,8 @@
   (when-not (or (nil? new-state)
                 ((change-application-state-targets application) (keyword new-state)))
     (fail :error.illegal-state)))
+
+(defn application-org-authz-users
+  [{org-id :organization :as application} & org-authz]
+  (->> (apply user/find-authorized-users-in-org org-id org-authz)
+       (map #(select-keys % [:id :firstName :lastName]))))
