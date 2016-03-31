@@ -52,7 +52,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   };
 
   self.duplicateLastGroup = function() {
-    var sourceIndex = _.parseInt( _(self.groups()).map("index").max() );
+    var sourceIndex = _(self.groups()).map("index").map(_.parseInt).max();
     service.copyRepeatingGroup(params.documentId, params.path, sourceIndex, self.indicator, self.result);
   };
 
