@@ -226,9 +226,13 @@
     var updateState = function(docs, stateMap) {
       _.forEach(docs, function(doc) {
         var id = ko.unwrap(doc.id);
-        var newState = stateMap[id];
-        if (newState) {
-          doc.metadata().tila(newState);
+        if (_.has(stateMap, id)) {
+          var newState = stateMap[id];
+          if (doc.metadata().tila) {
+            doc.metadata().tila(newState)
+          } else {
+            doc.state(newState);
+          }
           if (newState === "arkistoitu") {
             doc.sendToArchive(false);
           }
