@@ -167,25 +167,62 @@
           (:voimassaHetki dates) (conj [(i18n/localize lang "verdict.voimassaHetki") (or (util/to-local-date (:voimassaHetki dates)) "-")])
           (:raukeamis dates) (conj [(i18n/localize lang "verdict.raukeamis") (or (util/to-local-date (:raukeamis dates)) "-")])))
 
+(defn- verdict-lupamaaraykset [lang lupamaaraykset]
+  (cond-> []
+          (:autopaikkojaEnintaan lupamaaraykset) (conj [(i18n/localize lang "verdict.autopaikkojaEnintaan") (:autopaikkojaEnintaan lupamaaraykset)])
+          (:autopaikkojaVahintaan lupamaaraykset) (conj [(i18n/localize lang "verdict.autopaikkojaVahintaan") (:autopaikkojaVahintaan lupamaaraykset)])
+          (:autopaikkojaRakennettava lupamaaraykset) (conj [(i18n/localize lang "verdict.autopaikkojaRakennettava") (:autopaikkojaRakennettava lupamaaraykset)])
+          (:autopaikkojaRakennettu lupamaaraykset) (conj [(i18n/localize lang "verdict.autopaikkojaRakennettu") (:autopaikkojaRakennettu lupamaaraykset)])
+          (:autopaikkojaKiinteistolla lupamaaraykset) (conj [(i18n/localize lang "verdict.autopaikkojaKiinteistolla") (:autopaikkojaKiinteistolla lupamaaraykset)])
+          (:autopaikkojaUlkopuolella lupamaaraykset) (conj [(i18n/localize lang "verdict.autopaikkojaUlkopuolella") (:autopaikkojaUlkopuolella lupamaaraykset)])
+          (:kerrosala lupamaaraykset) (conj [(i18n/localize lang "verdict.kerrosala") (:kerrosala lupamaaraykset)])
+          (:rakennusoikeudellinenKerrosala lupamaaraykset) (conj [(i18n/localize lang "verdict.rakennusoikeudellinenKerrosala") (:rakennusoikeudellinenKerrosala lupamaaraykset)])
+          (:kokonaisala lupamaaraykset) (conj [(i18n/localize lang "verdict.kokonaisala") (:kokonaisala lupamaaraykset)])))
 
 (defn write-verdict-libre-doc [application id id2 lang file]
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
         paatos (first (filter #(= id2 (:id %)) (:paatokset verdict)))
-        reviews (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))]) (get-in paatos [:lupamaaraykset :vaaditutKatselmukset]))
-        orders (map (fn [val] [(str (:sisalto val))]) (get-in paatos [:lupamaaraykset :maaraykset]))
+        lupamaaraykset (:lupamaaraykset paatos)
+        reviews (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))]) (:vaaditutKatselmukset lupamaaraykset))
+        orders (map (fn [val] [(str (:sisalto val))]) (:maaraykset lupamaaraykset))
         ]
-    (debug "orders :" orders)
     (create-libre-doc (io/resource history-verdict-file) file (assoc (common-field-map application lang)
                                                                 "FIELD001" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
                                                                 "FIELD012" (str (i18n/localize lang "verdict.id") ": " (:kuntalupatunnus verdict))
                                                                 "FIELD013" (i18n/localize lang "date")
                                                                 "DATESTABLE" (verdict-dates lang (:paivamaarat paatos))
-                                                                "FIELD014" (i18n/localize lang "verdict.lupamaaraukset")
+
+                                                                "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraukset")
+                                                                "LUPAMAARAYKSETTABLE" (verdict-lupamaaraykset lang lupamaaraykset)
+
                                                                 "FIELD015A" (i18n/localize lang "foreman.requiredForemen")
                                                                 "FIELD015B" (get-in paatos [:lupamaaraykset :vaaditutTyonjohtajat])
+
+                                                                "PLANSHEADER" (i18n/localize lang "verdict.vaaditutErityissuunnitelmat")
+                                                                ;;TODO: get real data to see the structure
+                                                                "PLANSTABLE" (map #(str %) (:vaaditutErityissuunnitelmat lupamaaraykset))
+
+                                                                "LP-HEADER-OTHER" (i18n/localize lang "verdict.muutMaaraykset")
+                                                                ;;TODO: get real data to see the structure
+                                                                "OTHERTABLE" (map #(str %) (:muutMaaraykset lupamaaraykset))
+
                                                                 "FIELD016" (i18n/localize lang "verdict.vaaditutKatselmukset")
                                                                 "REVIEWSTABLE" reviews
 
                                                                 "FIELD17" (i18n/localize lang "verdict.maaraykset")
                                                                 "ORDERSTABLE" orders
+
+                                                                "MINUTESHEADER" (i18n/localize lang "verdict.poytakirjat")
+
+                                                                "MINUTESCOL1" (i18n/localize lang "verdict.status")
+                                                                "MINUTESCOL2" (i18n/localize lang "verdict.pykala")
+                                                                "MINUTESCOL3" (i18n/localize lang "verdict.name")
+                                                                "MINUTESCOL4" (i18n/localize lang "verdict.paatospvm")
+                                                                "MINUTESCOL5" (i18n/localize lang "verdict.attachments")
+
+                                                                "MINUTESTABLE" (map (fn [val] [(str (if (:status val) (i18n/localize lang "verdict.status" (:status val)) "") " (" (:paatoskoodi val) ") " (:paatos val))
+                                                                                               (str (:pykala val))
+                                                                                               (str (:paatoksentekija val))
+                                                                                               (or (util/to-local-date (:paatospvm val)) "-")
+                                                                                               "TODO"]) (:poytakirjat paatos))
                                                                 ))))
