@@ -128,7 +128,7 @@
       (doseq [line (line-seq rdr)]
         (.write wrtr (formatted-line line data))))))
 
-(defn write-history-libre-doc [application lang file]
+(defn export-to-file [application lang file]
   (create-libre-doc (io/resource history-template-file) (assoc (common-field-map application lang)
                                                           "COLTITLE1" (i18n/localize lang "caseFile.action")
                                                           "COLTITLE2" (i18n/localize lang "caseFile.event")

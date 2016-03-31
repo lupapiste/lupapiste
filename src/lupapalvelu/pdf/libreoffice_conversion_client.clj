@@ -3,11 +3,8 @@
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.pdf.libreoffice-template :refer :all]
             [sade.core :refer [def-]]
-            [sade.strings :as ss]
-            [sade.env :as env]
-            [clojure.java.io :as io])
+            [sade.env :as env])
   (:import (org.apache.commons.io FilenameUtils)
            (java.io File)))
 
@@ -45,9 +42,3 @@
       {:filename           filename
        :content            content
        :archivabilityError :libre-conversion-error})))
-
-(defn generate-casefile-pdfa [application lang]
-  (let [filename (str (localize lang "caseFile.heading") ".fodt")
-        tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
-    (write-history-libre-doc application lang tmp-file)
-    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))

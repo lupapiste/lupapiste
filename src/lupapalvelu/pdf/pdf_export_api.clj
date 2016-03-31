@@ -6,7 +6,6 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.application-bulletins-api :as bulletins-api]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.action :as action]))
 
 (defraw pdf-export
@@ -39,17 +38,17 @@
      :body "404"}))
 
 (defraw pdfa-casefile
-        {:parameters       [:id]
-         :user-roles       #{:applicant :authority :oirAuthority}
-         :user-authz-roles auth/all-authz-roles
-         :org-authz-roles  auth/all-org-authz-roles
-         :input-validators [(partial action/non-blank-parameters [:lang])]
-         :states           states/all-states}
-        [{:keys [user application lang]}]
-        (if application
-          {:status 200
-           :headers {"Content-Type" "application/pdf"}
-           :body (libre/generate-casefile-pdfa application lang)}
-          {:status 404
-           :headers {"Content-Type" "text/plain"}
-           :body "404"}))
+  {:parameters       [:id]
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/all-org-authz-roles
+   :input-validators [(partial action/non-blank-parameters [:lang])]
+   :states           states/all-states}
+  [{:keys [user application lang]}]
+  (if application
+    {:status  200
+     :headers {"Content-Type" "application/pdf"}
+     :body    (pdf-export/generate-pdf-a-case-file application lang)}
+    {:status  404
+     :headers {"Content-Type" "text/plain"}
+     :body    "404"}))
