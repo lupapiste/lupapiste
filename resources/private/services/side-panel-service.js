@@ -98,11 +98,11 @@ LUPAPISTE.SidePanelService = function() {
 
   hub.subscribe("page-load", refresh);
 
-  // Fetch authorities when application changes
+  // Fetch authorities/commenters when application changes
   ko.computed(function() {
     var applicationId = ko.unwrap(self.application.id);
-    if (applicationId && self.authorization.ok("application-authorities") ) {
-      ajax.query("application-authorities", {id: applicationId})
+    if (applicationId && self.authorization.ok("application-commenters") ) {
+      ajax.query("application-commenters", {id: applicationId})
       .success(function(resp) {
         self.authorities(resp.authorities);
       })

@@ -239,6 +239,12 @@
 (defn find-users [query]
   (mongo/select :users (user-query query)))
 
+(defn find-authorized-users-in-org [org-id & org-authz]
+  (mongo/select :users
+                {(str "orgAuthz." org-id) {$in org-authz}, :enabled true}
+                summary-keys
+                (array-map :lastName 1, :firstName 1)))
+
 ;;
 ;; jQuery data-tables support:
 ;;
