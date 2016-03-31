@@ -235,14 +235,16 @@
                    :attachments.$.metadata new-metadata}}))))))
 
 (defn mark-app-and-attachments-final! [app-id modified-ts]
-  (let [{:keys [metadata attachments verdicts] :as application} (domain/get-application-no-access-checking app-id)]
+  (let [{:keys [metadata attachments verdicts processMetadata] :as application} (domain/get-application-no-access-checking app-id)]
     (when (seq metadata)
-      (let [new-metadata (document-metadata-final-state metadata verdicts)]
-        (when-not (= metadata new-metadata)
+      (let [new-metadata (document-metadata-final-state metadata verdicts)
+            new-process-metadata (update-end-dates processMetadata verdicts)]
+        (when-not (and (= metadata new-metadata) (= processMetadata new-process-metadata))
           (action/update-application
             (action/application->command application)
             {$set {:modified modified-ts
-                   :metadata new-metadata}}))
+                   :metadata new-metadata
+                   :processMetadata new-process-metadata}}))
         (doseq [attachment attachments]
           (mark-attachment-final! application modified-ts attachment))))))
 

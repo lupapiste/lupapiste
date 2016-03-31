@@ -162,6 +162,7 @@
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         processed-metadata (-> (process-case-file-metadata (:processMetadata application) metadata user-roles)
+                               (t/update-end-dates (:verdicts application))
                                (t/calculate-process-metadata (:metadata application) (:attachments application)))]
     (action/update-application command {$set {:modified created
                                               :processMetadata processed-metadata}})
