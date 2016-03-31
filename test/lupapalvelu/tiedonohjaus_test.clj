@@ -139,9 +139,12 @@
                     :henkilotiedot       :sisaltaa
                     :julkisuusluokka     :salainen
                     :kayttajaryhmakuvaus :muokkausoikeus}
+          process-metadata {:julkisuusluokka :salainen
+                            :salassapitoaika 5}
           application {:id           1000
                        :organization "753-R"
                        :metadata     metadata
+                       :processMetadata process-metadata
                        :attachments  [{:id 1 :metadata metadata}
                                       {:id 2 :metadata metadata}]
                        :verdicts     [{:paatokset [{:poytakirjat [{:paatospvm 1456696800000}]}]}]}
@@ -150,24 +153,27 @@
       (provided
         (domain/get-application-no-access-checking 1000) => application
 
-        (action/update-application command {$set {:modified 12345678
-                                                  :metadata {:tila                :valmis
-                                                             :salassapitoaika     5
-                                                             :nakyvyys            :julkinen
-                                                             :sailytysaika        {:arkistointi          (keyword "m\u00E4\u00E4r\u00E4ajan")
-                                                                                   :pituus               10
-                                                                                   :perustelu            "foo"
-                                                                                   :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
-                                                             :myyntipalvelu       false
-                                                             :suojaustaso         :ei-luokiteltu
-                                                             :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
-                                                             :kayttajaryhma       :viranomaisryhma
-                                                             :kieli               :fi
-                                                             :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
-                                                             :salassapitoperuste  "peruste"
-                                                             :henkilotiedot       :sisaltaa
-                                                             :julkisuusluokka     :salainen
-                                                             :kayttajaryhmakuvaus :muokkausoikeus}}}) => nil
+        (action/update-application command {$set {:modified        12345678
+                                                  :metadata        {:tila                :valmis
+                                                                    :salassapitoaika     5
+                                                                    :nakyvyys            :julkinen
+                                                                    :sailytysaika        {:arkistointi          (keyword "m\u00E4\u00E4r\u00E4ajan")
+                                                                                          :pituus               10
+                                                                                          :perustelu            "foo"
+                                                                                          :retention-period-end #inst "2026-02-28T22:00:00.000-00:00"}
+                                                                    :myyntipalvelu       false
+                                                                    :suojaustaso         :ei-luokiteltu
+                                                                    :security-period-end #inst "2021-02-28T22:00:00.000-00:00"
+                                                                    :kayttajaryhma       :viranomaisryhma
+                                                                    :kieli               :fi
+                                                                    :turvallisuusluokka  :ei-turvallisuusluokkaluokiteltu
+                                                                    :salassapitoperuste  "peruste"
+                                                                    :henkilotiedot       :sisaltaa
+                                                                    :julkisuusluokka     :salainen
+                                                                    :kayttajaryhmakuvaus :muokkausoikeus}
+                                                  :processMetadata {:julkisuusluokka     :salainen
+                                                                    :salassapitoaika     5
+                                                                    :security-period-end #inst "2021-02-28T22:00:00.000-00:00"}}}) => nil
         (action/update-application command
                                    {:attachments.id 1}
                                    {$set {:modified               12345678

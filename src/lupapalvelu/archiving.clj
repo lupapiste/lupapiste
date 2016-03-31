@@ -65,6 +65,12 @@
     {$set {:modified now
            :metadata.tila next-state}}))
 
+(defn- set-process-state [next-state application now _]
+  (action/update-application
+    (action/application->command application)
+    {$set {:modified now
+           :processMetadata.tila next-state}}))
+
 (defn- upload-and-set-state [id is-or-file content-type metadata {app-id :id :as application} now state-update-fn]
   (info "Trying to archive attachment id" id "from application" app-id)
   (if-not (#{:arkistoidaan :arkistoitu} (:tila metadata))
@@ -79,9 +85,11 @@
                   (info "Archived attachment id" id "from application" app-id))
                 (do
                   (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
-                  (when (and (= status 409) (string/includes? body "already exists"))
-                    (info "Response indicates that" id "is already in archive. Updating state.")
-                    (state-update-fn :arkistoitu application now id)))))
+                  (if (and (= status 409) (string/includes? body "already exists"))
+                    (do
+                      (info "Response indicates that" id "is already in archive. Updating state.")
+                      (state-update-fn :arkistoitu application now id))
+                    (state-update-fn :valmis application now id)))))
             (when (instance? File is-or-file)
               (io/delete-file is-or-file :silently)))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
@@ -188,14 +196,21 @@
             (:scale attachment) (conj {:scale (:scale attachment)})
             true (merge s2-metadata))))
 
-(defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids archive-application?]
+(defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
   (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
                                        (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
-                                     attachments)]
-    (when archive-application?
+                                     attachments)
+        application-archive-id (str id "-application")
+        case-file-archive-id (str id "-case-file")]
+    (when (document-ids application-archive-id)
       (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
             metadata (generate-archive-metadata application user)]
-        (upload-and-set-state (str id "-application") application-file "application/pdf" metadata application created set-application-state)))
+        (upload-and-set-state application-archive-id application-file "application/pdf" metadata application created set-application-state)))
+    (when (document-ids case-file-archive-id)
+      (let [case-file-file (pdf-export/generate-pdf-a-case-file application :fi)
+            metadata (-> (generate-archive-metadata application user)
+                         (assoc :type :case-file))]
+        (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)))
     (doseq [attachment selected-attachments]
       (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
             metadata (generate-archive-metadata application user attachment)]
