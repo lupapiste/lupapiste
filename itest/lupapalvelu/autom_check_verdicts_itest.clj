@@ -50,6 +50,27 @@
       (fact "checking verdicts and sending emails to the authorities related to the applications"
         (count (batchrun/fetch-verdicts)) => pos?)
 
+      (fact "batchrun check-for-verdicts logs :error on exception"
+        (batchrun/check-for-verdicts) => nil
+        ;; (provided
+        ;;   ;; (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+        ;;   ;; (mongo/select :organizations anything anything) => [{:foo 42}]
+        ;;   ;; (clojure.string/blank? anything) => false
+        ;;   (lupapalvelu.logging/log-event :error anything) => nil
+        ;;   ;;(lupapalvelu.verdict-api/do-check-for-verdict anything) => nil
+        ;;   )
+        )
+       ;; (fact "batchrun check-for-verdicts logs failure details"
+      ;;       (batchrun/check-for-verdicts) => nil
+       ;;        (provided
+       ;;        (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+       ;;        (mongo/select :organizations anything anything) => [{:foo 42}]
+       ;;        (clojure.string/blank? anything) => false
+       ;;        (lupapalvelu.logging/log-event :error anything) => nil
+       ;;        ;;(lupapalvelu.verdict-api/do-check-for-verdict anything) => nil
+       ;;        ))
+
+
       (fact "Verifying the sent emails"
         (Thread/sleep 100) ; batchrun includes a parallel operation
         (let [emails (dummy-email-server/messages :reset true)]

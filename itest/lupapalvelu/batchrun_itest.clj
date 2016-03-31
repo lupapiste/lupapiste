@@ -18,4 +18,13 @@
               (lupapalvelu.logging/log-event :error anything) => nil
               ;;(lupapalvelu.verdict-api/do-check-for-verdict anything) => nil
               ))
+       (fact "check-for-verdicts logs failure details"
+             (bat/check-for-verdicts) => nil
+              (provided
+              (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+              (mongo/select :organizations anything anything) => [{:foo 42}]
+              (clojure.string/blank? anything) => false
+              (lupapalvelu.logging/log-event :error anything) => nil
+              ;;(lupapalvelu.verdict-api/do-check-for-verdict anything) => nil
+              ))
        )

@@ -108,8 +108,8 @@
     (fact "Successful batchrun"
       (mongo/with-db db-name
         (let [zip (fs/copy
-                    (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path])
-                    (fs/file (str local-target-folder "/verdict1.zip")))
+                   (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path])
+                   (fs/file (str local-target-folder "/verdict1.zip")))
               app (create-local-ah-app)
               app-id (:id app)]
           (generate-documents app pena true)
@@ -131,8 +131,8 @@
     (fact "Batchrun with unsuccessful verdict save (no xml inside zip)"
       (mongo/with-db db-name
         (let [zip (fs/copy
-                    (build-zip! [example-ah-attachment-path example-ah-attachment2-path])
-                    (fs/file (str local-target-folder "/verdict2.zip")))
+                   (build-zip! [example-ah-attachment-path example-ah-attachment2-path])
+                   (fs/file (str local-target-folder "/verdict2.zip")))
               app (create-local-ah-app)
               app-id (:id app)]
 
@@ -148,7 +148,19 @@
             (count (util/get-files-by-regex (str local-target-folder "/error") #"verdict2\.zip$")) => 1)
 
           (fact "application doesn't have verdict"
-            (count (:verdicts (query-application local-query pena app-id))) => 0))))))
+            (count (:verdicts (query-application local-query pena app-id))) => 0)))))
+  (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict error result"
+    (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
+    (provided
+      (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file "/dev/null")]
+      (ahk/process-ah-verdict anything anything anything) => (sade.core/fail "nope")
+      (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Failed to process ah-verdict", :zip-path "/dev/null"} ) => "bonk"))
+  (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict ok result"
+    (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
+    (provided
+      (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file "/dev/null")]
+      (ahk/process-ah-verdict anything anything anything) => (sade.core/ok)
+      (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Succesfully processed ah-verdict", :zip-path "/dev/null"} ) => "bonk")))
 
 (facts "Processing asianhallinta verdicts"
   (mongo/with-db db-name
@@ -224,21 +236,6 @@
                   email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant")))))))))
   (against-background
     (lupapalvelu.application/make-application-id anything) => "LP-297-2015-00001"))
-
-(facts "batch run tests"
-       (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict error result"
-             (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
-             (provided
-              (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file "/dev/null")]
-              (ahk/process-ah-verdict anything anything anything) => (sade.core/fail "nope")
-              (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Failed to process ah-verdict", :zip-path "/dev/null"} ) => "bonk"))
-       (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict ok result"
-             (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
-             (provided
-              (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file "/dev/null")]
-              (ahk/process-ah-verdict anything anything anything) => (sade.core/ok)
-              (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Succesfully processed ah-verdict", :zip-path "/dev/null"} ) => "bonk"
-              )))
 
 (facts "unit tests"
   (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path]))]
