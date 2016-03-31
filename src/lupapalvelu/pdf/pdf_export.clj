@@ -11,7 +11,10 @@
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.pdf.libreoffice-template :as lt]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as lcc])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream File]
            [javax.imageio ImageIO]))
 
@@ -555,3 +558,9 @@
     (generate application lang file)
     (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
     file))
+
+(defn generate-pdf-a-case-file [application lang]
+  (let [filename (str (i18n/localize lang "caseFile.heading") ".fodt")
+        tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
+    (lt/export-to-file application lang tmp-file)
+    (:content (lcc/convert-to-pdfa filename (io/input-stream tmp-file)))))

@@ -162,17 +162,19 @@
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         processed-metadata (-> (process-case-file-metadata (:processMetadata application) metadata user-roles)
+                               (t/update-end-dates (:verdicts application))
                                (t/calculate-process-metadata (:metadata application) (:attachments application)))]
     (action/update-application command {$set {:modified created
                                               :processMetadata processed-metadata}})
     (ok {:metadata processed-metadata})))
 
 (defquery case-file-data
-  {:parameters [:id]
+  {:parameters [:id lang]
+   :input-validators [(partial action/non-blank-parameters [:lang])]
    :user-roles #{:authority}
    :states states/all-application-states}
   [{:keys [application]}]
-  (ok :process (t/generate-case-file-data application)))
+  (ok :process (t/generate-case-file-data application lang)))
 
 (defquery tos-operations-enabled
   {:user-roles #{:authority}

@@ -282,18 +282,17 @@
       var attachmentIds = _.map(_.filter(self.attachments(), isSelectedForArchive), function(attachment) {
         return ko.unwrap(attachment.id);
       });
-      var archiveApplication = ko.unwrap(mainDocuments()[0].sendToArchive);
-      self.archivingInProgressIds(attachmentIds);
-      if (archiveApplication) {
-        self.archivingInProgressIds.push(mainDocuments()[0].id);
-      }
+      var mainDocumentIds = _.map(_.filter(mainDocuments(), isSelectedForArchive), function(doc) {
+        return ko.unwrap(doc.id);
+      });
+      self.archivingInProgressIds(attachmentIds.concat(mainDocumentIds));
       window.setTimeout(pollArchiveStatus, 3000);
       ajax
         .command("archive-documents",
           {
             id: ko.unwrap(params.application.id),
             attachmentIds: attachmentIds,
-            archiveApplication: archiveApplication
+            documentIds: mainDocumentIds
           })
         .error(function(e) {
           error(e.text);
