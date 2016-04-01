@@ -229,7 +229,7 @@
         if (_.has(stateMap, id)) {
           var newState = stateMap[id];
           if (doc.metadata().tila) {
-            doc.metadata().tila(newState)
+            doc.metadata().tila(newState);
           } else {
             doc.state(newState);
           }
