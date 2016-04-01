@@ -8579,7 +8579,7 @@ ul.tabs {
   white-space: pre-line;
 }
 
-/* line 247, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 246, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble {
   position: relative;
   color: #333333;
@@ -8633,36 +8633,35 @@ ul.tabs {
 }
 /* line 210, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender {
-  float: left;
   font-weight: bold;
 }
-/* line 213, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role {
   text-transform: lowercase;
 }
-/* line 215, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 214, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role:before {
   content: "(";
 }
-/* line 218, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role:after {
   content: ")";
 }
-/* line 223, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 222, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender .to:before {
   margin-left: 12px;
   margin-right: 12px;
   content: "→";
 }
-/* line 230, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 229, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .timestamp {
   float: right;
 }
-/* line 235, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 234, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .content .target {
   margin-right: 6px;
 }
-/* line 239, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 238, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble a {
   color: #f39129;
   text-decoration: none;
@@ -8681,12 +8680,12 @@ ul.tabs {
   color: #fbc732;
   text-decoration: underline;
 }
-/* line 242, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 241, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .deleted {
   text-decoration: line-through;
 }
 
-/* line 252, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 251, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority {
   position: relative;
   color: #333333;
@@ -8740,36 +8739,35 @@ ul.tabs {
 }
 /* line 210, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender {
-  float: left;
   font-weight: bold;
 }
-/* line 213, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role {
   text-transform: lowercase;
 }
-/* line 215, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 214, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role:before {
   content: "(";
 }
-/* line 218, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role:after {
   content: ")";
 }
-/* line 223, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 222, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .to:before {
   margin-left: 12px;
   margin-right: 12px;
   content: "→";
 }
-/* line 230, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 229, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .timestamp {
   float: right;
 }
-/* line 235, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 234, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .content .target {
   margin-right: 6px;
 }
-/* line 239, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 238, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority a {
   color: #f39129;
   text-decoration: none;
@@ -8788,34 +8786,34 @@ ul.tabs {
   color: #fbc732;
   text-decoration: underline;
 }
-/* line 242, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 241, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .deleted {
   text-decoration: line-through;
 }
-/* line 254, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 253, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header {
   border-bottom-color: #05d3b9;
 }
 
-/* line 259, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 258, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble > .content > span,
 .comment-bubble-authority > .content > span {
   white-space: pre-wrap;
 }
 
-/* line 264, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 263, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.attachment > .content > span.target,
 .comment-bubble-authority.attachment > .content > span.target {
   white-space: normal;
 }
 
-/* line 272, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 271, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.attachment .header,
 .comment-bubble-authority.attachment .header {
   border-bottom-color: #f7ac2e;
 }
 
-/* line 279, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 278, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.for-me .header,
 .comment-bubble-authority.for-me .header {
   border-bottom-color: #46b02d;
