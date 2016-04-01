@@ -20,7 +20,8 @@
   }
 }
 
-.stacked.help-toggle {
+.stacked.help-toggle,
+.stacked.help-toggle div {
   overflow-y: visible;
 }
 
@@ -75,5 +76,5 @@
 .help-adjacent-title {
   margin-top: 0 !important;
   line-height: normal;
-  float: left;
+  display: inline-block;
 }
