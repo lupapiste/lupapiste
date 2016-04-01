@@ -2,7 +2,7 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [sade.core :refer [now]]
+            [sade.core :refer [now fail]]
             [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.integrations-api]
@@ -51,25 +51,21 @@
         (count (batchrun/fetch-verdicts)) => pos?)
 
       (fact "batchrun check-for-verdicts logs :error on exception"
-        (batchrun/check-for-verdicts) => nil
-        ;; (provided
-        ;;   ;; (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
-        ;;   ;; (mongo/select :organizations anything anything) => [{:foo 42}]
-        ;;   ;; (clojure.string/blank? anything) => false
-        ;;   (lupapalvelu.logging/log-event :error anything) => nil
-        ;;   ;;(lupapalvelu.verdict-api/do-check-for-verdict anything) => nil
-        ;;   )
-        )
-       ;; (fact "batchrun check-for-verdicts logs failure details"
-      ;;       (batchrun/check-for-verdicts) => nil
-       ;;        (provided
-       ;;        (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
-       ;;        (mongo/select :organizations anything anything) => [{:foo 42}]
-       ;;        (clojure.string/blank? anything) => false
-       ;;        (lupapalvelu.logging/log-event :error anything) => nil
-       ;;        ;;(lupapalvelu.verdict-api/do-check-for-verdict anything) => nil
-       ;;        ))
+        (batchrun/fetch-verdicts) => count ;; length > 0
+        (provided
+          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select :organizations anything anything) => [{:foo 42}]
+          (clojure.string/blank? nil) =throws=> (IllegalArgumentException.)
+          (lupapalvelu.logging/log-event :error anything) => nil))
 
+      (fact "batchrun check-for-verdicts logs failure details"
+        (batchrun/fetch-verdicts) => count
+        (provided
+          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select :organizations anything anything) => [{:foo 42}]
+          (clojure.string/blank? anything) => false
+          (lupapalvelu.logging/log-event :error anything) => nil
+          (lupapalvelu.verdict-api/do-check-for-verdict anything) => (fail :foo)))
 
       (fact "Verifying the sent emails"
         (Thread/sleep 100) ; batchrun includes a parallel operation
