@@ -175,10 +175,11 @@
 
 (defn create-verdict-pdfa! [user application verdict-id lang]
   (debug "create-verdict-pdfa!" verdict-id " : " (count (filter #(= verdict-id (:id %)) (:verdicts application))))
-  (let [application (domain/get-application-no-access-checking (:id application))]
+  (let [application (domain/get-application-no-access-checking (:id application))
+        verdict (first (filter #(= verdict-id (:id %)) (:verdicts application)))]
     (doall
-      (for [paatos (filter #(= verdict-id (:id %)) (:verdicts application))]
-        (let [content (libre/generate-verdict-pdfa application verdict-id (:id paatos) lang)
+      (for [paatos-idx (range 0 (count (:paatokset verdict)))]
+        (let [content (libre/generate-verdict-pdfa application verdict-id paatos-idx lang)
               temp-file (File/createTempFile "create-verdict-pdfa-" ".pdf")]
           (io/copy content temp-file)
           (attachment/attach-file! application (child-to-attachment/build-attachment user application :verdicts verdict-id lang temp-file nil))

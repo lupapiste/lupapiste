@@ -180,13 +180,16 @@
           (:rakennusoikeudellinenKerrosala lupamaaraykset) (conj [(i18n/localize lang "verdict.rakennusoikeudellinenKerrosala") (:rakennusoikeudellinenKerrosala lupamaaraykset)])
           (:kokonaisala lupamaaraykset) (conj [(i18n/localize lang "verdict.kokonaisala") (:kokonaisala lupamaaraykset)])))
 
-(defn write-verdict-libre-doc [application id paatos-id lang file]
+(defn list-verdict-att [application id]
+  (clojure.string/join "\n" (map (fn [verdict-att] (str (get-in verdict-att [:latestVersion :filename]))) (filter (fn [att] (and (= :verdict (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application)))))
+
+(defn write-verdict-libre-doc [application id paatos-idx lang file]
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
-        paatos (first (filter #(= paatos-id (:id %)) (:paatokset verdict)))
+        paatos (nth (:paatokset verdict) paatos-idx)
         lupamaaraykset (:lupamaaraykset paatos)
         reviews (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))]) (:vaaditutKatselmukset lupamaaraykset))
         orders (map (fn [val] [(str (:sisalto val))]) (:maaraykset lupamaaraykset))]
-    (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id (" paatos-id ") not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
+    (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
     (create-libre-doc (io/resource history-verdict-file) file (assoc (common-field-map application lang)
                                                                 "FIELD001" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
                                                                 "FIELD012" (str (i18n/localize lang "verdict.id") ": " (:kuntalupatunnus verdict))
@@ -221,9 +224,9 @@
                                                                 "MINUTESCOL4" (i18n/localize lang "verdict.paatospvm")
                                                                 "MINUTESCOL5" (i18n/localize lang "verdict.attachments")
 
-                                                                "MINUTESTABLE" (map (fn [val] [(str (if (:status val) (i18n/localize lang "verdict.status" (:status val)) "") " (" (:paatoskoodi val) ") " (:paatos val))
-                                                                                               (str (:pykala val))
-                                                                                               (str (:paatoksentekija val))
-                                                                                               (or (util/to-local-date (:paatospvm val)) "-")
-                                                                                               "TODO"]) (:poytakirjat paatos))
+                                                                "MINUTESTABLE" (map (fn [val] (debug "MINUTESTABLE.val:" val) [(str (if (:status val) (i18n/localize lang "verdict.status" (str (:status val))) "") " (" (:paatoskoodi val) ") " (:paatos val))
+                                                                                                                               (str (:pykala val))
+                                                                                                                               (str (:paatoksentekija val))
+                                                                                                                               (or (util/to-local-date (:paatospvm val)) "-")
+                                                                                                                               (list-verdict-att application id)]) (:poytakirjat paatos))
                                                                 ))))

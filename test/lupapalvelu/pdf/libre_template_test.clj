@@ -139,7 +139,7 @@
        (doseq [lang i18n/languages]
                (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
                  (debug "writing file: " (.getAbsolutePath tmp-file))
-                 (write-verdict-libre-doc application1 "a1" "a2" lang tmp-file)
+                 (write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
                  (let [pos 1060
                        res (s/split (slurp tmp-file) #"\r?\n")]
                    #_(.delete tmp-file)
