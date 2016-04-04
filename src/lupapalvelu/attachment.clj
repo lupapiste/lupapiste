@@ -653,7 +653,7 @@
   (if (and libreoffice-client/enabled?
            (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
            (or (= (keyword type-group) :paatoksenteko) (= (keyword type-group) :muut))
-           (= (keyword type-id) :paatosote))
+           (#{:paatos :paatosote} (keyword type-id)))
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 

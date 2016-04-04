@@ -248,10 +248,10 @@
 
     var pollChangedState = function(documentIds) {
       ajax
-        .command("document-states",
+        .query("document-states",
           {
             id: ko.unwrap(params.application.id),
-            documentIds: documentIds
+            documentIds: JSON.stringify(documentIds)
           })
         .success(function(data) {
           updateState(mainDocuments(), data.state);
@@ -290,7 +290,7 @@
         return ko.unwrap(doc.id);
       });
       self.archivingInProgressIds(attachmentIds.concat(mainDocumentIds));
-      window.setTimeout(pollArchiveStatus, 3000);
+      window.setTimeout(pollArchiveStatus, 5000);
       ajax
         .command("archive-documents",
           {

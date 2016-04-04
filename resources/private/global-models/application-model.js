@@ -60,7 +60,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
-  self.tosFunction = ko.observable();
+  self.tosFunction = ko.observable(null);
   self.metadata = ko.observable();
   self.processMetadata = ko.observable();
 
