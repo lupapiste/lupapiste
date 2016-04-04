@@ -28,7 +28,8 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [clojure.string :as s])
   (:import [java.net URL]))
 
 (def verdict-codes ["my\u00f6nnetty"
@@ -182,7 +183,7 @@
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
-                   attachment-type    (verdict-attachment-type application (if (= "paatos" type) "paatos" "paatosote"))
+                   attachment-type    (verdict-attachment-type application (if (and type (= "paatos" (s/lower-case type))) "paatos" "paatosote"))
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
