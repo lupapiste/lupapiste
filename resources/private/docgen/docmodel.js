@@ -40,11 +40,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long", "xl": "form-input really-long"};
 
   // Context help
-  self.addFocus = function (e) {
-    var event = getEvent(e);
-    var input$ = $(event.target);
-    input$.focus();
-  };
 
   self.findHelpElement = function (e) {
     var event = getEvent(e);
