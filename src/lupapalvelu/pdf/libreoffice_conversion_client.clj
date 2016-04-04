@@ -51,3 +51,11 @@
         tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
     (write-history-libre-doc application lang tmp-file)
     (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
+
+
+(defn generate-verdict-pdfa [application verdict-id paatos-id lang]
+  (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-id ", lang: " lang)
+  (let [filename (str (localize lang "application.verdict.title") ".fodt")
+        tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+    (write-verdict-libre-doc application verdict-id paatos-id lang tmp-file)
+    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
