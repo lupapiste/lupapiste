@@ -247,6 +247,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.approvalModel = new LUPAPISTE.DocumentApprovalModel(self);
+  self.isApproved = self.approvalModel.isApproved;
 
   //----------------------------------------------------------------------
 

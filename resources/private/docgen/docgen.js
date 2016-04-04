@@ -81,8 +81,16 @@ var docgen = (function () {
     window.Stickyfill.rebuild();
   }
 
+  function nonApprovedDocuments() {
+    var models = _.concat.apply(null, _.values(docModels));
+    return _.filter(models, function(docModel) {
+      return !docModel.isApproved();
+    });
+  }
+
   return {
-    displayDocuments: displayDocuments
+    displayDocuments: displayDocuments,
+    nonApprovedDocuments: nonApprovedDocuments
   };
 
 })();
