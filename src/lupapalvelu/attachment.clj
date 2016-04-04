@@ -585,12 +585,8 @@
      {:attachments {$elemMatch {:id attachment-id}}}
      {$pull {:attachments.$.versions {:fileId fileId}
              :attachments.$.signatures {:fileId fileId}}
-      $set  {:attachments.$.latestVersion latest-version}})
-    (update-application
-     (application->command application)
-     {:attachments {$elemMatch {:id attachment-id
-                                :versions []}}}
-     {$set {:attachments.$.auth []}})
+      $set  (merge {:attachments.$.latestVersion latest-version}
+                   (when (nil? latest-version) {:attachments.$.auth []}))})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
 (defn get-attachment-file-as!
