@@ -33,7 +33,13 @@ var docutils = (function () {
     }
   }
 
-  function documentTitle(identifierText, operationText, accordionText) {
+  /**
+   * Form an optional header descpription
+   * @param {String} identifierText  Document identifier text that user can input
+   * @param {String} operationText   Operation description
+   * @param {String} accordionText   Text extracted from document data
+   */
+  function headerDescription(identifierText, operationText, accordionText) {
     var isEmpty = !identifierText && !operationText && !accordionText;
     if (!isEmpty) {
       var initStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
@@ -190,7 +196,7 @@ var docutils = (function () {
   return {
     SELECT_ONE_OF_GROUP_KEY: SELECT_ONE_OF_GROUP_KEY,
     accordionText: accordionText,
-    documentTitle: documentTitle,
+    headerDescription: headerDescription,
     makeGroupHelpTextSpan: makeGroupHelpTextSpan,
     makeSectionHelpTextSpan: makeSectionHelpTextSpan,
     showHelp: showHelp,

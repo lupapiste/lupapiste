@@ -72,7 +72,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     var identifier = self.identifierField && self.identifierField.value();
     var operation  = self.operationDescription();
     var accordionText = self.accordionText();
-    return docutils.documentTitle(identifier, operation, accordionText);
+    return docutils.headerDescription(identifier, operation, accordionText);
   });
 
   self.toggleAccordion = function() {
