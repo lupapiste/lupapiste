@@ -53,9 +53,9 @@
     (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
 
 
-(defn generate-verdict-pdfa [application verdict-id paatos-id lang]
-  (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-id ", lang: " lang)
+(defn generate-verdict-pdfa [application verdict-id paatos-idx lang]
+  (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-idx ", lang: " lang)
   (let [filename (str (localize lang "application.verdict.title") ".fodt")
         tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
-    (write-verdict-libre-doc application verdict-id paatos-id lang tmp-file)
+    (write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
     (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
