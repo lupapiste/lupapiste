@@ -99,6 +99,7 @@ LUPAPISTE.ForemanModel = function() {
       _.forEach(foremanTasks, function(task) {
         var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
         var linkedForemanApp = _.find(self.foremanApplications(), { "id": asiointitunnus});
+        var impersonating = lupapisteApp.models.currentUser.impersonating && lupapisteApp.models.currentUser.impersonating();
 
         var data = { "name": task.taskname,
                      "taskId": task.id,
@@ -106,6 +107,7 @@ LUPAPISTE.ForemanModel = function() {
                      "selectedForeman": ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus),
                      "selectableForemen": ko.observableArray(),
                      "canInvite": self.canInvite,
+                     "selectEnabled": !impersonating,
                      "indicator": ko.observable()};
 
         data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
