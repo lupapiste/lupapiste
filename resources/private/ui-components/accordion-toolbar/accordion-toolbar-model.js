@@ -72,7 +72,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
       var firstPathValue = paths[0][0];
       // are we dealing with _selected special case
-      var selectedValue = firstPathValue === docvars.SELECT_ONE_OF_GROUP_KEY ? _.get(docData.data, firstPathValue)() : false;
+      var selectedValue = firstPathValue === docutils.SELECT_ONE_OF_GROUP_KEY ? _.get(docData.data, firstPathValue)() : false;
       if (selectedValue) {
         var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
           return path[0] === selectedValue;

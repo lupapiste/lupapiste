@@ -1,4 +1,4 @@
-var docvars = (function () {
+var docutils = (function () {
   "use strict";
 
   // Magic key: if schema contains "_selected" radioGroup,

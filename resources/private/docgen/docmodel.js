@@ -1638,7 +1638,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function getSelectOneOfDefinition(schema) {
     var selectOneOfSchema = _.find(schema.body, function (subSchema) {
-      return subSchema.name === docvars.SELECT_ONE_OF_GROUP_KEY && subSchema.type === "radioGroup";
+      return subSchema.name === docutils.SELECT_ONE_OF_GROUP_KEY && subSchema.type === "radioGroup";
     });
 
     if (selectOneOfSchema) {
@@ -1685,13 +1685,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (selectOneOf.length) {
       // Show current selection or the first of the group
       var myModel = _.head(selectOneOf);
-      if (model[docvars.SELECT_ONE_OF_GROUP_KEY]) {
-        myModel = model[docvars.SELECT_ONE_OF_GROUP_KEY].value;
+      if (model[docutils.SELECT_ONE_OF_GROUP_KEY]) {
+        myModel = model[docutils.SELECT_ONE_OF_GROUP_KEY].value;
       }
 
       toggleSelectedGroup(myModel);
 
-      var s = "[name$='." + docvars.SELECT_ONE_OF_GROUP_KEY + "']";
+      var s = "[name$='." + docutils.SELECT_ONE_OF_GROUP_KEY + "']";
       $(body).find(s).change(function () {
         toggleSelectedGroup(this.value);
       });
