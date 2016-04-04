@@ -145,6 +145,8 @@ var repository = (function() {
           var sortedAttachmentTypes = attachmentUtils.sortAttachmentTypes(application.allowedAttachmentTypes);
           application.allowedAttachmentTypes = sortedAttachmentTypes;
 
+          application.tosFunction = application.tosFunction === undefined ? null : application.tosFunction;
+
           hub.send("application-loaded", {applicationDetails: loading, lightLoad: isLightLoad});
           if (_.isFunction(callback)) {
             callback(application);
