@@ -7,7 +7,7 @@
       <div class="form-group" data-bind="attr: {id: groupId}">
 
         <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
-        
+
         <!-- ko if: groupHelp -->
         <span class="group-help-text" data-bind="ltext: groupHelp"></span>
         <!-- /ko -->
@@ -19,7 +19,8 @@
                                                   path: path,
                                                   i18npath: i18npath,
                                                   applicationId: applicationId,
-                                                  documentId: documentId }}">
+                                                  documentId: documentId,
+                                                  service: $component.service }}">
           </span>
         </div>
       </div>

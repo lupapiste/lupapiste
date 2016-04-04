@@ -6,7 +6,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
 
-  var service = lupapisteApp.services.documentDataService;
+  var service = params.service || lupapisteApp.services.documentDataService;
 
   self.size = uiComponents.sizeClasses[params.schema.size];
   self.schema = params.schema;
