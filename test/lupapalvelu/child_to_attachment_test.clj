@@ -103,7 +103,7 @@
          (doseq [lang i18n/languages]
            (let [file (File/createTempFile (str "child-test-neighbour-" (name lang) "-") ".pdf")
                  att (build-attachment {} application :neighbors "2" lang file nil)
-                 att-other (build-attachment {} application :verdicts "2" lang file nil)]
+                 att-other (build-attachment {} application :tasks "2" lang file nil)]
              (fact ":contents"
                    (:contents att) => "Matti Malli")
              (fact ":attachment-type"
@@ -125,7 +125,7 @@
            (let [file (File/createTempFile (str "child-test-task-" (name lang) "-") ".pdf")
                  att (build-attachment {} application :tasks "2" lang file nil)
                  att1 (build-attachment {} application :tasks "1" lang file "one")
-                 att-other (build-attachment {} application :verdicts "2" lang file nil)]
+                 att-other (build-attachment {} application :tasks "2" lang file nil)]
              (fact ":contents"
                    (:contents att) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus"))
              (fact ":attachment-type"

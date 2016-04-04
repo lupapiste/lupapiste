@@ -3,8 +3,11 @@
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mime :as mime]
+            [lupapalvelu.pdf.libreoffice-template :refer :all]
             [sade.core :refer [def-]]
-            [sade.env :as env])
+            [sade.strings :as ss]
+            [sade.env :as env]
+            [clojure.java.io :as io])
   (:import (org.apache.commons.io FilenameUtils)
            (java.io File)))
 

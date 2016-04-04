@@ -558,9 +558,3 @@
     (generate application lang file)
     (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
     file))
-
-(defn generate-pdf-a-case-file [application lang]
-  (let [filename (str (i18n/localize lang "caseFile.heading") ".fodt")
-        tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
-    (lt/export-to-file application lang tmp-file)
-    (:content (lcc/convert-to-pdfa filename (io/input-stream tmp-file)))))

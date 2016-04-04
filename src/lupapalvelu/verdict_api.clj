@@ -254,7 +254,7 @@
                            $push {:verdicts.$.signatures {:created created
                                                           :user (user/summary user)}}
                           })
-      (create-verdict-pdfa! application id lang))
+      (create-verdict-pdfa! user application id lang))
     (do
       ; Throttle giving information about incorrect password
       (Thread/sleep 2000)
