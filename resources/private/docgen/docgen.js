@@ -1,9 +1,12 @@
 var docgen = (function () {
   "use strict";
 
-  var docModels = [];
+  var docModels = {};
 
-  function displayDocuments(containerSelector, application, documents, authorizationModel, options) {
+  function displayDocuments(containerId, application, documents, authorizationModel, options) {
+    var containerSelector = "#" + containerId;
+    var oldModels = docModels[containerId] ||  [];
+
     function updateOther(select) {
       var otherId = select.attr("data-select-other-id"),
           other = $("#" + otherId, select.parent().parent());
@@ -20,15 +23,18 @@ var docgen = (function () {
         window.Stickyfill.remove(elem);
     });
 
-    while (docModels.length > 0) {
-      docModels.pop().dispose();
+
+    while (oldModels.length > 0) {
+      oldModels.pop().dispose();
     }
+    docModels[containerId] = [];
+
     var docgenDiv = $(containerSelector).empty();
 
     _.each(documents, function (doc) {
       var schema = doc.schema;
       var docModel = new DocModel(schema, doc, application, authorizationModel, options);
-      docModels.push(docModel);
+
       docModel.triggerEvents();
 
       docgenDiv.append(docModel.element);
