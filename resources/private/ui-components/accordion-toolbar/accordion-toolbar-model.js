@@ -71,18 +71,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     // if identifier exists, subscribing to it's "value" observable
     var identifier = self.identifierField && self.identifierField.value();
     var operation  = self.operationDescription();
-    var accordionFieldStr = self.accordionText();
-    var isEmpty = !identifier && !operation && !accordionFieldStr;
-    if (!isEmpty) {
-      var initStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
-      var identifierAndOperation = _.filter([identifier, operation]).join(": ");
-      var withAccordionField = identifierAndOperation
-                               ? _.filter([identifierAndOperation, accordionFieldStr]).join(" - ")
-                               : accordionFieldStr;
-      return initStr + withAccordionField;
-    } else {
-      return "";
-    }
+    var accordionText = self.accordionText();
+    return docutils.documentTitle(identifier, operation, accordionText);
   });
 
   self.toggleAccordion = function() {

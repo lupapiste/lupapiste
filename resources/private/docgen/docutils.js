@@ -33,9 +33,24 @@ var docutils = (function () {
     }
   }
 
+  function documentTitle(identifierText, operationText, accordionText) {
+    var isEmpty = !identifierText && !operationText && !accordionText;
+    if (!isEmpty) {
+      var initStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
+      var identifierAndOperation = _.filter([identifierText, operationText]).join(": ");
+      var withAccordionField = identifierAndOperation
+                               ? _.filter([identifierAndOperation, accordionText]).join(" - ")
+                               : accordionText;
+      return initStr + withAccordionField;
+    } else {
+      return "";
+    }
+  }
+
   return {
     SELECT_ONE_OF_GROUP_KEY: SELECT_ONE_OF_GROUP_KEY,
-    accordionText: accordionText
+    accordionText: accordionText,
+    documentTitle: documentTitle
   };
 
 })();
