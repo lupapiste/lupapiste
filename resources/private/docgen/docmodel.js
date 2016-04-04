@@ -1935,11 +1935,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return section.append( contents.append( $(elements)));
   }
 
-  hub.subscribe("application-loaded", function() {
+  self.dispose = function() {
     while (self.subscriptions.length > 0) {
       hub.unsubscribe(self.subscriptions.pop());
     }
-  }, true);
+  };
 
   self.element = buildSection();
   // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,

@@ -1,6 +1,8 @@
 var docgen = (function () {
   "use strict";
 
+  var docModels = [];
+
   function displayDocuments(containerSelector, application, documents, authorizationModel, options) {
     function updateOther(select) {
       var otherId = select.attr("data-select-other-id"),
@@ -18,11 +20,15 @@ var docgen = (function () {
         window.Stickyfill.remove(elem);
     });
 
+    while (docModels.length > 0) {
+      docModels.pop().dispose();
+    }
     var docgenDiv = $(containerSelector).empty();
 
     _.each(documents, function (doc) {
       var schema = doc.schema;
       var docModel = new DocModel(schema, doc, application, authorizationModel, options);
+      docModels.push(docModel);
       docModel.triggerEvents();
 
       docgenDiv.append(docModel.element);
