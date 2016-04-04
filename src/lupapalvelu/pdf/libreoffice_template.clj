@@ -179,9 +179,10 @@
           (:rakennusoikeudellinenKerrosala lupamaaraykset) (conj [(i18n/localize lang "verdict.rakennusoikeudellinenKerrosala") (:rakennusoikeudellinenKerrosala lupamaaraykset)])
           (:kokonaisala lupamaaraykset) (conj [(i18n/localize lang "verdict.kokonaisala") (:kokonaisala lupamaaraykset)])))
 
-(defn write-verdict-libre-doc [application id id2 lang file]
+(defn write-verdict-libre-doc [application id paatos-id lang file]
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
-        paatos (first (filter #(= id2 (:id %)) (:paatokset verdict)))
+        paatos (first (filter #(= paatos-id (:id %)) (:paatokset verdict)))
+        _ (debug "write-verdict-libre-doc verdict: " (with-out-str (clojure.pprint/pprint verdict)) )
         lupamaaraykset (:lupamaaraykset paatos)
         reviews (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))]) (:vaaditutKatselmukset lupamaaraykset))
         orders (map (fn [val] [(str (:sisalto val))]) (:maaraykset lupamaaraykset))
