@@ -196,7 +196,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   // Returns the latest modification time of the model or
   // zero if no modifications.
-    function modelTimestamp( model ) {
+  function modelTimestamp( model ) {
     if( _.isObject( model )) {
       return !_.isUndefined(model.value)
                 ? model.modified || 0
@@ -230,6 +230,25 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var approval = approvalFun();
     return approval && approval.value === check;
   };
+
+  self.approvalHubSubscribe = function(fun, listenBroadcasts) {
+    var filter = {eventType: "approval-status-" + self.docId,
+                  broadcast: Boolean(listenBroadcasts) };
+    self.subscriptions.push(hub.subscribe( filter, fun ));
+  };
+
+  // Receiver path can be falsey for broadcast messages.
+  self.approvalHubSend = function( approval, senderPath, receiverPath ) {
+    hub.send( "approval-status-" + self.docId,
+              { broadcast: _.isEmpty(senderPath),
+                approval: _.clone(approval),
+                path: senderPath,
+                receiver: receiverPath});
+  };
+
+  self.approvalModel = new LUPAPISTE.DocumentApprovalModel(self);
+
+  //----------------------------------------------------------------------
 
   // Returns id if we are in the testing mode, otherwise null.
   // Null because Knockout does not render null attributes.
@@ -277,24 +296,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                            {title: loc("removeDoc.cancel") },
                                            {html: true });
   };
-
-  self.approvalHubSubscribe = function(fun, listenBroadcasts) {
-    var filter = {eventType: "approval-status-" + self.docId,
-                  broadcast: Boolean(listenBroadcasts) };
-    self.subscriptions.push(hub.subscribe( filter, fun ));
-  };
-
-  // Receiver path can be falsey for broadcast messages.
-  self.approvalHubSend = function( approval, senderPath, receiverPath ) {
-    hub.send( "approval-status-" + self.docId,
-              { broadcast: _.isEmpty(senderPath),
-                approval: _.clone(approval),
-                path: senderPath,
-                receiver: receiverPath});
-  };
-
-  // ----------------------------------------------------------------------
-
 
   function makeGroupHelpTextSpan(schema) {
     var span = document.createElement("span");
@@ -1918,6 +1919,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sticky.append(createComponent ( "accordion-toolbar",
                                     {docModel: self,
                                      docModelOptions: options,
+                                     approvalModel: self.approvalModel,
                                      openCallback: toggleContents
                                     }));
     section.append( sticky );
