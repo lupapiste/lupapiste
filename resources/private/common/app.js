@@ -234,7 +234,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var isAuthorizedToTosAndSearch = function() {
       return lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled") &&
-        lupapisteApp.models.globalAuthModel.ok("store-tos-metadata-for-application");
+        lupapisteApp.models.globalAuthModel.ok("tos-operations-enabled");
     };
 
     self.showArchiveMenuOptions = ko.observable(false);

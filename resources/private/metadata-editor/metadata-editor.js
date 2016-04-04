@@ -85,13 +85,16 @@
     return errors;
   };
 
-  var getForbiddenFields = function(schema, roles) {
+  var getForbiddenFields = function(schema, roles, data) {
     var naughtyFields = [];
     _.forEach(schema, function (attribute) {
       if (attribute["require-role"] && !_.includes(roles, attribute["require-role"])) {
         naughtyFields.push(attribute.type);
       }
     });
+    if (util.getIn(data, ["sailytysaika", "arkistointi"]) && ko.unwrap(data.sailytysaika.arkistointi) === "ikuisesti") {
+      naughtyFields.push("sailytysaika");
+    }
     return naughtyFields;
   };
 
@@ -149,7 +152,7 @@
         self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), data.schema, roles));
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);
         self.schema(data.schema);
-        self.disabledFields(getForbiddenFields(data.schema, roles));
+        self.disabledFields(getForbiddenFields(data.schema, roles, self.metadata()));
         uneditableFields = getUneditableFields(self.schema());
       })
       .call();
@@ -184,6 +187,9 @@
           self.metadata(ko.mapping.fromJS(data.metadata));
           self.editedMetadata(constructEditableMetadata(data.metadata, self.schema(), roles));
           self.editable(false);
+          if (util.getIn(data, ["metadata", "sailytysaika", "arkistointi"]) && ko.unwrap(data.metadata.sailytysaika.arkistointi) === "ikuisesti") {
+            self.disabledFields.push("sailytysaika");
+          }
           if (_.isFunction(params.saveCallback)) {
             params.saveCallback();
           }

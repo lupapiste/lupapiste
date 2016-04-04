@@ -93,7 +93,8 @@
   (let [disallowed-metadata (filter (fn [field] (when-let [role (:require-role field)]
                                                   (not (contains? roles role))))
                               editable-metadata-fields)
-        disallowed-keys (map :type disallowed-metadata)
+        disallowed-keys (cond-> (map :type disallowed-metadata)
+                                (= (get-in old-metadata [:sailytysaika :arkistointi]) :ikuisesti) (conj :sailytysaika))
         replacement-metadata (select-keys old-metadata disallowed-keys)]
     (merge new-metadata replacement-metadata)))
 
