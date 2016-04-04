@@ -39,8 +39,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long", "xl": "form-input really-long"};
 
-
-
   // trigger stored events once
   self.triggerEvents = function() {
     _.forEach(self.events, function(event) {
@@ -242,7 +240,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     opts = opts || {};
     var button = document.createElement("button");
     button.id = id;
-    //button.className = "btn";
     if( opts.icon ) {
       var i = document.createElement( "i");
       i.setAttribute( "class", opts.icon );
@@ -784,12 +781,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
     if (subSchema.approvable) {
-    $(div).append(createComponent( "group-approval",
-                                   {docModel: self,
-                                    subSchema: subSchema,
-                                    model: myModel,
-                                    path: path,
-        remove: resolveRemoveOptions( subSchema, path) }));
+      $(div).append(createComponent("group-approval",
+                                    {docModel: self,
+                                     subSchema: subSchema,
+                                     model: myModel,
+                                     path: path,
+                                     remove: resolveRemoveOptions(subSchema, path)}));
     }
     var label = makeLabel(subSchema, "group", myPath, true, validationResult);
     div.appendChild(label);
