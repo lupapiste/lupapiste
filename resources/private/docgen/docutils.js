@@ -182,6 +182,11 @@ var docutils = (function () {
     }, 4000);
   }
 
+  function setMaxLen(input, subSchema) {
+    var maxLen = subSchema["max-len"] || LUPAPISTE.config.inputMaxLength;
+    input.setAttribute("maxlength", maxLen);
+  }
+
   return {
     SELECT_ONE_OF_GROUP_KEY: SELECT_ONE_OF_GROUP_KEY,
     accordionText: accordionText,
@@ -192,7 +197,8 @@ var docutils = (function () {
     hideHelp: hideHelp,
     loaderImg: loaderImg,
     createIndicator: createIndicator,
-    showIndicator: showIndicator
+    showIndicator: showIndicator,
+    setMaxLen: setMaxLen
   };
 
 })();

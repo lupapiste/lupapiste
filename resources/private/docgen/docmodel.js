@@ -430,11 +430,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function setMaxLen(input, subSchema) {
-    var maxLen = subSchema["max-len"] || LUPAPISTE.config.inputMaxLength; // if you change the default, change in model.clj, too
-    input.setAttribute("maxlength", maxLen);
-  }
-
   function buildString(subSchema, model, path, partOfChoice) {
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
@@ -444,7 +439,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var inputType = _.includes(supportedInputSubtypes, subSchema.subtype) ? subSchema.subtype : "text";
 
     var input = makeInput(inputType, myPath, model, subSchema, validationResult);
-    setMaxLen(input, subSchema);
+    docutils.setMaxLen(input, subSchema);
 
     listen(subSchema, myPath, input);
 
@@ -544,7 +539,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.name = myPath;
     input.setAttribute("rows", subSchema.rows || "10");
     input.setAttribute("cols", subSchema.cols || "40");
-    setMaxLen(input, subSchema);
+    docutils.setMaxLen(input, subSchema);
 
     input.className = "form-input textarea";
     if (validationResult && validationResult[0]) {
