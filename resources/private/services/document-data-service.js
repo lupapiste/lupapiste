@@ -15,10 +15,20 @@ LUPAPISTE.DocumentDataService = function(params) {
     });
   };
 
+  function getDefaults(doc) {
+    var docType = doc.schema.info.type;
+    switch(docType) {
+      case "task":
+        return {updateCommand: "update-task", removeCommand: "remove-document-data", collection: "tasks"};
+      default:
+        return doc.schema.info["construction-time"] ?
+          {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data", collection: "documents"} :
+          {updateCommand: "update-doc",                   removeCommand: "remove-document-data", collection: "documents"};
+
+    }
+  }
   function resolveCommandNames(doc, options) {
-    var docDefaults = doc.schema.info["construction-time"] ?
-      {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data"} :
-      {updateCommand: "update-doc",                   removeCommand: "remove-document-data"};
+    var docDefaults = getDefaults(doc);
     return _.extend(docDefaults, _.pick(options, "updateCommand", "removeCommand"));
   }
 
@@ -76,6 +86,11 @@ LUPAPISTE.DocumentDataService = function(params) {
     return doc && doc.updateCommand || "update-doc";
   };
 
+  self.getTargetCollection = function(documentId) {
+    var doc = self.findDocumentById(documentId);
+    return doc && doc.collection || "documents";
+  };
+
   self.removeRepeatingGroup = function(documentId, path, index, indicator) {
     var repeatingModel = self.getInDocument(documentId, path);
     var cb = function() {
@@ -84,7 +99,7 @@ LUPAPISTE.DocumentDataService = function(params) {
     var params = {
       path: path.concat(index)
     };
-    command(self.getRemoveCommand(documentId), documentId, params, {
+    command(self.getRemoveCommand(documentId), self.getTargetCollection(documentId), documentId, params, {
       indicator: indicator,
       cb: cb
     });
@@ -96,20 +111,20 @@ LUPAPISTE.DocumentDataService = function(params) {
         return [update[0].join("."), update[1]];
       })
     };
-    command(self.getUpdateCommand(documentId), documentId, params, {
+    command(self.getUpdateCommand(documentId), self.getTargetCollection(documentId), documentId, params, {
       indicator: indicator,
       cb: cb
     });
   };
 
-  function command(commandName, documentId, params, opts) {
+  function command(commandName, collection, documentId, params, opts) {
     var indicator = opts.indicator || _.noop;
     var cb = opts.cb || _.noop;
     ajax
       .command(commandName, _.extend({
           doc: documentId,
           id: self.applicationId(),
-          collection: "documents"
+          collection: collection
         },
         params)
       )
