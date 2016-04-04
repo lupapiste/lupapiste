@@ -56,33 +56,10 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
 
-  function buildAccordionText(paths, data) {
-    return _(paths)
-      .map(function(path) {
-        return ko.unwrap(_.get(data, path));
-      })
-      .reject(_.isEmpty)
-      .value()
-      .join(" ");
-  }
-
   self.accordionText = ko.pureComputed(function() {
     // resolve values from given accordionPaths
     var paths = docData && docData.accordionPaths;
-    if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
-      var firstPathValue = paths[0][0];
-      // are we dealing with _selected special case
-      var selectedValue = firstPathValue === docutils.SELECT_ONE_OF_GROUP_KEY ? _.get(docData.data, firstPathValue)() : false;
-      if (selectedValue) {
-        var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
-          return path[0] === selectedValue;
-        });
-        return buildAccordionText(selectedPaths, docData.data);
-
-      } else { // no _selected, use paths as is
-        return buildAccordionText(paths, docData.data);
-      }
-    }
+    return docutils.accordionText(paths, docData.data);
   });
 
   // Required accordion title from operation/schema-info name
