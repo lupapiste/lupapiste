@@ -59,7 +59,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.accordionText = ko.pureComputed(function() {
     // resolve values from given accordionPaths
     var paths = docData && docData.accordionPaths;
-    return docutils.accordionText(paths, docData.data);
+    return docutils.accordionText(paths, _.get(docData, "data"));
   });
 
   // Required accordion title from operation/schema-info name
