@@ -327,7 +327,7 @@
                        :html ["integration-error.html"]}
 
    :ui-components {:depends [:common-html]
-                   :js (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js" "docgen/docgen-input-model.js"))
+                   :js (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js"))
                    :html (get-ui-components :ui-components :templates)}
 
    ;; Single Page Apps and standalone components:

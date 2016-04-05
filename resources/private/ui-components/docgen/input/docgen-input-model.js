@@ -8,6 +8,9 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   var service = params.service || lupapisteApp.services.documentDataService;
 
+  self.componentTemplate = (params.template || params.schema.template)
+                           || "docgen-" + (params.schema.inputType || params.schema.type) + "-template";
+
   self.size = uiComponents.sizeClasses[params.schema.size];
   self.schema = params.schema;
   self.path = params.path;
