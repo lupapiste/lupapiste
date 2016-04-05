@@ -3,6 +3,7 @@
 Documentation   Adding and removing of link permits
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../common_keywords/approve_helpers.robot
 
 *** Test Cases ***
 
@@ -14,7 +15,7 @@ Sonja prepares the application that will later act as link permit
   Set Suite Variable  ${propertyid}  753-423-5-10
   Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo
   Submit application
-  Click enabled by test id  approve-application
+  Approve application
 
   ${linkPermitAppId} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${linkPermitAppId}

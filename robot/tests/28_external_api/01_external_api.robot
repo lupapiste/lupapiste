@@ -5,6 +5,7 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../18_construction/task_resource.robot
+Resource        ../common_keywords/approve_helpers.robot
 Variables      ../06_attachments/variables.py
 
 *** Variables ***
@@ -58,7 +59,7 @@ Open permit and show permit on map buttons are visible
 #  - LupapisteApi.integrationSent
 Successful KRYSP generation emits LupapisteApi.integrationSent function call
   Submit application
-  Click enabled by test id  approve-application
+  Approve application
   Wait until  Element text should be  xpath=//div[@id='modal-dialog']//div[@class='header']/span  LupapisteApi.integrationSent
   Permit properties should be visible in dialog
 

@@ -1,6 +1,7 @@
 *** Settings ***
 
 Resource        ../../common_resource.robot
+Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
 Suite Setup     Initialize
 Suite Teardown  Logout
@@ -100,8 +101,7 @@ Can not be send before base app
 
 Approve base app
   Go back to project application
-  Click enabled by test id  approve-application
-  Wait until  Application state should be  sent
+  Approve application
 
 Fetch verdict to base app
   Open tab  verdict
