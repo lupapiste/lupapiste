@@ -13,6 +13,7 @@ jQuery(document).ready(function() {
     {name: "docgen-input", synchronous: true},
     {name: "docgen-string", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
     {name: "docgen-checkbox", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
+    {name: "docgen-text", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
     {name: "docgen-select", synchronous: true},
     {name: "docgen-button", synchronous: true},
     {name: "docgen-date", synchronous: true},
@@ -117,7 +118,8 @@ jQuery(document).ready(function() {
     {name: "cell-span"},
     {name: "cell-textarea", model: "cell-model"},
     {name: "cell-date"},
-    {name: "cell-select"}
+    {name: "cell-select"},
+    {name: "task"}
 ];
 
   _.forEach(components, function(component) {
