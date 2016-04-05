@@ -1801,6 +1801,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     while (self.subscriptions.length > 0) {
       hub.unsubscribe(self.subscriptions.pop());
     }
+    self.approvalModel.dispose();
+    self.approvalModel = null;
   };
 
   self.element = buildSection();

@@ -119,11 +119,9 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.reject  = _.partial( self.approvalModel.changeStatus, false );
   self.approve = _.partial( self.approvalModel.changeStatus, true );
 
-  self.showToolbar = self.remove.fun
-                  || self.showStatus()
-                  || self.showReject()
-                  || self.showApprove()
-                  || self.hasOperation();
+  self.showToolbar = ko.pureComputed(function() {
+    return self.remove.fun || self.showStatus() || self.showReject() || self.showApprove() || self.hasOperation();
+  });
 
   self.closeEditors = function( data, event ) {
     // Toggle editors visibility with key press

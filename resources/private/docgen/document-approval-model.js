@@ -84,4 +84,23 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
   self.changeStatus = function(flag) {
     docModel.updateApproval([], flag, self.masterApproval);
   };
+
+  // reset approval when document is updated
+  self.modificationHubSub = hub.subscribe(
+      {eventType: "update-doc-success", documentId: docModel.docId},
+      function() {
+        if (self.masterApproval() !== null) {
+          self.masterApproval(null);
+          window.Stickyfill.rebuild();
+        }
+      });
+
+  self.dispose = function() {
+    hub.unsubscribe(self.modificationHubSub);
+    _.each(self, function(property) {
+      if (_.isFunction(_.get(property, "dispose"))) {
+        property.dispose();
+      }
+    });
+  };
 };
