@@ -24,7 +24,7 @@ Mikko sets CV to be visible only to himself and authorities
   List selection should be  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  Julkinen
   Select From List By Value  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  viranomainen
   Positive indicator icon should be visible
-  Execute javascript  window.scrollTo(0,0)
+  Scroll to top
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
 

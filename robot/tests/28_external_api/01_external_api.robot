@@ -75,6 +75,7 @@ Add post verdict attachment
   Page should not contain  Siirrä liitteet taustajärjestelmään
 
 Transfering attachments emits LupapisteApi.integrationSent function call
+  Scroll to top
   # We have 3 buttons with the same test-id, check & click the first
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id='export-attachments-to-backing-system']
   Scroll to test id  export-attachments-to-backing-system
