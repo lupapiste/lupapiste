@@ -126,8 +126,7 @@
     (if (allowed-attachment-type-for-application? attachment-type application)
       (let [metadata (-> (tiedonohjaus/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
                          (tiedonohjaus/update-end-dates (:verdicts application)))]
-        (attachment/update-attachment-key! command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
-        (attachment/update-attachment-key! command attachmentId :metadata metadata created))
+        (attachment/update-attachment-data! command attachmentId {:type attachment-type :metadata metadata} created))
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.illegal-attachment-type)))))
@@ -155,7 +154,7 @@
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key! command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
+  (attachment/update-attachment-data! command attachmentId {:state :ok} created :set-app-modified? true :set-attachment-modified? false))
 
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
@@ -165,7 +164,7 @@
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key! command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
+  (attachment/update-attachment-data! command attachmentId {:state :requires_user_action} created :set-app-modified? true :set-attachment-modified? false))
 
 ;;
 ;; Create
@@ -580,10 +579,8 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
    :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
-  [{:keys [application user created] :as command}]
-  ; FIXME yhdella updatella!
-  (doseq [[k v] meta]
-    (attachment/update-attachment-key! command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
+  [{:keys [created] :as command}]
+  (attachment/update-attachment-data! command attachmentId meta created)
   (ok))
 
 (defcommand set-attachment-not-needed
@@ -594,7 +591,7 @@
    :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key! command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
+  (attachment/update-attachment-data! command attachmentId {:notNeeded notNeeded} created :set-app-modified? true :set-attachment-modified? false)
   (ok))
 
 (defcommand set-attachments-as-verdict-attachment
