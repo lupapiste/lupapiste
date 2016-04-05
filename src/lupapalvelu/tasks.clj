@@ -57,7 +57,8 @@
    {:name "katselmus" :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
-    [{:name "pitoPvm" :type :date :required true}
+    [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
+     {:name "pitoPvm" :type :date :required true}
      {:name "pitaja" :type :string}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000}
@@ -65,8 +66,7 @@
              {:name "toteaja" :type :string}
              {:name "toteamisHetki" :type :date}]}
      {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
-     {:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}]}])
+     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}])
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
