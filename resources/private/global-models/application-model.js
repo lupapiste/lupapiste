@@ -382,7 +382,7 @@ LUPAPISTE.ApplicationModel = function() {
       // All designers have not been approved?
       if (!_.isEmpty(nonApprovedDesigners)) {
         var text = loc("application.designers-not-approved-help") + "<ul>" + nonApprovedDesigners.join("") + "</ul>";
-        hub.send("show-dialog", {title: "application.designers-not-approved",
+        hub.send("show-dialog", {ltitle: "application.designers-not-approved",
           size: "medium",
           component: "yes-no-dialog",
           componentParams: {text: text, yesFn: approve, lyesTitle: "continue", lnoTitle: "cancel"}});
