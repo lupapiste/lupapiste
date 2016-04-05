@@ -40,7 +40,6 @@
   {"FOOTER_PAGE" (localized-text lang "application.export.page")
    "FOOTER_DATE" (util/to-local-date (System/currentTimeMillis))
 
-
    "FIELD002"    (xml-escape (:address application))
 
    "FIELD003A"   (localized-text lang "application.muncipality")
@@ -84,7 +83,8 @@
   (doseq [row table-rows]
     (.write wrtr (str (apply xml-table-row row) "\n")))
 
-  (doseq [skip-existing-rows (take-while (fn [line] (not (s/includes? line "</table:table>"))) (line-seq rdr))])
+  ;; advance reader past rows we want to skip
+  (doseq [_ (take-while (fn [line] (not (s/includes? line "</table:table>"))) (line-seq rdr))])
   (write-line "</table:table>" fields wrtr))
 
 
@@ -97,7 +97,6 @@
           (write-table! rdr wrtr table-rows fields))))))
 
 (defn- build-history-row [{:keys [type text version category contents ts user]} lang]
-  ;(debug "row data:" data)
   [""
    (str
      (case category
@@ -121,18 +120,15 @@
    user])
 
 (defn- build-history-child-rows [action docs lang]
-  ;  (debug " docs: " (with-out-str (clojure.pprint/pprint docs)))
   (loop [docs-in docs
          result []]
     (let [[doc-attn & others] docs-in]
-      ;(debug " doc-attn: " doc-attn)
       (if (nil? doc-attn)
         result
         (recur others (conj result (build-history-row doc-attn lang)))))))
 
 (defn- build-history-rows [application lang]
   (let [data (toj/generate-case-file-data application lang)]
-    ;(debug " data: " (with-out-str (clojure.pprint/pprint data)))
     (loop [data-in data
            result []]
       (let [[history & older] data-in
@@ -154,7 +150,6 @@
                                                                "COLTITLE3" (i18n/localize lang "caseFile.documentDate")
                                                                "COLTITLE4" (i18n/localize lang "lisaaja")
                                                                "HISTORYTABLE" (build-history-rows application lang))))
-
 
 (defn- verdict-dates [lang dates]
   (cond-> []
@@ -228,5 +223,4 @@
                                                                                                                                (str (:pykala val))
                                                                                                                                (str (:paatoksentekija val))
                                                                                                                                (or (util/to-local-date (:paatospvm val)) "-")
-                                                                                                                               (list-verdict-att application id)]) (:poytakirjat paatos))
-                                                                ))))
+                                                                                                                               (list-verdict-att application id)]) (:poytakirjat paatos))))))
