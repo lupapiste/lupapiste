@@ -60,7 +60,7 @@
     [{:name "pitoPvm" :type :date :required true}
      {:name "pitaja" :type :string}
      {:name "huomautukset" :type :group
-      :body [{:name "kuvaus" :required true :type :text :max-len 4000}
+      :body [{:name "kuvaus" :type :text :max-len 4000}
              {:name "maaraAika" :type :date}
              {:name "toteaja" :type :string}
              {:name "toteamisHetki" :type :date}]}

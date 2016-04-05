@@ -350,7 +350,8 @@
                                                                                 (fn [m k v] (if-not (ss/blank? v)
                                                                                               (assoc m k (util/to-xml-date-from-string v))
                                                                                               m))
-                                                                                (select-keys huomautukset [:kuvaus :toteaja])
+                                                                                {:kuvaus (if (ss/blank? (:kuvaus huomautukset)) "-" (:kuvaus huomautukset))
+                                                                                 :toteaja (:toteaja huomautukset)}
                                                                                 (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)

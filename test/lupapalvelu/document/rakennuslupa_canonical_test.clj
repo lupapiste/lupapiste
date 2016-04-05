@@ -1478,7 +1478,28 @@
              (:kuvaus huomautus) => "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
              (:maaraAika huomautus) => "2014-05-05"
              (:toteamisHetki huomautus) => "2014-04-04"
-             (:toteaja huomautus) => "Jussi"))
+             (:toteaja huomautus) => "Jussi")
+
+           (fact "If huomautus kuvaus is empty, a dash (-) is put as kuvaus value for huomautus"
+             (let [katselmus-huomautus (katselmus-canonical
+                                         application-rakennuslupa-verdict-given
+                                         "fi"
+                                         "123"
+                                         "Pohjakatselmus 1"
+                                         1354532324658
+                                         [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
+                                           :tila     {:tila "pidetty" :kayttoonottava false}}]
+                                         authority-user-jussi
+                                         "pohjakatselmus"
+                                         :katselmus
+                                         "pidetty"
+                                         "Sonja Silja"
+                                         true
+                                         {:kuvaus ""}
+                                         "Tiivi Taavi, Hipsu ja Lala"
+                                         "Ei poikkeamisia")]
+               (get-in katselmus-huomautus [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia
+                                            :katselmustieto :Katselmus :huomautukset :huomautus :kuvaus]) => "-")))
 
 (fl/facts* "Katselmus with empty buildings is OK (no buildings in canonical)"
   (let [canonical (katselmus-canonical
