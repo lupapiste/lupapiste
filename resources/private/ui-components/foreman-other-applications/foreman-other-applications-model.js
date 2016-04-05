@@ -4,7 +4,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.params = params;
   self.rows = ko.observableArray();
   self.autoupdatedRows = ko.observableArray();
-  
+
   var service = lupapisteApp.services.documentDataService;
 
   // inherit from DocgenGroupModel
@@ -37,10 +37,9 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
 
   self.subSchemasAutoupdated = _.map(self.subSchemas, function(schema) {
     var readonly = _.includes(LUPAPISTE.config.foremanReadonlyFields, schema.name);
-    var uicomponent = readonly && schema.locPrefix && schema.uicomponent === "docgen-string" ? "docgen-localized-string" : schema.uicomponent;
     return _.extend({}, schema, {
-      uicomponent: uicomponent,
-      readonly: readonly
+      readonly: readonly,
+      inputType: readonly && schema.locPrefix ? "localized-string" : schema.inputType
     });
   });
 
