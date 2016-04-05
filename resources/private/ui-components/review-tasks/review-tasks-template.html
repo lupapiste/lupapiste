@@ -1,0 +1,42 @@
+<script class="ko-template" id="review-tasks-template" type="text/x-jquery-tmpl">
+  <div class="review-tasks"
+       data-bind="visible: _.size( reviews() ),
+                  if: _.size( reviews() )">
+    <h2 data-bind="ltext: 'task-katselmus._group_label'"></h2>
+    <table class="reviews-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th data-bind="ltext: 'application.taskDisplayName'"></th>
+          <th data-bind="ltext: 'date'"></th>
+          <th data-bind="ltext: 'review.author'"></th>
+          <th data-bind="ltext: 'review.state'"></th>
+          <th data-bind="ltext: 'review.condition'"></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: reviews">
+        <tr>
+          <td class="reviews-table--icons" data-bind="if: hasAttachments">
+            <i class="lupicon-paperclip"></i></td>
+          <td><a data-bind="text: name"></a></td>
+          <td data-bind="text: date"></td>
+          <td data-bind="text: author"></td>
+          <td data-bind="if: state">
+            <span data-bind="ltext: 'task-katselmus.katselmus.tila.' + state"></span>
+          </td>
+          <td data-bind="if: condition">
+            <span data-bind="ltext: 'yes'"></span>
+          </td>
+          <td data-bind="if: notes" class="reviews-table--action">
+            <a data-bind="ltext: 'review.show-notes',
+                          toggleClick: notesVisible"></a></td>
+        </tr>
+        <!-- ko if: notesVisible -->
+        <tr class="reviews-table__note"><td colspan="7" data-bind="text: notes"></td></tr>
+        <tr></tr>
+        <!-- /ko -->
+      </tbody>
+    </table>
+  </div>
+</script>
