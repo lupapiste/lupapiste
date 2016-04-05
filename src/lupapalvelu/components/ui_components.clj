@@ -169,7 +169,8 @@
                    "fileupload-service.js"
                    "side-panel-service.js"
                    "accordion-service.js"
-                   "verdict-appeal-service.js"]}
+                   "verdict-appeal-service.js"
+                   "scroll-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

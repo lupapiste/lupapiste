@@ -146,6 +146,7 @@ LUPAPISTE.ApplicationModel = function() {
           tasks: _.map(groups[n], function(task) {
             task.displayName = taskUtil.shortDisplayName(task);
             task.openTask = function() {
+              hub.send( "scrollService::push");
               taskPageController.setApplicationModelAndTaskId(self._js, task.id);
               pageutil.openPage("task",  self.id() + "/" + task.id);
             };

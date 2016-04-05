@@ -13,4 +13,5 @@
   lupapisteApp.services.accordionService = new LUPAPISTE.AccordionService();
   lupapisteApp.services.fileUploadService = new LUPAPISTE.FileuploadService();
   lupapisteApp.services.verdictAppealService = new LUPAPISTE.VerdictAppealService();
+  lupapisteApp.services.scrollService = new LUPAPISTE.ScrollService();
 })();

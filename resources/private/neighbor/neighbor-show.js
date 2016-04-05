@@ -155,7 +155,9 @@
   function gotUser(user) {
     vetumaParams.visible(false);
     model.tupasUser(user);
-    scrollToResponse();
+    _.delay( function() {
+      window.scrollTo( 0 , document.body.scrollHeight);
+    }, 1000);
   }
 
   hub.onPageLoad("neighbor-show", function(e) {
