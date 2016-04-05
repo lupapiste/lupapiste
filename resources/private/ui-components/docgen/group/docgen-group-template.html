@@ -12,15 +12,17 @@
     <!-- /ko -->
 
     <div data-bind="foreach: subSchemas">
-      <span class="form-entry"
-            data-bind="component: { name: uicomponent,
-                                    params: { schema: $data,
-                                              path: path,
-                                              i18npath: i18npath,
-                                              applicationId: applicationId,
-                                              documentId: documentId,
-                                              service: $component.service }}">
-      </span>
+      <!-- ko if: !$data.hidden -->
+        <span class="form-entry"
+              data-bind="component: { name: uicomponent,
+                                      params: { schema: $data,
+                                                path: path,
+                                                i18npath: i18npath,
+                                                applicationId: applicationId,
+                                                documentId: documentId,
+                                                service: $component.service }}">
+        </span>
+      <!-- /ko -->
     </div>
   </div>
 </script>
