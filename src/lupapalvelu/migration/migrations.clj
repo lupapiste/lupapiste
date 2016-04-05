@@ -1866,10 +1866,10 @@
             0
             (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1}))))
 
-(defmigration add-id-for-verdicts-paatokset
+(defmigration add-id-for-verdicts-paatokset-v2
   (update-applications-array :verdicts
-                             (fn [verdict] (update verdict :paatokset (fn [paatokset] (map #(assoc % :id (mongo/create-id)) paatokset))))
-                             {:verdicts.paatokset.0 {$exists true}}))
+                             (fn [verdict] (update verdict :paatokset (fn [paatokset] (map #(if (:id %) % (assoc % :id (mongo/create-id))) paatokset))))
+                             {:verdicts.paatokset {$elemMatch {:id {$exists false}, :poytakirjat {$exists true}}}}))
 
 (defmigration clean-vaadittuTyonjohtajatieto-in-verdicts
   (update-applications-array :verdicts
