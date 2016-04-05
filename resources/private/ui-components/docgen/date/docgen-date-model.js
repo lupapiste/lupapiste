@@ -2,6 +2,8 @@ LUPAPISTE.DocgenDateModel = function( params ) {
   "use strict";
   var self = this;
 
+  params.template = params.template || "default-docgen-date-template";
+
   ko.utils.extend( self, new LUPAPISTE.DocgenInputModel( params ));
   self.dateInputId = _.uniqueId( "date-input-");
 
