@@ -49,6 +49,9 @@
          (:attachments application))
        (assoc application :attachments)))
 
+(defn- remove-non-approved-designers [application]
+  application)
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application organization]
@@ -58,7 +61,7 @@
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type)
-        filtered-app  (remove-unsupported-attachments application)
+        filtered-app  (-> application remove-unsupported-attachments remove-non-approved-designers)
         filtered-submitted-app (remove-unsupported-attachments submitted-application)]
     (assert krysp-fn "KRYSP mapper function not found/defined?")
     (krysp-fn filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)))
