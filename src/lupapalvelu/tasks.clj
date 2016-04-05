@@ -94,7 +94,8 @@
 
    {:info {:name "task-lupamaarays" :type :task :order 20}
     :body [{:name "maarays" :type :text :max-len 10000 :readonly true :layout :full-width}
-           {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}]}])
+           {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}
+           {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
 
 (defn new-task [schema-name task-name data {:keys [created assignee state] :as meta :or {state :requires_user_action}} source]
   {:pre [schema-name source (or (map? data) (nil? data))]}
