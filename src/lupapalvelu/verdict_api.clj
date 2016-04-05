@@ -29,7 +29,8 @@
             [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [sade.env :as env])
   (:import (java.io File)))
 
 ;;
@@ -174,16 +175,17 @@
              "verdicts.$.paatokset" (:paatokset verdict)}})))
 
 (defn create-verdict-pdfa! [user application verdict-id lang]
-  (debug "create-verdict-pdfa!" verdict-id " : " (count (filter #(= verdict-id (:id %)) (:verdicts application))))
-  (let [application (domain/get-application-no-access-checking (:id application))
-        verdict (first (filter #(= verdict-id (:id %)) (:verdicts application)))]
-    (doall
-      (for [paatos-idx (range 0 (count (:paatokset verdict)))]
-        (let [content (libre/generate-verdict-pdfa application verdict-id paatos-idx lang)
-              temp-file (File/createTempFile "create-verdict-pdfa-" ".pdf")]
-          (io/copy content temp-file)
-          (attachment/attach-file! application (child-to-attachment/build-attachment user application :verdicts verdict-id lang temp-file nil))
-          (io/delete-file temp-file :silently))))))
+  (if (env/feature? :paatos-pdfa)
+    (let [application (domain/get-application-no-access-checking (:id application))
+          verdict (first (filter #(= verdict-id (:id %)) (:verdicts application)))]
+      (doall
+        (for [paatos-idx (range 0 (count (:paatokset verdict)))]
+          (let [content (libre/generate-verdict-pdfa application verdict-id paatos-idx lang)
+                temp-file (File/createTempFile "create-verdict-pdfa-" ".pdf")]
+            (io/copy content temp-file)
+            (attachment/attach-file! application (child-to-attachment/build-attachment user application :verdicts verdict-id lang temp-file nil))
+            (io/delete-file temp-file :silently)))))
+    (info "feature.paatos-pdfa disabled !")))
 
 (defn- publish-verdict [{timestamp :created application :application lang :lang user :user :as command} {:keys [id kuntalupatunnus sopimus]}]
   (if-not (ss/blank? kuntalupatunnus)
