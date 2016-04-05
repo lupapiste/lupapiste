@@ -2,7 +2,7 @@ LUPAPISTE.DocgenSelectModel = function(params) {
   "use strict";
   var self = this;
 
-  params.template = params.template || "default-docgen-select-template";
+  params.template = (params.template || params.schema.template) || "default-docgen-select-template";
 
   // inherit from DocgenInputModel
   ko.utils.extend(self, new LUPAPISTE.DocgenInputModel(params));
