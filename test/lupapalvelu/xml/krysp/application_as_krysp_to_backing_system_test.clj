@@ -22,8 +22,8 @@
                                                      :id "LP-123456"}))
 
 (facts "Designer documents that have not been approved are removes"
-  (let [documents (map #(model/new-document (schemas/get-schema 1 %) 123) ["paasuunnittelija" "suunnittelija" "hakija-r"])
-        approved-docs (map #(assoc-in % [:meta :_approved] {:value "approved"}) documents)
+  (let [documents (mapv #(model/new-document (schemas/get-schema 1 %) 123) ["paasuunnittelija" "suunnittelija" "hakija-r"])
+        approved-docs (mapv #(assoc-in % [:meta :_approved] {:value "approved" :timestamp 124}) documents)
         application {:documents documents}]
 
     (fact "Approved have not been removed"
@@ -36,4 +36,11 @@
     (fact "Non-approved have been removed"
       (let [filtered (:documents (remove-non-approved-designers {:documents documents}))]
         (count filtered) => 1
-        (get-in (first filtered) [:schema-info :name]) => "hakija-r"))))
+        (get-in (first filtered) [:schema-info :name]) => "hakija-r"))
+
+    (fact "Modified, previously approved document is removed"
+      (let [modified (assoc-in approved-docs [0 :data :henkilotiedot :etunimi :modified] 125)
+            filtered (:documents (remove-non-approved-designers {:documents modified}))]
+        (count filtered) => 2
+        (get-in (first filtered) [:schema-info :name]) => "suunnittelija"
+        (get-in (last filtered) [:schema-info :name]) => "hakija-r"))))
