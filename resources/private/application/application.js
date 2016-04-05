@@ -215,21 +215,21 @@
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
 
-        docgen.displayDocuments("#applicationDocgen",
+        docgen.displayDocuments("applicationDocgen",
                                 app,
                                 applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
                                 authorizationModel,
                                 {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
-        docgen.displayDocuments("#partiesDocgen",
+        docgen.displayDocuments("partiesDocgen",
                                 app,
                                 sortedPartyDocs,
                                 authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
-        docgen.displayDocuments("#applicationAndPartiesDocgen",
+        docgen.displayDocuments("applicationAndPartiesDocgen",
                                 app,
                                 applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
                                 authorizationModel,
                                 {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
-        docgen.displayDocuments("#constructionTimeDocgen",
+        docgen.displayDocuments("constructionTimeDocgen",
                                 app,
                                 constructionTimeDocs,
                                 authorizationModel,

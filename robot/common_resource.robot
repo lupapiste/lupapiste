@@ -1194,6 +1194,9 @@ Scroll to
   [Arguments]  ${selector}
   Wait Until  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
 
+Scroll to top
+  Execute javascript  window.scrollTo(0,0)
+
 Scroll to test id
   [Arguments]  ${id}
   Scroll to  [data-test-id=${id}]

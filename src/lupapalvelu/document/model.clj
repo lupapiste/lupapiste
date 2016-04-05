@@ -22,7 +22,6 @@
 ;; Validation:
 ;;
 
-;; if you changes these values, change it in docgen.js, too
 (def default-max-len 255)
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 

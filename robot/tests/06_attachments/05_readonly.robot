@@ -20,7 +20,7 @@ Sonja creates an application with statement
   Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
   Wait and click  xpath=//*[@data-test-id='add-statement-giver']
   Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
-  Execute javascript  window.scrollTo(0,0)
+  Scroll to top
   Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-0']
   Wait until  Element text should be  xpath=//div[@data-test-id='header-statement-edit']//span[@data-bind='text: person.text']  PALOVIRANOMAINEN
   Input text  statement-text  do it

@@ -126,7 +126,7 @@ var taskPageController = (function() {
       taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);
 
       var options = {collection: "tasks", updateCommand: "update-task", validate: true};
-      docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, options);
+      docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
 
     } else {
       $("#taskDocgen").empty();

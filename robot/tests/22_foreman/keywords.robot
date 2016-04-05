@@ -80,10 +80,14 @@ Open application by id
   Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
   Wait until  Element Should Be Visible  xpath=//section[@id='application']
 
+Project application is open
+  ${appId} =   Get From List  ${applicationIds}  0
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
+
 Open project application
   ${appId} =   Get From List  ${applicationIds}  0
   Open application by id  ${appId}
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
+  Project application is open
 
 Foreman history should have text X times
   [Arguments]  ${text}  ${times}
