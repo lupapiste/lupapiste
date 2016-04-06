@@ -313,7 +313,7 @@
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Katselmuskatu 17")
         application-id (:id application)
         _ (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
-        task-id (:taskId (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus")) => truthy]
+        task-id (:taskId (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "aloituskokous")) => truthy]
 
        (upload-attachment-to-target sonja application-id nil true task-id "task") ; Related to task
        (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
@@ -361,7 +361,7 @@
           application-id (:id application)
           _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
           task-name "do the shopping"
-          task-id (:taskId (command apikey :create-task :id application-id :taskName task-name :schemaName "task-katselmus")) => truthy
+          task-id (:taskId (command apikey :create-task :id application-id :taskName task-name :schemaName "task-katselmus" :taskSubtype "aloituskokous")) => truthy
           application (query-application apikey application-id)]
 
       (populate-task application task-id apikey) => ok?

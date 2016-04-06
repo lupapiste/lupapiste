@@ -5132,3 +5132,5 @@
 "user" "sv" "Användare"
 "libre-conversion-error" "fi" "PDF/A-tiedoston luonti epäonnistui"
 "libre-conversion-error" "sv" ""
+"task.katselmuksenLaji-required" "fi" "Katselmuksen laji"
+"task.katselmuksenLaji-required" "sv" ""

@@ -6,6 +6,7 @@
             [sade.core :refer :all]
             [sade.env :as env]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.attachment :as attachment]
@@ -14,7 +15,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.document.model :as model]))
 
 ;; Helpers
 
@@ -45,6 +47,7 @@
 
 (defcommand create-task
   {:parameters [id taskName schemaName]
+   :optional-parameters [taskSubtype]
    :input-validators [(partial non-blank-parameters [:id :taskName :schemaName])]
    :user-roles #{:authority}
    :states     valid-states}
@@ -53,11 +56,25 @@
     (fail! :illegal-schema))
   (let [meta {:created created :assignee user}
         source (or (valid-source (:source data)) {:type :authority :id (:id user)})
-        task (tasks/new-task schemaName taskName {} meta source)]
-    (update-application command
-      {$push {:tasks task}
-       $set {:modified created}})
-    (ok :taskId (:id task))))
+        task (tasks/new-task schemaName
+                             taskName
+                             (if-not (ss/blank? taskSubtype)
+                               {:katselmuksenLaji taskSubtype}
+                               {})
+                             meta
+                             source)
+        validation-results (tasks/task-doc-validation schemaName task)
+        error (when (seq validation-results)
+                (-> (first validation-results)
+                    :result
+                    last))]
+    (if-not error
+      (do
+        (update-application command
+                            {$push {:tasks task}
+                             $set {:modified created}})
+        (ok :taskId (:id task)))
+      (fail (str "error." error)))))
 
 ;;TODO: remove task PDF attachment if it exists [and if you can figure out how to identify it]
 (defcommand delete-task
@@ -112,13 +129,26 @@
           set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
       (set-state command taskId :sent (when (seq set-statement) {$set set-statement})))))
 
+(defn- schema-with-type-options
+  "Genereate 'subtype' options for readonly elements with sequential body"
+  [{info :info body :body}]
+  {:schemaName (:name info)
+   :types      (some (fn [{:keys [name readonly body]}]
+                       (when (and readonly (seq body))
+                         (for [option body
+                               :let [option-id (:name option)]]
+                           {:id   option-id
+                            :text (i18n/localize i18n/*lang* (:name info) name option-id)})))
+                     body)})
+
 (defquery task-types-for-application
-  {:description "Returns a list of allowed schema names for current application and user"
-   :parameters [:id]
-   :user-roles #{:authority}
-   :states     states/all-states}
+  {:description      "Returns a list of allowed schema maps for current application and user. Map has :schemaName, and :types is list of subtypes for that schema"
+   :parameters       [:id :lang]
+   :user-roles       #{:authority}
+   :input-validators [(partial non-blank-parameters [:lang])]
+   :states           states/all-states}
   [{application :application}]
   (ok :schemas (->> application
                  (tasks/task-schemas)
                  (sort-by (comp :order :info))
-                 (map (comp :name :info)))))
+                 (map schema-with-type-options))))

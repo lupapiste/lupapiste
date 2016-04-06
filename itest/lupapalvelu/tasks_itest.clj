@@ -97,9 +97,19 @@
     (fact "Applicant can't create tasks"
       (command pena :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => unauthorized?)
     (fact "Authority can create tasks"
-      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => ok?
-      (some #(and (= "do the shopping" (:taskname %)) (= "task-katselmus") (-> % :schema-info :name)) (:tasks (query-application pena application-id))) => truthy)
+      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
+      (let [tasks (:tasks (query-application pena application-id))
+            katselmus-task (some #(when (and (= "task-katselmus" (-> % :schema-info :name))
+                                             (= "do the shopping" (:taskname %)))
+                                   %)
+                                 tasks)]
+        katselmus-task => truthy
+        (fact "katselmuksenLaji saved to doc"
+          (-> katselmus-task :data :katselmuksenLaji :value) => "aloituskokous")))
     (fact "Can't create documents with create-task command"
-      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "uusiRakennus") => (partial expected-failure? "illegal-schema")))
+      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "uusiRakennus") => (partial expected-failure? "illegal-schema"))
+    (fact "Can't create katselmus without valid katselmuksenLaji"
+      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => (partial expected-failure? "error.illegal-value:select")
+      (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "foofaa") => (partial expected-failure? "error.illegal-value:select")))
 
   )

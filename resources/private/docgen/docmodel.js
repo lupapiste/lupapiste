@@ -723,7 +723,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sourceValueChanged(select, selectedOption, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
 
     if (subSchema.readonly) {
-      select.readOnly = true;
+      select.disabled = true;
     } else {
       select.onchange = function(e) {
         sourceValueChanged(select, select.value, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);

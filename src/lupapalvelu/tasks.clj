@@ -31,8 +31,9 @@
   {:name "katselmuksenLaji"
    :type :select :sortBy :displayname
    :required true
+   :readonly true
    :whitelist {:roles [:authority] :otherwise :disabled}
-   :default "muu katselmus"
+   :default "illegal"
    :body (mapv (partial hash-map :name) task-types)})
 
 (def- katselmuksenLaji-ya
@@ -97,6 +98,11 @@
            {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}
            {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
 
+(defn task-doc-validation [schema-name doc]
+  (let [schema (schemas/get-schema task-schemas-version schema-name)
+        info   (model/document-info doc schema)]
+    (model/validate-fields nil info nil (:data doc) [])))
+
 (defn new-task [schema-name task-name data {:keys [created assignee state] :as meta :or {state :requires_user_action}} source]
   {:pre [schema-name source (or (map? data) (nil? data))]}
   (util/deep-merge
@@ -115,7 +121,7 @@
 
 (defn- katselmus->task [meta source katselmus]
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
-        data {:katselmuksenLaji (:katselmuksenLaji katselmus)
+        data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
               :vaadittuLupaehtona true}]
     (new-task "task-katselmus" task-name data meta source)))
 

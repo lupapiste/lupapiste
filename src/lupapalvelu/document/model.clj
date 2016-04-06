@@ -260,7 +260,7 @@
                      data
                      (dissoc data (if (= selected "henkilo") :yritys :henkilo))))]
         (filter
-          (comp not nil?)
+          seq
           (concat (flatten [result])
             (map (fn [[k2 v2]]
                    (validate-fields application info k2 v2 current-path)) data)))))))
