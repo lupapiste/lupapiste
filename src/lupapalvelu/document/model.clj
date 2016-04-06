@@ -22,7 +22,6 @@
 ;; Validation:
 ;;
 
-;; if you changes these values, change it in docgen.js, too
 (def default-max-len 255)
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
@@ -261,7 +260,7 @@
                      data
                      (dissoc data (if (= selected "henkilo") :yritys :henkilo))))]
         (filter
-          (comp not nil?)
+          seq
           (concat (flatten [result])
             (map (fn [[k2 v2]]
                    (validate-fields application info k2 v2 current-path)) data)))))))

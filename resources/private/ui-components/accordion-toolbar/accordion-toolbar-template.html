@@ -27,9 +27,8 @@
       </span>
     </button>
 
-    <div class="group-buttons"
-         data-bind="if: showToolbar,
-                    visible: showToolbar">
+    <!-- ko if: showToolbar -->
+    <div class="group-buttons" >
       <span class="form-approval-status is-status no-border-bottom"
             data-bind="css: {approved: isApproved,
                              rejected: isRejected,
@@ -89,7 +88,8 @@
         <!-- /ko -->
       </div>
       <!-- /ko -->
-      </div>
     </div>
+    <!-- /ko -->
+
   </div>
 </script>

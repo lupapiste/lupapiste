@@ -258,7 +258,7 @@
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
-  [{:keys [verdictId backendId timestamp name given status official text section draft agreement metadata]}]
+  [{:keys [verdictId backendId timestamp name given status official text section draft agreement metadata paatos-id]}]
   (let [verdict-id (or verdictId (mongo/create-id))]
     {:id verdict-id
     :kuntalupatunnus backendId
@@ -266,7 +266,8 @@
     :timestamp timestamp
     :sopimus agreement ; not in KRYSP
     :metadata metadata ; not in KRYSP?
-    :paatokset [{:paivamaarat {:anto             given
+    :paatokset [{:id          (or paatos-id (mongo/create-id))
+                 :paivamaarat {:anto             given
                                :lainvoimainen    official}
                  :poytakirjat [{:paatoksentekija name
                                 :urlHash         verdict-id
@@ -373,5 +374,3 @@
   {:name ""
    :description nil
    :created nil})
-
-

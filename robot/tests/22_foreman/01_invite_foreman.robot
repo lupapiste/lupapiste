@@ -1,6 +1,7 @@
 *** Settings ***
 
 Resource        ../../common_resource.robot
+Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
 Suite Setup     Initialize
 
@@ -129,7 +130,8 @@ Authority can view draft foreman application, but can't use commands
 
 Original application is approved and given a verdict
   Click by test id  test-application-link-permit-lupapistetunnus
-  Wait Until  Click enabled by test id  approve-application
+  Project application is open
+  Approve application
   Open tab  verdict
   Submit empty verdict
 

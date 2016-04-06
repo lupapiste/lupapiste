@@ -39,76 +39,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   self.sizeClasses = { "t": "form-input tiny", "s": "form-input short", "m": "form-input medium", "l": "form-input long", "xl": "form-input really-long"};
 
-  // Context help
-  self.addFocus = function (e) {
-    var event = getEvent(e);
-    var input$ = $(event.target);
-    input$.focus();
-  };
-
-  self.findHelpElement = function (e) {
-    var event = getEvent(e);
-    var input$ = $(event.target);
-    var help$ = input$.siblings(".form-help");
-    if (!help$.length) {
-      help$ = input$.parent().siblings(".form-help");
-    }
-    if (!help$.length) {
-      return false;
-    }
-    return help$;
-  };
-  self.findErrorElement = function (e) {
-    var event = getEvent(e);
-    var input$ = $(event.target);
-    var error$ = input$.siblings(".errorPanel");
-    if (!error$.length) {
-      error$ = input$.parent().siblings(".errorPanel");
-    }
-    if (!error$.length) {
-      return false;
-    }
-    return error$;
-  };
-
-  self.showHelp = function (e) {
-    var element = self.findHelpElement(e);
-    if (element) {
-      element.stop();
-      element.fadeIn("slow").css("display", "block");
-      var st = $(window).scrollTop(); // Scroll Top
-      var y = element.offset().top;
-      if ((y - 80) < (st)) {
-        $("html, body").animate({ scrollTop: y - 80 + "px" });
-      }
-    }
-    self.showError(e);
-  };
-  self.hideHelp = function (e) {
-    var element = self.findHelpElement(e);
-    if (element) {
-      element.stop();
-      element.fadeOut("slow").css("display", "none");
-    }
-    self.hideError(e);
-  };
-
-  self.showError = function (e) {
-    var element = self.findErrorElement(e);
-    if (element && element.children && element.children().size()) {
-      element.stop();
-      element.fadeIn("slow").css("display", "block");
-    }
-  };
-
-  self.hideError = function (e) {
-    var element = self.findErrorElement(e);
-    if (element) {
-      element.stop();
-      element.fadeOut("slow").css("display", "none");
-    }
-  };
-
   // trigger stored events once
   self.triggerEvents = function() {
     _.forEach(self.events, function(event) {
@@ -196,7 +126,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   // Returns the latest modification time of the model or
   // zero if no modifications.
-    function modelTimestamp( model ) {
+  function modelTimestamp( model ) {
     if( _.isObject( model )) {
       return !_.isUndefined(model.value)
                 ? model.modified || 0
@@ -230,6 +160,26 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var approval = approvalFun();
     return approval && approval.value === check;
   };
+
+  self.approvalHubSubscribe = function(fun, listenBroadcasts) {
+    var filter = {eventType: "approval-status-" + self.docId,
+                  broadcast: Boolean(listenBroadcasts) };
+    self.subscriptions.push(hub.subscribe( filter, fun ));
+  };
+
+  // Receiver path can be falsey for broadcast messages.
+  self.approvalHubSend = function( approval, senderPath, receiverPath ) {
+    hub.send( "approval-status-" + self.docId,
+              { broadcast: _.isEmpty(senderPath),
+                approval: _.clone(approval),
+                path: senderPath,
+                receiver: receiverPath});
+  };
+
+  self.approvalModel = new LUPAPISTE.DocumentApprovalModel(self);
+  self.isApproved = self.approvalModel.isApproved;
+
+  //----------------------------------------------------------------------
 
   // Returns id if we are in the testing mode, otherwise null.
   // Null because Knockout does not render null attributes.
@@ -278,47 +228,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                            {html: true });
   };
 
-  self.approvalHubSubscribe = function(fun, listenBroadcasts) {
-    var filter = {eventType: "approval-status-" + self.docId,
-                  broadcast: Boolean(listenBroadcasts) };
-    self.subscriptions.push(hub.subscribe( filter, fun ));
-  };
-
-  // Receiver path can be falsey for broadcast messages.
-  self.approvalHubSend = function( approval, senderPath, receiverPath ) {
-    hub.send( "approval-status-" + self.docId,
-              { broadcast: _.isEmpty(senderPath),
-                approval: _.clone(approval),
-                path: senderPath,
-                receiver: receiverPath});
-  };
-
-  // ----------------------------------------------------------------------
-
-
-  function makeGroupHelpTextSpan(schema) {
-    var span = document.createElement("span");
-    span.className = "group-help-text";
-
-    var locKey = schema["group-help"];
-    if (locKey) {
-      span.innerHTML = loc(locKey);
-    }
-
-    return span;
-  }
-
-  function makeSectionHelpTextSpan(schema) {
-    var span = document.createElement("span");
-    span.className = "group-help-text";
-    var locKey = schema.info["section-help"];
-    if (locKey) {
-      span.innerHTML = loc(locKey);
-    }
-
-    return span;
-  }
-
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
   }
@@ -331,7 +240,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     opts = opts || {};
     var button = document.createElement("button");
     button.id = id;
-    //button.className = "btn";
     if( opts.icon ) {
       var i = document.createElement( "i");
       i.setAttribute( "class", opts.icon );
@@ -504,27 +412,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var validationResult = getValidationResult(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath, validationResult);
     var input = makeInput("checkbox", myPath, model, subSchema, validationResult);
-    input.onmouseover = self.showHelp;
-    input.onmouseout = self.hideHelp;
+    input.onmouseover = docutils.showHelp;
+    input.onmouseout = docutils.hideHelp;
     span.appendChild(input);
 
     $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     if (subSchema.label) {
       var label = makeLabel(subSchema, "checkbox", myPath, false, validationResult);
-      label.onmouseover = self.showHelp;
-      label.onmouseout = self.hideHelp;
+      label.onmouseover = docutils.showHelp;
+      label.onmouseout = docutils.hideHelp;
       span.appendChild(label);
     }
 
     listen(subSchema, myPath, input);
 
     return span;
-  }
-
-  function setMaxLen(input, subSchema) {
-    var maxLen = subSchema["max-len"] || LUPAPISTE.config.inputMaxLength; // if you change the default, change in model.clj, too
-    input.setAttribute("maxlength", maxLen);
   }
 
   function buildString(subSchema, model, path, partOfChoice) {
@@ -536,7 +439,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var inputType = _.includes(supportedInputSubtypes, subSchema.subtype) ? subSchema.subtype : "text";
 
     var input = makeInput(inputType, myPath, model, subSchema, validationResult);
-    setMaxLen(input, subSchema);
+    docutils.setMaxLen(input, subSchema);
 
     listen(subSchema, myPath, input);
 
@@ -557,10 +460,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       kiintun.className = "form-maaraala";
       kiintun.appendChild(document.createTextNode(util.prop.toHumanFormat(self.propertyId) + "-M"));
 
-      input.onfocus = self.showHelp;
-      input.onblur = self.hideHelp;
-      input.onmouseover = self.showHelp;
-      input.onmouseout = self.hideHelp;
+      input.onfocus = docutils.showHelp;
+      input.onblur = docutils.hideHelp;
+      input.onmouseover = docutils.showHelp;
+      input.onmouseout = docutils.hideHelp;
 
       kiitunAndInput.appendChild(kiintun);
       kiitunAndInput.appendChild(input);
@@ -577,19 +480,19 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       unit.className = "form-string-unit";
       unit.appendChild(document.createTextNode(loc(["unit", subSchema.unit])));
 
-      input.onfocus = self.showHelp;
-      input.onblur = self.hideHelp;
-      input.onmouseover = self.showHelp;
-      input.onmouseout = self.hideHelp;
+      input.onfocus = docutils.showHelp;
+      input.onblur = docutils.hideHelp;
+      input.onmouseover = docutils.showHelp;
+      input.onmouseout = docutils.hideHelp;
 
       inputAndUnit.appendChild(unit);
       span.appendChild(inputAndUnit);
 
     } else {
-      input.onfocus = self.showHelp;
-      input.onblur = self.hideHelp;
-      input.onmouseover = self.showHelp;
-      input.onmouseout = self.hideHelp;
+      input.onfocus = docutils.showHelp;
+      input.onblur = docutils.hideHelp;
+      input.onmouseover = docutils.showHelp;
+      input.onmouseout = docutils.hideHelp;
       span.appendChild(input);
     }
 
@@ -628,15 +531,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     input.id = pathStrToID(myPath);
 
-    input.onfocus = self.showHelp;
-    input.onblur = self.hideHelp;
-    input.onmouseover = self.showHelp;
-    input.onmouseout = self.hideHelp;
+    input.onfocus = docutils.showHelp;
+    input.onblur = docutils.hideHelp;
+    input.onmouseover = docutils.showHelp;
+    input.onmouseout = docutils.hideHelp;
 
     input.name = myPath;
     input.setAttribute("rows", subSchema.rows || "10");
     input.setAttribute("cols", subSchema.cols || "40");
-    setMaxLen(input, subSchema);
+    docutils.setMaxLen(input, subSchema);
 
     input.className = "form-input textarea";
     if (validationResult && validationResult[0]) {
@@ -738,10 +641,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var span = makeEntrySpan(subSchema, myPath, validationResult);
     var sizeClass = self.sizeClasses[subSchema.size] || "";
 
-    select.onfocus = self.showHelp;
-    select.onblur = self.hideHelp;
-    select.onmouseover = self.showHelp;
-    select.onmouseout = self.hideHelp;
+    select.onfocus = docutils.showHelp;
+    select.onblur = docutils.hideHelp;
+    select.onmouseover = docutils.showHelp;
+    select.onmouseout = docutils.hideHelp;
     select.setAttribute("data-docgen-path", myPath);
     select.setAttribute("data-test-id", myPath);
 
@@ -820,7 +723,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sourceValueChanged(select, selectedOption, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
 
     if (subSchema.readonly) {
-      select.readOnly = true;
+      select.disabled = true;
     } else {
       select.onchange = function(e) {
         sourceValueChanged(select, select.value, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
@@ -873,17 +776,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
 
     if (subSchema.approvable) {
-    $(div).append(createComponent( "group-approval",
-                                   {docModel: self,
-                                    subSchema: subSchema,
-                                    model: myModel,
-                                    path: path,
-        remove: resolveRemoveOptions( subSchema, path) }));
+      $(div).append(createComponent("group-approval",
+                                    {docModel: self,
+                                     subSchema: subSchema,
+                                     model: myModel,
+                                     path: path,
+                                     remove: resolveRemoveOptions(subSchema, path)}));
     }
     var label = makeLabel(subSchema, "group", myPath, true, validationResult);
     div.appendChild(label);
 
-    var groupHelpText = makeGroupHelpTextSpan(subSchema);
+    var groupHelpText = docutils.makeGroupHelpTextSpan(subSchema);
     div.appendChild(groupHelpText);
 
 
@@ -1115,10 +1018,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       select.onchange = function() {
         var target = select;
-        var indicator = createIndicator(target);
+        var indicator = docutils.createIndicator(target);
         var path = target.name;
         var label = document.getElementById(pathStrToLabelID(path));
-        var loader = loaderImg();
+        var loader = docutils.loaderImg();
         var basePathEnd = (path.lastIndexOf(".") > 0) ? path.lastIndexOf(".") : path.length;
         var basePath = path.substring(0, basePathEnd);
 
@@ -1538,7 +1441,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
         div.appendChild(label);
 
-        var groupHelpText = makeGroupHelpTextSpan(subSchema);
+        var groupHelpText = docutils.makeGroupHelpTextSpan(subSchema);
         div.appendChild(groupHelpText);
 
         div.appendChild(table);
@@ -1636,7 +1539,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function getSelectOneOfDefinition(schema) {
     var selectOneOfSchema = _.find(schema.body, function (subSchema) {
-      return subSchema.name === docvars.SELECT_ONE_OF_GROUP_KEY && subSchema.type === "radioGroup";
+      return subSchema.name === docutils.SELECT_ONE_OF_GROUP_KEY && subSchema.type === "radioGroup";
     });
 
     if (selectOneOfSchema) {
@@ -1683,28 +1586,19 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (selectOneOf.length) {
       // Show current selection or the first of the group
       var myModel = _.head(selectOneOf);
-      if (model[docvars.SELECT_ONE_OF_GROUP_KEY]) {
-        myModel = model[docvars.SELECT_ONE_OF_GROUP_KEY].value;
+      if (model[docutils.SELECT_ONE_OF_GROUP_KEY]) {
+        myModel = model[docutils.SELECT_ONE_OF_GROUP_KEY].value;
       }
 
       toggleSelectedGroup(myModel);
 
-      var s = "[name$='." + docvars.SELECT_ONE_OF_GROUP_KEY + "']";
+      var s = "[name$='." + docutils.SELECT_ONE_OF_GROUP_KEY + "']";
       $(body).find(s).change(function () {
         toggleSelectedGroup(this.value);
       });
     }
 
     return body;
-  }
-
-  function loaderImg() {
-    var img = document.createElement("img");
-    img.src = "/lp-static/img/ajax-loader-12.gif";
-    img.alt = "...";
-    img.width = 12;
-    img.height = 12;
-    return img;
   }
 
   function saveForReal(paths, values, callback) {
@@ -1770,50 +1664,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function createIndicator(eventTarget, className) {
-    className = className || "form-indicator";
-    var parent$ = $(eventTarget.parentNode);
-    parent$.find("." + className).remove();
-    var indicator = document.createElement("span");
-    var icon = document.createElement("span");
-    var text = document.createElement("span");
-    text.className = "text";
-    icon.className = "icon";
-    indicator.className = className;
-    indicator.appendChild(text);
-    indicator.appendChild(icon);
-    parent$.append(indicator);
-    return indicator;
-  }
-
-  function showIndicator(indicator, className, locKey) {
-    var parent$ = $(indicator).closest("table");
-    var i$ = $(indicator);
-
-    if(parent$.length > 0) {
-      // disable indicator text for table element
-      i$.addClass(className).fadeIn(200);
-    } else {
-      i$.children(".text").text(loc(locKey));
-      i$.addClass(className).fadeIn(200);
-    }
-
-    setTimeout(function () {
-      i$.removeClass(className).fadeOut(200, function () {});
-    }, 4000);
-  }
-
   function afterSave(label, loader, indicator, callback, updateCommand, status, results) {
     self.showValidationResults(results);
     if (label) {
       label.removeChild(loader);
     }
     if (status === "warn" || status === "tip") {
-      showIndicator(indicator, "form-input-saved", "form.saved");
+      docutils.showIndicator(indicator, "form-input-saved", "form.saved");
     } else if (status === "err") {
-      showIndicator(indicator, "form-input-err", "form.err");
+      docutils.showIndicator(indicator, "form-input-err", "form.err");
     } else if (status === "ok") {
-      showIndicator(indicator, "form-input-saved", "form.saved");
+      docutils.showIndicator(indicator, "form-input-saved", "form.saved");
     } else if (status !== "ok") {
       error("Unknown status:", status);
     }
@@ -1831,10 +1692,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function save(e, callback) {
     var event = getEvent(e);
     var target = event.target;
-    var indicator = createIndicator(target);
+    var indicator = docutils.createIndicator(target);
 
     var path = target.name;
-    var loader = loaderImg();
+    var loader = docutils.loaderImg();
 
     var value = target.value;
     if (target.type === "checkbox") {
@@ -1850,7 +1711,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function saveMany(target, updates, callback) {
-    var indicator = createIndicator(target);
+    var indicator = docutils.createIndicator(target);
     saveForReal(updates.paths, updates.values, _.partial(afterSave, null, null, indicator, callback));
   }
 
@@ -1913,11 +1774,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         contents.toggle( isOpen );
       }
     }
-    contents.append( makeSectionHelpTextSpan(self.schema) );
+    contents.append(docutils.makeSectionHelpTextSpan(self.schema));
     var sticky =  $("<div>").addClass( "sticky");
     sticky.append(createComponent ( "accordion-toolbar",
                                     {docModel: self,
                                      docModelOptions: options,
+                                     approvalModel: self.approvalModel,
                                      openCallback: toggleContents
                                     }));
     section.append( sticky );
@@ -1935,11 +1797,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return section.append( contents.append( $(elements)));
   }
 
-  hub.subscribe("application-loaded", function() {
+  self.dispose = function() {
     while (self.subscriptions.length > 0) {
       hub.unsubscribe(self.subscriptions.pop());
     }
-  }, true);
+    self.approvalModel.dispose();
+    self.approvalModel = null;
+  };
 
   self.element = buildSection();
   // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,

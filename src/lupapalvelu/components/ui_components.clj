@@ -296,7 +296,7 @@
                   :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
 
    :docgen       {:depends [:accordion :common-html]
-                  :js ["docmodel.js" "docgen.js" "docvars.js"]}
+                  :js ["docmodel.js" "docgen.js" "docutils.js" "document-approval-model.js"]}
 
    :create       {:depends [:common-html :map]
                   :js ["locationmodel.js" "municipalities.js" "create.js"]
@@ -328,7 +328,7 @@
                        :html ["integration-error.html"]}
 
    :ui-components {:depends [:common-html]
-                   :js (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js" "docgen/docgen-input-model.js"))
+                   :js (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js"))
                    :html (get-ui-components :ui-components :templates)}
 
    ;; Single Page Apps and standalone components:

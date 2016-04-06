@@ -282,15 +282,6 @@
 ;; Upload
 ;;
 
-(def attachment-modification-prechecks
-  [attachment-is-not-locked
-   (partial if-not-authority-state-must-not-be #{:sent})
-   attachment-editable-by-application-state
-   validate-attachment-type
-   a/validate-authority-in-drafts
-   attachment-id-is-present-in-application-or-not-set
-   attachment-not-readOnly])
-
 (def- base-upload-options
   {:comment-text nil
    :required false
@@ -341,7 +332,13 @@
   {:parameters [id attachmentId attachmentType op filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
-   :pre-checks attachment-modification-prechecks
+   :pre-checks [attachment-is-not-locked
+                (partial if-not-authority-state-must-not-be #{:sent})
+                attachment-editable-by-application-state
+                validate-attachment-type
+                a/validate-authority-in-drafts
+                attachment-id-is-present-in-application-or-not-set
+                attachment-not-readOnly]
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -382,7 +379,11 @@
    :user-authz-roles auth/all-authz-writer-roles
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
-   :pre-checks  attachment-modification-prechecks
+   :pre-checks  [(partial if-not-authority-state-must-not-be #{:sent})
+                 attachment-editable-by-application-state
+                 validate-attachment-type
+                 a/validate-authority-in-drafts
+                 attachment-id-is-present-in-application-or-not-set]
    :states      (conj (states/all-states-but states/terminal-states) :answered)
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
   [{:keys [application]}]

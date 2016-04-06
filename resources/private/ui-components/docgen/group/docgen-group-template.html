@@ -1,31 +1,28 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="docgen-group-template">
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-group-template">
+  <div class="inline" data-bind="template: componentTemplate"></div>
+</script>
 
-      <div class="form-group" data-bind="attr: {id: groupId}">
+<script class="ko-template" type="text/x-jquery-tmpl" id="default-docgen-group-template">
+  <div class="form-group" data-bind="attr: {id: groupId}">
 
-        <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
+    <label class="form-label form-label-group" data-bind="ltext: groupLabel"></label>
 
-        <!-- ko if: groupHelp -->
-        <span class="group-help-text" data-bind="ltext: groupHelp"></span>
-        <!-- /ko -->
+    <!-- ko if: groupHelp -->
+    <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+    <!-- /ko -->
 
-        <div data-bind="foreach: subSchemas">
-          <span class="form-entry"
-                data-bind="component: { name: uicomponent,
-                                        params: { schema: $data,
-                                                  path: path,
-                                                  i18npath: i18npath,
-                                                  applicationId: applicationId,
-                                                  documentId: documentId,
-                                                  service: $component.service }}">
-          </span>
-        </div>
-      </div>
-
-    </script>
-  </section>
-</body>
-</html>
+    <div data-bind="foreach: subSchemas">
+      <!-- ko if: !$data.hidden -->
+        <span class="form-entry"
+              data-bind="component: { name: uicomponent,
+                                      params: { schema: $data,
+                                                path: path,
+                                                i18npath: i18npath,
+                                                applicationId: applicationId,
+                                                documentId: documentId,
+                                                service: $component.service }}">
+        </span>
+      <!-- /ko -->
+    </div>
+  </div>
+</script>

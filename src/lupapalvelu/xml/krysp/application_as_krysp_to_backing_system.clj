@@ -4,6 +4,7 @@
             [sade.core :refer [fail!]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.model :as model]
             ;; Make sure all the mappers are registered
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.xml.krysp.poikkeamis-mapping]
@@ -49,6 +50,16 @@
          (:attachments application))
        (assoc application :attachments)))
 
+(defn- non-approved-designer? [document]
+  (let [subtype  (keyword (get-in document [:schema-info :subtype]))
+        approval (get-in document [:meta :_approved :value])]
+    (and (= :suunnittelija subtype)
+         (or (not= "approved" approval)
+           (pos? (model/modifications-since-approvals document))))))
+
+(defn- remove-non-approved-designers [application]
+  (update application :documents #(remove non-approved-designer? %)))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application organization]
@@ -58,7 +69,7 @@
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type)
-        filtered-app  (remove-unsupported-attachments application)
+        filtered-app  (-> application remove-unsupported-attachments remove-non-approved-designers)
         filtered-submitted-app (remove-unsupported-attachments submitted-application)]
     (assert krysp-fn "KRYSP mapper function not found/defined?")
     (krysp-fn filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)))

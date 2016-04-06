@@ -21,11 +21,22 @@
               class="form-input combobox long">
             </select>
 
+            <label class="form-label" data-bind="visible: subtypeNeeded, ltext: 'task.katselmuksenLaji-required'"></label>
+            <select id="choose-task-subtype"
+              data-bind="options: taskSubtypes,
+                         optionsText: 'text',
+                         optionsValue: 'id',
+                         optionsCaption: loc('choose'),
+                         value: taskSubtype,
+                         visible: subtypeNeeded,
+                         valueAllowUnset: true"
+              class="form-input combobox long">
+            </select>
 
             <label class="form-label" data-bind="ltext: 'task.name'"></label>
             <input class="form-input text long" type="text" id="create-task-name" data-bind="textInput: taskName" />
 
-            <button data-test-id="create-task-save" class="btn btn-primary btn-dialog close" data-bind="click: save, disable: disabled, ltext: 'save'"></button>
+            <button data-test-id="create-task-save" class="btn btn-primary btn-dialog close" data-bind="click: save, enable: enabled, ltext: 'save'"></button>
           </div>
         </div>
       </div>

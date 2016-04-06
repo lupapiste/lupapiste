@@ -156,10 +156,11 @@
                     (when-not (:draft (find-verdict application verdictId))
                       (fail :error.verdict.not-draft))))]}
   [{:keys [application created data] :as command}]
-  (let [verdict (domain/->paatos
+  (let [paatos-id (-> (find-verdict application verdictId) :paatokset first :id)
+        verdict (domain/->paatos
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
-                    {:timestamp created, :draft true}))]
+                    {:timestamp created, :draft true, :paatos-id paatos-id}))]
     (update-application command
       {:verdicts {$elemMatch {:id verdictId}}}
       {$set {"verdicts.$.kuntalupatunnus" (:kuntalupatunnus verdict)

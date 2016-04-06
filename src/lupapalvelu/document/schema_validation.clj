@@ -13,6 +13,7 @@
   {:name              sc/Str         ;; Element name
    :type              (sc/enum :text :string :select :checkbox :radioGroup :date)
    (opt :uicomponent) sc/Keyword     ;; Component name for special components
+   (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string) ;; Input type of generic docgen-input component
    (opt :labelclass)  sc/Str         ;; Special label style class
    (opt :i18nkey)     sc/Str         ;; Absolute localization key
    (opt :locPrefix)   sc/Str         ;; 

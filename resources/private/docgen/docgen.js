@@ -1,7 +1,28 @@
 var docgen = (function () {
   "use strict";
 
-  function displayDocuments(containerSelector, application, documents, authorizationModel, options) {
+  var docModels = {};
+
+  function clear(containerId) {
+    var containerSelector = "#" + containerId;
+    var oldModels = docModels[containerId] ||  [];
+
+    _.each($(".sticky", containerSelector), function(elem) {
+      window.Stickyfill.remove(elem);
+    });
+
+    while (oldModels.length > 0) {
+      oldModels.pop().dispose();
+    }
+    docModels[containerId] = [];
+
+    $(containerSelector).empty();
+  }
+
+  function displayDocuments(containerId, application, documents, authorizationModel, options) {
+    var docgenDiv = $("#" + containerId);
+    var isDisabled = options && options.disabled;
+
     function updateOther(select) {
       var otherId = select.attr("data-select-other-id"),
           other = $("#" + otherId, select.parent().parent());
@@ -12,17 +33,12 @@ var docgen = (function () {
       updateOther($(event.target));
     }
 
-    var isDisabled = options && options.disabled;
-
-    _.each($(".sticky", containerSelector), function(elem) {
-        window.Stickyfill.remove(elem);
-    });
-
-    var docgenDiv = $(containerSelector).empty();
+    clear(containerId);
 
     _.each(documents, function (doc) {
       var schema = doc.schema;
       var docModel = new DocModel(schema, doc, application, authorizationModel, options);
+      docModels[containerId].push(docModel);
       docModel.triggerEvents();
 
       docgenDiv.append(docModel.element);
@@ -69,8 +85,17 @@ var docgen = (function () {
     window.Stickyfill.rebuild();
   }
 
+  function nonApprovedDocuments() {
+    var models = _.concat.apply(null, _.values(docModels));
+    return _.filter(models, function(docModel) {
+      return !docModel.isApproved();
+    });
+  }
+
   return {
-    displayDocuments: displayDocuments
+    displayDocuments: displayDocuments,
+    clear: clear,
+    nonApprovedDocuments: nonApprovedDocuments
   };
 
 })();

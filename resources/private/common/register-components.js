@@ -10,11 +10,11 @@ jQuery(document).ready(function() {
     {name: "docgen-group", synchronous: true},
     {name: "docgen-repeating-group", synchronous: true},
     {name: "docgen-table", synchronous: true},
-    {name: "docgen-checkbox", model: "docgen-input-model", synchronous: true},
+    {name: "docgen-input", synchronous: true},
+    {name: "docgen-string", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
+    {name: "docgen-checkbox", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
+    {name: "docgen-text", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
     {name: "docgen-select", synchronous: true},
-    {name: "docgen-string", model: "docgen-input-model", synchronous: true},
-    {name: "docgen-localized-string", model: "docgen-input-model", synchronous: true},
-    {name: "docgen-inline-string", model: "docgen-input-model", synchronous: true},
     {name: "docgen-button", synchronous: true},
     {name: "docgen-date", synchronous: true},
     {name: "construction-waste-report", synchronous: true},
@@ -119,7 +119,8 @@ jQuery(document).ready(function() {
     {name: "cell-textarea", model: "cell-model"},
     {name: "cell-date"},
     {name: "cell-select"},
-    {name: "review-tasks"}
+    {name: "review-tasks"},
+    {name: "task"}
 ];
 
   _.forEach(components, function(component) {

@@ -79,7 +79,9 @@ Aloituskokous form is still editable (LPK-494)
   Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//input[@readonly]  0
 
   Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//select
-  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//select[@disabled]  0
+  # LPK-1601 Katselmuksenlaji should be read only
+  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//select[@disabled]  1
+  Element should be disabled  //section[@data-doc-type="task-katselmus"]//select[@data-test-id='katselmuksenLaji']
 
 Return to listing
   Click link  xpath=//section[@id="task"]//a[@data-test-id='back-to-application-from-task']
@@ -125,11 +127,17 @@ Add katselmus
   Click enabled by test id  application-new-task
   Wait until  Element should be visible  dialog-create-task
   Select From List By Value  choose-task-type   task-katselmus
+  Wait until  Element should be visible  choose-task-subtype
+  Select From List By Value  choose-task-subtype   muu tarkastus
   Input text  create-task-name  uus muu tarkastus
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
   Task count is  task-katselmus  3
+
+Katselmuksenlaji is set and disabled
   Open task  uus muu tarkastus
+  Element should be disabled  xpath=//div[@id='taskDocgen']//select[@data-test-id='katselmuksenLaji']
+  List Selection Should Be  xpath=//div[@id='taskDocgen']//select[@data-test-id='katselmuksenLaji']  muu tarkastus
 
 Verify post-verdict attachments - Aloituskokous
   Click by test id  back-to-application-from-task
@@ -142,7 +150,7 @@ Katselmus task created in an YA application does not include any Rakennus inform
   Open tab  verdict
   Fetch YA verdict
   Open tab  tasks
-  Create katselmus task  task-katselmus-ya  uus muu ya-tarkastus
+  Create katselmus task  task-katselmus-ya  uus muu ya-tarkastus  Muu valvontak\u00e4ynti
   Task count is  task-katselmus-ya  1
   Open task  uus muu ya-tarkastus
   Wait until  Element should not be visible  xpath=//div[@id='taskDocgen']//div[@data-repeating-id='rakennus']
@@ -177,10 +185,12 @@ Mikko sets started past date for YA application (LPK-1054)
 *** Keywords ***
 
 Create katselmus task
-  [Arguments]  ${taskSchemaName}  ${taskName}
+  [Arguments]  ${taskSchemaName}  ${taskName}  ${taskSubtype}=
   Click enabled by test id  application-new-task
   Wait until  Element should be visible  dialog-create-task
   Select From List By Value  choose-task-type   ${taskSchemaName}
+  Run Keyword If  $taskSubtype  Wait until  Element should be visible  choose-task-subtype
+  Run Keyword If  $taskSubtype  Select From List By Value  choose-task-subtype   ${taskSubtype}
   Input text  create-task-name  ${taskName}
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task

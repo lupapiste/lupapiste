@@ -31,8 +31,9 @@
   {:name "katselmuksenLaji"
    :type :select :sortBy :displayname
    :required true
+   :readonly true
    :whitelist {:roles [:authority] :otherwise :disabled}
-   :default "muu katselmus"
+   :default "illegal"
    :body (mapv (partial hash-map :name) task-types)})
 
 (def- katselmuksenLaji-ya
@@ -57,16 +58,16 @@
    {:name "katselmus" :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
-    [{:name "pitoPvm" :type :date :required true}
+    [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
+     {:name "pitoPvm" :type :date :required true}
      {:name "pitaja" :type :string}
      {:name "huomautukset" :type :group
-      :body [{:name "kuvaus" :required true :type :text :max-len 4000}
+      :body [{:name "kuvaus" :type :text :max-len 4000}
              {:name "maaraAika" :type :date}
              {:name "toteaja" :type :string}
              {:name "toteamisHetki" :type :date}]}
      {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
-     {:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}]}])
+     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}])
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
@@ -94,7 +95,13 @@
 
    {:info {:name "task-lupamaarays" :type :task :order 20}
     :body [{:name "maarays" :type :text :max-len 10000 :readonly true :layout :full-width}
-           {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}]}])
+           {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}
+           {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
+
+(defn task-doc-validation [schema-name doc]
+  (let [schema (schemas/get-schema task-schemas-version schema-name)
+        info   (model/document-info doc schema)]
+    (model/validate-fields nil info nil (:data doc) [])))
 
 (defn new-task [schema-name task-name data {:keys [created assignee state] :as meta :or {state :requires_user_action}} source]
   {:pre [schema-name source (or (map? data) (nil? data))]}
@@ -114,7 +121,7 @@
 
 (defn- katselmus->task [meta source katselmus]
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
-        data {:katselmuksenLaji (:katselmuksenLaji katselmus)
+        data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
               :vaadittuLupaehtona true}]
     (new-task "task-katselmus" task-name data meta source)))
 

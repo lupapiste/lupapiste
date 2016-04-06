@@ -34,23 +34,19 @@ var taskUtil = (function() {
 var taskPageController = (function() {
   "use strict";
 
-  var currentApplicationId = null;
   var currentTaskId = null;
   var task = ko.observable();
   var processing = ko.observable(false);
   var pending = ko.observable(false);
   var taskSubmitOk = ko.observable(false);
 
+  var applicationModel = lupapisteApp.models.application;
   var authorizationModel = lupapisteApp.models.applicationAuthModel;
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
-  function reload() {
-    repository.load(currentApplicationId);
-  }
-
   function returnToApplication() {
-    reload();
-    pageutil.openApplicationPage({id: currentApplicationId}, "tasks");
+    applicationModel.reload();
+    applicationModel.open("tasks");
   }
 
   function deleteTask() {
@@ -59,7 +55,7 @@ var taskPageController = (function() {
         loc("task.delete.confirm"),
           {title: loc("yes"), fn: function() {
             ajax
-            .command("delete-task", {id: currentApplicationId, taskId: currentTaskId})
+            .command("delete-task", {id: applicationModel.id(), taskId: currentTaskId})
             .success(returnToApplication)
             .call();}},
             {title: loc("no")}
@@ -68,28 +64,27 @@ var taskPageController = (function() {
   }
 
   function runTaskCommand(cmd) {
-    var id = currentApplicationId;
-    ajax.command(cmd, { id: id, taskId: currentTaskId})
-      .success(reload)
-      .error(reload)
+    ajax.command(cmd, { id: applicationModel.id(), taskId: currentTaskId})
+      .success(applicationModel.reload)
+      .error(applicationModel.reload)
       .call();
     return false;
   }
 
   function sendTask() {
-    ajax.command("send-task", { id: currentApplicationId, taskId: currentTaskId, lang: loc.getCurrentLanguage()})
+    ajax.command("send-task", { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
       .success(function() {
-        var permit = externalApiTools.toExternalPermit(lupapisteApp.models.application._js);
-        reload();
+        var permit = externalApiTools.toExternalPermit(applicationModel._js);
+        applicationModel.reload();
         LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
-        if (lupapisteApp.models.application.externalApi.enabled()) {
+        if (applicationModel.externalApi.enabled()) {
           hub.send("external-api::integration-sent", permit);
         }
       })
       .error(function(e){
-        reload();
+        applicationModel.reload();
         LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
       })
       .call();
@@ -100,10 +95,9 @@ var taskPageController = (function() {
    * @param {String} taskId       Current task ID
    */
   function refresh(application, taskId) {
-    currentApplicationId = application.id;
     currentTaskId = taskId;
 
-    lupapisteApp.setTitle(lupapisteApp.models.application.title());
+    lupapisteApp.setTitle(applicationModel.title());
 
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
@@ -111,7 +105,7 @@ var taskPageController = (function() {
 
     if (t) {
       t.displayName = taskUtil.longDisplayName(t, application);
-      t.applicationId = currentApplicationId;
+      t.applicationId = application.id;
       t.deleteTask = deleteTask;
       t.returnToApplication = returnToApplication;
       t.approve = _.partial(runTaskCommand, "approve-task");
@@ -126,36 +120,36 @@ var taskPageController = (function() {
       taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);
 
       var options = {collection: "tasks", updateCommand: "update-task", validate: true};
-      docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, options);
+      docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
 
     } else {
-      $("#taskDocgen").empty();
+      docgen.clear("taskDocgen");
       task(null);
-      error("Task not found", currentApplicationId, currentTaskId);
+      error("Task not found", application.id, currentTaskId);
       notify.error(loc("error.dialog.title"), loc("error.task-not-found"));
     }
   }
 
   hub.subscribe("application-model-updated", function() {
     if (pageutil.getPage() === "task") {
-      refresh(lupapisteApp.models.application._js, currentTaskId);
+      refresh(applicationModel._js, currentTaskId);
     }
   });
 
   hub.onPageLoad("task", function(e) {
     var applicationId = e.pagePath[0];
-    currentTaskId = e.pagePath[1];
+    var taskId = e.pagePath[1];
     // Reload application only if needed
-    if (currentApplicationId !== applicationId) {
+    if (applicationModel.id() !== applicationId) {
+      currentTaskId = taskId;
       repository.load(applicationId);
-    } else {
-      lupapisteApp.setTitle(lupapisteApp.models.application.title());
+    } else if (taskId !== currentTaskId) {
+      refresh(applicationModel._js, taskId);
     }
-    currentApplicationId = applicationId;
   });
 
   hub.subscribe("update-task-success", function(e) {
-    if (task() && currentApplicationId === e.appId && currentTaskId === e.documentId) {
+    if (task() && applicationModel.id() === e.appId && currentTaskId === e.documentId) {
       var requiredErrors = util.extractRequiredErrors([e.results]);
       taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !requiredErrors.length);
     }
