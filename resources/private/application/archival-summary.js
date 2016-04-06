@@ -140,7 +140,6 @@
     ];
 
     var mainDocuments = ko.pureComputed(function() {
-      console.log(params.application._js.buildings);
       return addAdditionalFieldsToAttachments(docs);
     });
 
