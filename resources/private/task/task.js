@@ -129,7 +129,7 @@ var taskPageController = (function() {
       docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
 
     } else {
-      $("#taskDocgen").empty();
+      docgen.clear("taskDocgen");
       task(null);
       error("Task not found", currentApplicationId, currentTaskId);
       notify.error(loc("error.dialog.title"), loc("error.task-not-found"));

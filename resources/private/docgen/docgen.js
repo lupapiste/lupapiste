@@ -3,9 +3,25 @@ var docgen = (function () {
 
   var docModels = {};
 
-  function displayDocuments(containerId, application, documents, authorizationModel, options) {
+  function clear(containerId) {
     var containerSelector = "#" + containerId;
     var oldModels = docModels[containerId] ||  [];
+
+    _.each($(".sticky", containerSelector), function(elem) {
+      window.Stickyfill.remove(elem);
+    });
+
+    while (oldModels.length > 0) {
+      oldModels.pop().dispose();
+    }
+    docModels[containerId] = [];
+
+    $(containerSelector).empty();
+  }
+
+  function displayDocuments(containerId, application, documents, authorizationModel, options) {
+    var docgenDiv = $("#" + containerId);
+    var isDisabled = options && options.disabled;
 
     function updateOther(select) {
       var otherId = select.attr("data-select-other-id"),
@@ -17,19 +33,7 @@ var docgen = (function () {
       updateOther($(event.target));
     }
 
-    var isDisabled = options && options.disabled;
-
-    _.each($(".sticky", containerSelector), function(elem) {
-        window.Stickyfill.remove(elem);
-    });
-
-
-    while (oldModels.length > 0) {
-      oldModels.pop().dispose();
-    }
-    docModels[containerId] = [];
-
-    var docgenDiv = $(containerSelector).empty();
+    clear(containerId);
 
     _.each(documents, function (doc) {
       var schema = doc.schema;
@@ -90,6 +94,7 @@ var docgen = (function () {
 
   return {
     displayDocuments: displayDocuments,
+    clear: clear,
     nonApprovedDocuments: nonApprovedDocuments
   };
 
