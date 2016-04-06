@@ -36,8 +36,12 @@
       {$set {:tasks.$.state state :modified created}}
       updates)))
 
+(defn- task-is-review? [task]
+  (let [task-type (-> task :schema-info :name)]
+    (contains? #{"task-katselmus" "task-katselmus-ya"} task-type)))
+
 ;; API
-(def valid-source-types #{"verdict"})
+(def valid-source-types #{"verdict" "task"})
 
 (def valid-states states/all-application-states-but-draft-or-terminal)
 
@@ -89,6 +93,10 @@
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
 
+(defn generate-task-pdfa [application {info :schema-info :as task} user lang]
+  (when (= "task-katselmus" (:name info))
+    (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
+
 (defcommand approve-task
   {:description "Authority can approve task, moves to ok"
    :parameters  [id taskId]
@@ -97,8 +105,7 @@
    :states      valid-states}
   [{:keys [application user lang] :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
-     (when (= (get-in (get-task (:tasks application) taskId) [:schema-info :name] "task-katselmus"))
-       (child-to-attachment/create-attachment-from-children user application :tasks taskId lang))
+  (generate-task-pdfa application (get-task (:tasks application) taskId) user lang)
   (set-state command taskId :ok))
 
 (defcommand reject-task
@@ -111,12 +118,17 @@
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
   (set-state command taskId :requires_user_action))
 
-(defn- validate-task-is-review [{data :data} application]
+(defn- validate-task-is-review [{data :data} {tasks :tasks}]
   (when-let [task-id (:taskId data)]
-    (let [task (get-task (:tasks application) task-id)
-          task-type (-> task :schema-info :name)]
-      (when-not (#{"task-katselmus" "task-katselmus-ya"} task-type)
-        (fail :error.invalid-task-type)))))
+    ; TODO create own auth model for task and combile let forms
+    (when-not (task-is-review? (get-task tasks task-id))
+      (fail :error.invalid-task-type))))
+
+(defn- validate-review-kind [{data :data} {tasks :tasks}]
+  (when-let [task-id (:taskId data)]
+    ; TODO create own auth model for task and combile let forms
+    (when (ss/blank? (get-in (get-task tasks task-id) [:data :katselmuksenLaji :value]))
+      (fail :error.missing-parameters))))
 
 ;; TODO to be deleted after review-done feature is in production
 (defcommand send-task
@@ -124,17 +136,17 @@
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [validate-task-is-review
+                 validate-review-kind
                  (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
    :user-roles  #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)
-        all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))]
-    (when (ss/blank? (get-in task [:data :katselmuksenLaji :value])) (fail! :error.missing-parameters))
-    (let [sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
-          set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
-      (set-state command taskId :sent (when (seq set-statement) {$set set-statement})))))
+        all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
+        sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+        set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
+    (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))))
 
 (defn- schema-with-type-options
   "Genereate 'subtype' options for readonly elements with sequential body"
