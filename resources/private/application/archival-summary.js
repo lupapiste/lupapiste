@@ -155,7 +155,7 @@
         return ko.unwrap(att.id);
       }), getState);
       stateMap[appDocId] = getState(params.application);
-      stateMap[caseFileDocId] = util.getIn(params.application, ["processMetadata", "tila"]) ? params.application.processMetadata().tila() : 'valmis';
+      stateMap[caseFileDocId] = util.getIn(params.application, ["processMetadata", "tila"]) ? params.application.processMetadata().tila() : "valmis";
       return stateMap;
     });
 
