@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="targetted-attachments-template">
     <div data-bind="with: $root.attachmentsModel" >
-      <div class="statement-attachments">
+      <div class="targetted-attachments">
         <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
         <div data-bind="if: attachments().length">
           <table class="table" data-test-id="targetted-attachments-table">
@@ -41,9 +41,13 @@
         </div>
 
         <button
-          class="btn"
-          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: newAttachment"
-          data-test-id="add-targetted-attachment">
+          class="positive"
+          data-bind="visible: $root.authorization.ok('upload-attachment'),
+                     enabled: $root.authorization.ok('upload-attachment'),
+                     click: newAttachment"
+           data-test-id="add-targetted-attachment">
+          <i class="lupicon-circle-plus"></i>
+          <span data-bind="ltext: 'application.attachmentsAdd'"></span>
         </button>
       </div>
     </div>

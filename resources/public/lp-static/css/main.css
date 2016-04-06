@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1459860171082');
+@import url('main-blessed1.css?z=1459938799727');
 
 /* line 107, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info {
@@ -1592,6 +1592,12 @@ td.comment-text {
 /* line 302, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone i {
   font-size: 50px;
+}
+
+/* line 308, ../../../private/common-html/sass/views/_attachment.scss */
+.targetted-attachments {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 /* line 3, ../../../private/common-html/sass/views/_statement.scss */
