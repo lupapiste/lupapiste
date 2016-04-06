@@ -145,6 +145,8 @@ var taskPageController = (function() {
       repository.load(applicationId);
     } else if (taskId !== currentTaskId) {
       refresh(applicationModel._js, taskId);
+    } else {
+      lupapisteApp.setTitle(applicationModel.title());
     }
   });
 
