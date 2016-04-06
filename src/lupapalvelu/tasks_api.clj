@@ -97,7 +97,7 @@
    :states      valid-states}
   [{:keys [application user lang] :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
-     (when (and (env/feature? :tasks-pdf-export) (= (get-in (get-task (:tasks application) taskId) [:schema-info :name] "task-katselmus")))
+     (when (= (get-in (get-task (:tasks application) taskId) [:schema-info :name] "task-katselmus"))
        (child-to-attachment/create-attachment-from-children user application :tasks taskId lang))
   (set-state command taskId :ok))
 
@@ -118,6 +118,7 @@
       (when-not (#{"task-katselmus" "task-katselmus-ya"} task-type)
         (fail :error.invalid-task-type)))))
 
+;; TODO to be deleted after review-done feature is in production
 (defcommand send-task
   {:description "Authority can send task info to municipality backend system."
    :parameters  [id taskId lang]
