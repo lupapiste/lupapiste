@@ -221,7 +221,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   }
 
   function isGroupType(schema) {
-    return _.includes(["group", "table", "location", "document", "party"], schema.type);
+    return _.includes(["group", "table", "location", "document", "party", "task"], schema.type);
   }
 
   function createDataModel(schema, rawModel, path) {

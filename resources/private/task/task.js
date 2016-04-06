@@ -39,6 +39,7 @@ var taskPageController = (function() {
   var processing = ko.observable(false);
   var pending = ko.observable(false);
   var taskSubmitOk = ko.observable(false);
+  var taskService = new LUPAPISTE.DocumentDataService({name: "taskD"});
 
   var applicationModel = lupapisteApp.models.application;
   var authorizationModel = lupapisteApp.models.applicationAuthModel;
@@ -116,6 +117,9 @@ var taskPageController = (function() {
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
       task(t);
 
+      console.log(task);
+
+      taskService.addDocument(task());
       var requiredErrors = util.extractRequiredErrors([t.validationErrors]);
       taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);
 
@@ -162,7 +166,8 @@ var taskPageController = (function() {
       processing: processing,
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
-      taskSubmitOk: taskSubmitOk
+      taskSubmitOk: taskSubmitOk,
+      taskDataService: taskService
     });
   });
 

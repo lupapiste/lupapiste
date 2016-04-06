@@ -51,11 +51,13 @@
     :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :repeating true
-    :body [{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
+    :uicomponent :docgen-repeating-group
+    :body [#_{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
            {:name "tila" :type :group
             :body [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
                    {:name "kayttoonottava" :type :checkbox}]}]}
    {:name "katselmus" :type :group
+
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
     [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
