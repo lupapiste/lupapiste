@@ -144,13 +144,16 @@ var taskPageController = (function() {
 
   hub.onPageLoad("task", function(e) {
     var applicationId = e.pagePath[0];
-    currentTaskId = e.pagePath[1];
+    var taskId = e.pagePath[1];
     // Reload application only if needed
     if (currentApplicationId !== applicationId) {
       repository.load(applicationId);
+    } else if (taskId !== currentTaskId) {
+      refresh(lupapisteApp.models.application._js, taskId);
     } else {
       lupapisteApp.setTitle(lupapisteApp.models.application.title());
     }
+    currentTaskId = taskId;
     currentApplicationId = applicationId;
   });
 
