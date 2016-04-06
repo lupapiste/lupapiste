@@ -201,7 +201,7 @@
                               (:mongo-query doc-updates)
                               (:mongo-updates doc-updates)))
         (t/mark-app-and-attachments-final! (:id application) timestamp)
-        (when (not sopimus) (create-verdict-pdfa! user application id lang))
+        (when-not sopimus (create-verdict-pdfa! user application id lang))
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 
