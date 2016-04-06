@@ -1302,6 +1302,8 @@
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
                         <!-- /ko -->
 
+                        <review-tasks params="openTask: openTask"></review-tasks>
+
                         <div class="tasks-content">
                             <div data-bind="foreach: taskGroups">
                                 <h2 data-bind="text: name" style="padding-top:1em"></h2>

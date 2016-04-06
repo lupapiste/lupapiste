@@ -31,15 +31,20 @@ Sonja gives verdict
 Rakentaminen tab opens
   Open tab  tasks
 
-Rakentaminen tab contains 9 tasks
-  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//div[@data-bind="foreach: taskGroups"]//tbody/tr  6
+Rakentaminen tab contains 3 foreman tasks
   Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  3
+
+Rakentaminen tab contains 3 review tasks (katselmus)
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//div[@class="review-tasks"]//tbody/tr  3
+
+Rakentaminen tab contains 3 requirements (lupamaarays)
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@class="tasks"]//tbody/tr  3
 
 Katselmukset
   Wait Until  Page should contain  Kokoukset, katselmukset ja tarkastukset
   Task count is  task-katselmus  3
 
-Työnjohtajat
+Tyonjohtajat
   Wait until  Page should contain  Vaaditut työnjohtajat
   Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  3
 

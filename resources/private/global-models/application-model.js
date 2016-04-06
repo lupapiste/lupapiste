@@ -122,11 +122,18 @@ LUPAPISTE.ApplicationModel = function() {
     return self.inPostVerdictState() || self.state() === "canceled";
   });
 
+  self.openTask = function( taskId ) {
+    hub.send( "scrollService::push");
+    taskPageController.setApplicationModelAndTaskId(self._js, taskId);
+    pageutil.openPage("task",  self.id() + "/" + taskId);
+  };
+
   self.taskGroups = ko.pureComputed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
     tasks = _.filter(tasks, function(task) {
-      return task["schema-info"].name !== "task-vaadittu-tyonjohtaja";
+      return !_.includes( ["task-vaadittu-tyonjohtaja", "task-katselmus"],
+                          task["schema-info"].name);
     });
     var schemaInfos = _.reduce(tasks, function(m, task){
       var info = task.schema.info;
@@ -144,10 +151,7 @@ LUPAPISTE.ApplicationModel = function() {
           order: schemaInfos[n].order,
           tasks: _.map(groups[n], function(task) {
             task.displayName = taskUtil.shortDisplayName(task);
-            task.openTask = function() {
-              taskPageController.setApplicationModelAndTaskId(self._js, task.id);
-              pageutil.openPage("task",  self.id() + "/" + task.id);
-            };
+            task.openTask = _.partial( self.openTask, task.id);
             task.statusName = LUPAPISTE.statuses[task.state] || "unknown";
 
             return task;

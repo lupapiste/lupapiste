@@ -119,6 +119,7 @@ jQuery(document).ready(function() {
     {name: "cell-textarea", model: "cell-model"},
     {name: "cell-date"},
     {name: "cell-select"},
+    {name: "review-tasks"},
     {name: "task"}
 ];
 

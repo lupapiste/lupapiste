@@ -8220,6 +8220,42 @@ td.negative {
   color: white;
 }
 
+/* line 226, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table td.reviews-table--action {
+  text-align: right;
+}
+/* line 228, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table td.reviews-table--action a {
+  padding-right: 2em;
+}
+/* line 232, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table td.reviews-table--icons {
+  text-align: center;
+  color: #f39129;
+}
+/* line 236, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table tr.reviews-table__note {
+  padding-left: 2em;
+  padding-right: 2em;
+  background-color: white;
+}
+/* line 241, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table tr.reviews-table__note:active {
+  background-color: initial;
+}
+/* line 245, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table tr.reviews-table__note td.reviews-table--extra {
+  white-space: pre-wrap;
+}
+/* line 248, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table tr.reviews-table__note td.reviews-table--no-extra {
+  color: #bbbbbb;
+}
+/* line 252, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table div.bubble-dialog {
+  border: none;
+}
+
 /*Tab styles*/
 /* line 42, ../../../private/common-html/sass/partials/_tabs.scss */
 .tab-wrapper {
@@ -11606,41 +11642,4 @@ span.icon_clear:before {
 .application_summary .application-map-container .application-map-actions .map-search-button {
   color: white;
   padding: 0 24px;
-}
-/* line 107, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info {
-  margin: 0 24px 24px 24px;
-  color: #333333;
-}
-/* line 110, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info h1 {
-  width: 100%;
-  color: #333333;
-}
-/* line 113, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info h1 a {
-  padding-left: 32px;
-  background-position: 8px -4200px;
-}
-/* line 118, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info h2 {
-  color: #333333;
-}
-/* line 121, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info a {
-  font-size: 15px;
-  text-transform: none;
-  height: auto;
-  width: auto;
-}
-/* line 127, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info .summary-help {
-  width: 100%;
-  background-color: #eeeeee;
-  font-size: 0.8em;
-  font-style: italic;
-}
-/* line 133, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info .help-text p, .application_summary .application_summary_info .summary-help p {
-  width: 100%;
 }
