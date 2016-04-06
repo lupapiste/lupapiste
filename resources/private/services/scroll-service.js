@@ -16,30 +16,34 @@ LUPAPISTE.ScrollService = function() {
 
   var positions = {};
 
-  self.push = function() {
+  // Options [optional]:
+  //  [override]: If true the current position wll override the
+  //  possibly stored one (default false).
+  self.push = function( options ) {
+    options = options || {};
     var hash = window.location.hash;
-    if( !positions[hash]) {
+    if( !positions[hash] || options.override ) {
       positions[hash] = {x: window.scrollX, y: window.scrollY };
     }
   };
 
-  self.pop = function( delayMilliseconds ) {
+  // Options [optional]
+  // [delay]: delay in milliseconds before scrolling (default 1).
+  self.pop = function( options ) {
+    options = options || {};
     var hash = window.location.hash;
     var pos = positions[hash];
     delete positions[hash];
     if( pos ) {
       _.delay( _.partial( window.scrollTo, pos.x, pos.y ),
-               delayMilliseconds || 1 );
+               options.delay || 1 );
     }
   };
 
   // There really should be a better way to restore
   // the scroll position than waiting for 500 ms and hoping
   // that everything has been rendered.
-  hub.subscribe( "application-model-updated", _.partial( self.pop, 500 ) );
+  hub.subscribe( "application-model-updated", _.partial( self.pop, {delay: 500} ) );
   hub.subscribe( self.serviceName +"::push", self.push );
-  hub.subscribe( self.serviceName + "::pop",
-                 function( options ) {
-                   self.pop( options.delay );
-                 });
+  hub.subscribe( self.serviceName + "::pop", self.pop );
 };
