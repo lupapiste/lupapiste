@@ -20,11 +20,8 @@
 
 ;; Helpers
 
-(defn- get-task [tasks task-id]
-  (some #(when (= (:id %) task-id) %) tasks))
-
 (defn- assert-task-state-in [states {{task-id :taskId} :data {tasks :tasks} :application}]
-  (if-let [task (get-task tasks task-id)]
+  (if-let [task (util/find-by-id task-id tasks)]
     (when-not ((set states) (keyword (:state task)))
       (fail! :error.command-illegal-state))
     (fail! :error.task-not-found)))
@@ -105,7 +102,7 @@
    :states      valid-states}
   [{:keys [application user lang] :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
-  (generate-task-pdfa application (get-task (:tasks application) taskId) user lang)
+  (generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
   (set-state command taskId :ok))
 
 (defcommand reject-task
@@ -121,13 +118,13 @@
 (defn- validate-task-is-review [{data :data} {tasks :tasks}]
   (when-let [task-id (:taskId data)]
     ; TODO create own auth model for task and combile let forms
-    (when-not (task-is-review? (get-task tasks task-id))
+    (when-not (task-is-review? (util/find-by-id task-id tasks))
       (fail :error.invalid-task-type))))
 
 (defn- validate-review-kind [{data :data} {tasks :tasks}]
   (when-let [task-id (:taskId data)]
     ; TODO create own auth model for task and combile let forms
-    (when (ss/blank? (get-in (get-task tasks task-id) [:data :katselmuksenLaji :value]))
+    (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
       (fail :error.missing-parameters))))
 
 ;; TODO to be deleted after review-done feature is in production
@@ -142,7 +139,7 @@
    :states      valid-states}
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
-  (let [task (get-task (:tasks application) taskId)
+  (let [task (util/find-by-id taskId (:tasks application))
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
         sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
         set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
