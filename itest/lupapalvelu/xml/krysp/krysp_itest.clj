@@ -45,11 +45,15 @@
 
 (defn- populate-task [{:keys [id tasks]} task-id apikey]
        (let [task (some #(when (= (:id %) task-id) %) tasks)
-             data (tools/create-document-data (model/get-document-schema task) (partial tools/dummy-values (id-for-key apikey)))
+             schema (model/get-document-schema task)
+             data (tools/create-document-data schema (partial tools/dummy-values (id-for-key apikey)))
+             readonly-schemas (filter :readonly (:body schema))
+             ;; remove data where schema has readonly defined (katselmuksenLaji) as it's illegal to update readonly data
+             data    (reduce (fn [final-data {schema-name :name}] (dissoc final-data (keyword schema-name))) data readonly-schemas)
              updates (tools/path-vals data)
              updates (map (fn [[p v]] [(butlast p) v]) updates)
              updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)]
-            (command apikey :update-task :id id :doc task-id :updates updates)))
+         (command apikey :update-task :id id :doc task-id :updates updates)))
 
 (def- drawings [{:id 1,
                  :name "A",
@@ -313,13 +317,13 @@
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Katselmuskatu 17")
         application-id (:id application)
         _ (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
-        task-id (:taskId (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "aloituskokous")) => truthy]
+        task-id (:taskId (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "rakennekatselmus")) => truthy]
 
        (upload-attachment-to-target sonja application-id nil true task-id "task") ; Related to task
        (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
                                                                                       ".katselmuksen_tai_tarkastuksen_poytakirja"))
 
-       (command sonja :update-task :id application-id :doc task-id :updates [["katselmuksenLaji" "rakennekatselmus"]]) => ok?
+       (command sonja :update-task :id application-id :doc task-id :updates [["katselmuksenLaji" "rakennekatselmus"]]) => (partial expected-failure? :error-trying-to-update-readonly-field)
 
        (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
                                                                              ["rakennus.0.rakennus.rakennusnro" "001"]
