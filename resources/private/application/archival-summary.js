@@ -1,19 +1,21 @@
 (function() {
   "use strict";
 
-  function GroupModel(groupName, groupDesc, attachments) {
+  function GroupModel(groupName, groupDesc, attachments, building) {
     var self = this;
     self.attachments = ko.observableArray(attachments);
     self.groupName = groupName;
-    self.groupDesc = groupDesc;
+    var fullGroupDesc = "";
+    if (groupDesc) {
+      fullGroupDesc += " - " + groupDesc;
+    }
+    if (building) {
+      fullGroupDesc += " - " + building;
+    }
     // computed name, depending if attachments belongs to operation or not
     self.name = ko.computed( function() {
-      if ( loc.hasTerm(["operations", self.groupName]) ) {
-        if ( self.groupDesc ) {
-          return loc(["operations", self.groupName]) + " - " + self.groupDesc;
-        } else {
-          return loc(["operations", self.groupName]);
-        }
+      if (loc.hasTerm(["operations", self.groupName])) {
+        return loc(["operations", self.groupName]) + fullGroupDesc;
       } else {
         return loc(self.groupName);
       }
@@ -47,7 +49,7 @@
 
   var generalAttachmentsStr = "attachments.general";
 
-  var getGroupList = function(attachments) {
+  var getGroupList = function(attachments, buildings) {
     if (_.isEmpty(attachments)) {
       return [];
     }
@@ -59,7 +61,7 @@
         return new GroupModel(group, null, attachments);
       } else {
         var att = _.head(attachments);
-        return new GroupModel(ko.unwrap(att.op.name), ko.unwrap(att.op.description), attachments);
+        return new GroupModel(ko.unwrap(att.op.name), ko.unwrap(att.op.description), attachments, buildings[att.op.id()]);
       }
     });
     return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created
@@ -138,6 +140,7 @@
     ];
 
     var mainDocuments = ko.pureComputed(function() {
+      console.log(params.application._js.buildings);
       return addAdditionalFieldsToAttachments(docs);
     });
 
@@ -169,17 +172,28 @@
     var archivedPostAttachments = ko.pureComputed(function() {
       return filterByArchiveStatus(postAttachments(), true);
     });
+    var buildings = _
+      .chain(params.application._js.buildings)
+      .filter(function(val) {
+        return val.operationId && (val.nationalId || val.localId);
+      })
+      .keyBy("operationId")
+      .mapValues(function(val) {
+        return val.nationalId || val.localId;
+      })
+      .value();
+
     self.archivedGroups = ko.pureComputed(function() {
-      return getGroupList(archivedPreAttachments());
+      return getGroupList(archivedPreAttachments(), buildings);
     });
     self.archivedPostGroups = ko.pureComputed(function() {
-      return getGroupList(archivedPostAttachments());
+      return getGroupList(archivedPostAttachments(), buildings);
     });
     self.notArchivedGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(preAttachments(), false));
+      return getGroupList(filterByArchiveStatus(preAttachments(), false), buildings);
     });
     self.notArchivedPostGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(postAttachments(), false));
+      return getGroupList(filterByArchiveStatus(postAttachments(), false), buildings);
     });
 
     self.archivedDocuments = ko.pureComputed(function() {
