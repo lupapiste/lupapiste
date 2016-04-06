@@ -14,46 +14,48 @@
 (defn- get-child [application type id]
   (first (filter #(or (nil? id) (= id (:id %))) (type application))))
 
-(defn- build-attachment [user application type id lang file attachment-id]
+(defn build-attachment [user application type id lang file attachment-id]
   {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts :tasks} type)]}
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
+        child (get-child application type id)
         type-name (case type
                     :statements (i18n/localize (name lang) "statement.lausunto")
                     :neighbors (i18n/localize (name lang) "application.MM.neighbors")
-                    :verdicts (i18n/localize (name lang) "application.verdict.title")
-                    :tasks (i18n/localize (name lang) "task-katselmus.rakennus.tila._group_label"))
-        child (get-child application type id)]
-    {:application application
-     :filename (str type-name ".pdf")
-     :size (.length file)
-     :content file
-     :attachment-id attachment-id
-     :attachment-type (if (env/feature? :updated-attachments)
-                        (case type
-                          :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
-                          :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
-                          :tasks {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
-                          {:type-group "muut" :type-id "muu"})
-                        (case type
-                          :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
-                          :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
-                          :tasks {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
-                          {:type-group "muut" :type-id "muu"}))
-     :op nil
-     :contents (case type
-                 :statements (get-in child [:person :text])
-                 :neighbors (get-in child [:owner :name])
-                 :tasks (i18n/localize (name lang) (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value])))
-                 type-name)
-     :locked true
-     :read-only (or (= :neighbors type) (= :statements type))
-     :user user
-     :created (now)
-     :required false
-     :archivable is-pdf-a?
+                    :verdicts (i18n/localize (name lang) (if (:sopimus child) "userInfo.company.contract" "application.verdict.title"))
+                    :tasks (i18n/localize (name lang) "task-katselmus.rakennus.tila._group_label"))]
+    {:application        application
+     :filename           (str type-name ".pdf")
+     :size               (.length file)
+     :content            file
+     :attachment-id      attachment-id
+     :attachment-type    (if (env/feature? :updated-attachments)
+                           (case type
+                             :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
+                             :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
+                             :tasks {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
+                             :verdicts {:type-group "paatoksenteko" :type-id "paatos"}
+                             {:type-group "muut" :type-id "muu"})
+                           (case type
+                             :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
+                             :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
+                             :tasks {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
+                             :verdicts {:type-group "paatoksenteko" :type-id "paatos"}
+                             {:type-group "muut" :type-id "muu"}))
+     :op                 nil
+     :contents           (case type
+                           :statements (get-in child [:person :text])
+                           :neighbors (get-in child [:owner :name])
+                           :tasks (i18n/localize (name lang) (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value])))
+                           type-name)
+     :locked             true
+     :read-only          (contains? #{:neighbors :statements :verdicts} type)
+     :user               user
+     :created            (now)
+     :required           false
+     :archivable         is-pdf-a?
      :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
-     :missing-fonts []
-     :source {:type type :id id}}))
+     :missing-fonts      []
+     :source             {:type type :id id}}))
 
 (defn- get-child-attachment-id [app child-type id]
   (let [attachment (filter #(= {:type (name child-type) :id id} (:source %)) (:attachments app))
@@ -77,5 +79,5 @@
     (io/delete-file file :silently)))
 
 (defn delete-child-attachment [app child-type id]
-    (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))
+  (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))
 
