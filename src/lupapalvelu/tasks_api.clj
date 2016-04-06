@@ -111,19 +111,25 @@
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
   (set-state command taskId :requires_user_action))
 
+(defn- validate-task-is-review [{data :data} application]
+  (when-let [task-id (:taskId data)]
+    (let [task (get-task (:tasks application) task-id)
+          task-type (-> task :schema-info :name)]
+      (when-not (#{"task-katselmus" "task-katselmus-ya"} task-type)
+        (fail :error.invalid-task-type)))))
+
 (defcommand send-task
   {:description "Authority can send task info to municipality backend system."
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
-   :pre-checks  [(permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
-   :user-roles #{:authority}
+   :pre-checks  [validate-task-is-review
+                 (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
+   :user-roles  #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
   (let [task (get-task (:tasks application) taskId)
-        task-type (-> task :schema-info :name)
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))]
-    (when-not (#{"task-katselmus" "task-katselmus-ya"} task-type) (fail! :error.invalid-task-type))
     (when (ss/blank? (get-in task [:data :katselmuksenLaji :value])) (fail! :error.missing-parameters))
     (let [sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
           set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
