@@ -4415,6 +4415,8 @@
 "task.ok.title" "sv" "Kravet uppfyllt"
 "task.reject" "fi" "Tarkennettavaa"
 "task.reject" "sv" "Bör preciseras"
+"task.review-done" "fi" "Katselmus pidetty"
+"task.review-done" "sv" ""
 "task.send" "fi" "Siirrä taustajärjestelmään"
 "task.send" "sv" "Flytta till bakgrundssystemet"
 "task.type" "fi" "Vaatimuksen tyyppi"
