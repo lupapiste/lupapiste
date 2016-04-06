@@ -122,6 +122,12 @@ LUPAPISTE.ApplicationModel = function() {
     return self.inPostVerdictState() || self.state() === "canceled";
   });
 
+  self.openTask = function( taskId ) {
+    hub.send( "scrollService::push");
+    taskPageController.setApplicationModelAndTaskId(self._js, taskId);
+    pageutil.openPage("task",  self.id() + "/" + taskId);
+  };
+
   self.taskGroups = ko.pureComputed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
@@ -145,11 +151,7 @@ LUPAPISTE.ApplicationModel = function() {
           order: schemaInfos[n].order,
           tasks: _.map(groups[n], function(task) {
             task.displayName = taskUtil.shortDisplayName(task);
-            task.openTask = function() {
-              hub.send( "scrollService::push");
-              taskPageController.setApplicationModelAndTaskId(self._js, task.id);
-              pageutil.openPage("task",  self.id() + "/" + task.id);
-            };
+            task.openTask = _.partial( self.openTask, task.id);
             task.statusName = LUPAPISTE.statuses[task.state] || "unknown";
 
             return task;

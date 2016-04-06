@@ -19,7 +19,8 @@
         <tr>
           <td class="reviews-table--icons" data-bind="if: hasAttachments">
             <i class="lupicon-paperclip"></i></td>
-          <td><a data-bind="text: name"></a></td>
+          <td><a data-bind="text: name,
+                            click: $parent.openTask"></a></td>
           <td data-bind="text: date"></td>
           <td data-bind="text: author"></td>
           <td data-bind="if: state">
