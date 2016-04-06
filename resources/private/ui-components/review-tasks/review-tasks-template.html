@@ -16,7 +16,7 @@
         </tr>
       </thead>
       <tbody data-bind="foreach: reviews">
-        <tr>
+        <tr data-test-type="task-katselmus">
           <td class="reviews-table--icons" data-bind="if: hasAttachments">
             <i class="lupicon-paperclip"></i></td>
           <td><a data-bind="text: name,
