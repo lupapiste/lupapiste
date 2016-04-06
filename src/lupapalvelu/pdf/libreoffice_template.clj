@@ -3,6 +3,7 @@
             [lupapalvelu.tiedonohjaus :as toj]
             [sade.util :as util]
             [sade.property :as p]
+            [sade.xml :as sx]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [clojure.xml :as xml]
@@ -12,7 +13,8 @@
 (def history-verdict-file "private/lupapiste-verdict-template.fodt")
 
 (defn- xml-escape [text]
-  (clojure.string/escape (str text) {\< "&lt;", \> "&gt;", \& "&amp;"}))
+  (sx/escape-xml (str text)))
+  ;;(clojure.string/escape (str text) {\< "&lt;", \> "&gt;", \& "&amp;"}))
 
 (defn xml-table-row [& cols]
   (with-out-str (xml/emit-element {:tag     :table:table-row
@@ -140,7 +142,7 @@
           (recur older new-result))))))
 
 (defn build-xml-history [application lang]
-  (clojure.string/join " " (map #(apply xml-table-row %) (build-history-rows application lang))))
+  (s/join " " (map #(apply xml-table-row %) (build-history-rows application lang))))
 
 (defn write-history-libre-doc [application lang file]
   (create-libre-doc (io/resource history-template-file) file (assoc (common-field-map application lang)
@@ -219,7 +221,7 @@
                                                                 "MINUTESCOL4" (i18n/localize lang "verdict.paatospvm")
                                                                 "MINUTESCOL5" (i18n/localize lang "verdict.attachments")
 
-                                                                "MINUTESTABLE" (map (fn [val] (debug "MINUTESTABLE.val:" val) [(str (if (:status val) (i18n/localize lang "verdict.status" (str (:status val))) "") " (" (:paatoskoodi val) ") " (:paatos val))
+                                                                "MINUTESTABLE" (map (fn [val] [(str (if (:status val) (i18n/localize lang "verdict.status" (str (:status val))) "") " (" (:paatoskoodi val) ") " (:paatos val))
                                                                                                                                (str (:pykala val))
                                                                                                                                (str (:paatoksentekija val))
                                                                                                                                (or (util/to-local-date (:paatospvm val)) "-")
