@@ -25,7 +25,7 @@
 
       <!-- ko if: features.enabled("review-done") -->
       <div class="feature" style="display:inline-block">
-      <button data-test-id="review-done" data-bind="ltext: 'task.review-done', click: reviewDone, enable: $root.taskSubmitOk() && !$root.processing(), visible: $root.authorization.ok('review-done')" class="positive"></button>
+      <button data-test-id="review-done" data-bind="ltext: 'task.review-done', click: reviewDone, enable: $root.reviewSubmitOk() && !$root.processing(), visible: $root.authorization.ok('review-done')" class="positive"></button>
       </div>
       <!-- /ko -->
 

@@ -11,7 +11,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.tools :as tools]))
 
-(def- task-schemas-version 1)
+(def task-schemas-version 1)
 
 (def- task-name-max-len 80)
 

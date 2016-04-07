@@ -34,8 +34,9 @@
       updates)))
 
 (defn- task-is-review? [task]
-  (let [task-type (-> task :schema-info :name)]
-    (contains? #{"task-katselmus" "task-katselmus-ya"} task-type)))
+  (let [task-type (-> task :schema-info :name)
+        schema (schemas/get-schema tasks/task-schemas-version task-type)]
+    (= :review (-> schema :info :subtype keyword))))
 
 ;; API
 (def valid-source-types #{"verdict" "task"})
