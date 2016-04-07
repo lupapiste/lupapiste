@@ -77,6 +77,7 @@
   task-schemas-version
   [{:info {:name "task-katselmus"
            :type :task
+           :subtype :review
            :order 1
            :section-help "authority-fills"
            :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
@@ -84,6 +85,7 @@
 
    {:info {:name "task-katselmus-ya"
            :type :task
+           :subtype :review
            :order 1
            :section-help "authority-fills"
            :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
