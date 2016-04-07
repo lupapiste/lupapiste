@@ -7,9 +7,9 @@ LUPAPISTE.OkButtonGroupModel = function (params) {
   var okFn = util.getIn(params, ["okFn"]);
 
   self.ok = function() {
+    hub.send("close-dialog");
     if (_.isFunction(okFn)) {
       okFn();
     }
-    hub.send("close-dialog");
   };
 };
