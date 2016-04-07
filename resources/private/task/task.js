@@ -45,7 +45,7 @@ var taskPageController = (function() {
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
   function returnToApplication() {
-    applicationModel.reload();
+    applicationModel.lightReload();
     applicationModel.open("tasks");
   }
 
@@ -65,8 +65,8 @@ var taskPageController = (function() {
 
   function runTaskCommand(cmd) {
     ajax.command(cmd, { id: applicationModel.id(), taskId: currentTaskId})
-      .success(applicationModel.reload)
-      .error(applicationModel.reload)
+      .success(applicationModel.lightReload)
+      .error(applicationModel.lightReload)
       .call();
     return false;
   }
@@ -78,7 +78,7 @@ var taskPageController = (function() {
       .processing(processing)
       .success(function() {
         var permit = externalApiTools.toExternalPermit(applicationModel._js);
-        applicationModel.reload();
+        applicationModel.lightReload();
         LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
         if (applicationModel.externalApi.enabled()) {
           hub.send("external-api::integration-sent", permit);
@@ -86,7 +86,7 @@ var taskPageController = (function() {
       })
       .onError("error.invalid-task-type", notify.ajaxError)
       .error(function(e){
-        applicationModel.reload();
+        applicationModel.lightReload();
         LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
       })
       .call();
