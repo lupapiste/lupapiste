@@ -168,3 +168,42 @@
                  (tasks/task-schemas)
                  (sort-by (comp :order :info))
                  (map schema-with-type-options))))
+
+(defcommand review-done
+  {:description "Marks review done, generates PDF/A and sends data to backend"
+   :feature     :review-done
+   :parameters  [id taskId lang]
+   :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
+   :pre-checks  [validate-task-is-review
+                 validate-review-kind
+                 (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
+   :user-roles  #{:authority}
+   :states      valid-states}
+  [{application :application user :user created :created :as command}]
+  (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
+  (let [task (util/find-by-id taskId (:tasks application))
+        tila (get-in task [:data :katselmus :tila :value])
+
+        _    (generate-task-pdfa application task user lang)
+        application (domain/get-application-no-access-checking id [:attachments])
+        all-attachments (:attachments application)
+        command (assoc command :application application)
+
+        sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+        set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
+
+    (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
+
+    (when (= "osittainen" tila)
+      (let [meta {:created created :assignee (:assignee task)}
+            source {:type :task :id taskId}
+            laji (get-in task [:data :katselmuksenLaji :value])
+            lupaehtona (get-in task [:data :vaadittuLupaehtona :value])
+            new-task (tasks/new-task (get-in task [:schema-info :name])
+                                     (:taskname task)
+                                     {:katselmuksenLaji laji, :vaadittuLupaehtona lupaehtona}
+                                     meta
+                                     source)]
+        (update-application command {$push {:tasks new-task}}))))
+
+  )

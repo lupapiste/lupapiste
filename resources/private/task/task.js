@@ -71,8 +71,9 @@ var taskPageController = (function() {
     return false;
   }
 
-  function sendTask() {
-    ajax.command("send-task", { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
+  function sendTask(cmd) {
+    var command = _.isString(cmd) ? cmd : "send-task";
+    ajax.command(command, { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
       .success(function() {
@@ -83,11 +84,16 @@ var taskPageController = (function() {
           hub.send("external-api::integration-sent", permit);
         }
       })
+      .onError("error.invalid-task-type", notify.ajaxError)
       .error(function(e){
         applicationModel.reload();
         LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
       })
       .call();
+  }
+
+  function reviewDone() {
+    sendTask("review-done");
   }
 
   /**
@@ -112,6 +118,7 @@ var taskPageController = (function() {
       t.reject = _.partial(runTaskCommand, "reject-task");
       t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
       t.rejectable = authorizationModel.ok("reject-task");
+      t.reviewDone = reviewDone;
       t.sendTask = sendTask;
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
       task(t);
