@@ -17,6 +17,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.documentId = params.documentId || params.schema.documentId;
   self.model = service.getInDocument(self.documentId, params.path);
   self.value = self.model.model;
+  self.schemaCss = self.schema.css;
 
   self.i18npath = params.schema.i18nkey ? [params.schema.i18nkey] : params.schema.i18npath;
   if (!self.i18npath) {
@@ -56,7 +57,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   }
 
   self.classes = ko.computed(function() {
-    var classes = [];
+    var classes = self.schemaCss || [];
     var result = self.result() ? self.result()[0] : undefined;
     if (result) {
       classes.push(result);
