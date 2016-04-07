@@ -11,10 +11,7 @@
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
-            [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.pdf.libreoffice-template :as lt]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as lcc])
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream File]
            [javax.imageio ImageIO]))
 

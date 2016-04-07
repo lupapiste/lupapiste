@@ -9,8 +9,12 @@
     [sade.core :as sade]
     [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
     [lupapalvelu.pdf.libreoffice-template :refer :all]
+    [lupapalvelu.pdf.libreoffice-template-history :as history]
+    [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
     [lupapalvelu.tiedonohjaus :refer :all])
   (:import (java.io File StringWriter)))
+
+(def build-history-rows #'lupapalvelu.pdf.libreoffice-template-history/build-history-rows)
 
 (def date-01012016 1451606400000)
 (def date-02012016 1451692800000)
@@ -111,6 +115,9 @@
                                    :user  {:firstName "Testi"
                                            :lastName  "Testaaja"}}]})
 
+(defn build-xml-history [application lang]
+  (s/join " " (map #(apply xml-table-row %) (build-history-rows application lang))))
+
 (fact {:midje/description (str "Libre Template common-field-map ")}
       (common-field-map application1 :fi) => {"FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "J\u00e4rvenp\u00e4\u00e4", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteist\u00f6tunnus", "FIELD005B" "(Tyhj\u00e4)", "FIELD006A" "Hakemus j\u00e4tetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus", "FIELD007B" "", "FIELD008A" "K\u00e4sittelij\u00e4", "FIELD008B" "(Tyhj\u00e4)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" "", "FOOTER_PAGE" "Sivu", "FOOTER_DATE" (util/to-local-date (sade/now))})
 
@@ -130,7 +137,7 @@
        (doseq [lang i18n/languages]
          (fact {:midje/description (str "history libre document: " (name lang))}
                (let [tmp-file (File/createTempFile (str "history-" (name lang) "-") ".fodt")]
-                 (write-history-libre-doc application1 lang tmp-file)
+                 (history/write-history-libre-doc application1 lang tmp-file)
                  (let [res (s/split (slurp tmp-file) #"\r?\n")]
                    #_(.delete tmp-file)
                    (nth res 945))) => (str (localize lang "caseFile.operation.review.request") ": rakennuksen paikan tarkastaminen"))))
@@ -138,7 +145,7 @@
 (facts "Verdict export "
        (doseq [lang i18n/languages]
                (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
-                 (write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
+                 (verdict/write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
                  (let [pos 1060
                        res (s/split (slurp tmp-file) #"\r?\n")]
                    (.delete tmp-file)

@@ -4,6 +4,8 @@
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.libreoffice-template :refer :all]
+            [lupapalvelu.pdf.libreoffice-template-history :as history]
+            [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.env :as env]
@@ -49,7 +51,7 @@
 (defn generate-casefile-pdfa [application lang]
   (let [filename (str (localize lang "caseFile.heading") ".fodt")
         tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
-    (write-history-libre-doc application lang tmp-file)
+    (history/write-history-libre-doc application lang tmp-file)
     (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
 
 
@@ -57,5 +59,5 @@
   (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-idx ", lang: " lang)
   (let [filename (str (localize lang "application.verdict.title") ".fodt")
         tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
-    (write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
+    (verdict/write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
     (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
