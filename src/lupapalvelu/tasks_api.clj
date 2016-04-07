@@ -185,7 +185,7 @@
         tila (get-in task [:data :katselmus :tila :value])
 
         _    (generate-task-pdfa application task user lang)
-        application (domain/get-application-no-access-checking id [:attachments])
+        application (domain/get-application-no-access-checking id)
         all-attachments (:attachments application)
         command (assoc command :application application)
 
