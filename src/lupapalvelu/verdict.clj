@@ -28,8 +28,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [clojure.string :as s])
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
   (:import [java.net URL]))
 
 (def verdict-codes ["my\u00f6nnetty"
@@ -155,6 +154,12 @@
      {:type-group "paatoksenteko" :type-id type}
      {:type-group "muut" :type-id type})))
 
+(defn- attachment-type-from-krysp-type [type]
+  (case (ss/lower-case type)
+    "paatos" "paatos"
+    "lupaehto" "lupaehto"
+    "paatosote"))
+
 (defn- get-poytakirja
   "At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
@@ -183,7 +188,7 @@
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
-                   attachment-type    (verdict-attachment-type application (if (and type (= "paatos" (s/lower-case type))) "paatos" "paatosote"))
+                   attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type type))
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
