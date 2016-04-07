@@ -29,7 +29,8 @@
    (opt :whitelist)   {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
    (opt :blacklist)   [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
    (opt :emit)        [sc/Keyword]   ;; Change in element emits events
-   (opt :listen)      [sc/Keyword]}) ;; Events to listen
+   (opt :listen)      [sc/Keyword]   ;; Events to listen
+   (opt :css)         [sc/Keyword]})
 
 (defschema Text
   "Text area element. Represented as text-area html element"
@@ -248,7 +249,9 @@
           (opt :exclude-from-pdf)            sc/Bool    ;; 
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
           (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary
-          (opt :order)                       sc/Int}    ;; 
+          (opt :order)                       sc/Int}    ;;
+   (opt :rows) [(sc/either [sc/Str] {sc/Keyword sc/Str})]
+   (opt :template) sc/Str
    :body  [Element]})
 
 (defn validate-doc-schema [doc-schema]

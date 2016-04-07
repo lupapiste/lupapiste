@@ -62,7 +62,7 @@
     :body
     [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
      {:name "pitoPvm" :type :date :required true}
-     {:name "pitaja" :type :string}
+     {:name "pitaja" :type :string :css [:testiclassi]}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000}
              {:name "maaraAika" :type :date}
@@ -82,6 +82,15 @@
            :order 1
            :section-help "authority-fills"
            :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
+    :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
+           ["rakennus"]
+           ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
+           {:h2 "huomautukset-ltext"}
+           ["katselmus/huomautukset/kuvaus::3"]
+           ["katselmus/huomautukset/maaraAika" "katselmus/huomautukset/toteaja" "katselmus/huomautukset/toteamisHetki"]
+           ["katselmus/lasnaolijat::3"]
+           ["katselmus/poikkeamat::3"]]
+    :template "form-grid-docgen-group-template"
     :body task-katselmus-body}
 
    {:info {:name "task-katselmus-ya"

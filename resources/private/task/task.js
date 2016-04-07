@@ -117,8 +117,6 @@ var taskPageController = (function() {
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
       task(t);
 
-      console.log(task);
-
       taskService.addDocument(task());
       var requiredErrors = util.extractRequiredErrors([t.validationErrors]);
       taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);

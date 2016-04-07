@@ -6,6 +6,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.applicationId = params.applicationId;
   self.documentId = params.documentId;
   self.service = params.service || lupapisteApp.services.documentDataService;
+  self.schemaRows = params.schema.rows;
 
   self.componentTemplate = (params.template || params.schema.template) || "default-docgen-group-template";
 
@@ -19,7 +20,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.subSchemas = _.map(params.schema.body, function(schema) {
     var uicomponent = schema.uicomponent || "docgen-" + schema.type;
     var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
-    return _.extend({}, schema, {
+    var finalschema = _.extend({}, schema, {
       path: self.path.concat(schema.name),
       uicomponent: uicomponent,
       schemaI18name: params.schemaI18name,
@@ -28,6 +29,44 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       documentId: params.documentId,
       service: self.service
     });
+    return finalschema;
+  });
+
+  function getInSchema(schema, path) {
+    var pathArray = _.isArray(path) ? path : path.split("/");
+    if (_.isEmpty(pathArray)) {
+      return schema;
+    } else {
+      return getInSchema(_.find(schema.body, {name: _.head(pathArray)}), _.tail(pathArray));
+    }
+  }
+
+  self.getColClass = function(schema) {
+    return "col-" + schema.cols;
+  };
+
+  self.rowSchemas = _.map(self.schemaRows, function(row) {
+    if ( _.isArray(row)) {
+      return _.map(row, function(schemaName) {
+        var splitted = schemaName.split("::");
+        var cols = splitted[1] || 1;
+        var schema = getInSchema(params.schema, splitted[0]);
+        return _.extend({}, schema, {
+                  path: self.path.concat(splitted[0].split("/")),
+                  uicomponent: schema.uicomponent || "docgen-" + schema.type,
+                  schemaI18name: params.schemaI18name,
+                  i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name),
+                  applicationId: params.applicationId,
+                  documentId: params.documentId,
+                  service: self.service,
+                  cols: cols
+                });
+      });
+    } else {
+      var headerTag = _.head(_.keys(row));
+      var ltext = row[headerTag];
+      return {ltext: ltext, tag: headerTag};
+    }
   });
 
 };
