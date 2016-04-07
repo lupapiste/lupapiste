@@ -60,16 +60,16 @@
 
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
-    [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
+    [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
      {:name "pitoPvm" :type :date :required true}
-     {:name "pitaja" :type :string :css [:testiclassi]}
+     {:name "pitaja" :type :string}
      {:name "huomautukset" :type :group
-      :body [{:name "kuvaus" :type :text :max-len 4000}
+      :body [{:name "kuvaus" :type :text :max-len 4000 :css [] }
              {:name "maaraAika" :type :date}
              {:name "toteaja" :type :string}
              {:name "toteamisHetki" :type :date}]}
-     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}])
+     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css []}
+     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css []}]}])
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
@@ -85,7 +85,7 @@
     :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["rakennus"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
-           {:h2 "huomautukset-ltext"}
+           {:h2 "task-katselmus.huomautukset"}
            ["katselmus/huomautukset/kuvaus::3"]
            ["katselmus/huomautukset/maaraAika" "katselmus/huomautukset/toteaja" "katselmus/huomautukset/toteamisHetki"]
            ["katselmus/lasnaolijat::3"]
