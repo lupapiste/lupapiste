@@ -112,4 +112,26 @@
       (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => (partial expected-failure? "error.illegal-value:select")
       (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "foofaa") => (partial expected-failure? "error.illegal-value:select")))
 
+  (facts "review edit and done"
+    (let [task-id (-> tasks second :id)]
+      (fact "readonly field can't be updated"
+        (command sonja :update-task :id application-id :doc task-id :updates [["katselmuksenLaji" "rakennekatselmus"]]) => (partial expected-failure? :error-trying-to-update-readonly-field))
+
+      (facts "mark done"
+        (fact "can't be done as required fieds are not filled"
+          (command sonja :review-done :id application-id :taskId task-id :lang "fi") => fail?)
+
+        (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
+                                                                              ["rakennus.0.rakennus.rakennusnro" "001"]
+                                                                              ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
+                                                                              ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
+                                                                              ["katselmus.tila" "osittainen"]]) => ok?
+
+        (fact "can now be marked done, required fields are filled"
+          (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
+
+        (fact "as the review was not final, a new task has been createad"
+          (-> (query-application sonja application-id) :tasks count) => (+ 9 1 1)) ; fixture + prev. facts + review-done
+        )))
+
   )
