@@ -196,15 +196,12 @@
     (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
 
     (when (= "osittainen" tila)
-      (let [meta {:created created :assignee (:assignee task)}
+      (let [schama-name (get-in task [:schema-info :name])
+            meta {:created created :assignee (:assignee task)}
             source {:type :task :id taskId}
             laji (get-in task [:data :katselmuksenLaji :value])
-            lupaehtona (get-in task [:data :vaadittuLupaehtona :value])
-            new-task (tasks/new-task (get-in task [:schema-info :name])
-                                     (:taskname task)
-                                     {:katselmuksenLaji laji, :vaadittuLupaehtona lupaehtona}
-                                     meta
-                                     source)]
+            data {:katselmuksenLaji laji}
+            new-task (tasks/new-task schema-name (:taskname task) data meta source)]
         (update-application command {$push {:tasks new-task}}))))
 
   )
