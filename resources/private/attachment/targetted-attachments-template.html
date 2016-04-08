@@ -40,6 +40,7 @@
           <i data-bind="ltext: 'no-attachments'"></i>
         </div>
 
+        <!-- ko ifnot: $root.addAttachmentDisabled -->
         <button
           class="positive"
           data-bind="visible: $root.authorization.ok('upload-attachment'),
@@ -49,6 +50,7 @@
           <i class="lupicon-circle-plus"></i>
           <span data-bind="ltext: 'application.attachmentsAdd'"></span>
         </button>
+        <!-- /ko -->
       </div>
     </div>
     </script>

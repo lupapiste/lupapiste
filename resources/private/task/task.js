@@ -52,6 +52,11 @@ var taskPageController = (function() {
     return authorizationModel.ok("review-done") && schemaNameOK && stateOK && _.isEmpty(requiredErrors());
   });
 
+  var addAttachmentDisabled = ko.computed(function() {
+    var t = task();
+    return "sent" === _.get(t, "state");
+  });
+
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
   function returnToApplication() {
@@ -186,7 +191,8 @@ var taskPageController = (function() {
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
       taskSubmitOk: taskSubmitOk, // FIXME remove
-      reviewSubmitOk: reviewSubmitOk
+      reviewSubmitOk: reviewSubmitOk,
+      addAttachmentDisabled: addAttachmentDisabled
     });
   });
 
