@@ -34,14 +34,29 @@ var taskUtil = (function() {
 var taskPageController = (function() {
   "use strict";
 
+  var applicationModel = lupapisteApp.models.application;
+  var authorizationModel = lupapisteApp.models.applicationAuthModel;
+
   var currentTaskId = null;
   var task = ko.observable();
   var processing = ko.observable(false);
   var pending = ko.observable(false);
   var taskSubmitOk = ko.observable(false);
 
-  var applicationModel = lupapisteApp.models.application;
-  var authorizationModel = lupapisteApp.models.applicationAuthModel;
+  var requiredErrors = ko.observable([null]);
+
+  var reviewSubmitOk = ko.computed(function() {
+    var t = task();
+    var stateOK =  "sent" !== _.get(t, "state");
+    var schemaNameOK = util.getIn(t, ["schema-info", "subtype"]) === "review";
+    return authorizationModel.ok("review-done") && schemaNameOK && stateOK && _.isEmpty(requiredErrors());
+  });
+
+  var addAttachmentDisabled = ko.computed(function() {
+    var t = task();
+    return "sent" === _.get(t, "state");
+  });
+
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
   function returnToApplication() {
@@ -123,8 +138,10 @@ var taskPageController = (function() {
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
       task(t);
 
-      var requiredErrors = util.extractRequiredErrors([t.validationErrors]);
-      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);
+      var errors = util.extractRequiredErrors([t.validationErrors]);
+      requiredErrors(errors);
+      // FIXME to be removed
+      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !errors.length);
 
       var options = {collection: "tasks", updateCommand: "update-task", validate: true};
       docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
@@ -159,8 +176,10 @@ var taskPageController = (function() {
 
   hub.subscribe("update-task-success", function(e) {
     if (task() && applicationModel.id() === e.appId && currentTaskId === e.documentId) {
-      var requiredErrors = util.extractRequiredErrors([e.results]);
-      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !requiredErrors.length);
+      var errors = util.extractRequiredErrors([e.results]);
+      requiredErrors(errors);
+      // FIXME to be removed
+      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !errors.length);
     }
   });
 
@@ -171,7 +190,9 @@ var taskPageController = (function() {
       processing: processing,
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
-      taskSubmitOk: taskSubmitOk
+      taskSubmitOk: taskSubmitOk, // FIXME remove
+      reviewSubmitOk: reviewSubmitOk,
+      addAttachmentDisabled: addAttachmentDisabled
     });
   });
 
