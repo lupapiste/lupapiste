@@ -18,11 +18,6 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]))
 
-(defn- find-repeating-document [schema-name documents]
-  (some #(and (= schema-name (get-in % [:schema-info :name]))
-              (get-in % [:schema-info :repeating]))
-        documents))
-
 (defn by-id [application collection id]
   (let [docs ((keyword collection) application)]
     (some #(when (= (:id %) id) %) docs)))
