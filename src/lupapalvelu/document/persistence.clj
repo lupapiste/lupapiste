@@ -96,48 +96,28 @@
   (when-not (#{"documents" "tasks"} collection)
     (fail :error.unknown-type)))
 
-(defn- get-subschema-by-name [schema sub-schema-name]
-  (some (fn [schema-body]
-          (when (= (:name schema-body) (name sub-schema-name))
-            schema-body))
-        (:body schema)))
-
-(defn- path->schema-path [path]
-  (remove (comp ss/numeric? name) path))
-
-(defn- seek-field-from-schema-path [field-name schema schema-path]
-  (reduce (fn [[schema field-value] path]
-            (let [subschema (get-subschema-by-name schema path)
-                  value (or (get subschema field-name) field-value)]
-              [subschema value]))
-          [schema nil]
-          schema-path))
-
 (defn validate-against-whitelist! [document update-paths user-role]
-  (let [doc-schema            (model/get-document-schema document)
-        schema-paths          (map path->schema-path update-paths)]
-    (doseq [path schema-paths]
-      (let [[_ whitelist] (seek-field-from-schema-path :whitelist doc-schema path)]
+  (let [doc-schema (model/get-document-schema document)]
+    (doseq [path update-paths]
+      (let [{whitelist :whitelist} (model/find-by-name (:body doc-schema) path)]
         (when-not (or (empty? whitelist)
                       (some #{(keyword user-role)} (:roles whitelist)))
           (unauthorized!))))))
 
 (defn validate-readonly-updates! [document update-paths]
-  (let [doc-schema            (model/get-document-schema document)
-        schema-paths          (map path->schema-path update-paths)]
-    (doseq [path schema-paths]
-      (let [[_ readonly] (seek-field-from-schema-path :readonly doc-schema path)]
+  (let [doc-schema (model/get-document-schema document)]
+    (doseq [path update-paths]
+      (let [{readonly :readonly} (model/find-by-name (:body doc-schema) path)]
         (when readonly
           (fail! :error-trying-to-update-readonly-field))))))
 
 (defn validate-readonly-removes! [document remove-paths]
   (let [doc-schema              (model/get-document-schema document)
-        schema-paths            (map path->schema-path remove-paths)
         validate-all-subschemas (fn validate-all-subschemas [schema]
                                   (or (:readonly schema)
                                       (some validate-all-subschemas (:body schema))))]
-    (doseq [path schema-paths]
-      (let [[subschema readonly] (seek-field-from-schema-path :readonly doc-schema path)]
+    (doseq [path remove-paths]
+      (let [{readonly :readonly :as subschema} (model/find-by-name (:body doc-schema) path)]
         (when (or readonly (validate-all-subschemas subschema))
           (fail! :error-trying-to-remove-readonly-field))))))
 
