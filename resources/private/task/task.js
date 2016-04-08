@@ -47,7 +47,7 @@ var taskPageController = (function() {
 
   var reviewSubmitOk = ko.computed(function() {
     var t = task();
-    var stateOK =  t && (t.state === "requires_user_action" || t.state === "requires_authority_action");
+    var stateOK =  "sent" !== _.get(t, "state");
     var schemaNameOK = util.getIn(t, ["schema-info", "subtype"]) === "review";
     return authorizationModel.ok("review-done") && schemaNameOK && stateOK && _.isEmpty(requiredErrors());
   });
