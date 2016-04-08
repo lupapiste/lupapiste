@@ -60,9 +60,9 @@
       <!-- ko foreach: attachments -->
       <div class="attachment-row">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id()) }">
-           <input type="checkbox" data-bind="visible: archivable && state() !== 'arkistoitu', checked: sendToArchive">
+           <input type="checkbox" data-bind="visible: archivable && $component.stateMap()[id()] !== 'arkistoitu', checked: sendToArchive">
            <i class="lupicon-circle-attention disabled" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></i>
-           <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="lupicon-archives enabled" data-bind="visible: $component.stateMap()[id()] === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
@@ -159,8 +159,8 @@
       <!-- ko foreach: documents -->
       <div class="attachment-row">
         <div class="archival-status" data-bind="visible: $parent.showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
-           <input type="checkbox" data-bind="visible: state() !== 'arkistoitu', checked: sendToArchive">
-           <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <input type="checkbox" data-bind="visible: $component.stateMap()[id] !== 'arkistoitu', checked: sendToArchive">
+           <i class="lupicon-archives enabled" data-bind="visible: $component.stateMap()[id] === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">

@@ -46,7 +46,7 @@ var taskPageController = (function() {
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
   function returnToApplication() {
-    applicationModel.reload();
+    applicationModel.lightReload();
     applicationModel.open("tasks");
   }
 
@@ -66,29 +66,35 @@ var taskPageController = (function() {
 
   function runTaskCommand(cmd) {
     ajax.command(cmd, { id: applicationModel.id(), taskId: currentTaskId})
-      .success(applicationModel.reload)
-      .error(applicationModel.reload)
+      .success(applicationModel.lightReload)
+      .error(applicationModel.lightReload)
       .call();
     return false;
   }
 
-  function sendTask() {
-    ajax.command("send-task", { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
+  function sendTask(cmd) {
+    var command = _.isString(cmd) ? cmd : "send-task";
+    ajax.command(command, { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
       .success(function() {
         var permit = externalApiTools.toExternalPermit(applicationModel._js);
-        applicationModel.reload();
+        applicationModel.lightReload();
         LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
         if (applicationModel.externalApi.enabled()) {
           hub.send("external-api::integration-sent", permit);
         }
       })
+      .onError("error.invalid-task-type", notify.ajaxError)
       .error(function(e){
-        applicationModel.reload();
+        applicationModel.lightReload();
         LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
       })
       .call();
+  }
+
+  function reviewDone() {
+    sendTask("review-done");
   }
 
   /**
@@ -113,6 +119,7 @@ var taskPageController = (function() {
       t.reject = _.partial(runTaskCommand, "reject-task");
       t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
       t.rejectable = authorizationModel.ok("reject-task");
+      t.reviewDone = reviewDone;
       t.sendTask = sendTask;
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
       task(t);
@@ -147,6 +154,8 @@ var taskPageController = (function() {
       repository.load(applicationId);
     } else if (taskId !== currentTaskId) {
       refresh(applicationModel._js, taskId);
+    } else {
+      lupapisteApp.setTitle(applicationModel.title());
     }
   });
 

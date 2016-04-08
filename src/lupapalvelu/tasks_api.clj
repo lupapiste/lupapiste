@@ -20,11 +20,8 @@
 
 ;; Helpers
 
-(defn- get-task [tasks task-id]
-  (some #(when (= (:id %) task-id) %) tasks))
-
 (defn- assert-task-state-in [states {{task-id :taskId} :data {tasks :tasks} :application}]
-  (if-let [task (get-task tasks task-id)]
+  (if-let [task (util/find-by-id task-id tasks)]
     (when-not ((set states) (keyword (:state task)))
       (fail! :error.command-illegal-state))
     (fail! :error.task-not-found)))
@@ -36,8 +33,12 @@
       {$set {:tasks.$.state state :modified created}}
       updates)))
 
+(defn- task-is-review? [task]
+  (let [task-type (-> task :schema-info :name)]
+    (contains? #{"task-katselmus" "task-katselmus-ya"} task-type)))
+
 ;; API
-(def valid-source-types #{"verdict"})
+(def valid-source-types #{"verdict" "task"})
 
 (def valid-states states/all-application-states-but-draft-or-terminal)
 
@@ -89,6 +90,10 @@
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
 
+(defn generate-task-pdfa [application {info :schema-info :as task} user lang]
+  (when (= "task-katselmus" (:name info))
+    (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
+
 (defcommand approve-task
   {:description "Authority can approve task, moves to ok"
    :parameters  [id taskId]
@@ -97,8 +102,7 @@
    :states      valid-states}
   [{:keys [application user lang] :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
-     (when (and (env/feature? :tasks-pdf-export) (= (get-in (get-task (:tasks application) taskId) [:schema-info :name] "task-katselmus")))
-       (child-to-attachment/create-attachment-from-children user application :tasks taskId lang))
+  (generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
   (set-state command taskId :ok))
 
 (defcommand reject-task
@@ -111,29 +115,35 @@
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
   (set-state command taskId :requires_user_action))
 
-(defn- validate-task-is-review [{data :data} application]
+(defn- validate-task-is-review [{data :data} {tasks :tasks}]
   (when-let [task-id (:taskId data)]
-    (let [task (get-task (:tasks application) task-id)
-          task-type (-> task :schema-info :name)]
-      (when-not (#{"task-katselmus" "task-katselmus-ya"} task-type)
-        (fail :error.invalid-task-type)))))
+    ; TODO create own auth model for task and combile let forms
+    (when-not (task-is-review? (util/find-by-id task-id tasks))
+      (fail :error.invalid-task-type))))
 
+(defn- validate-review-kind [{data :data} {tasks :tasks}]
+  (when-let [task-id (:taskId data)]
+    ; TODO create own auth model for task and combile let forms
+    (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
+      (fail :error.missing-parameters))))
+
+;; TODO to be deleted after review-done feature is in production
 (defcommand send-task
   {:description "Authority can send task info to municipality backend system."
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [validate-task-is-review
+                 validate-review-kind
                  (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
    :user-roles  #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
-  (let [task (get-task (:tasks application) taskId)
-        all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))]
-    (when (ss/blank? (get-in task [:data :katselmuksenLaji :value])) (fail! :error.missing-parameters))
-    (let [sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
-          set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
-      (set-state command taskId :sent (when (seq set-statement) {$set set-statement})))))
+  (let [task (util/find-by-id taskId (:tasks application))
+        all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
+        sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+        set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
+    (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))))
 
 (defn- schema-with-type-options
   "Genereate 'subtype' options for readonly elements with sequential body"
@@ -158,3 +168,42 @@
                  (tasks/task-schemas)
                  (sort-by (comp :order :info))
                  (map schema-with-type-options))))
+
+(defcommand review-done
+  {:description "Marks review done, generates PDF/A and sends data to backend"
+   :feature     :review-done
+   :parameters  [id taskId lang]
+   :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
+   :pre-checks  [validate-task-is-review
+                 validate-review-kind
+                 (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
+   :user-roles  #{:authority}
+   :states      valid-states}
+  [{application :application user :user created :created :as command}]
+  (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
+  (let [task (util/find-by-id taskId (:tasks application))
+        tila (get-in task [:data :katselmus :tila :value])
+
+        _    (generate-task-pdfa application task user lang)
+        application (domain/get-application-no-access-checking id)
+        all-attachments (:attachments application)
+        command (assoc command :application application)
+
+        sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+        set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
+
+    (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
+
+    (when (= "osittainen" tila)
+      (let [meta {:created created :assignee (:assignee task)}
+            source {:type :task :id taskId}
+            laji (get-in task [:data :katselmuksenLaji :value])
+            lupaehtona (get-in task [:data :vaadittuLupaehtona :value])
+            new-task (tasks/new-task (get-in task [:schema-info :name])
+                                     (:taskname task)
+                                     {:katselmuksenLaji laji, :vaadittuLupaehtona lupaehtona}
+                                     meta
+                                     source)]
+        (update-application command {$push {:tasks new-task}}))))
+
+  )

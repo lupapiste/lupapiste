@@ -40,7 +40,7 @@
     "docutils": true,
     "DocModel" : true,
     "error": true,
-	"externalApiTools" : true,
+    "externalApiTools" : true,
     "features": true,
     "ga": true,
     "getEvent": true,
@@ -75,18 +75,19 @@
     "warn": true,
     "Waypoint":false
   },
-  "exported":
-     ["accordion","AccordionState","ajax","attachment",
-      "attachmentUtils","attachmentTypeSelect",
-       "authorization","comments","currentUser",
-       "docutils", "DocModel","docgen",
-	   "expand", "externalApiTools", "features",
-       "ga","gis","getEvent","hub","invites","loc",
-       "locationSearch","vetuma","notify",
-       "trace","debug","info","warn","error",
-       "LUPAPISTE","municipalities","organizations",
-       "pageutil","repository","RequestContext",
-       "stamping","taskUtil","taskPageController",
-       "tree", "uiComponents",
-       "user","users","util", "lupapisteApp"]
+  "exported": [
+    "accordion","AccordionState","ajax","attachment",
+    "attachmentUtils","attachmentTypeSelect",
+    "authorization","comments","currentUser",
+    "docutils", "DocModel","docgen",
+    "expand", "externalApiTools", "features",
+    "ga","gis","getEvent","hub","invites","loc",
+    "locationSearch","vetuma","notify",
+    "trace","debug","info","warn","error",
+    "LUPAPISTE","municipalities","organizations",
+    "pageutil","repository","RequestContext",
+    "stamping","taskUtil","taskPageController",
+    "tree", "uiComponents",
+    "user","users","util", "lupapisteApp"
+  ]
 }

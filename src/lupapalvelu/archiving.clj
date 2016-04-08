@@ -16,6 +16,7 @@
             [clj-time.core :as t]
             [clj-time.format :as f]
             [lupapalvelu.application-meta-fields :as amf]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [clojure.string :as string])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
@@ -207,7 +208,7 @@
             metadata (generate-archive-metadata application user)]
         (upload-and-set-state application-archive-id application-file "application/pdf" metadata application created set-application-state)))
     (when (document-ids case-file-archive-id)
-      (let [case-file-file (pdf-export/generate-pdf-a-case-file application :fi)
+      (let [case-file-file (libre/generate-casefile-pdfa application :fi)
             metadata (-> (generate-archive-metadata application user)
                          (assoc :type :case-file))]
         (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)))

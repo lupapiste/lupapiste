@@ -1,19 +1,21 @@
 (function() {
   "use strict";
 
-  function GroupModel(groupName, groupDesc, attachments) {
+  function GroupModel(groupName, groupDesc, attachments, building) {
     var self = this;
     self.attachments = ko.observableArray(attachments);
     self.groupName = groupName;
-    self.groupDesc = groupDesc;
+    var fullGroupDesc = "";
+    if (groupDesc) {
+      fullGroupDesc += " - " + groupDesc;
+    }
+    if (building) {
+      fullGroupDesc += " - " + building;
+    }
     // computed name, depending if attachments belongs to operation or not
     self.name = ko.computed( function() {
-      if ( loc.hasTerm(["operations", self.groupName]) ) {
-        if ( self.groupDesc ) {
-          return loc(["operations", self.groupName]) + " - " + self.groupDesc;
-        } else {
-          return loc(["operations", self.groupName]);
-        }
+      if (loc.hasTerm(["operations", self.groupName])) {
+        return loc(["operations", self.groupName]) + fullGroupDesc;
       } else {
         return loc(self.groupName);
       }
@@ -47,7 +49,7 @@
 
   var generalAttachmentsStr = "attachments.general";
 
-  var getGroupList = function(attachments) {
+  var getGroupList = function(attachments, buildings) {
     if (_.isEmpty(attachments)) {
       return [];
     }
@@ -59,7 +61,7 @@
         return new GroupModel(group, null, attachments);
       } else {
         var att = _.head(attachments);
-        return new GroupModel(ko.unwrap(att.op.name), ko.unwrap(att.op.description), attachments);
+        return new GroupModel(ko.unwrap(att.op.name), ko.unwrap(att.op.description), attachments, buildings[att.op.id()]);
       }
     });
     return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created
@@ -122,19 +124,41 @@
       attachment.archivable = util.getIn(attachment, ["latestVersion", "archivable"]) ? attachment.latestVersion.archivable() : false;
       attachment.archivabilityError = util.getIn(attachment, ["latestVersion", "archivabilityError"]) ? attachment.latestVersion.archivabilityError() : null;
       attachment.sendToArchive = ko.observable(false);
-      attachment.state = util.getIn(attachment, ["metadata", "tila"]) ? attachment.metadata().tila : ko.observable();
       return attachment;
     });
-  };
-
-  var collectMainDocuments = function(application) {
-    return [{documentNameKey: "applications.application", metadata: application.metadata, id: application.id() + "-application", previewAction: "pdf-export"},
-            {documentNameKey: "caseFile.heading", metadata: application.processMetadata, id: application.id() + "-case-file", previewAction: "pdfa-casefile"}];
   };
 
   var model = function(params) {
     var self = this;
     self.attachments = params.application.attachments;
+    var appDocId = params.application.id() + "-application";
+    var caseFileDocId = params.application.id() + "-case-file";
+
+    var docs = [
+      {documentNameKey: "applications.application", metadata: params.application.metadata, id: appDocId, previewAction: "pdf-export"},
+      {documentNameKey: "caseFile.heading", metadata: params.application.processMetadata, id: caseFileDocId, previewAction: "pdfa-casefile"}
+    ];
+
+    var mainDocuments = ko.pureComputed(function() {
+      return addAdditionalFieldsToAttachments(docs);
+    });
+
+    self.stateMap = ko.pureComputed(function() {
+      var getState = function(doc) {
+        if (util.getIn(doc, ["metadata", "tila"])) {
+          return ko.unwrap(ko.unwrap(doc.metadata).tila);
+        } else {
+          return "valmis";
+        }
+      };
+      var stateMap = _.mapValues(_.keyBy(self.attachments(), function(att) {
+        return ko.unwrap(att.id);
+      }), getState);
+      stateMap[appDocId] = getState(params.application);
+      stateMap[caseFileDocId] = util.getIn(params.application, ["processMetadata", "tila"]) ? params.application.processMetadata().tila() : "valmis";
+      return stateMap;
+    });
+
     var preAttachments = ko.pureComputed(function() {
       return addAdditionalFieldsToAttachments(getPreAttachments(self.attachments()), params.application.id());
     });
@@ -147,21 +171,30 @@
     var archivedPostAttachments = ko.pureComputed(function() {
       return filterByArchiveStatus(postAttachments(), true);
     });
+    var buildings = _
+      .chain(params.application._js.buildings)
+      .filter(function(val) {
+        return val.operationId && (val.nationalId || val.localId);
+      })
+      .keyBy("operationId")
+      .mapValues(function(val) {
+        return val.nationalId || val.localId;
+      })
+      .value();
+
     self.archivedGroups = ko.pureComputed(function() {
-      return getGroupList(archivedPreAttachments());
+      return getGroupList(archivedPreAttachments(), buildings);
     });
     self.archivedPostGroups = ko.pureComputed(function() {
-      return getGroupList(archivedPostAttachments());
+      return getGroupList(archivedPostAttachments(), buildings);
     });
     self.notArchivedGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(preAttachments(), false));
+      return getGroupList(filterByArchiveStatus(preAttachments(), false), buildings);
     });
     self.notArchivedPostGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(postAttachments(), false));
+      return getGroupList(filterByArchiveStatus(postAttachments(), false), buildings);
     });
-    var mainDocuments = ko.pureComputed(function() {
-      return addAdditionalFieldsToAttachments(collectMainDocuments(params.application));
-    });
+
     self.archivedDocuments = ko.pureComputed(function() {
       return filterByArchiveStatus(mainDocuments(), true);
     });
@@ -210,28 +243,29 @@
 
     self.selectAll = function() {
       var selectIfArchivable = function(attachment) {
-        if (attachment.archivable && attachment.state() !== "arkistoitu") {
+        if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
           attachment.sendToArchive(true);
         }
       };
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
-        if (doc.state() !== "arkistoitu") {
+        if (doc.metadata().tila() !== "arkistoitu") {
           doc.sendToArchive(true);
         }
       });
     };
 
-    var updateState = function(docs, stateMap) {
+    var updateState = function(docs, newStateMap) {
       _.forEach(docs, function(doc) {
         var id = ko.unwrap(doc.id);
-        if (_.has(stateMap, id)) {
-          var newState = stateMap[id];
-          if (doc.metadata().tila) {
-            doc.metadata().tila(newState);
-          } else {
-            doc.state(newState);
+        if (_.has(newStateMap, id)) {
+          var newState = newStateMap[id];
+          var metadata = ko.unwrap(doc.metadata);
+          if (metadata && _.isFunction(metadata.tila)) {
+            metadata.tila(newState);
+          } else if (metadata) {
+            metadata.tila = ko.observable(newState);
           }
           if (newState === "arkistoitu") {
             doc.sendToArchive(false);
@@ -270,15 +304,12 @@
       }
     };
 
+
     var getId = function(doc) {
       return ko.unwrap(doc.id);
     };
 
-    var allIds = _.concat(
-      _.map(mainDocuments(), getId),
-      _.map(archivedPreAttachments(), getId),
-      _.map(archivedPostAttachments(), getId)
-    );
+    var allIds = _.map(self.attachments().concat(docs), getId);
 
     pollChangedState(allIds);
 
@@ -290,7 +321,6 @@
         return ko.unwrap(doc.id);
       });
       self.archivingInProgressIds(attachmentIds.concat(mainDocumentIds));
-      window.setTimeout(pollArchiveStatus, 5000);
       ajax
         .command("archive-documents",
           {
@@ -298,7 +328,11 @@
             attachmentIds: attachmentIds,
             documentIds: mainDocumentIds
           })
+        .success(function() {
+          window.setTimeout(pollArchiveStatus, 3000);
+        })
         .error(function(e) {
+          window.setTimeout(pollArchiveStatus, 3000);
           error(e.text);
         })
         .call();

@@ -6,6 +6,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.application-bulletins-api :as bulletins-api]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.action :as action]))
 
 (defraw pdf-export
@@ -48,7 +49,7 @@
   (if application
     {:status  200
      :headers {"Content-Type" "application/pdf"}
-     :body    (pdf-export/generate-pdf-a-case-file application lang)}
+           :body (libre/generate-casefile-pdfa application lang)}
     {:status  404
      :headers {"Content-Type" "text/plain"}
      :body    "404"}))

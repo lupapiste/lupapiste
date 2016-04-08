@@ -12,6 +12,7 @@
       </a>
       <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="positive"></button>
       <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>
+
       <button data-test-id="send-task"
               data-bind="click: sendTask,
                          visible: $root.authorization.ok('send-task'),
@@ -21,9 +22,17 @@
           <i class="wait spin lupicon-refresh"></i>
           <span data-bind="ltext: 'task.send'"></span>
       </button>
+
+      <!-- ko if: features.enabled("review-done") -->
+      <div class="feature" style="display:inline-block">
+      <button data-test-id="review-done" data-bind="ltext: 'task.review-done', click: reviewDone, enable: $root.taskSubmitOk() && !$root.processing(), visible: $root.authorization.ok('review-done')" class="positive"></button>
+      </div>
+      <!-- /ko -->
+
       <button data-test-id="delete-task"
               data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')"
               class="secondary" style="float:right"></button>
+
     </div>
 
     <div id="taskAttachments" >
