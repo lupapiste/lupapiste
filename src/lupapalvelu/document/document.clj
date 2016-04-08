@@ -65,8 +65,8 @@
                                                             (catch Exception e (:rekisterointipvm ktj-tiedot)))
                                                           "")]]
           schema (schemas/get-schema (:schema-info document))
-          updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) doc-updates)]
-      (doc-persistence/persist-model-updates application "documents" document doc-updates time))))
+          updates (filter (partial doc-persistence/update-key-in-schema? (:body schema)) doc-updates)]
+      (doc-persistence/persist-model-updates application "documents" document updates time))))
 
 
 ;;

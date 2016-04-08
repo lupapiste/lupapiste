@@ -223,7 +223,7 @@
                                   $set  {:modified created}})
       document)))
 
-(defn- update-key-in-schema? [schema [update-key _]]
+(defn update-key-in-schema? [schema [update-key _]]
   (model/find-by-name schema update-key))
 
 (defn set-subject-to-document
