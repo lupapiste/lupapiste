@@ -78,6 +78,8 @@
     (defschema version schema)))
 
 (defn get-schema
+  "Returns document schema map that contais :info and :body,
+   see lupapalvelu.document.schema-validation/Doc"
   ([{:keys [version name] :or {version 1}}] (get-schema version name))
   ([schema-version schema-name]
     {:pre [schema-version schema-name]}

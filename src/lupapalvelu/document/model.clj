@@ -299,6 +299,7 @@
       (map #(check (sub-schema-by-name schema-body %)) sub-schemas-to-validate)))
 
 (defn get-document-schema [{schema-info :schema-info}]
+  "Returns document's schema map that contais :info and :body."
   {:pre [schema-info]
    :post [%]}
   (schemas/get-schema schema-info))
