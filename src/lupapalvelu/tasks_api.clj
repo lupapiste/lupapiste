@@ -9,6 +9,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
@@ -170,6 +171,12 @@
                  (sort-by (comp :order :info))
                  (map schema-with-type-options))))
 
+(defn- root-task [application {source :source :as task}]
+  (let [{:keys [id type]} source]
+    (if (= "task" type)
+      (recur application (util/find-by-id id (:tasks application)))
+      task)))
+
 (defcommand review-done
   {:description "Marks review done, generates PDF/A and sends data to backend"
    :feature     :review-done
@@ -195,13 +202,26 @@
 
     (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
 
-    (when (= "osittainen" tila)
-      (let [schama-name (get-in task [:schema-info :name])
+    (case tila
+      ; Create new, similar task
+      "osittainen"
+      (let [schema-name (get-in task [:schema-info :name])
             meta {:created created :assignee (:assignee task)}
             source {:type :task :id taskId}
             laji (get-in task [:data :katselmuksenLaji :value])
             data {:katselmuksenLaji laji}
             new-task (tasks/new-task schema-name (:taskname task) data meta source)]
-        (update-application command {$push {:tasks new-task}}))))
+        (update-application command {$push {:tasks new-task}}))
 
-  )
+      ; Mark the state of the original task to final
+      "lopullinen"
+      (let [root-task (root-task application task)
+            task-updates [[[:katselmus :tila] "lopullinen"]]
+            schema  (schemas/get-schema (:schema-info task))
+            updates (filter (partial doc-persistence/update-key-in-schema? (:body schema)) task-updates)]
+        (if (and (not= (:id root-task) taskId)
+                 (get-in root-task [:data :vaadittuLupaehtona :value]))
+          (doc-persistence/persist-model-updates application "tasks" root-task updates created)
+          (ok)))
+
+      (ok))))

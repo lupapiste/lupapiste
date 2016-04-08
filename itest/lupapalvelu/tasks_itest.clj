@@ -136,8 +136,27 @@
         (fact "review state can no longer be updated"
           (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]]) => fail?)
 
-        (fact "as the review was not final, a new task has been createad"
-          (-> (query-application sonja application-id) :tasks count) => (+ 9 1 1)) ; fixture + prev. facts + review-done
-        )))
+        (let [tasks (:tasks (query-application sonja application-id))
+              expected-count (+ 9 1 1) ; fixture + prev. facts + review-done
+              new-id (:id (last tasks))]
+          (fact "as the review was not final, a new task has been createad"
+            (count tasks) => expected-count)
+
+          (fact "mark the new task final"
+            (command sonja :update-task :id application-id :doc new-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
+                                                                                 ["rakennus.0.rakennus.rakennusnro" "001"]
+                                                                                 ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
+                                                                                 ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
+                                                                                 ["katselmus.tila" "lopullinen"]]) => ok?)
+
+          (fact "mark the new task done"
+            (command sonja :review-done :id application-id :taskId new-id :lang "fi") => ok?)
+
+          (let [tasks (:tasks (query-application sonja application-id))]
+            (fact "no new tasks were generated (see count above)"
+              (count tasks) => expected-count)
+
+            (fact "the original task was marked final too"
+              (get-in (second tasks) [:data :katselmus :tila :value]) => "lopullinen"))))))
 
   )
