@@ -29,7 +29,8 @@
 
 (def- katselmuksenLaji
   {:name "katselmuksenLaji"
-   :type :select :sortBy :displayname
+   :type :select
+   :sortBy :displayname
    :required true
    :readonly true
    :whitelist {:roles [:authority] :otherwise :disabled}
@@ -45,29 +46,41 @@
   [katselmuksenLaji
    {:name "vaadittuLupaehtona"
     :type :checkbox
+    :readonly-after-sent true
     :whitelist {:roles [:authority] :otherwise :disabled}
     :i18nkey "vaadittuLupaehtona"}
    {:name "rakennus"
     :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :repeating true
-    :body [{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
+    :body [{:name "rakennus" :type :group
+            :body (map #(assoc % :readonly-after-sent true) schemas/uusi-rakennuksen-valitsin)}
            {:name "tila" :type :group
-            :body [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
-                   {:name "kayttoonottava" :type :checkbox}]}]}
+            :body [{:name "tila"
+                    :type :select
+                    :sortBy :displayname
+                    :readonly-after-sent true
+                    :body [{:name "osittainen"}
+                           {:name "lopullinen"}]}
+                   {:name "kayttoonottava" :type :checkbox :readonly-after-sent true}]}]}
    {:name "katselmus" :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
-    [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
-     {:name "pitoPvm" :type :date :required true}
-     {:name "pitaja" :type :string}
+    [{:name "tila"
+      :type :select
+      :sortBy :displayname
+      :readonly-after-sent true
+      :body [{:name "osittainen"}
+             {:name "lopullinen"}]}
+     {:name "pitoPvm" :type :date :required true :readonly-after-sent true}
+     {:name "pitaja" :type :string :readonly-after-sent true}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000}
              {:name "maaraAika" :type :date}
              {:name "toteaja" :type :string}
              {:name "toteamisHetki" :type :date}]}
-     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}])
+     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :readonly-after-sent true}
+     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :readonly-after-sent true}]}])
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]

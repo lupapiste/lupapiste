@@ -130,6 +130,12 @@
         (fact "can now be marked done, required fields are filled"
           (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
 
+        (fact "notes can still be updated"
+          (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.huomautukset.kuvaus" "additional notes"]]) => ok?)
+
+        (fact "review state can no longer be updated"
+          (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]]) => fail?)
+
         (fact "as the review was not final, a new task has been createad"
           (-> (query-application sonja application-id) :tasks count) => (+ 9 1 1)) ; fixture + prev. facts + review-done
         )))

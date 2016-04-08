@@ -99,21 +99,25 @@
                       (some #{(keyword user-role)} (:roles whitelist)))
           (unauthorized!))))))
 
+(defn- sent? [{state :state}]
+  (and state (= "sent" (name state))))
+
 (defn validate-readonly-updates! [document update-paths]
   (let [doc-schema (model/get-document-schema document)]
     (doseq [path update-paths]
-      (let [{readonly :readonly} (model/find-by-name (:body doc-schema) path)]
-        (when readonly
+      (let [{:keys [readonly readonly-after-sent]} (model/find-by-name (:body doc-schema) path)]
+        (when (or readonly (and (sent? document) readonly-after-sent))
           (fail! :error-trying-to-update-readonly-field))))))
 
 (defn validate-readonly-removes! [document remove-paths]
   (let [doc-schema              (model/get-document-schema document)
-        validate-all-subschemas (fn validate-all-subschemas [schema]
-                                  (or (:readonly schema)
-                                      (some validate-all-subschemas (:body schema))))]
+        validate-all-subschemas (fn validate-all-subschemas [{:keys [readonly readonly-after-sent body]}]
+                                  (or readonly
+                                      (and (sent? document) readonly-after-sent)
+                                      (some validate-all-subschemas body)))]
     (doseq [path remove-paths]
-      (let [{readonly :readonly :as subschema} (model/find-by-name (:body doc-schema) path)]
-        (when (or readonly (validate-all-subschemas subschema))
+      (let [{:keys [readonly readonly-after-sent] :as subschema} (model/find-by-name (:body doc-schema) path)]
+        (when (validate-all-subschemas subschema)
           (fail! :error-trying-to-remove-readonly-field))))))
 
 (defn update! [{application :application timestamp :created {role :role} :user} doc-id updates collection]
