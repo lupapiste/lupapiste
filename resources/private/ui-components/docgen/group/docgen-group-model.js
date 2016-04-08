@@ -65,7 +65,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     } else {
       var headerTag = _.head(_.keys(row));
       var ltext = row[headerTag];
-      return {ltext: ltext, tag: headerTag};
+      return {ltext: ltext, css: _.fromPairs( [[headerTag, true]])};
     }
   });
 

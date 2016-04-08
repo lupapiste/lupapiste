@@ -25,7 +25,7 @@ p {
   line-height: $baseline;
 }
 
-h1 {
+h1, .h1 {
   font-family: $font-heading;
   font-weight: normal;
   font-size: $baseline;
@@ -36,13 +36,13 @@ h1 {
 
 }
 
-h2 {
+h2, .h2 {
   font-size: $baseline * 0.9;
   font-family: $font-heading;
   margin-bottom: $marginS;
 }
 
-h3 {
+h3, .h3 {
   font-size: $baseline * 0.75;
   font-family: $font-heading;
   font-weight: normal;

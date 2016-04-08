@@ -30,8 +30,8 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="form-grid-docgen-group-template">
 <div class="form-grid" data-bind="foreach: rowSchemas">
   <div class="row">
-    <!-- ko if: $data.tag -->
-    <h3 data-bind="ltext: $data.ltext"></h3>
+    <!-- ko if: $data.ltext -->
+    <div data-bind="ltext: $data.ltext, css: $data.css"></div>
     <!-- /ko -->
     <!-- ko ifnot: $data.tag -->
     <div data-bind="foreach: $data">

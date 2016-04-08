@@ -30,6 +30,7 @@
 (def- katselmuksenLaji
   {:name "katselmuksenLaji"
    :type :select :sortBy :displayname
+   :css [:dropdown--plain]
    :required true
    :readonly true
    :whitelist {:roles [:authority] :otherwise :disabled}
@@ -45,6 +46,7 @@
   [katselmuksenLaji
    {:name "vaadittuLupaehtona"
     :type :checkbox
+    :inputType :check-string
     :whitelist {:roles [:authority] :otherwise :disabled}
     :i18nkey "vaadittuLupaehtona"}
    {:name "rakennus"
@@ -81,8 +83,9 @@
            :type :task
            :order 1
            :section-help "authority-fills"
-           :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
-    :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
+           ;;:i18nprefix "task-katselmus.katselmuksenLaji"
+           } ; Had :i18npath ["katselmuksenLaji"]
+        :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["rakennus"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
            {:h2 "task-katselmus.huomautukset"}
@@ -97,7 +100,16 @@
            :type :task
            :order 1
            :section-help "authority-fills"
-           :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
+           :i18name "task-katselmus"
+           ;;:i18nprefix "task-katselmus.katselmuksenLaji"
+           } ; Had :i18npath ["katselmuksenLaji"]
+    :rows [["katselmuksenLaji" "katselmus/pitoPvm" "katselmus/pitaja" "vaadittuLupaehtona"]
+           {:h2 "task-katselmus.huomautukset"}
+           ["katselmus/huomautukset/kuvaus::3"]
+           ["katselmus/huomautukset/maaraAika" "katselmus/huomautukset/toteaja" "katselmus/huomautukset/toteamisHetki"]
+           ["katselmus/lasnaolijat::3"]
+           ["katselmus/poikkeamat::3"]]
+    :template "form-grid-docgen-group-template"
     :body task-katselmus-body-ya}
 
    {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
@@ -105,8 +117,10 @@
            {:name "asiointitunnus" :type :string :max-len 17}]}
 
    {:info {:name "task-lupamaarays" :type :task :order 20}
-    :body [{:name "maarays" :type :text :max-len 10000 :readonly true :layout :full-width}
-           {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}
+    :rows [["maarays::3"] ["kuvaus::3"]]
+    :template "form-grid-docgen-group-template"
+    :body [{:name "maarays" :type :text :max-len 10000 :readonly true}
+           {:name "kuvaus"  :type :text :max-len 4000 }
            {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
 
 (defn task-doc-validation [schema-name doc]

@@ -3,6 +3,15 @@
   <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
   <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
   <input type="checkbox" data-bind="checked: value,
-                                    disable: disabled() || readonly()" />
+                                    disable: disabled() || readonly(),
+                                    css: inputClasses" />
   <span data-bind="saveIndicator: indicator, label: false"></span>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="docgen-check-string-template">
+  <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
+  <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
+  <label>&nbsp;</label>
+  <div data-bind="ltext: (i18npath || path) + '.' + Boolean( value() ),
+                  css: inputClasses"></div>
 </script>

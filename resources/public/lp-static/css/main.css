@@ -1,5 +1,86 @@
-@import url('main-blessed1.css?z=1459938799727');
+@import url('main-blessed1.css?z=1460127281222');
 
+/* line 32, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble {
+  position: relative;
+  min-height: 280px;
+  padding-left: 320px;
+  padding-right: 24%;
+  margin-right: 61px;
+}
+/* line 40, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+/* line 45, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container {
+  left: 0;
+  width: 320px;
+  margin-bottom: 12px;
+}
+/* line 52, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application_actions {
+  right: 0;
+}
+@media (max-width: 991px) {
+  /* line 32, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble {
+    padding: 0;
+  }
+  /* line 59, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+    position: relative;
+    width: auto;
+    float: left;
+  }
+  /* line 64, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application-map-container {
+    float: left;
+    margin-left: 24px;
+  }
+  /* line 70, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application_actions {
+    float: right;
+    margin-right: 24px;
+  }
+}
+/* line 76, ../../../private/common-html/sass/views/_application.scss */
+.application_summary li {
+  display: inline;
+}
+/* line 79, ../../../private/common-html/sass/views/_application.scss */
+.application_summary h1 {
+  margin: 0;
+  color: #fff;
+  line-height: 24px;
+  margin-bottom: 6px;
+}
+/* line 85, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container {
+  position: relative;
+}
+/* line 87, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .map {
+  float: left;
+  margin: 12px;
+}
+/* line 91, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .application-map-actions {
+  position: absolute;
+  z-index: 1000;
+  left: 0;
+  top: 256px;
+  text-align: center;
+  display: block;
+  background: #04c714;
+}
+/* line 100, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .application-map-actions .map-search-button {
+  color: white;
+  padding: 0 24px;
+}
 /* line 107, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info {
   margin: 0 24px 24px 24px;
@@ -2704,7 +2785,7 @@ ul.appeals-files li span.appeals-files__size {
     display: table;
   }
   /* line 446, ../../../private/common-html/sass/partials/_buttons.scss */
-  #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
+  #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .check-string, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;

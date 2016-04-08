@@ -4417,6 +4417,7 @@
 "task.reject" "sv" "Bör preciseras"
 "task.review-done" "fi" "Katselmus pidetty"
 "task.review-done" "sv" ""
+"task.review-done.help" "fi" "Kun katselmus merkitään pidetyksi, se siirretään taustajärjestelmään ja katselmuksesta muodostetaan liite Suunnitelmat ja liitteet -välilehdelle. Osittaisesta katselmuksesta luodaan automaattisesti uusi katselmus. Lopullinen katselmus merkitsee myös lupaehtokatselmuksen lopulliseksi. Pidettyä katselmusta ei voi enää muokata Lupapisteessä."
 "task.send" "fi" "Siirrä taustajärjestelmään"
 "task.send" "sv" "Flytta till bakgrundssystemet"
 "task.type" "fi" "Vaatimuksen tyyppi"

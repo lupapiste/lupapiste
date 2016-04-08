@@ -34,6 +34,7 @@ var taskUtil = (function() {
 var taskPageController = (function() {
   "use strict";
 
+
   var currentTaskId = null;
   var task = ko.observable();
   var processing = ko.observable(false);
@@ -122,9 +123,11 @@ var taskPageController = (function() {
       t.reviewDone = reviewDone;
       t.sendTask = sendTask;
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
+      t.addedToService = ko.observable();
       task(t);
 
       taskService.addDocument(task());
+      t.addedToService( true );
       var requiredErrors = util.extractRequiredErrors([t.validationErrors]);
       taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);
 

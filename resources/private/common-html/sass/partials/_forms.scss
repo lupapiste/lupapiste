@@ -1454,10 +1454,39 @@ select.dropdown--full-width {
   min-width: 100%;
 }
 
+select.dropdown--plain {
+  border: none;
+  background-image: white;
+  padding-left: 0;
+  &:disabled {
+    border: none;
+    background-image: none;
+    background-color: white;
+
+  }
+}
+
 .no-wrap-whitespace {
   white-space: nowrap;
 }
 
 .cell-span {
   line-height: $btn-height;
+}
+
+.check-string {
+  @extend .btn-base;
+  display: block;
+}
+
+div.review-done {
+  margin: {
+  top: 10px;
+  bottom: 10px;
+  }
+  div {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
 }

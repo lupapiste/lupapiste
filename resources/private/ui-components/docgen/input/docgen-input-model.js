@@ -11,7 +11,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.componentTemplate = (params.template || params.schema.template)
                            || "docgen-" + (params.schema.inputType || params.schema.type) + "-template";
 
-  self.size = uiComponents.sizeClasses[params.schema.size];
+    self.size = uiComponents.sizeClasses[params.schema.size];
   self.schema = params.schema;
   self.path = params.path;
   self.documentId = params.documentId || params.schema.documentId;
@@ -56,11 +56,12 @@ LUPAPISTE.DocgenInputModel = function(params) {
     self.helpMessage(loc(helpLocKey));
   }
 
-  function defaultClasses() {
+  function defaultInputClasses() {
     var typeDefaults = {select: "form-input combobox",
                         text: "form-input textarea",
                         "inline-string": "form-input inline",
-                        "localized-string": "form-string"};
+                        "localized-string": "form-string",
+                        "check-string": "check-string"};
     return _.get( typeDefaults, (self.schema.inputType || self.schema.type), "");
   }
 
@@ -79,7 +80,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   });
 
   self.inputClasses = ko.computed(function() {
-    return (self.schemaCss || defaultClasses()) + " " + self.signalClasses();
+    return (self.schemaCss || defaultInputClasses()) + " " + self.signalClasses();
   });
 
   self.readonly = ko.observable(params.schema.readonly || params.readonly);
