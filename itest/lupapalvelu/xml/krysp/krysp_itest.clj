@@ -323,8 +323,6 @@
        (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
                                                                                       ".katselmuksen_tai_tarkastuksen_poytakirja"))
 
-       (command sonja :update-task :id application-id :doc task-id :updates [["katselmuksenLaji" "rakennekatselmus"]]) => (partial expected-failure? :error-trying-to-update-readonly-field)
-
        (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
                                                                              ["rakennus.0.rakennus.rakennusnro" "001"]
                                                                              ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]

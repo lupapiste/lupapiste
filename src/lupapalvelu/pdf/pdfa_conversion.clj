@@ -2,7 +2,7 @@
   (:require [clojure.java.shell :as shell]
             [clojure.pprint :refer [pprint]]
             [clojure.core.memoize :as memo]
-            [taoensso.timbre :refer [trace debug debugf info infof warn error fatal]]
+            [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
             [sade.strings :as ss]
             [clojure.java.io :as io]
             [sade.env :as env]
@@ -121,17 +121,19 @@
     (try
       (info "Trying to convert PDF to PDF/A")
       (let [stream? (instance? java.io.InputStream pdf-file)
-            file-or-stream (if stream?
-                             pdf-file
-                             (.getCanonicalPath pdf-file))
-            page-count (get-pdf-page-count file-or-stream)
-            pdf-a-file-path (or target-file-path (if stream?
-                                                   (.getCanonicalPath (File/createTempFile "lupapiste-pdfa-conversion" ".pdf"))
-                                                   (str file-or-stream "-pdfa.pdf")))
-            conversion-result (run-pdf-to-pdf-a-conversion file-or-stream pdf-a-file-path)]
+            file-path (if stream?
+                        (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")]
+                          (io/copy pdf-file temp-file)
+                          (.getCanonicalPath temp-file))
+                        (.getCanonicalPath pdf-file))
+            page-count (get-pdf-page-count file-path)
+            pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
+            conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path)]
         (store-converted-page-count conversion-result page-count)
         (if (:pdfa? conversion-result)
-          (info "Converted to PDF/A " pdf-a-file-path)
+          (if (pos? (-> conversion-result :output-file .length))
+            (info "Converted to PDF/A " pdf-a-file-path)
+            (throw (Exception. (str "PDF/A conversion resulted in empty file. Original file: " file-path))))
           (info "Could not convert the file to PDF/A"))
         conversion-result)
       (catch Exception e

@@ -296,7 +296,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
     var source = _.isObject(modelOrValue) ? getModelSource(modelOrValue, subSchema.name) : undefined;
     var extraClass = self.sizeClasses[subSchema.size] || "";
-    var readonly = subSchema.readonly || getModelDisabled(modelOrValue, subSchema.name);
 
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
@@ -317,7 +316,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.className += " " + level;
     }
 
-    if (readonly) {
+    if (isInputReadOnly(doc, subSchema, modelOrValue)) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
@@ -416,7 +415,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.onmouseout = docutils.hideHelp;
     span.appendChild(input);
 
-    $(input).prop("disabled", getModelDisabled(model, subSchema.name));
+    input.disabled = isInputReadOnly(doc, subSchema, model);
 
     if (subSchema.label) {
       var label = makeLabel(subSchema, "checkbox", myPath, false, validationResult);
@@ -515,8 +514,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return util.getIn(model, [name, "source"]);
   }
 
-  function getModelDisabled(model, name) {
-    return util.getIn(model, [name, "whitelist-action"]) === "disabled";
+  function isInputReadOnly(doc, subSchema, model) {
+    var modelDisabled = util.getIn(model, [subSchema.name, "whitelist-action"]) === "disabled";
+    var readonlyByState = subSchema["readonly-after-sent"] && "sent" === doc.state;
+    return subSchema.readonly || readonlyByState || modelDisabled;
   }
 
   function isSubSchemaWhitelisted(schema) {
@@ -559,7 +560,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     sourceValueChanged(input, value, sourceValue, source);
 
-    if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
+    if (isInputReadOnly(doc, subSchema, model)) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
@@ -606,7 +607,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     sourceValueChanged(input.get(0), value, sourceValue, source);
 
-    if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
+    if (isInputReadOnly(doc, subSchema, model)) {
       input.attr("readonly", true);
     } else {
       input.datepicker($.datepicker.regional[lang]).change(function(e) {
@@ -632,8 +633,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var myPath = path.join(".");
     var select = document.createElement("select");
     var validationResult = getValidationResult(model, subSchema.name);
-
-    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
@@ -722,7 +721,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     sourceValueChanged(select, selectedOption, sourceValue, source, locSelectedOption ? locSelectedOption[1] : undefined);
 
-    if (subSchema.readonly) {
+    if (isInputReadOnly(doc, subSchema, model)) {
       select.disabled = true;
     } else {
       select.onchange = function(e) {
@@ -891,8 +890,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.className += " " + level;
     }
 
-    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
-
     var otherKey = subSchema["other-key"];
     if (otherKey) {
       var pathToOther = path.slice(0, -1);
@@ -900,8 +897,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.setAttribute("data-select-other-id", pathStrToID(pathToOther.join(".")));
     }
 
-    if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
-      select.readOnly = true;
+    if (isInputReadOnly(doc, subSchema, model)) {
+      select.disabled = true;
     } else {
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -1011,10 +1008,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.className += " " + level;
     }
 
-    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
-
-    if (subSchema.readonly || getModelDisabled(model, subSchema.name)) {
-      select.readOnly = true;
+    if (isInputReadOnly(doc, subSchema, model)) {
+      select.disabled = true;
     } else {
       select.onchange = function() {
         var target = select;

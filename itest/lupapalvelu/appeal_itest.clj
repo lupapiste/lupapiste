@@ -376,9 +376,13 @@
               (-> pdf-versions first :version) => {:major 0
                                                    :minor 1}
               (last pdf-versions) => (-> pdf-attachment :latestVersion)
+              (count pdf-versions) => 2
+              (fact "Conversion has content"
+                (-> pdf-attachment :latestVersion :size) => pos?))
             (facts "No PDF/A conversion"
+              (count pdf-versions) => 1
               (-> pdf-versions first :fileId) => file-id-2
-              (-> pdf-versions first :archivabilityError) => "invalid-mime-type")))))
+              (-> pdf-versions first :archivabilityError) => "invalid-mime-type"))))
 
       (fact "removing second attachment from appeal"
         (command raktark-jarvenpaa :upsert-appeal
