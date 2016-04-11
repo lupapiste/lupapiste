@@ -5,7 +5,8 @@
             [lupapalvelu.tiedonohjaus-api :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [execute update-application]]
-            [lupapalvelu.tiedonohjaus :as t]))
+            [lupapalvelu.tiedonohjaus :as t]
+            [lupapalvelu.organization :as organization]))
 
 (testable-privates lupapalvelu.tiedonohjaus-api store-function-code update-application-child-metadata!)
 
@@ -324,6 +325,7 @@
                                  :functionCode "10 03 00 01"}}]
       (execute command) => {:ok true}
       (provided
+        (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
         (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
         (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
         (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
