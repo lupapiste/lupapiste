@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="resources-admin" >
+  <div class="container">
+    <section>
+      <h2 data-bind="ltext: 'auth-admin.resources-admin'"></h2>
+      <table data-test-id="resources-admin-calendars-table">
+        <thead>
+        <tr>
+          <th data-bind="ltext: 'auth-admin.resource.calendar.name'"></th>
+          <th data-bind="ltext: 'auth-admin.resource.calendar.organization'"></th>
+          <th data-bind="ltext: 'auth-admin.actions'"></th>
+        </tr>
+        </thead>
+        <tbody data-bind="foreach: calendars.items">
+        <tr>
+          <td data-bind="text: name"></td>
+          <td data-bind="text: organization"></td>
+          <td>
+            <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
+              [<a href="#" data-bind="click: $root.calendars.editCalendar.bind($data, $index), ltext: 'edit'"
+                  data-test-id="edit" class="modal"></a>]
+              <!--[<a href="#" data-bind="click: $root.calendars.rmCalendar.bind($data, $index), ltext: 'remove'"
+                  data-test-id="remove" class="modal"></a>] -->
+            </span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <a href="#" data-bind="click: $root.calendars.addCalendar, ltext: 'auth-admin.resource.calendar.add', visible: lupapisteApp.models.globalAuthModel.ok('add-organization-link')"
+         data-test-id="add-link" class="modal btn btn-primary"></a>
+    </section>
+  </div>
+
+  <!-- DIALOGS -->
+
+  <div id="dialog-edit-calendar" class="window autosized">
+    <div class="dialog-header">
+      <p data-bind="ltext: $root.calendars.editCalendarModel.commandName"></p>
+      <p class="dialog-close close lupicon-remove"></p>
+    </div>
+    <div class="dialog-content">
+      <div data-bind="with: $root.calendars.editCalendarModel">
+        <label data-bind="ltext: 'auth-admin.resource.calendar.name'" for="calendar-name" class="form-label"></label>
+        <input data-bind="textInput: name" class="form-input text long" type="text" id="calendar-name" autofocus="autofocus"/>
+        <label data-bind="ltext: 'auth-admin.resource.calendar.organization'" for="organization" class="form-label"></label>
+        <input data-bind="textInput: organization" class="form-input text long" type="text" id="organization" />
+        <button data-bind="click: execute, enable: ok(), ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

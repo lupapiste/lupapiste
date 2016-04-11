@@ -364,8 +364,10 @@
                          :js ["authority-admin-app.js"]}
    :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer :ui-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
+                              "resource-calendars-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
-                         :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"]}
+                         :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
+                                "resources-admin.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}
@@ -429,6 +431,7 @@
                     "application-bulletins/bulletins-search/bulletins-search-model.js"
                     "application-bulletins/bulletins-search/autocomplete/autocomplete-municipalities-model.js"
                     "application-bulletins/bulletins-search/autocomplete/autocomplete-states-model.js"]}
+
    })
 
 ; Make sure all dependencies are resolvable:

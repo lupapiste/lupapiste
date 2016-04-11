@@ -12,7 +12,8 @@
       asianhallintaModel,
       linkToVendorBackendModel,
       usersList = null,
-      editRolesDialogModel;
+      editRolesDialogModel,
+      resourceCalendarsModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -384,6 +385,7 @@
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
   editAttachmentsModel = new EditAttachmentsModel();
+  resourceCalendarsModel = new LUPAPISTE.ResourceCalendarsModel();
 
   wfsModel = new LUPAPISTE.WFSModel();
   statementGiversModel = new StatementGiversModel();
@@ -433,6 +435,7 @@
 
   $(function() {
     organizationModel.load();
+    resourceCalendarsModel.load();
 
     $("#applicationTabs").applyBindings({});
     $("#users").applyBindings({
@@ -461,6 +464,9 @@
     });
     $("#areas").applyBindings({
       organization:        organizationModel
+    });
+    $("#resources-admin").applyBindings({
+      calendars:           resourceCalendarsModel
     });
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();
