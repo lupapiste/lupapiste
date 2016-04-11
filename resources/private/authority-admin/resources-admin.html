@@ -19,10 +19,11 @@
           <td data-bind="text: organization"></td>
           <td>
             <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
+              [<a href="#" data-bind="click: $root.calendars.viewCalendar.bind($data, $index), ltext: 'view'"></a>]
               [<a href="#" data-bind="click: $root.calendars.editCalendar.bind($data, $index), ltext: 'edit'"
                   data-test-id="edit" class="modal"></a>]
-              <!--[<a href="#" data-bind="click: $root.calendars.rmCalendar.bind($data, $index), ltext: 'remove'"
-                  data-test-id="remove" class="modal"></a>] -->
+              [<a href="#" data-bind="click: $root.calendars.rmCalendar.bind($data, $index), ltext: 'remove'"
+                  data-test-id="remove" class="modal"></a>]
             </span>
           </td>
         </tr>
@@ -34,6 +35,39 @@
   </div>
 
   <!-- DIALOGS -->
+
+  <div id="dialog-view-calendar" class="window">
+    <div class="dialog-header">
+      <div data-bind="with: $root.calendars.viewCalendarModel">
+        <p>Kalenteri: <span data-bind="text: name"></span> (<span data-bind="text: organization"></span>)
+        <p class="dialog-close close lupicon-remove"></p>
+      </div>
+    </div>
+    <div class="dialog-content">
+      <div data-bind="with: $root.calendars.viewCalendarModel">
+        <table data-test-id="resources-admin-calendar-weekview-table">
+          <thead>
+          <tr>
+            <th>ma</th>
+            <th>ti</th>
+            <th>ke</th>
+            <th>to</th>
+            <th>pe</th>
+          </tr>
+          </thead>
+          <tbody data-bind="foreach: allowedCalendarSlots">
+          <tr>
+            <td data-bind="text: time"></td>
+            <td data-bind="text: time"></td>
+            <td data-bind="text: time"></td>
+            <td data-bind="text: time"></td>
+            <td data-bind="text: time"></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
   <div id="dialog-edit-calendar" class="window autosized">
     <div class="dialog-header">

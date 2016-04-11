@@ -1,0 +1,13 @@
+#dialog-view-calendar {
+  width:$cols8;
+  min-height:$baseline * 6;
+  height: auto;
+
+  table td {
+    background: $gray246;
+
+    &:nth-child(even) {
+      background: white;
+    }
+  }
+}

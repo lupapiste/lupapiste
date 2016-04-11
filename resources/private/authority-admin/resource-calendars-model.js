@@ -29,6 +29,29 @@ LUPAPISTE.ResourceCalendarsModel = function () {
   }
   self.editCalendarModel = new EditCalendarModel();
 
+  function ViewCalendarModel() {
+    var self = this;
+
+    self.name = ko.observable();
+    self.organization = ko.observable();
+    self.allowedCalendarSlots = ko.observableArray();
+
+    self.init = function(params) {
+      self.name(util.getIn(params, ["source", "name"], ""));
+      self.organization(util.getIn(params, ["source", "organization"], ""));
+      self.allowedCalendarSlots([
+        { time: "7:00" },
+        { time: "8:00" },
+        { time: "9:00" },
+        { time: "10:00" },
+        { time: "11:00" },
+        { time: "12:00" },
+        { time: "13:00" }
+      ]);
+    };
+  }
+  self.viewCalendarModel = new ViewCalendarModel();
+
   self.items = ko.observableArray();
 
   self.editCalendar = function(indexFn) {
@@ -51,7 +74,7 @@ LUPAPISTE.ResourceCalendarsModel = function () {
         LUPAPISTE.ModalDialog.close();
       }
     });
-    self.openCalendarDialog();
+    self.openCalendarEditDialog();
   };
 
   self.addCalendar = function() {
@@ -73,11 +96,28 @@ LUPAPISTE.ResourceCalendarsModel = function () {
         LUPAPISTE.ModalDialog.close();
       }
     });
-    self.openCalendarDialog();
+    self.openCalendarEditDialog();
   };
 
-  self.openCalendarDialog = function() {
+  self.rmCalendar = function(indexFn) {
+    // DUMMY DATA EDIT
+    var index = indexFn();
+    self.items.splice(index, 1);
+  };
+
+  self.viewCalendar = function(indexFn) {
+    self.viewCalendarModel.init({
+      source: this
+    });
+    self.openCalendarViewDialog();
+  };
+
+  self.openCalendarEditDialog = function() {
     LUPAPISTE.ModalDialog.open("#dialog-edit-calendar");
+  };
+
+  self.openCalendarViewDialog = function() {
+    LUPAPISTE.ModalDialog.open("#dialog-view-calendar");
   };
 
   self.init = function(data) {
