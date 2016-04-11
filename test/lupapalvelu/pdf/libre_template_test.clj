@@ -22,7 +22,8 @@
 (def date-30012016 1454112000000)
 (def date-01022016 1454284800000)
 
-(def application1 {:organization "753-R"
+(def application1 {:id "LP-000-0000-0000"
+                   :organization "753-R"
                    :tosFunction  "10 03 00 01"
                    :created      100
                    :applicant    "Testaaja Testi"
@@ -31,16 +32,18 @@
                    :verdicts     [{:id              "a1"
                                    :timestamp       1454562242169
                                    :kuntalupatunnus "20160043"
-                                   :sopimus false
-                                   :paatokset       [{:id "a2"
+                                   :sopimus         false
+                                   :paatokset       [{:id             "a2"
                                                       :paivamaarat    {:anto          1454544000000
                                                                        :lainvoimainen 1454544000000
                                                                        :voimassaHetki 1613520000000
                                                                        :aloitettava   1550448000000}
 
-                                                      :lupamaaraykset {:maaraykset               [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viem\u00e4risuunnitelma"}]
-                                                                       :vaaditutTyonjohtajat     "Vastaava ty\u00f6njohtaja"
-                                                                       :vaadittuTyonjohtajatieto ["Vastaava ty\u00f6njohtaja"]
+                                                      :lupamaaraykset {:kerrosala "100m2"
+                                                                       :maaraykset               [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viemärisuunnitelma"}]
+                                                                       :vaaditutTyonjohtajat     "Vastaava työnjohtaja"
+                                                                       :vaadittuTyonjohtajatieto ["Vastaava työnjohtaja" "Toinen työnjohtaja"]
+                                                                       :vaaditutErityissuunnitelmat ["Joku erityissuunnitelma" "Joku toinen erityissuunnitelma"]
                                                                        :vaaditutKatselmukset     [{:tarkastuksenTaiKatselmuksenNimi "* KVV-tarkastus" :katselmuksenLaji " muu katselmus "}
                                                                                                   {:tarkastuksenTaiKatselmuksenNimi " * S\u00e4hk\u00f6tarkastus " :katselmuksenLaji " muu katselmus "}
                                                                                                   {:tarkastuksenTaiKatselmuksenNimi " * Rakennetarkastus " :katselmuksenLaji " muu katselmus "}
@@ -115,6 +118,139 @@
                                    :user  {:firstName "Testi"
                                            :lastName  "Testaaja"}}]})
 
+(def application2 {:id "LP-000-0000-0000"
+                   :organization "753-R"
+                   :tosFunction  "10 03 00 01"
+                   :created      100
+                   :applicant    "Testaaja Testi"
+                   :address      "Korpikuusen kannon alla 6"
+                   :municipality "186"
+                   :verdicts     [{:id              "a1"
+                                   :timestamp       1454562242169
+                                   :kuntalupatunnus "20160043"
+                                   :sopimus         false
+                                   :paatokset       [{:id          "a2"
+                                                      :paivamaarat {:anto          1454544000000
+                                                                    :lainvoimainen 1454544000000
+                                                                    :voimassaHetki 1613520000000
+                                                                    :aloitettava   1550448000000}
+
+                                                      :poytakirjat [{:urlHash         "4196f10a7fef9bec325dc567f1b87fbcd10163ce"
+                                                                     :status          "1"
+                                                                     :paatoksentekija "Tytti Mäntyoja"
+                                                                     :pykala          31
+                                                                     :paatospvm       1454284800000
+                                                                     :paatoskoodi     "myönnetty"}]}]}]
+                   :statements   [{:person    {:text "Pelastusviranomainen"
+                                               :name "Pia Nyman"}
+                                   :requested date-02012016
+                                   :given     date-01022016
+                                   :status    "ehdoilla"
+                                   :text      "Lausunto liitteen\u00e4"
+                                   :state     "given"}
+                                  {:person    {:text "Rakennussuunnittelu"
+                                               :name "Sampo S\u00e4levaara"}
+                                   :requested date-03012016
+                                   :given     nil
+                                   :status    nil
+                                   :state     "requested"}]
+                   :neighbors    [{:propertyId "111"
+                                   :owner      {:type "luonnollinen"
+                                                :name "Joku naapurin nimi"}
+                                   :id         "112"
+                                   :status     [{:state   "open"
+                                                 :created date-02012016}
+                                                {:state   "mark-done"
+                                                 :user    {:firstName "Etu" :lastName "Suku"}
+                                                 :created 1453372412991}]}]
+                   :tasks        [{:data        {:katselmuksenLaji { :value "muu katselmus"}}
+                                   :state       "requires_user_action"
+                                   :taskname    "rakennuksen paikan tarkastaminen"
+                                   :schema-info {:name    "task-katselmus"
+                                                 :i18nprefix "task-katselmus.katselmuksenLaji"
+                                                 :version 1}
+                                   :closed      nil
+                                   :created     date-02012016
+                                   :duedate     nil
+                                   :assignee    {:lastName  "Suku"
+                                                 :firstName "Etu"
+                                                 :id        1111}
+                                   :source      {:type "verdict"
+                                                 :id   "a1"
+                                                 }
+                                   :id          "2222"}
+                                  {:data        {}
+                                   :state       "requires_user_action"
+                                   :taskname    "Joku työhohtaja"
+                                   :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                 :version 1}
+                                   :closed      nil
+                                   :created     date-02012016
+                                   :duedate     nil
+                                   :assignee    {:lastName  "Suku"
+                                                 :firstName "Etu"
+                                                 :id        1111}
+                                   :source      {:type "verdict"
+                                                 :id   "a1"
+                                                 }
+                                   :id          "2223"}
+                                  {:data        {}
+                                   :state       "requires_user_action"
+                                   :taskname    "Joku toinen työhohtaja"
+                                   :schema-info {:name    "task-vaadittu-tyonjohtaja"
+                                                 :version 1}
+                                   :closed      nil
+                                   :created     date-02012016
+                                   :duedate     nil
+                                   :assignee    {:lastName  "Suku"
+                                                 :firstName "Etu"
+                                                 :id        1111}
+                                   :source      {:type "verdict"
+                                                 :id   "a1"
+                                                 }
+                                   :id          "2224"}
+                                  {:data        {}
+                                   :state       "requires_user_action"
+                                   :taskname    "Joku lupamääräys"
+                                   :schema-info {:name    "task-lupamaarays"
+                                                 :version 1}
+                                   :closed      nil
+                                   :created     date-02012016
+                                   :duedate     nil
+                                   :assignee    {:lastName  "Suku"
+                                                 :firstName "Etu"
+                                                 :id        1111}
+                                   :source      {:type "verdict"
+                                                 :id   "a1"
+                                                 }
+                                   :id          "2224"}]
+                   :attachments  [{:type     {:type-group "paapiirustus" :type-id "asemapiirros"}
+                                   :versions [{:version {:major 1 :minor 0}
+                                               :created date-02012016
+                                               :user    {:firstName "Testi"
+                                                         :lastName  "Testaaja"}}
+                                              {:version {:major 2 :minor 0}
+                                               :created date-01022016
+                                               :user    {:firstName "Testi"
+                                                         :lastName  "Testaaja"}}]
+                                   :user     {:firstName "Testi"
+                                              :lastName  "Testaaja"}
+                                   :contents "Great attachment"}
+                                  {:type     {:type-group "muut" :type-id "paatosote"}
+                                   :versions [{::version {:major 1 :minor 0}
+                                               :created  date-03012016
+                                               :user     {:firstName "Testi"
+                                                          :lastName  "Testaaja"}}]}]
+                   :history      [{:state "draft"
+                                   :ts    date-01012016
+                                   :user  {:firstName "Testi"
+                                           :lastName  "Testaaja"}}
+                                  {:state "open"
+                                   :ts    date-30012016
+                                   :user  {:firstName "Testi"
+                                           :lastName  "Testaaja"}}]})
+
+
 (defn build-xml-history [application lang]
   (s/join " " (map #(apply xml-table-row %) (build-history-rows application lang))))
 
@@ -126,11 +262,14 @@
              (-> (xml-table-row "a" "b" "c" "d")
                  (s/replace "\r\n" "\n")) => "<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\na\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nb\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nc\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nd\n</text:p>\n</table:table-cell>\n</table:table-row>\n")
 
-  (background
-    (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
-    (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})
+       (background
+         (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
+         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})
 
-       (fact {:midje/description (str "history rows ")}
+       (fact {:midje/description (str "history rows")}
+             (build-history-rows application1 :fi) => [["Valmisteilla" "" "01.01.2016" "Testaaja Testi"] ["" "Asiakirja lisätty: Asemapiirros, Great attachment, v. 1.0" "02.01.2016" "Testaaja Testi"] ["" "Lausuntopyyntö tehty: Pelastusviranomainen" "02.01.2016" ""] ["" "Naapurin kuuleminen tehty: Joku naapurin nimi" "02.01.2016" " "] ["" "Vaatimus lisätty: rakennuksen paikan tarkastaminen" "02.01.2016" "Suku Etu"] ["Käsittelyssä" "" "30.01.2016" "Testaaja Testi"] ["" "Asiakirja lisätty: Asemapiirros, Great attachment, v. 2.0" "01.02.2016" "Testaaja Testi"] ["" "Asiakirja lisätty: Päätösote" "01.03.2016" "Testaaja Testi"] ["" "Lausuntopyyntö tehty: Rakennussuunnittelu" "01.03.2016" ""]])
+
+       (fact {:midje/description (str "history rows xml")}
              (-> (build-xml-history application1 :fi)
                  (s/replace "\r\n" "\n")) => "<table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nValmisteilla\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja lis\u00e4tty: Asemapiirros, Great attachment, v. 1.0\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nLausuntopyynt\u00f6 tehty: Pelastusviranomainen\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nNaapurin kuuleminen tehty: Joku naapurin nimi\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n \n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nVaatimus lis\u00e4tty: rakennuksen paikan tarkastaminen\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n02.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nSuku Etu\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\nK\u00e4sittelyss\u00e4\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n30.01.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja lis\u00e4tty: Asemapiirros, Great attachment, v. 2.0\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.02.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nAsiakirja lis\u00e4tty: P\u00e4\u00e4t\u00f6sote\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.03.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nTestaaja Testi\n</text:p>\n</table:table-cell>\n</table:table-row>\n <table:table-row>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\nLausuntopyynt\u00f6 tehty: Rakennussuunnittelu\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n01.03.2016\n</text:p>\n</table:table-cell>\n<table:table-cell office:value-type='string'>\n<text:p>\n\n</text:p>\n</table:table-cell>\n</table:table-row>\n")
 
@@ -142,13 +281,3 @@
                    #_(.delete tmp-file)
                    (nth res 945))) => (str (localize lang "caseFile.operation.review.request") ": rakennuksen paikan tarkastaminen"))))
 
-(facts "Verdict export "
-       (doseq [lang i18n/languages]
-               (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
-                 (verdict/write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
-                 (let [pos 1060
-                       res (s/split (slurp tmp-file) #"\r?\n")]
-                   (.delete tmp-file)
-                   (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
-                   (fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043" ) ))
-                   ))))

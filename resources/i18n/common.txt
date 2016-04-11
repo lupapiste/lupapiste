@@ -402,6 +402,8 @@
 "application.return" "sv" "Tillbaka till ansökan"
 "application.select-verdict-attachments" "fi" "Valitse päätöksen liitteet"
 "application.select-verdict-attachments" "sv" "Välj beslutets bilagor"
+"application.verdict-attachments" "fi" "Päätöksen liitteet"
+"application.verdict-attachments" "sv" ""
 "application.showApplication" "fi" "Näytä hakemus"
 "application.showApplication" "sv" "Visa ansökningen"
 "application.showInBackingSystem" "fi" "Näytä taustajärjestelmässä"
