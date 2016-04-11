@@ -1880,6 +1880,20 @@
                                                                paatokset))))
                              {:verdicts.paatokset.lupamaaraykset.vaadittuTyonjohtajatieto {$type 3}}))
 
+(defmigration application-pintavesi-attachment-type-update
+  (update-applications-array :attachments
+                             (partial update-attachment-type attachment-type-mapping/attachment-mapping :type)
+                             {:permitType  {$in ["R" "P"]}
+                              :attachments {$elemMatch {:type.type-group :muut :type.type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta}}}))
+
+(defmigration organization-operation-attachments-type-update-pintavesi
+  (reduce (fn [cnt org] (+ cnt (mongo/update-n :organizations {:_id (:id org)}
+                                               {$set {:operations-attachments (->> (:operations-attachments org)
+                                                                                   (map (partial update-operations-attachments-types attachment-type-mapping/attachment-mapping r-or-p-operation?))
+                                                                                   (into {}))}})))
+          0
+          (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1})))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
