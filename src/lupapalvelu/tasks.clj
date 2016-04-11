@@ -1,5 +1,6 @@
 (ns lupapalvelu.tasks
   (:require [clojure.string :as s]
+            [clojure.set :refer [rename-keys]]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [def-]]
@@ -53,18 +54,26 @@
     :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :repeating true
-    :uicomponent :docgen-repeating-group
-    :body [#_{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
-           {:name "tila" :type :group
-            :body [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
-                   {:name "kayttoonottava" :type :checkbox}]}]}
+    :i18nkey ""
+    :uicomponent :docgen-review-buildings
+    :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :hidden true}
+                                                 {:name "valtakunnallinenNumero" :type :string :hidden true}
+                                                 {:name "rakennusnro" :type :string :hidden true}
+                                                 {:name "kiinttun" :type :string :hidden true}
+                                                 {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}]}
+           {:name "tila" :type :group :i18nkey "empty"
+            :body [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
+                    :i18nkey "task-katselmus.katselmus.tila"
+                    :body [{:name "osittainen"} {:name "lopullinen"}]}
+                   {:name "kayttoonottava" :type :checkbox :inputType :checkbox-wrapper}
+                   ]}]}
    {:name "katselmus" :type :group
 
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
     [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
      {:name "pitoPvm" :type :date :required true}
-     {:name "pitaja" :type :string}
+     {:name "pitaja" :type :string :required true}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000 :css [] }
              {:name "maaraAika" :type :date}
@@ -86,7 +95,7 @@
            ;;:i18nprefix "task-katselmus.katselmuksenLaji"
            } ; Had :i18npath ["katselmuksenLaji"]
         :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
-           ["rakennus"]
+           ["rakennus::4"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
            {:h2 "task-katselmus.huomautukset"}
            ["katselmus/huomautukset/kuvaus::3"]
@@ -144,18 +153,28 @@
      :created created
      :closed nil}))
 
-(defn- katselmus->task [meta source katselmus]
+(defn- katselmus->task [meta source {buildings :buildings} katselmus]
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
         data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
-              :vaadittuLupaehtona true}]
+              :vaadittuLupaehtona true
+              :rakennus (reduce (fn [acc build]
+                                  (let [index    (-> acc keys count str keyword)
+                                        rakennus {:rakennus {:jarjestysnumero                    (:index build)
+                                                             :kiinttun                           (:propertyId build)
+                                                             :rakennusnro                        (:localShortId build)
+                                                             :valtakunnallinenNumero             (:nationalId build)
+                                                             :kunnanSisainenPysyvaRakennusnumero (:localId build)}
+                                                  :tila {:tila ""
+                                                         :kayttoonottava false} }]
+                                    (assoc acc index rakennus))) {} buildings)}]
     (new-task "task-katselmus" task-name data meta source)))
 
-(defn- verdict->tasks [verdict meta]
+(defn- verdict->tasks [verdict meta application]
   (map
     (fn [{lupamaaraykset :lupamaaraykset}]
       (let [source {:type "verdict" :id (:id verdict)}]
         (concat
-          (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
+          (map (partial katselmus->task meta source application) (:vaaditutKatselmukset lupamaaraykset))
           (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
             (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
           ; KRYSP yhteiset 2.1.5+
@@ -177,7 +196,7 @@
   (let [owner (first (auth/get-auths-by-role application :owner))
         meta {:created timestamp
               :assignee (user/get-user-by-id (:id owner))}]
-    (flatten (map #(verdict->tasks % meta) (:verdicts application)))))
+    (flatten (map #(verdict->tasks % meta application) (:verdicts application)))))
 
 (defn task-schemas [{:keys [schema-version permitType]}]
   (let [allowed-task-schemas (permit/get-metadata permitType :allowed-task-schemas)]

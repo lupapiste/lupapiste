@@ -1,5 +1,49 @@
-@import url('main-blessed1.css?z=1460127281222');
+@import url('main-blessed1.css?z=1460388850218');
 
+
+/* line 239, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search {
+  padding-right: 17px;
+  /* add space for the 'x' icon*/
+}
+
+/* line 242, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search::-ms-clear {
+  display: none;
+}
+
+/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  display: none;
+  /* now go with the styling */
+  cursor: pointer;
+  font: bold 1em sans-serif;
+  color: #38468F;
+}
+/* line 255, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear:before {
+  color: #f52;
+}
+
+/* application section styles*/
+/*Summary styles*/
+/* line 17, ../../../private/common-html/sass/views/_application.scss */
+.application_summary {
+  background-color: #eeeeee;
+  border-bottom: 2px solid #bbbbbb;
+  min-height: 332px;
+  padding: 6px 0 0 0;
+  position: relative;
+  display: block;
+  float: none;
+}
+/* line 26, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .container {
+  margin-bottom: 0;
+}
 /* line 32, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .preamble {
   position: relative;
@@ -3345,7 +3389,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 
 /* basic styles*/
 /* line 211, ../../../private/common-html/sass/main.scss */
-.table, .reviews-table, .appeals-table {
+.table, .reviews-table, table.review-buildings-table, .appeals-table {
   font-size: 16px;
   line-height: 24px;
 }

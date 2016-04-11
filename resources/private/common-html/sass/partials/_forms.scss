@@ -1027,6 +1027,28 @@ $max-columns: 12;
   }
 }
 
+@mixin label-checkbox ($label-cls, $size: $lupicon-size ) {
+  .#{$label-cls}:before {
+    @include lupicon-font( $size );
+    content: "\e603";
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    color: $checkbox-color;
+    cursor: pointer;
+  }
+
+  input[type=checkbox]:checked + .#{$label-cls}:before {
+    @include lupicon-font($size);
+    content: "\e604";
+    color: $checkbox-selected-color;
+  }
+
+  input[type=checkbox]:disabled + .#{$label-cls}:before {
+    cursor: initial;
+  }
+}
+
 .form-grid {
   // overflow-y: hidden;
   width: 100%;
@@ -1057,11 +1079,12 @@ $max-columns: 12;
     border: 1px solid $radio-border-color;
     padding: $marginS $marginL $marginS $marginS;
   }
-  .checkbox-wrapper, .radio-wrapper {
+  .radio-wrapper {
     label {
       cursor: pointer;
     }
   }
+
   .col--no-margin {
     padding: 0 !important;
     .checkbox-wrapper {
@@ -1109,20 +1132,7 @@ $max-columns: 12;
     font-size: 0;
   }
 
-  .checkbox-label:before {
-    @include lupicon-font;
-    content: "\e603";
-    display: inline-block;
-    margin-right: 10px;
-    vertical-align: top;
-    color: $checkbox-color;
-  }
-
-  input[type=checkbox]:checked + .checkbox-label:before {
-    @include lupicon-font;
-    content: "\e604";
-    color: $checkbox-selected-color;
-  }
+  @include label-checkbox (checkbox-label) {}
 
   .radio-label:before {
     @include lupicon-font;
@@ -1481,12 +1491,11 @@ select.dropdown--plain {
 
 div.review-done {
   margin: {
-  top: 10px;
-  bottom: 10px;
+    top: 10px;
+    bottom: 10px;
   }
   div {
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
 }
