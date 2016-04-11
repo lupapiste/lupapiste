@@ -6,10 +6,6 @@
             [clojure.string :as s]
             [clojure.java.io :as io]))
 
-
-(defn- verdict-attachments [application id]
-  (s/join "\n" (map (fn [verdict-att] (str (get-in verdict-att [:latestVersion :filename]))) (filter (fn [att] (and (= :verdict (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application)))))
-
 (defn- get-lupamaaraykset [application verdict-id paatos-idx]
   (:lupamaaraykset (nth (:paatokset (first (filter #(= verdict-id (:id %)) (:verdicts application)))) paatos-idx)))
 
@@ -76,46 +72,62 @@
 (defn- verdict-maaraykset [application verdict-id paatos-idx]
   (into [] (map (fn [val] [(str (:sisalto val))]) (:maaraykset (get-lupamaaraykset application verdict-id paatos-idx)))))
 
+(defn- verdict-attachments [application id]
+  (s/join "\n" (map (fn [verdict-att] (str (get-in verdict-att [:latestVersion :filename]))) (filter (fn [att] (and (= :verdict (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application)))))
+
+(defn- verdict-status [paatos lang]
+  (s/join "\n" (map (fn [val] (str (if (:status val) (i18n/localize lang "verdict.status" (str (:status val))) (:paatoskoodi val)))) (:poytakirjat paatos))))
+
+(defn- verdict-text [paatos]
+  (s/join "\n" (map (fn [val] (str (:paatos val))) (:poytakirjat paatos))))
+
 (defn write-verdict-libre-doc [application id paatos-idx lang file]
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
         paatos (nth (:paatokset verdict) paatos-idx)]
     (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
-    (template/create-libre-doc (io/resource "private/lupapiste-verdict-template.fodt")
+    (log/debug "verdict-muutMaaraykset: " (verdict-muutMaaraykset application id paatos-idx))
+    (template/create-libre-doc (io/resource "private/lupapiste-verdict-template2.fodt")
                                file
                                (assoc (template/common-field-map application lang)
                                  "FIELD001" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
-                                 "FIELD012" (str (i18n/localize lang "verdict.id") ": " (:kuntalupatunnus verdict))
-                                 "FIELD013" (i18n/localize lang "date")
-                                 "DATESTABLE" (verdict-dates lang (:paivamaarat paatos))
 
-                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraukset")
-                                 "LUPAMAARAYKSETTABLE" (verdict-lupamaaraykset application id paatos-idx lang)
+                                 "LPTITLE_KUNTA" (i18n/localize lang "verdict.id")
+                                 "FIELD012" (str (:kuntalupatunnus verdict))
 
-                                 "FOREMENHEADER" (i18n/localize lang "foreman.requiredForemen")
-                                 "FOREMENTABLE" (verdict-foremen application id paatos-idx)
+                                 "LPTITLE_SIJAINTI" (i18n/localize lang "applications.location")
 
-                                 "PLANSHEADER" (i18n/localize lang "verdict.vaaditutErityissuunnitelmat")
-                                 "PLANSTABLE" (verdict-vaaditutErityissuunnitelmat application id paatos-idx)
+                                 "LPTITLE_VERDICT_GIVEN" (i18n/localize lang "verdict.anto")
+                                 "LPVALUE_VERDICT_GIVEN" (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")
+
+                                 "LPTITLE_VERDICT_LEGAL" (i18n/localize lang "verdict.lainvoimainen")
+                                 "LPVALUE_VERDICT_LEGAL" (or (util/to-local-date (get-in paatos [:paivamaarat :lainvoimainen])) "-")
+
+                                 "LPTITLE_VERDICT_STATE" (i18n/localize lang "verdict.status")
+                                 "LPVALUE_VERDICT_STATE" (verdict-status paatos lang)
+
+                                 "LPTITLE_TEKSTI" (i18n/localize lang "verdict.text")
+                                 "LPVALUE_TEKSTI" (verdict-text paatos)
+
+;;                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraukset")
+;;                                 "LUPAMAARAYKSETTABLE" (verdict-lupamaaraykset application id paatos-idx lang)
+
+;;                                 "FOREMENHEADER" (i18n/localize lang "foreman.requiredForemen")
+;;                                 "FOREMENTABLE" (verdict-foremen application id paatos-idx)
+
+;;                                 "PLANSHEADER" (i18n/localize lang "verdict.vaaditutErityissuunnitelmat")
+;;                                 "PLANSTABLE" (verdict-vaaditutErityissuunnitelmat application id paatos-idx)
 
                                  "OTHERHEADER" (i18n/localize lang "verdict.muutMaaraykset")
                                  "OTHERTABLE" (verdict-muutMaaraykset application id paatos-idx)
 
+
                                  "REVIEWHEADER" (i18n/localize lang "verdict.vaaditutKatselmukset")
                                  "REVIEWSTABLE" (verdict-vaaditutKatselmukset application id paatos-idx lang)
 
-                                 "FIELD17" (i18n/localize lang "verdict.maaraykset")
-                                 "ORDERSTABLE" (verdict-maaraykset application id paatos-idx)
 
-                                 "MINUTESHEADER" (i18n/localize lang "verdict.poytakirjat")
+;;                                 "FIELD17" (i18n/localize lang "verdict.maaraykset")
+;;                                 "ORDERSTABLE" (verdict-maaraykset application id paatos-idx)
 
-                                 "MINUTESCOL1" (i18n/localize lang "verdict.status")
-                                 "MINUTESCOL2" (i18n/localize lang "verdict.pykala")
-                                 "MINUTESCOL3" (i18n/localize lang "verdict.name")
-                                 "MINUTESCOL4" (i18n/localize lang "verdict.paatospvm")
-                                 "MINUTESCOL5" (i18n/localize lang "verdict.attachments")
+                                 "LPTITLE_ATTACHMENTS" (i18n/localize lang "application.verdict-attachments")
 
-                                 "MINUTESTABLE" (map (fn [val] [(str (if (:status val) (i18n/localize lang "verdict.status" (str (:status val))) "") " (" (:paatoskoodi val) ") " (:paatos val))
-                                                                (str (:pykala val))
-                                                                (str (:paatoksentekija val))
-                                                                (or (util/to-local-date (:paatospvm val)) "-")
-                                                                (verdict-attachments application id)]) (:poytakirjat paatos))))))
+                                 ))))

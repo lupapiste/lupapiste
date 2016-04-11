@@ -20,11 +20,11 @@
              (verdict-lupamaaraykset application2 "a1" 0 :fi) => '[]))
 
 (facts "Verdict foremen "
-         (def verdict-foremen #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-foremen)
-         (fact {:midje/description (str " krysp")}
-               (verdict-foremen application1 "a1" 0) => '[["Vastaava työnjohtaja"] ["Toinen työnjohtaja"]])
-         (fact {:midje/description (str " non-krysp")}
-               (verdict-foremen application2 "a1" 0) => '[["Joku työhohtaja"] ["Joku toinen työhohtaja"]]))
+       (def verdict-foremen #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-foremen)
+       (fact {:midje/description (str " krysp")}
+             (verdict-foremen application1 "a1" 0) => '[["Vastaava työnjohtaja"] ["Toinen työnjohtaja"]])
+       (fact {:midje/description (str " non-krysp")}
+             (verdict-foremen application2 "a1" 0) => '[["Joku työhohtaja"] ["Joku toinen työhohtaja"]]))
 
 (facts "Verdict vaaditutErityissuunnitelmat "
        (def verdict-vaaditutErityissuunnitelmat #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-vaaditutErityissuunnitelmat)
@@ -33,40 +33,38 @@
        (fact {:midje/description (str " non-krysp")}
              (verdict-vaaditutErityissuunnitelmat application2 "a1" 0) => '[]))
 
-
 (facts "Verdict other muutMaaraykset "
-         (def verdict-muutMaaraykset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-muutMaaraykset)
-         (fact {:midje/description (str " krysp")}
-               (verdict-muutMaaraykset application1 "a1" 0) => '[])
-         (fact {:midje/description (str " non-krysp")}
-               (verdict-muutMaaraykset application2 "a1" 0) => '[["Joku lupamääräys"]]))
+       (def verdict-muutMaaraykset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-muutMaaraykset)
+       (fact {:midje/description (str " krysp")}
+             (verdict-muutMaaraykset application1 "a1" 0) => '[])
+       (fact {:midje/description (str " non-krysp")}
+             (verdict-muutMaaraykset application2 "a1" 0) => '[["Joku lupamääräys"]]))
 
 (facts "Verdict vaaditutKatselmukset "
-         (def verdict-vaaditutKatselmukset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-vaaditutKatselmukset)
-
-         (fact {:midje/description (str "verdict-reviews krysp")}
-               (verdict-vaaditutKatselmukset application1 "a1" 0 :fi) => '[[" muu katselmus " "* KVV-tarkastus"] [" muu katselmus " " * Sähkötarkastus "] [" muu katselmus " " * Rakennetarkastus "] [" loppukatselmus " ""] [" muu katselmus " " Aloitusilmoitus "]])
-         (fact {:midje/description (str "verdict-reviews non-krysp")}
-               (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[("Muu katselmus")]))
+       (def verdict-vaaditutKatselmukset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-vaaditutKatselmukset)
+       (fact {:midje/description (str "verdict-reviews krysp")}
+             (verdict-vaaditutKatselmukset application1 "a1" 0 :fi) => '[[" muu katselmus " "* KVV-tarkastus"] [" muu katselmus " " * Sähkötarkastus "] [" muu katselmus " " * Rakennetarkastus "] [" loppukatselmus " ""] [" muu katselmus " " Aloitusilmoitus "]])
+       (fact {:midje/description (str "verdict-reviews non-krysp")}
+             (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[("Muu katselmus")]))
 
 (facts "Verdict export krysp "
-         (doseq [lang i18n/languages]
-           (let [tmp-file (File/createTempFile (str "verdict-krysp-" (name lang) "-") ".fodt")]
-             (verdict/write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
-             (let [pos 1073
-                   res (s/split (slurp tmp-file) #"\r?\n")]
-               #_(.delete tmp-file)
-               (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
-               (fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
-               ))))
+       (doseq [lang i18n/languages]
+         (let [tmp-file (File/createTempFile (str "verdict-krysp-" (name lang) "-") ".fodt")]
+           (verdict/write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
+           (let [pos 1073
+                 res (s/split (slurp tmp-file) #"\r?\n")]
+             #_(.delete tmp-file)
+             (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
+             (fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
+             ))))
 
 (facts "Verdict export non-krysp "
-         (doseq [lang i18n/languages]
-           (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
-             (verdict/write-verdict-libre-doc application2 "a1" 0 lang tmp-file)
-             (let [pos 1073
-                   res (s/split (slurp tmp-file) #"\r?\n")]
-               #_(.delete tmp-file)
-               (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
-               (fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
-               ))))
+       (doseq [lang i18n/languages]
+         (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+           (verdict/write-verdict-libre-doc application2 "a1" 0 lang tmp-file)
+           (let [pos 1073
+                 res (s/split (slurp tmp-file) #"\r?\n")]
+             #_(.delete tmp-file)
+             (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
+             (fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
+             ))))

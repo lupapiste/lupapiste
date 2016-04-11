@@ -38,7 +38,7 @@
 
 (defn common-field-map [application lang]
   {"FOOTER_PAGE" (localized-text lang "application.export.page")
-   "FOOTER_DATE" (util/to-local-date (System/currentTimeMillis))
+   "FOOTER_DATE" (util/to-local-datetime (System/currentTimeMillis))
 
    "FIELD002"    (xml-escape (:address application))
 
@@ -95,4 +95,5 @@
       (doseq [line (line-seq rdr)]
         (write-line line fields wrtr)
         (when-let [table-rows (get fields (get-table-name line))]
+          (debug "TABLE: " (get-table-name line))
           (write-table! rdr wrtr table-rows fields))))))

@@ -22,7 +22,8 @@
 (def date-30012016 1454112000000)
 (def date-01022016 1454284800000)
 
-(def application1 {:organization "753-R"
+(def application1 {:id "LP-000-0000-0000"
+                   :organization "753-R"
                    :tosFunction  "10 03 00 01"
                    :created      100
                    :applicant    "Testaaja Testi"
@@ -117,7 +118,8 @@
                                    :user  {:firstName "Testi"
                                            :lastName  "Testaaja"}}]})
 
-(def application2 {:organization "753-R"
+(def application2 {:id "LP-000-0000-0000"
+                   :organization "753-R"
                    :tosFunction  "10 03 00 01"
                    :created      100
                    :applicant    "Testaaja Testi"
