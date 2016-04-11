@@ -2,7 +2,7 @@
   (:require [lupapalvelu.states :as states]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archiving :as archiving]
-            [sade.core :refer [ok unauthorized]]
+            [sade.core :refer [ok unauthorized fail]]
             [lupapalvelu.user :as user]
             [clojure.set :as set]
             [lupapalvelu.organization :as organization]
@@ -19,8 +19,8 @@
                           (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                             unauthorized)))]}
   [{:keys [application user] :as command}]
-  (when (contains? (get-in user [:orgAuthz (keyword (:organization application))]) :archivist)
-    (archiving/send-to-archive command (set attachmentIds) (set documentIds))
+  (if-let [{:keys [error]} (archiving/send-to-archive command (set attachmentIds) (set documentIds))]
+    (fail error)
     (ok)))
 
 (defquery document-states

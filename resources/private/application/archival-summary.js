@@ -334,6 +334,7 @@
         .error(function(e) {
           window.setTimeout(pollArchiveStatus, 3000);
           error(e.text);
+          notify.error(loc(e.text));
         })
         .call();
     };
