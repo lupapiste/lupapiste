@@ -125,14 +125,18 @@ var taskPageController = (function() {
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
 
     if (t) {
+      // FIXME handle with authz model, see LPK-388
+      var isReview = util.getIn(t, ["schema-info", "subtype"]) === "review";
+      var showApprovalButtons = !isReview || !features.enabled("review-done");
+      t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action") && showApprovalButtons;
+      t.rejectable = authorizationModel.ok("reject-task") && showApprovalButtons;
+
       t.displayName = taskUtil.longDisplayName(t, application);
       t.applicationId = application.id;
       t.deleteTask = deleteTask;
       t.returnToApplication = returnToApplication;
       t.approve = _.partial(runTaskCommand, "approve-task");
       t.reject = _.partial(runTaskCommand, "reject-task");
-      t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
-      t.rejectable = authorizationModel.ok("reject-task");
       t.reviewDone = reviewDone;
       t.sendTask = sendTask;
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
@@ -141,7 +145,7 @@ var taskPageController = (function() {
       var errors = util.extractRequiredErrors([t.validationErrors]);
       requiredErrors(errors);
       // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !errors.length);
+      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !errors.length && isReview);
 
       var options = {collection: "tasks", updateCommand: "update-task", validate: true};
       docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
