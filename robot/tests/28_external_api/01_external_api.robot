@@ -98,11 +98,8 @@ Fill review info
   Input text with jQuery  .hasDatepicker:first  29.2.2016
   Input text with jQuery  textarea[name="katselmus.huomautukset.kuvaus"]  ei
 
-  Click enabled by test id  approve-task
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
-
 Transfering task emits LupapisteApi.integrationSent function call
-  Click enabled by test id  send-task
+  Click enabled by test id  review-done
   Confirm  dynamic-ok-confirm-dialog
   Permit properties should be visible in dialog
 
