@@ -11,7 +11,6 @@
 
 (defn- filter-tasks [application verdict-id type]
   (filter (fn [task]
-            (log/debug "task: " task "=" (= (get-in task [:schema-info :name]) type))
             (and (= (get-in task [:schema-info :name]) type)
                  (= (get-in task [:source :type]) "verdict")
                  (= (get-in task [:source :id]) verdict-id))) (:tasks application)))
@@ -73,7 +72,7 @@
   (into [] (map (fn [val] [(str (:sisalto val))]) (:maaraykset (get-lupamaaraykset application verdict-id paatos-idx)))))
 
 (defn- verdict-attachments [application id]
-  (s/join "\n" (map (fn [verdict-att] (str (get-in verdict-att [:latestVersion :filename]))) (filter (fn [att] (and (= :verdict (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application)))))
+  (map (fn [verdict-att] [(str (get-in verdict-att [:latestVersion :filename]))]) (filter (fn [att] (and (= :verdict (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application))))
 
 (defn- verdict-status [paatos lang]
   (s/join "\n" (map (fn [val] (str (if (:status val) (i18n/localize lang "verdict.status" (str (:status val))) (:paatoskoodi val)))) (:poytakirjat paatos))))
@@ -85,7 +84,6 @@
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
         paatos (nth (:paatokset verdict) paatos-idx)]
     (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
-    (log/debug "verdict-muutMaaraykset: " (verdict-muutMaaraykset application id paatos-idx))
     (template/create-libre-doc (io/resource "private/lupapiste-verdict-template2.fodt")
                                file
                                (assoc (template/common-field-map application lang)
@@ -117,17 +115,14 @@
 ;;                                 "PLANSHEADER" (i18n/localize lang "verdict.vaaditutErityissuunnitelmat")
 ;;                                 "PLANSTABLE" (verdict-vaaditutErityissuunnitelmat application id paatos-idx)
 
-                                 "OTHERHEADER" (i18n/localize lang "verdict.muutMaaraykset")
-                                 "OTHERTABLE" (verdict-muutMaaraykset application id paatos-idx)
-
-
                                  "REVIEWHEADER" (i18n/localize lang "verdict.vaaditutKatselmukset")
                                  "REVIEWSTABLE" (verdict-vaaditutKatselmukset application id paatos-idx lang)
 
+                                 "OTHERHEADER" (i18n/localize lang "verdict.muutMaaraykset")
+                                 "OTHERTABLE" (verdict-muutMaaraykset application id paatos-idx)
 
 ;;                                 "FIELD17" (i18n/localize lang "verdict.maaraykset")
 ;;                                 "ORDERSTABLE" (verdict-maaraykset application id paatos-idx)
 
                                  "LPTITLE_ATTACHMENTS" (i18n/localize lang "application.verdict-attachments")
-
-                                 ))))
+                                 "ATTACHMENTTABLE" (verdict-attachments application id)))))

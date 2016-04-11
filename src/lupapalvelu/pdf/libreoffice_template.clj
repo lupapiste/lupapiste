@@ -78,11 +78,9 @@
   (doseq [line (take-while (fn [line] (not (s/includes? line "</table:table-header-rows>"))) (line-seq rdr))]
     (write-line line fields wrtr)
     (when-let [table-rows2 (get fields (get-table-name line))]
-      (debug "TABLE: " (get-table-name line))
       (write-table! rdr wrtr table-rows2 fields)))
   (write-line "      </table:table-header-rows>" fields wrtr)
   (doseq [row table-rows]
-    (debug "row: " (with-out-str (clojure.pprint/pprint row)))
     (.write wrtr (str (apply xml-table-row row) "\n")))
 
   ;; advance reader past rows we want to skip
@@ -95,5 +93,4 @@
       (doseq [line (line-seq rdr)]
         (write-line line fields wrtr)
         (when-let [table-rows (get fields (get-table-name line))]
-          (debug "TABLE: " (get-table-name line))
           (write-table! rdr wrtr table-rows fields))))))

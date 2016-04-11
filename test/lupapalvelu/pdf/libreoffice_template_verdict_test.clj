@@ -51,7 +51,7 @@
        (doseq [lang i18n/languages]
          (let [tmp-file (File/createTempFile (str "verdict-krysp-" (name lang) "-") ".fodt")]
            (verdict/write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
-           (let [pos 1073
+           (let [pos 1109
                  res (s/split (slurp tmp-file) #"\r?\n")]
              #_(.delete tmp-file)
              (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
@@ -62,7 +62,7 @@
        (doseq [lang i18n/languages]
          (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
            (verdict/write-verdict-libre-doc application2 "a1" 0 lang tmp-file)
-           (let [pos 1073
+           (let [pos 1109
                  res (s/split (slurp tmp-file) #"\r?\n")]
              #_(.delete tmp-file)
              (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
