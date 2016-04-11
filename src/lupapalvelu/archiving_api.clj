@@ -8,16 +8,18 @@
             [lupapalvelu.organization :as organization]
             [cheshire.core :as json]))
 
+(defn check-user-is-archivist [{:keys [user]} {:keys [organization]}]
+  (let [org-set (set/intersection #{organization} (user/organization-ids-by-roles user #{:archivist}))]
+    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
+      unauthorized)))
+
 (defcommand archive-documents
   {:parameters       [:id attachmentIds documentIds]
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
    :feature          :arkistointi
-   :pre-checks       [(fn [{:keys [user]} {:keys [organization]}]
-                        (let [org-set (set/intersection #{organization} (user/organization-ids-by-roles user #{:archivist}))]
-                          (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
-                            unauthorized)))]}
+   :pre-checks       [check-user-is-archivist]}
   [{:keys [application user] :as command}]
   (if-let [{:keys [error]} (archiving/send-to-archive command (set attachmentIds) (set documentIds))]
     (fail error)
@@ -45,8 +47,5 @@
 (defquery archiving-operations-enabled
   {:user-roles #{:authority}
    :states     states/all-application-states
-   :pre-checks [(fn [{:keys [user]} {:keys [organization]}]
-                  (let [org-set (set/intersection #{organization} (user/organization-ids-by-roles user #{:archivist}))]
-                    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
-                      unauthorized)))]}
+   :pre-checks [check-user-is-archivist]}
   (ok))

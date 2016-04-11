@@ -10519,6 +10519,19 @@ ul.no-bullets {
   border-collapse: separate;
 }
 
+/* line 172, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.tos-function-correction {
+  margin-top: 3em;
+}
+/* line 174, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.tos-function-correction p {
+  margin-bottom: 1em;
+}
+/* line 177, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.tos-function-correction select {
+  min-width: 500px;
+}
+
 /* line 1, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-top {
   background-color: #eeeeee;
@@ -11622,24 +11635,4 @@ span.icon_clear:before {
 /* line 85, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application-map-container {
   position: relative;
-}
-/* line 87, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application-map-container .map {
-  float: left;
-  margin: 12px;
-}
-/* line 91, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application-map-container .application-map-actions {
-  position: absolute;
-  z-index: 1000;
-  left: 0;
-  top: 256px;
-  text-align: center;
-  display: block;
-  background: #04c714;
-}
-/* line 100, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application-map-container .application-map-actions .map-search-button {
-  color: white;
-  padding: 0 24px;
 }
