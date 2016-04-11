@@ -1816,55 +1816,52 @@
                         (let [applications (mongo/select collection {:documents.schema-info.subtype "suunnittelija"} {:documents 1})]
                           (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
 
+(defn update-attachment-type [mapping type-key attachment]
+  (let [type (->> (type-key attachment) (map (fn [kv-pair] (mapv keyword kv-pair))) (into {}))]
+    (assoc attachment type-key (get mapping type type))))
 
-(when (env/feature? :updated-attachments)
+(defmigration application-attachment-type-update
+  (update-applications-array :attachments
+                             (partial update-attachment-type attachment-type-mapping/attachment-mapping :type)
+                             {:permitType  {$in ["R" "P"]}
+                              :attachments {$gt {$size 0}}}))
 
-  (defn update-attachment-type [mapping type-key attachment]
-    (let [type (->> (type-key attachment) (map (fn [kv-pair] (mapv keyword kv-pair))) (into {}))]
-      (assoc attachment type-key (get mapping type type))))
+(defmigration application-ya-osapuoli-attachment-type-update
+  (update-applications-array :attachments
+                             (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :type)
+                             {:permitType  {$in ["YA"]}
+                              :attachments {$gt {$size 0}}}))
 
-  (defmigration application-attachment-type-update
-    (update-applications-array :attachments
-                               (partial update-attachment-type attachment-type-mapping/attachment-mapping :type)
-                               {:permitType  {$in ["R" "P"]}
-                                :attachments {$gt {$size 0}}}))
+(defmigration update-user-attachments
+  (reduce (fn [cnt user] (+ cnt (mongo/update-n :users {:_id (:id user)}
+                                                {$set {:attachments (->> (:attachments user)
+                                                                         (map (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :attachment-type)))}})))
+          0
+          (mongo/select :users {:attachments {$gt {$size 0}}} {:attachments 1})))
 
-  (defmigration application-ya-osapuoli-attachment-type-update
-    (update-applications-array :attachments
-                               (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :type)
-                               {:permitType  {$in ["YA"]}
-                                :attachments {$gt {$size 0}}}))
+(def r-or-p-operation? (->> (filter (comp #{"R" "P"} :permit-type val) op/operations) keys set))
+(def ya-operation? (->> op/ya-operations keys set))
 
-  (defmigration update-user-attachments
-    (reduce (fn [cnt user] (+ cnt (mongo/update-n :users {:_id (:id user)}
-                                                  {$set {:attachments (->> (:attachments user)
-                                                                           (map (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :attachment-type)))}})))
-            0
-            (mongo/select :users {:attachments {$gt {$size 0}}} {:attachments 1})))
+(defn update-operations-attachment-type [mapping [type-group type-id]]
+  (let [{new-group :type-group new-id :type-id} (-> {:type-group (keyword type-group) :type-id (keyword type-id)}
+                                                    attachment-type-mapping/attachment-mapping)]
+    (if (and new-group new-id)
+      [new-group  new-id]
+      [type-group type-id])))
 
-  (def r-or-p-operation? (->> (filter (comp #{"R" "P"} :permit-type val) op/operations) keys set))
-  (def ya-operation? (->> op/ya-operations keys set))
-  
-  (defn update-operations-attachment-type [mapping [type-group type-id]]
-    (let [{new-group :type-group new-id :type-id} (-> {:type-group (keyword type-group) :type-id (keyword type-id)}
-                                                      attachment-type-mapping/attachment-mapping)]
-      (if (and new-group new-id)
-        [new-group  new-id]
-        [type-group type-id])))
-  
-  (defn update-operations-attachments-types [mapping operation-pred [operation attachment-types]]
-    (if (operation-pred (keyword operation))
-      [operation (map (partial update-operations-attachment-type mapping) attachment-types)]
-      [operation attachment-types]))
+(defn update-operations-attachments-types [mapping operation-pred [operation attachment-types]]
+  (if (operation-pred (keyword operation))
+    [operation (map (partial update-operations-attachment-type mapping) attachment-types)]
+    [operation attachment-types]))
 
-  (defmigration organization-operation-attachments-type-update
-    (reduce (fn [cnt org] (+ cnt (mongo/update-n :organizations {:_id (:id org)}
-                                                 {$set {:operations-attachments (->> (:operations-attachments org) 
-                                                                                     (map (partial update-operations-attachments-types attachment-type-mapping/attachment-mapping r-or-p-operation?))
-                                                                                     (map (partial update-operations-attachments-types attachment-type-mapping/osapuoli-attachment-mapping ya-operation?))
-                                                                                     (into {}))}})))
-            0
-            (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1}))))
+(defmigration organization-operation-attachments-type-update
+  (reduce (fn [cnt org] (+ cnt (mongo/update-n :organizations {:_id (:id org)}
+                                               {$set {:operations-attachments (->> (:operations-attachments org)
+                                                                                   (map (partial update-operations-attachments-types attachment-type-mapping/attachment-mapping r-or-p-operation?))
+                                                                                   (map (partial update-operations-attachments-types attachment-type-mapping/osapuoli-attachment-mapping ya-operation?))
+                                                                                   (into {}))}})))
+          0
+          (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1})))
 
 (defmigration add-id-for-verdicts-paatokset-v2
   (update-applications-array :verdicts
