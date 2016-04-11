@@ -102,15 +102,18 @@
             security-end (assoc :security-period-end security-end))))
 
 (defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function application & [type]]
-  (let [document-type (or type (:type document))
-        existing-tila (:tila metadata)
-        existing-nakyvyys (:nakyvyys metadata)
-        new-metadata (metadata-for-document organization tos-function document-type)
-        processed-metadata (cond-> new-metadata
-                                   existing-tila (assoc :tila (keyword existing-tila))
-                                   true (update-end-dates (:verdicts application))
-                                   (and (not (:nakyvyys new-metadata)) existing-nakyvyys) (assoc :nakyvyys existing-nakyvyys))]
-    (assoc document :metadata processed-metadata)))
+  (if (#{:arkistoidaan :arkistoitu} (keyword (:tila metadata)))
+    ; Do not update metadata for documents that are already archived
+    document
+    (let [document-type (or type (:type document))
+          existing-tila (:tila metadata)
+          existing-nakyvyys (:nakyvyys metadata)
+          new-metadata (metadata-for-document organization tos-function document-type)
+          processed-metadata (cond-> new-metadata
+                                     existing-tila (assoc :tila (keyword existing-tila))
+                                     true (update-end-dates (:verdicts application))
+                                     (and (not (:nakyvyys new-metadata)) existing-nakyvyys) (assoc :nakyvyys existing-nakyvyys))]
+      (assoc document :metadata processed-metadata))))
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
   (if (and organization tos-function state)
@@ -190,7 +193,7 @@
 (defn- tos-function-changes-from-history [history]
   (->> (filter :tosFunction history)
        (map #(merge % {:text (str (get-in % [:tosFunction :code]) " " (get-in % [:tosFunction :name]))
-                       :category :tos-function-change
+                       :category (if (:correction %) :tos-function-correction :tos-function-change)
                        :user (full-name (:user %))}))))
 
 (defn generate-case-file-data [{:keys [history organization] :as application} lang]

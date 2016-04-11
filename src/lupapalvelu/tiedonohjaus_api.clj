@@ -12,7 +12,8 @@
             [taoensso.timbre :as timbre]
             [lupapiste-commons.schema-utils :as schema-utils]
             [lupapalvelu.attachment-api :as aa]
-            [lupapalvelu.application :as a]))
+            [lupapalvelu.application :as a]
+            [lupapalvelu.archiving-api :as archiving-api]))
 
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
@@ -38,26 +39,38 @@
   [{user :user}]
   (store-function-code operation functionCode user))
 
+(defn- update-tos-metadata [function-code {:keys [application created user] :as command} mark-as-correction?]
+  (if-let [tos-function-map (t/tos-function-with-name function-code (:organization application))]
+    (let [orgId (:organization application)
+          updated-attachments (map #(t/document-with-updated-metadata % orgId function-code application) (:attachments application))
+          {updated-metadata :metadata} (t/document-with-updated-metadata application orgId function-code application "hakemus")
+          process-metadata (t/calculate-process-metadata (t/metadata-for-process orgId function-code) updated-metadata updated-attachments)]
+      (action/update-application command
+                                 {$set {:modified created
+                                        :tosFunction function-code
+                                        :metadata updated-metadata
+                                        :processMetadata process-metadata
+                                        :attachments updated-attachments}
+                                  $push {:history (a/tos-history-entry tos-function-map created user mark-as-correction?)}})
+      (ok))
+    (fail "error.invalid-tos-function")))
+
 (defcommand set-tos-function-for-application
   {:parameters [:id functionCode]
    :input-validators [(partial non-blank-parameters [:id :functionCode])]
    :user-roles #{:authority}
    :states states/pre-verdict-but-draft}
-  [{:keys [application created user] :as command}]
-  (if-let [tos-function-map (t/tos-function-with-name functionCode (:organization application))]
-    (let [orgId (:organization application)
-          updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode application) (:attachments application))
-          {updated-metadata :metadata} (t/document-with-updated-metadata application orgId functionCode application "hakemus")
-          process-metadata (t/calculate-process-metadata (t/metadata-for-process orgId functionCode) updated-metadata updated-attachments)]
-      (action/update-application command
-                                 {$set {:modified created
-                                        :tosFunction functionCode
-                                        :metadata updated-metadata
-                                        :processMetadata process-metadata
-                                        :attachments updated-attachments}
-                                  $push {:history (a/tos-history-entry tos-function-map created user)}})
-      (ok))
-    (fail "error.invalid-tos-function")))
+  [command]
+  (update-tos-metadata functionCode command false))
+
+(defcommand force-fix-tos-function-for-application
+  {:parameters [:id functionCode]
+   :input-validators [(partial non-blank-parameters [:id :functionCode])]
+   :user-roles #{:authority}
+   :states states/all-application-states-but-draft-or-terminal
+   :pre-checks [archiving-api/check-user-is-archivist]}
+  [command]
+  (update-tos-metadata functionCode command :mark-as-correction))
 
 (def schema-to-input-type-map
   {s/Str "text"

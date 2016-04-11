@@ -2,11 +2,16 @@
   (:require [lupapalvelu.states :as states]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archiving :as archiving]
-            [sade.core :refer [ok unauthorized]]
+            [sade.core :refer [ok unauthorized fail]]
             [lupapalvelu.user :as user]
             [clojure.set :as set]
             [lupapalvelu.organization :as organization]
             [cheshire.core :as json]))
+
+(defn check-user-is-archivist [{:keys [user]} {:keys [organization]}]
+  (let [org-set (set/intersection #{organization} (user/organization-ids-by-roles user #{:archivist}))]
+    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
+      unauthorized)))
 
 (defcommand archive-documents
   {:parameters       [:id attachmentIds documentIds]
@@ -14,13 +19,10 @@
    :user-roles       #{:authority}
    :states           states/post-verdict-states
    :feature          :arkistointi
-   :pre-checks       [(fn [{:keys [user]} {:keys [organization]}]
-                        (let [org-set (set/intersection #{organization} (user/organization-ids-by-roles user #{:archivist}))]
-                          (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
-                            unauthorized)))]}
+   :pre-checks       [check-user-is-archivist]}
   [{:keys [application user] :as command}]
-  (when (contains? (get-in user [:orgAuthz (keyword (:organization application))]) :archivist)
-    (archiving/send-to-archive command (set attachmentIds) (set documentIds))
+  (if-let [{:keys [error]} (archiving/send-to-archive command (set attachmentIds) (set documentIds))]
+    (fail error)
     (ok)))
 
 (defquery document-states
@@ -45,8 +47,5 @@
 (defquery archiving-operations-enabled
   {:user-roles #{:authority}
    :states     states/all-application-states
-   :pre-checks [(fn [{:keys [user]} {:keys [organization]}]
-                  (let [org-set (set/intersection #{organization} (user/organization-ids-by-roles user #{:archivist}))]
-                    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
-                      unauthorized)))]}
+   :pre-checks [check-user-is-archivist]}
   (ok))

@@ -12,7 +12,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.tools :as tools]))
 
-(def- task-schemas-version 1)
+(def task-schemas-version 1)
 
 (def- task-name-max-len 80)
 
@@ -48,6 +48,7 @@
    {:name "vaadittuLupaehtona"
     :type :checkbox
     :inputType :check-string
+    :readonly-after-sent true
     :whitelist {:roles [:authority] :otherwise :disabled}
     :i18nkey "vaadittuLupaehtona"}
    {:name "rakennus"
@@ -63,24 +64,27 @@
                                                  {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}]}
            {:name "tila" :type :group :i18nkey "empty"
             :body [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
+                    :readonly-after-sent true
                     :i18nkey "task-katselmus.katselmus.tila"
                     :body [{:name "osittainen"} {:name "lopullinen"}]}
-                   {:name "kayttoonottava" :type :checkbox :inputType :checkbox-wrapper}
+                   {:name "kayttoonottava" :readonly-after-sent true :type :checkbox :inputType :checkbox-wrapper}
                    ]}]}
    {:name "katselmus" :type :group
 
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
-    [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
-     {:name "pitoPvm" :type :date :required true}
-     {:name "pitaja" :type :string :required true}
+    [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
+      :readonly-after-sent true
+      :body [{:name "osittainen"} {:name "lopullinen"}]}
+     {:name "pitoPvm" :type :date :required true :readonly-after-sent true}
+     {:name "pitaja" :type :string :required true :readonly-after-sent true}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000 :css [] }
              {:name "maaraAika" :type :date}
              {:name "toteaja" :type :string}
              {:name "toteamisHetki" :type :date}]}
-     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css []}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css []}]}])
+     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true}
+     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true}]}])
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
@@ -90,6 +94,7 @@
   task-schemas-version
   [{:info {:name "task-katselmus"
            :type :task
+           :subtype :review
            :order 1
            :section-help "authority-fills"
            ;;:i18nprefix "task-katselmus.katselmuksenLaji"
@@ -107,6 +112,7 @@
 
    {:info {:name "task-katselmus-ya"
            :type :task
+           :subtype :review
            :order 1
            :section-help "authority-fills"
            :i18name "task-katselmus"

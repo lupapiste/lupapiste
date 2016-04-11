@@ -64,10 +64,10 @@
 
 (fact "removing-updates-by-path - two paths"
   (removing-updates-by-path :someCollection "123" [[:path :to :removed :item] [:path "to" :another "removed" :item]])
-  =>  {:mongo-query   {:someCollection {"$elemMatch" {:id "123"}}}, 
-       :mongo-updates {"$unset" {"someCollection.$.data.path.to.removed.item" "", 
-                                 "someCollection.$.meta.path.to.removed.item" "", 
-                                 "someCollection.$.data.path.to.another.removed.item" "", 
+  =>  {:mongo-query   {:someCollection {"$elemMatch" {:id "123"}}},
+       :mongo-updates {"$unset" {"someCollection.$.data.path.to.removed.item" "",
+                                 "someCollection.$.meta.path.to.removed.item" "",
+                                 "someCollection.$.data.path.to.another.removed.item" "",
                                  "someCollection.$.meta.path.to.another.removed.item" ""}}})
 
 (fact "new-doc - without updates"
@@ -76,43 +76,51 @@
   => truthy)
 
 (fact "new-doc - with updates"
-  (-> [[[:rakennusJaPurkujate :0 :suunniteltuMaara] "123"] 
+  (-> [[[:rakennusJaPurkujate :0 :suunniteltuMaara] "123"]
        [[:rakennusJaPurkujate :1 :yksikko] "tonni"]]
       ((partial new-doc {} (schemas/get-schema 1 "rakennusjatesuunnitelma") "22"))
-      (get-in [:data :rakennusJaPurkujate :1 :yksikko :value])) 
+      (get-in [:data :rakennusJaPurkujate :1 :yksikko :value]))
   => "tonni")
 
 (fact "new-doc - with failing updates"
   (-> [[[:rakennusJaPurkujate :0 :illegalKey] "123"] ]
       ((partial new-doc {} (schemas/get-schema 1 "rakennusjatesuunnitelma") "22"))
-      (get-in [:data :rakennusJaPurkujate :1])) 
+      (get-in [:data :rakennusJaPurkujate :1]))
   => (throws Exception))
 
 (fact "removing-updates-by-path - no paths"
   (removing-updates-by-path :someCollection "123" [])
   => {})
 
-(fact "validate-readonly-updates! - valid update"
-  (validate-readonly-updates! {:schema-info {:name "rakennusjatesuunnitelma"}}
-                              [[:rakennusJaPurkujate :0 :suunniteltuMaara]])
-  => nil)
+(facts "validate-readonly-updates!"
+  (fact "valid update"
+    (validate-readonly-updates! {:schema-info {:name "rakennusjatesuunnitelma"}}
+      [[:rakennusJaPurkujate :0 :suunniteltuMaara]])
+    => nil)
 
-(fact "validate-readonly-updates! - contains readonly"
-  (validate-readonly-updates! {:schema-info {:name "rakennusjateselvitys"}}
-                              [[:rakennusJaPurkujate :suunniteltuJate :0 :suunniteltuMaara]])
-  => (throws Exception))
+  (fact "contains readonly"
+    (validate-readonly-updates! {:schema-info {:name "rakennusjateselvitys"}}
+      [[:rakennusJaPurkujate :suunniteltuJate :0 :suunniteltuMaara]])
+    => (throws Exception))
 
-(fact "validate-readonly-updates! - another valid update"
-  (validate-readonly-updates! {:schema-info {:name "rakennusjateselvitys"}}
-                              [[:rakennusJaPurkujate :suunniteltuJate :0 :arvioituMaara]])
-  => nil)
+  (fact "task is sent"
+    (validate-readonly-updates! {:schema-info {:name "task-katselmus"} :state "sent"} [[:katselmus :pitaja]]) => (throws Exception))
 
-(fact "validate-readonly-removes! - valid"
-  (validate-readonly-updates! {:schema-info {:name "rakennusjatesuunnitelma"}}
-                              [[:rakennusJaPurkujate :0]])
-  => nil)
+  (fact "task is not sent"
+    (validate-readonly-updates! {:schema-info {:name "task-katselmus"} :state "requires_user_action"} [[:katselmus :pitaja]]) => nil)
 
-(fact "validate-readonly-removes! - contains readonly"
-  (validate-readonly-removes! {:schema-info {:name "rakennusjateselvitys"}}
-                              [[:rakennusJaPurkujate :suunniteltuJate :0]])
-  => (throws Exception))
+  (fact "another valid update"
+    (validate-readonly-updates! {:schema-info {:name "rakennusjateselvitys"}}
+      [[:rakennusJaPurkujate :suunniteltuJate :0 :arvioituMaara]])
+    => nil))
+
+(facts "validate-readonly-removes!"
+  (fact "valid"
+    (validate-readonly-updates! {:schema-info {:name "rakennusjatesuunnitelma"}}
+      [[:rakennusJaPurkujate :0]])
+    => nil)
+
+  (fact "contains readonly"
+    (validate-readonly-removes! {:schema-info {:name "rakennusjateselvitys"}}
+      [[:rakennusJaPurkujate :suunniteltuJate :0]])
+    => (throws Exception)))

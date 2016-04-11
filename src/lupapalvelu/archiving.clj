@@ -131,7 +131,6 @@
                 (remove nil?)
                 (sort)
                 (last))]
-    (println ts)
     (when ts
       (->iso-8601-date (c/from-long ts)))))
 
@@ -198,21 +197,23 @@
             true (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
-  (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
-                                       (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
-                                     attachments)
-        application-archive-id (str id "-application")
-        case-file-archive-id (str id "-case-file")]
-    (when (document-ids application-archive-id)
-      (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
-            metadata (generate-archive-metadata application user)]
-        (upload-and-set-state application-archive-id application-file "application/pdf" metadata application created set-application-state)))
-    (when (document-ids case-file-archive-id)
-      (let [case-file-file (libre/generate-casefile-pdfa application :fi)
-            metadata (-> (generate-archive-metadata application user)
-                         (assoc :type :case-file))]
-        (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)))
-    (doseq [attachment selected-attachments]
-      (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
-            metadata (generate-archive-metadata application user attachment)]
-        (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state)))))
+  (if (get-paatospvm application)
+    (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
+                                         (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
+                                       attachments)
+          application-archive-id (str id "-application")
+          case-file-archive-id (str id "-case-file")]
+      (when (document-ids application-archive-id)
+        (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
+              metadata (generate-archive-metadata application user)]
+          (upload-and-set-state application-archive-id application-file "application/pdf" metadata application created set-application-state)))
+      (when (document-ids case-file-archive-id)
+        (let [case-file-file (libre/generate-casefile-pdfa application :fi)
+              metadata (-> (generate-archive-metadata application user)
+                           (assoc :type :case-file))]
+          (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)))
+      (doseq [attachment selected-attachments]
+        (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
+              metadata (generate-archive-metadata application user attachment)]
+          (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))
+    {:error :error.invalid-metadata-for-archive}))

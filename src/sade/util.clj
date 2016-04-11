@@ -394,12 +394,15 @@
 
 (defn list-jar [jar-path inner-dir]
   (if-let [jar         (JarFile. jar-path)]
-    (let [inner-dir    (if (and (not= "" inner-dir) (not= \/ (last inner-dir)))
+    (let [inner-dir    (if (and (not (ss/blank? inner-dir)) (not= \/ (last inner-dir)))
                          (str inner-dir "/")
+                         (str inner-dir))
+          inner-dir    (if (ss/starts-with inner-dir "/")
+                         (subs inner-dir 1)
                          inner-dir)
           entries      (enumeration-seq (.entries jar))
           names        (map (fn [x] (.getName x)) entries)
-          snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
+          snames       (filter #(ss/starts-with % inner-dir) names)
           fsnames      (map #(subs % (count inner-dir)) snames)]
       fsnames)))
 

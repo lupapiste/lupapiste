@@ -16,15 +16,16 @@
    (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string :check-string :checkbox-wrapper) ;; Input type of generic docgen-input component
    (opt :labelclass)  sc/Str         ;; Special label style class
    (opt :i18nkey)     sc/Str         ;; Absolute localization key
-   (opt :locPrefix)   sc/Str         ;; 
+   (opt :locPrefix)   sc/Str         ;;
    (opt :layout)      (sc/enum :full-width)
    (opt :hidden)      sc/Bool        ;; Element is hidden (default false)
    (opt :label)       sc/Bool        ;; Label is shown? (default true)
    (opt :size)        (apply sc/enum input-sizes) ;; Element size (default ?)
    (opt :readonly)    sc/Bool        ;; Element is readonly
+   (opt :readonly-after-sent) sc/Bool;; Element is readonly if document state is sent
    (opt :required)    sc/Bool        ;; Required field
-   (opt :approvable)  sc/Bool        ;; 
-   (opt :codes)       [sc/Keyword]   ;; 
+   (opt :approvable)  sc/Bool        ;; Authority can apporove/reject field
+   (opt :codes)       [sc/Keyword]   ;;
    (opt :validator)   sc/Keyword     ;; Specific validator key for element (see model/validate-element)
    (opt :whitelist)   {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
    (opt :blacklist)   [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
@@ -128,14 +129,14 @@
 
 (defschema Option
   "Option for select and radiogroup types."
-  {:name                         sc/Str       ;; 
+  {:name                         sc/Str       ;;
    (opt :i18nkey)                sc/Str       ;; Absolute localization key for element
-   (opt :code)                   sc/Keyword}) ;; 
+   (opt :code)                   sc/Keyword}) ;;
 
-(defschema Select 
+(defschema Select
   (merge GenInput
-         {:type                  (sc/eq :select)  ;; 
-          :body                  [Option]         ;; 
+         {:type                  (sc/eq :select)  ;;
+          :body                  [Option]         ;;
           (opt :default)         sc/Str           ;; Default option name
           (opt :valueAllowUnset) sc/Bool          ;; Selection is not required (default true)
           (opt :sortBy)          (sc/enum nil :displayname)  ;; (default ?)
@@ -147,7 +148,7 @@
           :body                  [Option]         ;;
           (opt :default)         sc/Str}))        ;; Default option name
 
-(defschema Str 
+(defschema Str
   (sc/conditional (subtype-pred :number)           Num
                   (subtype-pred :decimal)          Decimal
                   (subtype-pred :digit)            Digit
@@ -193,15 +194,15 @@
   "Table element. Represented as html table. Not recursive group type."
   {:name                       sc/Str       ;;
    :type                       (sc/eq :table)
-   :body                       [Input]      ;; 
+   :body                       [Input]      ;;
    (opt :i18nkey)              sc/Str       ;; Absolute localization key
-   (opt :group-help)           sc/Str       ;; 
+   (opt :group-help)           sc/Str       ;;
    (opt :uicomponent)          sc/Keyword   ;; Component name for special components
-   (opt :approvable)           sc/Bool      ;; 
+   (opt :approvable)           sc/Bool      ;;
    (opt :repeating)            sc/Bool      ;; Should be  always repeating -> default true
-   (opt :repeating-init-empty) sc/Bool      ;; 
-   (opt :copybutton)           sc/Bool      ;; 
-   (opt :validator)            sc/Keyword}) ;; 
+   (opt :repeating-init-empty) sc/Bool      ;;
+   (opt :copybutton)           sc/Bool      ;;
+   (opt :validator)            sc/Keyword}) ;;
 
 (defschema Group
   "Group type that groups any doc elements."
@@ -217,9 +218,9 @@
    (opt :approvable)           sc/Bool      ;; Approvable by authority
    (opt :repeating)            sc/Bool      ;; Array of groups
    (opt :repeating-init-empty) sc/Bool      ;; Init repeating group as empty array (default false)
-   (opt :removable)            sc/Bool      ;; 
-   (opt :copybutton)           sc/Bool      ;; 
-   (opt :exclude-from-pdf)     sc/Bool      ;; 
+   (opt :removable)            sc/Bool      ;;
+   (opt :copybutton)           sc/Bool      ;;
+   (opt :exclude-from-pdf)     sc/Bool      ;;
    (opt :validator)            sc/Keyword   ;; Specific validator key for element (see model/validate-element)
    (opt :whitelist)            {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
    (opt :blacklist)            [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
@@ -235,18 +236,18 @@
   {:info {:name                              sc/Str     ;;
           (opt :version)                     sc/Int     ;;
           (opt :type)                        sc/Keyword ;; TODO: enum type ?
-          (opt :subtype)                     sc/Keyword ;; 
+          (opt :subtype)                     sc/Keyword ;;
           (opt :i18name)                     sc/Str     ;; Root localization key (inherited by childs)
           (opt :i18nprefix)                  sc/Str     ;; TODO: not used
           (opt :group-help)                  (sc/maybe sc/Str) ;; TODO: remove nils?
           (opt :section-help)                (sc/maybe sc/Str) ;; TODO: remove nils?
-          (opt :approvable)                  sc/Bool    ;; 
-          (opt :repeating)                   sc/Bool    ;; 
-          (opt :removable)                   sc/Bool    ;; 
+          (opt :approvable)                  sc/Bool    ;;
+          (opt :repeating)                   sc/Bool    ;;
+          (opt :removable)                   sc/Bool    ;;
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
-          (opt :no-repeat-button)            sc/Bool    ;; 
+          (opt :no-repeat-button)            sc/Bool    ;;
           (opt :construction-time)           sc/Bool    ;; Is a construction time doc
-          (opt :exclude-from-pdf)            sc/Bool    ;; 
+          (opt :exclude-from-pdf)            sc/Bool    ;;
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
           (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary
           (opt :order)                       sc/Int}    ;;
@@ -259,4 +260,3 @@
 
 (defn validate-elem-schema [elem-schema]
   (sc/check Element elem-schema))
-

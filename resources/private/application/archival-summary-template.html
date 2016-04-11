@@ -107,7 +107,7 @@
 
         <div data-bind="if: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
-            <!-- ko if: !$data.readOnly() -->
+            <!-- ko if: _.isFunction($data.readOnly) && !$data.readOnly() -->
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'attachment.changeType'"></div>
               <div class="contents">

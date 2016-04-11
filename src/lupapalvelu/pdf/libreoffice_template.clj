@@ -38,7 +38,7 @@
 
 (defn common-field-map [application lang]
   {"FOOTER_PAGE" (localized-text lang "application.export.page")
-   "FOOTER_DATE" (util/to-local-date (System/currentTimeMillis))
+   "FOOTER_DATE" (util/to-local-datetime (System/currentTimeMillis))
 
    "FIELD002"    (xml-escape (:address application))
 

@@ -5,7 +5,8 @@
             [lupapalvelu.tiedonohjaus-api :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [execute update-application]]
-            [lupapalvelu.tiedonohjaus :as t]))
+            [lupapalvelu.tiedonohjaus :as t]
+            [lupapalvelu.organization :as organization]))
 
 (testable-privates lupapalvelu.tiedonohjaus-api store-function-code update-application-child-metadata!)
 
@@ -290,15 +291,75 @@
         (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
         (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
         (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
-        (update-application command {"$set" {:modified 1000
-                                             :tosFunction fc
-                                             :metadata {:julkisuusluokka :julkinen}
-                                             :processMetadata {:julkisuusluokka :salainen}
-                                             :attachments []}
+        (update-application command {"$set"  {:modified        1000
+                                              :tosFunction     fc
+                                              :metadata        {:julkisuusluokka :julkinen}
+                                              :processMetadata {:julkisuusluokka :salainen}
+                                              :attachments     []}
                                      "$push" {:history {:tosFunction {:code fc
                                                                       :text "Foobar"}
-                                                        :ts 1000
-                                                        :user {:id            "monni"
-                                                               :firstName     "Monni"
-                                                               :lastName      "Tiskaa"
-                                                               :role :authority}}}}) => nil))))
+                                                        :ts          1000
+                                                        :user        {:id        "monni"
+                                                                      :firstName "Monni"
+                                                                      :lastName  "Tiskaa"
+                                                                      :role      :authority}
+                                                        :correction  false}}}) => nil)))
+
+  (fact "archivist can set the tos function after verdict as correction"
+    (let [fc "10 03 00 01"
+          application {:organization    "753-R"
+                       :id              "ABC123"
+                       :state           :verdictGiven
+                       :history []
+                       :attachments []}
+          command {:application application
+                   :created     1000
+                   :user        {:id            "monni"
+                                 :firstName     "Monni"
+                                 :lastName      "Tiskaa"
+                                 :orgAuthz      {:753-R #{:authority :archivist}}
+                                 :organizations ["753-R"]
+                                 :role          :authority}
+                   :action      "force-fix-tos-function-for-application"
+                   :data        {:id       "ABC123"
+                                 :functionCode "10 03 00 01"}}]
+      (execute command) => {:ok true}
+      (provided
+        (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
+        (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
+        (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
+        (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
+        (update-application command {"$set"  {:modified        1000
+                                              :tosFunction     fc
+                                              :metadata        {:julkisuusluokka :julkinen}
+                                              :processMetadata {:julkisuusluokka :salainen}
+                                              :attachments     []}
+                                     "$push" {:history {:tosFunction {:code fc
+                                                                      :text "Foobar"}
+                                                        :ts          1000
+                                                        :user        {:id        "monni"
+                                                                      :firstName "Monni"
+                                                                      :lastName  "Tiskaa"
+                                                                      :role      :authority}
+                                                        :correction  true}}}) => nil)))
+
+  (fact "normal authority user cannot change tos function after verdict"
+    (let [application {:organization    "753-R"
+                       :id              "ABC123"
+                       :state           :verdictGiven
+                       :history []
+                       :attachments []}
+          command {:application application
+                   :created     1000
+                   :user        {:id            "monni"
+                                 :firstName     "Monni"
+                                 :lastName      "Tiskaa"
+                                 :orgAuthz      {:753-R #{:authority}}
+                                 :organizations ["753-R"]
+                                 :role          :authority}
+                   :action      "force-fix-tos-function-for-application"
+                   :data        {:id       "ABC123"
+                                 :functionCode "10 03 00 01"}}
+          command2 (assoc command :action "set-tos-function-for-application")]
+      (execute command) => {:ok false :text "error.unauthorized"}
+      (execute command2) => {:ok false :state :verdictGiven :text "error.command-illegal-state"})))
