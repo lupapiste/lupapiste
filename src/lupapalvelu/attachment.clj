@@ -51,7 +51,7 @@
 ;; Metadata
 ;;
 
-(def attachment-types-osapuoli attachment-types/osapuolet)
+(def attachment-types-osapuoli attachment-types/osapuolet-v2)
 
 (def attachment-meta-types [:size :scale :op :contents])
 
