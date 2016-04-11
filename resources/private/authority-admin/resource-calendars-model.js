@@ -34,20 +34,24 @@ LUPAPISTE.ResourceCalendarsModel = function () {
 
     self.name = ko.observable();
     self.organization = ko.observable();
-    self.allowedCalendarSlots = ko.observableArray();
+    self.weekdays = ko.observableArray();
+    self.timelineTimes = ko.observableArray();
+
+    var timelineTimesBuilder = function() {
+      var times = [];
+      ko.utils.arrayForEach(ko.utils.range(7, 16), function(hour) {
+        times.push(hour+":00");
+        times.push(hour+":30");
+      });
+      console.log(times);
+      return times;
+    };
 
     self.init = function(params) {
       self.name(util.getIn(params, ["source", "name"], ""));
       self.organization(util.getIn(params, ["source", "organization"], ""));
-      self.allowedCalendarSlots([
-        { time: "7:00" },
-        { time: "8:00" },
-        { time: "9:00" },
-        { time: "10:00" },
-        { time: "11:00" },
-        { time: "12:00" },
-        { time: "13:00" }
-      ]);
+      self.weekdays([{text: "ma"}, {text: "ti"}, {text: "ke"}, {text: "to"}, {text: "pe"}]);
+      self.timelineTimes(timelineTimesBuilder());
     };
   }
   self.viewCalendarModel = new ViewCalendarModel();

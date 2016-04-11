@@ -14756,15 +14756,33 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 #dialog-view-calendar {
   width: 47.5em;
   min-height: 144px;
-  height: auto;
+  height: 90%;
 }
 /* line 6, ../../../private/common-html/sass/views/_resources.scss */
+#dialog-view-calendar .dialog-content {
+  height: 100%;
+  overflow-y: scroll;
+}
+/* line 11, ../../../private/common-html/sass/views/_resources.scss */
+#dialog-view-calendar table {
+  width: 97%;
+}
+/* line 13, ../../../private/common-html/sass/views/_resources.scss */
 #dialog-view-calendar table td {
   background: #f6f6f6;
+  padding: 6px;
 }
-/* line 9, ../../../private/common-html/sass/views/_resources.scss */
+/* line 17, ../../../private/common-html/sass/views/_resources.scss */
 #dialog-view-calendar table td:nth-child(even) {
   background: white;
+}
+/* line 21, ../../../private/common-html/sass/views/_resources.scss */
+#dialog-view-calendar table td div.timeline-slot {
+  height: 48px;
+}
+/* line 23, ../../../private/common-html/sass/views/_resources.scss */
+#dialog-view-calendar table td div.timeline-slot:hover {
+  background: #dddddd;
 }
 
 /*------------------------------------*\
