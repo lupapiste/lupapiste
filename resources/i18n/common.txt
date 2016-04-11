@@ -100,8 +100,6 @@
 "answered" "sv" "Besvarad"
 "answered.title" "fi" "Vastattu"
 "answered.title" "sv" "Besvarad"
-"appealed" "fi" "Muutoksenhaussa"
-"appealed" "sv" "I ändringssökan"
 "appealed.title" "fi" ""
 "appealed.title" "sv" ""
 "applicant" "fi" "Hakija"
