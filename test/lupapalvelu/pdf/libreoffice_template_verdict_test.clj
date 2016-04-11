@@ -53,7 +53,7 @@
            (verdict/write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
            (let [pos 1121
                  res (s/split (slurp tmp-file) #"\r?\n")]
-             #_(.delete tmp-file)
+             (.delete tmp-file)
              (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
              ;(fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
              ))))
@@ -64,7 +64,7 @@
            (verdict/write-verdict-libre-doc application2 "a1" 0 lang tmp-file)
            (let [pos 1121
                  res (s/split (slurp tmp-file) #"\r?\n")]
-             #_(.delete tmp-file)
+             (.delete tmp-file)
              (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
              ;(fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
              ))))
