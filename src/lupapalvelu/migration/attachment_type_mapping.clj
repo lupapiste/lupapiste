@@ -30,6 +30,7 @@
    {:type-group :rakennuspaikka :type-id :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista}    {:type-group :selvitykset :type-id :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista},
    {:type-group :muut :type-id :selvitys_rakennuspaikan_terveellisyydesta}    {:type-group :selvitykset :type-id :selvitys_rakennuspaikan_terveellisyydesta},
    {:type-group :muut :type-id :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista}    {:type-group :selvitykset :type-id :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista},
+   {:type-group :muut :type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta}   {:type-group :selvitykset :type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta},
    {:type-group :muut :type-id :hankeselvitys}    {:type-group :suunnitelmat :type-id :hankeselvitys},
    {:type-group :muut :type-id :julkisivujen_varityssuunnitelma}    {:type-group :suunnitelmat :type-id :julkisivujen_varityssuunnitelma},
    {:type-group :muut :type-id :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta}    {:type-group :suunnitelmat :type-id :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta},
