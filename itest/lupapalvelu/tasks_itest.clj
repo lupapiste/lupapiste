@@ -9,6 +9,8 @@
 
 (defn- task-by-type [task-type task] (= (str "task-" task-type) (-> task :schema-info :name)))
 
+(apply-remote-minimal)
+
 (let [application (create-and-submit-application pena :municilapity sonja-muni)
       application-id (:id application)
       resp (command sonja :check-for-verdict :id application-id)
@@ -121,11 +123,15 @@
         (fact "can't be done as required fieds are not filled"
           (command sonja :review-done :id application-id :taskId task-id :lang "fi") => fail?)
 
-        (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
+        (command sonja :update-task :id application-id :doc task-id :updates [
+                                                                              ["rakennus.0.rakennus.jarjestysnumero" "1"]
                                                                               ["rakennus.0.rakennus.rakennusnro" "001"]
                                                                               ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
+                                                                              ["rakennus.0.tila.tila" "osittainen"]
                                                                               ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
-                                                                              ["katselmus.tila" "osittainen"]]) => ok?
+                                                                              ["katselmus.tila" "osittainen"]
+                                                                              ["katselmus.pitoPvm" "12.04.2016"]
+                                                                              ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?
 
         (fact "can now be marked done, required fields are filled"
           (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
@@ -143,11 +149,9 @@
             (count tasks) => expected-count)
 
           (fact "mark the new task final"
-            (command sonja :update-task :id application-id :doc new-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
-                                                                                 ["rakennus.0.rakennus.rakennusnro" "001"]
-                                                                                 ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
-                                                                                 ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
-                                                                                 ["katselmus.tila" "lopullinen"]]) => ok?)
+                (command sonja :update-task :id application-id :doc new-id :updates [ ["katselmus.tila" "lopullinen"]
+                                                                                 ["katselmus.pitoPvm" "12.04.2016"]
+                                                                                 ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?)
 
           (fact "mark the new task done"
             (command sonja :review-done :id application-id :taskId new-id :lang "fi") => ok?)

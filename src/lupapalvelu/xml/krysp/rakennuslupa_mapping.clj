@@ -404,6 +404,7 @@
                        %)))
 
         xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
+
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
@@ -434,7 +435,8 @@
                        (remove
                          #(or
                             (nil? %)
-                            (= "ei tiedossa" (get-in % [:rakennus :jarjestysnumero])))))]
+                            (= "ei tiedossa" (get-in % [:rakennus :jarjestysnumero]))
+                            (util/empty-or-nil? (get-in % [:tila :tila])))))]
     (save-katselmus-xml
       application
       lang

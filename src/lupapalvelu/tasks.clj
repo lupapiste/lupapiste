@@ -78,6 +78,7 @@
     [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
       :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
+      :required true
       :body [{:name "osittainen"} {:name "lopullinen"}]}
      {:name "pitoPvm" :type :date :required true :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}
