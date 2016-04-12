@@ -14,14 +14,19 @@
       <table>
         <thead>
         <tr data-bind="foreach: weekdays">
-          <th data-bind="text: text"></th>
+          <th data-bind="text: str"></th>
         </tr>
         </thead>
         <tbody>
         <tr data-bind="foreach: weekdays">
           <td>
-            <div class="resource-calendar-timeline" data-bind="foreach: $parent.timelineTimes">
+            <div style="position: relative;">
+              <!-- ko foreach: $parent.timelineTimes -->
               <div class="timeline-slot"><span data-bind="text: $data"></span></div>
+              <!-- /ko -->
+              <!-- ko foreach: slots -->
+              <div class="reserved-slot" data-bind="style: { top: positionTop, height: height }, text: viewText"></div>
+              <!-- /ko -->
             </div>
           </td>
         </tr>
