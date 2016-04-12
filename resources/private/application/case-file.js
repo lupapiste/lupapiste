@@ -7,7 +7,7 @@
     self.caseFile = ko.observableArray();
 
     var fetchCaseFile = function() {
-      ajax.query("case-file-data", {id: params.application.id, lang: loc.getCurrentLanguage()})
+      ajax.query("case-file-data", {id: ko.unwrap(params.application.id), lang: loc.getCurrentLanguage()})
         .success(function (data) {
           self.caseFile(data.process);
         })

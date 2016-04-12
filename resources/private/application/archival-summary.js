@@ -311,7 +311,9 @@
 
     var allIds = _.map(self.attachments().concat(docs), getId);
 
-    pollChangedState(allIds);
+    if (ko.unwrap(params.application.id)) {
+      pollChangedState(allIds);
+    }
 
     self.archiveSelected = function() {
       var attachmentIds = _.map(_.filter(self.attachments(), isSelectedForArchive), function(attachment) {

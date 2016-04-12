@@ -42,5 +42,7 @@ LUPAPISTE.ChangeStateModel = function( params) {
   });
 
   // Initialization
-  fetchStates();
+  if (params.id) {
+    fetchStates();
+  }
 };
