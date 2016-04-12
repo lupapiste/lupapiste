@@ -37,7 +37,7 @@
            data-bind="visible: $root.authorization.ok('review-done'),
                       if: $root.authorization.ok('review-done')">
         <div data-bind="ltext: 'task.review-done.help'"></div>
-        <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.taskSubmitOk() && !$root.processing()" class="positive">
+        <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.reviewSubmitOk() && !$root.processing()" class="positive">
           <i class="lupicon-eye"></i>
           <span data-bind="ltext: 'task.review-done'"></span>
         </button>

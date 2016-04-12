@@ -44,7 +44,13 @@ var taskPageController = (function() {
   var taskSubmitOk = ko.observable(false);
   var service = lupapisteApp.services.documentDataService;
 
-  var requiredErrors = ko.observable([null]);
+  var requiredErrors = ko.computed(function() {
+    var t = task();
+    if (t && t.addedToService()) {
+      var fromService = service.findDocumentById(t.id);
+      return util.extractRequiredErrors([fromService.validationResults()]);
+    }
+  });
 
   var reviewSubmitOk = ko.computed(function() {
     var t = task();
@@ -146,10 +152,8 @@ var taskPageController = (function() {
 
       service.addDocument(task());
       t.addedToService( true );
-      var errors = util.extractRequiredErrors([t.validationErrors]);
-      requiredErrors(errors);
       // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !errors.length && isReview);
+      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && _.isEmpty(requiredErrors()) && isReview);
 
       var options = {collection: "tasks", updateCommand: "update-task", validate: true};
       docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
@@ -184,10 +188,8 @@ var taskPageController = (function() {
 
   hub.subscribe("update-task-success", function(e) {
     if (task() && applicationModel.id() === e.appId && currentTaskId === e.documentId) {
-      var errors = util.extractRequiredErrors([e.results]);
-      requiredErrors(errors);
       // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !errors.length);
+      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && _.isEmpty(requiredErrors()).length);
     }
   });
 
