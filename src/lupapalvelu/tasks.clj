@@ -65,9 +65,11 @@
            {:name "tila" :type :group :i18nkey "empty"
             :body [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
                     :readonly-after-sent true
+                    :whitelist {:roles [:authority] :otherwise :disabled}
                     :i18nkey "task-katselmus.katselmus.tila"
                     :body [{:name "osittainen"} {:name "lopullinen"}]}
-                   {:name "kayttoonottava" :readonly-after-sent true :type :checkbox :inputType :checkbox-wrapper}
+                   {:name "kayttoonottava" :readonly-after-sent true :type :checkbox :inputType :checkbox-wrapper
+                    :whitelist {:roles [:authority] :otherwise :disabled}}
                    ]}]}
    {:name "katselmus" :type :group
 
@@ -75,16 +77,22 @@
     :body
     [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
       :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}
       :body [{:name "osittainen"} {:name "lopullinen"}]}
-     {:name "pitoPvm" :type :date :required true :readonly-after-sent true}
-     {:name "pitaja" :type :string :required true :readonly-after-sent true}
+     {:name "pitoPvm" :type :date :required true :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}}
+     {:name "pitaja" :type :string :required true :readonly-after-sent true
+            :whitelist {:roles [:authority] :otherwise :disabled}}
      {:name "huomautukset" :type :group
-      :body [{:name "kuvaus" :type :text :max-len 4000 :css [] }
-             {:name "maaraAika" :type :date}
-             {:name "toteaja" :type :string}
-             {:name "toteamisHetki" :type :date}]}
-     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true}
-     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true}]}])
+      :body [{:name "kuvaus" :type :text :max-len 4000 :css []
+              :whitelist {:roles [:authority] :otherwise :disabled} }
+             {:name "maaraAika" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}
+             {:name "toteaja" :type :string :whitelist {:roles [:authority] :otherwise :disabled}}
+             {:name "toteamisHetki" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}]}
+     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}}
+     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}}]}])
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]

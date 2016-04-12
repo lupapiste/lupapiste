@@ -11,7 +11,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.componentTemplate = (params.template || params.schema.template)
                            || "docgen-" + (params.schema.inputType || params.schema.type) + "-template";
 
-    self.size = uiComponents.sizeClasses[params.schema.size];
+  self.size = uiComponents.sizeClasses[params.schema.size];
   self.schema = params.schema;
   self.path = params.path;
   self.documentId = params.documentId || params.schema.documentId;
@@ -88,8 +88,10 @@ LUPAPISTE.DocgenInputModel = function(params) {
                        max: ko.observable(params.schema.max),
                        min: ko.observable(params.schema.min)};
 
-  self.disabled = ko.observable(params.isDisabled || !self.authModel.ok(service.getUpdateCommand(self.documentId)) ||
-                                util.getIn(params, ["model", "disabled"]));
+  self.disabled = ko.observable(params.isDisabled
+                                || !(service.isWhitelisted( self.schema ))
+                                || !self.authModel.ok(service.getUpdateCommand(self.documentId))
+                                || util.getIn(params, ["model", "disabled"]));
   var save = function(val) {
     service.updateDoc(self.documentId,
       [[params.path, val]],

@@ -1046,6 +1046,7 @@ $max-columns: 12;
 
   input[type=checkbox]:disabled + .#{$label-cls}:before {
     cursor: initial;
+    opacity: .5;
   }
 }
 

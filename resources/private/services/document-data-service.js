@@ -149,6 +149,17 @@ LUPAPISTE.DocumentDataService = function(params) {
       .call();
   }
 
+  // Schema support
+
+  // Returns true if either the current user is on the whitelist
+  // (action is allowed) or no whitelist is defined in the given
+  // schema.
+  self.isWhitelisted = function( schema ) {
+    return !(util.getIn(schema, ["whitelist", "otherwise"]) === "disabled"
+            && !_.includes(util.getIn(schema, ["whitelist", "roles"]),
+                           lupapisteApp.models.currentUser.role()));
+  };
+
   //
   // Repeating utilities
   //
