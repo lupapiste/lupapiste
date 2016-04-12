@@ -41,7 +41,6 @@ var taskPageController = (function() {
   var task = ko.observable();
   var processing = ko.observable(false);
   var pending = ko.observable(false);
-  var taskSubmitOk = ko.observable(false);
   var service = lupapisteApp.services.documentDataService;
 
   var requiredErrors = ko.computed(function() {
@@ -93,9 +92,8 @@ var taskPageController = (function() {
     return false;
   }
 
-  function sendTask(cmd) {
-    var command = _.isString(cmd) ? cmd : "send-task";
-    ajax.command(command, { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
+  function reviewDone() {
+    ajax.command("review-done", { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
       .success(function() {
@@ -112,10 +110,6 @@ var taskPageController = (function() {
         LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
       })
       .call();
-  }
-
-  function reviewDone() {
-    sendTask("review-done");
   }
 
   /**
@@ -144,15 +138,12 @@ var taskPageController = (function() {
       t.approve = _.partial(runTaskCommand, "approve-task");
       t.reject = _.partial(runTaskCommand, "reject-task");
       t.reviewDone = reviewDone;
-      t.sendTask = sendTask;
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
       t.addedToService = ko.observable();
       task(t);
 
       service.addDocument(task());
       t.addedToService( true );
-      // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && _.isEmpty(requiredErrors()) && t.isReview());
 
       var options = {collection: "tasks", updateCommand: "update-task", validate: true};
       docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
@@ -185,13 +176,6 @@ var taskPageController = (function() {
     }
   });
 
-  hub.subscribe("update-task-success", function(e) {
-    if (task() && applicationModel.id() === e.appId && currentTaskId === e.documentId) {
-      // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && _.isEmpty(requiredErrors()).length);
-    }
-  });
-
   $(function() {
     $("#task").applyBindings({
       task: task,
@@ -200,7 +184,6 @@ var taskPageController = (function() {
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
       dataService: service,
-      taskSubmitOk: taskSubmitOk, // FIXME remove
       reviewSubmitOk: reviewSubmitOk,
       addAttachmentDisabled: addAttachmentDisabled
     });

@@ -140,23 +140,23 @@
                       false [:pitoPvm :pitaja :tila])
           (fail :error.missing-parameters))))))
 
-;; TODO to be deleted after review-done feature is in production
-(defcommand send-task
-  {:description "Authority can send task info to municipality backend system."
-   :parameters  [id taskId lang]
-   :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
-   :pre-checks  [validate-task-is-review
-                 validate-review-kind
-                 (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
-   :user-roles  #{:authority}
-   :states      valid-states}
-  [{application :application user :user created :created :as command}]
-  (assert-task-state-in [:ok :sent] command)
-  (let [task (util/find-by-id taskId (:tasks application))
-        all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
-        sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
-        set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
-    (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))))
+(comment ;; deleted after review-done feature is in production, will be used later to send updated data to backing systems
+  (defcommand send-task
+    {:description "Authority can send task info to municipality backend system."
+     :parameters  [id taskId lang]
+     :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
+     :pre-checks  [validate-task-is-review
+                   validate-review-kind
+                   (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
+     :user-roles  #{:authority}
+     :states      valid-states}
+    [{application :application user :user created :created :as command}]
+    (assert-task-state-in [:ok :sent] command)
+    (let [task (util/find-by-id taskId (:tasks application))
+          all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
+          sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+          set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
+      (set-state command taskId :sent (when (seq set-statement) {$set set-statement})))))
 
 (defn- schema-with-type-options
   "Genereate 'subtype' options for readonly elements with sequential body"
