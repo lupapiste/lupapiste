@@ -40,9 +40,9 @@
                                                                        :aloitettava   1550448000000}
 
                                                       :lupamaaraykset {:kerrosala "100m2"
-                                                                       :maaraykset               [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viemärisuunnitelma"}]
-                                                                       :vaaditutTyonjohtajat     "Vastaava työnjohtaja"
-                                                                       :vaadittuTyonjohtajatieto ["Vastaava työnjohtaja" "Toinen työnjohtaja"]
+                                                                       :maaraykset               [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viem\u00e4risuunnitelma"}]
+                                                                       :vaaditutTyonjohtajat     "Vastaava ty\u00f6njohtaja"
+                                                                       :vaadittuTyonjohtajatieto ["Vastaava ty\u00f6njohtaja" "Toinen ty\u00f6njohtaja"]
                                                                        :vaaditutErityissuunnitelmat ["Joku erityissuunnitelma" "Joku toinen erityissuunnitelma"]
                                                                        :vaaditutKatselmukset     [{:tarkastuksenTaiKatselmuksenNimi "* KVV-tarkastus" :katselmuksenLaji " muu katselmus "}
                                                                                                   {:tarkastuksenTaiKatselmuksenNimi " * S\u00e4hk\u00f6tarkastus " :katselmuksenLaji " muu katselmus "}
@@ -138,11 +138,11 @@
 
                                                       :poytakirjat [{:urlHash         "4196f10a7fef9bec325dc567f1b87fbcd10163ce"
                                                                      :status          "1"
-                                                                     :paatoksentekija "Tytti Mäntyoja"
+                                                                     :paatoksentekija "Tytti M\u00e4ntyoja"
                                                                      :paatos "Lorem ipsum dolor sit amet"
                                                                      :pykala          31
                                                                      :paatospvm       1454284800000
-                                                                     :paatoskoodi     "myönnetty"}]}]}]
+                                                                     :paatoskoodi     "my\u00f6nnetty"}]}]}]
                    :statements   [{:person    {:text "Pelastusviranomainen"
                                                :name "Pia Nyman"}
                                    :requested date-02012016
@@ -183,7 +183,7 @@
                                    :id          "2222"}
                                   {:data        {}
                                    :state       "requires_user_action"
-                                   :taskname    "Joku työhohtaja"
+                                   :taskname    "Joku ty\u00f6hohtaja"
                                    :schema-info {:name    "task-vaadittu-tyonjohtaja"
                                                  :version 1}
                                    :closed      nil
@@ -198,7 +198,7 @@
                                    :id          "2223"}
                                   {:data        {}
                                    :state       "requires_user_action"
-                                   :taskname    "Joku toinen työhohtaja"
+                                   :taskname    "Joku toinen ty\u00f6hohtaja"
                                    :schema-info {:name    "task-vaadittu-tyonjohtaja"
                                                  :version 1}
                                    :closed      nil
@@ -213,7 +213,7 @@
                                    :id          "2224"}
                                   {:data        {}
                                    :state       "requires_user_action"
-                                   :taskname    "Joku lupamääräys"
+                                   :taskname    "Joku lupam\u00e4\u00e4r\u00e4ys"
                                    :schema-info {:name    "task-lupamaarays"
                                                  :version 1}
                                    :closed      nil
@@ -270,7 +270,7 @@
          (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"})
 
        (fact {:midje/description (str "history rows")}
-             (build-history-rows application1 :fi) => [["Valmisteilla" "" "01.01.2016" "Testaaja Testi"] ["" "Asiakirja lisätty: Asemapiirros, Great attachment, v. 1.0" "02.01.2016" "Testaaja Testi"] ["" "Lausuntopyyntö tehty: Pelastusviranomainen" "02.01.2016" ""] ["" "Naapurin kuuleminen tehty: Joku naapurin nimi" "02.01.2016" " "] ["" "Vaatimus lisätty: rakennuksen paikan tarkastaminen" "02.01.2016" "Suku Etu"] ["Käsittelyssä" "" "30.01.2016" "Testaaja Testi"] ["" "Asiakirja lisätty: Asemapiirros, Great attachment, v. 2.0" "01.02.2016" "Testaaja Testi"] ["" "Asiakirja lisätty: Päätösote" "01.03.2016" "Testaaja Testi"] ["" "Lausuntopyyntö tehty: Rakennussuunnittelu" "01.03.2016" ""]])
+             (build-history-rows application1 :fi) => [["Valmisteilla" "" "01.01.2016" "Testaaja Testi"] ["" "Asiakirja lis\u00e4tty: Asemapiirros, Great attachment, v. 1.0" "02.01.2016" "Testaaja Testi"] ["" "Lausuntopyynt\u00f6 tehty: Pelastusviranomainen" "02.01.2016" ""] ["" "Naapurin kuuleminen tehty: Joku naapurin nimi" "02.01.2016" " "] ["" "Vaatimus lis\u00e4tty: rakennuksen paikan tarkastaminen" "02.01.2016" "Suku Etu"] ["K\u00e4sittelyss\u00e4" "" "30.01.2016" "Testaaja Testi"] ["" "Asiakirja lis\u00e4tty: Asemapiirros, Great attachment, v. 2.0" "01.02.2016" "Testaaja Testi"] ["" "Asiakirja lis\u00e4tty: P\u00e4\u00e4t\u00f6sote" "01.03.2016" "Testaaja Testi"] ["" "Lausuntopyynt\u00f6 tehty: Rakennussuunnittelu" "01.03.2016" ""]])
 
        (fact {:midje/description (str "history rows xml")}
              (-> (build-xml-history application1 :fi)
@@ -283,4 +283,3 @@
                  (let [res (s/split (slurp tmp-file) #"\r?\n")]
                    #_(.delete tmp-file)
                    (nth res 945))) => (str (localize lang "caseFile.operation.review.request") ": rakennuksen paikan tarkastaminen"))))
-

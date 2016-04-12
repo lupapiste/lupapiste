@@ -22,9 +22,9 @@
 (facts "Verdict foremen "
        (def verdict-foremen #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-foremen)
        (fact {:midje/description (str " krysp")}
-             (verdict-foremen application1 "a1" 0) => '[["Vastaava työnjohtaja"] ["Toinen työnjohtaja"]])
+             (verdict-foremen application1 "a1" 0) => '[["Vastaava ty\u00f6njohtaja"] ["Toinen ty\u00f6njohtaja"]])
        (fact {:midje/description (str " non-krysp")}
-             (verdict-foremen application2 "a1" 0) => '[["Joku työhohtaja"] ["Joku toinen työhohtaja"]]))
+             (verdict-foremen application2 "a1" 0) => '[["Joku ty\u00f6hohtaja"] ["Joku toinen ty\u00f6hohtaja"]]))
 
 (facts "Verdict vaaditutErityissuunnitelmat "
        (def verdict-vaaditutErityissuunnitelmat #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-vaaditutErityissuunnitelmat)
@@ -38,12 +38,12 @@
        (fact {:midje/description (str " krysp")}
              (verdict-muutMaaraykset application1 "a1" 0) => '[])
        (fact {:midje/description (str " non-krysp")}
-             (verdict-muutMaaraykset application2 "a1" 0) => '[["Joku lupamääräys"]]))
+             (verdict-muutMaaraykset application2 "a1" 0) => '[["Joku lupam\u00e4\u00e4r\u00e4ys"]]))
 
 (facts "Verdict vaaditutKatselmukset "
        (def verdict-vaaditutKatselmukset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-vaaditutKatselmukset)
        (fact {:midje/description (str "verdict-reviews krysp")}
-             (verdict-vaaditutKatselmukset application1 "a1" 0 :fi) => '[[" muu katselmus " "* KVV-tarkastus"] [" muu katselmus " " * Sähkötarkastus "] [" muu katselmus " " * Rakennetarkastus "] [" loppukatselmus " ""] [" muu katselmus " " Aloitusilmoitus "]])
+             (verdict-vaaditutKatselmukset application1 "a1" 0 :fi) => '[[" muu katselmus " "* KVV-tarkastus"] [" muu katselmus " " * S\u00e4hk\u00f6tarkastus "] [" muu katselmus " " * Rakennetarkastus "] [" loppukatselmus " ""] [" muu katselmus " " Aloitusilmoitus "]])
        (fact {:midje/description (str "verdict-reviews non-krysp")}
              (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[("Muu katselmus")]))
 

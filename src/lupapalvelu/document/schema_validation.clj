@@ -31,7 +31,8 @@
    (opt :blacklist)   [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
    (opt :emit)        [sc/Keyword]   ;; Change in element emits events
    (opt :listen)      [sc/Keyword]   ;; Events to listen
-   (opt :css)         [sc/Keyword]})
+   (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
+   })
 
 (defschema Text
   "Text area element. Represented as text-area html element"
