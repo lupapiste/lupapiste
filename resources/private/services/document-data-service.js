@@ -35,12 +35,13 @@ LUPAPISTE.DocumentDataService = function(params) {
   self.addDocument = function(doc, options) {
     self.model.remove(self.findDocumentById(doc.id));
     return self.model.push( _.extend({
-        id: doc.id,
-        path: [],
-        name: doc.schema.info.name,
-        schema: doc.schema,
-        isDisabled: options && options.disabled,
-        validationResults: ko.observableArray(doc.validationErrors)
+      id: doc.id,
+      path: [],
+      name: doc.schema.info.name,
+      state: doc.state,
+      schema: doc.schema,
+      isDisabled: options && options.disabled,
+      validationResults: ko.observableArray(doc.validationErrors)
       },
       resolveCommandNames(doc, options),
       createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, [])

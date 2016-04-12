@@ -83,7 +83,11 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return (self.schemaCss || defaultInputClasses()) + " " + self.signalClasses();
   });
 
-  self.readonly = ko.observable(params.schema.readonly || params.readonly);
+  self.readonly = ko.pureComputed(function () {
+    var doc = service.findDocumentById( self.documentId );
+    var readOnlyAfterSent = params.schema["readonly-after-sent"] && doc.state === "sent";
+    return readOnlyAfterSent || params.schema.readonly || params.readonly;
+  });
   self.inputOptions = {maxLength: ko.observable(params.schema["max-len"] || LUPAPISTE.config.inputMaxLength),
                        max: ko.observable(params.schema.max),
                        min: ko.observable(params.schema.min)};
