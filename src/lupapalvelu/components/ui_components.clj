@@ -106,7 +106,7 @@
 
 (def ui-components
   {;; 3rd party libs
-   :cdn-fallback   {:js ["jquery-2.2.2.min.js" "jquery-ui-1.11.4.min.js" "jquery.dataTables.min.js"]}
+   :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
    :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
