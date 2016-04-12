@@ -338,6 +338,26 @@
         })
         .call();
     };
+
+    self.newTosFunction = ko.observable(ko.unwrap(params.application.tosFunction));
+    self.tosFunctionCorrectionReason = ko.observable();
+    self.tosFunctionCorrectionEnabled = ko.pureComputed(function() {
+      return self.newTosFunction() !== params.application.tosFunction() && self.tosFunctionCorrectionReason();
+    });
+    self.updateTosFunction = function() {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
+      var data = {
+        id: ko.unwrap(params.application.id),
+        functionCode: self.newTosFunction(),
+        reason: self.tosFunctionCorrectionReason()
+      };
+      ajax
+        .command("force-fix-tos-function-for-application", data)
+        .success(function() {
+          repository.load(ko.unwrap(params.application.id));
+        })
+        .call();
+    };
   };
 
   ko.components.register("archival-summary", {

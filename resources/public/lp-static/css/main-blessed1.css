@@ -10615,11 +10615,17 @@ ul.no-bullets {
 }
 /* line 174, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .tos-function-correction p {
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
 }
 /* line 177, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.tos-function-correction select {
-  min-width: 500px;
+.tos-function-correction .form-part {
+  display: inline-block;
+}
+/* line 180, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.tos-function-correction select, .tos-function-correction input {
+  min-width: 350px;
+  min-height: 40px;
+  box-sizing: border-box;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_applications_search.scss */
@@ -11597,15 +11603,4 @@ div.search i {
 /* line 183, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls select {
   display: block;
-}
-
-/* line 189, ../../../private/common-html/sass/views/_applications.scss */
-#applications-list .indicator-count, .applications-table .indicator-count {
-  padding-left: 0;
-  padding-right: 0;
-  font-weight: bold;
-  color: #f39129;
-  text-align: center;
-  width: 22px;
-  padding: 3px;
 }

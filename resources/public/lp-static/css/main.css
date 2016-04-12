@@ -1,5 +1,16 @@
-@import url('main-blessed1.css?z=1460446052007');
+@import url('main-blessed1.css?z=1460451974293');
 
+
+/* line 189, ../../../private/common-html/sass/views/_applications.scss */
+#applications-list .indicator-count, .applications-table .indicator-count {
+  padding-left: 0;
+  padding-right: 0;
+  font-weight: bold;
+  color: #f39129;
+  text-align: center;
+  width: 22px;
+  padding: 3px;
+}
 /* line 198, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list div, .applications-table div {
   padding-top: 3px;

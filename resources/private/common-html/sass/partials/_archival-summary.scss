@@ -172,9 +172,14 @@
 .tos-function-correction {
   margin-top: 3em;
   p {
-    margin-bottom: 1em;
+    margin-bottom: 0.5em;
   }
-  select {
-    min-width: 500px;
+  .form-part {
+    display: inline-block;
+  }
+  select, input {
+    min-width: 350px;
+    min-height: 40px;
+    box-sizing: border-box;
   }
 }
