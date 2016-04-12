@@ -176,10 +176,14 @@
   }
   .form-part {
     display: inline-block;
+    vertical-align: bottom;
+    line-height: normal;
   }
   select, input {
     width: 350px;
     min-height: 40px;
     box-sizing: border-box;
+    display: inline-block;
+    margin: 0;
   }
 }
