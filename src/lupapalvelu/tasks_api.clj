@@ -190,7 +190,6 @@
 
 (defcommand review-done
   {:description "Marks review done, generates PDF/A and sends data to backend"
-   :feature     :review-done
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [validate-task-is-review
