@@ -35,7 +35,7 @@
     <div class="feature" style="display:inline-block">
       <div class="review-done"
            data-bind="visible: $root.authorization.ok('review-done'),
-                      if: $root.authorization.ok('review-done')">
+                      if: $root.authorization.ok('review-done') && isReview()">
         <div data-bind="ltext: 'task.review-done.help'"></div>
         <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.reviewSubmitOk() && !$root.processing()" class="positive">
           <i class="lupicon-eye"></i>

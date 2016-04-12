@@ -133,8 +133,8 @@ var taskPageController = (function() {
 
     if (t) {
       // FIXME handle with authz model, see LPK-388
-      var isReview = util.getIn(t, ["schema-info", "subtype"]) === "review";
-      var showApprovalButtons = !isReview || !features.enabled("review-done");
+      t.isReview = ko.observable(util.getIn(t, ["schema-info", "subtype"]) === "review");
+      var showApprovalButtons = !t.isReview() || !features.enabled("review-done");
       t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action") && showApprovalButtons;
       t.rejectable = authorizationModel.ok("reject-task") && showApprovalButtons;
 
@@ -153,7 +153,7 @@ var taskPageController = (function() {
       service.addDocument(task());
       t.addedToService( true );
       // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && _.isEmpty(requiredErrors()) && isReview);
+      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && _.isEmpty(requiredErrors()) && t.isReview());
 
       var options = {collection: "tasks", updateCommand: "update-task", validate: true};
       docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
