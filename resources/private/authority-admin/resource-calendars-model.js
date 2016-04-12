@@ -80,7 +80,14 @@ LUPAPISTE.ResourceCalendarsModel = function () {
   self.rmCalendar = function(indexFn) {
     // DUMMY DATA EDIT
     var index = indexFn();
-    self.items.splice(index, 1);
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+            loc("areyousure"),
+            loc("auth-admin.resource.calendar.delete.confirm"),
+              {title: loc("yes"), fn: function() {
+                self.items.splice(index, 1);
+              }}
+            );
+    return false;
   };
 
   self.viewCalendar = function() {
