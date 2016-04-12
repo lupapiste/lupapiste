@@ -329,9 +329,15 @@
                                                                              ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
                                                                              ["rakennus.0.tila.tila" "osittainen"]]) => ok?
 
-       (command sonja :send-task :id application-id :taskId task-id :lang "fi") => fail?
-       (command sonja :approve-task :id application-id :taskId task-id) => ok?
-       (command sonja :send-task :id application-id :taskId task-id :lang "fi") => ok?
+       (fact "Review done fails as missing required info for KRYSP transfer"
+         (command sonja :review-done :id application-id :taskId task-id :lang "fi") => (partial expected-failure? :error.missing-parameters))
+
+       (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]
+                                                                             ["katselmus.pitoPvm" "12.04.2016"]
+                                                                             ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?
+
+       (fact "After filling required review data, transfer is ok"
+         (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
 
        (final-xml-validation
          (query-application sonja application-id)
@@ -342,6 +348,7 @@
              (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
                    katselmuksenRakennus (xml/select1 xml [:katselmuksenRakennustieto :KatselmuksenRakennus])
                    liitetieto (xml/select1 katselmus [:liitetieto])]
+               (xml/get-text katselmus :osittainen) => "osittainen"
                (xml/get-text liitetieto :kuvaus) => "Katselmuksen p\u00f6yt\u00e4kirja"
                (xml/get-text liitetieto ::tyyppi) => "katselmuksen_tai_tarkastuksen_poytakirja"
                (xml/get-text katselmuksenRakennus :rakennusnro) => "001"
@@ -379,8 +386,7 @@
         (fact "sent timestamp not set"
           (:sent attachment) => nil))
 
-      (command apikey :approve-task :id application-id :taskId task-id) => ok?
-      (command apikey :send-task :id application-id :taskId task-id :lang "fi") => ok?
+      (command apikey :review-done :id application-id :taskId task-id :lang "fi") => ok?
 
       (let [application (query-application apikey application-id)]
         (final-xml-validation

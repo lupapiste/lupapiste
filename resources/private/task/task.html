@@ -15,16 +15,6 @@
       <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>
       <!-- /ko -->
 
-      <button data-test-id="send-task"
-              data-bind="click: sendTask,
-                         visible: $root.authorization.ok('send-task'),
-                         enable: $root.taskSubmitOk() && !$root.processing(),
-                         css: {waiting: $root.pending}"
-              class="positive">
-          <i class="wait spin lupicon-refresh"></i>
-          <span data-bind="ltext: 'task.send'"></span>
-      </button>
-
       <button data-test-id="delete-task"
               data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')"
               class="secondary" style="float:right"></button>
