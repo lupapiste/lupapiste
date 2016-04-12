@@ -68,3 +68,14 @@
              (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
              ;(fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
              ))))
+
+(facts "Verdict-contact export non-krysp "
+       (doseq [lang i18n/languages]
+         (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
+           (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
+           (let [pos 1157
+                 res (s/split (slurp tmp-file) #"\r?\n")]
+             #_(.delete tmp-file)
+             (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "userInfo.company.contract")))
+             ;(fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
+             ))))

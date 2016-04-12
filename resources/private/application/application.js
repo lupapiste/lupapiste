@@ -98,10 +98,9 @@
 
   function updateTosFunction(value) {
     if (!isInitializing) {
-      var apiCommand = ko.unwrap(applicationModel.inPostVerdictState) ? "force-fix-tos-function-for-application" : "set-tos-function-for-application";
       LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       ajax
-        .command(apiCommand, {id: currentId, functionCode: value})
+        .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
           repository.load(currentId, applicationModel.pending, updateMetadataFields);
         })

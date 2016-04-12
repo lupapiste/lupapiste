@@ -59,11 +59,13 @@
     (fail! :illegal-schema))
   (let [meta {:created created :assignee user}
         source (or (valid-source (:source data)) {:type :authority :id (:id user)})
+        rakennus-data (when (= "task-katselmus" schemaName)
+                        (util/strip-empty-maps {:rakennus (tasks/rakennus-data-from-buildings {} (:buildings application))}))
         task (tasks/new-task schemaName
                              taskName
                              (if-not (ss/blank? taskSubtype)
-                               {:katselmuksenLaji taskSubtype}
-                               {})
+                               (merge rakennus-data {:katselmuksenLaji taskSubtype})
+                               rakennus-data)
                              meta
                              source)
         validation-results (tasks/task-doc-validation schemaName task)

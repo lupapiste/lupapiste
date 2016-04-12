@@ -47,12 +47,12 @@
 (defn history-entry [to-state timestamp user]
   {:state to-state, :ts timestamp, :user (user/summary user)})
 
-(defn tos-history-entry [tos-function timestamp user & [mark-as-correction?]]
+(defn tos-history-entry [tos-function timestamp user & [correction-reason]]
   {:pre [(map? tos-function)]}
   {:tosFunction tos-function
    :ts timestamp
    :user (user/summary user)
-   :correction (if mark-as-correction? true false)})
+   :correction correction-reason})
 
 ;;
 ;; Validators

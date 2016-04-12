@@ -877,24 +877,6 @@
                         <div data-bind="component: {name: 'archival-summary', params: {application: application}}"></div>
                       </div>
                     </div>
-
-                    <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->
-                    <div class="tos-function-correction">
-                      <!-- ko if: features.enabled('tos-function-correction') -->
-                      <div class="feature">
-                        <h2 data-bind="ltext: 'tos.function.fix'"></h2>
-                        <p data-bind="ltext: 'tos.function.fix.guide'"></p>
-                        <select class="dropdown"
-                                data-bind="options: $root.tosFunctions,
-                                                       optionsText: function(item) { return item.code + ' - ' + item.name; },
-                                                       optionsValue: 'code',
-                                                       value: $root.application.tosFunction,
-                                                       valueAllowUnset: true,
-                                                       enable: $root.authorization.ok('force-fix-tos-function-for-application')" ></select>
-                      </div>
-                      <!-- /ko -->
-                    </div>
-                    <!-- /ko -->
                     <!-- /ko -->
 
                     <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") && $root.authorization.ok('tos-operations-enabled') -->
