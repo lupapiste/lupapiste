@@ -57,10 +57,11 @@
     :repeating true
     :i18nkey ""
     :uicomponent :docgen-review-buildings
-    :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :hidden true}
-                                                 {:name "valtakunnallinenNumero" :type :string :hidden true}
-                                                 {:name "rakennusnro" :type :string :hidden true}
-                                                 {:name "kiinttun" :type :string :hidden true}
+    :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :subtype :digit :hidden true}
+                                                 {:name "valtakunnallinenNumero" :type :string :subtype :rakennustunnus
+                                                  :hidden true}
+                                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
                                                  {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}]}
            {:name "tila" :type :group :i18nkey "empty"
             :body [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
