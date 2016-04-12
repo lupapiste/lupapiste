@@ -19,7 +19,7 @@
           <td data-bind="text: organization"></td>
           <td>
             <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
-              [<a href="#" data-bind="click: $root.calendars.viewCalendar.bind($data, $index), ltext: 'view'"></a>]
+              [<a href="#" data-bind="click: $root.calendars.viewCalendar.bind($data), ltext: 'view'"></a>]
               [<a href="#" data-bind="click: $root.calendars.editCalendar.bind($data, $index), ltext: 'edit'"
                   data-test-id="edit" class="modal"></a>]
               [<a href="#" data-bind="click: $root.calendars.rmCalendar.bind($data, $index), ltext: 'remove'"
@@ -38,30 +38,13 @@
 
   <div id="dialog-view-calendar" class="window">
     <div class="dialog-header">
-      <div data-bind="with: $root.calendars.viewCalendarModel">
-        <p>Kalenteri: <span data-bind="text: name"></span> (<span data-bind="text: organization"></span>)
+      <div>
+        <p>Kalenteri</p>
         <p class="dialog-close close lupicon-remove"></p>
       </div>
     </div>
     <div class="dialog-content">
-      <div data-bind="with: $root.calendars.viewCalendarModel">
-        <table data-test-id="resources-admin-calendar-weekview-table">
-          <thead>
-          <tr data-bind="foreach: weekdays">
-            <th data-bind="text: text"></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr data-bind="foreach: weekdays">
-            <td>
-              <div class="resource-calendar-timeline" data-bind="foreach: $root.calendars.viewCalendarModel.timelineTimes">
-                <div class="timeline-slot"><span data-bind="text: $data"></span></div>
-              </div>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+      <div class="view-calendar-table"></div>
     </div>
   </div>
 

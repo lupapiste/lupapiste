@@ -360,9 +360,13 @@
                        :docgen :debug :analytics :header :footer :ui-components]
              :css ["oir.css"]}
 
+   :calendar-view {:depends [:common-html]
+                   :js ["calendar-view.js"]
+                   :html ["calendar-view.html"]}
+
    :authority-admin-app {:depends []
                          :js ["authority-admin-app.js"]}
-   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer :ui-components]
+   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer :ui-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
                               "resource-calendars-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]

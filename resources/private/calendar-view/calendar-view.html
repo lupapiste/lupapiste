@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="calendar-view-templates">
+
+    <!--
+      WARNING:
+      This is a template that will be cloned to
+      multiple places, so DO NOT USE element ID's.
+    -->
+
+    <div class="weekview-table">
+      <h3><span data-bind="text: name"></span> (<span data-bind="text: organization"></span>) </h3>
+      <table>
+        <thead>
+        <tr data-bind="foreach: weekdays">
+          <th data-bind="text: text"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr data-bind="foreach: weekdays">
+          <td>
+            <div class="resource-calendar-timeline" data-bind="foreach: $parent.timelineTimes">
+              <div class="timeline-slot"><span data-bind="text: $data"></span></div>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+</body>
+</html>

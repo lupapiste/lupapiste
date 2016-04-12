@@ -1,7 +1,8 @@
 LUPAPISTE.ResourceCalendarsModel = function () {
   "use strict";
 
-  var self = this;
+  var self = this,
+      calendarViewModel = null;
 
   function EditCalendarModel() {
     var self = this;
@@ -28,33 +29,6 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     });
   }
   self.editCalendarModel = new EditCalendarModel();
-
-  function ViewCalendarModel() {
-    var self = this;
-
-    self.name = ko.observable();
-    self.organization = ko.observable();
-    self.weekdays = ko.observableArray();
-    self.timelineTimes = ko.observableArray();
-
-    var timelineTimesBuilder = function() {
-      var times = [];
-      ko.utils.arrayForEach(ko.utils.range(7, 16), function(hour) {
-        times.push(hour+":00");
-        times.push(hour+":30");
-      });
-      console.log(times);
-      return times;
-    };
-
-    self.init = function(params) {
-      self.name(util.getIn(params, ["source", "name"], ""));
-      self.organization(util.getIn(params, ["source", "organization"], ""));
-      self.weekdays([{text: "ma"}, {text: "ti"}, {text: "ke"}, {text: "to"}, {text: "pe"}]);
-      self.timelineTimes(timelineTimesBuilder());
-    };
-  }
-  self.viewCalendarModel = new ViewCalendarModel();
 
   self.items = ko.observableArray();
 
@@ -109,11 +83,13 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     self.items.splice(index, 1);
   };
 
-  self.viewCalendar = function(indexFn) {
-    self.viewCalendarModel.init({
-      source: this
-    });
+  self.viewCalendar = function() {
     self.openCalendarViewDialog();
+    if (!calendarViewModel) {
+      calendarViewModel = calendarView.create($("#dialog-view-calendar .view-calendar-table"));
+    }
+    calendarViewModel.init({ source: this });
+    LUPAPISTE.ModalDialog.open("#dialog-view-calendar");
   };
 
   self.openCalendarEditDialog = function() {
@@ -121,7 +97,6 @@ LUPAPISTE.ResourceCalendarsModel = function () {
   };
 
   self.openCalendarViewDialog = function() {
-    LUPAPISTE.ModalDialog.open("#dialog-view-calendar");
   };
 
   self.init = function(data) {
