@@ -4,6 +4,10 @@ var LUPAPISTE = LUPAPISTE || {};
   "use strict";
 
   var startPageHref = window.location.href.replace(window.location.hash, "");
+  var mainWindow = !window.parent || window.parent === window;
+  if (mainWindow) {
+    window.name = "lupapiste";
+  }
 
   /**
    * Prototype for Lupapiste Single Page Apps.
