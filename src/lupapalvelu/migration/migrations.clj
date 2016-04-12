@@ -1851,7 +1851,7 @@
 
 (defn update-operations-attachments-types [mapping operation-pred [operation attachment-types]]
   (if (operation-pred (keyword operation))
-    [operation (map (partial update-operations-attachment-type mapping) attachment-types)]
+    [operation (->> attachment-types (map (partial update-operations-attachment-type mapping)) distinct)]
     [operation attachment-types]))
 
 (defmigration organization-operation-attachments-type-update
