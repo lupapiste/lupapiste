@@ -79,13 +79,8 @@ Approve Aloituskokous
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
 
 Aloituskokous form is still editable (LPK-494)
-  Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//input
-  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//input[@readonly]  0
-
-  Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//select
-  # LPK-1601 Katselmuksenlaji should be read only
-  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//select[@disabled]  1
-  Element should be disabled  //section[@data-doc-type="task-katselmus"]//select[@data-test-id='katselmuksenLaji']
+  Page Should Contain Element  xpath=//section[@id="task"]//input
+  Xpath Should Match X Times  //section[@id="task"]//input[@readonly]  0
 
 Return to listing
   Click link  xpath=//section[@id="task"]//a[@data-test-id='back-to-application-from-task']
@@ -123,7 +118,7 @@ Construction of the first building should be started
   Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="dateString: $data.constructionStarted"]  1.1.2014
   Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="fullName: $data.startedBy"]  Sibbo Sonja
 
-Construction of the other buildins is not started
+Construction of the other buildings is not started
   [Tags]  fail
   Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  2
 
@@ -140,8 +135,8 @@ Add katselmus
 
 Katselmuksenlaji is set and disabled
   Open task  uus muu tarkastus
-  Element should be disabled  xpath=//div[@id='taskDocgen']//select[@data-test-id='katselmuksenLaji']
-  List Selection Should Be  xpath=//div[@id='taskDocgen']//select[@data-test-id='katselmuksenLaji']  muu tarkastus
+  Element should be disabled  xpath=//section[@id="task"]//select[@data-test-id='katselmuksenLaji']
+  List Selection Should Be  xpath=//section[@id="task"]//select[@data-test-id='katselmuksenLaji']  muu tarkastus
 
 Verify post-verdict attachments - Aloituskokous
   Click by test id  back-to-application-from-task
@@ -166,13 +161,23 @@ Mikko is unable to edit Aloituskokous (LPK-494)
   Open tab  tasks
   Open task  Aloituskokous
 
-  Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//input
-  ${inputCount} =  Get Matching Xpath Count  //section[@data-doc-type="task-katselmus"]//input
-  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//input[@readonly]  ${inputCount}
+  Page Should Contain Element  xpath=//section[@id="task"]//input
+  ${inputCount} =  Get Matching Xpath Count  //section[@id="task"]//input
+  Xpath Should Match X Times  //section[@id="task"]//input[@disabled]  ${inputCount}
 
-  Page Should Contain Element  xpath=//section[@data-doc-type="task-katselmus"]//select
-  ${selectCount} =  Get Matching Xpath Count  //section[@data-doc-type="task-katselmus"]//select
-  Xpath Should Match X Times  //section[@data-doc-type="task-katselmus"]//select[@disabled]  ${selectCount}
+  Page Should Contain Element  xpath=//section[@id="task"]//select
+  ${selectCount} =  Get Matching Xpath Count  //section[@id="task"]//select
+  Xpath Should Match X Times  //section[@id="task"]//select[@disabled]  ${selectCount}
+
+
+Mikko can add attachments though
+  Scroll and click test id  add-targetted-attachment
+  Select Frame     uploadFrame
+  Wait until       Element should be visible  test-save-new-attachment
+  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PNG_TESTFILE_PATH}
+  Click element    test-save-new-attachment
+  Unselect Frame
+  Wait Until Page Contains  ${PNG_TESTFILE_NAME}
   Click by test id  back-to-application-from-task
 
 Mikko sets started past date for YA application (LPK-1054)
