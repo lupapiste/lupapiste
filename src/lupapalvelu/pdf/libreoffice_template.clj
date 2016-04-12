@@ -9,7 +9,7 @@
             [clojure.java.io :as io]
             [clojure.string :as s]))
 
-(defn- xml-escape [text]
+(defn xml-escape [text]
   (sx/escape-xml (str text)))
 ;;(s/escape (str text) {\< "&lt;", \> "&gt;", \& "&amp;"}))
 
