@@ -22,7 +22,6 @@
    {:type-group :muut :type-id :maalampo_rakennettavuusselvitys}    {:type-group :selvitykset :type-id :maalampo_rakennettavuusselvitys},
    {:type-group :muut :type-id :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo}    {:type-group :selvitykset :type-id :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo},
    {:type-group :muut :type-id :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta}    {:type-group :selvitykset :type-id :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta},
-   {:type-group :muut :type-id :riskianalyysi}    {:type-group :selvitykset :type-id :riskianalyysi},
    {:type-group :muut :type-id :selvitys_kiinteiston_jatehuollon_jarjestamisesta}    {:type-group :selvitykset :type-id :selvitys_kiinteiston_jatehuollon_jarjestamisesta},
    {:type-group :muut :type-id :selvitys_liittymisesta_ymparoivaan_rakennuskantaan}    {:type-group :selvitykset :type-id :selvitys_liittymisesta_ymparoivaan_rakennuskantaan},
    {:type-group :muut :type-id :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo}    {:type-group :selvitykset :type-id :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo},
@@ -30,7 +29,6 @@
    {:type-group :rakennuspaikka :type-id :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista}    {:type-group :selvitykset :type-id :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista},
    {:type-group :muut :type-id :selvitys_rakennuspaikan_terveellisyydesta}    {:type-group :selvitykset :type-id :selvitys_rakennuspaikan_terveellisyydesta},
    {:type-group :muut :type-id :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista}    {:type-group :selvitykset :type-id :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista},
-   {:type-group :muut :type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta}   {:type-group :selvitykset :type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta},
    {:type-group :muut :type-id :hankeselvitys}    {:type-group :suunnitelmat :type-id :hankeselvitys},
    {:type-group :muut :type-id :julkisivujen_varityssuunnitelma}    {:type-group :suunnitelmat :type-id :julkisivujen_varityssuunnitelma},
    {:type-group :muut :type-id :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta}    {:type-group :suunnitelmat :type-id :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta},
@@ -72,7 +70,14 @@
    {:type-group :rakennuspaikan_hallinta :type-id :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta}    {:type-group :rakennuspaikan_hallinta :type-id :todistus_hallintaoikeudesta},
    {:type-group :rakennuspaikan_hallinta :type-id :jaljennos_myonnetyista_lainhuudoista}    {:type-group :rakennuspaikan_hallinta :type-id :todistus_hallintaoikeudesta},
    {:type-group :rakennuspaikan_hallinta :type-id :jaljennos_perunkirjasta}    {:type-group :rakennuspaikan_hallinta :type-id :todistus_hallintaoikeudesta},
-   {:type-group :rakennuspaikan_hallinta :type-id :jaljennos_vuokrasopimuksesta}    {:type-group :rakennuspaikan_hallinta :type-id :todistus_hallintaoikeudesta}})
+   {:type-group :rakennuspaikan_hallinta :type-id :jaljennos_vuokrasopimuksesta}    {:type-group :rakennuspaikan_hallinta :type-id :todistus_hallintaoikeudesta},
+   {:type-group :muut :type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta}   {:type-group :selvitykset :type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta},
+   {:type-group :muut :type-id :aitapiirustus}    {:type-group :paapiirustus :type-id :aitapiirustus},
+   {:type-group :muut :type-id :vesi_ja_viemariliitoslausunto_tai_kartta}    {:type-group :ennakkoluvat_ja_lausunnot :type-id :vesi_ja_viemariliitoslausunto_tai_kartta},
+   {:type-group :muut :type-id :sopimusjaljennos}    {:type-group :rakennuspaikan_hallinta :type-id :sopimusjaljennos},
+   {:type-group :muut :type-id :karttaaineisto}    {:type-group :rakennuspaikka :type-id :karttaaineisto},
+   {:type-group :muut :type-id :selvitys_rakennuspaikan_korkeusasemasta}    {:type-group :rakennuspaikka :type-id :selvitys_rakennuspaikan_korkeusasemasta},
+   {:type-group :muut :type-id :riskianalyysi}   {:type-group :selvitykset :type-id :rakenteellisen_turvallisuuden_alustava_riskiarvio}})
 
 (def osapuoli-attachment-mapping
   {{:type-group :osapuolet :type-id :paa_ja_rakennussuunnittelijan_tiedot}    {:type-group :osapuolet :type-id :suunnittelijan_tiedot}})
