@@ -17,6 +17,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.documentId = params.documentId || params.schema.documentId;
   self.model = service.getInDocument(self.documentId, params.path);
   self.value = self.model.model;
+  self.schemaCss = self.schema.css;
 
   self.i18npath = params.schema.i18nkey ? [params.schema.i18nkey] : params.schema.i18npath;
   if (!self.i18npath) {
@@ -55,7 +56,16 @@ LUPAPISTE.DocgenInputModel = function(params) {
     self.helpMessage(loc(helpLocKey));
   }
 
-  self.classes = ko.computed(function() {
+  function defaultInputClasses() {
+    var typeDefaults = {select: "form-input combobox",
+                        text: "form-input textarea",
+                        "inline-string": "form-input inline",
+                        "localized-string": "form-string",
+                        "check-string": "check-string"};
+    return _.get( typeDefaults, (self.schema.inputType || self.schema.type), "");
+  }
+
+  self.signalClasses = ko.computed(function() {
     var classes = [];
     var result = self.result() ? self.result()[0] : undefined;
     if (result) {
@@ -65,13 +75,23 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return classes.join(" ");
   });
 
+  self.labelClasses = ko.computed(function() {
+    return "form-label " + self.signalClasses();
+  });
+
+  self.inputClasses = ko.computed(function() {
+    return (self.schemaCss || defaultInputClasses()) + " " + self.signalClasses();
+  });
+
   self.readonly = ko.observable(params.schema.readonly || params.readonly);
   self.inputOptions = {maxLength: ko.observable(params.schema["max-len"] || LUPAPISTE.config.inputMaxLength),
                        max: ko.observable(params.schema.max),
                        min: ko.observable(params.schema.min)};
 
-  self.disabled = ko.observable(params.isDisabled || !self.authModel.ok(service.getUpdateCommand(self.documentId)) ||
-                                util.getIn(params, ["model", "disabled"]));
+  self.disabled = ko.observable(params.isDisabled
+                                || !(service.isWhitelisted( self.schema ))
+                                || !self.authModel.ok(service.getUpdateCommand(self.documentId))
+                                || util.getIn(params, ["model", "disabled"]));
   var save = function(val) {
     service.updateDoc(self.documentId,
       [[params.path, val]],

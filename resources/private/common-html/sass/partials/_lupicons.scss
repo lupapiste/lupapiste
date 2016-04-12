@@ -16,11 +16,11 @@ $lupicon-size: 22px;
   font-style: normal;
 }
 
-@mixin lupicon-font {
+@mixin lupicon-font ($font-size: $lupicon-size ) {
   font-family: 'lupapiste';
   speak: none;
   font-style: normal;
-  font-size: $lupicon-size;
+  font-size: $font-size;
   font-weight: normal;
   font-variant: normal;
   text-transform: none;
