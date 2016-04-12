@@ -3,8 +3,8 @@
             [clojure.string :as s]
             [sade.util :refer [fn->>]]))
 
-(defn merge-translations 
-  "Merges Swedish translations from file 'translations-file-name' into file 
+(defn merge-translations
+  "Merges Swedish translations from file 'translations-file-name' into file
   'orig-localization-file-name' and outputs result in file 'output-file-name'.
   If Swedish translation for key is provided it is merged right after Finnish
   translation with same key. Duplicate keys are also removed."
@@ -32,8 +32,11 @@
               (when (and (translations k) (= lang "\"fi\""))
                 (swap! writed-keys conj [k "\"sv\""])
                 (.write out (str (translations k) \newline)))))
-          (recur))))))
+          (recur)))
+      (doto (->> (map first @writed-keys) (distinct) (filter translations))
+        (#(println "Number of translations writed: " (count %)))
+        (#(println "Writed keys: " %))))))
 
-#_(merge-translations "../lupapiste-commons/resources/shared_translations.txt"
-                    "../lupapiste-commons/resources/shared_translations_sv.txt"
-                    "../lupapiste-commons/resources/shared_translations_new.txt")
+#_(merge-translations "resources/i18n/errors.txt"
+                    "../../sv.txt"
+                    "resources/i18n/errors_new.txt")
