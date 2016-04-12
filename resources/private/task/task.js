@@ -42,9 +42,15 @@ var taskPageController = (function() {
   var processing = ko.observable(false);
   var pending = ko.observable(false);
   var taskSubmitOk = ko.observable(false);
-  var taskService = new LUPAPISTE.DocumentDataService({name: "taskD"});
+  var service = lupapisteApp.services.documentDataService;
 
-  var requiredErrors = ko.observable([null]);
+  var requiredErrors = ko.computed(function() {
+    var t = task();
+    if (t && t.addedToService()) {
+      var fromService = service.findDocumentById(t.id);
+      return util.extractRequiredErrors([fromService.validationResults()]);
+    }
+  });
 
   var reviewSubmitOk = ko.computed(function() {
     var t = task();
@@ -127,10 +133,9 @@ var taskPageController = (function() {
 
     if (t) {
       // FIXME handle with authz model, see LPK-388
-      var isReview = util.getIn(t, ["schema-info", "subtype"]) === "review";
-      var showApprovalButtons = !isReview || !features.enabled("review-done");
-      t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action") && showApprovalButtons;
-      t.rejectable = authorizationModel.ok("reject-task") && showApprovalButtons;
+      t.isReview = ko.observable(util.getIn(t, ["schema-info", "subtype"]) === "review");
+      t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action") && !t.isReview();
+      t.rejectable = authorizationModel.ok("reject-task") && !t.isReview();
 
       t.displayName = taskUtil.longDisplayName(t, application);
       t.applicationId = application.id;
@@ -144,12 +149,10 @@ var taskPageController = (function() {
       t.addedToService = ko.observable();
       task(t);
 
-      taskService.addDocument(task());
+      service.addDocument(task());
       t.addedToService( true );
-      var errors = util.extractRequiredErrors([t.validationErrors]);
-      requiredErrors(errors);
       // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !errors.length && isReview);
+      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && _.isEmpty(requiredErrors()) && t.isReview());
 
       var options = {collection: "tasks", updateCommand: "update-task", validate: true};
       docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
@@ -184,10 +187,8 @@ var taskPageController = (function() {
 
   hub.subscribe("update-task-success", function(e) {
     if (task() && applicationModel.id() === e.appId && currentTaskId === e.documentId) {
-      var errors = util.extractRequiredErrors([e.results]);
-      requiredErrors(errors);
       // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !errors.length);
+      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && _.isEmpty(requiredErrors()).length);
     }
   });
 
@@ -198,7 +199,7 @@ var taskPageController = (function() {
       processing: processing,
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
-      taskDataService: taskService,
+      dataService: service,
       taskSubmitOk: taskSubmitOk, // FIXME remove
       reviewSubmitOk: reviewSubmitOk,
       addAttachmentDisabled: addAttachmentDisabled

@@ -326,7 +326,8 @@
        (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
                                                                              ["rakennus.0.rakennus.rakennusnro" "001"]
                                                                              ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
-                                                                             ["rakennus.0.rakennus.kiinttun" (:propertyId application)]]) => ok?
+                                                                             ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
+                                                                             ["rakennus.0.tila.tila" "osittainen"]]) => ok?
 
        (command sonja :send-task :id application-id :taskId task-id :lang "fi") => fail?
        (command sonja :approve-task :id application-id :taskId task-id) => ok?

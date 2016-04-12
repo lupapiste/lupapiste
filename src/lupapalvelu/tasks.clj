@@ -57,10 +57,11 @@
     :repeating true
     :i18nkey ""
     :uicomponent :docgen-review-buildings
-    :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :hidden true}
-                                                 {:name "valtakunnallinenNumero" :type :string :hidden true}
-                                                 {:name "rakennusnro" :type :string :hidden true}
-                                                 {:name "kiinttun" :type :string :hidden true}
+    :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :subtype :digit :hidden true}
+                                                 {:name "valtakunnallinenNumero" :type :string :subtype :rakennustunnus
+                                                  :hidden true}
+                                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
                                                  {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}]}
            {:name "tila" :type :group :i18nkey "empty"
             :body [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
@@ -78,6 +79,7 @@
     [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
       :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
+      :required true
       :body [{:name "osittainen"} {:name "lopullinen"}]}
      {:name "pitoPvm" :type :date :required true :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}
@@ -167,20 +169,30 @@
      :created created
      :closed nil}))
 
+(defn rakennus-data-from-buildings [initial-rakennus buildings]
+  (reduce
+    (fn [acc build]
+      (let [index (->> (map (comp #(Integer/parseInt %) name) (keys acc))
+                       (apply max -1) ; if no keys, starting index (inc -1) => 0
+                       inc
+                       str
+                       keyword)
+            rakennus {:rakennus {:jarjestysnumero                    (:index build)
+                                 :kiinttun                           (:propertyId build)
+                                 :rakennusnro                        (:localShortId build)
+                                 :valtakunnallinenNumero             (:nationalId build)
+                                 :kunnanSisainenPysyvaRakennusnumero (:localId build)}
+                      :tila {:tila ""
+                             :kayttoonottava false} }]
+        (assoc acc index rakennus)))
+    initial-rakennus
+    buildings))
+
 (defn- katselmus->task [meta source {buildings :buildings} katselmus]
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
         data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
               :vaadittuLupaehtona true
-              :rakennus (reduce (fn [acc build]
-                                  (let [index    (-> acc keys count str keyword)
-                                        rakennus {:rakennus {:jarjestysnumero                    (:index build)
-                                                             :kiinttun                           (:propertyId build)
-                                                             :rakennusnro                        (:localShortId build)
-                                                             :valtakunnallinenNumero             (:nationalId build)
-                                                             :kunnanSisainenPysyvaRakennusnumero (:localId build)}
-                                                  :tila {:tila ""
-                                                         :kayttoonottava false} }]
-                                    (assoc acc index rakennus))) {} buildings)}]
+              :rakennus (rakennus-data-from-buildings {} buildings)}]
     (new-task "task-katselmus" task-name data meta source)))
 
 (defn- verdict->tasks [verdict meta application]

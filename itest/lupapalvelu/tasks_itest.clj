@@ -2,12 +2,15 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]))
 
+(apply-remote-minimal)
+
 (defn- task-by-type [task-type task] (= (str "task-" task-type) (-> task :schema-info :name)))
+
+(apply-remote-minimal)
 
 (let [application (create-and-submit-application pena :municilapity sonja-muni)
       application-id (:id application)
@@ -98,14 +101,19 @@
       (command pena :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => unauthorized?)
     (fact "Authority can create tasks"
       (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
-      (let [tasks (:tasks (query-application pena application-id))
+      (let [application (query-application pena application-id)
+            tasks (:tasks application)
+            buildings (:buildings application)
             katselmus-task (some #(when (and (= "task-katselmus" (-> % :schema-info :name))
                                              (= "do the shopping" (:taskname %)))
                                    %)
-                                 tasks)]
+                                 tasks)
+            katselmus-rakennus-data (-> katselmus-task :data :rakennus)]
         katselmus-task => truthy
         (fact "katselmuksenLaji saved to doc"
-          (-> katselmus-task :data :katselmuksenLaji :value) => "aloituskokous")))
+          (-> katselmus-task :data :katselmuksenLaji :value) => "aloituskokous")
+        (fact "buildings are saved to task-katselmus"
+          (count buildings) => (count (vals katselmus-rakennus-data)))))
     (fact "Can't create documents with create-task command"
       (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "uusiRakennus") => (partial expected-failure? "illegal-schema"))
     (fact "Can't create katselmus without valid katselmuksenLaji"
@@ -124,8 +132,11 @@
         (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
                                                                               ["rakennus.0.rakennus.rakennusnro" "001"]
                                                                               ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
+                                                                              ["rakennus.0.tila.tila" "osittainen"]
                                                                               ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
-                                                                              ["katselmus.tila" "osittainen"]]) => ok?
+                                                                              ["katselmus.tila" "osittainen"]
+                                                                              ["katselmus.pitoPvm" "12.04.2016"]
+                                                                              ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?
 
         (fact "can now be marked done, required fields are filled"
           (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
@@ -143,11 +154,9 @@
             (count tasks) => expected-count)
 
           (fact "mark the new task final"
-            (command sonja :update-task :id application-id :doc new-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
-                                                                                 ["rakennus.0.rakennus.rakennusnro" "001"]
-                                                                                 ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
-                                                                                 ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
-                                                                                 ["katselmus.tila" "lopullinen"]]) => ok?)
+                (command sonja :update-task :id application-id :doc new-id :updates [ ["katselmus.tila" "lopullinen"]
+                                                                                 ["katselmus.pitoPvm" "12.04.2016"]
+                                                                                 ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?)
 
           (fact "mark the new task done"
             (command sonja :review-done :id application-id :taskId new-id :lang "fi") => ok?)

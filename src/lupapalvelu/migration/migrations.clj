@@ -1854,7 +1854,7 @@
 
 (defn update-operations-attachments-types [mapping operation-pred [operation attachment-types]]
   (if (operation-pred (keyword operation))
-    [operation (map (partial update-operations-attachment-type mapping) attachment-types)]
+    [operation (->> attachment-types (map (partial update-operations-attachment-type mapping)) distinct)]
     [operation attachment-types]))
 
 (defmigration organization-operation-attachments-type-update
@@ -1873,23 +1873,29 @@
 
 (defmigration clean-vaadittuTyonjohtajatieto-in-verdicts
   (update-applications-array :verdicts
-                             (fn [verdict] 
+                             (fn [verdict]
                                (update verdict :paatokset
                                           (fn [paatokset] (map (fn [paatos]
-                                                                 (update-in paatos [:lupamaaraykset :vaadittuTyonjohtajatieto] 
+                                                                 (update-in paatos [:lupamaaraykset :vaadittuTyonjohtajatieto]
                                                                             (fn [tj] (cond (map? tj)    [(get-in tj [:VaadittuTyonjohtaja :tyonjohtajaLaji])]
                                                                                            (vector? tj) (map #(or (get-in % [:VaadittuTyonjohtaja :tyonjohtajaLaji]) %) tj)
                                                                                            :else        tj))))
                                                                paatokset))))
                              {:verdicts.paatokset.lupamaaraykset.vaadittuTyonjohtajatieto {$type 3}}))
 
-(defmigration application-pintavesi-attachment-type-update
+(defmigration application-attachment-type-update-v2
   (update-applications-array :attachments
                              (partial update-attachment-type attachment-type-mapping/attachment-mapping :type)
                              {:permitType  {$in ["R" "P"]}
-                              :attachments {$elemMatch {:type.type-group :muut :type.type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta}}}))
+                              :attachments.type.type-id {$in [:selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
+                                                              :aitapiirustus
+                                                              :vesi_ja_viemariliitoslausunto_tai_kartta
+                                                              :sopimusjaljennos
+                                                              :karttaaineisto
+                                                              :selvitys_rakennuspaikan_korkeusasemasta
+                                                              :riskianalyysi]}}))
 
-(defmigration organization-operation-attachments-type-update-pintavesi
+(defmigration organization-operation-attachments-type-update-v2
   (reduce (fn [cnt org] (+ cnt (mongo/update-n :organizations {:_id (:id org)}
                                                {$set {:operations-attachments (->> (:operations-attachments org)
                                                                                    (map (partial update-operations-attachments-types attachment-type-mapping/attachment-mapping r-or-p-operation?))

@@ -59,11 +59,13 @@
     (fail! :illegal-schema))
   (let [meta {:created created :assignee user}
         source (or (valid-source (:source data)) {:type :authority :id (:id user)})
+        rakennus-data (when (= "task-katselmus" schemaName)
+                        (util/strip-empty-maps {:rakennus (tasks/rakennus-data-from-buildings {} (:buildings application))}))
         task (tasks/new-task schemaName
                              taskName
                              (if-not (ss/blank? taskSubtype)
-                               {:katselmuksenLaji taskSubtype}
-                               {})
+                               (merge rakennus-data {:katselmuksenLaji taskSubtype})
+                               rakennus-data)
                              meta
                              source)
         validation-results (tasks/task-doc-validation schemaName task)
@@ -124,10 +126,19 @@
       (fail :error.invalid-task-type))))
 
 (defn- validate-review-kind [{data :data} {tasks :tasks}]
-  (when-let [task-id (:taskId data)]
+    (when-let [task-id (:taskId data)]
     ; TODO create own auth model for task and combile let forms
     (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
       (fail :error.missing-parameters))))
+
+(defn- validate-required-review-fields [{data :data} {tasks :tasks :as application}]
+  (when (= (permit/permit-type application) permit/R)
+    (when-let [task-id (:taskId data)]
+      (let [task (util/find-by-id task-id tasks)]
+        (when (reduce (fn [acc k]
+                        (or acc (ss/blank? (get-in task [:data :katselmus k :value]))))
+                      false [:pitoPvm :pitaja :tila])
+          (fail :error.missing-parameters))))))
 
 ;; TODO to be deleted after review-done feature is in production
 (defcommand send-task
@@ -179,12 +190,12 @@
 
 (defcommand review-done
   {:description "Marks review done, generates PDF/A and sends data to backend"
-   :feature     :review-done
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [validate-task-is-review
                  validate-review-kind
-                 (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
+                 (permit/validate-permit-type-is permit/R permit/YA)
+                 validate-required-review-fields] ; KRYPS mapping currently implemented only for R & YA
    :user-roles  #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
