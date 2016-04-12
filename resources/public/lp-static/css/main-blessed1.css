@@ -10620,12 +10620,16 @@ ul.no-bullets {
 /* line 177, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .tos-function-correction .form-part {
   display: inline-block;
+  vertical-align: bottom;
+  line-height: normal;
 }
-/* line 180, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 182, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .tos-function-correction select, .tos-function-correction input {
   width: 350px;
   min-height: 40px;
   box-sizing: border-box;
+  display: inline-block;
+  margin: 0;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_applications_search.scss */
