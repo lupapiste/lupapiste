@@ -256,3 +256,18 @@ td.negative {
 }
 
 @include note-table ( reviews ) {}
+
+table.review-buildings-table {
+  @extend .table;
+  th.review-buildings--description {
+    min-width: 20em;
+  }
+  select.dropdown {
+    min-width: 10em;
+  }
+  div.checkbox-wrapper {
+    border: none;
+    text-align: center;
+  }
+  @include label-checkbox( checkbox-empty-label, 30px ) {}
+}

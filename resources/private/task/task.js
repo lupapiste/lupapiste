@@ -42,6 +42,7 @@ var taskPageController = (function() {
   var processing = ko.observable(false);
   var pending = ko.observable(false);
   var taskSubmitOk = ko.observable(false);
+  var taskService = new LUPAPISTE.DocumentDataService({name: "taskD"});
 
   var requiredErrors = ko.observable([null]);
 
@@ -140,8 +141,11 @@ var taskPageController = (function() {
       t.reviewDone = reviewDone;
       t.sendTask = sendTask;
       t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
+      t.addedToService = ko.observable();
       task(t);
 
+      taskService.addDocument(task());
+      t.addedToService( true );
       var errors = util.extractRequiredErrors([t.validationErrors]);
       requiredErrors(errors);
       // FIXME to be removed
@@ -194,6 +198,7 @@ var taskPageController = (function() {
       processing: processing,
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
+      taskDataService: taskService,
       taskSubmitOk: taskSubmitOk, // FIXME remove
       reviewSubmitOk: reviewSubmitOk,
       addAttachmentDisabled: addAttachmentDisabled

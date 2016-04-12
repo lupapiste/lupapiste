@@ -1,12 +1,11 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="docgen-string-template">
   <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
   <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
-  <label class="form-label" data-bind="visible: label, ltext: label, css: classes"></label>
+  <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
   <span data-bind="css: schema.unit ? 'form-input-and-unit' : ''">
-    <input class="form-input"
-           type="text"
+    <input type="text"
            data-bind="textInput: value,
-                      css: classes,
+                      css: inputClasses,
                       event: events,
                       disable: disabled,
                       attr: { 'readonly': readonly,

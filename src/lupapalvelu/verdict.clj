@@ -28,6 +28,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
   (:import [java.net URL]))
 
@@ -235,7 +236,9 @@
         extras-reader (permit/get-verdict-extras-reader (:permitType application))]
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-            tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)]
+            tasks (tasks/verdicts->tasks (assoc application
+                                                :verdicts verdicts-with-attachments
+                                                :buildings  (building-reader/->buildings-summary app-xml)) created)]
         (util/deep-merge
           {$set (merge {:verdicts verdicts-with-attachments, :modified created}
                   (when-not has-old-verdict-tasks {:tasks tasks})

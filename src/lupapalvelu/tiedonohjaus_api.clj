@@ -39,7 +39,7 @@
   [{user :user}]
   (store-function-code operation functionCode user))
 
-(defn- update-tos-metadata [function-code {:keys [application created user] :as command} mark-as-correction?]
+(defn- update-tos-metadata [function-code {:keys [application created user] :as command} & [correction-reason]]
   (if-let [tos-function-map (t/tos-function-with-name function-code (:organization application))]
     (let [orgId (:organization application)
           updated-attachments (map #(t/document-with-updated-metadata % orgId function-code application) (:attachments application))
@@ -51,7 +51,7 @@
                                         :metadata updated-metadata
                                         :processMetadata process-metadata
                                         :attachments updated-attachments}
-                                  $push {:history (a/tos-history-entry tos-function-map created user mark-as-correction?)}})
+                                  $push {:history (a/tos-history-entry tos-function-map created user correction-reason)}})
       (ok))
     (fail "error.invalid-tos-function")))
 
@@ -61,16 +61,16 @@
    :user-roles #{:authority}
    :states states/pre-verdict-but-draft}
   [command]
-  (update-tos-metadata functionCode command false))
+  (update-tos-metadata functionCode command))
 
 (defcommand force-fix-tos-function-for-application
-  {:parameters [:id functionCode]
-   :input-validators [(partial non-blank-parameters [:id :functionCode])]
+  {:parameters [:id functionCode reason]
+   :input-validators [(partial non-blank-parameters [:id :functionCode :reason])]
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal
    :pre-checks [archiving-api/check-user-is-archivist]}
   [command]
-  (update-tos-metadata functionCode command :mark-as-correction))
+  (update-tos-metadata functionCode command reason))
 
 (def schema-to-input-type-map
   {s/Str "text"

@@ -303,7 +303,7 @@
                                                                       :firstName "Monni"
                                                                       :lastName  "Tiskaa"
                                                                       :role      :authority}
-                                                        :correction  false}}}) => nil)))
+                                                        :correction  nil}}}) => nil)))
 
   (fact "archivist can set the tos function after verdict as correction"
     (let [fc "10 03 00 01"
@@ -322,7 +322,8 @@
                                  :role          :authority}
                    :action      "force-fix-tos-function-for-application"
                    :data        {:id       "ABC123"
-                                 :functionCode "10 03 00 01"}}]
+                                 :functionCode "10 03 00 01"
+                                 :reason "invalid procedure"}}]
       (execute command) => {:ok true}
       (provided
         (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
@@ -341,7 +342,7 @@
                                                                       :firstName "Monni"
                                                                       :lastName  "Tiskaa"
                                                                       :role      :authority}
-                                                        :correction  true}}}) => nil)))
+                                                        :correction  "invalid procedure"}}}) => nil)))
 
   (fact "normal authority user cannot change tos function after verdict"
     (let [application {:organization    "753-R"
@@ -359,7 +360,8 @@
                                  :role          :authority}
                    :action      "force-fix-tos-function-for-application"
                    :data        {:id       "ABC123"
-                                 :functionCode "10 03 00 01"}}
+                                 :functionCode "10 03 00 01"
+                                 :reason "invalid procedure"}}
           command2 (assoc command :action "set-tos-function-for-application")]
       (execute command) => {:ok false :text "error.unauthorized"}
       (execute command2) => {:ok false :state :verdictGiven :text "error.command-illegal-state"})))

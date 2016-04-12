@@ -1,5 +1,133 @@
-@import url('main-blessed1.css?z=1460380503796');
+@import url('main-blessed1.css?z=1460453410979');
 
+
+/* line 189, ../../../private/common-html/sass/views/_applications.scss */
+#applications-list .indicator-count, .applications-table .indicator-count {
+  padding-left: 0;
+  padding-right: 0;
+  font-weight: bold;
+  color: #f39129;
+  text-align: center;
+  width: 22px;
+  padding: 3px;
+}
+/* line 198, ../../../private/common-html/sass/views/_applications.scss */
+#applications-list div, .applications-table div {
+  padding-top: 3px;
+  height: 30px;
+}
+
+/* line 234, ../../../private/common-html/sass/views/_applications.scss */
+.clearable {
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+/* line 239, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search {
+  padding-right: 17px;
+  /* add space for the 'x' icon*/
+}
+
+/* line 242, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search::-ms-clear {
+  display: none;
+}
+
+/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  display: none;
+  /* now go with the styling */
+  cursor: pointer;
+  font: bold 1em sans-serif;
+  color: #38468F;
+}
+/* line 255, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear:before {
+  color: #f52;
+}
+
+/* application section styles*/
+/*Summary styles*/
+/* line 17, ../../../private/common-html/sass/views/_application.scss */
+.application_summary {
+  background-color: #eeeeee;
+  border-bottom: 2px solid #bbbbbb;
+  min-height: 332px;
+  padding: 6px 0 0 0;
+  position: relative;
+  display: block;
+  float: none;
+}
+/* line 26, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .container {
+  margin-bottom: 0;
+}
+/* line 32, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble {
+  position: relative;
+  min-height: 280px;
+  padding-left: 320px;
+  padding-right: 24%;
+  margin-right: 61px;
+}
+/* line 40, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+/* line 45, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container {
+  left: 0;
+  width: 320px;
+  margin-bottom: 12px;
+}
+/* line 52, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application_actions {
+  right: 0;
+}
+@media (max-width: 991px) {
+  /* line 32, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble {
+    padding: 0;
+  }
+  /* line 59, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+    position: relative;
+    width: auto;
+    float: left;
+  }
+  /* line 64, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application-map-container {
+    float: left;
+    margin-left: 24px;
+  }
+  /* line 70, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application_actions {
+    float: right;
+    margin-right: 24px;
+  }
+}
+/* line 76, ../../../private/common-html/sass/views/_application.scss */
+.application_summary li {
+  display: inline;
+}
+/* line 79, ../../../private/common-html/sass/views/_application.scss */
+.application_summary h1 {
+  margin: 0;
+  color: #fff;
+  line-height: 24px;
+  margin-bottom: 6px;
+}
+/* line 85, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container {
+  position: relative;
+}
 /* line 87, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application-map-container .map {
   float: left;
@@ -2724,7 +2852,7 @@ ul.appeals-files li span.appeals-files__size {
     display: table;
   }
   /* line 446, ../../../private/common-html/sass/partials/_buttons.scss */
-  #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
+  #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .check-string, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
@@ -3284,7 +3412,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 
 /* basic styles*/
 /* line 211, ../../../private/common-html/sass/main.scss */
-.table, .reviews-table, .appeals-table {
+.table, .reviews-table, table.review-buildings-table, .appeals-table {
   font-size: 16px;
   line-height: 24px;
 }
