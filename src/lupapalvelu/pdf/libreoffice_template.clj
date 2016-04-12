@@ -9,7 +9,7 @@
             [clojure.java.io :as io]
             [clojure.string :as s]))
 
-(defn- xml-escape [text]
+(defn xml-escape [text]
   (sx/escape-xml (str text)))
 ;;(s/escape (str text) {\< "&lt;", \> "&gt;", \& "&amp;"}))
 
@@ -38,7 +38,7 @@
 
 (defn common-field-map [application lang]
   {"FOOTER_PAGE" (localized-text lang "application.export.page")
-   "FOOTER_DATE" (util/to-local-date (System/currentTimeMillis))
+   "FOOTER_DATE" (util/to-local-datetime (System/currentTimeMillis))
 
    "FIELD002"    (xml-escape (:address application))
 

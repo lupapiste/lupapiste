@@ -311,7 +311,9 @@
 
     var allIds = _.map(self.attachments().concat(docs), getId);
 
-    pollChangedState(allIds);
+    if (ko.unwrap(params.application.id)) {
+      pollChangedState(allIds);
+    }
 
     self.archiveSelected = function() {
       var attachmentIds = _.map(_.filter(self.attachments(), isSelectedForArchive), function(attachment) {
@@ -335,6 +337,27 @@
           window.setTimeout(pollArchiveStatus, 3000);
           error(e.text);
           notify.error(loc(e.text));
+        })
+        .call();
+    };
+
+    self.newTosFunction = ko.observable(ko.unwrap(params.application.tosFunction));
+    self.tosFunctionCorrectionReason = ko.observable();
+    self.tosFunctionCorrectionEnabled = ko.pureComputed(function() {
+      return self.newTosFunction() !== params.application.tosFunction() && self.tosFunctionCorrectionReason();
+    });
+    self.updateTosFunction = function() {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
+      var data = {
+        id: ko.unwrap(params.application.id),
+        functionCode: self.newTosFunction(),
+        reason: self.tosFunctionCorrectionReason()
+      };
+      ajax
+        .command("force-fix-tos-function-for-application", data)
+        .success(function() {
+          self.tosFunctionCorrectionReason(null);
+          repository.load(ko.unwrap(params.application.id));
         })
         .call();
     };

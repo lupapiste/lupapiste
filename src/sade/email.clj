@@ -1,5 +1,5 @@
 (ns sade.email
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [postal.core :as postal]
@@ -26,6 +26,12 @@
               (select-keys [:host :port :user :pass :sender :ssl :tls :connectiontimeout :timeout])
               (update-in [:connectiontimeout] int)
               (update-in [:timeout] int)))
+
+;; Dynamic for testing purposes only, thus no earmuffs
+(def ^:dynamic blacklist (when-let [p (env/value :email :blacklist)] (re-pattern p)))
+
+(defn blacklisted? [email]
+  (boolean  (when (and blacklist email) (re-matches blacklist email))))
 
 ;;
 ;; Delivery:
@@ -78,18 +84,24 @@
    Attachments as sequence of maps with keys :file-name and :content. :content as File object."
   [to subject msg & [attachments]]
   {:pre [subject msg (or (nil? attachments) (and (sequential? attachments) (every? map? attachments)))]}
-  (if-not (ss/blank? to)
-    (let [[plain html] msg]
-      (try
-        (send-mail to subject :plain plain :html html :attachments attachments)
-        false
-        (catch Exception e
-          (error "Email failure:" e)
-          (.printStackTrace e)
-          true)))
-    (do
-      (error "Email could not be sent because of missing To field. Subject being: " subject)
-      true)))
+
+  (cond
+    (ss/blank? to) (do
+                     (error "Email could not be sent because of missing To field. Subject being: " subject)
+                     true)
+
+    (blacklisted? to) (do
+                        (warnf "Ignoring message to %s bacause address matches blacklist %s" to blacklist)
+                        true)
+
+    :else (let [[plain html] msg]
+            (try
+              (send-mail to subject :plain plain :html html :attachments attachments)
+              false
+              (catch Exception e
+                (error "Email failure:" e)
+                (.printStackTrace e)
+                true)))))
 
 ;;
 ;; templating:

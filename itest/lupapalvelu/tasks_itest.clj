@@ -2,10 +2,11 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.schemas :as schemas]))
+
+(apply-remote-minimal)
 
 (defn- task-by-type [task-type task] (= (str "task-" task-type) (-> task :schema-info :name)))
 
@@ -98,14 +99,19 @@
       (command pena :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus") => unauthorized?)
     (fact "Authority can create tasks"
       (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "aloituskokous") => ok?
-      (let [tasks (:tasks (query-application pena application-id))
+      (let [application (query-application pena application-id)
+            tasks (:tasks application)
+            buildings (:buildings application)
             katselmus-task (some #(when (and (= "task-katselmus" (-> % :schema-info :name))
                                              (= "do the shopping" (:taskname %)))
                                    %)
-                                 tasks)]
+                                 tasks)
+            katselmus-rakennus-data (-> katselmus-task :data :rakennus)]
         katselmus-task => truthy
         (fact "katselmuksenLaji saved to doc"
-          (-> katselmus-task :data :katselmuksenLaji :value) => "aloituskokous")))
+          (-> katselmus-task :data :katselmuksenLaji :value) => "aloituskokous")
+        (fact "buildings are saved to task-katselmus"
+          (count buildings) => (count (vals katselmus-rakennus-data)))))
     (fact "Can't create documents with create-task command"
       (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "uusiRakennus") => (partial expected-failure? "illegal-schema"))
     (fact "Can't create katselmus without valid katselmuksenLaji"

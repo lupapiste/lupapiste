@@ -17,6 +17,7 @@ jQuery(document).ready(function() {
     {name: "docgen-select", synchronous: true},
     {name: "docgen-button", synchronous: true},
     {name: "docgen-date", synchronous: true},
+    {name: "docgen-review-buildings", synchronous: true},
     {name: "construction-waste-report", synchronous: true},
     {name: "attachments-multiselect"},
     {name: "authority-select"},

@@ -13,7 +13,7 @@
   {:name              sc/Str         ;; Element name
    :type              (sc/enum :text :string :select :checkbox :radioGroup :date)
    (opt :uicomponent) sc/Keyword     ;; Component name for special components
-   (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string) ;; Input type of generic docgen-input component
+   (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string :check-string :checkbox-wrapper) ;; Input type of generic docgen-input component
    (opt :labelclass)  sc/Str         ;; Special label style class
    (opt :i18nkey)     sc/Str         ;; Absolute localization key
    (opt :locPrefix)   sc/Str         ;;
@@ -30,7 +30,8 @@
    (opt :whitelist)   {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
    (opt :blacklist)   [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
    (opt :emit)        [sc/Keyword]   ;; Change in element emits events
-   (opt :listen)      [sc/Keyword]}) ;; Events to listen
+   (opt :listen)      [sc/Keyword]   ;; Events to listen
+   (opt :css)         [sc/Keyword]})
 
 (defschema Text
   "Text area element. Represented as text-area html element"
@@ -250,6 +251,8 @@
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
           (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary
           (opt :order)                       sc/Int}    ;;
+   (opt :rows) [(sc/either [sc/Str] {sc/Keyword sc/Str})]
+   (opt :template) sc/Str
    :body  [Element]})
 
 (defn validate-doc-schema [doc-schema]
@@ -257,4 +260,3 @@
 
 (defn validate-elem-schema [elem-schema]
   (sc/check Element elem-schema))
-
