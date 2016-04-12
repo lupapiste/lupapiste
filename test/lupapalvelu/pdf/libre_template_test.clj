@@ -22,7 +22,7 @@
 (def date-30012016 1454112000000)
 (def date-01022016 1454284800000)
 
-(def application1 {:id "LP-000-0000-0000"
+(def application1 {:id           "LP-000-0000-0000"
                    :organization "753-R"
                    :tosFunction  "10 03 00 01"
                    :created      100
@@ -39,21 +39,21 @@
                                                                        :voimassaHetki 1613520000000
                                                                        :aloitettava   1550448000000}
 
-                                                      :lupamaaraykset {:kerrosala "100m2"
-                                                                       :maaraykset               [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viemärisuunnitelma"}]
-                                                                       :vaaditutTyonjohtajat     "Vastaava työnjohtaja"
-                                                                       :vaadittuTyonjohtajatieto ["Vastaava työnjohtaja" "Toinen työnjohtaja"]
+                                                      :lupamaaraykset {:kerrosala                   "100m2"
+                                                                       :maaraykset                  [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viemärisuunnitelma"}]
+                                                                       :vaaditutTyonjohtajat        "Vastaava työnjohtaja"
+                                                                       :vaadittuTyonjohtajatieto    ["Vastaava työnjohtaja" "Toinen työnjohtaja"]
                                                                        :vaaditutErityissuunnitelmat ["Joku erityissuunnitelma" "Joku toinen erityissuunnitelma"]
-                                                                       :vaaditutKatselmukset     [{:tarkastuksenTaiKatselmuksenNimi "* KVV-tarkastus" :katselmuksenLaji " muu katselmus "}
-                                                                                                  {:tarkastuksenTaiKatselmuksenNimi " * S\u00e4hk\u00f6tarkastus " :katselmuksenLaji " muu katselmus "}
-                                                                                                  {:tarkastuksenTaiKatselmuksenNimi " * Rakennetarkastus " :katselmuksenLaji " muu katselmus "}
-                                                                                                  {:katselmuksenLaji " loppukatselmus "}
-                                                                                                  {:tarkastuksenTaiKatselmuksenNimi " Aloitusilmoitus " :katselmuksenLaji " muu katselmus "}]}
+                                                                       :vaaditutKatselmukset        [{:tarkastuksenTaiKatselmuksenNimi "* KVV-tarkastus" :katselmuksenLaji " muu katselmus "}
+                                                                                                     {:tarkastuksenTaiKatselmuksenNimi " * S\u00e4hk\u00f6tarkastus " :katselmuksenLaji " muu katselmus "}
+                                                                                                     {:tarkastuksenTaiKatselmuksenNimi " * Rakennetarkastus " :katselmuksenLaji " muu katselmus "}
+                                                                                                     {:katselmuksenLaji " loppukatselmus "}
+                                                                                                     {:tarkastuksenTaiKatselmuksenNimi " Aloitusilmoitus " :katselmuksenLaji " muu katselmus "}]}
 
                                                       :poytakirjat    [{:urlHash         "4196f10a7fef9bec325dc567f1b87fbcd10163ce"
                                                                         :status          "1"
                                                                         :paatoksentekija "Tytti M\u00e4ntyoja"
-                                                                        :paatos "Lorelei ipsum sidith meth"
+                                                                        :paatos          "Lorelei ipsum sidith meth"
                                                                         :pykala          31
                                                                         :paatospvm       1454284800000
                                                                         :paatoskoodi     "my\u00f6nnetty"}]}]}]
@@ -119,7 +119,7 @@
                                    :user  {:firstName "Testi"
                                            :lastName  "Testaaja"}}]})
 
-(def application2 {:id "LP-000-0000-0000"
+(def application2 {:id           "LP-000-0000-0000"
                    :organization "753-R"
                    :tosFunction  "10 03 00 01"
                    :created      100
@@ -130,6 +130,17 @@
                                    :timestamp       1454562242169
                                    :kuntalupatunnus "20160043"
                                    :sopimus         false
+                                   :signatures    [{:created 1424669824461
+                                                    :user    {:role      "applicant"
+                                                              :lastName  "Mallikas"
+                                                              :firstName "Matti"
+                                                              :username  "matti.maiilkas@example.com"}}
+                                                   {:created 1424669824461
+                                                    :user    {:role      "applicant"
+                                                              :lastName  "Mallikas"
+                                                              :firstName "Minna"
+                                                              :username  "minna.maiilkas@example.com"}}
+                                                   ]
                                    :paatokset       [{:id          "a2"
                                                       :paivamaarat {:anto          1454544000000
                                                                     :lainvoimainen 1454544000000
@@ -139,7 +150,7 @@
                                                       :poytakirjat [{:urlHash         "4196f10a7fef9bec325dc567f1b87fbcd10163ce"
                                                                      :status          "1"
                                                                      :paatoksentekija "Tytti Mäntyoja"
-                                                                     :paatos "Lorem ipsum dolor sit amet"
+                                                                     :paatos          "Lorem ipsum dolor sit amet"
                                                                      :pykala          31
                                                                      :paatospvm       1454284800000
                                                                      :paatoskoodi     "myönnetty"}]}]}]
@@ -165,12 +176,12 @@
                                                 {:state   "mark-done"
                                                  :user    {:firstName "Etu" :lastName "Suku"}
                                                  :created 1453372412991}]}]
-                   :tasks        [{:data        {:katselmuksenLaji { :value "muu katselmus"}}
+                   :tasks        [{:data        {:katselmuksenLaji {:value "muu katselmus"}}
                                    :state       "requires_user_action"
                                    :taskname    "rakennuksen paikan tarkastaminen"
-                                   :schema-info {:name    "task-katselmus"
+                                   :schema-info {:name       "task-katselmus"
                                                  :i18nprefix "task-katselmus.katselmuksenLaji"
-                                                 :version 1}
+                                                 :version    1}
                                    :closed      nil
                                    :created     date-02012016
                                    :duedate     nil
@@ -258,7 +269,7 @@
 
 ;;TODO fix datetime value assert
 #_(fact {:midje/description (str "Libre Template common-field-map ")}
-      (common-field-map application1 :fi) => {"FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "J\u00e4rvenp\u00e4\u00e4", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteist\u00f6tunnus", "FIELD005B" "(Tyhj\u00e4)", "FIELD006A" "Hakemus j\u00e4tetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus", "FIELD007B" "LP-000-0000-0000", "FIELD008A" "K\u00e4sittelij\u00e4", "FIELD008B" "(Tyhj\u00e4)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" "", "FOOTER_PAGE" "Sivu", "FOOTER_DATE" (util/to-local-date (sade/now))})
+        (common-field-map application1 :fi) => {"FIELD002" "Korpikuusen kannon alla 6", "FIELD003A" "Asiointikunta", "FIELD003B" "J\u00e4rvenp\u00e4\u00e4", "FIELD004A" "Hakemuksen vaihe", "FIELD004B" "", "FIELD005A" "Kiinteist\u00f6tunnus", "FIELD005B" "(Tyhj\u00e4)", "FIELD006A" "Hakemus j\u00e4tetty", "FIELD006B" "-", "FIELD007A" "Asiointitunnus", "FIELD007B" "LP-000-0000-0000", "FIELD008A" "K\u00e4sittelij\u00e4", "FIELD008B" "(Tyhj\u00e4)", "FIELD009A" "Hankkeen osoite", "FIELD009B" "Korpikuusen kannon alla 6", "FIELD010A" "Hakija", "FIELD010B" "", "FIELD011A" "Toimenpiteet", "FIELD011B" "", "FOOTER_PAGE" "Sivu", "FOOTER_DATE" (util/to-local-date (sade/now))})
 
 (facts "History export"
        (fact "Single row"

@@ -47,6 +47,14 @@
        (fact {:midje/description (str "verdict-reviews non-krysp")}
              (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[("Muu katselmus")]))
 
+(facts "Verdict signatures "
+       (def verdict-signatures #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-signatures)
+       (fact
+         (let [verdict (first (filter #(= "a1" (:id %)) (:verdicts application2)))
+               paatos (nth (:paatokset verdict) 0)]
+             (verdict-signatures verdict paatos) => '[["Tytti Mäntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
+
+
 (facts "Verdict export krysp "
        (doseq [lang i18n/languages]
          (let [tmp-file (File/createTempFile (str "verdict-krysp-" (name lang) "-") ".fodt")]
@@ -69,7 +77,7 @@
              ;(fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
              ))))
 
-(facts "Verdict-contact export non-krysp "
+(facts "Verdict-contract export non-krysp "
        (doseq [lang i18n/languages]
          (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
            (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)

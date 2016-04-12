@@ -244,21 +244,22 @@
 
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
-   :parameters [id verdictId password]
+   :parameters [id verdictId password lang]
    :input-validators [(partial action/non-blank-parameters [:id :verdictId :password])]
    :states     states/post-verdict-states
    :pre-checks [domain/validate-owner-or-write-access]
    :user-roles #{:applicant :authority}}
-  [{:keys [application created user lang] :as command}]
+  [{:keys [application created user] :as command}]
   (if (user/get-user-with-password (:username user) password)
     (when (find-verdict application verdictId)
-      (update-application command
+      (let [result (update-application command
                           {:verdicts {$elemMatch {:id verdictId}}}
                           {$set  {:modified              created}
                            $push {:verdicts.$.signatures {:created created
                                                           :user (user/summary user)}}
-                          })
-      (create-verdict-pdfa! user application id lang))
+                          })]
+          (create-verdict-pdfa! user application verdictId lang)
+          result))
     (do
       ; Throttle giving information about incorrect password
       (Thread/sleep 2000)

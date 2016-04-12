@@ -81,7 +81,7 @@
   (s/join "\n" (map (fn [val] (str (key val))) (:poytakirjat paatos))))
 
 (defn verdict-signatures [verdict paatos]
-  (merge [[(verdict-paatos-key paatos :paatoksentekija) (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")]]
+  (into [[(verdict-paatos-key paatos :paatoksentekija) (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")]]
          (map (fn [sig] [(xml-escape (str (get-in sig [:user :firstName]) " " (get-in sig [:user :lastName]))) (or (util/to-local-date (:created sig)) "-")]) (:signatures verdict))))
 
 (defn write-verdict-libre-doc [application id paatos-idx lang file]
