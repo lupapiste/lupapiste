@@ -220,7 +220,9 @@
             meta {:created created :assignee (:assignee task)}
             source {:type :task :id taskId}
             laji (get-in task [:data :katselmuksenLaji :value])
-            data {:katselmuksenLaji laji}
+            rakennus-data (when (= "task-katselmus" schema-name)
+                            (util/strip-empty-maps {:rakennus (tasks/rakennus-data-from-buildings {} (:buildings application))}))
+            data (merge rakennus-data {:katselmuksenLaji laji})
             new-task (tasks/new-task schema-name (:taskname task) data meta source)]
         (update-application command {$push {:tasks new-task}}))
 

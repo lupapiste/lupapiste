@@ -147,11 +147,15 @@
         (fact "review state can no longer be updated"
           (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]]) => fail?)
 
-        (let [tasks (:tasks (query-application sonja application-id))
+        (let [app (query-application sonja application-id)
+              tasks (:tasks app)
               expected-count (+ 9 1 1) ; fixture + prev. facts + review-done
-              new-id (:id (last tasks))]
+              new-task (last tasks)
+              new-id (:id new-task)]
           (fact "as the review was not final, a new task has been createad"
             (count tasks) => expected-count)
+          (fact "buildings are populated to newly created task"
+            (count (:buildings app)) => (-> new-task :data :rakennus vals count))
 
           (fact "mark the new task final"
                 (command sonja :update-task :id application-id :doc new-id :updates [ ["katselmus.tila" "lopullinen"]
