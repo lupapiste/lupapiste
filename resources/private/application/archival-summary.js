@@ -354,6 +354,7 @@
       ajax
         .command("force-fix-tos-function-for-application", data)
         .success(function() {
+          self.tosFunctionCorrectionReason(null);
           repository.load(ko.unwrap(params.application.id));
         })
         .call();

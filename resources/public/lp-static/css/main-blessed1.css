@@ -10623,7 +10623,7 @@ ul.no-bullets {
 }
 /* line 180, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .tos-function-correction select, .tos-function-correction input {
-  min-width: 350px;
+  width: 350px;
   min-height: 40px;
   box-sizing: border-box;
 }

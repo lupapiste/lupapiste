@@ -49,7 +49,7 @@
           <h2 data-bind="ltext: 'tos.function.fix'"></h2>
           <p data-bind="ltext: 'tos.function.fix.guide'"></p>
           <div class="form-part">
-            <label for="tos-function-correction-function" class="form-label form-label-text">Uusi tehtäväluokka</label><br>
+            <label for="tos-function-correction-function" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.select'"></label><br>
             <select class="dropdown" id="tos-function-correction-function"
                     data-bind="options: $root.tosFunctions,
                                optionsText: function(item) { return item.code + ' - ' + item.name; },
@@ -59,11 +59,11 @@
                                enable: $root.authorization.ok('force-fix-tos-function-for-application')" ></select>
            </div>
            <div class="form-part">
-             <label for="tos-function-correction-reason" class="form-label form-label-text">Korjauksen syy</label>
-             <input type="text" id="tos-function-correction-reason" class="form-input long" data-bind="textInput: tosFunctionCorrectionReason">
+             <label for="tos-function-correction-reason" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.reason'"></label>
+             <input type="text" id="tos-function-correction-reason" class="form-input" data-bind="textInput: tosFunctionCorrectionReason">
            </div>
            <div class="form-part">
-             <button class="btn-primary" data-bind="enable: tosFunctionCorrectionEnabled">Korjaa</button>
+             <button class="btn-primary" data-bind="enable: tosFunctionCorrectionEnabled, click: updateTosFunction, ltext: 'korjaa'"></button>
            </div>
         </div>
         <!-- /ko -->
