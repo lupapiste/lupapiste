@@ -190,11 +190,13 @@
                          :user     (full-name (:assignee task))})
               acc)) [] (:tasks application)))
 
-(defn- tos-function-changes-from-history [history]
+(defn- tos-function-changes-from-history [history lang]
   (->> (filter :tosFunction history)
-       (map #(merge % {:text (str (get-in % [:tosFunction :code]) " " (get-in % [:tosFunction :name]))
-                       :category (if (:correction %) :tos-function-correction :tos-function-change)
-                       :user (full-name (:user %))}))))
+       (map (fn [{:keys [tosFunction correction user] :as item}]
+              (merge item {:text (str (:code tosFunction) " " (:name tosFunction)
+                                      (when correction (str ", " (i18n/localize lang "tos.function.fix.reason") ": " correction)))
+                           :category (if correction :tos-function-correction :tos-function-change)
+                           :user (full-name user)})))))
 
 (defn generate-case-file-data [{:keys [history organization] :as application} lang]
   (let [documents (get-documents-from-application application)
@@ -203,7 +205,7 @@
         neighbors-reqs (get-neighbour-requests-from-application application)
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
-        tos-fn-changes (tos-function-changes-from-history history)
+        tos-fn-changes (tos-function-changes-from-history history lang)
         all-docs (sort-by :ts (concat tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
         state-changes (filter :state history)]
     (map (fn [[{:keys [state ts user]} next]]
