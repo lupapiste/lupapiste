@@ -1,6 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="docgen-review-buildings-template">
-  <h3 data-bind="ltext: 'task-katselmus.rakennukset'"></h3>
+  <div class="h2" data-bind="ltext: 'task-katselmus.rakennukset'"></div>
 
   <table class="review-buildings-table">
     <thead>
@@ -11,7 +11,7 @@
       <th data-bind="ltext: 'task-katselmus.rakennus.kiinteistotunnus'"></th>
     </thead>
     <tbody data-bind="foreach: buildings">
-      <tr>
+      <tr data-bind="attr: {'data-test-index': $index}">
         <td data-bind="text: description"></td>
         <td data-bind="component: { name: $data.tila.uicomponent,
                        params: { schema: $data.tila,

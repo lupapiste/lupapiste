@@ -6,7 +6,7 @@ LUPAPISTE.DocgenReviewBuildingsModel = function( params ) {
   var data = service.getInDocument( params.documentId,
                                     _.flatten( [params.path])).model();
 
-  self.notEndReview = service.getInDocument( params.documentId,
+  self.notEndReview = !service.getInDocument( params.documentId,
                                              ["katselmuksenLaji"])
     .model()
     .match( /^(osittainen )?loppukatselmus$/);
