@@ -163,7 +163,7 @@
                    (str (ss/substring task-name 0 (- task-name-max-len 3)) "...")
                    task-name))
      :state state
-     :data (when data (-> data tools/wrapped (tools/timestamped created)))
+     :data (if data (-> data tools/wrapped (tools/timestamped created)) {})
      :assignee (select-keys assignee [:id :firstName :lastName])
      :duedate nil
      :created created
