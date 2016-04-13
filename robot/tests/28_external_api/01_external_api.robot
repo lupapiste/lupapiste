@@ -93,10 +93,11 @@ Fill review info
   Open tab  tasks
   Open task  Aloituskokous
 
-  Select From List  rakennus.0.rakennus.jarjestysnumero  ei tiedossa
+  Select From List by test id  katselmus.tila  lopullinen
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text with jQuery  .hasDatepicker:first  29.2.2016
-  Input text with jQuery  textarea[name="katselmus.huomautukset.kuvaus"]  ei
+  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  29.2.2016
+  Input text with jQuery  input[data-test-id="katselmus.pitaja"]  Sonja Sibbo
+  Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ei
 
 Transfering task emits LupapisteApi.integrationSent function call
   Click enabled by test id  review-done
