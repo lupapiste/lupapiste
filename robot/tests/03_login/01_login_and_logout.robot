@@ -99,4 +99,5 @@ My page opens after login
 
 Cleanup cookies
   [Tags]  ie8
-  Delete All Cookies
+  Delete Cookie  ring-session
+  Delete Cookie  my-email

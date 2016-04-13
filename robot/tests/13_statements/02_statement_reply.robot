@@ -84,7 +84,7 @@ Olli types in draft
   Sleep  2.5
 
 Olli peeks reply request tab
-  Execute javascript  window.scrollTo(0,0)
+  Scroll to top
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
   Wait until element contains  xpath=//div[@class='statement-info']//p  Kun lausunto on annettu
   Element should not be visible  statement-submit
@@ -217,7 +217,7 @@ Return from statement
 
 Open statement
   [Arguments]  ${number}
-  Execute javascript  window.scrollTo(0,0)
+  Scroll to top
   Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-${number}']
   Wait until  element should be visible  xpath=//div[@class='statement-top']//div[@class='tabs-container']
 

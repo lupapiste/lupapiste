@@ -429,7 +429,7 @@
  <office:master-styles>
   <style:master-page style:name="Standard" style:page-layout-name="pm1">
    <style:footer>
-    <text:p text:style-name="P1"><text:span text:style-name="T1">FOOTER_DATE</text:span> <text:span text:style-name="T1">FOOTER_PAGE </text:span><text:page-number text:select-page="current">1</text:page-number> / <text:page-count>1</text:page-count></text:p>
+    <text:p text:style-name="P1"><text:span text:style-name="T1">FOOTER_DATE</text:span> <text:span text:style-name="T1">FOOTER_PAGE</text:span> <text:page-number text:select-page="current">1</text:page-number> / <text:page-count>1</text:page-count></text:p>
    </style:footer>
   </style:master-page>
  </office:master-styles>
@@ -822,7 +822,7 @@
    </table:table>
    <text:p text:style-name="P7"/>
    <text:p text:style-name="P5"/>
-   <table:table table:name="Process" table:style-name="Process">
+   <table:table table:name="HISTORYTABLE" table:style-name="Process">
     <table:table-column table:style-name="Process.A"/>
     <table:table-column table:style-name="Process.B"/>
     <table:table-column table:style-name="Process.C"/>
@@ -843,7 +843,6 @@
       </table:table-cell>
      </table:table-row>
     </table:table-header-rows>
-    HISTORY_ROWS_PLACEHOLDER
    </table:table>
    <text:p text:style-name="P5"/>
   </office:text>

@@ -12,9 +12,24 @@ LUPAPISTE.createTaskController = new (function() {
   self.source = {};
   self.taskName = ko.observable(null);
   self.taskType = ko.observable(null);
+  self.taskSubtype = ko.observable(null);
   self.taskTypes = ko.observable([]);
-  self.disabled = ko.computed(function() {
-    return !self.taskType() || !self.taskName();
+
+  self.taskSubtypes = ko.computed(function() {
+    var currentTask = _.find(self.taskTypes(), function(task) {
+      return task.id === self.taskType();
+    });
+    return currentTask && currentTask.subTypes;
+  });
+
+  self.subtypeNeeded = ko.pureComputed(function() {
+    var subtypes = self.taskSubtypes();
+    return subtypes && subtypes.length > 0;
+  });
+
+
+  self.enabled = ko.computed(function() {
+    return self.taskType() && self.taskName() && (self.subtypeNeeded() ? self.taskSubtype() : true);
   });
 
   self.reset = function(id, source) {
@@ -23,6 +38,7 @@ LUPAPISTE.createTaskController = new (function() {
     self.taskName(null);
     self.taskType(null);
     self.taskTypes([]);
+    self.taskSubtype(null);
   };
 
   // Open the dialog
@@ -31,15 +47,23 @@ LUPAPISTE.createTaskController = new (function() {
       self.reset(app.id(), self.source);
     }
 
-    ajax.query("task-types-for-application", {id: self.id})
+    ajax.query("task-types-for-application", {id: self.id,  lang: loc.getCurrentLanguage()})
       .success(function(data) {
-        self.taskTypes(_.map(data.schemas, function(id) { return {id: id, text: loc([id, "_group_label"])};}));
+        self.taskTypes(_.map(data.schemas, function(schema) {
+          return {id:       schema.schemaName,
+                  text:     loc([schema.schemaName, "_group_label"]),
+                  subTypes: schema.types};
+        }));
         LUPAPISTE.ModalDialog.open(self.dialogSelector);
       }).call();
   };
 
   self.save = function() {
-    ajax.command("create-task", {id: self.id, taskName: self.taskName(), schemaName: self.taskType(), source: self.source})
+    ajax.command("create-task", {id: self.id,
+                                 taskName: self.taskName(),
+                                 schemaName: self.taskType(),
+                                 taskSubtype: self.taskSubtype(),
+                                 source: self.source})
       .success(function() {
         repository.load(self.id);
         LUPAPISTE.ModalDialog.close();

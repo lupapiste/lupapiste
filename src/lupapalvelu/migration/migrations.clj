@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
+            [clojure.set :refer [rename-keys]]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
@@ -14,6 +15,7 @@
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
@@ -21,6 +23,7 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
             [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
+            [lupapalvelu.tasks :refer [task-doc-validation]]
             [sade.env :as env]
             [sade.excel-reader :as er]
             [sade.coordinate :as coord]))
@@ -1899,6 +1902,53 @@
                                                                                    (into {}))}})))
           0
           (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1})))
+
+(defn update-katselmus-buildings
+  "Assocs missing buildings from buildings array to repeating :rakennus data for katselmus tasks."
+  [buildings {{rakennus :rakennus} :data :as katselmus-doc}]
+  (let [saved-building-indices (map (util/fn-> :rakennus :jarjestysnumero :value) (vals rakennus))
+        unselected-buildings   (remove (fn [{idx :index}] (some #(= idx %) saved-building-indices)) buildings)
+        building-keys          [:index :nationalId :localShortId :propertyId :localId]
+        rakennus-keys          [:jarjestysnumero :valtakunnallinenNumero :rakennusnro :kiinttun :kunnanSisainenPysyvaRakennusnumero]
+        new-rakennus-map       (reduce
+                                 (fn [acc building]
+                                   (let [next-idx-kw (->> (map (comp #(Integer/parseInt %) name) (keys acc))
+                                                          (apply max -1) ; if no keys, starting index (inc -1) => 0
+                                                          inc
+                                                          str
+                                                          keyword)
+                                         rakennus-data (-> (rename-keys building (zipmap building-keys rakennus-keys))
+                                                           (select-keys rakennus-keys))]
+                                     (assoc acc next-idx-kw {:rakennus (tools/wrapped rakennus-data)})))
+                                 rakennus
+                                 unselected-buildings)]
+    (when (seq unselected-buildings)
+      (let [updated-katselmus (assoc-in katselmus-doc [:data :rakennus] new-rakennus-map)]
+        (if (model/has-errors? (task-doc-validation "task-katselmus" updated-katselmus))
+          (errorf "Migration: task-katselmus validation error for doc-id %s" (:id katselmus-doc))
+          updated-katselmus)))))
+
+(defmigration buildings-to-katselmus-tasks
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                {:keys [id tasks buildings]} (mongo/select collection {:tasks {$elemMatch {:schema-info.name "task-katselmus" :state {$ne "sent"}}}} [:tasks :buildings])]
+            (let [katselmus-tasks (filter #(and
+                                            (= (get-in % [:schema-info :name]) "task-katselmus")
+                                            (not= "sent" (:state %)))
+                                          tasks)
+                  updated-tasks   (->> (map (partial update-katselmus-buildings buildings) katselmus-tasks)
+                                       (remove nil?))
+                  task-updates    (when (seq updated-tasks)
+                                    (apply merge
+                                           (map #(mongo/generate-array-updates :tasks
+                                                                               tasks
+                                                                               (fn [task] (= (:id task) (:id %)))
+                                                                               "data.rakennus"
+                                                                               (get-in % [:data :rakennus]))
+                                                updated-tasks)))]
+              (if (map? task-updates)
+                (mongo/update-n collection {:_id id} {$set task-updates})
+                0)))))
 
 ;;
 ;; ****** NOTE! ******

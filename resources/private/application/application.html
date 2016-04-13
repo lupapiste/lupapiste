@@ -879,7 +879,7 @@
                     </div>
                     <!-- /ko -->
 
-                    <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") && $root.authorization.ok('tos-operations-enabled') -->
+                    <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") && $root.authorization.ok('tos-operations-enabled') && application.id -->
                     <div id="application-caseFile-tab" class="tab-content">
                       <div>
                         <div data-bind="component: {name: 'case-file', params: {application: application}}"></div>
@@ -1301,6 +1301,8 @@
                         <!-- ko if: $root.foreman.isVisible -->
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
                         <!-- /ko -->
+
+                        <review-tasks params="openTask: openTask"></review-tasks>
 
                         <div class="tasks-content">
                             <div data-bind="foreach: taskGroups">

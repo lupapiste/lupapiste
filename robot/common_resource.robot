@@ -973,7 +973,7 @@ Invite company to application
 
 Task count is
   [Arguments]  ${type}  ${amount}
-  Wait until  Xpath Should Match X Times  //*[@data-bind="foreach: taskGroups"]//tbody/tr[@data-test-type="${type}"]  ${amount}
+  Wait until  Xpath Should Match X Times  //table//tbody/tr[@data-test-type="${type}"]  ${amount}
 
 Foreman count is
   [Arguments]  ${amount}
@@ -1193,6 +1193,12 @@ Clear mocks
 Scroll to
   [Arguments]  ${selector}
   Wait Until  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
+
+Scroll to top
+  Execute javascript  window.scrollTo(0,0)
+
+Scroll to bottom
+  Execute javascript  window.scrollTo(0,888888)
 
 Scroll to test id
   [Arguments]  ${id}

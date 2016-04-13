@@ -3,8 +3,13 @@
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mime :as mime]
+            [lupapalvelu.pdf.libreoffice-template :refer :all]
+            [lupapalvelu.pdf.libreoffice-template-history :as history]
+            [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
             [sade.core :refer [def-]]
-            [sade.env :as env])
+            [sade.strings :as ss]
+            [sade.env :as env]
+            [clojure.java.io :as io])
   (:import (org.apache.commons.io FilenameUtils)
            (java.io File)))
 
@@ -42,3 +47,17 @@
       {:filename           filename
        :content            content
        :archivabilityError :libre-conversion-error})))
+
+(defn generate-casefile-pdfa [application lang]
+  (let [filename (str (localize lang "caseFile.heading") ".fodt")
+        tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
+    (history/write-history-libre-doc application lang tmp-file)
+    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
+
+
+(defn generate-verdict-pdfa [application verdict-id paatos-idx lang]
+  (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-idx ", lang: " lang)
+  (let [filename (str (localize lang "application.verdict.title") ".fodt")
+        tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+    (verdict/write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
+    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))

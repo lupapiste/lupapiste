@@ -283,6 +283,9 @@
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
 
+(defn create-read-only-update-statements [attachments file-ids]
+  (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :readOnly true))
+
 (defn get-attachment-types-by-permit-type
   "Returns partitioned list of allowed attachment types or throws exception"
   [permit-type]
@@ -483,14 +486,16 @@
         (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-attachment-key! [command attachmentId k v now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
-  (let [update-key (->> (name k) (str "attachments.$.") keyword)]
-    (update-application command
-      {:attachments {$elemMatch {:id attachmentId}}}
-      {$set (merge
-              {update-key v}
-              (when set-app-modified? {:modified now})
-              (when set-attachment-modified? {:attachments.$.modified now}))})))
+(defn update-attachment-data! [command attachmentId data now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
+  (update-application command
+                      {:attachments {$elemMatch {:id attachmentId}}}
+                      {$set (merge (zipmap (->> (keys data)
+                                                (map name)
+                                                (map (partial str "attachments.$."))
+                                                (map keyword))
+                                           (vals data))
+                                   (when set-app-modified? {:modified now})
+                                   (when set-attachment-modified? {:attachments.$.modified now}))}))
 
 (defn update-latest-version-content!
   "Updates latest version when version is stamped"
@@ -585,12 +590,8 @@
      {:attachments {$elemMatch {:id attachment-id}}}
      {$pull {:attachments.$.versions {:fileId fileId}
              :attachments.$.signatures {:fileId fileId}}
-      $set  {:attachments.$.latestVersion latest-version}})
-    (update-application
-     (application->command application)
-     {:attachments {$elemMatch {:id attachment-id
-                                :versions []}}}
-     {$set {:attachments.$.auth []}})
+      $set  (merge {:attachments.$.latestVersion latest-version}
+                   (when (nil? latest-version) {:attachments.$.auth []}))})
     (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
 
 (defn get-attachment-file-as!

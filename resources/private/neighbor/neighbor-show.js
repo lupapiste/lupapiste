@@ -75,8 +75,8 @@
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
       var options = {disabled: true, validate: false};
 
-      docgen.displayDocuments("#neighborDocgen", a, sortedNonpartyDocs, lupapisteApp.models.applicationAuthModel, options);
-      docgen.displayDocuments("#neighborPartiesDocgen", a, sortedPartyDocs, lupapisteApp.models.applicationAuthModel, options);
+      docgen.displayDocuments("neighborDocgen", a, sortedNonpartyDocs, lupapisteApp.models.applicationAuthModel, options);
+      docgen.displayDocuments("neighborPartiesDocgen", a, sortedPartyDocs, lupapisteApp.models.applicationAuthModel, options);
 
       self.attachmentsByGroup(getAttachmentsByGroup(a.attachments));
       self.attachments(_.map(a.attachments || [], function(a) {
@@ -155,7 +155,9 @@
   function gotUser(user) {
     vetumaParams.visible(false);
     model.tupasUser(user);
-    scrollToResponse();
+    _.delay( function() {
+      window.scrollTo( 0 , document.body.scrollHeight);
+    }, 1000);
   }
 
   hub.onPageLoad("neighbor-show", function(e) {

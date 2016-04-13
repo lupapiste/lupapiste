@@ -41,6 +41,34 @@
       <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
       <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
     </div>
+
+    <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->
+      <div class="tos-function-correction">
+        <div>
+          <h2 data-bind="ltext: 'tos.function.fix'"></h2>
+          <p data-bind="ltext: 'tos.function.fix.guide'"></p>
+          <div>
+            <div class="form-part">
+              <label for="tos-function-correction-function" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.select'"></label><br>
+              <select class="dropdown" id="tos-function-correction-function"
+                      data-bind="options: $root.tosFunctions,
+                                 optionsText: function(item) { return item.code + ' - ' + item.name; },
+                                 optionsValue: 'code',
+                                 value: $component.newTosFunction,
+                                 valueAllowUnset: true,
+                                 enable: $root.authorization.ok('force-fix-tos-function-for-application')" ></select>
+             </div>
+             <div class="form-part">
+               <label for="tos-function-correction-reason" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.reason'"></label><br>
+               <input type="text" id="tos-function-correction-reason" class="form-input" data-bind="textInput: tosFunctionCorrectionReason">
+             </div>
+             <div class="form-part">
+               <button class="btn-primary" data-bind="enable: tosFunctionCorrectionEnabled, click: updateTosFunction, ltext: 'korjaa'"></button>
+             </div>
+           </div>
+        </div>
+      </div>
+    <!-- /ko -->
   </script>
   <script type="text/x-jquery-tmpl" id="archival-summary-attachment-table">
     <div class="table archival-summary-table" data-bind="foreach: groups">
@@ -60,9 +88,9 @@
       <!-- ko foreach: attachments -->
       <div class="attachment-row">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id()) }">
-           <input type="checkbox" data-bind="visible: archivable && state() !== 'arkistoitu', checked: sendToArchive">
+           <input type="checkbox" data-bind="visible: archivable && $component.stateMap()[id()] !== 'arkistoitu', checked: sendToArchive">
            <i class="lupicon-circle-attention disabled" data-bind="visible: !archivable, attr: {title: loc(archivabilityError)}"></i>
-           <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="lupicon-archives enabled" data-bind="visible: $component.stateMap()[id()] === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">
@@ -107,7 +135,7 @@
 
         <div data-bind="if: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
-            <!-- ko if: !$data.readOnly() -->
+            <!-- ko if: _.isFunction($data.readOnly) && !$data.readOnly() -->
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'attachment.changeType'"></div>
               <div class="contents">
@@ -159,8 +187,8 @@
       <!-- ko foreach: documents -->
       <div class="attachment-row">
         <div class="archival-status" data-bind="visible: $parent.showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
-           <input type="checkbox" data-bind="visible: state() !== 'arkistoitu', checked: sendToArchive">
-           <i class="lupicon-archives enabled" data-bind="visible: state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <input type="checkbox" data-bind="visible: $component.stateMap()[id] !== 'arkistoitu', checked: sendToArchive">
+           <i class="lupicon-archives enabled" data-bind="visible: $component.stateMap()[id] === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: function(){$data.showAdditionalControls(!showAdditionalControls())}">

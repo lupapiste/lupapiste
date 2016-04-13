@@ -168,3 +168,22 @@
     }
   }
 }
+
+.tos-function-correction {
+  margin-top: 3em;
+  p {
+    margin-bottom: 0.5em;
+  }
+  .form-part {
+    display: inline-block;
+    vertical-align: bottom;
+    line-height: normal;
+  }
+  select, input {
+    width: 350px;
+    min-height: 40px;
+    box-sizing: border-box;
+    display: inline-block;
+    margin: 0;
+  }
+}

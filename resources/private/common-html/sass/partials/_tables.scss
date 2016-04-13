@@ -219,3 +219,55 @@ td.negative {
   background-color: $negative;
   color: white;
 }
+
+@mixin note-table($name) {
+  .#{$name}-table {
+    @extend .table;
+    td.#{$name}-table--action {
+      text-align: right;
+      a {
+        padding-right: 2em;
+      }
+    }
+    td.#{$name}-table--icons {
+      text-align: center;
+      color: $primary;
+    }
+    tr.#{$name}-table__note {
+      padding: {
+      left: 2em;
+      right: 2em;
+    }
+      &:active {
+        background-color: initial;
+      }
+      background-color: white;
+      td.#{$name}-table--extra {
+        white-space: pre-wrap;
+      }
+      td.#{$name}-table--no-extra {
+        color: $gray187;
+      }
+    }
+    div.bubble-dialog {
+      border: none;
+    }
+  }
+}
+
+@include note-table ( reviews ) {}
+
+table.review-buildings-table {
+  @extend .table;
+  th.review-buildings--description {
+    min-width: 20em;
+  }
+  select.dropdown {
+    min-width: 10em;
+  }
+  div.checkbox-wrapper {
+    border: none;
+    text-align: center;
+  }
+  @include label-checkbox( checkbox-empty-label, 30px ) {}
+}

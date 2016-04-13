@@ -1,3 +1,4 @@
+
 (ns lupapalvelu.document.model
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.walk :refer [keywordize-keys]]
@@ -22,7 +23,6 @@
 ;; Validation:
 ;;
 
-;; if you changes these values, change it in docgen.js, too
 (def default-max-len 255)
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
@@ -261,7 +261,7 @@
                      data
                      (dissoc data (if (= selected "henkilo") :yritys :henkilo))))]
         (filter
-          (comp not nil?)
+          seq
           (concat (flatten [result])
             (map (fn [[k2 v2]]
                    (validate-fields application info k2 v2 current-path)) data)))))))
@@ -299,9 +299,10 @@
 
       (map #(check (sub-schema-by-name schema-body %)) sub-schemas-to-validate)))
 
-(defn get-document-schema [{schema-info :schema-info}]
-  {:pre [schema-info]
-   :post [%]}
+(defn get-document-schema
+  "Returns document's schema map that contais :info and :body."
+  [{schema-info :schema-info}]
+  {:pre [schema-info], :post [%]}
   (schemas/get-schema schema-info))
 
 (defn- validate-document [{data :data :as document} info]

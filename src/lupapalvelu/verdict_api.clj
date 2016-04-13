@@ -26,7 +26,12 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.appeal-common :as appeal-common]))
+            [lupapalvelu.appeal-common :as appeal-common]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
+            [clojure.java.io :as io]
+            [sade.env :as env])
+  (:import (java.io File)))
 
 ;;
 ;; KRYSP verdicts
@@ -169,7 +174,20 @@
              "verdicts.$.sopimus" (:sopimus verdict)
              "verdicts.$.paatokset" (:paatokset verdict)}})))
 
-(defn- publish-verdict [{timestamp :created application :application :as command} {:keys [id kuntalupatunnus]}]
+(defn create-verdict-pdfa! [user application verdict-id lang]
+  (if (env/feature? :paatos-pdfa)
+    (let [application (domain/get-application-no-access-checking (:id application))
+          verdict (first (filter #(= verdict-id (:id %)) (:verdicts application)))]
+      (doall
+        (for [paatos-idx (range 0 (count (:paatokset verdict)))]
+          (let [content (libre/generate-verdict-pdfa application verdict-id paatos-idx lang)
+                temp-file (File/createTempFile "create-verdict-pdfa-" ".pdf")]
+            (io/copy content temp-file)
+            (attachment/attach-file! application (child-to-attachment/build-attachment user application :verdicts verdict-id lang temp-file nil))
+            (io/delete-file temp-file :silently)))))
+    (info "feature.paatos-pdfa disabled !")))
+
+(defn- publish-verdict [{timestamp :created application :application lang :lang user :user :as command} {:keys [id kuntalupatunnus sopimus]}]
   (if-not (ss/blank? kuntalupatunnus)
     (when-let [next-state (sm/verdict-given-state application)]
       (let [doc-updates (doc-transformations/get-state-transition-updates command next-state)]
@@ -183,6 +201,7 @@
                               (:mongo-query doc-updates)
                               (:mongo-updates doc-updates)))
         (t/mark-app-and-attachments-final! (:id application) timestamp)
+        (when-not sopimus (create-verdict-pdfa! user application id lang))
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 
@@ -220,12 +239,13 @@
       (doseq [{attachment-id :id} attachments]
         (attachment/delete-attachment! application attachment-id))
       (appeal-common/delete-by-verdict command verdictId)
+      (child-to-attachment/delete-child-attachment application :verdicts verdictId)
       (when step-back?
         (notifications/notify! :application-state-change command)))))
 
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
-   :parameters [id verdictId password]
+   :parameters [id verdictId password lang]
    :input-validators [(partial action/non-blank-parameters [:id :verdictId :password])]
    :states     states/post-verdict-states
    :pre-checks [domain/validate-owner-or-write-access]
@@ -233,12 +253,14 @@
   [{:keys [application created user] :as command}]
   (if (user/get-user-with-password (:username user) password)
     (when (find-verdict application verdictId)
-      (update-application command
+      (let [result (update-application command
                           {:verdicts {$elemMatch {:id verdictId}}}
                           {$set  {:modified              created}
                            $push {:verdicts.$.signatures {:created created
                                                           :user (user/summary user)}}
-                          }))
+                          })]
+          (create-verdict-pdfa! user application verdictId lang)
+          result))
     (do
       ; Throttle giving information about incorrect password
       (Thread/sleep 2000)

@@ -84,6 +84,7 @@ var repository = (function() {
   }
 
   function doLoad(id, pending, callback, isLightLoad) {
+    hub.send( "scrollService::push");
     currentQuery = ajax
       .query("application", {id: id, lang: loc.getCurrentLanguage()})
       .pending(pending || _.noop)

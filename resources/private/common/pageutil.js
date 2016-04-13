@@ -81,6 +81,7 @@ var pageutil = (function($) {
     } else {
       window.location.hash = "!/" + page + suffixStr;
     }
+    hub.send( "scrollService::pop", {delay: 200});
   }
 
   function openApplicationPage(application, suffix) {

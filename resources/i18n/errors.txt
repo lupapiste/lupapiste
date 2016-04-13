@@ -39,4 +39,6 @@
 "error.appeal-type-change-denied" "fi" "Valituksen/oikaisuvaatimuksen tyyppiä ei voi vaihtaa"
 "error.appeal-type-change-denied" "sv" "Typ av besvär/rättelseyrkan kan inte ändras"
 "error.invalid-tos-function" "fi" "Valittua menettelyä ei löytynyt tiedonohjaussuunnitelmasta"
-"error.invalid-tos-function" "sv" ""
+"error.invalid-tos-function" "sv" "Det valda förfarandet hittades inte i datastyrningsplanen"
+"error.invalid-metadata-for-archive" "fi" "Arkistointiin vaadittavien metatietojen generointi hankkeen tiedoista epäonnistui"
+"error.invalid-metadata-for-archive" "sv" "Projektdata kunde inte genereras till arkiveringsdugliga metadata"

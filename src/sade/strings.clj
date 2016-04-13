@@ -120,9 +120,9 @@
 
 ; alias common clojure.string stuff, so that you dont need to require both namespaces:
 
-(def blank? s/blank?)
+(def ^{:doc "Alias to clojure.string/blank?"} blank? s/blank?)
 
-(def join s/join)
+(def ^{:doc "Arguments: [coll] or [separator coll]. Alias to clojure.string/join"} join s/join)
 
 ;; File name handling
 

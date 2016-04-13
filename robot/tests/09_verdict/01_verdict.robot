@@ -49,7 +49,7 @@ Sonja creates verdict with adds comment
   Wait test id visible  targetted-attachments-table
 
 Add katselmus
-  Create task  task-katselmus  Lopullinen loppukatselmus
+  Create task  task-katselmus  Lopullinen loppukatselmus  loppukatselmus
   # One on this verdict screen (and 3 hidden in tasks tab)
   Task count is  task-katselmus  1
 
@@ -165,10 +165,12 @@ Comment verdict
   Close side panel  conversation
 
 Create task
-  [Arguments]  ${type}  ${message}
+  [Arguments]  ${taskType}  ${message}  ${taskSubtype}=
   Click enabled by test id  verdict-new-task
   Wait until  Element should be visible  dialog-create-task
-  Wait until  Select From List By Value  choose-task-type   ${type}
+  Wait until  Select From List By Value  choose-task-type   ${taskType}
+  Run Keyword If  $taskSubtype  Wait until  Element should be visible  choose-task-subtype
+  Run Keyword If  $taskSubtype  Select From List By Value  choose-task-subtype   ${taskSubtype}
   Input text  create-task-name  ${message}
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task

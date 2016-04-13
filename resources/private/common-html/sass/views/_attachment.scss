@@ -117,8 +117,6 @@ $previewHeight: 500px;
 }
 
 .attachment-info-wrapper {
-  float: left;
-  vertical-align: top;
   margin-top: $marginL;
   width: 80%;
   .tab-info {
@@ -129,10 +127,11 @@ $previewHeight: 500px;
 .attachment-info-header {
   width: 100%;
   display: block;
+  vertical-align: baseline;
   h1 {
     line-height: normal;
     max-width: 80%;
-    float: left;
+    display: inline-block;
   }
   a {
     margin-left: $marginL * 2;
@@ -303,4 +302,12 @@ td.comment-text {
   i {
     font-size: 50px;
   }
+}
+
+// Used when editing tasks, for example
+.targetted-attachments {
+  margin: {
+  top: 10px;
+  bottom: 10px;
+}
 }

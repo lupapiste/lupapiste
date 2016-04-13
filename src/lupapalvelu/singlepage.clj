@@ -10,7 +10,6 @@
             [sade.core :refer :all]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
-           [java.util.zip GZIPOutputStream]
            [org.apache.commons.io IOUtils]
            [com.googlecode.htmlcompressor.compressor HtmlCompressor]
            [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]

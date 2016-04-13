@@ -210,26 +210,25 @@
       }
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
-      var scroll = {x: window.scrollX, y: window.scrollY };
       if (!lightLoad) {
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
 
-        docgen.displayDocuments("#applicationDocgen",
+        docgen.displayDocuments("applicationDocgen",
                                 app,
                                 applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
                                 authorizationModel,
                                 {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
-        docgen.displayDocuments("#partiesDocgen",
+        docgen.displayDocuments("partiesDocgen",
                                 app,
                                 sortedPartyDocs,
                                 authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
-        docgen.displayDocuments("#applicationAndPartiesDocgen",
+        docgen.displayDocuments("applicationAndPartiesDocgen",
                                 app,
                                 applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
                                 authorizationModel,
                                 {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
-        docgen.displayDocuments("#constructionTimeDocgen",
+        docgen.displayDocuments("constructionTimeDocgen",
                                 app,
                                 constructionTimeDocs,
                                 authorizationModel,
@@ -252,12 +251,6 @@
       pageutil.hideAjaxWait();
 
       hub.send("application-model-updated", {applicationId: app.id});
-      // There really should be a better way to restore
-      // the scroll position than waiting for 500 ms and hoping
-      // that everything has been rendered.
-      _.delay( function() {
-        window.scrollTo( scroll.x, scroll.y );
-      }, 500);
     });
   }
 

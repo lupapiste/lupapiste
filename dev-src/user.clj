@@ -56,3 +56,6 @@
                            result))
         result (to-zip-entries zip-stream [])]
     result)) ; returns readable zip entries in sequence
+
+(defn object-id-to-date [object-id]
+  (-> object-id org.bson.types.ObjectId. bean :time java.util.Date.))

@@ -78,6 +78,8 @@
     (defschema version schema)))
 
 (defn get-schema
+  "Returns document schema map that contais :info and :body,
+   see lupapalvelu.document.schema-validation/Doc"
   ([{:keys [version name] :or {version 1}}] (get-schema version name))
   ([schema-version schema-name]
     {:pre [schema-version schema-name]}
@@ -610,19 +612,19 @@
                                     {:name "kaytettavaAika" :type :string :size :s :unit :tuntiaviikko :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
                                     {:name "kayntienMaara" :type :string :size :s :unit :kpl :subtype :number :min 0 :max 9999999}]})
 
-(def hanke-row [{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
-                {:name "katuosoite" :type :string :size :m :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.katuosoite"}
-                {:name "rakennustoimenpide" :type :string :size :l :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
-                {:name "kokonaisala" :type :string :subtype :decimal :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.kokonaisala"}
+(def hanke-row [{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.luvanNumero"}
+                {:name "katuosoite" :type :string :size :m :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.katuosoite"}
+                {:name "rakennustoimenpide" :type :string :size :l :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.rakennustoimenpide" :locPrefix "operations"}
+                {:name "kokonaisala" :type :string :subtype :decimal :size :s :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.kokonaisala"}
                 {:name "vaihe" :type :select :size :t :label false :uicomponent :docgen-select :i18nkey "muutHankkeet.vaihe" :valueAllowUnset false
                  :body [{:name "R" :i18nkey "muutHankkeet.R"}
                         {:name "A" :i18nkey "muutHankkeet.A"}
                         {:name "K" :i18nkey "muutHankkeet.K"}]}
-                {:name "3kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.3kk"}
-                {:name "6kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.6kk"}
-                {:name "9kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.9kk"}
-                {:name "12kk" :type :string :subtype :number  :size :s :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.12kk"}
-                {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-checkbox :whitelist {:roles [:none]
+                {:name "3kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.3kk"}
+                {:name "6kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.6kk"}
+                {:name "9kk" :type :string :subtype :number :size :s :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.9kk"}
+                {:name "12kk" :type :string :subtype :number  :size :s :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.12kk"}
+                {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :docgen-input :inputType :checkbox :whitelist {:roles [:none]
                                                                                                                                                 :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
@@ -736,7 +738,7 @@
                          {:name "m2"}
                          {:name "m3"}]})
 
-(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-string :min 0 :max 9999999 :size :s})
+(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-input :inputType :string :min 0 :max 9999999 :size :s})
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
                                  jateyksikko
@@ -1149,12 +1151,12 @@
                       :type :group
                       :uicomponent :propertyGroup
                       :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s}
-                             ;{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
-                             {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
-                             {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
-                             {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
-                             {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
-                             {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-checkbox}]}
+                             ;{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.luvanNumero"}
+                             {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                             {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                             {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                             {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                             {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-input :inputType :checkbox}]}
                      {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                       :body [{:name "oma"}
                              {:name "vuokra"}
@@ -1183,12 +1185,12 @@
                                 :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s}
                                        ; Please channge yhteystiedot-api/application-property-owners if kiinteistoTunnus path changes
                                        {:name "kiinteistoTunnus" :type :string :hidden true}
-                                       ;{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-string :i18nkey "muutHankkeet.luvanNumero"}
-                                       {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-string}
-                                       {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-string}
-                                       {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
-                                       {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-string}
-                                       {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-checkbox}]}
+                                       ;{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.luvanNumero"}
+                                       {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                       {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
+                                       {:name "maapintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                                       {:name "vesipintaala" :type :string :readonly true :unit :hehtaaria :uicomponent :docgen-input :inputType :string}
+                                       {:name "rantaKytkin" :type :checkbox :uicomponent :docgen-input :inputType :checkbox}]}
                                {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                                 :body [{:name "oma"}
                                        {:name "vuokra"}

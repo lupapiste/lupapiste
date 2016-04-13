@@ -6,16 +6,16 @@ LUPAPISTE.YesNoButtonGroupModel = function (params) {
   self.noTitle = params.noTitle || loc("no");
 
   self.yes = function() {
+    hub.send("close-dialog");
     if (_.isFunction(params.yesFn)) {
       params.yesFn();
     }
-    hub.send("close-dialog");
   };
 
   self.no = function() {
+    hub.send("close-dialog");
     if (_.isFunction(params.noFn)) {
       params.noFn();
     }
-    hub.send("close-dialog");
   };
 };
