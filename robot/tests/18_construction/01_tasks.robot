@@ -55,6 +55,7 @@ Muut lupamaaraykset
 Add attachment to Aloituskokous
   Open task  Aloituskokous
   Wait Until  Title Should Be  ${appname} - Lupapiste
+  Test id disabled  review-done
   Scroll and click test id  add-targetted-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
@@ -63,7 +64,7 @@ Add attachment to Aloituskokous
   Unselect Frame
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
-# FIXME check on a nother type of task
+# FIXME check on another type of task
 Aloituskokous requires action
   [Tags]  fail
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
@@ -85,6 +86,7 @@ Aloituskokous form is still editable (LPK-494)
 Return to listing
   Click link  xpath=//section[@id="task"]//a[@data-test-id='back-to-application-from-task']
   Tab should be visible  tasks
+  Element should be visible  jquery=tr[data-test-index=0] i.lupicon-paperclip
 
 Delete Muu tarkastus
   Wait until  Element should be visible  xpath=//div[@id="application-tasks-tab"]//table[@class="tasks"]//tbody/tr
@@ -169,6 +171,7 @@ Mikko is unable to edit Aloituskokous (LPK-494)
   ${selectCount} =  Get Matching Xpath Count  //section[@id="task"]//select
   Xpath Should Match X Times  //section[@id="task"]//select[@disabled]  ${selectCount}
 
+  No such test id  review-done
 
 Mikko can add attachments though
   Scroll and click test id  add-targetted-attachment
