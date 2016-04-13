@@ -97,6 +97,14 @@ Partial review generates new review
   Finalize review
   Review row check  1  Aloituskokous  ${EMPTY}  ${EMPTY}  ${EMPTY}  ${EMPTY}
 
+The review task cannot be deleted after the review
+  Open review  0
+  Click enabled by test id  delete-task
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Element should be visible  jquery=#dynamic-ok-confirm-dialog
+  Confirm  dynamic-ok-confirm-dialog
+  Return from review
+
 The same thing happens if the new review is also partially reviewed
   Open review  1
   Edit katselmus  osittainen  20.5.2016  Sonja Igen  ${EMPTY}
@@ -198,6 +206,7 @@ Mikko is unable to edit Kayttoonottotarkastus (LPK-494)
   Xpath Should Match X Times  //section[@id="task"]//select[@disabled]  ${selectCount}
 
   No such test id  review-done
+  No such test id  delete-task
 
 Mikko can add attachments though
   Scroll and click test id  add-targetted-attachment
