@@ -12,6 +12,23 @@
     </div>
     <div class="calendar-table"></div>
   </div>
+
+
+  <!-- DIALOGS -->
+
+  <div id="dialog-new-slot" class="window autosized">
+    <div class="dialog-header">
+      <p data-bind="ltext: 'auth-admin.resource.calendar.create-slot'"></p>
+      <p class="dialog-close close lupicon-remove"></p>
+    </div>
+    <div class="dialog-content">
+      <div data-bind="with: $root.calendars.newReservationSlotModel">
+        <span data-bind="text: weekdayStr"></span>
+        ooo
+        <span data-bind="text: startTime"></span>
+      </div>
+    </div>
+  </div>
 </section>
 </body>
 </html>

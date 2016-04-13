@@ -3,6 +3,40 @@ LUPAPISTE.ResourceCalendarsModel = function () {
 
   var self = this;
 
+  function NewReservationSlotModel() {
+    var self = this;
+
+    self.weekday = ko.observable();
+    self.weekdayStr = ko.observable();
+    self.startTime = ko.observable();
+    self.commandName = ko.observable();
+    self.command = null;
+
+    self.init = function(params) {
+      self.commandName(params.commandName);
+      self.command = params.command;
+      self.weekday(util.getIn(params, ["source", "weekday"], null));
+      self.weekdayStr(util.getIn(params, ["source", "weekday", "str"], null));
+      self.startTime(util.getIn(params, ["source", "startTime"], ""));
+    };
+  };
+
+  self.newReservationSlotModel = new NewReservationSlotModel();
+  self.newReservationSlot = function (weekday, time) {
+    self.newReservationSlotModel.init({
+      source: { startTime: time, weekday: weekday },
+      commandName: 'create',
+      command: function() {
+        LUPAPISTE.ModalDialog.close();
+      }
+    });
+    self.openNewReservationSlotDialog();
+  };
+
+  self.openNewReservationSlotDialog = function() {
+    LUPAPISTE.ModalDialog.open("#dialog-new-slot");
+  };
+
   function EditCalendarModel() {
     var self = this;
 

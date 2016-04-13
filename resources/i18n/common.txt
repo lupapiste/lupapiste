@@ -1679,6 +1679,8 @@
 "auth-admin.required-fields-obligatory.title" "sv" "Villkor för att lämna ansökan"
 "auth-admin.resource.calendar.add" "fi" "Lisää kalenteri"
 "auth-admin.resource.calendar.add" "sv" "Lägg till kalendar"
+"auth-admin.resource.calendar.create-slot" "fi" "Lisää varattavia aikoja"
+"auth-admin.resource.calendar.create-slot" "sv" "Lägg till bokningsbara tider"
 "auth-admin.resource.calendar.delete.confirm" "fi" "Oletko varma, että haluat poistaa kalenterin?"
 "auth-admin.resource.calendar.delete.confirm" "sv" "Är du säker på att du vill ta bort kalendern?"
 "auth-admin.resource.calendar.name" "fi" "Nimi"

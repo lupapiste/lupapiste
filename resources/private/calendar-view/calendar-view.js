@@ -10,6 +10,7 @@ var calendarView = (function($) {
     self.organization = ko.observable();
     self.weekdays = ko.observableArray();
     self.timelineTimes = ko.observableArray();
+    self.timelineClickHandler = null;
 
     self.firstFullHour = ko.observable(7);
     self.lastFullHour = ko.observable(16);
@@ -39,6 +40,16 @@ var calendarView = (function($) {
       this.viewText = startTime.format("H:mm") + " - " + this.endTime.format("H:mm") + " Varaus";
     }
 
+    self.clickHandler = function(clazz, data) {
+      if (clazz === 'timeline-slot' && self.timelineClickHandler) {
+        self.timelineClickHandler(this, data);
+      }
+
+      if (clazz === 'reserved-slot') {
+        console.log('reserved-slot', data);
+      }
+    }
+
     self.init = function(params) {
       self.name(util.getIn(params, ["source", "name"], ""));
       self.organization(util.getIn(params, ["source", "organization"], ""));
@@ -53,6 +64,7 @@ var calendarView = (function($) {
                      new Weekday(startOfWeek.clone().isoWeekday(5), [])]);
 
       self.timelineTimes(timelineTimesBuilder());
+      self.timelineClickHandler = util.getIn(params, ["opts", "clickTimeline"], null);
     };
 
     component.applyBindings(self);

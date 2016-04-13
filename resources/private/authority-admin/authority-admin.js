@@ -440,7 +440,9 @@
     }
     var calendarId = pageutil.subPage();
     var calendar = resourceCalendarsModel.items()[calendarId] || { name: "", organization: "" };
-    calendarViewModel.init({ source: calendar });
+    calendarViewModel.init({ source: calendar,
+                             opts: { clickTimeline: resourceCalendarsModel.newReservationSlot }
+                           });
   });
 
   $(function() {
