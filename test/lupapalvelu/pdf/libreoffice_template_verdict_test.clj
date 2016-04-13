@@ -52,7 +52,7 @@
        (fact
          (let [verdict (first (filter #(= "a1" (:id %)) (:verdicts application2)))
                paatos (nth (:paatokset verdict) 0)]
-             (verdict-signatures verdict paatos) => '[["Tytti Mäntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
+             (verdict-signatures verdict paatos) => '[["Tytti M\u00e4ntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
 
 
 (facts "Verdict export krysp "
