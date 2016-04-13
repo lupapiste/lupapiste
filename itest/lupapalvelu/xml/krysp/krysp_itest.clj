@@ -384,7 +384,9 @@
 
       (doseq [attachment (:attachments (query-application apikey application-id))]
         (fact "sent timestamp not set"
-          (:sent attachment) => nil))
+          (:sent attachment) => nil)
+        (fact "read only is false"
+          (:readOnly attachment) => false))
 
       (command apikey :review-done :id application-id :taskId task-id :lang "fi") => ok?
 
@@ -407,7 +409,9 @@
 
         (doseq [attachment (filter :target (:attachments application))]
           (fact "sent timestamp is set"
-            (:sent attachment) => number?))))))
+            (:sent attachment) => number?)
+          (fact "read only is true"
+            (:readOnly attachment) => true))))))
 
 (fact* "Only approved designers are transferred"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Katselmuskatu 18")

@@ -203,13 +203,17 @@
   (let [task (util/find-by-id taskId (:tasks application))
         tila (get-in task [:data :katselmus :tila :value])
 
-        _    (generate-task-pdfa application task user lang)
+        task-pdf-version (generate-task-pdfa application task user lang)
         application (domain/get-application-no-access-checking id)
         all-attachments (:attachments application)
         command (assoc command :application application)
 
         sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
-        set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
+        set-statement (util/deep-merge
+                        (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
+                        (attachment/create-read-only-update-statements
+                          all-attachments
+                          (if task-pdf-version (conj sent-file-ids (:fileId task-pdf-version)) sent-file-ids)))]
 
     (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
 
