@@ -239,6 +239,7 @@
       (doseq [{attachment-id :id} attachments]
         (attachment/delete-attachment! application attachment-id))
       (appeal-common/delete-by-verdict command verdictId)
+      (child-to-attachment/delete-child-attachment application :verdicts verdictId)
       (when step-back?
         (notifications/notify! :application-state-change command)))))
 
