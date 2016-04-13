@@ -107,7 +107,7 @@
            :subtype :review
            :order 1
            :section-help "authority-fills"
-           ;;:i18nprefix "task-katselmus.katselmuksenLaji"
+           :i18nprefix "task-katselmus.katselmuksenLaji"
            } ; Had :i18npath ["katselmuksenLaji"]
         :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["rakennus::4"]
@@ -126,7 +126,7 @@
            :order 1
            :section-help "authority-fills"
            :i18name "task-katselmus"
-           ;;:i18nprefix "task-katselmus.katselmuksenLaji"
+           :i18nprefix "task-katselmus.katselmuksenLaji"
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "katselmus/pitoPvm" "katselmus/pitaja" "vaadittuLupaehtona"]
            {:h2 "task-katselmus.huomautukset"}
