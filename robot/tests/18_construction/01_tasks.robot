@@ -56,6 +56,8 @@ Add attachment to Aloituskokous
   Open task  Aloituskokous
   Wait Until  Title Should Be  ${appname} - Lupapiste
   Test id disabled  review-done
+  Review active
+  Review checkboxes disabled
   Scroll and click test id  add-targetted-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
@@ -82,21 +84,45 @@ Approve Aloituskokous
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
   Xpath Should Match X Times  //section[@id="task"]//input[@readonly]  0
+  Edit katselmus  osittainen  1.5.2016  Sonja Sibbo  Hello world!
 
 Return to listing
-  Click link  xpath=//section[@id="task"]//a[@data-test-id='back-to-application-from-task']
-  Tab should be visible  tasks
-  Element should be visible  jquery=tr[data-test-index=0] i.lupicon-paperclip
+  Return from review
+  Review row check  0  Aloituskokous  1.5.2016  Sonja Sibbo  Osittainen  Kyllä
+  Review row has attachments  0
+  Review row note  0  Hello world!
+
+Partial review generates new review
+  Open review  0
+  Finalize review
+  Review row check  1  Aloituskokous  ${EMPTY}  ${EMPTY}  ${EMPTY}  ${EMPTY}
+
+The same thing happens if the new review is also partially reviewed
+  Open review  1
+  Edit katselmus  osittainen  20.5.2016  Sonja Igen  ${EMPTY}
+  Finalize review
+  Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
+  No such test id  show-review-note-1
+  Review row check  2  Aloituskokous  ${EMPTY}  ${EMPTY}  ${EMPTY}  ${EMPTY}
+
+Making the latest Aloituskokous final will also finalize the first but not the second
+  Open review  2
+  Edit katselmus  lopullinen  22.5.2016  Ronja Rules  Done!
+  Finalize review
+  Review row check  0  Aloituskokous  1.5.2016  Sonja Sibbo  Lopullinen  Kyllä
+  Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
+  Review row check  2  Aloituskokous  22.5.2016  Ronja Rules  Lopullinen  ${EMPTY}
 
 Delete Muu tarkastus
   Wait until  Element should be visible  xpath=//div[@id="application-tasks-tab"]//table[@class="tasks"]//tbody/tr
   Open task  loppukatselmus
+  Review checkboxes enabled
   Click enabled by test id  delete-task
   Confirm  dynamic-yes-no-confirm-dialog
 
 Listing contains one less task
   Tab should be visible  tasks
-  Task count is  task-katselmus  2
+  Task count is  task-katselmus  4
 
 Three buildings, all not started
   [Tags]  fail
@@ -133,7 +159,7 @@ Add katselmus
   Input text  create-task-name  uus muu tarkastus
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
-  Task count is  task-katselmus  3
+  Task count is  task-katselmus  5
 
 Katselmuksenlaji is set and disabled
   Open task  uus muu tarkastus
@@ -157,12 +183,12 @@ Katselmus task created in an YA application does not include any Rakennus inform
   Wait until  Element should not be visible  xpath=//div[@id='taskDocgen']//div[@data-repeating-id='rakennus']
   [Teardown]  Logout
 
-Mikko is unable to edit Aloituskokous (LPK-494)
+Mikko is unable to edit Kayttoonottotarkastus (LPK-494)
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  tasks
-  Open task  Aloituskokous
-
+  Open task  Käyttöönottotarkastus
+  Review checkboxes disabled
   Page Should Contain Element  xpath=//section[@id="task"]//input
   ${inputCount} =  Get Matching Xpath Count  //section[@id="task"]//input
   Xpath Should Match X Times  //section[@id="task"]//input[@disabled]  ${inputCount}
@@ -181,7 +207,7 @@ Mikko can add attachments though
   Click element    test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  ${PNG_TESTFILE_NAME}
-  Click by test id  back-to-application-from-task
+  Return from review
 
 Mikko sets started past date for YA application (LPK-1054)
   Open application  ${appname-ya}  ${propertyId}
@@ -219,3 +245,4 @@ Set date and check
   Wait Until  Element should not be visible  modal-datepicker-date
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element Text Should Be  jquery=[data-test-id=${span}]  ${date}
+
