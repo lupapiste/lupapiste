@@ -15,6 +15,7 @@ Open task
 
 Edit katselmus
   [Arguments]  ${state}  ${date}  ${name}  ${notes}
+  Test id disabled  review-done
   Select From List by test id  katselmus.tila  ${state}
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
@@ -22,6 +23,7 @@ Edit katselmus
   Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ${notes}
   Sleep  2s
   Wait for jQuery
+  Test id enabled  review-done
 
 Open review
   [Arguments]  ${index}
