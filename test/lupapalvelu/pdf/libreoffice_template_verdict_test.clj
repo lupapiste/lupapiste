@@ -7,10 +7,15 @@
     [midje.util :refer [testable-privates]]
     [sade.util :as util]
     [sade.core :as sade]
+    [lupapalvelu.organization :refer :all]
     [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
     [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
     [lupapalvelu.pdf.libre-template-test :refer :all])
   (:import (java.io File StringWriter)))
+
+(def applicant-index #'lupapalvelu.pdf.libreoffice-template-verdict/applicant-index)
+(fact "Applicant index"
+      (applicant-index application2) => '[["Testaaja Testi"]])
 
 (facts "Verdict lupamaaraykset "
        (def verdict-lupamaaraykset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-lupamaaraykset)
@@ -52,38 +57,50 @@
        (fact
          (let [verdict (first (filter #(= "a1" (:id %)) (:verdicts application2)))
                paatos (nth (:paatokset verdict) 0)]
-             (verdict-signatures verdict paatos) => '[["Tytti Mäntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
+           (verdict-signatures verdict paatos) => '[["Tytti Mäntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
 
+
+(defn- start-pos [res]
+  (first (first (filter #(s/includes? (second %) "</draw:frame>") (map-indexed vector res)))))
+
+(background
+  (get-organization "753-R") => {:name {:fi "org-name-fi"}})
 
 (facts "Verdict export krysp "
        (doseq [lang i18n/languages]
          (let [tmp-file (File/createTempFile (str "verdict-krysp-" (name lang) "-") ".fodt")]
            (verdict/write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
-           (let [pos 1121
-                 res (s/split (slurp tmp-file) #"\r?\n")]
+           (let [res (s/split (slurp tmp-file) #"\r?\n")
+                 pos (start-pos res)]
              (.delete tmp-file)
              (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
-             ;(fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
+             (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
+             (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
+             ;;TODO: test rest of the lines
              ))))
 
 (facts "Verdict export non-krysp "
-       (doseq [lang i18n/languages]
-         (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
-           (verdict/write-verdict-libre-doc application2 "a1" 0 lang tmp-file)
-           (let [pos 1121
-                 res (s/split (slurp tmp-file) #"\r?\n")]
-             (.delete tmp-file)
-             (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
-             ;(fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
-             ))))
+         (doseq [lang i18n/languages]
+           (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+             (verdict/write-verdict-libre-doc application2 "a1" 0 lang tmp-file)
+             (let [res (s/split (slurp tmp-file) #"\r?\n")
+                   pos (start-pos res)]
+               (.delete tmp-file)
+               (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
+               (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
+               (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
+               ;;TODO: test rest of the lines
+               ))))
 
 (facts "Verdict-contract export non-krysp "
        (doseq [lang i18n/languages]
-         (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
-           (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
-           (let [pos 1157
-                 res (s/split (slurp tmp-file) #"\r?\n")]
-             #_(.delete tmp-file)
-             (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "userInfo.company.contract")))
-             ;(fact {:midje/description (str " verdict libre document kuntalupatunnus (" (name lang) ")")} (nth res (+ pos 55)) => #(s/includes? % (str (localize lang "verdict.id") ": " "20160043")))
-             ))))
+           (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
+             (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
+             (let [res (s/split (slurp tmp-file) #"\r?\n")
+                   pos (start-pos res)]
+               (.delete tmp-file)
+               (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "userInfo.company.contract")))
+               (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
+               (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
+               (fact {:midje/description (str " verdict libre document last signature ")} (nth res (+ pos 87)) => #(s/includes? % "Minna Mallikas"))
+               ))))

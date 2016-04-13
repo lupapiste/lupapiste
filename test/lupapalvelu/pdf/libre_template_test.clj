@@ -29,6 +29,7 @@
                    :applicant    "Testaaja Testi"
                    :address      "Korpikuusen kannon alla 6"
                    :municipality "186"
+                   :documents []
                    :verdicts     [{:id              "a1"
                                    :timestamp       1454562242169
                                    :kuntalupatunnus "20160043"
@@ -126,6 +127,7 @@
                    :applicant    "Testaaja Testi"
                    :address      "Korpikuusen kannon alla 6"
                    :municipality "186"
+                   :documents []
                    :verdicts     [{:id              "a1"
                                    :timestamp       1454562242169
                                    :kuntalupatunnus "20160043"
