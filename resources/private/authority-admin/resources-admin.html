@@ -19,7 +19,7 @@
           <td data-bind="text: organization"></td>
           <td>
             <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
-              [<a href="#" data-bind="click: $root.calendars.viewCalendar.bind($data), ltext: 'view'"></a>]
+              [<a data-bind="attr: {'href': '#!/calendar-admin/' + $index() }, ltext: 'view'"></a>]
               [<a href="#" data-bind="click: $root.calendars.editCalendar.bind($data, $index), ltext: 'edit'"
                   data-test-id="edit" class="modal"></a>]
               [<a href="#" data-bind="click: $root.calendars.rmCalendar.bind($data, $index), ltext: 'remove'"
@@ -35,18 +35,6 @@
   </div>
 
   <!-- DIALOGS -->
-
-  <div id="dialog-view-calendar" class="window">
-    <div class="dialog-header">
-      <div>
-        <p>Kalenteri</p>
-        <p class="dialog-close close lupicon-remove"></p>
-      </div>
-    </div>
-    <div class="dialog-content">
-      <div class="view-calendar-table"></div>
-    </div>
-  </div>
 
   <div id="dialog-edit-calendar" class="window autosized">
     <div class="dialog-header">

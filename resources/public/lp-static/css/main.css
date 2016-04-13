@@ -14866,41 +14866,40 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 }
 
 /* line 1, ../../../private/common-html/sass/views/_resources.scss */
-#dialog-view-calendar {
+#calendar-admin .container > div {
+  padding: 0px 24px;
+}
+
+/* line 5, ../../../private/common-html/sass/views/_resources.scss */
+#calendar-admin .calendar-table {
   width: 47.5em;
   min-height: 144px;
-  height: 90%;
 }
-/* line 6, ../../../private/common-html/sass/views/_resources.scss */
-#dialog-view-calendar .dialog-content {
-  height: 100%;
-  overflow-y: scroll;
-}
-/* line 11, ../../../private/common-html/sass/views/_resources.scss */
-#dialog-view-calendar table {
+/* line 9, ../../../private/common-html/sass/views/_resources.scss */
+#calendar-admin .calendar-table table {
   width: 97%;
 }
-/* line 13, ../../../private/common-html/sass/views/_resources.scss */
-#dialog-view-calendar table td {
+/* line 11, ../../../private/common-html/sass/views/_resources.scss */
+#calendar-admin .calendar-table table td {
   background: #f6f6f6;
   padding: 6px;
   width: 19%;
 }
-/* line 18, ../../../private/common-html/sass/views/_resources.scss */
-#dialog-view-calendar table td:nth-child(even) {
+/* line 16, ../../../private/common-html/sass/views/_resources.scss */
+#calendar-admin .calendar-table table td:nth-child(even) {
   background: white;
 }
-/* line 22, ../../../private/common-html/sass/views/_resources.scss */
-#dialog-view-calendar table td div.timeline-slot {
+/* line 20, ../../../private/common-html/sass/views/_resources.scss */
+#calendar-admin .calendar-table table td div.timeline-slot {
   height: 30px;
   border-bottom: 1px solid #ccc;
 }
-/* line 25, ../../../private/common-html/sass/views/_resources.scss */
-#dialog-view-calendar table td div.timeline-slot:hover {
+/* line 23, ../../../private/common-html/sass/views/_resources.scss */
+#calendar-admin .calendar-table table td div.timeline-slot:hover {
   background: #dddddd;
 }
-/* line 30, ../../../private/common-html/sass/views/_resources.scss */
-#dialog-view-calendar table td .reserved-slot {
+/* line 28, ../../../private/common-html/sass/views/_resources.scss */
+#calendar-admin .calendar-table table td .reserved-slot {
   position: absolute;
   background-color: #fbc732;
   width: 100%;

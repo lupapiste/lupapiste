@@ -13,7 +13,8 @@
       linkToVendorBackendModel,
       usersList = null,
       editRolesDialogModel,
-      resourceCalendarsModel;
+      resourceCalendarsModel,
+      calendarViewModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -433,6 +434,15 @@
     linkToVendorBackendModel.load();
   });
 
+  hub.onPageLoad("calendar-admin", function() {
+    if (!calendarViewModel) {
+      calendarViewModel = calendarView.create($("#calendar-admin .calendar-table"));
+    }
+    var calendarId = pageutil.subPage();
+    var calendar = resourceCalendarsModel.items()[calendarId] || { name: "", organization: "" };
+    calendarViewModel.init({ source: calendar });
+  });
+
   $(function() {
     organizationModel.load();
     resourceCalendarsModel.load();
@@ -466,6 +476,9 @@
       organization:        organizationModel
     });
     $("#resources-admin").applyBindings({
+      calendars:           resourceCalendarsModel
+    });
+    $("#calendar-admin").applyBindings({
       calendars:           resourceCalendarsModel
     });
     // Init the dynamically created dialogs

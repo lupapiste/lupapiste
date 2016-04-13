@@ -1,8 +1,7 @@
 LUPAPISTE.ResourceCalendarsModel = function () {
   "use strict";
 
-  var self = this,
-      calendarViewModel = null;
+  var self = this;
 
   function EditCalendarModel() {
     var self = this;
@@ -90,20 +89,8 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     return false;
   };
 
-  self.viewCalendar = function() {
-    self.openCalendarViewDialog();
-    if (!calendarViewModel) {
-      calendarViewModel = calendarView.create($("#dialog-view-calendar .view-calendar-table"));
-    }
-    calendarViewModel.init({ source: this });
-    LUPAPISTE.ModalDialog.open("#dialog-view-calendar");
-  };
-
   self.openCalendarEditDialog = function() {
     LUPAPISTE.ModalDialog.open("#dialog-edit-calendar");
-  };
-
-  self.openCalendarViewDialog = function() {
   };
 
   self.init = function(data) {

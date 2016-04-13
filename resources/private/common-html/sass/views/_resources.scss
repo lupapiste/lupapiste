@@ -1,12 +1,10 @@
-#dialog-view-calendar {
+#calendar-admin>.container>div {
+  padding: 0px $baseline;
+}
+
+#calendar-admin .calendar-table {
   width:$cols8;
   min-height:$baseline * 6;
-  height: 90%;
-
-  .dialog-content {
-    height: 100%;
-    overflow-y: scroll;
-  }
 
   table {
     width: 97%;
