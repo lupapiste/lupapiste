@@ -72,11 +72,13 @@
     (build-attachment user app child-type id lang pdf-file attachment-id)))
 
 (defn create-attachment-from-children [user app child-type id lang]
-  "Generates attachment from child and saves it"
+  "Generates attachment from child and saves it. Returns created attachment version."
   (let [child (generate-attachment-from-children user app child-type id lang)
         file (:content child)]
-    (attachment/attach-file! app child)
-    (io/delete-file file :silently)))
+    (try
+      (attachment/attach-file! app child)
+      (finally
+        (io/delete-file file :silently)))))
 
 (defn delete-child-attachment [app child-type id]
   (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))
