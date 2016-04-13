@@ -1197,6 +1197,9 @@ Scroll to
 Scroll to top
   Execute javascript  window.scrollTo(0,0)
 
+Scroll to bottom
+  Execute javascript  window.scrollTo(0,888888)
+
 Scroll to test id
   [Arguments]  ${id}
   Scroll to  [data-test-id=${id}]
