@@ -37,6 +37,9 @@
    :constructionStarted "ei tiedossa"
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
+(defn last-history-timestamp [state application]
+  (some #(when (= state (:state %)) (:ts %)) (reverse (application :history))))
+
 (def- state-timestamp-fn
   {:submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
@@ -47,7 +50,8 @@
    :closed :closed})
 
 (defn state-timestamp [{state :state :as application}]
-  ((state-timestamp-fn (keyword state)) application))
+  ((or (state-timestamp-fn (keyword state))
+       (partial last-history-timestamp state)) application))
 
 (defn all-state-timestamps [application]
   (into {}

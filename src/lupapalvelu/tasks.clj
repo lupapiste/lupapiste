@@ -39,9 +39,14 @@
    :body (mapv (partial hash-map :name) task-types)})
 
 (def- katselmuksenLaji-ya
-  (assoc katselmuksenLaji :body [{:name "Aloituskatselmus"}
-                                 {:name "Loppukatselmus"}
-                                 {:name "Muu valvontak\u00e4ynti"}]))
+  {:name "katselmuksenLaji"
+   :type :select :sortBy :displayname
+   :css [:dropdown]
+   :required true
+   :whitelist {:roles [:authority] :otherwise :disabled}
+   :body [{:name "Aloituskatselmus"}
+          {:name "Loppukatselmus"}
+          {:name "Muu valvontak\u00e4ynti"}]})
 
 (def- task-katselmus-body
   [katselmuksenLaji
@@ -98,7 +103,8 @@
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
-    (tools/schema-body-without-element-by-name task-katselmus-body "rakennus" "tila" "katselmuksenLaji")))
+          (update-in (tools/schema-body-without-element-by-name task-katselmus-body "rakennus" "tila" "katselmuksenLaji")
+                     [1 :body 2 :body 0] assoc :required true)))
 
 (schemas/defschemas
   task-schemas-version
