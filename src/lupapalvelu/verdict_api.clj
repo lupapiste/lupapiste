@@ -41,54 +41,6 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
-(defn normalize-special-verdict
-  "Normalizes special foreman/designer verdicts by
-  creating a traditional paatostieto element from the proper special
-  verdict party.
-    application: Application that requests verdict.
-    app-xml:     Verdict xml message
-  Returns either normalized app-xml (without namespaces) or app-xml if
-  the verdict is not special."
-  [application app-xml]
-  (let [xml (cr/strip-xml-namespaces app-xml)]
-    (if (verdict/special-foreman-designer-verdict? (meta-fields/enrich-with-link-permit-data application) xml)
-      (verdict/verdict-xml-with-foreman-designer-verdicts application xml)
-      app-xml)))
-
-(defn save-verdicts-from-xml
-  "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
-  [{:keys [application] :as command} app-xml]
-  (appeal-common/delete-all command)
-  (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-    (when updates
-      (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
-        (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
-        (t/mark-app-and-attachments-final! (:id application) (:created command))))
-    (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
-
-(defn save-buildings
-  "Get buildings from verdict XML and save to application. Updates also operation documents
-   with building data, if applicable."
-  [{:keys [application] :as command} buildings]
-  (let [building-updates (building/building-updates buildings application)]
-    (update-application command {$set building-updates})
-    (when building-updates {:buildings (map :nationalId buildings)})))
-
-(defn do-check-for-verdict [{:keys [application] :as command}]
-  {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
-                         ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
-                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))]
-    (let [app-xml (normalize-special-verdict application app-xml)
-          organization (organization/get-organization (:organization application))
-          validator-fn (permit/get-verdict-validator (permit/permit-type application))
-          validation-errors (validator-fn app-xml organization)]
-      (if-not validation-errors
-        (save-verdicts-from-xml command app-xml)
-        (if-let [buildings (seq (building-reader/->buildings-summary app-xml))]
-          (merge validation-errors (save-buildings command buildings))
-          validation-errors)))))
-
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
    :tab            "verdict"})
@@ -113,7 +65,7 @@
    :pre-checks [application-has-verdict-given-state]
    :on-success (notify :application-verdict)}
   [command]
-  (let [result (do-check-for-verdict command)]
+  (let [result (verdict/do-check-for-verdict command)]
     (cond
       (nil? result) (fail :info.no-verdicts-found-from-backend)
       (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
