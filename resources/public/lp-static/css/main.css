@@ -1,5 +1,9 @@
-@import url('main-blessed1.css?z=1460547988852');
+@import url('main-blessed1.css?z=1460619730158');
 
+/* line 183, ../../../private/common-html/sass/views/_applications.scss */
+.filter-controls select {
+  display: block;
+}
 
 /* line 189, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list .indicator-count, .applications-table .indicator-count {

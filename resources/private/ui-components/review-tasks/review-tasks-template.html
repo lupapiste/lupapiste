@@ -40,6 +40,7 @@
         <!-- ko if: notesVisible -->
         <tr class="reviews-table__note">
           <td colspan="7"
+              class="reviews-table--extra"
               data-bind="text: notes,
                          attr: {'data-test-id': 'review-note-' + $index()}"></td>
         </tr>
