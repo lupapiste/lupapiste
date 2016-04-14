@@ -387,6 +387,9 @@
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
 
+(defn ->backend-ids [xml]
+  (->> (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)
+       (map ->kuntalupatunnus)))
 
 ;; Reads the verdicts
 ;; Arguments:

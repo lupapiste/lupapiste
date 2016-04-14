@@ -99,7 +99,7 @@
 (defschema Poytakirja
   "Schema for verdict record."
   {(sc/optional-key :paatoksentekija) (sc/maybe sc/Str)
-   (sc/optional-key :paatoskoodi)     (sc/maybe sc/Str) ;; (apply sc/enum verdict-codes), data contains invalid values: nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11" 
+   (sc/optional-key :paatoskoodi)     (sc/maybe sc/Str) ;; (apply sc/enum verdict-codes), data contains invalid values: nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11"
    (sc/optional-key :status)          (sc/maybe Status)
    (sc/optional-key :urlHash)         sc/Str
    (sc/optional-key :paatos)          (sc/maybe sc/Str)
@@ -152,6 +152,13 @@
    (sc/optional-key :signatures) [Signature]
    (sc/optional-key :metadata)   (sc/eq nil)})
 
+(defn- backend-id->verdict [backend-id]
+  {:id              (mongo/create-id)
+   :kuntalupatunnus backend-id
+   :timestamp       nil
+   :paatokset       []
+   :draft           true})
+
 (defn verdict-attachment-type
   ([application] (verdict-attachment-type application "paatosote"))
   ([{permit-type :permitType :as application} type]
@@ -201,7 +208,7 @@
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
          (if (= 200 (:status resp))
-           (attachment/attach-file! current-application 
+           (attachment/attach-file! current-application
                                     {:filename (or header-filename filename)
                                      :size content-length
                                      :content (:body resp)
@@ -372,6 +379,15 @@
     (update-application command {$set building-updates})
     (when building-updates {:buildings (map :nationalId buildings)})))
 
+(defn- save-backend-ids
+  [{{verdicts :verdicts} :application :as command} backend-ids]
+  (some->> backend-ids
+           (remove (set (map :kuntalupatunnus verdicts)))
+           (map backend-id->verdict)
+           (assoc-in {} [$push :verdicts $each])
+           (update-application command))
+  (when backend-ids {:backend-ids backend-ids}))
+
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
@@ -383,6 +399,8 @@
           validation-errors (validator-fn app-xml organization)]
       (if-not validation-errors
         (save-verdicts-from-xml command app-xml)
-        (if-let [buildings (seq (building-reader/->buildings-summary app-xml))]
-          (merge validation-errors (save-buildings command buildings))
-          validation-errors)))))
+        (let [buildings    (seq (building-reader/->buildings-summary app-xml))
+              backend-ids  (seq (krysp-reader/->backend-ids app-xml))]
+          (cond-> validation-errors
+            buildings   (merge (save-buildings command buildings))
+            backend-ids (merge (save-backend-ids command backend-ids))))))))
