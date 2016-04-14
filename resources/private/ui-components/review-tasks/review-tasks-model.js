@@ -36,7 +36,7 @@ LUPAPISTE.ReviewTasksModel = function( params ) {
                   date: reviewProperty( task, "pitoPvm"),
                   author: reviewProperty( task, "pitaja"),
                   state: reviewProperty( task, "tila"),
-                  condition: task.data.vaadittuLupaehtona.value,
+                  condition: util.getIn(task, ["data", "vaadittuLupaehtona", "value"]),
                   notes: reviewProperty( task, "huomautukset.kuvaus"),
                   id: task.id,
                   source: task.source
