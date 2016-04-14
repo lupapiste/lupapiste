@@ -309,10 +309,9 @@
         apps))))
 
 (defn check-for-verdicts [& args]
-  (when (env/feature? :automatic-verdicts-checking)
-    (mongo/connect!)
-    (fetch-verdicts)
-    (mongo/disconnect!)))
+  (mongo/connect!)
+  (fetch-verdicts)
+  (mongo/disconnect!))
 
 (defn- get-asianhallinta-ftp-users [organizations]
   (->> (for [org organizations
