@@ -339,7 +339,7 @@
       nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
       (enlive/at xml [:RakennusvalvontaAsia place] (enlive/before paatostieto)))))
 
-(defn normalize-special-verdict
+(defn- normalize-special-verdict
   "Normalizes special foreman/designer verdicts by
   creating a traditional paatostieto element from the proper special
   verdict party.
@@ -353,7 +353,7 @@
       (verdict-xml-with-foreman-designer-verdicts application xml)
       app-xml)))
 
-(defn save-verdicts-from-xml
+(defn- save-verdicts-from-xml
   "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
   [{:keys [application] :as command} app-xml]
   (appeal-common/delete-all command)
@@ -364,7 +364,7 @@
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
 
-(defn save-buildings
+(defn- save-buildings
   "Get buildings from verdict XML and save to application. Updates also operation documents
    with building data, if applicable."
   [{:keys [application] :as command} buildings]
