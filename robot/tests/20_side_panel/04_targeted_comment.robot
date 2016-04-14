@@ -38,6 +38,3 @@ Open the application
 Comment is visible
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
   [Teardown]  Logout
-
-No errors so far
-  There are no frontend errors

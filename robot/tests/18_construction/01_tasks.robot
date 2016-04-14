@@ -229,6 +229,9 @@ Mikko sets started past date for YA application (LPK-1054)
 # TODO: Sonja sets ready past date for YA application (LPK-1054)
 # This would require a well-formed application with all the required fields.
 
+No errors so far
+  There are no frontend errors
+
 *** Keywords ***
 
 Create katselmus task
@@ -254,4 +257,3 @@ Set date and check
   Wait Until  Element should not be visible  modal-datepicker-date
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element Text Should Be  jquery=[data-test-id=${span}]  ${date}
-
