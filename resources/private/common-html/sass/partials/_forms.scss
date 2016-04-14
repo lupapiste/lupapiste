@@ -429,6 +429,11 @@ input.form-input.inline {
  width: $cols2;
 }
 
+.form-paragraph {
+  white-space: pre-wrap;
+  padding-left: 1em;
+}
+
 // docgen-spefic styles
 .docgen-content {
   transition: width 600ms;

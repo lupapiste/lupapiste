@@ -144,7 +144,7 @@
    {:info {:name "task-lupamaarays" :type :task :order 20}
     :rows [["maarays::3"] ["kuvaus::3"]]
     :template "form-grid-docgen-group-template"
-    :body [{:name "maarays" :type :text :max-len 20000 :readonly true}
+    :body [{:name "maarays" :type :text :inputType :paragraph :max-len 20000 :readonly true}
            {:name "kuvaus"  :type :text :max-len 4000 }
            {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
 
