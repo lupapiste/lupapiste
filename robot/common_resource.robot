@@ -1233,7 +1233,7 @@ Test id empty
 Test id disabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Element should be disabled  jquery=[data-test-id=${id}]
+  Wait Until  Element should be disabled  jquery=[data-test-id=${id}]
 
 Test id enabled
   [Arguments]  ${id}

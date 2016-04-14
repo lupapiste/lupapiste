@@ -27,7 +27,7 @@ Edit katselmus
 
 Open review
   [Arguments]  ${index}
-  Click element  jquery=tr[data-test-index=${index}] td[data-test-column=requirement] a
+  Wait until  Click element  jquery=tr[data-test-index=${index}] td[data-test-column=requirement] a
   Wait test id visible  review-done
 
 Return from review
