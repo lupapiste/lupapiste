@@ -14,9 +14,9 @@ Open task
   Wait Until  Element should be visible  taskAttachments
 
 Edit katselmus
-  [Arguments]  ${state}  ${date}  ${name}  ${notes}
+  [Arguments]  ${select}  ${item}  ${date}  ${name}  ${notes}
   Test id disabled  review-done
-  Select From List by test id  katselmus.tila  ${state}
+  Select From List by test id  ${select}  ${item}
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
   Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}
@@ -24,6 +24,14 @@ Edit katselmus
   Sleep  2s
   Wait for jQuery
   Test id enabled  review-done
+
+Edit R katselmus
+  [Arguments]  ${state}  ${date}  ${name}  ${notes}
+  Edit katselmus  katselmus.tila  ${state}  ${date}  ${name}  ${notes}
+
+Edit YA katselmus
+  [Arguments]  ${type}  ${date}  ${name}  ${notes}
+  Edit katselmus  katselmuksenLaji  ${type}  ${date}  ${name}  ${notes}
 
 Open review
   [Arguments]  ${index}

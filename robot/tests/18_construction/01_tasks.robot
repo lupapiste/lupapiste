@@ -84,7 +84,7 @@ Approve Aloituskokous
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
   Xpath Should Match X Times  //section[@id="task"]//input[@readonly]  0
-  Edit katselmus  osittainen  1.5.2016  Sonja Sibbo  Hello world!
+  Edit R katselmus  osittainen  1.5.2016  Sonja Sibbo  Hello world!
 
 Return to listing
   Return from review
@@ -107,7 +107,7 @@ The review task cannot be deleted after the review
 
 The same thing happens if the new review is also partially reviewed
   Open review  1
-  Edit katselmus  osittainen  20.5.2016  Sonja Igen  ${EMPTY}
+  Edit R katselmus  osittainen  20.5.2016  Sonja Igen  ${EMPTY}
   Finalize review
   Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
   No such test id  show-review-note-1
@@ -115,7 +115,7 @@ The same thing happens if the new review is also partially reviewed
 
 Making the latest Aloituskokous final will also finalize the first but not the second
   Open review  2
-  Edit katselmus  lopullinen  22.5.2016  Ronja Rules  Done!
+  Edit R katselmus  lopullinen  22.5.2016  Ronja Rules  Done!
   Finalize review
   Review row check  0  Aloituskokous  1.5.2016  Sonja Sibbo  Lopullinen  Kyllä
   Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
@@ -225,6 +225,19 @@ Mikko sets started past date for YA application (LPK-1054)
   Set date and check  application-inform-construction-started-btn  construction-state-change-info-started  10.8.2012
   Wait Until  Element Text Should Be  jquery=[data-test-id=task-started-by]  Intonen Mikko
   [Teardown]  Logout
+
+Sonja comes back and finalizes YA review
+  Sonja logs in
+  Open application  ${appname-ya}  ${propertyId}
+  Open tab  tasks
+  Open task  uus muu ya-tarkastus
+  Edit YA katselmus  Aloituskatselmus  14.4.2016  Some Sonja  Description is mandatory for YA reviews.
+  # TODO: Sending requires fully formed application
+  #Finalize review
+  [Teardown]  Logout
+
+
+
 
 # TODO: Sonja sets ready past date for YA application (LPK-1054)
 # This would require a well-formed application with all the required fields.
