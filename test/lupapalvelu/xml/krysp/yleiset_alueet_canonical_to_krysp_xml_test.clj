@@ -150,6 +150,11 @@
         canonical (katselmus-canonical application  katselmus "fi" {})
         operation-name-key (-> application :primaryOperation :name keyword)
         lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
+
+        xml-212 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.2")
+        xml-212s (indent-str xml-212)
+        lp-xml-212 (cr/strip-xml-namespaces (xml/parse xml-212s))
+
         xml-221 (yleisetalueet-element-to-xml canonical lupa-name-key "2.2.1")
         xml-221s (indent-str xml-221)
         lp-xml-221 (cr/strip-xml-namespaces (xml/parse xml-221s))
@@ -157,6 +162,7 @@
         katselmus (xml/select1 lp-xml-221 [:katselmustieto :Katselmus])
         huomautus (xml/select1 katselmus [:Huomautus])]
 
+    (validator/validate xml-212s (:permitType application) "2.1.2")
     (validator/validate xml-221s (:permitType application) "2.2.1")
 
     (fact "pitaja" (xml/get-text katselmus [:pitaja]) => "Viranomaisen nimi")
