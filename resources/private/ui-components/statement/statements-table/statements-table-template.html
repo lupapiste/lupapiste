@@ -26,9 +26,9 @@
                       <!-- /ko -->
                   </tr>
               </thead>
-              <tbody data-bind="foreach: $data.statements()">
+              <tbody data-bind="foreach: $data.statements">
                   <tr class="statement-row"
-                      data-bind="click: _.partial($component.openStatement, 'statement')">
+                      data-bind="click: _.partial($component.openStatement, 'statement'), attr: {'data-test-email':$data.person.email()}">
                       <td>
                         <i class="lupicon-paperclip" data-bind="visible: $component.hasAttachment($data),
                                                                 attr: {'title': loc('tooltip.statement-or-reply-has-attachments')}"></i>
@@ -36,7 +36,7 @@
                       <td>
                           <span data-bind="if: $component.canAccessStatement($data)">
                               <a href="#" data-bind="text: $data.person.text,
-                                                     attr: {'data-test-id' : 'open-statement-' + $index()}"></a>
+                                                     attr: {'data-test-email' : 'open-statement-' + $data.person.email()}"></a>
                           </span>
                           <span data-bind="ifnot: $component.canAccessStatement($data)">
                               <span data-bind="text: $data.person.text, attr: {'data-test-id' : 'open-statement-' + $index()}"></span>
@@ -50,7 +50,7 @@
                       <td>
                         <!-- ko if: $component.isGiven($data) -->
                         <span data-bind="text: $data.status && $data.status() && loc(['statement', $data.status()]),
-                                         attr: {'data-test-id' : 'statement-status-' + $index()}"></span>
+                                         attr: {'data-test-id' : 'statement-status-' + $index()}" data-test-class="statement-status"></span>
                         <!-- /ko -->
                       </td>
                       <td data-bind="visible: $component.repliesEnabled">

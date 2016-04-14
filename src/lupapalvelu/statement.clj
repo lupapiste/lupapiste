@@ -140,8 +140,9 @@
 
 (defn fetch-organization-statement-givers [org-id]
   (let [organization (organization/get-organization org-id)
-        permitPersons (or (:statementGivers organization) [])]
-    (ok :data permitPersons)))
+        statement-givers (->> (or (:statementGivers organization) [])
+                              (sort-by (juxt :text :name)))]
+    (ok :data statement-givers)))
 
 ;;
 ;; Statuses
