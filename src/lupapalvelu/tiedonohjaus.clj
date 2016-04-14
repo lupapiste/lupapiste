@@ -81,16 +81,16 @@
                             (remove nil?)
                             (sort)
                             (last))]
-    (-> (c/from-long paatos-ts)
+    (-> (c/from-long (long paatos-ts))
         (t/plus (t/years years))
         (.toDate))))
 
 (defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} verdicts]
-  (when (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi))
+  (when (and (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi)) (seq verdicts))
     (paatospvm-plus-years verdicts pituus)))
 
 (defn- security-end-date [{:keys [salassapitoaika julkisuusluokka]} verdicts]
-  (when (and (#{:osittain-salassapidettava :salainen} (keyword julkisuusluokka)) salassapitoaika)
+  (when (and (#{:osittain-salassapidettava :salainen} (keyword julkisuusluokka)) salassapitoaika (seq verdicts))
     (paatospvm-plus-years verdicts salassapitoaika)))
 
 (defn update-end-dates [metadata verdicts]
