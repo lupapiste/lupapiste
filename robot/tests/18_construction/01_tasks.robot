@@ -185,7 +185,7 @@ Katselmus task created in an YA application does not include any Rakennus inform
   Open tab  verdict
   Fetch YA verdict
   Open tab  tasks
-  Create katselmus task  task-katselmus-ya  uus muu ya-tarkastus  Muu valvontak\u00e4ynti
+  Create katselmus task  task-katselmus-ya  uus muu ya-tarkastus
   Task count is  task-katselmus-ya  1
   Open task  uus muu ya-tarkastus
   Wait until  Element should not be visible  xpath=//div[@id='taskDocgen']//div[@data-repeating-id='rakennus']
