@@ -18,7 +18,9 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.refresh = function(application, authorities) {
     self.applicationId = application.id;
-    var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
+    var verdicts = _(application.verdicts || [])
+      .cloneDeep()
+      .map(function(verdict) {
       var paatokset = _.map(verdict.paatokset || [], function(paatos) {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
           var myAttachments = _.filter(application.attachments || [], function(attachment) {
@@ -50,7 +52,8 @@ LUPAPISTE.VerdictsModel = function() {
       verdict.canBePublished = verdict.kuntalupatunnus && pk.status && pk.paatoksentekija && dates.anto && dates.lainvoimainen;
 
       return verdict;
-    });
+    })
+      .filter(function(v) {return !_.isEmpty(v.paatokset)});
 
     self.verdicts(verdicts);
     self.authorities = authorities;
