@@ -3,6 +3,15 @@ LUPAPISTE.ResourceCalendarsModel = function () {
 
   var self = this;
 
+  var dummyReservationSlotsFixture = function() {
+    var slots = [],
+        startOfWeek = moment().startOf('isoWeek');
+    slots.push({ startTime: startOfWeek.clone().isoWeekday(2).hour(9).toISOString(),
+                 status: "available",
+                 duration: "PT1H" });
+    return slots;
+  };
+
   function NewReservationSlotModel() {
     var self = this;
 
@@ -136,7 +145,7 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     // DUMMY DATA
     self.init({
       calendars: [
-        { name: "Tarkastaja Teppo", organization: "Rakennusvalvonta" }
+        { name: "Tarkastaja Teppo", organization: "Rakennusvalvonta", slots: dummyReservationSlotsFixture() }
       ]
     });
   };

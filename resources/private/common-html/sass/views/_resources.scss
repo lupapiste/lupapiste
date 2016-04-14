@@ -3,7 +3,7 @@
 }
 
 #calendar-admin .calendar-table {
-  width:$cols8;
+  width:$cols12;
   min-height:$baseline * 6;
 
   table {
@@ -25,7 +25,7 @@
         }
       }
 
-      .reserved-slot {
+      .reservation-slot {
         position: absolute;
         background-color: $orange-light;
         width: 100%;

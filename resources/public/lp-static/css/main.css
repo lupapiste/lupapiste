@@ -14866,13 +14866,13 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 }
 
 /* line 1, ../../../private/common-html/sass/views/_resources.scss */
-#calendar-admin .container > div {
+#calendar-admin > .container > div {
   padding: 0px 24px;
 }
 
 /* line 5, ../../../private/common-html/sass/views/_resources.scss */
 #calendar-admin .calendar-table {
-  width: 47.5em;
+  width: 72.5em;
   min-height: 144px;
 }
 /* line 9, ../../../private/common-html/sass/views/_resources.scss */
@@ -14899,7 +14899,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   background: #dddddd;
 }
 /* line 28, ../../../private/common-html/sass/views/_resources.scss */
-#calendar-admin .calendar-table table td .reserved-slot {
+#calendar-admin .calendar-table table td .reservation-slot {
   position: absolute;
   background-color: #fbc732;
   width: 100%;

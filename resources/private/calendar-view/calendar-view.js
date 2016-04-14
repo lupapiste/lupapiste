@@ -31,7 +31,7 @@ var calendarView = (function($) {
       self.slots = ko.observableArray(slots);
     }
 
-    function ReservedSlot(startTime, duration) {
+    function ReservationSlot(startTime, duration) {
       this.startTime = startTime;
       this.duration = duration;
       this.endTime = startTime.clone().add(duration);
@@ -45,8 +45,8 @@ var calendarView = (function($) {
         self.timelineClickHandler(this, data);
       }
 
-      if (clazz === 'reserved-slot') {
-        console.log('reserved-slot', data);
+      if (clazz === 'reservation-slot') {
+        console.log('reservation-slot', data);
       }
     }
 
@@ -54,14 +54,13 @@ var calendarView = (function($) {
       self.name(util.getIn(params, ["source", "name"], ""));
       self.organization(util.getIn(params, ["source", "organization"], ""));
 
-      // DUMMY DATA
+      console.log(params.source.slots);
       var startOfWeek = moment().startOf('isoWeek');
-      self.weekdays([new Weekday(startOfWeek.clone().isoWeekday(1), []),
-                     new Weekday(startOfWeek.clone().isoWeekday(2),
-                       [new ReservedSlot(startOfWeek.clone().isoWeekday(2).hour(9), moment.duration(1, 'hours'))]),
-                     new Weekday(startOfWeek.clone().isoWeekday(3), []),
-                     new Weekday(startOfWeek.clone().isoWeekday(4), []),
-                     new Weekday(startOfWeek.clone().isoWeekday(5), [])]);
+      self.weekdays(_.map([1, 2, 3, 4, 5], function(i) {
+        var day = startOfWeek.clone().isoWeekday(i);
+        var slotsForDay = _.filter(params.source.slots, function(s) { return day.isSame(s.startTime, 'day'); });
+        return new Weekday(day, _.map(slotsForDay, function(s) { return new ReservationSlot(moment(s.startTime), moment.duration(s.duration)); }));
+      }));
 
       self.timelineTimes(timelineTimesBuilder());
       self.timelineClickHandler = util.getIn(params, ["opts", "clickTimeline"], null);
