@@ -21,11 +21,12 @@
 
 ;; Helpers
 
-(defn- assert-task-state-in [states {{task-id :taskId} :data {tasks :tasks} :application}]
-  (if-let [task (util/find-by-id task-id tasks)]
-    (when-not ((set states) (keyword (:state task)))
-      (fail! :error.command-illegal-state))
-    (fail! :error.task-not-found)))
+(defn- task-state-assertion [states]
+  (fn [{{task-id :taskId} :data} {tasks :tasks}]
+    (if-let [task (util/find-by-id task-id tasks)]
+      (when-not ((set states) (keyword (:state task)))
+        (fail :error.command-illegal-state))
+      (fail :error.task-not-found))))
 
 (defn- set-state [{created :created :as command} task-id state & [updates]]
   (update-application command
@@ -86,9 +87,9 @@
   {:parameters [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
-   :states     valid-states}
+   :states     valid-states
+   :pre-checks [(task-state-assertion [:requires_user_action :requires_authority_action :ok])]}
   [{:keys [application created] :as command}]
-  (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
   (child-to-attachment/delete-child-attachment application :tasks taskId)
   (update-application command
     {$pull {:tasks {:id taskId}}
@@ -103,9 +104,10 @@
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
-   :states      valid-states}
+   :states      valid-states
+   :pre-checks [(task-state-assertion [:requires_user_action :requires_authority_action])
+                not-review?]}
   [{:keys [application user lang] :as command}]
-  (assert-task-state-in [:requires_user_action :requires_authority_action] command)
   (generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
   (set-state command taskId :ok))
 
@@ -114,9 +116,9 @@
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
-   :states      valid-states}
+   :states      valid-states
+   :pre-checks  [(task-state-assertion [:ok :requires_user_action :requires_authority_action])]}
   [{:keys [application] :as command}]
-  (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
   (set-state command taskId :requires_user_action))
 
 (defn- validate-task-is-review [{data :data} {tasks :tasks}]
@@ -147,11 +149,11 @@
      :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
      :pre-checks  [validate-task-is-review
                    validate-review-kind
-                   (permit/validate-permit-type-is permit/R permit/YA)] ; KRYPS mapping currently implemented only for R & YA
+                   (permit/validate-permit-type-is permit/R permit/YA)
+                   (task-state-assertion [:ok :sent])] ; KRYPS mapping currently implemented only for R & YA
      :user-roles  #{:authority}
      :states      valid-states}
     [{application :application user :user created :created :as command}]
-    (assert-task-state-in [:ok :sent] command)
     (let [task (util/find-by-id taskId (:tasks application))
           all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
           sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
@@ -195,11 +197,11 @@
    :pre-checks  [validate-task-is-review
                  validate-review-kind
                  (permit/validate-permit-type-is permit/R permit/YA)
-                 validate-required-review-fields] ; KRYPS mapping currently implemented only for R & YA
+                 validate-required-review-fields
+                 (task-state-assertion [:requires_user_action :requires_authority_action :ok])] ; KRYPS mapping currently implemented only for R & YA
    :user-roles  #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
-  (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
   (let [task (util/find-by-id taskId (:tasks application))
         tila (get-in task [:data :katselmus :tila :value])
 
