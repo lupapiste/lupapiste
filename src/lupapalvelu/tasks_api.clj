@@ -209,11 +209,17 @@
         command (assoc command :application application)
 
         sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+        review-attachments (if-not sent-file-ids
+                             (->> (:attachments application)
+                                  (filter #(= {:type "task" :id taskId} (:target %)) )
+                                  (map (comp :fileId :latestVersion))
+                                  (remove ss/blank?))
+                             sent-file-ids)
         set-statement (util/deep-merge
                         (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
                         (attachment/create-read-only-update-statements
                           all-attachments
-                          (if task-pdf-version (conj sent-file-ids (:fileId task-pdf-version)) sent-file-ids)))]
+                          (if task-pdf-version (conj review-attachments (:fileId task-pdf-version)) review-attachments)))]
 
     (set-state command taskId :sent (when (seq set-statement) {$set set-statement}))
 
@@ -236,9 +242,8 @@
             task-updates [[[:katselmus :tila] "lopullinen"]]
             schema  (schemas/get-schema (:schema-info task))
             updates (filter (partial doc-persistence/update-key-in-schema? (:body schema)) task-updates)]
-        (if (and (not= (:id root-task) taskId)
-                 (get-in root-task [:data :vaadittuLupaehtona :value]))
-          (doc-persistence/persist-model-updates application "tasks" root-task updates created)
-          (ok)))
+        (when (and (not= (:id root-task) taskId)
+                   (get-in root-task [:data :vaadittuLupaehtona :value]))
+          (doc-persistence/persist-model-updates application "tasks" root-task updates created)))
 
-      (ok))))
+      (ok :integrationAvailable (not (nil? sent-file-ids))))))

@@ -96,12 +96,20 @@ var taskPageController = (function() {
     ajax.command("review-done", { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
-      .success(function() {
+      .success(function(resp) {
         var permit = externalApiTools.toExternalPermit(applicationModel._js);
         applicationModel.lightReload();
-        LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
-        if (applicationModel.externalApi.enabled()) {
-          hub.send("external-api::integration-sent", permit);
+
+        if (!resp.integrationAvailable) {
+          hub.send("show-dialog", {ltitle: "integration.title",
+                                   size: "medium",
+                                   component: "ok-dialog",
+                                   componentParams: {ltext: "integration.unavailable"}});
+        } else {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
+          if (applicationModel.externalApi.enabled()) {
+            hub.send("external-api::integration-sent", permit);
+          }
         }
       })
       .onError("error.invalid-task-type", notify.ajaxError)
