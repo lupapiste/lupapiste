@@ -246,4 +246,6 @@
                    (get-in root-task [:data :vaadittuLupaehtona :value]))
           (doc-persistence/persist-model-updates application "tasks" root-task updates created)))
 
-      (ok :integrationAvailable (not (nil? sent-file-ids))))))
+      :nop)
+
+    (ok :integrationAvailable (not (nil? sent-file-ids)))))
