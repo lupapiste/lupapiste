@@ -243,11 +243,13 @@
                            (assoc-in {:_selected (first path-arr)} (map keyword path-arr) person)
                            person)
             include-update (fn [path-val]
-                             (and
-                               ; Path must exist in schema!
-                               (update-key-in-schema? (:body schema) path-val)
-                               ; Optionally skip empty values
-                               (or set-empty-values? (not (ss/blank? (second path-val))))))
+                             (let [v (second path-val)]
+                               (and
+                                ; Path must exist in schema!
+                                (update-key-in-schema? (:body schema) path-val)
+                                (or (ss/other-than-string? v)
+                                    ; Optionally skip empty values
+                                    set-empty-values?  (not (ss/blank? v))))))
             updates      (filter include-update (tools/path-vals model))]
         (when-not schema (fail! :error.schema-not-found))
         (debugf "merging user %s with best effort into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
