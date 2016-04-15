@@ -92,7 +92,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states     valid-states
-   :pre-checks [(task-state-assertion [:requires_user_action :requires_authority_action :ok])]}
+   :pre-checks [(task-state-assertion (tasks/all-states-but :sent))]}
   [{:keys [application created] :as command}]
   (child-to-attachment/delete-child-attachment application :tasks taskId)
   (update-application command
@@ -109,7 +109,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states      valid-states
-   :pre-checks [(task-state-assertion [:requires_user_action :requires_authority_action])
+   :pre-checks [(task-state-assertion (tasks/all-states-but :sent :ok))
                 validate-task-is-not-review]}
   [{:keys [application user lang] :as command}]
   (generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
@@ -121,7 +121,7 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states      valid-states
-   :pre-checks  [(task-state-assertion [:ok :requires_user_action :requires_authority_action])
+   :pre-checks  [(task-state-assertion (tasks/all-states-but :sent))
                  validate-task-is-not-review]}
   [{:keys [application] :as command}]
   (set-state command taskId :requires_user_action))
@@ -200,7 +200,7 @@
    :pre-checks  [validate-task-is-review
                  validate-review-kind
                  (permit/validate-permit-type-is permit/R permit/YA)
-                 (task-state-assertion [:requires_user_action :requires_authority_action :ok])]}
+                 (task-state-assertion (tasks/all-states-but :sent))]}
   [_])
 
 (defcommand review-done
@@ -209,9 +209,9 @@
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [validate-task-is-review
                  validate-review-kind
-                 (permit/validate-permit-type-is permit/R permit/YA)
+                 (permit/validate-permit-type-is permit/R permit/YA)  ; KRYPS mapping currently implemented only for R & YA
                  validate-required-review-fields
-                 (task-state-assertion [:requires_user_action :requires_authority_action :ok])] ; KRYPS mapping currently implemented only for R & YA
+                 (task-state-assertion (tasks/all-states-but :sent))]
    :user-roles  #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
