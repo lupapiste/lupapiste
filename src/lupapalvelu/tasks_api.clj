@@ -87,7 +87,6 @@
         (ok :taskId (:id task)))
       (fail (str "error." error)))))
 
-;;TODO: remove task PDF attachment if it exists [and if you can figure out how to identify it]
 (defcommand delete-task
   {:parameters [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
@@ -127,17 +126,13 @@
   [{:keys [application] :as command}]
   (set-state command taskId :requires_user_action))
 
-(defn- validate-task-is-review [{data :data} {tasks :tasks}]
-  (when-let [task-id (:taskId data)]
-    ; TODO create own auth model for task and combile let forms
-    (when-not (task-is-review? (util/find-by-id task-id tasks))
-      (fail :error.invalid-task-type))))
+(defn- validate-task-is-review [{{task-id :taskId} :data} {tasks :tasks}]
+  (when-not (task-is-review? (util/find-by-id task-id tasks))
+    (fail :error.invalid-task-type)))
 
-(defn- validate-review-kind [{data :data} {tasks :tasks}]
-    (when-let [task-id (:taskId data)]
-    ; TODO create own auth model for task and combile let forms
-    (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
-      (fail :error.missing-parameters))))
+(defn- validate-review-kind [{{task-id :taskId} :data} {tasks :tasks}]
+  (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
+    (fail :error.missing-parameters)))
 
 (defn- validate-required-review-fields [{data :data} {tasks :tasks :as application}]
   (when (= (permit/permit-type application) permit/R)
