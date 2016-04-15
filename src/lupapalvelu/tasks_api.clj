@@ -134,14 +134,11 @@
   (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
     (fail :error.missing-parameters)))
 
-(defn- validate-required-review-fields [{data :data} {tasks :tasks :as application}]
+(defn- validate-required-review-fields! [{{task-id :taskId :as data} :data} {tasks :tasks :as application}]
   (when (= (permit/permit-type application) permit/R)
-    (when-let [task-id (:taskId data)]
-      (let [task (util/find-by-id task-id tasks)]
-        (when (reduce (fn [acc k]
-                        (or acc (ss/blank? (get-in task [:data :katselmus k :value]))))
-                      false [:pitoPvm :pitaja :tila])
-          (fail :error.missing-parameters))))))
+    (let [review (get-in (util/find-by-id task-id tasks) [:data :katselmus])]
+      (when (some #(ss/blank? (get-in review [% :value])) [:pitoPvm :pitaja :tila])
+        (fail! :error.missing-parameters)))))
 
 (comment ;; deleted after review-done feature is in production, will be used later to send updated data to backing systems
   (defcommand send-task
@@ -199,8 +196,7 @@
    :states      valid-states
    :pre-checks  [validate-task-is-review
                  validate-review-kind
-                 (permit/validate-permit-type-is permit/R permit/YA)
-                 (task-state-assertion (tasks/all-states-but :sent))]}
+                 (permit/validate-permit-type-is permit/R permit/YA)]}
   [_])
 
 (defcommand review-done
@@ -210,11 +206,11 @@
    :pre-checks  [validate-task-is-review
                  validate-review-kind
                  (permit/validate-permit-type-is permit/R permit/YA)  ; KRYPS mapping currently implemented only for R & YA
-                 validate-required-review-fields
                  (task-state-assertion (tasks/all-states-but :sent))]
    :user-roles  #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
+  (validate-required-review-fields! command application)
   (let [task (util/find-by-id taskId (:tasks application))
         tila (get-in task [:data :katselmus :tila :value])
 

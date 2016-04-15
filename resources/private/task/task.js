@@ -52,7 +52,7 @@ var taskPageController = (function() {
   });
 
   var reviewSubmitOk = ko.computed(function() {
-    return authorizationModel.ok("review-can-be-marked-done") && _.isEmpty(requiredErrors());
+    return authorizationModel.ok("review-done") && _.isEmpty(requiredErrors());
   });
 
   var addAttachmentDisabled = ko.computed(function() {
