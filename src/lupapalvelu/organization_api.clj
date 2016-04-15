@@ -89,7 +89,7 @@
 
 ;; Validators
 (defn validate-optional-url [param command]
-  (let [url (get-in command [:data param])]
+  (let [url (ss/trim (get-in command [:data param]))]
     (when-not (ss/blank? url)
       (util/validate-url url))))
 
@@ -170,7 +170,7 @@
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
                       (partial validate-optional-url :url)]}
   [{user :user}]
-  (o/update-organization (user/authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  (o/update-organization (user/authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url (ss/trim url)}}})
   (ok))
 
 (defcommand update-organization-link
@@ -181,7 +181,7 @@
                       (partial validate-optional-url :url)
                       (partial number-parameters [:index])]}
   [{user :user}]
-  (o/update-organization (user/authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
+  (o/update-organization (user/authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url (ss/trim url)}}})
   (ok))
 
 (defcommand remove-organization-link
@@ -395,7 +395,7 @@
       (fail :error.unknown-organization))))
 
 (defcommand set-krysp-endpoint
-  {:parameters [url username password permitType version]
+  {:parameters [:url username password permitType version]
    :user-roles #{:authorityAdmin}
    :input-validators [(fn [{{permit-type :permitType} :data}]
                         (when-not (or
@@ -403,8 +403,9 @@
                                     (permit/valid-permit-type? permit-type))
                           (fail :error.missing-parameters :parameters [:permitType])))
                       (partial validate-optional-url :url)]}
-  [{user :user}]
-  (let [organization-id (user/authority-admins-organization-id user)
+  [{data :data user :user}]
+  (let [url             (-> data :url ss/trim)
+        organization-id (user/authority-admins-organization-id user)
         krysp-config    (o/get-krysp-wfs {:_id organization-id} permitType)
         password        (if (s/blank? password) (second (:credentials krysp-config)) password)]
     (if (or (s/blank? url) (wfs/wfs-is-alive? url username password))
@@ -464,7 +465,7 @@
   [{user :user}]
   (let [key    (csk/->kebab-case key)
         org-id (user/authority-admins-organization-id user)]
-    (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) val}})))
+    (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) (ss/trim val)}})))
 
 (defcommand save-organization-tags
   {:parameters [tags]
@@ -568,7 +569,7 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (o/update-organization-map-server (user/authority-admins-organization-id user)
-                                    url username password)
+                                    (ss/trim url) username password)
   (ok))
 
 (defcommand update-user-layers
