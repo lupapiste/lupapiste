@@ -23,7 +23,7 @@
                           <span data-bind="text: $index() + 1"></span>
                       </span>
                   </button>
-                  <div class="accordion_content expanded">
+                  <div class="accordion_content expanded verdict-content">
                       <div class="accordion-fields">
                           <div class="verdict-info-fields">
                               <div class="verdict-signature-fields" data-bind="visible: !$parent.draft && $parent.sopimus">
@@ -37,7 +37,7 @@
                                   </div>
                               </div>
 
-                              <div data-bind="if: $data.paivamaarat">
+                              <div data-bind="if: $data.paivamaarat" class="spacerM">
                                   <div data-bind="if: paivamaarat.anto" class="key-value-pair">
                                       <label data-bind="ltext: 'verdict.anto'"></label>
                                       <span class="value" data-bind="dateString: paivamaarat.anto"></span>
@@ -146,7 +146,7 @@
                                               <tr>
                                                   <td data-bind='dateString: $data.maaraysaika'></td>
                                                   <!-- <td data-bind='dateString: toteutusHetki'></td> -->
-                                                  <td data-bind='text: $data.sisalto'></td>
+                                                  <td data-bind='text: $data.sisalto' class="verdict-text"></td>
                                               </tr>
                                           </tbody>
                                       </table>
