@@ -4472,7 +4472,7 @@
 "task-katselmus.rakennus.rakennus._group_label" "sv" "Byggnad"
 "task-katselmus.rakennukset" "fi" "Rakennukset"
 "task-katselmus.rakennukset" "sv" "Byggnader"
-"task-katselmus.no-buildings" "fi" "Päätöksellä ei rakennustietoja."
+"task-katselmus.no-buildings" "fi" "Ei rakennustietoja."
 "task-katselmus.rakennus.tila._group_label" "fi" "Rakennuksen katselmus"
 "task-katselmus.rakennus.tila._group_label" "sv" "Syn av byggnad"
 "task-katselmus.rakennus.tila.kayttoonottava" "fi" "Rakennus otettu käyttöön"
