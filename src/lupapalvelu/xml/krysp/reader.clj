@@ -379,14 +379,6 @@
 (permit/register-function permit/VVVL :verdict-krysp-validator simple-verdicts-validator)
 (permit/register-function permit/KT :verdict-krysp-validator outlier-verdicts-validator)
 
-(defn- ->lp-tunnus [asia]
-  (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
-      (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
-
-(defn- ->kuntalupatunnus [asia]
-  (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
-      (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
-
 
 ;; Reads the verdicts
 ;; Arguments:
@@ -510,8 +502,8 @@
             hakijat (filter #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
 
         (-> (merge
-              {:id                          (->lp-tunnus asia)
-               :kuntalupatunnus             (->kuntalupatunnus asia)
+              {:id                          (common/->lp-tunnus asia)
+               :kuntalupatunnus             (common/->kuntalupatunnus asia)
                :municipality                municipality
                :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)

@@ -50,6 +50,15 @@
                                 :Rasitetoimitus])]
                 (str "typeName=" (ss/join "," elems))))
 
+(defn ->lp-tunnus [asia]
+  (or (sxml/get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
+      (sxml/get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
+
+(defn ->kuntalupatunnus [asia]
+  (or (sxml/get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
+      (sxml/get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
+
+
 (defn get-tunnus-path
   [permit-type search-type]
   (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)

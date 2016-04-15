@@ -71,3 +71,27 @@
         (fact "state history"
           (-> application-sent :history last :state) => "verdictGiven"
           (-> application-verdict-given :history last :state) => "verdictGiven")))))
+
+(facts "Automatic checking for reviews"
+  (mongo/with-db db-name
+    (let [application-reviewed-eka         (create-reviewed-application "Paatoskuja 17")
+          application-id-reviewed-eka      (:id application-reviewed-eka)
+          application-reviewed-toka        (create-reviewed-application "Paatoskuja 18")
+          application-id-reviewed-toka     (:id application-reviewed-toka)
+          application-kolmas      (create-reviewed-application "Paatoskuja 19")
+          application-id-kolmas  (:id application-kolmas)]
+
+      (local-command sonja :approve-application :id application-id-reviewed-toka :lang "fi") => ok?
+      (local-command sonja :approve-application :id application-id-kolmas :lang "fi") => ok?
+      (give-local-verdict sonja application-id-kolmas :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+
+      (fact "checking verdicts and sending emails to the authorities related to the applications"
+        (count (batchrun/poll-verdicts-for-reviews)) => pos?)
+
+      (let [application-reviewed-eka (query-application local-query sonja application-id-reviewed-eka) => truthy
+            application-reviewed-toka (query-application local-query sonja application-id-reviewed-toka) => truthy
+            application-kolmas (query-application local-query sonja application-id-kolmas) => truthy]
+        (:state application-reviewed-eka) => "submitted"
+        ;;(:state application-reviewed-toka) => "" ;; ??
+        ;;(:state application-kolmas) => "" ;; ??
+        ))))

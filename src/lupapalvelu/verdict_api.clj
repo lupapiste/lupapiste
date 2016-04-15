@@ -29,6 +29,7 @@
             [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
+            [lupapalvelu.xml.krysp.review-reader :as review-reader]
             [clojure.java.io :as io]
             [sade.env :as env])
   (:import (java.io File)))
@@ -56,7 +57,7 @@
       app-xml)))
 
 (defn save-verdicts-from-xml
-  "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
+  "Saves verdicts from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
   [{:keys [application] :as command} app-xml]
   (appeal-common/delete-all command)
   (let [updates (verdict/find-verdicts-from-xml command app-xml)]
@@ -265,3 +266,36 @@
       ; Throttle giving information about incorrect password
       (Thread/sleep 2000)
       (fail :error.password))))
+
+(defn save-reviews-from-xml
+  "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
+  ;; adapted from save-verdicts-from-xml. called from do-check-for-verdict-w-review
+  [{:keys [application] :as command} app-xml]
+
+  ;; schemas?
+
+  (let [reviews (review-reader/get-reviews-from-message app-xml)
+        review-task-name (fn [review] "some-task-name")
+        ;; review-to-task (fn [review]
+        ;;                  ;; sc/check katselmus-task-schema new-task...
+        ;;                  (lupapalvelu.tasks/new-task "task-katselmus" (review-task-name review) review)
+        ;;                  )
+        review-to-task #(lupapalvelu.tasks/katselmus->task % {} {})
+        ]
+    ;; (doseq [review reviews]
+    ;;   (update-application command {$push {:tasks (review-to-task review)}}))
+    (update-application command {$push {:tasks (map review-to-task reviews)}})
+    (ok :reviews reviews)))
+
+(defn do-check-for-verdict-w-review [{:keys [application] :as command}]
+  ;; to get
+  ;;
+  {:pre [(every? command [:application :user :created])]}
+  (when-let [
+             app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
+                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
+
+             ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml") "utf-8")
+             ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
+             ]
+    (save-reviews-from-xml app-xml)))
