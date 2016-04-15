@@ -402,7 +402,12 @@ input.form-input.inline {
 }
 
 .form-input.textarea {
-  height: $baseline *7;
+  height: $baseline *8;
+  width: 80%;
+}
+
+.form-input.textarea.high {
+  height: $baseline *9;
   width: 80%;
 }
 
