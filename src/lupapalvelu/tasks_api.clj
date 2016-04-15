@@ -190,6 +190,17 @@
       (recur application (util/find-by-id id (:tasks application)))
       task)))
 
+(defquery review-can-be-marked-done
+  {:description "Review can be marked done by authorities"
+   :parameters  [:id :taskId]
+   :input-validators [(partial non-blank-parameters [:id :taskId])]
+   :user-roles  #{:authority}
+   :states      valid-states
+   :pre-checks  [validate-task-is-review
+                 validate-review-kind
+                 (permit/validate-permit-type-is permit/R permit/YA)]}
+  [_])
+
 (defcommand review-done
   {:description "Marks review done, generates PDF/A and sends data to backend"
    :parameters  [id taskId lang]
