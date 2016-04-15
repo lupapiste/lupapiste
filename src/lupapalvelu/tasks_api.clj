@@ -204,7 +204,8 @@
    :states      valid-states
    :pre-checks  [validate-task-is-review
                  validate-review-kind
-                 (permit/validate-permit-type-is permit/R permit/YA)]}
+                 (permit/validate-permit-type-is permit/R permit/YA)
+                 (task-state-assertion [:requires_user_action :requires_authority_action :ok])]}
   [_])
 
 (defcommand review-done

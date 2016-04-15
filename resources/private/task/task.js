@@ -52,10 +52,7 @@ var taskPageController = (function() {
   });
 
   var reviewSubmitOk = ko.computed(function() {
-    var t = task();
-    var stateOK =  "sent" !== _.get(t, "state");
-    var schemaNameOK = util.getIn(t, ["schema-info", "subtype"]) === "review";
-    return authorizationModel.ok("review-done") && schemaNameOK && stateOK && _.isEmpty(requiredErrors());
+    return authorizationModel.ok("review-can-be-marked-done") && _.isEmpty(requiredErrors());
   });
 
   var addAttachmentDisabled = ko.computed(function() {
