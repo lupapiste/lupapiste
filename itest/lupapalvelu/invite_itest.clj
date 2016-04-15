@@ -4,14 +4,14 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]))
 
-(defn- invite [apikey application-id document-id doc-name email & [text]]
+(defn- invite [apikey application-id document-id doc-name email & [path text]]
   (command apikey :invite-with-role
     :id application-id
     :email email
     :text  (or text email)
     :documentName doc-name
     :documentId document-id
-    :path ""
+    :path (or path "")
     :role "writer"))
 
 (apply-remote-minimal)
@@ -43,7 +43,7 @@
     (fact "Mikko must be able to invite Teppo!"
       (last-email) ; Inbox zero
 
-      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo) "Hei, sinut on kutsuttu") => ok?
+      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo) "" "Hei, sinut on kutsuttu") => ok?
 
       (let [invs (query teppo :invites)
             email (last-email)]
@@ -136,20 +136,21 @@
         (:applicant application ) => "Intonen Mikko"))
 
     (fact "Mikko sets Teppo as co-applicant"
-
       (command mikko :set-user-to-document :id application-id :documentId hakija-doc :userId teppo-id :path "henkilo") => ok?
       (fact "Teppo is now the applicant"
         (let [application  (query-application mikko application-id)
               hakija (domain/get-document-by-id application hakija-doc)]
           (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Teppo"
           (get-in hakija [:data :henkilo :userId :value]) => teppo-id
-          (:applicant application ) => "Nieminen Teppo"
+          (get-in hakija [:data :henkilo :kytkimet :suoramarkkinointilupa :value]) => true
+          (:applicant application ) => "Nieminen Teppo")))
 
-
-          )
-
-
-        ))
+    (fact "Mikko removes Teppo by mistake"
+      (command mikko :remove-auth :id application-id :username (email-for-key teppo)) => ok?
+      (fact "invites again as applicant"
+        (invite mikko application-id hakija-doc "hakija-r" (email-for-key teppo) "henkilo" "moi") => ok?)
+      (fact "Teppo approves"
+        (command teppo :approve-invite :id application-id) => ok?))
 
     (let [actions (:actions (query teppo :allowed-actions :id application-id))]
       (fact "Teppo should be able to"
@@ -176,41 +177,42 @@
       (count (:invites (query pena :invites))) => 1
 
       (fact "Pena can still approve invite"
-        (command pena :approve-invite :id application-id) => ok?))))
+        (command pena :approve-invite :id application-id) => ok?))
+    ))
 
 (facts* "Authority invites designer"
-  (doseq [user-key [sonja mikko teppo]]
-    (let [resp (query user-key :invites) => ok?]
-      (count (:invites resp)) => 0))
+ (doseq [user-key [sonja mikko teppo]]
+   (let [resp (query user-key :invites) => ok?]
+     (count (:invites resp)) => 0))
 
-  (let [resp  (create-app sonja :propertyId sipoo-property-id) => ok?
-        id    (:id resp) => truthy
-        app    (query-application sonja id)
-        suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]
+ (let [resp  (create-app sonja :propertyId sipoo-property-id) => ok?
+       id    (:id resp) => truthy
+       app    (query-application sonja id)
+       suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]
 
-    (fact "Sonja must be able to invite Teppo!"
-      (invite sonja id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => ok?
-      (count (:invites (query teppo :invites))) => 1)
+   (fact "Sonja must be able to invite Teppo!"
+     (invite sonja id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => ok?
+     (count (:invites (query teppo :invites))) => 1)
 
-    (fact "Sonja must be able to uninvite Teppo!"
-      (command sonja :remove-auth :id id :username (email-for-key teppo)) => ok?
-      (count (:invites (query teppo :invites))) => 0)
+   (fact "Sonja must be able to uninvite Teppo!"
+     (command sonja :remove-auth :id id :username (email-for-key teppo)) => ok?
+     (count (:invites (query teppo :invites))) => 0)
 
-    (fact "Reinvite & accept"
-      (invite sonja id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => ok?
-      (count (:invites (query teppo :invites))) => 1
-      (command teppo :approve-invite :id id) => ok?)
+   (fact "Reinvite & accept"
+     (invite sonja id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => ok?
+     (count (:invites (query teppo :invites))) => 1
+     (command teppo :approve-invite :id id) => ok?)
 
-    (fact "Teppo must be able to comment!"
-      (comment-application teppo id false) => ok?)
+   (fact "Teppo must be able to comment!"
+     (comment-application teppo id false) => ok?)
 
-    (fact "Teppo must be able to invite another designer, Mikko!"
-      (invite teppo id suunnittelija-doc "suunnittelija" "mikko@example.com") => ok?)
+   (fact "Teppo must be able to invite another designer, Mikko!"
+     (invite teppo id suunnittelija-doc "suunnittelija" "mikko@example.com") => ok?)
 
-    (fact "Sonja must be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id id :username (email-for-key teppo)) => ok?)
+   (fact "Sonja must be able to remove authz from Teppo!"
+     (command sonja :remove-auth :id id :username (email-for-key teppo)) => ok?)
 
-    (fact "Invite without document"
-      (invite sonja id "" "" (email-for-key teppo)) => ok?
-      (count (:invites (query teppo :invites))) => 1
-      (command teppo :approve-invite :id id) => ok?)))
+   (fact "Invite without document"
+     (invite sonja id "" "" (email-for-key teppo)) => ok?
+     (count (:invites (query teppo :invites))) => 1
+     (command teppo :approve-invite :id id) => ok?)))

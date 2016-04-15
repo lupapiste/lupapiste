@@ -111,6 +111,24 @@
   (fact (decimal-number? "..0") => false)
   (fact (decimal-number? "123123132.456465465465464") => true))
 
+(facts "other-than-string?"
+  (fact "nil is nothing"
+    (other-than-string? nil) => false)
+  (fact "string is not other than string"
+    (other-than-string? "") => false)
+  (fact "booleas"
+    (other-than-string? true) => true
+    (other-than-string? false) => true)
+  (fact "numbers"
+    (other-than-string? 1) => true
+    (other-than-string? 3.14) => true)
+  (fact "collections"
+    (other-than-string? {}) => true
+    (other-than-string? #{}) => true
+    (other-than-string? []) => true)
+  (fact "Object"
+    (other-than-string? (Object.)) => true))
+
 (fact "lower-case"
   (lower-case nil)   => nil
   (lower-case "")    => ""

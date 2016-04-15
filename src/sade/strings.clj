@@ -102,6 +102,9 @@
 (defn decimal-number? [s]
   (or (numeric? s) (if (and (string? s) (re-matches #"^\d+\.\d+$" s)) true false)))
 
+(defn other-than-string? [x]
+  (and (not (nil? x)) (not (string? x))))
+
 ;; Nil-safe wrappers to clojure.string
 
 (defn lower-case ^String [^CharSequence x] (when x (s/lower-case x)))
