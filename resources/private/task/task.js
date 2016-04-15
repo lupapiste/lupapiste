@@ -129,12 +129,10 @@ var taskPageController = (function() {
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
 
     if (t) {
-      // FIXME handle with authz model, see LPK-388
       authorizationModel.refresh(application, {taskId: taskId}, function() {
 
-        t.isReview = ko.observable(util.getIn(t, ["schema-info", "subtype"]) === "review");
-        t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action") && !t.isReview();
-        t.rejectable = authorizationModel.ok("reject-task") && !t.isReview();
+        t.approvable = authorizationModel.ok("approve-task");
+        t.rejectable = authorizationModel.ok("reject-task");
 
         t.displayName = taskUtil.longDisplayName(t, application);
         t.applicationId = application.id;

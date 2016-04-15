@@ -40,6 +40,11 @@
         schema (schemas/get-schema tasks/task-schemas-version task-type)]
     (= :review (-> schema :info :subtype keyword))))
 
+(defn- validate-task-is-not-review [{data :data} {tasks :tasks}]
+  (when-let [task-id (:taskId data)]
+    (when (task-is-review? (util/find-by-id task-id tasks))
+      (fail :error.invalid-task-type))))
+
 ;; API
 (def valid-source-types #{"verdict" "task"})
 
@@ -106,7 +111,7 @@
    :user-roles #{:authority}
    :states      valid-states
    :pre-checks [(task-state-assertion [:requires_user_action :requires_authority_action])
-                not-review?]}
+                validate-task-is-not-review]}
   [{:keys [application user lang] :as command}]
   (generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
   (set-state command taskId :ok))
@@ -117,7 +122,8 @@
    :input-validators [(partial non-blank-parameters [:id :taskId])]
    :user-roles #{:authority}
    :states      valid-states
-   :pre-checks  [(task-state-assertion [:ok :requires_user_action :requires_authority_action])]}
+   :pre-checks  [(task-state-assertion [:ok :requires_user_action :requires_authority_action])
+                 validate-task-is-not-review]}
   [{:keys [application] :as command}]
   (set-state command taskId :requires_user_action))
 
