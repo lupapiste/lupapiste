@@ -409,6 +409,16 @@
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
+(defn- bad-building?
+  "Building can be bad either by choice (no state selected) or by
+  accident (ghost buildings)."
+  [building]
+  (or
+   (nil? building)
+   (= "ei tiedossa" (get-in building [:rakennus :jarjestysnumero]))
+   (util/empty-or-nil? (get-in building [:tila :tila]))
+   (every? ss/blank? (-> building :rakennus vals))))
+
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application katselmus user lang krysp-version output-dir begin-of-link]
@@ -432,11 +442,7 @@
                                    desc (:description (find-building nid))
                                    b (if desc (assoc-in b [:rakennus :description] desc) b)]
                                b))))
-                       (remove
-                         #(or
-                            (nil? %)
-                            (= "ei tiedossa" (get-in % [:rakennus :jarjestysnumero]))
-                            (util/empty-or-nil? (get-in % [:tila :tila])))))]
+                       (remove bad-building?))]
     (save-katselmus-xml
       application
       lang

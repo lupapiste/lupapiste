@@ -60,6 +60,7 @@
     :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :repeating true
+    :repeating-init-empty true
     :i18nkey ""
     :uicomponent :docgen-review-buildings
     :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :subtype :digit :hidden true}
