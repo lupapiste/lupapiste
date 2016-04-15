@@ -1,7 +1,12 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="docgen-review-buildings-template">
+
   <div class="h2" data-bind="ltext: 'task-katselmus.rakennukset'"></div>
 
+  <!-- ko ifnot: _.size( buildings ) -->
+  <span data-bind="ltext: 'task-katselmus.no-buildings'"></span>
+  <!-- /ko -->
+  <!-- ko if: _.size( buildings ) -->
   <table class="review-buildings-table">
     <thead>
       <th class="review-buildings--description" data-bind="ltext: 'task-katselmus.selite'"></th>
@@ -33,4 +38,5 @@
       </tr>
     </tbody>
   </table>
+  <!-- /ko -->
 </script>

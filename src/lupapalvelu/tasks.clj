@@ -121,9 +121,9 @@
            :section-help "authority-fills"
            :i18nprefix "task-katselmus.katselmuksenLaji"
            } ; Had :i18npath ["katselmuksenLaji"]
-        :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
-           ["rakennus::4"]
+    :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
+           ["rakennus::4"]
            {:h2 "task-katselmus.huomautukset"}
            ["katselmus/huomautukset/kuvaus::3"]
            ["katselmus/huomautukset/maaraAika" "katselmus/huomautukset/toteaja" "katselmus/huomautukset/toteamisHetki"]
