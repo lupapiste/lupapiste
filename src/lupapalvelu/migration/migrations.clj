@@ -1950,6 +1950,47 @@
                 (mongo/update-n collection {:_id id} {$set task-updates})
                 0)))))
 
+(defn remove-empty-buildings [{{rakennus :rakennus} :data :as katselmus-doc}]
+  (let [rakennus-keys (keys rakennus)
+        new-rakennus-map (reduce
+                           (fn [acc index]
+                             (let [{rakennus-data :rakennus} (index acc)
+                                   unwrapped-data (tools/unwrapped rakennus-data)
+                                   all-empty? (every? util/empty-or-nil? (vals unwrapped-data))]
+                               (if all-empty?
+                                 (dissoc acc index)
+                                 acc)))
+                           rakennus
+                           rakennus-keys)]
+    (when-not (= (count rakennus-keys) (count (keys new-rakennus-map)))
+      ; keys have been dissociated, return katselmus document with updated rakennus data
+      (assoc-in katselmus-doc [:data :rakennus] new-rakennus-map))))
+
+
+(defmigration cleanup-empty-buildings-from-tasks
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                {:keys [id tasks]} (mongo/select collection {:tasks {$elemMatch {:schema-info.name "task-katselmus" :state {$ne "sent"}}}} [:tasks])]
+            (let [katselmus-tasks (filter #(and
+                                            (= (get-in % [:schema-info :name]) "task-katselmus")
+                                            (not= "sent" (:state %)))
+                                          tasks)
+                  updated-tasks   (->> (map remove-empty-buildings katselmus-tasks)
+                                       (remove nil?))
+                  task-updates    (when (seq updated-tasks)
+                                    (apply merge
+                                           (map #(mongo/generate-array-updates :tasks
+                                                                               tasks
+                                                                               (fn [task] (= (:id task) (:id %)))
+                                                                               "data.rakennus"
+                                                                               (get-in % [:data :rakennus]))
+                                                updated-tasks)))]
+              (if (map? task-updates)
+                (mongo/update-n collection {:_id id} {$set task-updates})
+                0)))))
+
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

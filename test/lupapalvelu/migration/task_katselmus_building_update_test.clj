@@ -1,7 +1,7 @@
 (ns lupapalvelu.migration.task-katselmus-building-update-test
   (:require  [midje.sweet :refer :all]
              [sade.util :as util]
-             [lupapalvelu.migration.migrations :refer [update-katselmus-buildings]]))
+             [lupapalvelu.migration.migrations :refer [update-katselmus-buildings remove-empty-buildings]]))
 
 (def buildings [{:description "Talo A, Toinen selite",
                  :localShortId "101",
@@ -93,3 +93,42 @@
                                         :rakennusnro {:value "102"},
                                         :jarjestysnumero {:value "2"},
                                         :kiinttun {:value "18601234567891"}}})))
+
+(def data-with-empty-rakennus {:data {:katselmus {:tila {:value nil},
+                                                  :poikkeamat {:value ""},
+                                                  :lasnaolijat {:value ""},
+                                                  :huomautukset {:toteamisHetki {:value nil},
+                                                                 :toteaja {:value ""},
+                                                                 :maaraAika {:value nil},
+                                                                 :kuvaus {:value ""}},
+                                                  :pitaja {:value ""},
+                                                  :pitoPvm {:value nil}},
+                                      :rakennus {:3 {:rakennus {:kunnanSisainenPysyvaRakennusnumero {:value nil},
+                                                                :kiinttun {:value "132456"},
+                                                                :rakennusnro {:value "003"},
+                                                                :valtakunnallinenNumero {:value "231313321"},
+                                                                :jarjestysnumero {:value "3"}}},
+                                                 :2 {:rakennus {:kunnanSisainenPysyvaRakennusnumero {:value nil},
+                                                                :kiinttun {:value "5431312"},
+                                                                :rakennusnro {:value "002"},
+                                                                :valtakunnallinenNumero {:value "24321321"},
+                                                                :jarjestysnumero {:value "2"}}},
+                                                 :1 {:rakennus {:kunnanSisainenPysyvaRakennusnumero {:value nil},
+                                                                :kiinttun {:value "313215664"},
+                                                                :rakennusnro {:value "001"},
+                                                                :valtakunnallinenNumero {:value "3213587951"},
+                                                                :jarjestysnumero {:value "1"}}}
+                                                 :0 {:rakennus {:jarjestysnumero {:value nil},
+                                                                :valtakunnallinenNumero {:value ""},
+                                                                :rakennusnro {:value ""},
+                                                                :kiinttun {:value ""},
+                                                                :kunnanSisainenPysyvaRakennusnumero {:value ""}}},
+                                      :vaadittuLupaehtona {:modified 1452747765376, :value true},
+                                      :katselmuksenLaji {:modified 1452747765376, :value "loppukatselmus"}}}})
+
+(facts "cleaning up buildings"
+  (fact "index 0 is removed, as all it's :rakennus values are empty"
+    (-> (remove-empty-buildings data-with-empty-rakennus)
+        :data
+        :rakennus
+        keys) => (just [:3 :2 :1])))
