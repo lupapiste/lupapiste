@@ -18,12 +18,14 @@ Edit katselmus
   Test id disabled  review-done
   Select From List by test id  ${select}  ${item}
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
-  Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}
-  Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ${notes}
-  Sleep  2s
   Wait for jQuery
-  Test id enabled  review-done
+  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
+  Wait for jQuery
+  Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}
+  Wait for jQuery
+  Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ${notes}
+  Wait for jQuery
+  Wait until  Test id enabled  review-done
 
 Edit R katselmus
   [Arguments]  ${state}  ${date}  ${name}  ${notes}
@@ -80,7 +82,7 @@ Review checkboxes disabled
   Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
 
 Review frozen
-  Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3
+  Wait until  Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3
   Test id disabled  review-done
   Element should not be visible  jquery=table.review-buildings-table tbody select:enabled
   Review checkboxes disabled
