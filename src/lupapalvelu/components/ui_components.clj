@@ -32,6 +32,20 @@
               :js ["jquery.mockjax.js"]
               :name "jquery"})
 
+(defn- breaked-json-map [m, ^StringBuilder sb, ^Long break-at]
+  (.append sb "{")
+  (loop [kvs m, line-length (.length sb)]
+    (if (seq kvs)
+      (let [[k v] (first kvs)
+            map-entry (str (json/generate-string k) ":" (json/generate-string v))
+            new-length (+ line-length (.length map-entry) 1) ; +1 for the comma or ending brace
+            tail  (rest kvs)]
+        (when (> new-length break-at) (.append sb \newline))
+        (.append sb map-entry)
+        (when (seq tail) (.append sb \,))
+        (recur tail (if (>= new-length break-at) (.length map-entry) new-length)))
+      (.append sb "}"))))
+
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
@@ -67,7 +81,9 @@
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
-  (str ";loc.setTerms(" (json/generate-string (i18n/get-terms i18n/*lang*)) ");"))
+  (-> (breaked-json-map (i18n/get-terms i18n/*lang*) (StringBuilder. ";loc.setTerms(") 32000)
+    (.append ");")
+    (.toString)))
 
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
