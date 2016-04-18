@@ -148,8 +148,8 @@
      :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
      :pre-checks  [validate-task-is-review
                    validate-review-kind
-                   (permit/validate-permit-type-is permit/R permit/YA)
-                   (task-state-assertion [:ok :sent])] ; KRYPS mapping currently implemented only for R & YA
+                   (permit/validate-permit-type-is permit/R permit/YA) ; KRYSP mapping currently implemented only for R & YA
+                   (task-state-assertion [:ok :sent])]
      :user-roles  #{:authority}
      :states      valid-states}
     [{application :application user :user created :created :as command}]
@@ -204,7 +204,7 @@
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [validate-task-is-review
-                 (permit/validate-permit-type-is permit/R permit/YA)  ; KRYPS mapping currently implemented only for R & YA
+                 (permit/validate-permit-type-is permit/R permit/YA)  ; KRYSP mapping currently implemented only for R & YA
                  (task-state-assertion (tasks/all-states-but :sent))]
    :user-roles  #{:authority}
    :states      valid-states}
