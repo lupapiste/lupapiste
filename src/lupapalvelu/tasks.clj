@@ -95,7 +95,9 @@
      {:name "pitoPvm" :type :date :required true :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}
      {:name "pitaja" :type :string :required true :readonly-after-sent true
-            :whitelist {:roles [:authority] :otherwise :disabled}}
+      :whitelist {:roles [:authority] :otherwise :disabled}}
+     {:name "tiedoksianto" :type :checkbox :inputType :checkbox-wrapper :readonly-after-sent true
+           :whitelist {:roles [:authority] :otherwise :disabled}}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000 :css []
               :whitelist {:roles [:authority] :otherwise :disabled} }
@@ -109,7 +111,8 @@
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
-          (update-in (tools/schema-body-without-element-by-name task-katselmus-body "rakennus" "tila" "katselmuksenLaji")
+          (update-in (tools/schema-body-without-element-by-name task-katselmus-body
+                                                                "rakennus" "tila" "katselmuksenLaji" "tiedoksianto")
                      [1 :body 2 :body 0] assoc :required true)))
 
 (schemas/defschemas
@@ -123,6 +126,7 @@
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
+           ["katselmus/tiedoksianto::2"]
            ["rakennus::4"]
            {:h2 "task-katselmus.huomautukset"}
            ["katselmus/huomautukset/kuvaus::3"]

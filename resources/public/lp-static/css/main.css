@@ -1,5 +1,27 @@
-@import url('main-blessed1.css?z=1460711511002');
+@import url('main-blessed1.css?z=1460962492472');
 
+/* line 154, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation div .btn, .invitations .invitation div .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .invitations .invitation div .paginate_disabled_previous, .invitations .invitation div .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .invitations .invitation div .paginate_disabled_next {
+  margin: 0 6px 0 6px;
+}
+/* line 158, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation p {
+  max-width: 35em;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* line 164, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation h3 {
+  max-width: 35em;
+  margin-top: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* line 170, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation .invitation-actions {
+  white-space: nowrap;
+}
 
 /* line 176, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls div {

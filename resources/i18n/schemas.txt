@@ -4483,6 +4483,7 @@
 "task-katselmus.tila" "sv" "Status"
 "task-katselmus.katselmus.tila" "fi" ""
 "task-katselmus.katselmus.tila" "sv" ""
+"task-katselmus.tiedoksianto"  "fi"  "Tiedoksianto verottajalle laiminlyöty"
 "task-katselmus.rakennus.tila.tila.lopullinen" "fi" "Lopullinen"
 "task-katselmus.rakennus.tila.tila.lopullinen" "sv" "Slutlig"
 "task-katselmus.rakennus.tila.tila.osittainen" "fi" "Osittainen"
