@@ -577,13 +577,14 @@
    :input-validators [(partial action/vector-parameter-of :layers map?)]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (when-let [validation-errors (seq (remove nil? (map (partial sc/check o/Layer) layers)))]
-    (fail! :error.missing-parameters))
-
-  (o/update-organization (user/authority-admins-organization-id user)
-                         {$set {:map-layers.layers layers}})
-  (ok))
-
+  (let [selected-layers (remove (comp ss/blank? :id) layers)
+        validation-errors (remove nil? (map (partial sc/check o/Layer) selected-layers))]
+    (if (zero? (count validation-errors))
+      (do
+        (o/update-organization (user/authority-admins-organization-id user)
+          {$set {:map-layers.layers selected-layers}})
+        (ok))
+      (fail :error.missing-parameters))))
 
 (defraw waste-ads-feed
   {:description "Simple RSS feed for construction waste information."
