@@ -19,7 +19,7 @@
   (when (env/feature? :no-minification)
     (.write out (format "\n\n/*\n * %s\n */\n" n)))
   (when (= kind :js)
-    (.write out "\n;\n\n"))
+    (.write out "\n"))
   out)
 
 (def error-reporter
