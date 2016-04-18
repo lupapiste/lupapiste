@@ -389,7 +389,8 @@
 
 (defn ->backend-ids [xml]
   (->> (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)
-       (map ->kuntalupatunnus)))
+       (map ->kuntalupatunnus)
+       (remove ss/blank?)))
 
 ;; Reads the verdicts
 ;; Arguments:
