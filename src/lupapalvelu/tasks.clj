@@ -28,6 +28,11 @@
                  "loppukatselmus"
                  "ei tiedossa"])
 
+(def task-states #{:requires_user_action :requires_authority_action :ok :sent})
+
+(defn all-states-but [& states]
+  (apply disj task-states states))
+
 (def- katselmuksenLaji
   {:name "katselmuksenLaji"
    :type :select :sortBy :displayname

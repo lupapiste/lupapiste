@@ -99,10 +99,8 @@ Partial review generates new review
 
 The review task cannot be deleted after the review
   Open review  0
-  Click enabled by test id  delete-task
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Element should be visible  jquery=#dynamic-ok-confirm-dialog
-  Confirm  dynamic-ok-confirm-dialog
+  Wait until  List Selection Should Be  xpath=//select[@data-test-id="katselmus.tila"]  Osittainen
+  No such test id  delete-task
   Return from review
 
 The same thing happens if the new review is also partially reviewed

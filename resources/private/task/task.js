@@ -35,7 +35,7 @@ var taskPageController = (function() {
   "use strict";
 
   var applicationModel = lupapisteApp.models.application;
-  var authorizationModel = lupapisteApp.models.applicationAuthModel;
+  var authorizationModel = authorization.create();
 
   var currentTaskId = null;
   var task = ko.observable();
@@ -52,10 +52,7 @@ var taskPageController = (function() {
   });
 
   var reviewSubmitOk = ko.computed(function() {
-    var t = task();
-    var stateOK =  "sent" !== _.get(t, "state");
-    var schemaNameOK = util.getIn(t, ["schema-info", "subtype"]) === "review";
-    return authorizationModel.ok("review-done") && schemaNameOK && stateOK && _.isEmpty(requiredErrors());
+    return authorizationModel.ok("review-done") && _.isEmpty(requiredErrors());
   });
 
   var addAttachmentDisabled = ko.computed(function() {
@@ -125,6 +122,9 @@ var taskPageController = (function() {
    * @param {String} taskId       Current task ID
    */
   function refresh(application, taskId) {
+    docgen.clear("taskDocgen");
+    task(null);
+
     currentTaskId = taskId;
 
     lupapisteApp.setTitle(applicationModel.title());
@@ -134,31 +134,30 @@ var taskPageController = (function() {
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
 
     if (t) {
-      // FIXME handle with authz model, see LPK-388
-      t.isReview = ko.observable(util.getIn(t, ["schema-info", "subtype"]) === "review");
-      t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action") && !t.isReview();
-      t.rejectable = authorizationModel.ok("reject-task") && !t.isReview();
+      authorizationModel.refresh(application, {taskId: taskId}, function() {
 
-      t.displayName = taskUtil.longDisplayName(t, application);
-      t.applicationId = application.id;
-      t.deleteTask = deleteTask;
-      t.returnToApplication = returnToApplication;
-      t.approve = _.partial(runTaskCommand, "approve-task");
-      t.reject = _.partial(runTaskCommand, "reject-task");
-      t.reviewDone = reviewDone;
-      t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
-      t.addedToService = ko.observable();
-      task(t);
+        t.approvable = authorizationModel.ok("approve-task");
+        t.rejectable = authorizationModel.ok("reject-task");
 
-      service.addDocument(task());
-      t.addedToService( true );
+        t.displayName = taskUtil.longDisplayName(t, application);
+        t.applicationId = application.id;
+        t.deleteTask = deleteTask;
+        t.returnToApplication = returnToApplication;
+        t.approve = _.partial(runTaskCommand, "approve-task");
+        t.reject = _.partial(runTaskCommand, "reject-task");
+        t.reviewDone = reviewDone;
+        t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
+        t.addedToService = ko.observable();
+        task(t);
 
-      var options = {collection: "tasks", updateCommand: "update-task", validate: true};
-      docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
+        service.addDocument(task());
+        t.addedToService( true );
 
+        var options = {collection: "tasks", updateCommand: "update-task", validate: true};
+        docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
+
+      });
     } else {
-      docgen.clear("taskDocgen");
-      task(null);
       error("Task not found", application.id, currentTaskId);
       notify.error(loc("error.dialog.title"), loc("error.task-not-found"));
     }
