@@ -390,7 +390,7 @@
   [xml ->function]
   (map
     (fn [asia]
-      (let [verdict-model {:kuntalupatunnus (->kuntalupatunnus asia)}
+      (let [verdict-model {:kuntalupatunnus (common/->kuntalupatunnus asia)}
             verdicts      (->> asia
                            (->function)
                            (cr/cleanup)
@@ -466,7 +466,7 @@
         kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
         asiat (enlive/select xml-no-ns common/case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
-        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
+        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (common/->kuntalupatunnus %)) %) asiat)]
     (when (pos? (count asiat-with-kuntalupatunnus))
       ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
       ;; Log an error if there were many. Use the first one anyway.

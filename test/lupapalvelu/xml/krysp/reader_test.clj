@@ -331,6 +331,21 @@
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
 
+
+(facts "KRYSP verdict with reviews"
+  (let [xml (-> "../prod-sample-verdict-w-review.xml" slurp xml/parse)
+        reviews (lupapalvelu.xml.krysp.review-reader/xml->reviews xml)
+        katselmus-tasks (map (partial lupapalvelu.tasks/katselmus->task {} {} {}) reviews)
+        k5 (last katselmus-tasks)
+        ]
+    ;; (println "xml:")
+    ;; (clojure.pprint/pprint (last reviews))
+    ;; (println "last task (w/o schema-info):")
+    ;; (clojure.pprint/pprint (dissoc k5 :schema-info))
+    (fact "xml has 5 reviews" (count reviews) => 5)
+    (fact "last review has huomautukset" (:huomautukset (last katselmus-tasks)) => truthy)
+    ))
+
 ;; YA verdict
 
 (facts "KRYSP ya-verdict"
@@ -494,5 +509,3 @@
         (party-with-paatos-data [osapuoli] nil) => truthy)
       (fact "Sijaistus can be empty"
         (party-with-paatos-data [osapuoli] {}) => truthy))))
-
-

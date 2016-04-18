@@ -195,12 +195,34 @@
     initial-rakennus
     buildings))
 
-(defn- katselmus->task [meta source {buildings :buildings} katselmus]
+(defn old-katselmus->task [meta source {buildings :buildings} katselmus]
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
         data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
               :vaadittuLupaehtona true
               :rakennus (rakennus-data-from-buildings {} buildings)}]
     (new-task "task-katselmus" task-name data meta source)))
+
+
+(defn katselmus->task [meta source {buildings :buildings} katselmus]
+  (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
+        data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
+              :vaadittuLupaehtona true
+              :rakennus (rakennus-data-from-buildings {} buildings)
+              }
+        optional-single-keys [:tilanneKoodi :osittainen :pitaja  :tarkastuksenTaiKatselmuksenNimi
+                              :lasnaolijat :poikkeamat :verottajanTvl]
+        optional-list-keys [:muuTunnustieto :liitetieto]
+        optional-data (select-keys katselmus (conj optional-single-keys optional-list-keys))
+        data-wo-katselmus (dissoc data :katselmus)
+        ]
+    ;; (println "data:")
+    ;; (clojure.pprint/pprint data)
+    ;; (println "katselmus:")
+    ;; (clojure.pprint/pprint katselmus)
+    ;; (new-task "task-katselmus" task-name (conj data optional-data) meta source)
+    ;; (new-task "task-katselmus" task-name data-wo-katselmus meta source)
+    (new-task "task-katselmus" task-name optional-data meta source)
+    ))
 
 (defn- verdict->tasks [verdict meta application]
   (map

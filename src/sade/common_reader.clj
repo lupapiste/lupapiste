@@ -145,4 +145,3 @@
 (defn get-boolean [xml & selector] (to-boolean (apply get-text xml selector)))
 
 (defn get-date [xml & selector] (to-timestamp (apply get-text xml selector)))
-

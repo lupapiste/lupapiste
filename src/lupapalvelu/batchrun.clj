@@ -367,18 +367,21 @@
     orgs-by-id))
 
 (defn fetch-reviews-for-application [orgs-by-id eraajo-user {:keys [id permitType organization] :as app}]
-  (try
-    (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
-      (logging/with-logging-context {:applicationId id}
-        (println "batchrun poll-verdicts-for-reviews: looking at" url id organization)
-        (if-not (s/blank? url)
-          ;; url means there's a defined location (eg sftp) for polling xml verdicts
-          (let [command (assoc (application->command app) :user eraajo-user :created (now))
-                result (verdict-api/do-check-for-verdict-w-review command)]
-            (when-not (nil? result) (println "app got non-nil result from va/dcfvwr:" id permitType organization ))
-            result))))
-    (catch Throwable t
-      (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
+  (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+    (logging/with-logging-context {:applicationId id}
+      (println "batchrun poll-verdicts-for-reviews: looking at" url id organization)
+      (if-not (s/blank? url)
+        ;; url means there's a defined location (eg sftp) for polling xml verdicts
+        (let [command (assoc (application->command app) :user eraajo-user :created (now))
+              result (verdict-api/do-check-for-verdict-w-review command)]
+          (when-not (nil? result) (println "app got non-nil result from va/dcfvwr:" id permitType organization ))
+          result))))
+  ;; (try
+  ;;   ;; let form here
+  ;;   (catch Throwable t
+  ;;     (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t))))
+
+  )
 
 (defn poll-verdicts-for-reviews []
   ;; modified from fetch-verdicts.

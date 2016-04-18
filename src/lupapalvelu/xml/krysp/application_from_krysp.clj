@@ -14,7 +14,9 @@
 (defn- get-application-xml [{:keys [permitType organization] :as application} id search-type & [raw?]]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
     (if-let [fetch-fn (fetch-fetch-fn application)]
-      (fetch-fn url credentials id search-type raw?)
+      (do
+        (println "get-application-xml: fetch-fn & params" fetch-fn url credentials id search-type raw?)
+        (fetch-fn url credentials id search-type raw?))
       (do
         (error "No fetch function for" permitType organization)
         (fail! :error.unknown)))

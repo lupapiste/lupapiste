@@ -14,21 +14,19 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.building :as building]))
 
-(defn get-reviews-from-message [xml]
+
+(defn xml->reviews [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         asiat (enlive/select xml-no-ns common/case-elem-selector)]
     (when (pos? (count asiat))
-      ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
-      ;; Log an error if there were many. Use the first one anyway.
+      (println "pos")
       (when (> (count asiat) 1)
-        (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message."))
+        (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message. Count:" (count asiat)))
 
       (let [asia (first asiat)
             katselmukset (map cr/all-of  (select asia [:katselmustieto :Katselmus]))]
-
         (println "#katselmukset" (count katselmukset))
-        (-> (merge
-             {:id                          (common/->lp-tunnus asia)
-              :katselmukset                katselmukset})
+        (-> katselmukset
             cr/convert-booleans
-            cr/cleanup)))))
+            cr/cleanup)))
+    ))

@@ -280,22 +280,21 @@
         ;;                  ;; sc/check katselmus-task-schema new-task...
         ;;                  (lupapalvelu.tasks/new-task "task-katselmus" (review-task-name review) review)
         ;;                  )
-        review-to-task #(lupapalvelu.tasks/katselmus->task % {} {})
+        review-to-task #(lupapalvelu.tasks/katselmus->task {} {} application %)
+        review-tasks (map review-to-task reviews)
         ]
     ;; (doseq [review reviews]
     ;;   (update-application command {$push {:tasks (review-to-task review)}}))
-    (update-application command {$push {:tasks (map review-to-task reviews)}})
-    (ok :reviews reviews)))
+    (update-application command {$push {:tasks review-tasks}})
+    (ok :review-tasks review-tasks)))
 
 (defn do-check-for-verdict-w-review [{:keys [application] :as command}]
-  ;; to get
-  ;;
   {:pre [(every? command [:application :user :created])]}
   (when-let [
-             app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
-                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
+             ;; app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
+             ;;             (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
 
              ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml") "utf-8")
-             ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
+             app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
              ]
-    (save-reviews-from-xml app-xml)))
+    (save-reviews-from-xml command app-xml)))
