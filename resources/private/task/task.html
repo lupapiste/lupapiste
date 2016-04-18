@@ -34,7 +34,6 @@
       <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, addAttachmentDisabled: $root.addAttachmentDisabled, authorization: $root.authorization}}"></div>
     </div>
 
-    <!--<div id="taskDocgen" class="docgen-content" ></div>-->
     <!-- ko if: $data.addedToService -->
      <div data-bind="component: {name: 'docgen-group',
                                  params: {schema: $data.schema,
@@ -42,7 +41,7 @@
                                           applicationId: $data.applicationId,
                                           documentId: $data.id,
                                           service: $root.dataService,
-                                          authModel: lupapisteApp.models.applicationAuthModel,
+                                          authModel: $root.authorization,
                                           i18npath: [$data.schema.info.i18name || $data.schema.info.name]}}"></div>
     <!-- /ko -->
   </section>

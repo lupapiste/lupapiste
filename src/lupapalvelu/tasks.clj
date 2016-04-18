@@ -80,7 +80,9 @@
                     :whitelist {:roles [:authority] :otherwise :disabled}
                     :i18nkey "task-katselmus.katselmus.tila"
                     :body [{:name "osittainen"} {:name "lopullinen"}]}
-                   {:name "kayttoonottava" :readonly-after-sent true :type :checkbox :inputType :checkbox-wrapper
+                   {:name "kayttoonottava" :readonly-after-sent true
+                    :type :checkbox :inputType :checkbox-wrapper
+                    :auth {:enabled [:is-end-review]}
                     :whitelist {:roles [:authority] :otherwise :disabled}}
                    ]}]}
    {:name "katselmus" :type :group
@@ -96,8 +98,10 @@
       :whitelist {:roles [:authority] :otherwise :disabled}}
      {:name "pitaja" :type :string :required true :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}
-     {:name "tiedoksianto" :type :checkbox :inputType :checkbox-wrapper :readonly-after-sent true
-           :whitelist {:roles [:authority] :otherwise :disabled}}
+     {:name "tiedoksianto" :type :checkbox :inputType :checkbox-wrapper
+      :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}
+      :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000 :css []
               :whitelist {:roles [:authority] :otherwise :disabled} }

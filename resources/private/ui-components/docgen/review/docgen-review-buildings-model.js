@@ -2,16 +2,12 @@ LUPAPISTE.DocgenReviewBuildingsModel = function( params ) {
   "use strict";
   var self = this;
 
-  var service = params.service;
-  var data = service.getInDocument( params.documentId,
-                                    _.flatten( [params.path])).model();
+  self.authModel = params.authModel;
+  self.service = params.service;
+  var data = self.service.getInDocument( params.documentId,
+                                         _.flatten( [params.path])).model();
 
-  self.notEndReview = !service.getInDocument( params.documentId,
-                                             ["katselmuksenLaji"])
-    .model()
-    .match( /^(osittainen )?loppukatselmus$/);
-
-  function buildingDescription( nationalId ) {
+ function buildingDescription( nationalId ) {
     var build = _.find( lupapisteApp.models.application._js.buildings,
                         {nationalId: nationalId });
     return build ? build.description || "" : "";
@@ -28,8 +24,7 @@ LUPAPISTE.DocgenReviewBuildingsModel = function( params ) {
       schemaI18name: params.schemaI18name,
       i18npath: i18npath,
       applicationId: params.applicationId,
-      documentId: params.documentId,
-      service: service
+      documentId: params.documentId
     });
     return finalschema;
   }

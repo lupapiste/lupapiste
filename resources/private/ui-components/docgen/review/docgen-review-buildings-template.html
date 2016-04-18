@@ -24,15 +24,16 @@
                        i18npath: $data.tila.i18npath,
                        applicationId: $data.tila.applicationId,
                        documentId: $data.tila.documentId,
-                       service: $data.tila.service }}"></td>
+                       authModel: $parent.authModel,
+                       service: $parent.service }}"></td>
         <td data-bind="component: { name: $data.kayttoonottava.uicomponent,
                        params: { schema: $data.kayttoonottava,
-                       readonly: $parent.notEndReview,
                        path: $data.kayttoonottava.path,
                        i18npath: $data.kayttoonottava.i18npath,
                        applicationId: $data.kayttoonottava.applicationId,
                        documentId: $data.kayttoonottava.documentId,
-                       service: $data.kayttoonottava.service }}"></td>
+                       authModel: $parent.authModel,
+                       service: $parent.service }}"></td>
         <td data-bind="text: nationalId"></td>
         <td data-bind="text: propertyId"></td>
       </tr>

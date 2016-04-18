@@ -138,6 +138,7 @@ var taskPageController = (function() {
 
         t.approvable = authorizationModel.ok("approve-task");
         t.rejectable = authorizationModel.ok("reject-task");
+        t.isEndReview = authorizationModel.ok( "is-end-review");
 
         t.displayName = taskUtil.longDisplayName(t, application);
         t.applicationId = application.id;
@@ -153,8 +154,8 @@ var taskPageController = (function() {
         service.addDocument(task());
         t.addedToService( true );
 
-        var options = {collection: "tasks", updateCommand: "update-task", validate: true};
-        docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
+        // var options = {collection: "tasks", updateCommand: "update-task", validate: true};
+        // docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
 
       });
     } else {

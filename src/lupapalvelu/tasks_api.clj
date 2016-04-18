@@ -50,6 +50,13 @@
   (when-not (task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
+(defn- task-is-end-review? [task]
+  (re-matches #"(?i)^(osittainen )?loppukatselmus$" (or (:taskname task) "")))
+
+(defn- validate-task-is-end-review [{{task-id :taskId} :data} {tasks :tasks}]
+  (when-not (task-is-end-review? (util/find-by-id task-id tasks))
+    (fail :error.invalid-task-type)))
+
 ;; API
 (def valid-source-types #{"verdict" "task"})
 
@@ -140,24 +147,6 @@
     (let [review (get-in (util/find-by-id task-id tasks) [:data :katselmus])]
       (when (some #(ss/blank? (get-in review [% :value])) [:pitoPvm :pitaja :tila])
         (fail! :error.missing-parameters)))))
-
-(comment ;; deleted after review-done feature is in production, will be used later to send updated data to backing systems
-  (defcommand send-task
-    {:description "Authority can send task info to municipality backend system."
-     :parameters  [id taskId lang]
-     :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
-     :pre-checks  [validate-task-is-review
-                   validate-review-kind
-                   (permit/validate-permit-type-is permit/R permit/YA) ; KRYSP mapping currently implemented only for R & YA
-                   (task-state-assertion [:ok :sent])]
-     :user-roles  #{:authority}
-     :states      valid-states}
-    [{application :application user :user created :created :as command}]
-    (let [task (util/find-by-id taskId (:tasks application))
-          all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
-          sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
-          set-statement (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)]
-      (set-state command taskId :sent (when (seq set-statement) {$set set-statement})))))
 
 (defn- schema-with-type-options
   "Genereate 'subtype' options for readonly elements with sequential body"
@@ -260,3 +249,13 @@
       :nop)
 
     (ok :integrationAvailable (not (nil? sent-file-ids)))))
+
+(defquery is-end-review
+  {:description "Pseudo query that fails if the task is neither
+  Loppukatselmus nor Osittainen loppukatselmus."
+   :parameters [id taskId]
+   :input-validators [(partial non-blank-parameters [:id :taskId])]
+   :user-roles #{:authority}
+   :states valid-states
+   :pre-checks [validate-task-is-end-review
+                (permit/validate-permit-type-is permit/R)]})
