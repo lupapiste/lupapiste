@@ -4,7 +4,8 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [sade.util :refer [fn->>]]))
 
 (apply-remote-minimal)
 
@@ -77,24 +78,32 @@
       (reduce + 0 (map #(let [schema (schemas/get-schema (:schema-info %))]
                          (model/modifications-since-approvals (:body schema) [] (:data %) {} true modified)) tasks)) => 0))
 
-  (let [task-id (-> tasks first :id)
-        task (doc-persistence/by-id application :tasks task-id)]
+  (let [task-id (->> tasks (remove (fn->> :schema-info :subtype keyword (= :review))) first :id)
+        review-id (->> tasks (filter (fn->> :schema-info :subtype keyword (= :review))) first :id)
+        task (doc-persistence/by-id application :tasks task-id)
+        review (doc-persistence/by-id application :tasks review-id)]
 
     (fact "Pena can't approve"
       (command pena :approve-task :id application-id :taskId task-id) => unauthorized?)
 
-    (facts* "Approve the first task"
+    (facts* "Approve the first non-review task"
       (let [_ (command sonja :approve-task :id application-id :taskId task-id) => ok?
             updated-app (query-application pena application-id)
             updated-task (doc-persistence/by-id updated-app :tasks task-id)]
         (:state task) => "requires_user_action"
         (:state updated-task) => "ok"))
 
+    (fact "Review cannot be approved"
+       (command sonja :approve-task :id application-id :taskId review-id) => (partial expected-failure? "error.invalid-task-type"))
+
     (facts* "Reject the first task"
       (let [_ (command sonja :reject-task :id application-id :taskId task-id) => ok?
             updated-app (query-application pena application-id)
             updated-task (doc-persistence/by-id updated-app :tasks task-id)]
-        (:state updated-task) => "requires_user_action")))
+        (:state updated-task) => "requires_user_action"))
+
+    (fact "Review cannot be rejected"
+      (command sonja :reject-task :id application-id :taskId review-id) => (partial expected-failure? "error.invalid-task-type")))
 
   (facts "create task"
     (fact "Applicant can't create tasks"
