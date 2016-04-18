@@ -371,22 +371,20 @@
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
 
-(defn- save-buildings
+(defn- building-mongo-updates
   "Get buildings from verdict XML and save to application. Updates also operation documents
    with building data, if applicable."
-  [{:keys [application] :as command} buildings]
-  (let [building-updates (building/building-updates buildings application)]
-    (update-application command {$set building-updates})
-    (when building-updates {:buildings (map :nationalId buildings)})))
+  [application buildings]
+  (when buildings
+    (->> (building/building-updates buildings application)
+         (hash-map $set))))
 
-(defn- save-backend-ids
-  [{{verdicts :verdicts} :application :as command} backend-ids]
+(defn- backend-id-mongo-updates
+  [{verdicts :verdicts} backend-ids]
   (some->> backend-ids
            (remove (set (map :kuntalupatunnus verdicts)))
            (map backend-id->verdict)
-           (assoc-in {} [$push :verdicts $each])
-           (update-application command))
-  (when backend-ids {:backend-ids backend-ids}))
+           (assoc-in {} [$push :verdicts $each])))
 
 (defn do-check-for-verdict [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
@@ -399,8 +397,9 @@
           validation-errors (validator-fn app-xml organization)]
       (if-not validation-errors
         (save-verdicts-from-xml command app-xml)
-        (let [buildings    (seq (building-reader/->buildings-summary app-xml))
-              backend-ids  (seq (krysp-reader/->backend-ids app-xml))]
-          (cond-> validation-errors
-            buildings   (merge (save-buildings command buildings))
-            backend-ids (merge (save-backend-ids command backend-ids))))))))
+        (let [building-updates   (->> (seq (building-reader/->buildings-summary app-xml))
+                                      (building-mongo-updates application))
+              backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
+                                      (backend-id-mongo-updates application))]
+          (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
+          validation-errors)))))

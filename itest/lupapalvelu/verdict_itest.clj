@@ -309,7 +309,6 @@
         (:ok response) => false
         (:text response) => "info.no-verdicts-found-from-backend")
       (fact "Buildings were still read"
-        (:buildings response) => truthy
         (:buildings application) => sequential?)
       (fact "building id from KRYSP is saved to document"
         (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")
