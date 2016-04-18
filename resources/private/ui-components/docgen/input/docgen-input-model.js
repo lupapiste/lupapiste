@@ -6,7 +6,6 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
 
-  //console.log( "Docgen input auth:", params.authModel )
   var service = params.service || lupapisteApp.services.documentDataService;
 
   self.componentTemplate = (params.template || params.schema.template)
