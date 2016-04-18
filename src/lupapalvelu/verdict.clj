@@ -12,9 +12,12 @@
             [sade.util :refer [fn->>] :as util]
             [sade.xml :as xml]
             [sade.env :as env]
-            [lupapalvelu.action :as action]
+            [lupapalvelu.action :refer [update-application] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.appeal-common :as appeal-common]
+            [lupapalvelu.building :as building]
+            [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -26,6 +29,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
@@ -95,7 +99,7 @@
 (defschema Poytakirja
   "Schema for verdict record."
   {(sc/optional-key :paatoksentekija) (sc/maybe sc/Str)
-   (sc/optional-key :paatoskoodi)     (sc/maybe sc/Str) ;; (apply sc/enum verdict-codes), data contains invalid values: nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11" 
+   (sc/optional-key :paatoskoodi)     (sc/maybe sc/Str) ;; (apply sc/enum verdict-codes), data contains invalid values: nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11"
    (sc/optional-key :status)          (sc/maybe Status)
    (sc/optional-key :urlHash)         sc/Str
    (sc/optional-key :paatos)          (sc/maybe sc/Str)
@@ -148,6 +152,13 @@
    (sc/optional-key :signatures) [Signature]
    (sc/optional-key :metadata)   (sc/eq nil)})
 
+(defn- backend-id->verdict [backend-id]
+  {:id              (mongo/create-id)
+   :kuntalupatunnus backend-id
+   :timestamp       nil
+   :paatokset       []
+   :draft           true})
+
 (defn verdict-attachment-type
   ([application] (verdict-attachment-type application "paatosote"))
   ([{permit-type :permitType :as application} type]
@@ -197,7 +208,7 @@
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
          (if (= 200 (:status resp))
-           (attachment/attach-file! current-application 
+           (attachment/attach-file! current-application
                                     {:filename (or header-filename filename)
                                      :size content-length
                                      :content (:body resp)
@@ -335,3 +346,60 @@
       nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
       (enlive/at xml [:RakennusvalvontaAsia place] (enlive/before paatostieto)))))
 
+(defn- normalize-special-verdict
+  "Normalizes special foreman/designer verdicts by
+  creating a traditional paatostieto element from the proper special
+  verdict party.
+    application: Application that requests verdict.
+    app-xml:     Verdict xml message
+  Returns either normalized app-xml (without namespaces) or app-xml if
+  the verdict is not special."
+  [application app-xml]
+  (let [xml (cr/strip-xml-namespaces app-xml)]
+    (if (special-foreman-designer-verdict? (meta-fields/enrich-with-link-permit-data application) xml)
+      (verdict-xml-with-foreman-designer-verdicts application xml)
+      app-xml)))
+
+(defn- save-verdicts-from-xml
+  "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
+  [{:keys [application] :as command} app-xml]
+  (appeal-common/delete-all command)
+  (let [updates (find-verdicts-from-xml command app-xml)]
+    (when updates
+      (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+        (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+        (t/mark-app-and-attachments-final! (:id application) (:created command))))
+    (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+
+(defn- building-mongo-updates
+  "Get buildings from verdict XML and save to application. Updates also operation documents
+   with building data, if applicable."
+  [application buildings]
+  (when buildings
+    (->> (building/building-updates buildings application)
+         (hash-map $set))))
+
+(defn- backend-id-mongo-updates
+  [{verdicts :verdicts} backend-ids]
+  (some->> backend-ids
+           (remove (set (map :kuntalupatunnus verdicts)))
+           (map backend-id->verdict)
+           (assoc-in {} [$push :verdicts $each])))
+
+(defn do-check-for-verdict [{:keys [application] :as command}]
+  {:pre [(every? command [:application :user :created])]}
+  (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
+                         ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
+                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))]
+    (let [app-xml (normalize-special-verdict application app-xml)
+          organization (organization/get-organization (:organization application))
+          validator-fn (permit/get-verdict-validator (permit/permit-type application))
+          validation-errors (validator-fn app-xml organization)]
+      (if-not validation-errors
+        (save-verdicts-from-xml command app-xml)
+        (let [building-updates   (->> (seq (building-reader/->buildings-summary app-xml))
+                                      (building-mongo-updates application))
+              backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
+                                      (backend-id-mongo-updates application))]
+          (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
+          validation-errors)))))
