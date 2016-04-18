@@ -180,7 +180,8 @@ var attachment = (function() {
     },
 
     previewUrl: ko.pureComputed(function() {
-      return "/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId;
+      var fileId = util.getIn(model, ["latestVersion", "fileId"]);
+      return "/api/raw/view-attachment?attachment-id=" + fileId;
     }),
 
     rotete: function(rotation) {
