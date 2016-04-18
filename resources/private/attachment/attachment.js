@@ -338,18 +338,19 @@ var attachment = (function() {
       .call();
     }));
 
-
     model.subscriptions.push(model.visibility.subscribe(function(data) {
-      ajax.command("set-attachment-visibility", {
-        id: applicationId,
-        attachmentId: model.id(),
-        value: data
-      })
-      .success(function() {
-        model.dirty = true;
-        hub.send("indicator-icon", {style: "positive"});
-      })
-      .call();
+      if (authorizationModel.ok("set-attachment-visibility")) {
+        ajax.command("set-attachment-visibility", {
+          id: applicationId,
+          attachmentId: model.id(),
+          value: data
+        })
+        .success(function() {
+          model.dirty = true;
+          hub.send("indicator-icon", {style: "positive"});
+        })
+        .call();
+      }
     }));
 
 

@@ -192,7 +192,7 @@
                             data-bind="options: attachmentVisibilities,
                                        optionsText: function(i) { return loc('attachment.visibility.' + i)},
                                        value: visibility,
-                                       enable: $root.authorization.ok('set-attachment-visibility') && editable"/>
+                                       enable: $root.authorization.ok('set-attachment-visibility') && editable"></select>
                   </div>
                   <div data-bind="if: $root.authorization.ok('permanent-archive-enabled') && latestVersion">
                     <div class="archive-valid" data-bind="with: latestVersion">
