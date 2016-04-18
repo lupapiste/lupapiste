@@ -36,14 +36,19 @@
       updates)))
 
 (defn- task-is-review? [task]
-  (let [task-type (-> task :schema-info :name)
-        schema (schemas/get-schema tasks/task-schemas-version task-type)]
-    (= :review (-> schema :info :subtype keyword))))
+  (some->> (get-in task [:schema-info :name])
+           (schemas/get-schema tasks/task-schemas-version)
+           (#(get-in % [:info :subtype]))
+           (keyword)
+           (= :review)))
 
-(defn- validate-task-is-not-review [{data :data} {tasks :tasks}]
-  (when-let [task-id (:taskId data)]
-    (when (task-is-review? (util/find-by-id task-id tasks))
-      (fail :error.invalid-task-type))))
+(defn- validate-task-is-not-review [{{task-id :taskId} :data} {tasks :tasks}]
+  (when (task-is-review? (util/find-by-id task-id tasks))
+    (fail :error.invalid-task-type)))
+
+(defn- validate-task-is-review [{{task-id :taskId} :data} {tasks :tasks}]
+  (when-not (task-is-review? (util/find-by-id task-id tasks))
+    (fail :error.invalid-task-type)))
 
 ;; API
 (def valid-source-types #{"verdict" "task"})
@@ -126,13 +131,9 @@
   [{:keys [application] :as command}]
   (set-state command taskId :requires_user_action))
 
-(defn- validate-task-is-review [{{task-id :taskId} :data} {tasks :tasks}]
-  (when-not (task-is-review? (util/find-by-id task-id tasks))
-    (fail :error.invalid-task-type)))
-
 (defn- validate-review-kind [{{task-id :taskId} :data} {tasks :tasks}]
   (when (ss/blank? (get-in (util/find-by-id task-id tasks) [:data :katselmuksenLaji :value]))
-    (fail :error.missing-parameters)))
+    (fail! :error.missing-parameters)))
 
 (defn- validate-required-review-fields! [{{task-id :taskId :as data} :data} {tasks :tasks :as application}]
   (when (= (permit/permit-type application) permit/R)
@@ -195,7 +196,6 @@
    :user-roles  #{:authority}
    :states      valid-states
    :pre-checks  [validate-task-is-review
-                 validate-review-kind
                  (permit/validate-permit-type-is permit/R permit/YA)]}
   [_])
 
@@ -204,13 +204,13 @@
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [validate-task-is-review
-                 validate-review-kind
                  (permit/validate-permit-type-is permit/R permit/YA)  ; KRYPS mapping currently implemented only for R & YA
                  (task-state-assertion (tasks/all-states-but :sent))]
    :user-roles  #{:authority}
    :states      valid-states}
   [{application :application user :user created :created :as command}]
   (validate-required-review-fields! command application)
+  (validate-review-kind command application)
   (let [task (util/find-by-id taskId (:tasks application))
         tila (get-in task [:data :katselmus :tila :value])
 
