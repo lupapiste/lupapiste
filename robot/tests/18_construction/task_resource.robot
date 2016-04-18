@@ -72,14 +72,17 @@ Test id editable
 
 Show checkboxes
   Execute Javascript  $("table.review-buildings-table tbody input").height(10)
+  Execute Javascript  $("input[data-test-id='katselmus.tiedoksianto']").height(10)
 
 Review checkboxes enabled
   Show checkboxes
   Element should not be visible  jquery=table.review-buildings-table tbody input:disabled
+  Element should not be visible  jquery=input[data-test-id="katselmus.tiedoksianto"]:disabled
 
 Review checkboxes disabled
   Show checkboxes
   Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
+  Element should not be visible  jquery=input[data-test-id="katselmus.tiedoksianto"]:enabled
 
 Review frozen
   Wait until  Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3
