@@ -54,7 +54,7 @@
                                                            "rest-api"
                                                            "trusted-etl")
            :email                                 ssc/Email
-           :username                              (ssc/max-length-string 255)
+           :username                              ssc/Username
            :enabled                               sc/Bool
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}

@@ -1,6 +1,7 @@
 (ns sade.schemas
   (:require [sade.util :as util]
             [sade.validators :as validators]
+            [sade.strings :as ss]
             [clj-time.format :as ctf]
             [schema.core :refer [defschema] :as sc]
             [schema.coerce :as coerce])
@@ -42,7 +43,7 @@
 ;; Schemas
 ;;
 
-(defschema Nat 
+(defschema Nat
   "A schema for natural number integer"
   (sc/constrained sc/Int (comp not neg?) "Natural number"))
 
@@ -95,7 +96,11 @@
 
 (defschema Email
   "A simple schema for email"
-  (sc/constrained sc/Str (every-pred validators/valid-email? (max-length-constraint 255)) "Email"))
+  (sc/constrained sc/Str (every-pred validators/valid-email? ss/in-lower-case? (max-length-constraint 255)) "Email"))
+
+(defschema Username
+  "A simple schema for username"
+  (sc/constrained sc/Str (every-pred ss/in-lower-case? (max-length-constraint 255)) "Username"))
 
 (defschema Timestamp
   "A schema for timestamp"
@@ -126,7 +131,7 @@
 
 (defdynamicschema date-string [format]
   (let [formatter (ctf/formatter format)]
-    (sc/constrained sc/Str #(try (ctf/parse formatter %) 
+    (sc/constrained sc/Str #(try (ctf/parse formatter %)
                                  (catch IllegalFieldValueException e false))
                     (str "Date string " format))))
 
