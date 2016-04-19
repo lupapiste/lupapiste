@@ -58,6 +58,8 @@ LUPAPISTE.AuthoritySelectModel = function() {
   }
 
   self.addHubListener( "application-model-updated", fetchAuthorities);
+  // Initialization
+  fetchAuthorities();
 
   self.disableAuthorities = function( option, item ) {
     if( item ) {
