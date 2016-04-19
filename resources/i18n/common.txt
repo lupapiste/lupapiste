@@ -630,6 +630,8 @@
 "applications.search.clear-filters" "sv" "Töm sökvillkor"
 "applications.search.filter-name-already-in-use" "fi" "Nimi on jo käytössä"
 "applications.search.filter-name-already-in-use" "sv" "Namnet används redan"
+"error.filter-title-collision" "fi" "Nimi on jo käytössä"
+"error.filter-title-collision" "sv" "Namnet används redan"
 "applications.search.foremen" "fi" "Työnjohtajat"
 "applications.search.foremen" "sv" "Arbetsledarna"
 "applications.search.handler.no-authority" "fi" "Ei käsittelijää"
