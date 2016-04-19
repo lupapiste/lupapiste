@@ -13,13 +13,17 @@ Open task
   Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
   Wait Until  Element should be visible  taskAttachments
 
+Edit review date
+  [Arguments]  ${date}
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Wait for jQuery
+  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
+
 Edit katselmus
   [Arguments]  ${select}  ${item}  ${date}  ${name}  ${notes}
   Test id disabled  review-done
   Select From List by test id  ${select}  ${item}
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Wait for jQuery
-  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
+  Edit review date  ${date}
   Wait for jQuery
   Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}
   Wait for jQuery

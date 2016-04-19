@@ -95,10 +95,9 @@ Return to listing
 Invalid date prevents review done
   Open review  0
   Wait until  Test id editable  review-done
-  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  1.2.34
-  Wait for jQuery
-  Test id disabled  review-done
-  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  1.5.2016
+  Edit review date  1.2.34
+  Wait until  Test id disabled  review-done
+  Edit review date  1.5.2016
   Wait for jQuery
   Wait until  Test id editable  review-done
 
