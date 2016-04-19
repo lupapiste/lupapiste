@@ -1785,11 +1785,11 @@
 
 (defmigration add-original-file-id-for-attachment-versions
   {:apply-when (pos? (mongo/count :applications
-                                  {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                                  {:attachments.versions {$elemMatch {:fileId {$exists true}
                                                                       :originalFileId {$exists false}}}}))}
   (update-applications-array :attachments
                              add-original-file-id-for-versions-and-latestVersion
-                             {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                             {:attachments.versions {$elemMatch {:fileId {$exists true}
                                                                  :originalFileId {$exists false}}}}))
 
 #_(defmigration rename-hankkeen-kuvaus-rakennuslupa-back-to-hankkeen-kuvaus ;; TODO: migrate, LPK-1448
@@ -1989,6 +1989,9 @@
                 (mongo/update-n collection {:_id id} {$set task-updates})
                 0)))))
 
+(defmigration image-jpeg
+  {:apply-when (pos? (mongo/count :fs.files {:contentType "image/jpg"}))}
+  (mongo/update-n :fs.files {:contentType "image/jpg"} {$set {:contentType "image/jpeg"}} :multi true))
 
 
 ;;
