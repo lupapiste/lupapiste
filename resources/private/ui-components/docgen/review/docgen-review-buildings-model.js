@@ -7,10 +7,28 @@ LUPAPISTE.DocgenReviewBuildingsModel = function( params ) {
   var data = self.service.getInDocument( params.documentId,
                                          _.flatten( [params.path])).model();
 
- function buildingDescription( nationalId ) {
-    var build = _.find( lupapisteApp.models.application._js.buildings,
-                        {nationalId: nationalId });
-    return build ? build.description || "" : "";
+  // The description cell value consists of two parts:
+  // Tag and description, either one or both can be
+  // missing.
+  function buildingDescription( nationalId ) {
+    var appData = lupapisteApp.models.application._js;
+    var description = "";
+    var build = _.find(appData.buildings,
+                       {nationalId: nationalId });
+    if( build ) {
+      description = build.description || "";
+      var doc = _.find( appData.documents,
+                        function( doc ) {
+                          var opId = _.get( doc, "schema-info.op.id");
+                          var natId = _.get( doc, "data.valtakunnallinenNumero.value");
+                          return (opId && opId === build.operationId)
+                            || (natId && natId === nationalId);
+                        });
+      description = _.filter( [_.get( doc, "data.tunnus.value"),
+                               description], _.identity ).join( ": ");
+
+    }
+    return description;
   }
 
   function subSchema( sub ) {
