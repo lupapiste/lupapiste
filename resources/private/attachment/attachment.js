@@ -258,6 +258,12 @@ var attachment = (function() {
              true;
   });
 
+  model.previewTracking = ko.computed(function() {
+    if (model.previewVisible()) {
+      hub.send("track-click", {category:"Attachments", label: "", event:"previewVisible"});
+    }
+  });
+
   model.previousAttachmentPresent = ko.pureComputed(function() {
     return model.groupIndex() > 0;
   });
