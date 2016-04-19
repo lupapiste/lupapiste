@@ -92,8 +92,17 @@ Return to listing
   Review row has attachments  0
   Review row note  0  Hello world!
 
-Partial review generates new review
+Invalid date prevents review done
   Open review  0
+  Wait until  Test id editable  review-done
+  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  1.2.34
+  Wait for jQuery
+  Test id disabled  review-done
+  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  1.5.2016
+  Wait for jQuery
+  Wait until  Test id editable  review-done
+
+Partial review generates new review
   Finalize review
   Review row check  1  Aloituskokous  ${EMPTY}  ${EMPTY}  ${EMPTY}  ${EMPTY}
 
