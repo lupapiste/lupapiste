@@ -38,7 +38,7 @@ var attachment = (function() {
         repository.load(applicationId, undefined, undefined, true);
       })
       .call();
-      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVertion"});
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVersion"});
     return false;
   }
 
