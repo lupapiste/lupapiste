@@ -607,7 +607,7 @@
                     unauthorized))]
    :user-roles #{:anonymous}})
 
-(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
+(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename size]}] :files attachmentType :attachmentType}
   (let [user              (usr/current-user (request/ring-request))
         filename          (mime/sanitize-filename filename)
         attachment-type   (attachment/parse-attachment-type attachmentType)
@@ -615,7 +615,7 @@
         file-info         {:attachment-type  attachment-type
                            :attachment-id    attachment-id
                            :file-name        filename
-                           :content-type     content-type
+                           :content-type     (mime/mime-type filename)
                            :size             size
                            :created          (now)}]
 
