@@ -92,8 +92,16 @@ Return to listing
   Review row has attachments  0
   Review row note  0  Hello world!
 
-Partial review generates new review
+Invalid date prevents review done
   Open review  0
+  Wait until  Test id editable  review-done
+  Edit review date  1.2.34
+  Wait until  Test id disabled  review-done
+  Edit review date  1.5.2016
+  Wait for jQuery
+  Wait until  Test id editable  review-done
+
+Partial review generates new review
   Finalize review
   Review row check  1  Aloituskokous  ${EMPTY}  ${EMPTY}  ${EMPTY}  ${EMPTY}
 

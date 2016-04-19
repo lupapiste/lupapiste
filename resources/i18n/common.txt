@@ -2511,6 +2511,8 @@
 "error.password" "sv" "Lösenordet är felaktigt"
 "error.password.minlength" "fi" "Pituus vähintään 8 merkkiä"
 "error.password.minlength" "sv" "Minst antal tecken 8"
+"password-too-short" "fi" "Pituus vähintään 8 merkkiä"
+"password-too-short" "sv" "Minst antal tecken 8"
 "error.permit-must-have-link-permit" "fi" "Hakemuksesi vaatii viitteenä alkuperäisen luvan. Voit lisätä viittauksen \"lisää viitelupa\"-painikkeella."
 "error.permit-must-have-link-permit" "sv" "Din ansökan kräver det ursprungliga tillståndet som referens. Du kan lägga till referensen genom att klicka på \"lägg till referens\"-knappen."
 "error.point-coordinate-not-number" "fi" "Koordinaattipisteet eivät ole numeroita"

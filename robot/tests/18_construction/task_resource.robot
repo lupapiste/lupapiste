@@ -13,13 +13,17 @@ Open task
   Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
   Wait Until  Element should be visible  taskAttachments
 
+Edit review date
+  [Arguments]  ${date}
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Wait for jQuery
+  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
+
 Edit katselmus
   [Arguments]  ${select}  ${item}  ${date}  ${name}  ${notes}
   Test id disabled  review-done
   Select From List by test id  ${select}  ${item}
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Wait for jQuery
-  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
+  Edit review date  ${date}
   Wait for jQuery
   Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}
   Wait for jQuery
@@ -72,14 +76,17 @@ Test id editable
 
 Show checkboxes
   Execute Javascript  $("table.review-buildings-table tbody input").height(10)
+  Execute Javascript  $("input[data-test-id='katselmus.tiedoksianto']").height(10)
 
 Review checkboxes enabled
   Show checkboxes
   Element should not be visible  jquery=table.review-buildings-table tbody input:disabled
+  Element should not be visible  jquery=input[data-test-id="katselmus.tiedoksianto"]:disabled
 
 Review checkboxes disabled
   Show checkboxes
   Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
+  Element should not be visible  jquery=input[data-test-id="katselmus.tiedoksianto"]:enabled
 
 Review frozen
   Wait until  Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3

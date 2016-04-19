@@ -43,16 +43,17 @@ var taskPageController = (function() {
   var pending = ko.observable(false);
   var service = lupapisteApp.services.documentDataService;
 
-  var requiredErrors = ko.computed(function() {
+  var validationErrors = ko.computed(function() {
     var t = task();
     if (t && t.addedToService()) {
-      var fromService = service.findDocumentById(t.id);
-      return util.extractRequiredErrors([fromService.validationResults()]);
+      var results = [service.findDocumentById(t.id).validationResults()];
+      return _.concat( util.extractRequiredErrors(results),
+                       util.extractWarnErrors( results ));
     }
   });
 
   var reviewSubmitOk = ko.computed(function() {
-    return authorizationModel.ok("review-done") && _.isEmpty(requiredErrors());
+    return authorizationModel.ok("review-done") && _.isEmpty(validationErrors());
   });
 
   var addAttachmentDisabled = ko.computed(function() {
@@ -138,6 +139,7 @@ var taskPageController = (function() {
 
         t.approvable = authorizationModel.ok("approve-task");
         t.rejectable = authorizationModel.ok("reject-task");
+        t.isEndReview = authorizationModel.ok( "is-end-review");
 
         t.displayName = taskUtil.longDisplayName(t, application);
         t.applicationId = application.id;
@@ -153,8 +155,8 @@ var taskPageController = (function() {
         service.addDocument(task());
         t.addedToService( true );
 
-        var options = {collection: "tasks", updateCommand: "update-task", validate: true};
-        docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
+        // var options = {collection: "tasks", updateCommand: "update-task", validate: true};
+        // docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
 
       });
     } else {

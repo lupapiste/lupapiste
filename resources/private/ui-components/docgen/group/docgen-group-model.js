@@ -7,7 +7,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.documentId = params.documentId;
   self.service = params.service || lupapisteApp.services.documentDataService;
   self.schemaRows = params.schema.rows;
-
+  self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
   self.componentTemplate = (params.template || params.schema.template) || "default-docgen-group-template";
 
   self.groupId = ["group", params.documentId].concat(self.path).join("-");
