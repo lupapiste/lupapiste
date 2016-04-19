@@ -379,7 +379,7 @@
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
   (let [caller (usr/get-user-by-email caller-email)]
-    (when-not caller (fail! :not-found :desc (format "can't process invitation token for email %s, authority admin (%s) no longer exists" email caller-email)))
+    (when-not caller (fail! :not-found))
     (usr/change-password email password)
     (infof "invitation was accepted: email=%s, organization=%s" email organization)
     (ok)))

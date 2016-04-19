@@ -538,7 +538,7 @@
   [email]
   (let [apikey (security/random-password)
         n      (mongo/update-n :users {:email (canonize-email email)} {$set {:private.apikey apikey}})]
-    (when-not (= n 1) (fail! :unknown-user :email email))
+    (when-not (= n 1) (fail! :unknown-user))
     apikey))
 
 ;;
@@ -561,7 +561,7 @@
       (do
         (mongo/remove-many :activation {:email email})
         (clear-logins (:username updated-user)))
-      (fail! :unknown-user :email email))
+      (fail! :unknown-user))
     nil))
 
 ;;
