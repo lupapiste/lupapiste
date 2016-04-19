@@ -21,6 +21,8 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     self.commandName = ko.observable();
     self.command = null;
 
+    self.execute = function() { self.command(); };
+
     self.init = function(params) {
       self.commandName(params.commandName);
       self.command = params.command;
