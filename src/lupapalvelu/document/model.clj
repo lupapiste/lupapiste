@@ -16,14 +16,23 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo])
+  (:import [org.joda.time DateTimeFieldType]
+           [org.joda.time.format DateTimeFormatterBuilder]))
 
 ;;
 ;; Validation:
 ;;
 
 (def default-max-len 255)
-(def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
+;; Finnish date format d.m.yyyy, where the year must be four digits.
+(def dd-mm-yyyy (-> (DateTimeFormatterBuilder.)
+                    (.appendDayOfMonth 1)
+                    (.appendLiteral ".")
+                    (.appendMonthOfYear 1)
+                    (.appendLiteral ".")
+                    (.appendFixedDecimal (DateTimeFieldType/year) 4)
+                    (.toFormatter)))
 
 (def- latin1 (java.nio.charset.Charset/forName "ISO-8859-1"))
 

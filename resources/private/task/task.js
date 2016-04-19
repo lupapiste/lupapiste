@@ -43,16 +43,17 @@ var taskPageController = (function() {
   var pending = ko.observable(false);
   var service = lupapisteApp.services.documentDataService;
 
-  var requiredErrors = ko.computed(function() {
+  var validationErrors = ko.computed(function() {
     var t = task();
     if (t && t.addedToService()) {
-      var fromService = service.findDocumentById(t.id);
-      return util.extractRequiredErrors([fromService.validationResults()]);
+      var results = [service.findDocumentById(t.id).validationResults()];
+      return _.concat( util.extractRequiredErrors(results),
+                       util.extractWarnErrors( results ));
     }
   });
 
   var reviewSubmitOk = ko.computed(function() {
-    return authorizationModel.ok("review-done") && _.isEmpty(requiredErrors());
+    return authorizationModel.ok("review-done") && _.isEmpty(validationErrors());
   });
 
   var addAttachmentDisabled = ko.computed(function() {
