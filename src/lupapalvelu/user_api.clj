@@ -612,16 +612,17 @@
         filename          (mime/sanitize-filename filename)
         attachment-type   (attachment/parse-attachment-type attachmentType)
         attachment-id     (mongo/create-id)
+        content-type      (mime/mime-type filename)
         file-info         {:attachment-type  attachment-type
                            :attachment-id    attachment-id
                            :file-name        filename
-                           :content-type     (mime/mime-type filename)
+                           :content-type     content-type
                            :size             size
                            :created          (now)}]
 
     (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
-    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
+    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
     (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
 
