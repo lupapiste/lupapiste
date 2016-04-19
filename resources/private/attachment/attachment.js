@@ -199,6 +199,7 @@ var attachment = (function() {
     },
 
     goBackToApplication: function() {
+      hub.send("track-click", {category:"Attachments", label: "", event:"backToApplication"});
       model.application.open("attachments");
       if (model.dirty) {
         repository.load(model.application.id(), undefined, undefined, true);
