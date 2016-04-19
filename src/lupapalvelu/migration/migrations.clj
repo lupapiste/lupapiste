@@ -2,7 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
-            [clojure.set :refer [rename-keys]]
+            [clojure.set :refer [rename-keys] :as set]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
@@ -17,6 +17,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as op]
@@ -1993,6 +1994,17 @@
   {:apply-when (pos? (mongo/count :fs.files {:contentType "image/jpg"}))}
   (mongo/update-n :fs.files {:contentType "image/jpg"} {$set {:contentType "image/jpeg"}} :multi true))
 
+(defmigration fix-content-types
+  (let [content-types (mongo/distinct :fs.files "contentType")
+        all-unallowed-types (set (remove #(re-matches mime/mime-type-pattern %) content-types))
+        localized-unallowed-types #{"application/vnd.ms-outlook" "application/msworks"}
+        unallowed-types (set/difference all-unallowed-types localized-unallowed-types)]
+
+    (reduce + 0
+      (for [f (mongo/select :fs.files {:contentType {$in unallowed-types}})
+           :let [{:keys [id filename]} f
+                 content-type (mime/mime-type filename)]]
+        (mongo/update-n :fs.files {:_id id} {$set {:contentType content-type}})))))
 
 ;;
 ;; ****** NOTE! ******
