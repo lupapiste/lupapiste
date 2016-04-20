@@ -35,8 +35,12 @@ LUPAPISTE.ScrollService = function() {
     var pos = positions[hash];
     delete positions[hash];
     if( pos ) {
-      _.delay( _.partial( window.scrollTo, pos.x, pos.y ),
-               options.delay || 1 );
+      _.delay( function() {
+        // The page may have changed during delay
+        if( hash === window.location.hash ) {
+          window.scrollTo(pos.x, pos.y);
+        }
+      }, options.delay || 1 );
     }
   };
 
@@ -44,6 +48,6 @@ LUPAPISTE.ScrollService = function() {
   // the scroll position than waiting for 500 ms and hoping
   // that everything has been rendered.
   hub.subscribe( "application-model-updated", _.partial( self.pop, {delay: 500} ) );
-  hub.subscribe( self.serviceName +"::push", self.push );
+  hub.subscribe( self.serviceName + "::push", self.push );
   hub.subscribe( self.serviceName + "::pop", self.pop );
 };

@@ -152,6 +152,7 @@
   "Genereate 'subtype' options for readonly elements with sequential body"
   [{info :info body :body}]
   {:schemaName (:name info)
+   :schemaSubtype (:subtype info)
    :types      (some (fn [{:keys [name readonly body]}]
                        (when (and readonly (seq body))
                          (for [option body
