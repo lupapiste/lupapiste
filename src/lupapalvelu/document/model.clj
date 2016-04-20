@@ -1,5 +1,5 @@
 (ns lupapalvelu.document.model
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf]]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.set :refer [union difference]]
             [clj-time.format :as timeformat]
@@ -300,9 +300,11 @@
 
 (defn get-document-schema
   "Returns document's schema map that contais :info and :body."
-  [{schema-info :schema-info}]
+  [{:keys [schema-info id]}]
   {:pre [schema-info], :post [%]}
-  (schemas/get-schema schema-info))
+  (if-let [schema (schemas/get-schema schema-info)]
+    schema
+    (errorf "Schema '%s' not found for document %s!" (:name schema-info) id)))
 
 (defn- validate-document [{data :data :as document} info]
   (let [doc-validation-results (validator/validate document)]
