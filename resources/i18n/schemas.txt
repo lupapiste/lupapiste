@@ -4345,7 +4345,7 @@
 "suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.muita_vaikutuksia" "fi" "Muita vaikutuksia"
 "suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.muita_vaikutuksia" "sv" "Övriga inverkningar"
 "suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.turvallinen_polkupyoratie_kouluun" "fi" "Rakennuspaikalta on olemassa turvallinen polkupyörätie kouluun"
-"suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.turvallinen_polkupyoratie_kouluun" "sv" "Det finns rygg cykelväg från byggplats till skolan"
+"suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.turvallinen_polkupyoratie_kouluun" "sv" "Det finns trygg cykelväg från byggplats till skolan"
 "suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet._group_label" "fi" "Vaikutukset alueen virkistystarpeisiin"
 "suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet._group_label" "sv" "Inverkningar på områdets rekreationsbehov"
 "suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet.ulkoilu_ja_virkistysaluetta_varattu" "fi" "Emätilalta varattu virkistys- ja ulkoilutarpeisiin rakennuspaikan viereltä vähintään saman verran aluetta kuin rakennuspaikoiksi"
