@@ -27,7 +27,7 @@
               <label data-bind="ltext: 'stamp.text'"></label>
               <input data-bind="value: text, enable: status() === statusReady"
                         type="text"
-                        class="form-input text"
+                        class="text"
                      data-test-id="stamp-info-text"/>
               </div>
               <div class="col-1">
@@ -37,21 +37,21 @@
                           enable: status() === statusReady,
                           valueUpdate: 'afterkeydown'"
                         type="text"
-                        class="form-input text"
+                        class="text"
                      data-test-id="stamp-info-date"/>
               </div>
               <div class="col-1">
               <label data-bind="ltext: 'stamp.organization'"></label>
               <input data-bind="textInput: organization, enable: status() === statusReady"
                         type="text"
-                        class="form-input text"/
+                        class="text"/
                      data-test-id="stamp-info-organization">
               </div>
               <div class="col-1">
               <label data-bind="ltext: 'stamp.text.extra'"></label>
               <input data-bind="value: extraInfo, enable: status() === statusReady"
                         type="text"
-                        class="form-input text"/
+                        class="text"/
                      data-test-id="stamp-info-extratext">
               </div>
             </div>
@@ -62,7 +62,7 @@
               <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
               <input data-bind="textInput: kuntalupatunnus, enable: status() === statusReady"
                      type="text"
-                     class="form-input text"
+                     class="text"
                      data-test-id="stamp-info-kuntalupatunnus"/>
 
               </div>
@@ -70,7 +70,7 @@
               <label data-bind="ltext: 'stamp.section'"></label>
               <input data-bind="textInput: section, enable: status() === statusReady"
                      type="text"
-                     class="form-input text"
+                     class="text"
                      data-test-id="stamp-info-section"/>
               </div>               
 
@@ -98,7 +98,7 @@
                           enable: status() === statusReady,
                           css: {'invalid-margin': !xMarginOk()}"
                         type="text"
-                        class="form-input text"/
+                        class="text"/
                      data-test-id="stamp-info-xmargin">
 
               </div>
@@ -108,7 +108,7 @@
                           enable: status() === statusReady,
                           css: {'invalid-margin': !yMarginOk()}"
                         type="text"
-                        class="form-input text"
+                        class="text"
                      data-test-id="stamp-info-ymargin"/>
 
               </div>
