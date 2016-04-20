@@ -6,7 +6,7 @@
                  [org.clojure/tools.nrepl "0.2.12"]
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
-                 [org.clojure/core.memoize "0.5.8"]
+                 [org.clojure/core.memoize "0.5.9"]
 
                  ; Web frameworks
                  [ring "1.4.0"]
@@ -21,7 +21,7 @@
 
                  ; Logging
                  [com.taoensso/timbre "4.0.2"]
-                 [org.slf4j/slf4j-log4j12 "1.7.16"]
+                 [org.slf4j/slf4j-log4j12 "1.7.21"]
 
                  ; markup processing
                  [enlive "1.1.6"]
@@ -34,7 +34,7 @@
                  [org.jasypt/jasypt "1.9.2"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
-                 [org.bouncycastle/bcprov-jdk15on "1.52"]
+                 [org.bouncycastle/bcprov-jdk15on "1.54"]
                  [pandect "0.3.0" :exclusions [org.bouncycastle/bcprov-jdk15on]]
 
                  ; JSON
@@ -79,11 +79,11 @@
                  [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
                  [com.google.zxing/javase "2.2"] ; QR codes
-                 [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
+                 [com.levigo.jbig2/levigo-jbig2-imageio "1.6.5"]
 
                  ; MS Office document processing
-                 [ontodev/excel "0.2.3" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
-                 [org.apache.poi/poi-ooxml "3.11"]
+                 [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
+                 [org.apache.poi/poi-ooxml "3.14"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.5"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.5" :exclusions [com.lowagie/itext]]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.5"]
@@ -106,11 +106,11 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.23"]
+                 [lupapiste/commons "0.7.24"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
-                 [lupapiste/openpdf "1.0.2"]
+                 [lupapiste/openpdf "1.0.4"]
                  ; Wrapper for clj-pdf for PDF/A document generation
                  [lupapiste/pdfa-generator "1.0.1"]]
   :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
