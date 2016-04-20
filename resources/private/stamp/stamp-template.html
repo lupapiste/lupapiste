@@ -18,17 +18,19 @@
       </div>
 
       <script type="text/x-jquery-tmpl" id="stamp-attachments-template">
-        <div class="stamp-info-container">
-          <form id="stamp-info" class="clear three-col">
-            <fieldset class="col1">
-              <legend data-bind="ltext: 'stamp.information'"></legend>
+        <div class="stamp-info-container form-grid">
+          <form id="stamp-info">
+            <div class="row">
+            <h3 data-bind="ltext: 'stamp.information'"></h3>
 
+              <div class="col-1">
               <label data-bind="ltext: 'stamp.text'"></label>
               <input data-bind="value: text, enable: status() === statusReady"
                         type="text"
                         class="form-input text"
                      data-test-id="stamp-info-text"/>
-
+              </div>
+              <div class="col-1">
               <label data-bind="ltext: 'stamp.date'"></label>
               <input data-bind="
                           datepicker: date,
@@ -37,56 +39,59 @@
                         type="text"
                         class="form-input text"
                      data-test-id="stamp-info-date"/>
-
+              </div>
+              <div class="col-1">
               <label data-bind="ltext: 'stamp.organization'"></label>
               <input data-bind="textInput: organization, enable: status() === statusReady"
                         type="text"
                         class="form-input text"/
                      data-test-id="stamp-info-organization">
-
+              </div>
+              <div class="col-1">
               <label data-bind="ltext: 'stamp.text.extra'"></label>
               <input data-bind="value: extraInfo, enable: status() === statusReady"
                         type="text"
                         class="form-input text"/
                      data-test-id="stamp-info-extratext">
-            </fieldset>
-            <fieldset class="col2">
-              <legend data-bind="ltext: 'stamp.reference-info'"></legend>
+              </div>
+            </div>
+            <div class="row">
+              <h3 data-bind="ltext: 'stamp.reference-info'"></h3>
 
-              <label data-bind="ltext: 'stamp.buildingid'"></label>
-
-              <!-- ko if: showBuildingList -->
-              <select data-bind="options: buildingIdList,
-                                 optionsText: 'buildingId',
-                                 optionsCaption: loc('stamp.building.none'),
-                                 optionsValue: 'buildingId',
-                                 value: buildingId,
-                                 enable: status() === statusReady"
-                      data-test-id="stamp-info-buildingid-list"></select>
-              <!-- /ko -->
-              <!-- ko ifnot: showBuildingList -->
-              <input data-bind="textInput: buildingId, enable: status() === statusReady"
-                     type="text"
-                     class="form-input text"
-                     data-test-id="stamp-info-buildingid"/>
-              <!-- /ko -->
-
-
+              <div class="col-1">
               <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
               <input data-bind="textInput: kuntalupatunnus, enable: status() === statusReady"
                      type="text"
                      class="form-input text"
                      data-test-id="stamp-info-kuntalupatunnus"/>
 
+              </div>
+              <div class="col-1">
               <label data-bind="ltext: 'stamp.section'"></label>
               <input data-bind="textInput: section, enable: status() === statusReady"
                      type="text"
                      class="form-input text"
                      data-test-id="stamp-info-section"/>
-            </fieldset>
+              </div>               
 
-            <fieldset class="col3">
-              <legend data-bind="ltext: 'stamp.margin'"></legend>
+              <div class="col-2">
+              <label>&nbsp</label>
+              <div class="col--vertical checkbox-wrapper"
+                   data-bind="css: {'checkbox-wrapper--disabled': status() !== statusReady}">
+                <input data-bind="checked: includeBuildings,
+                                  disabled: status() !== statusReady"
+                       type="checkbox" 
+                       class="form-input"
+                       id="stamp-info-include-buildings"/>
+                <label data-bind="ltext: 'stamp.include-buildings'" class="inline-label checkbox-label" for="stamp-info-include-buildings"></label>
+              </div>
+              </div>
+
+            </div>
+
+            <div class="row">
+              <h3 data-bind="ltext: 'stamp.margin'"></h3>
+              <div class="col-1">
 
               <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"></label>
               <input data-bind="textInput: xMargin,
@@ -96,6 +101,8 @@
                         class="form-input text"/
                      data-test-id="stamp-info-xmargin">
 
+              </div>
+              <div class="col-1">
               <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"></label>
               <input data-bind="textInput: yMargin,
                           enable: status() === statusReady,
@@ -104,14 +111,20 @@
                         class="form-input text"
                      data-test-id="stamp-info-ymargin"/>
 
+              </div>
+              <div class="col-1">
               <label data-bind="ltext: 'stamp.transparency'"></label>
-              <select data-bind="options: transparencies, optionsText: 'text', optionsValue: 'value', value: transparency" class="form-input combobox"
+              <select data-bind="options: transparencies, optionsText: 'text', optionsValue: 'value', value: transparency" class="dropdown"
                       data-test-id="stamp-info-transparency"></select>
 
+              </div>
+              <div class="col-1">
               <label data-bind="ltext: 'stamp.page'"></label>
-              <select data-bind="options: pages, optionsText: 'text', optionsValue: 'value', value: page" class="form-input combobox"
+              <select data-bind="options: pages, optionsText: 'text', optionsValue: 'value', value: page" class="dropdown"
                       data-test-id="stamp-info-page"></select>
-            </fieldset>
+
+              </div>
+            </div>
           </form>
         </div>
         <div class="clear">

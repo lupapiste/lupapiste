@@ -62,7 +62,7 @@
 (defn- building->str [lang {:keys [short-id national-id]}]
   (when-not (or (ss/blank? short-id) (ss/blank? national-id))
     (i18n/with-lang lang
-      (str (i18n/loc "application.building") " " short-id " : " national-id))))
+      (str (i18n/loc "stamp.building") " " short-id " : " national-id))))
 
 (defn- info-fields->stamp [{:keys [text created transparency lang]} fields]
   {:pre [text (pos? created)]}

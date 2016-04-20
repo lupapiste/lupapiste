@@ -410,7 +410,7 @@
     (fail :error.unknown)))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo  kuntalupatunnus section lang]
+  {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo includeBuildings kuntalupatunnus section lang]
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
                       (partial action/number-parameters [:xMargin :yMargin])
                       (partial action/non-blank-parameters [:page])]
@@ -444,7 +444,8 @@
                                          :section      section
                                          :extra-info   extraInfo
                                          :organization org
-                                         :buildings    (building/building-ids application)}})]
+                                         :buildings    (when includeBuildings
+                                                         (building/building-ids application))}})]
     (ok :job job)))
 
 (defquery stamp-attachments-job
