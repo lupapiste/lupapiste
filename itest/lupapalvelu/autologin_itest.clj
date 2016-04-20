@@ -34,18 +34,16 @@
  (let [email (email-for "pekka")
        password (password-hash email)
        url (str (server-address) "/app/fi/")
-       resp (http-get url {:basic-auth [email password]})]
-
-   (-> resp :trace-redirects last) => (str (server-address) "/app/fi/authority")))
+       resp (http-get url {:basic-auth [email password] :follow-redirects false})]
+   (-> resp :headers (get "Location")) => #"/app/fi/authority"))
 
 (fact "Invalid timestamp, autologin fails"
  (let [email (email-for "pekka")
        timestamp  (- (now) (* 1000 60 60 6))
        password (password-hash email timestamp)
        url (str (server-address) "/app/fi/")
-       resp (http-get url {:basic-auth [email password]})]
-
-   (-> resp :trace-redirects last) => (str (server-address) "/app/fi/welcome")))
+       resp (http-get url {:basic-auth [email password] :follow-redirects false})]
+   (-> resp :headers (get "Location")) => #"/app/fi/welcome"))
 
 (fact "Sipoo does not have allowed IPs in fixture, autologin fails"
   (let [email (email-for "sonja")

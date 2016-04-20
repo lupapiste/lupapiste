@@ -178,6 +178,7 @@
                                                     {:user
                                                      (just
                                                        {:city "Tampere"
+                                                        :allowDirectMarketing true
                                                         :email "teppo@example.com"
                                                         :enabled true
                                                         :firstName "Teppo"
