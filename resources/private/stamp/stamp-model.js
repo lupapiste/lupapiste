@@ -146,6 +146,7 @@ LUPAPISTE.StampModel = function(params) {
       .command("stamp-attachments", {
         id: self.application.id(),
         text: self.text(),
+        lang: loc.getCurrentLanguage(),
         timestamp: new Date(self.date()).getTime(),
         organization: self.organization(),
         files: _.map(self.selectedFiles(), "id"),

@@ -27,7 +27,8 @@
         source     (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size :archivable])
            :re-stamp? re-stamp?
-           :attachment-id (:id attachment))))
+           :attachment-id (:id attachment)
+           :attachment-type (:type attachment))))
 
 (defn- stamp-attachment! [stamp file-info {:keys [application user now] :as context}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
@@ -55,21 +56,32 @@
       (tos/mark-attachment-final! application now attachment-id))
     new-file-id))
 
-(defn- info-fields->stamp [{:keys [text created transparency]} fields]
+(defn- asemapiirros? [{{type :type-id} :attachment-type}]
+  (= :asemapiirros (keyword type)))
+
+(defn- building->str [lang {:keys [short-id national-id]}]
+  (when-not (or (ss/blank? short-id) (ss/blank? national-id))
+    (i18n/with-lang lang
+      (str (i18n/loc "application.building") " " short-id " : " national-id))))
+
+(defn- info-fields->stamp [{:keys [text created transparency lang]} fields]
   {:pre [text (pos? created)]}
-  (->> ((juxt :backend-id :section :extra-info :building-id :organization) fields)
+  (->> (update fields :buildings (partial map (partial building->str lang)))
+       ((juxt :backend-id :section :extra-info :buildings :organization))
        (flatten)
        (map (fn-> str (ss/limit 100)))
        (stamper/make-stamp (ss/limit text 100) created transparency)))
 
 (defn- stamp-attachments!
   [file-infos {:keys [job-id application info-fields] :as context}]
-  (let [stamp (info-fields->stamp context (dissoc info-fields :buildings))]
+  (let [stamp-without-buildings (info-fields->stamp context (dissoc info-fields :buildings))
+        stamp-with-buildings (info-fields->stamp context info-fields)]
     (doseq [file-info file-infos]
       (try
-        (debug "Stamping" (select-keys file-info [:attachment-id :contentType :originalFileId :fileId :filename :re-stamp?]))
+        (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
         (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
-        (let [new-file-id (stamp-attachment! stamp file-info context)]
+        (let [stamp (if (asemapiirros? file-info) stamp-with-buildings stamp-without-buildings)
+              new-file-id (stamp-attachment! stamp file-info context)]
           (job/update job-id assoc (:attachment-id file-info) {:status :done :fileId new-file-id}))
         (catch Throwable t
           (errorf t "failed to stamp attachment: application=%s, file=%s" (:id application) (:fileId file-info))

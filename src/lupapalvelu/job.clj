@@ -41,7 +41,7 @@
 (defn update [id f & args]
   (dosync
     (let [old-job (find-job id)
-          new-value (apply f (cons (:value old-job) args))
+          new-value (apply f (:value old-job) args)
           new-job (assoc old-job :version (inc (:version old-job))
                          :value new-value
                          :status ((:status-fn old-job) new-value)
