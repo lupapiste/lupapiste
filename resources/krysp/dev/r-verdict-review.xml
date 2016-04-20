@@ -319,6 +319,28 @@
       </rakval:toimenpidetieto>
       <rakval:katselmustieto>
         <rakval:Katselmus>
+          <rakval:muuTunnustieto>
+            <rakval:MuuTunnus>
+              <yht:tunnus>fefefefefefefefefefefefefefefe</yht:tunnus>
+              <yht:sovellus>Facta</yht:sovellus>
+            </rakval:MuuTunnus>
+          </rakval:muuTunnustieto>
+          <rakval:pitoPvm>2011-11-11Z</rakval:pitoPvm>
+          <rakval:osittainen>lopullinen</rakval:osittainen>
+          <rakval:pitaja>Erkki Everest</rakval:pitaja>
+          <rakval:katselmuksenLaji>aloituskokous</rakval:katselmuksenLaji>
+          <rakval:vaadittuLupaehtonaKytkin>true</rakval:vaadittuLupaehtonaKytkin>
+          <rakval:huomautukset>
+            <rakval:huomautus>
+              <rakval:kuvaus>Aloituskokous LVI+RAK&#xd;
+Seurantakatselmus pidetään 11.12.2011 klo 11:11.</rakval:kuvaus>
+            </rakval:huomautus>
+          </rakval:huomautukset>
+          <rakval:tarkastuksenTaiKatselmuksenNimi>aloituskokous</rakval:tarkastuksenTaiKatselmuksenNimi>
+        </rakval:Katselmus>
+      </rakval:katselmustieto>
+      <rakval:katselmustieto>
+        <rakval:Katselmus>
           <rakval:katselmuksenRakennustieto>
             <rakval:KatselmuksenRakennus>
               <rakval:jarjestysnumero>1</rakval:jarjestysnumero>

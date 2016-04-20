@@ -333,19 +333,19 @@
 
 
 (facts "KRYSP verdict with reviews"
-  (let [xml (-> "../prod-sample-verdict-w-review.xml" slurp xml/parse)
+  (let [xml (-> "resources/krysp/dev/r-verdict-review.xml" slurp xml/parse)
         reviews (lupapalvelu.xml.krysp.review-reader/xml->reviews xml)
         katselmus-tasks (map (partial lupapalvelu.tasks/katselmus->task {} {} {}) reviews)
-        aloitus-review-task (nth katselmus-tasks 4)
+        aloitus-review-task (nth katselmus-tasks 0)
         non-empty (complement clojure.string/blank?)]
     ;; (println "xml:")
     ;; (clojure.pprint/pprint (last reviews))
     (println "a task (w/o schema-info):")
     (clojure.pprint/pprint (map #(dissoc % :schema-info) katselmus-tasks))
-    (fact "xml has 5 reviews" (count reviews) => 5)
+    (fact "xml has 10 reviews" (count reviews) => 10)
     (fact "huomautukset" (get-in aloitus-review-task [:data :katselmus :huomautukset :kuvaus :value]) => non-empty)
     (fact "pitaja" (get-in aloitus-review-task [:data :katselmuksenLaji :value]) => "aloituskokous")
-    (fact "tunnustieto" (get-in aloitus-review-task [:data :muuTunnus :sovellus]) => "Facta")
+    (fact "tunnustieto" (get-in aloitus-review-task [:data :katselmus :muuTunnus :sovellus :value]) => "Facta")
     ))
 
 ;; YA verdict
