@@ -157,7 +157,7 @@
     :template "form-grid-docgen-group-template"
     :body task-katselmus-body-ya}
 
-   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
+   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :subtype :foreman :order 10}
     :body [{:name "osapuolena" :type :checkbox}
            {:name "asiointitunnus" :type :string :max-len 17}]}
 

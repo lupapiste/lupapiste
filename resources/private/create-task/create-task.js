@@ -51,6 +51,7 @@ LUPAPISTE.createTaskController = new (function() {
       .success(function(data) {
         self.taskTypes(_.map(data.schemas, function(schema) {
           return {id:       schema.schemaName,
+                  schemaSubtype: schema.schemaSubtype,
                   text:     loc([schema.schemaName, "_group_label"]),
                   subTypes: schema.types};
         }));
@@ -64,7 +65,15 @@ LUPAPISTE.createTaskController = new (function() {
                                  schemaName: self.taskType(),
                                  taskSubtype: self.taskSubtype(),
                                  source: self.source})
-      .success(function() {
+      .success(function( res ) {
+        // Non-foreman tasks are automatically opened.
+        if(  !_.find( self.taskTypes(), {schemaSubtype: "foreman",
+                                         id: self.taskType()}) ) {
+          hub.subscribe( "application-model-updated",
+                         _.partial( lupapisteApp.models.application.openTask,
+                                    res.taskId ),
+                         true);
+        }
         repository.load(self.id);
         LUPAPISTE.ModalDialog.close();
       })

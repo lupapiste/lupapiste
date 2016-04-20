@@ -172,16 +172,18 @@ Add katselmus
   Select From List By Value  choose-task-subtype   muu tarkastus
   Input text  create-task-name  uus muu tarkastus
   Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
-  Task count is  task-katselmus  5
+  Wait Until  Element should be visible  taskAttachments
 
 Katselmuksenlaji is set and disabled
-  Open task  uus muu tarkastus
   Element should be disabled  xpath=//section[@id="task"]//select[@data-test-id='katselmuksenLaji']
   List Selection Should Be  xpath=//section[@id="task"]//select[@data-test-id='katselmuksenLaji']  muu tarkastus
+  Click by test id  back-to-application-from-task
+
+New katselmus is listed
+  Tab should be visible  tasks
+  Task count is  task-katselmus  5
 
 Verify post-verdict attachments - Aloituskokous
-  Click by test id  back-to-application-from-task
   Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
@@ -192,8 +194,6 @@ Katselmus task created in an YA application does not include any Rakennus inform
   Fetch YA verdict
   Open tab  tasks
   Create katselmus task  task-katselmus-ya  uus muu ya-tarkastus
-  Task count is  task-katselmus-ya  1
-  Open task  uus muu ya-tarkastus
   Wait until  Element should not be visible  xpath=//div[@id='taskDocgen']//div[@data-repeating-id='rakennus']
   [Teardown]  Logout
 
@@ -274,7 +274,7 @@ Create katselmus task
   Run Keyword If  $taskSubtype  Select From List By Value  choose-task-subtype   ${taskSubtype}
   Input text  create-task-name  ${taskName}
   Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
+  Wait test id visible  review-done
 
 Set date and check
   [Arguments]  ${button}  ${span}  ${date}
