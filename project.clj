@@ -55,7 +55,7 @@
                  [clj-time "0.11.0"]
 
                  ; String case manipulation
-                 [camel-snake-kebab "0.1.2"]
+                 [camel-snake-kebab "0.4.0"]
 
                  ; Collection of arrow macros
                  [swiss-arrows "1.0.0"]

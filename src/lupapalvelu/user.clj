@@ -3,7 +3,7 @@
             [swiss.arrows :refer [-<>]]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
-            [camel-snake-kebab :as kebab]
+            [camel-snake-kebab.core :as csk]
             [monger.operators :refer :all]
             [monger.query :as query]
             [schema.core :as sc]
@@ -512,7 +512,7 @@
     (cond
       (or (ss/blank? s) (= s "dummy")) "applicant"
       (= s "oirAuthority") "oir"
-      :else (kebab/->kebab-case s))))
+      :else (csk/->kebab-case s))))
 
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))
