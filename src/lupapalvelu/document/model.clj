@@ -304,7 +304,7 @@
   {:pre [schema-info], :post [%]}
   (if-let [schema (schemas/get-schema schema-info)]
     schema
-    (errorf "Schema '%s' not found for document %s!" (:name schema-info) id)))
+    (errorf "Schema '%s' (version %s) not found for document %s!" (:name schema-info) (:version schema-info) id)))
 
 (defn- validate-document [{data :data :as document} info]
   (let [doc-validation-results (validator/validate document)]
