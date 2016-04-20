@@ -83,7 +83,7 @@
   ([{:keys [version name] :or {version 1}}] (get-schema version name))
   ([schema-version schema-name]
     {:pre [schema-version schema-name]}
-    (get-in @registered-schemas [schema-version (name schema-name)])))
+    (get-in @registered-schemas [(long schema-version) (name schema-name)])))
 
 
 
