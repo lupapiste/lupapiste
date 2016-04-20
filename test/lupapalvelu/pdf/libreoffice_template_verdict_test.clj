@@ -5,15 +5,12 @@
     [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
-    [sade.util :as util]
-    [sade.core :as sade]
     [lupapalvelu.organization :refer :all]
     [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
     [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
-    [lupapalvelu.pdf.libre-template-test :refer :all])
-  (:import (java.io File StringWriter)))
+    [lupapalvelu.pdf.libre-template-test :refer :all]))
 
-(def applicant-index #'lupapalvelu.pdf.libreoffice-template-verdict/applicant-index)
+(def applicant-index #'lupapalvelu.pdf.libreoffice-template/applicant-index)
 (fact "Applicant index"
       (applicant-index application2) => '[["Testaaja Testi"]])
 
@@ -58,10 +55,6 @@
          (let [verdict (first (filter #(= "a1" (:id %)) (:verdicts application2)))
                paatos (nth (:paatokset verdict) 0)]
              (verdict-signatures verdict paatos) => '[["Tytti M\u00e4ntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
-
-
-(defn- start-pos [res]
-  (first (first (filter #(s/includes? (second %) "</draw:frame>") (map-indexed vector res)))))
 
 (background
   (get-organization "753-R") => {:name {:fi "org-name-fi"}})

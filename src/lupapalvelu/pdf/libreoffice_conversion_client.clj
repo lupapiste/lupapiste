@@ -6,6 +6,7 @@
             [lupapalvelu.pdf.libreoffice-template :refer :all]
             [lupapalvelu.pdf.libreoffice-template-history :as history]
             [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
+            [lupapalvelu.pdf.libreoffice-template-statement :as statement]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.env :as env]
@@ -60,4 +61,11 @@
   (let [filename (str (localize lang "application.verdict.title") ".fodt")
         tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
     (verdict/write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
+    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
+
+(defn generate-statment-pdfa [application id lang]
+  (debug "Generating PDF/A for statement: " id ", lang: " lang)
+  (let [filename (str (localize lang "application.statement.status") ".fodt")
+        tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+    (statement/write-statement-libre-doc application id lang tmp-file)
     (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))

@@ -3,6 +3,7 @@
             [sade.util :as util]
             [sade.property :as p]
             [sade.xml :as sx]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [clojure.xml :as xml]
@@ -86,6 +87,28 @@
   ;; advance reader past rows we want to skip
   (doseq [_ (take-while (fn [line] (not (s/includes? line "</table:table>"))) (line-seq rdr))])
   (write-line "</table:table>" fields wrtr))
+
+(defn- applicant-name-from-doc [document]
+  (when-let [body (:data document)]
+    (if (= (get-in body [:_selected :value]) "yritys")
+      (let [name (get-in body [:yritys :yritysnimi :value])
+            y-tunnus (get-in body [:yritys :liikeJaYhteisoTunnus :value])]
+        (str name " / (" y-tunnus ")"))
+      (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+        (s/trim (str (:value last-name) \space (:value first-name)))))))
+
+(defn applicant-index [application]
+  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
+        applicant (:applicant application)]
+    [(if (seq applicants) applicants [applicant])]))
+
+(defn child-attachments [application child-type id]
+  (filter (fn [att] (and (= child-type (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application)))
+
+(defn get-organization-name [application lang]
+  (let [organization (org/get-organization (:organization application))
+        default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
+    (get-in organization [:name lang] default)))
 
 (defn create-libre-doc [template file fields]
   (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]

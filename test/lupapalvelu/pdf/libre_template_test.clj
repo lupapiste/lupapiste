@@ -156,15 +156,16 @@
                                                                      :pykala          31
                                                                      :paatospvm       1454284800000
                                                                      :paatoskoodi     "my\u00f6nnetty"}]}]}]
-                   :statements   [{:person    {:text "Pelastusviranomainen"
-                                               :name "Pia Nyman"}
+                   :statements   [{:id "101"
+                                   :person    {:text "Pelastusviranomainen"
+                                               :name "Pia Palomies"}
                                    :requested date-02012016
                                    :given     date-01022016
                                    :status    "ehdoilla"
                                    :text      "Lausunto liitteen\u00e4"
                                    :state     "given"}
                                   {:person    {:text "Rakennussuunnittelu"
-                                               :name "Sampo S\u00e4levaara"}
+                                               :name "Risto Rakentaja"}
                                    :requested date-03012016
                                    :given     nil
                                    :status    nil
@@ -264,7 +265,8 @@
                                    :ts    date-30012016
                                    :user  {:firstName "Testi"
                                            :lastName  "Testaaja"}}]})
-
+(defn start-pos [res]
+  (first (first (filter #(s/includes? (second %) "</draw:frame>") (map-indexed vector res)))))
 
 (defn build-xml-history [application lang]
   (s/join " " (map #(apply xml-table-row %) (build-history-rows application lang))))

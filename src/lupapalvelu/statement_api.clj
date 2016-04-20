@@ -18,7 +18,11 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as user]
-            [lupapalvelu.child-to-attachment :as child-to-attachment]))
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
+            [clojure.java.io :as io]
+            [lupapalvelu.attachment :as attachment])
+  (:import (java.io File)))
 
 ;;
 ;; Authority Admin operations
@@ -35,6 +39,13 @@
    :organization-fi (:fi (:name organization))
    :organization-sv (:sv (:name organization))})
 
+(defn create-statement-pdfa! [user application id lang]
+  (let [application (domain/get-application-no-access-checking (:id application))
+        content (libre-client/generate-statment-pdfa application id lang)
+        temp-file (File/createTempFile "create-statement-pdfa-" ".pdf")]
+    (io/copy content temp-file)
+    (attachment/attach-file! application (child-to-attachment/build-attachment user application :statements id lang temp-file nil))
+    (io/delete-file temp-file :silently)))
 
 (notifications/defemail :add-statement-giver
   {:recipients-fn  notifications/from-user
@@ -207,9 +218,8 @@
                                      {:statements {$elemMatch {:id statementId}}}
                                      (util/deep-merge
                                       comment-model
-                                      {$set {:statements.$ statement}}))
-        updated-app (assoc application :statements (util/update-by-id statement (:statements application)))]
-    (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
+                                      {$set {:statements.$ statement}}))]
+    (create-statement-pdfa! user application statementId lang)
     (ok :modify-id (:modify-id statement))))
 
 (defcommand request-for-statement-reply
