@@ -21,112 +21,116 @@
         <div class="stamp-info-container form-grid">
           <form id="stamp-info">
             <div class="row">
-            <h3 data-bind="ltext: 'stamp.information'"></h3>
+              <h3 data-bind="ltext: 'stamp.information'"></h3>
 
               <div class="col-1">
-              <label data-bind="ltext: 'stamp.text'"></label>
-              <input data-bind="value: text, enable: status() === statusReady"
-                        type="text"
-                        class="text"
-                     data-test-id="stamp-info-text"/>
+                <label data-bind="ltext: 'stamp.text'"></label>
+                <input data-bind="value: text, enable: status() === statusReady"
+                          type="text"
+                          class="text"
+                       data-test-id="stamp-info-text"/>
               </div>
+
               <div class="col-1">
-              <label data-bind="ltext: 'stamp.date'"></label>
-              <input data-bind="
-                          datepicker: date,
-                          enable: status() === statusReady,
-                          valueUpdate: 'afterkeydown'"
-                        type="text"
-                        class="text"
-                     data-test-id="stamp-info-date"/>
+                <label data-bind="ltext: 'stamp.date'"></label>
+                <input data-bind="
+                            datepicker: date,
+                            enable: status() === statusReady,
+                            valueUpdate: 'afterkeydown'"
+                          type="text"
+                          class="text"
+                       data-test-id="stamp-info-date"/>
               </div>
+
               <div class="col-1">
-              <label data-bind="ltext: 'stamp.organization'"></label>
-              <input data-bind="textInput: organization, enable: status() === statusReady"
-                        type="text"
-                        class="text"/
-                     data-test-id="stamp-info-organization">
+                <label data-bind="ltext: 'stamp.organization'"></label>
+                <input data-bind="textInput: organization, enable: status() === statusReady"
+                          type="text"
+                          class="text"/
+                       data-test-id="stamp-info-organization">
               </div>
+
               <div class="col-1">
-              <label data-bind="ltext: 'stamp.text.extra'"></label>
-              <input data-bind="value: extraInfo, enable: status() === statusReady"
-                        type="text"
-                        class="text"/
-                     data-test-id="stamp-info-extratext">
+                <label data-bind="ltext: 'stamp.text.extra'"></label>
+                <input data-bind="value: extraInfo, enable: status() === statusReady"
+                          type="text"
+                          class="text"/
+                       data-test-id="stamp-info-extratext">
               </div>
+
             </div>
+
             <div class="row">
               <h3 data-bind="ltext: 'stamp.reference-info'"></h3>
 
               <div class="col-1">
-              <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
-              <input data-bind="textInput: kuntalupatunnus, enable: status() === statusReady"
-                     type="text"
-                     class="text"
-                     data-test-id="stamp-info-kuntalupatunnus"/>
-
+                <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
+                <input data-bind="textInput: kuntalupatunnus, enable: status() === statusReady"
+                       type="text"
+                       class="text"
+                       data-test-id="stamp-info-kuntalupatunnus"/>
               </div>
+
               <div class="col-1">
-              <label data-bind="ltext: 'stamp.section'"></label>
-              <input data-bind="textInput: section, enable: status() === statusReady"
-                     type="text"
-                     class="text"
-                     data-test-id="stamp-info-section"/>
-              </div>               
+                <label data-bind="ltext: 'stamp.section'"></label>
+                <input data-bind="textInput: section, enable: status() === statusReady"
+                       type="text"
+                       class="text"
+                       data-test-id="stamp-info-section"/>
+              </div>
 
               <div class="col-2">
-              <label>&nbsp</label>
-              <div class="col--vertical checkbox-wrapper"
-                   data-bind="css: {'checkbox-wrapper--disabled': status() !== statusReady}">
-                <input data-bind="checked: includeBuildings,
-                                  disabled: status() !== statusReady"
-                       type="checkbox" 
-                       class="form-input"
-                       id="stamp-info-include-buildings"/>
-                <label data-bind="ltext: 'stamp.include-buildings'" class="inline-label checkbox-label" for="stamp-info-include-buildings"></label>
+                <label>&nbsp</label>
+                <div class="col--vertical checkbox-wrapper"
+                     data-bind="css: {'checkbox-wrapper--disabled': status() !== statusReady}">
+                  <input data-bind="checked: includeBuildings,
+                                    disabled: status() !== statusReady"
+                         type="checkbox" 
+                         class="form-input"
+                         id="stamp-info-include-buildings"/>
+                  <label data-bind="ltext: 'stamp.include-buildings'" class="inline-label checkbox-label" for="stamp-info-include-buildings"></label>
+                </div>
               </div>
-              </div>
-
             </div>
 
             <div class="row">
               <h3 data-bind="ltext: 'stamp.margin'"></h3>
+
               <div class="col-1">
-
-              <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"></label>
-              <input data-bind="textInput: xMargin,
-                          enable: status() === statusReady,
-                          css: {'invalid-margin': !xMarginOk()}"
-                        type="text"
-                        class="text"/
-                     data-test-id="stamp-info-xmargin">
-
+                <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"></label>
+                <input data-bind="textInput: xMargin,
+                            enable: status() === statusReady,
+                            css: {'invalid-margin': !xMarginOk()}"
+                          type="text"
+                          class="text"/
+                       data-test-id="stamp-info-xmargin">
               </div>
-              <div class="col-1">
-              <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"></label>
-              <input data-bind="textInput: yMargin,
-                          enable: status() === statusReady,
-                          css: {'invalid-margin': !yMarginOk()}"
-                        type="text"
-                        class="text"
-                     data-test-id="stamp-info-ymargin"/>
 
+              <div class="col-1">
+                <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"></label>
+                <input data-bind="textInput: yMargin,
+                            enable: status() === statusReady,
+                            css: {'invalid-margin': !yMarginOk()}"
+                          type="text"
+                          class="text"
+                       data-test-id="stamp-info-ymargin"/>
               </div>
-              <div class="col-1">
-              <label data-bind="ltext: 'stamp.transparency'"></label>
-              <select data-bind="options: transparencies, optionsText: 'text', optionsValue: 'value', value: transparency" class="dropdown"
-                      data-test-id="stamp-info-transparency"></select>
 
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.transparency'"></label>
+                <select data-bind="options: transparencies, optionsText: 'text', optionsValue: 'value', value: transparency" class="dropdown"
+                        data-test-id="stamp-info-transparency"></select>
               </div>
-              <div class="col-1">
-              <label data-bind="ltext: 'stamp.page'"></label>
-              <select data-bind="options: pages, optionsText: 'text', optionsValue: 'value', value: page" class="dropdown"
-                      data-test-id="stamp-info-page"></select>
 
+              <div class="col-1">
+                <label data-bind="ltext: 'stamp.page'"></label>
+                <select data-bind="options: pages, optionsText: 'text', optionsValue: 'value', value: page" class="dropdown"
+                        data-test-id="stamp-info-page"></select>
               </div>
             </div>
           </form>
         </div>
+
         <div class="clear">
             <div data-bind="if: postFiles().length > 0">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
