@@ -80,8 +80,7 @@ Sonja sees stamping info fields
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
-  ${BuildingInput} =  Run Keyword And Return Status  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-buildingid"]
-  Run keyword Unless  ${BuildingInput}  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-buildingid-list"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//label[@for="stamp-info-include-buildings"]
 
 
 Sonja inputs new stamping info values
