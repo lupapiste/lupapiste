@@ -67,7 +67,8 @@
                  [slingshot "0.12.2"]
 
                  ; A Clojure(Script) library for declarative data description and validation
-                 [prismatic/schema "1.0.4"]
+                 [prismatic/schema "1.1.0"]
+                 [prismatic/schema-generators "0.1.0"]
 
                  ; MIME type resolution
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
