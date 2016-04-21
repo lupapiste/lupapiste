@@ -252,7 +252,7 @@
                                                 :buildings  (building-reader/->buildings-summary app-xml)) created)]
         (util/deep-merge
           {$set (merge {:verdicts verdicts-with-attachments, :modified created}
-                       {:tasks tasks}
+                  (when-not has-old-verdict-tasks {:tasks tasks})
                   (when extras-reader (extras-reader app-xml application)))}
           (when-not (states/post-verdict-states (keyword (:state application)))
             (application/state-transition-update (sm/verdict-given-state application) created user)))))))
