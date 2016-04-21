@@ -4,6 +4,7 @@
   (:require [taoensso.timbre :refer [trace debug info warn error]]
             [lupapalvelu.xml.krysp.common-reader :as common]
             [net.cgrand.enlive-html :as enlive]
+            [sade.core :refer [now def- fail]]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.validators :as v]
@@ -27,6 +28,17 @@
             katselmukset (map cr/all-of  (select asia [:katselmustieto :Katselmus]))]
         (println "#katselmukset" (count katselmukset))
         (-> katselmukset
+            (sade.util/ensure-sequential :huomautukset)
             cr/convert-booleans
-            cr/cleanup)))
-    ))
+            cr/cleanup)))))
+
+
+(defn review-xml-validator [xml ]
+  (let [reviews (xml->reviews xml)
+        pvm-valid-or-absent #(> (util/get-timestamp-ago :day 1)
+                                (sade.common-reader/to-timestamp (:pitoPvm % "2011-11-11Z")))]
+    (cond
+      (not-any? pvm-valid-or-absent (map :pitoPvm reviews))
+      (fail :info.???)
+      (not-any? empty? (map :katselmuksenLaji reviews))
+      (fail :info.???))))
