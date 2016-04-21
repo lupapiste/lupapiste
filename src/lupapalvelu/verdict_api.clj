@@ -274,7 +274,7 @@
 
   ;; schemas?
 
-  (let [reviews (review-reader/get-reviews-from-message app-xml)
+  (let [reviews (review-reader/xml->reviews app-xml)
         review-task-name (fn [review] "some-task-name")
         ;; review-to-task (fn [review]
         ;;                  ;; sc/check katselmus-task-schema new-task...
