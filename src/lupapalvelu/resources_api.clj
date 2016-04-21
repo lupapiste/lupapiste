@@ -15,7 +15,8 @@
 (defn ->FrontendCalendar [cal]
   (-> cal
       (select-keys [:id :name])
-      (merge {:organization (:organizationCode cal)})))
+      (merge {:organization (:organizationCode cal)
+              :slots []})))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :ajanvaraus :host) path-parts))
@@ -27,6 +28,17 @@
                    :throw-exceptions false
                    :basic-auth       [(env/value :ajanvaraus :username)
                                       (env/value :ajanvaraus :password)]})))
+
+(defquery calendar
+  {:parameters [calendarId]
+   :input-validators [(partial action/non-blank-parameters [:calendarId])]
+   :user-roles #{:authorityAdmin}}
+  [_]
+  (let [response (api-query (str "/api/resources/" calendarId))]
+    (if (= 200 (:status response))
+      (ok :calendar (->FrontendCalendar (:body response)))
+      (do (error response)
+          (fail :resources.backend-error)))))
 
 (defquery list-calendars
   {:user-roles #{:authorityAdmin}}

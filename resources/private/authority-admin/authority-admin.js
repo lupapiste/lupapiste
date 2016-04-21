@@ -439,10 +439,13 @@
       calendarViewModel = calendarView.create($("#calendar-admin .calendar-table"));
     }
     var calendarId = pageutil.subPage();
-    var calendar = resourceCalendarsModel.items()[calendarId] || { name: "", organization: "" };
-    calendarViewModel.init({ source: calendar,
-                             opts: { clickTimeline: resourceCalendarsModel.newReservationSlot }
-                           });
+    ajax.query("calendar", {calendarId: calendarId})
+      .success(function(data) {
+        calendarViewModel.init({ source: data.calendar,
+                                 opts: { clickTimeline: resourceCalendarsModel.newReservationSlot }
+                               });
+      })
+      .call();
   });
 
   $(function() {

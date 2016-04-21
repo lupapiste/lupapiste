@@ -144,11 +144,11 @@ LUPAPISTE.ResourceCalendarsModel = function () {
   };
 
   self.load = function() {
-    // DUMMY DATA
     ajax.query("list-calendars")
       .success(function(d) {
         self.init(d);
       })
       .call();
   };
+
 };
