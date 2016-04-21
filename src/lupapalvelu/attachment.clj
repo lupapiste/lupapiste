@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+            [com.netflix.hystrix.core :refer [defcommand]]
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -30,7 +31,8 @@
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
-           [java.util.concurrent Executors ThreadFactory]))
+           [java.util.concurrent Executors ThreadFactory]
+           [com.netflix.hystrix HystrixCommandProperties]))
 
 (defn thread-factory []
   (let [security-manager (System/getSecurityManager)
@@ -623,7 +625,11 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
-(defn- create-preview!
+(defcommand create-preview!
+  {:hystrix/group-key   "Attachment"
+   :hystrix/command-key "Create preview"
+   :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 2 60 1000))) setter)
+   :hystrix/fallback-fn  (constantly nil)}
   [file-id filename content-type content application-id & [db-name]]
   (when (preview/converter content-type)
     (mongo/with-db (or db-name mongo/default-db-name)
