@@ -303,6 +303,9 @@
   (when (numeric? s)
     (Long/parseLong s)))
 
+(defn ->long [v]
+  (if (string? v) (to-long v) v))
+
 (defn sequable?
   "Returns true if x can be converted to sequence."
   [x]
