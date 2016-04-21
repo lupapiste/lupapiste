@@ -1,14 +1,12 @@
 (ns lupapalvelu.pdf.libreoffice-template-statement-test
   (:require
-    [clojure.java.io :refer [writer reader resource]]
     [clojure.string :as s]
-    [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+    [taoensso.timbre :refer [trace debug]]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
-    [lupapalvelu.organization :refer :all]
     [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
     [lupapalvelu.pdf.libreoffice-template-statement :as statement]
-    [lupapalvelu.pdf.libre-template-test :refer :all])
+    [lupapalvelu.pdf.libreoffice-template-base-test :refer :all])
   (:import (java.io File)))
 
 (facts "Statement fodt export "
