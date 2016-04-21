@@ -183,6 +183,18 @@ New katselmus is listed
   Tab should be visible  tasks
   Task count is  task-katselmus  5
 
+Sonja adds an end review
+  Click enabled by test id  application-new-task
+  Wait until  Element should be visible  dialog-create-task
+  Select From List By Value  choose-task-type   task-katselmus
+  Wait until  Element should be visible  choose-task-subtype
+  Select From List By Value  choose-task-subtype   osittainen loppukatselmus
+  Input text  create-task-name  End review
+  Click enabled by test id  create-task-save
+  Wait Until  Element should be visible  taskAttachments
+  Review checkboxes enabled
+  Return from review
+
 Verify post-verdict attachments - Aloituskokous
   Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
   Open tab  attachments

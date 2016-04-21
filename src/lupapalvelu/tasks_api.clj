@@ -51,7 +51,7 @@
     (fail :error.invalid-task-type)))
 
 (defn- task-is-end-review? [task]
-  (re-matches #"(?i)^(osittainen )?loppukatselmus$" (or (:taskname task) "")))
+  (re-matches #"(?i)^(osittainen )?loppukatselmus$" (or (get-in task [:data :katselmuksenLaji :value]) "")))
 
 (defn- validate-task-is-end-review [{{task-id :taskId} :data} {tasks :tasks}]
   (when-not (task-is-end-review? (util/find-by-id task-id tasks))
