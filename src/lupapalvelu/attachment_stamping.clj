@@ -8,7 +8,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.job :as job]
             [lupapalvelu.i18n :as i18n]
-            [sade.util :refer [future* fn->] :as util]
+            [sade.util :refer [future* fn-> fn->>] :as util]
             [sade.strings :as ss])
   (:import [java.io File]))
 
@@ -66,7 +66,7 @@
 
 (defn- info-fields->stamp [{:keys [text created transparency lang]} fields]
   {:pre [text (pos? created)]}
-  (->> (update fields :buildings (partial map (partial building->str lang)))
+  (->> (update fields :buildings (fn->> (map (partial building->str lang)) sort))
        ((juxt :backend-id :section :extra-info :buildings :organization))
        flatten
        (map (fn-> str (ss/limit 100)))
