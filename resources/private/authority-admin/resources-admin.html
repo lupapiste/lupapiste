@@ -19,10 +19,10 @@
           <td data-bind="text: organization"></td>
           <td>
             <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
-              [<a data-bind="attr: {'href': '#!/calendar-admin/' + $index() }, ltext: 'view'"></a>]
-              [<a href="#" data-bind="click: $root.calendars.editCalendar.bind($data, $index), ltext: 'edit'"
+              [<a data-bind="attr: {'href': '#!/calendar-admin/' + id }, ltext: 'view'"></a>]
+              [<a href="#" data-bind="click: $root.calendars.editCalendar.bind($data, id), ltext: 'edit'"
                   data-test-id="edit" class="modal"></a>]
-              [<a href="#" data-bind="click: $root.calendars.rmCalendar.bind($data, $index), ltext: 'remove'"
+              [<a href="#" data-bind="click: $root.calendars.rmCalendar.bind($data, id), ltext: 'remove'"
                   data-test-id="remove" class="modal"></a>]
             </span>
           </td>

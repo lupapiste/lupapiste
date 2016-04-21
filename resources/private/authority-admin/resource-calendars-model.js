@@ -145,10 +145,10 @@ LUPAPISTE.ResourceCalendarsModel = function () {
 
   self.load = function() {
     // DUMMY DATA
-    self.init({
-      calendars: [
-        { name: "Tarkastaja Teppo", organization: "Rakennusvalvonta", slots: dummyReservationSlotsFixture() }
-      ]
-    });
+    ajax.query("list-calendars")
+      .success(function(d) {
+        self.init(d);
+      })
+      .call();
   };
 };
