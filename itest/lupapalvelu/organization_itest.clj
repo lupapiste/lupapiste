@@ -26,6 +26,9 @@
     (fact "sipoo can set working krysp-url"
       (command sipoo :set-krysp-endpoint :url uri :username "" :password "" :permitType "YA" :version "2") => ok?)
 
+    (fact "sipoo can set working krysp-url containing extra spaces"
+      (command sipoo :set-krysp-endpoint :url (str " " uri " ") :username "" :password "" :permitType "YA" :version "2") => ok?)
+
    (fact "sipoo cant set incorrect krysp-url"
       (command sipoo :set-krysp-endpoint :url "BROKEN_URL" :username "" :password "" :permitType "R"  :version "1") => fail?)))
 

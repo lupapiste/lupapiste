@@ -192,28 +192,20 @@
   }
 
   // ========================================================================================
-  // Tab and Tabs:
+  // Tabs:
   // ========================================================================================
 
-  function Tab(parent, name) {
-    this.parent  = parent;
-    this.name    = name;
-    this.active  = ko.observable(false);
-  }
-
-  Tab.prototype.click = function(m) {
-    m.parent.click(m.name);
-  };
-
   function TabsModel(companyId) {
-    this.tabs = _.map(["info", "users"], function(name) { return new Tab(this, name); }, this);
-    this.companyId = companyId;
+    this.tabs = _.map(["info", "users"], function(name) {
+      return {
+        name: name,
+        active: ko.observable(false),
+        click: function() {
+          pageutil.openPage("company", companyId() + "/" + name);
+          return false;
+        }
+      };});
   }
-
-  TabsModel.prototype.click = function(tab) {
-    pageutil.openPage("company", this.companyId() + "/" + tab);
-    return false;
-  };
 
   TabsModel.prototype.show = function(name) {
     name = _.isBlank(name) ? "info" : name;

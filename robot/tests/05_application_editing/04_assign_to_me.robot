@@ -4,6 +4,7 @@ Documentation  Sonja can assign application to herself
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Resource       assignment_resource.robot
+Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
 
@@ -54,6 +55,14 @@ Sonja assign application to herself
 
 Assignee has changed
   Wait Until  Application assignee select is  Sibbo Sonja
+
+Viewing attachment should not reset the assignee select
+  Open tab  attachments
+  Open attachment details  hakija.valtakirja
+  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
+  Scroll and click test id  back-to-application-from-attachment
+  Wait Until  Application assignee select is  Sibbo Sonja
+  Open tab  parties
 
 Sonja checks property owners
   Click enabled by test id  application-property-owners-btn

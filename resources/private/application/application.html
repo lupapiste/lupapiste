@@ -1066,7 +1066,7 @@
                                                               <tr>
                                                                   <td data-bind='dateString: $data.maaraysaika'></td>
                                                                   <!-- <td data-bind='dateString: toteutusHetki'></td> -->
-                                                                  <td data-bind='text: $data.sisalto'></td>
+                                                                  <td data-bind='text: $data.sisalto' class="verdict-text"></td>
                                                               </tr>
                                                           </tbody>
                                                       </table>
@@ -1341,7 +1341,7 @@
 
                         <button class="positive"
                                 data-test-id="application-new-task"
-                                data-bind="click: $root.createTask.createTask,
+                                data-bind="click: _.partialRight( $root.createTask.createTask, true ),
                                            ltext: 'task.create',
                                            visible: $root.authorization.ok('create-task'),
                                            enable: $root.authorization.ok('create-task')"></button>

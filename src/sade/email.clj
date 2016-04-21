@@ -92,7 +92,7 @@
 
     (blacklisted? to) (do
                         (warnf "Ignoring message to %s bacause address matches blacklist %s" to blacklist)
-                        true)
+                        false) ; false = pretend that the message was send
 
     :else (let [[plain html] msg]
             (try

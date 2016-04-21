@@ -111,11 +111,48 @@
   (fact (decimal-number? "..0") => false)
   (fact (decimal-number? "123123132.456465465465464") => true))
 
+(facts "other-than-string?"
+  (fact "nil is nothing"
+    (other-than-string? nil) => false)
+  (fact "string is not other than string"
+    (other-than-string? "") => false)
+  (fact "booleas"
+    (other-than-string? true) => true
+    (other-than-string? false) => true)
+  (fact "numbers"
+    (other-than-string? 1) => true
+    (other-than-string? 3.14) => true)
+  (fact "collections"
+    (other-than-string? {}) => true
+    (other-than-string? #{}) => true
+    (other-than-string? []) => true)
+  (fact "Object"
+    (other-than-string? (Object.)) => true))
+
 (fact "lower-case"
   (lower-case nil)   => nil
   (lower-case "")    => ""
   (lower-case "a")   => "a"
   (lower-case "A")   => "a")
+
+(facts "in-lower-case?"
+  (facts "nil"
+    (in-lower-case? nil) => false
+    (in-lower-case? (lower-case nil)) => false)
+
+  (facts "empty"
+    (in-lower-case? "") => true
+    (in-lower-case? (lower-case "")) => true)
+
+  (in-lower-case? "a")   => true
+  (in-lower-case? "aaaaaaaaaaaaaaa")  => true
+
+  (in-lower-case? "A")                => false
+  (in-lower-case? "AAAAAAAAAAAAAAA")  => false
+  (in-lower-case? "AaAaAaAaAaAaAaA")  => false
+
+  (in-lower-case? (lower-case "A"))   => true
+  (in-lower-case? (lower-case "AaAaAaAaAaAaAaA"))   => true)
 
 (fact "trim"
   (trim nil)    => nil

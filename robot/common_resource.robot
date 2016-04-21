@@ -201,6 +201,9 @@ Positive indicator should be visible
 Positive indicator should not be visible
   Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-positive"]
 
+Negative indicator should not be visible
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-negative"]
+
 Negative indicator icon should not be visible
   Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-icon-negative"]
 
@@ -1197,6 +1200,9 @@ Scroll to
 Scroll to top
   Execute javascript  window.scrollTo(0,0)
 
+Scroll to bottom
+  Execute javascript  window.scrollTo(0,888888)
+
 Scroll to test id
   [Arguments]  ${id}
   Scroll to  [data-test-id=${id}]
@@ -1230,7 +1236,7 @@ Test id empty
 Test id disabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Element should be disabled  jquery=[data-test-id=${id}]
+  Wait Until  Element should be disabled  jquery=[data-test-id=${id}]
 
 Test id enabled
   [Arguments]  ${id}

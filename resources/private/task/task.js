@@ -35,22 +35,25 @@ var taskPageController = (function() {
   "use strict";
 
   var applicationModel = lupapisteApp.models.application;
-  var authorizationModel = lupapisteApp.models.applicationAuthModel;
+  var authorizationModel = authorization.create();
 
   var currentTaskId = null;
   var task = ko.observable();
   var processing = ko.observable(false);
   var pending = ko.observable(false);
-  var taskSubmitOk = ko.observable(false);
   var service = lupapisteApp.services.documentDataService;
 
-  var requiredErrors = ko.observable([null]);
+  var validationErrors = ko.computed(function() {
+    var t = task();
+    if (t && t.addedToService()) {
+      var results = [service.findDocumentById(t.id).validationResults()];
+      return _.concat( util.extractRequiredErrors(results),
+                       util.extractWarnErrors( results ));
+    }
+  });
 
   var reviewSubmitOk = ko.computed(function() {
-    var t = task();
-    var stateOK =  "sent" !== _.get(t, "state");
-    var schemaNameOK = util.getIn(t, ["schema-info", "subtype"]) === "review";
-    return authorizationModel.ok("review-done") && schemaNameOK && stateOK && _.isEmpty(requiredErrors());
+    return authorizationModel.ok("review-done") && _.isEmpty(validationErrors());
   });
 
   var addAttachmentDisabled = ko.computed(function() {
@@ -87,17 +90,24 @@ var taskPageController = (function() {
     return false;
   }
 
-  function sendTask(cmd) {
-    var command = _.isString(cmd) ? cmd : "send-task";
-    ajax.command(command, { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
+  function reviewDone() {
+    ajax.command("review-done", { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
-      .success(function() {
+      .success(function(resp) {
         var permit = externalApiTools.toExternalPermit(applicationModel._js);
         applicationModel.lightReload();
-        LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
-        if (applicationModel.externalApi.enabled()) {
-          hub.send("external-api::integration-sent", permit);
+
+        if (!resp.integrationAvailable) {
+          hub.send("show-dialog", {ltitle: "integration.title",
+                                   size: "medium",
+                                   component: "ok-dialog",
+                                   componentParams: {ltext: "integration.unavailable"}});
+        } else {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
+          if (applicationModel.externalApi.enabled()) {
+            hub.send("external-api::integration-sent", permit);
+          }
         }
       })
       .onError("error.invalid-task-type", notify.ajaxError)
@@ -108,15 +118,14 @@ var taskPageController = (function() {
       .call();
   }
 
-  function reviewDone() {
-    sendTask("review-done");
-  }
-
   /**
    * @param {Object} application  Keys: id, tasks, attachment
    * @param {String} taskId       Current task ID
    */
   function refresh(application, taskId) {
+    docgen.clear("taskDocgen");
+    task(null);
+
     currentTaskId = taskId;
 
     lupapisteApp.setTitle(applicationModel.title());
@@ -126,37 +135,31 @@ var taskPageController = (function() {
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
 
     if (t) {
-      // FIXME handle with authz model, see LPK-388
-      var isReview = util.getIn(t, ["schema-info", "subtype"]) === "review";
-      var showApprovalButtons = !isReview || !features.enabled("review-done");
-      t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action") && showApprovalButtons;
-      t.rejectable = authorizationModel.ok("reject-task") && showApprovalButtons;
+      authorizationModel.refresh(application, {taskId: taskId}, function() {
 
-      t.displayName = taskUtil.longDisplayName(t, application);
-      t.applicationId = application.id;
-      t.deleteTask = deleteTask;
-      t.returnToApplication = returnToApplication;
-      t.approve = _.partial(runTaskCommand, "approve-task");
-      t.reject = _.partial(runTaskCommand, "reject-task");
-      t.reviewDone = reviewDone;
-      t.sendTask = sendTask;
-      t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
-      t.addedToService = ko.observable();
-      task(t);
+        t.approvable = authorizationModel.ok("approve-task");
+        t.rejectable = authorizationModel.ok("reject-task");
+        t.isEndReview = authorizationModel.ok( "is-end-review");
 
-      service.addDocument(task());
-      t.addedToService( true );
-      var errors = util.extractRequiredErrors([t.validationErrors]);
-      requiredErrors(errors);
-      // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !errors.length && isReview);
+        t.displayName = taskUtil.longDisplayName(t, application);
+        t.applicationId = application.id;
+        t.deleteTask = deleteTask;
+        t.returnToApplication = returnToApplication;
+        t.approve = _.partial(runTaskCommand, "approve-task");
+        t.reject = _.partial(runTaskCommand, "reject-task");
+        t.reviewDone = reviewDone;
+        t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
+        t.addedToService = ko.observable();
+        task(t);
 
-      var options = {collection: "tasks", updateCommand: "update-task", validate: true};
-      docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
+        service.addDocument(task());
+        t.addedToService( true );
 
+        // var options = {collection: "tasks", updateCommand: "update-task", validate: true};
+        // docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
+
+      });
     } else {
-      docgen.clear("taskDocgen");
-      task(null);
       error("Task not found", application.id, currentTaskId);
       notify.error(loc("error.dialog.title"), loc("error.task-not-found"));
     }
@@ -182,15 +185,6 @@ var taskPageController = (function() {
     }
   });
 
-  hub.subscribe("update-task-success", function(e) {
-    if (task() && applicationModel.id() === e.appId && currentTaskId === e.documentId) {
-      var errors = util.extractRequiredErrors([e.results]);
-      requiredErrors(errors);
-      // FIXME to be removed
-      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !errors.length);
-    }
-  });
-
   $(function() {
     $("#task").applyBindings({
       task: task,
@@ -199,7 +193,6 @@ var taskPageController = (function() {
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
       dataService: service,
-      taskSubmitOk: taskSubmitOk, // FIXME remove
       reviewSubmitOk: reviewSubmitOk,
       addAttachmentDisabled: addAttachmentDisabled
     });

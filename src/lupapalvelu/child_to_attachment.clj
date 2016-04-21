@@ -62,8 +62,9 @@
         attachment-id (:id (first attachment))]
     attachment-id))
 
-(defn- generate-attachment-from-children [user app child-type id lang]
+(defn- generate-attachment-from-children
   "Builds attachment and return attachment data as map"
+  [user app child-type id lang]
   (trace "   generate-attachment-from-children lang=" (name lang) ", type=" (name child-type) ", id=" id ",org: " (:organization app) ", child: " (get-child app child-type id))
   (let [pdf-file (File/createTempFile (str "pdf-export-" (name lang) "-" (name child-type) "-") ".pdf")
         fis (FileOutputStream. pdf-file)
@@ -71,12 +72,15 @@
     (pdf-export/generate-pdf-with-child app child-type id lang fis)
     (build-attachment user app child-type id lang pdf-file attachment-id)))
 
-(defn create-attachment-from-children [user app child-type id lang]
-  "Generates attachment from child and saves it"
+(defn create-attachment-from-children
+  "Generates attachment from child and saves it. Returns created attachment version."
+  [user app child-type id lang]
   (let [child (generate-attachment-from-children user app child-type id lang)
         file (:content child)]
-    (attachment/attach-file! app child)
-    (io/delete-file file :silently)))
+    (try
+      (attachment/attach-file! app child)
+      (finally
+        (io/delete-file file :silently)))))
 
 (defn delete-child-attachment [app child-type id]
   (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))

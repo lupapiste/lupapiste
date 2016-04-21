@@ -8,12 +8,22 @@
 
 (def input-sizes [:t :s :m :l :xl])
 
+(defschema Auth
+  "Authorization model based component state. See docgen-input-model
+  for how this is enforced in the frontend. Note: empty lists do not
+  affect the state in any way."
+  {(opt :disabled) [sc/Keyword]  ;;Disabled if any listed action is allowed.
+   (opt :enabled)  [sc/Keyword]  ;; Disabled if any listed action is not allowed.
+   })
+
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
   {:name              sc/Str         ;; Element name
    :type              (sc/enum :text :string :select :checkbox :radioGroup :date)
    (opt :uicomponent) sc/Keyword     ;; Component name for special components
-   (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string :check-string :checkbox-wrapper) ;; Input type of generic docgen-input component
+   (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string
+                               :check-string :checkbox-wrapper
+                               :paragraph) ;; Input types for generic docgen-input component
    (opt :labelclass)  sc/Str         ;; Special label style class
    (opt :i18nkey)     sc/Str         ;; Absolute localization key
    (opt :locPrefix)   sc/Str         ;;
@@ -31,7 +41,9 @@
    (opt :blacklist)   [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
    (opt :emit)        [sc/Keyword]   ;; Change in element emits events
    (opt :listen)      [sc/Keyword]   ;; Events to listen
-   (opt :css)         [sc/Keyword]})
+   (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
+   (opt :auth)        Auth
+   })
 
 (defschema Text
   "Text area element. Represented as text-area html element"

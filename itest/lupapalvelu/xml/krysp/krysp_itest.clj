@@ -326,11 +326,18 @@
        (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
                                                                              ["rakennus.0.rakennus.rakennusnro" "001"]
                                                                              ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
-                                                                             ["rakennus.0.rakennus.kiinttun" (:propertyId application)]]) => ok?
+                                                                             ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
+                                                                             ["rakennus.0.tila.tila" "osittainen"]]) => ok?
 
-       (command sonja :send-task :id application-id :taskId task-id :lang "fi") => fail?
-       (command sonja :approve-task :id application-id :taskId task-id) => ok?
-       (command sonja :send-task :id application-id :taskId task-id :lang "fi") => ok?
+       (fact "Review done fails as missing required info for KRYSP transfer"
+         (command sonja :review-done :id application-id :taskId task-id :lang "fi") => (partial expected-failure? :error.missing-parameters))
+
+       (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]
+                                                                             ["katselmus.pitoPvm" "12.04.2016"]
+                                                                             ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?
+
+       (fact "After filling required review data, transfer is ok"
+         (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
 
        (final-xml-validation
          (query-application sonja application-id)
@@ -341,6 +348,7 @@
              (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
                    katselmuksenRakennus (xml/select1 xml [:katselmuksenRakennustieto :KatselmuksenRakennus])
                    liitetieto (xml/select1 katselmus [:liitetieto])]
+               (xml/get-text katselmus :osittainen) => "osittainen"
                (xml/get-text liitetieto :kuvaus) => "Katselmuksen p\u00f6yt\u00e4kirja"
                (xml/get-text liitetieto ::tyyppi) => "katselmuksen_tai_tarkastuksen_poytakirja"
                (xml/get-text katselmuksenRakennus :rakennusnro) => "001"
@@ -376,10 +384,11 @@
 
       (doseq [attachment (:attachments (query-application apikey application-id))]
         (fact "sent timestamp not set"
-          (:sent attachment) => nil))
+          (:sent attachment) => nil)
+        (fact "read only is false"
+          (:readOnly attachment) => false))
 
-      (command apikey :approve-task :id application-id :taskId task-id) => ok?
-      (command apikey :send-task :id application-id :taskId task-id :lang "fi") => ok?
+      (command apikey :review-done :id application-id :taskId task-id :lang "fi") => ok?
 
       (let [application (query-application apikey application-id)]
         (final-xml-validation
@@ -400,7 +409,9 @@
 
         (doseq [attachment (filter :target (:attachments application))]
           (fact "sent timestamp is set"
-            (:sent attachment) => number?))))))
+            (:sent attachment) => number?)
+          (fact "read only is true"
+            (:readOnly attachment) => true))))))
 
 (fact* "Only approved designers are transferred"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Katselmuskatu 18")

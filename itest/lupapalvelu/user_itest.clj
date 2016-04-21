@@ -28,9 +28,9 @@
       (mongo/with-db db-name
         (-> (user/find-user {:email "veikko.viranomainen@tampere.fi"}) :private :password) => "hash"))
 
-  (fact 
+  (fact
       (mongo/with-db db-name
-        (user/change-password "does.not@exist.at.all" "anything") => (throws Exception #"unknown-user"))))
+        (user/change-password "does.not@exist.at.all" "anything") => (throws Exception #"user-not-found"))))
 
 ;;
 ;; ==============================================================================
@@ -41,9 +41,9 @@
 
 (facts login-trottle
   (mongo/with-db db-name
-    (against-background 
+    (against-background
      [(sade.env/value :login :allowed-failures) => 2
-      (sade.env/value :login :throttle-expires) => 1] 
+      (sade.env/value :login :throttle-expires) => 1]
      (fact "First failure doesn't lock username"
        (user/throttle-login? "foo") => false
        (user/login-failed "foo") => nil
@@ -57,9 +57,9 @@
 
 (facts clear-login-trottle
   (mongo/with-db db-name
-    (against-background 
+    (against-background
      [(sade.env/value :login :allowed-failures) => 1
-      (sade.env/value :login :throttle-expires) => 10] 
+      (sade.env/value :login :throttle-expires) => 10]
      (fact (user/throttle-login? "bar") => false
            (user/login-failed "bar") => nil
            (user/throttle-login? "bar") => true

@@ -36,6 +36,14 @@
     (.isEmpty s)
     true))
 
+(defn other-than-string? [x]
+  (and (not (nil? x)) (not (string? x))))
+
+(defn in-lower-case? [^String s]
+  (if s
+    (= s (.toLowerCase s))
+    false))
+
 (defn suffix
   "Returns a substring from the end of last occurance of separator till the end of s"
   [^String s ^String separator]
@@ -55,11 +63,6 @@
 (defn strip-non-printables [^String s] (when s (s/replace s non-printables "")))
 
 (defn remove-leading-zeros [^String s] (when s (.replaceFirst s "^0+(?!$)", "")))
-
-(defn zero-pad
-  "Pad 's' with zeros so that its at least 'c' characters long"
-  [^Long c ^String s]
-  (apply str (conj (vec (repeat (- c (count s)) \0)) s)))
 
 (defn starts-with [^String s ^String prefix]
   (when (and s prefix)
@@ -101,6 +104,11 @@
 
 (defn decimal-number? [s]
   (or (numeric? s) (if (and (string? s) (re-matches #"^\d+\.\d+$" s)) true false)))
+
+(defn zero-pad
+  "Pad 's' with zeros so that its at least 'c' characters long"
+  [^Integer c ^String s]
+  (StringUtils/leftPad s  c \0))
 
 ;; Nil-safe wrappers to clojure.string
 

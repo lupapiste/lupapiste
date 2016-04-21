@@ -84,8 +84,10 @@
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type)
         filtered-app  (remove-unsupported-attachments application)]
-    (assert krysp-fn "KRYSP 'review mapper' function not found/defined?")
-    (krysp-fn filtered-app task user lang krysp-version output-dir begin-of-link)))
+    (when (organization/krysp-integration? organization permit-type)
+      (assert krysp-fn "KRYSP 'review mapper' function not found/defined?")
+      (krysp-fn filtered-app task user lang krysp-version output-dir begin-of-link))))
+
 
 (defn save-unsent-attachments-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

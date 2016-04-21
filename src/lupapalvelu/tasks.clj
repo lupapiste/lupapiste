@@ -28,6 +28,11 @@
                  "loppukatselmus"
                  "ei tiedossa"])
 
+(def task-states #{:requires_user_action :requires_authority_action :ok :sent})
+
+(defn all-states-but [& states]
+  (apply disj task-states states))
+
 (def- katselmuksenLaji
   {:name "katselmuksenLaji"
    :type :select :sortBy :displayname
@@ -39,9 +44,14 @@
    :body (mapv (partial hash-map :name) task-types)})
 
 (def- katselmuksenLaji-ya
-  (assoc katselmuksenLaji :body [{:name "Aloituskatselmus"}
-                                 {:name "Loppukatselmus"}
-                                 {:name "Muu valvontak\u00e4ynti"}]))
+  {:name "katselmuksenLaji"
+   :type :select :sortBy :displayname
+   :css [:dropdown]
+   :required true
+   :whitelist {:roles [:authority] :otherwise :disabled}
+   :body [{:name "Aloituskatselmus"}
+          {:name "Loppukatselmus"}
+          {:name "Muu valvontak\u00e4ynti"}]})
 
 (def- task-katselmus-body
   [katselmuksenLaji
@@ -55,12 +65,14 @@
     :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :repeating true
+    :repeating-init-empty true
     :i18nkey ""
     :uicomponent :docgen-review-buildings
-    :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :hidden true}
-                                                 {:name "valtakunnallinenNumero" :type :string :hidden true}
-                                                 {:name "rakennusnro" :type :string :hidden true}
-                                                 {:name "kiinttun" :type :string :hidden true}
+    :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :subtype :digit :hidden true}
+                                                 {:name "valtakunnallinenNumero" :type :string :subtype :rakennustunnus
+                                                  :hidden true}
+                                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
                                                  {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}]}
            {:name "tila" :type :group :i18nkey "empty"
             :body [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
@@ -68,7 +80,9 @@
                     :whitelist {:roles [:authority] :otherwise :disabled}
                     :i18nkey "task-katselmus.katselmus.tila"
                     :body [{:name "osittainen"} {:name "lopullinen"}]}
-                   {:name "kayttoonottava" :readonly-after-sent true :type :checkbox :inputType :checkbox-wrapper
+                   {:name "kayttoonottava" :readonly-after-sent true
+                    :type :checkbox :inputType :checkbox-wrapper
+                    :auth {:enabled [:is-end-review]}
                     :whitelist {:roles [:authority] :otherwise :disabled}}
                    ]}]}
    {:name "katselmus" :type :group
@@ -78,11 +92,16 @@
     [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
       :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
+      :required true
       :body [{:name "osittainen"} {:name "lopullinen"}]}
      {:name "pitoPvm" :type :date :required true :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}
      {:name "pitaja" :type :string :required true :readonly-after-sent true
-            :whitelist {:roles [:authority] :otherwise :disabled}}
+      :whitelist {:roles [:authority] :otherwise :disabled}}
+     {:name "tiedoksianto" :type :checkbox :inputType :checkbox-wrapper
+      :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}
+      :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000 :css []
               :whitelist {:roles [:authority] :otherwise :disabled} }
@@ -96,7 +115,9 @@
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
-    (tools/schema-body-without-element-by-name task-katselmus-body "rakennus" "tila" "katselmuksenLaji")))
+          (update-in (tools/schema-body-without-element-by-name task-katselmus-body
+                                                                "rakennus" "tila" "katselmuksenLaji" "tiedoksianto")
+                     [1 :body 2 :body 0] assoc :required true)))
 
 (schemas/defschemas
   task-schemas-version
@@ -105,11 +126,12 @@
            :subtype :review
            :order 1
            :section-help "authority-fills"
-           ;;:i18nprefix "task-katselmus.katselmuksenLaji"
+           :i18nprefix "task-katselmus.katselmuksenLaji"
            } ; Had :i18npath ["katselmuksenLaji"]
-        :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
-           ["rakennus::4"]
+    :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
+           ["katselmus/tiedoksianto::2"]
+           ["rakennus::4"]
            {:h2 "task-katselmus.huomautukset"}
            ["katselmus/huomautukset/kuvaus::3"]
            ["katselmus/huomautukset/maaraAika" "katselmus/huomautukset/toteaja" "katselmus/huomautukset/toteamisHetki"]
@@ -124,7 +146,7 @@
            :order 1
            :section-help "authority-fills"
            :i18name "task-katselmus"
-           ;;:i18nprefix "task-katselmus.katselmuksenLaji"
+           :i18nprefix "task-katselmus.katselmuksenLaji"
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "katselmus/pitoPvm" "katselmus/pitaja" "vaadittuLupaehtona"]
            {:h2 "task-katselmus.huomautukset"}
@@ -135,14 +157,14 @@
     :template "form-grid-docgen-group-template"
     :body task-katselmus-body-ya}
 
-   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
+   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :subtype :foreman :order 10}
     :body [{:name "osapuolena" :type :checkbox}
            {:name "asiointitunnus" :type :string :max-len 17}]}
 
    {:info {:name "task-lupamaarays" :type :task :order 20}
     :rows [["maarays::3"] ["kuvaus::3"]]
     :template "form-grid-docgen-group-template"
-    :body [{:name "maarays" :type :text :max-len 20000 :readonly true}
+    :body [{:name "maarays" :type :text :inputType :paragraph :max-len 20000 :readonly true}
            {:name "kuvaus"  :type :text :max-len 4000 }
            {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
 
@@ -161,7 +183,7 @@
                    (str (ss/substring task-name 0 (- task-name-max-len 3)) "...")
                    task-name))
      :state state
-     :data (when data (-> data tools/wrapped (tools/timestamped created)))
+     :data (if data (-> data tools/wrapped (tools/timestamped created)) {})
      :assignee (select-keys assignee [:id :firstName :lastName])
      :duedate nil
      :created created

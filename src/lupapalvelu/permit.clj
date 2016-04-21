@@ -16,6 +16,7 @@
    :multiple-parties-allowed sc/Bool
    :extra-statement-selection-values sc/Bool
    :state-graph     {sc/Keyword [sc/Keyword]}
+   (sc/optional-key :allow-state-change) (sc/either sc/Keyword [(sc/either sc/Keyword sc/Str)] )
    (sc/optional-key :wfs-krysp-ns-name) sc/Str
    (sc/optional-key :wfs-krysp-url-asia-prefix) sc/Str})
 
@@ -50,6 +51,7 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :state-graph      states/full-application-state-graph
+   :allow-state-change ["tyonjohtaja-hakemus" :empty]
    :sftp-directory   "/rakennus"
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -60,6 +62,7 @@
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes             []
    :state-graph          states/default-application-state-graph
+   :allow-state-change []
    :sftp-directory       "/yleiset_alueet"
    :allowed-task-schemas #{"task-katselmus-ya" "task-lupamaarays"}
    :multiple-parties-allowed false
@@ -79,6 +82,7 @@
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
    :state-graph    states/default-application-state-graph
+   :allow-state-change []
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -89,6 +93,7 @@
 (defpermit YM  "Muut ymparistoluvat"
   {:subtypes       []
    :state-graph    states/default-application-state-graph
+   :allow-state-change []
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -97,6 +102,7 @@
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
    :state-graph    states/default-application-state-graph
+   :allow-state-change []
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -107,6 +113,7 @@
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :state-graph      states/full-application-state-graph
+   :allow-state-change :all
    :sftp-directory   "/poikkeusasiat"
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -117,6 +124,7 @@
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
    :state-graph    states/default-application-state-graph
+   :allow-state-change []
    :sftp-directory "/ymparisto"
    :allowed-task-schemas #{"task-katselmus" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -254,7 +262,6 @@
   subtype or no subtype are valid."
   [permit-types _ {:keys [permitType permitSubtype]}]
   (let [app-type (keyword permitType)
-        types    (set (keys permit-types))
         subs     (get permit-types app-type)]
     (when-not (and subs
                    (or (= subs :all)
@@ -267,9 +274,7 @@
 (defn valid-permit-types-for-state-change
   "Convenience pre-checker."
   [_ application]
-  (valid-permit-types {:R   ["tyonjohtaja-hakemus" :empty]
-                       :P   :all
-                       :YA  []
-                       :YL  []
-                       :YM  []
-                       :VVL []} _ application))
+  (let [allow-state-change (->> (filter (fn [[k v]] (contains? v :allow-state-change)) (permit-types))
+                                (map (fn [[k v]] [(keyword k) (:allow-state-change v)]))
+                                (into {}))]
+    (valid-permit-types allow-state-change _ application)))

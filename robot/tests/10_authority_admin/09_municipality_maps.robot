@@ -64,6 +64,13 @@ Admin reloads page and makes sure that layers are still present
   Check layer name  2  Beijing
   Element should not be visible  jquery=input[data-test-id=layer3-input]
 
+Admin unsets layers
+  Select layer  0  ${EMPTY}
+  Wait for jQuery
+  Negative indicator should not be visible
+  Select layer  1  ${EMPTY}
+  Wait for jQuery
+  Negative indicator should not be visible
 
 *** Keywords ***
 

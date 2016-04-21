@@ -61,7 +61,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
                         text: "form-input textarea",
                         "inline-string": "form-input inline",
                         "localized-string": "form-string",
-                        "check-string": "check-string"};
+                        "check-string": "check-string",
+                        "paragraph" : "form-paragraph"};
     return _.get( typeDefaults, (self.schema.inputType || self.schema.type), "");
   }
 
@@ -83,15 +84,39 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return (self.schemaCss || defaultInputClasses()) + " " + self.signalClasses();
   });
 
-  self.readonly = ko.observable(params.schema.readonly || params.readonly);
+  self.readonly = ko.pureComputed(function () {
+    var doc = service.findDocumentById( self.documentId );
+    var readOnlyAfterSent = params.schema["readonly-after-sent"] && doc.state === "sent";
+    return readOnlyAfterSent || params.schema.readonly || params.readonly;
+  });
   self.inputOptions = {maxLength: ko.observable(params.schema["max-len"] || LUPAPISTE.config.inputMaxLength),
                        max: ko.observable(params.schema.max),
                        min: ko.observable(params.schema.min)};
 
-  self.disabled = ko.observable(params.isDisabled
-                                || !(service.isWhitelisted( self.schema ))
-                                || !self.authModel.ok(service.getUpdateCommand(self.documentId))
-                                || util.getIn(params, ["model", "disabled"]));
+  function authState( state ) {
+    var commands = _.get( self.schema.auth, state );
+    if( _.isArray( commands) && _.size( commands )) {
+      return _.some( commands, self.authModel.ok );
+    }
+  }
+
+  self.disabled = ko.pureComputed( function() {
+    var disabled = params.isDisabled
+          || !(service.isWhitelisted( self.schema ))
+          || !self.authModel.ok(service.getUpdateCommand(self.documentId))
+          || util.getIn(params, ["model", "disabled"]);
+    var authDisabled = authState( "disabled" );
+    if( _.isBoolean( authDisabled ) ) {
+      disabled = disabled || authDisabled;
+    }
+    var authEnabled = authState( "enabled" );
+    if( _.isBoolean( authEnabled ) ) {
+      disabled = disabled || !authEnabled;
+    }
+    return disabled;
+  });
+
+    ko.observable();
   var save = function(val) {
     service.updateDoc(self.documentId,
       [[params.path, val]],

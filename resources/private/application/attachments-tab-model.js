@@ -185,7 +185,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
         .success(self.appModel.lightReload)
         .processing(self.appModel.processing)
         .call();
-        hub.send("track-click", {category:"Application", label: "", event:"deleteSingleAttachment"});
+        hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
       return false;
     };
     hub.send("show-dialog", {ltitle: "attachment.delete.header",

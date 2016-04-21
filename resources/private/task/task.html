@@ -15,41 +15,25 @@
       <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>
       <!-- /ko -->
 
-      <button data-test-id="send-task"
-              data-bind="click: sendTask,
-                         visible: $root.authorization.ok('send-task'),
-                         enable: $root.taskSubmitOk() && !$root.processing(),
-                         css: {waiting: $root.pending}"
-              class="positive">
-          <i class="wait spin lupicon-refresh"></i>
-          <span data-bind="ltext: 'task.send'"></span>
-      </button>
-
       <button data-test-id="delete-task"
               data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')"
               class="secondary" style="float:right"></button>
 
     </div>
 
-    <!-- ko if: features.enabled("review-done") -->
-    <div class="feature" style="display:inline-block">
-      <div class="review-done"
-           data-bind="visible: $root.authorization.ok('review-done'),
-                      if: $root.authorization.ok('review-done')">
-        <div data-bind="ltext: 'task.review-done.help'"></div>
-        <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.taskSubmitOk() && !$root.processing()" class="positive">
-          <i class="lupicon-eye"></i>
-          <span data-bind="ltext: 'task.review-done'"></span>
-        </button>
-      </div>
+    <div class="review-done"
+         data-bind="visible: $root.authorization.ok('review-can-be-marked-done')">
+      <div data-bind="ltext: 'task.review-done.help'"></div>
+      <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.reviewSubmitOk() && !$root.processing()" class="positive">
+        <i class="lupicon-eye"></i>
+        <span data-bind="ltext: 'task.review-done'"></span>
+      </button>
     </div>
-    <!-- /ko -->
 
     <div id="taskAttachments" >
       <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, addAttachmentDisabled: $root.addAttachmentDisabled, authorization: $root.authorization}}"></div>
     </div>
 
-    <!--<div id="taskDocgen" class="docgen-content" ></div>-->
     <!-- ko if: $data.addedToService -->
      <div data-bind="component: {name: 'docgen-group',
                                  params: {schema: $data.schema,
@@ -57,7 +41,7 @@
                                           applicationId: $data.applicationId,
                                           documentId: $data.id,
                                           service: $root.dataService,
-                                          authModel: lupapisteApp.models.applicationAuthModel,
+                                          authModel: $root.authorization,
                                           i18npath: [$data.schema.info.i18name || $data.schema.info.name]}}"></div>
     <!-- /ko -->
   </section>

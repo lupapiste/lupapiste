@@ -137,6 +137,7 @@
 
     (some-> (mongo/select-one :applications {$and [query-id-part query-user-part]})
             (update :documents (partial map schemas/with-current-schema-info))
+            (update :tasks (partial map schemas/with-current-schema-info))
             (filter-application-content-for user))))
 
 (defn get-application-no-access-checking
@@ -146,7 +147,8 @@
   ([query-or-id projection]
    (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
      (some-> (mongo/select-one :applications query projection)
-             (update :documents (partial map schemas/with-current-schema-info))))))
+             (update :documents (partial map schemas/with-current-schema-info))
+             (update :tasks (partial map schemas/with-current-schema-info))))))
 
 ;;
 ;; authorization

@@ -25,7 +25,7 @@ LUPAPISTE.VerdictSigningModel = function(dialogSelector) {
 
   self.sign = function() {
     self.errorMessage("");
-    ajax.command("sign-verdict", {id: self.applicationId, verdictId: self.verdictId, password: self.password()})
+    ajax.command("sign-verdict", {id: self.applicationId, verdictId: self.verdictId, password: self.password(), lang: loc.getCurrentLanguage()})
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {

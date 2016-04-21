@@ -16,28 +16,38 @@
         </tr>
       </thead>
       <tbody data-bind="foreach: reviews">
-        <tr data-test-type="task-katselmus">
+        <tr data-test-type="task-katselmus"
+            data-bind="attr: {'data-test-index': $index}">
           <td class="reviews-table--icons" data-bind="if: hasAttachments">
             <i class="lupicon-paperclip"></i></td>
-          <td><a data-bind="text: name,
-                            click: $parent.openTask"></a></td>
-          <td data-bind="text: date"></td>
-          <td data-bind="text: author"></td>
-          <td data-bind="if: state">
+          <td data-test-column="requirement">
+            <a data-bind="text: name,
+                          click: $parent.openTask"></a>
+          </td>
+          <td data-test-column="date" data-bind="text: date"></td>
+          <td data-test-column="name" data-bind="text: author"></td>
+          <td data-test-column="state" data-bind="if: state">
             <span data-bind="ltext: 'task-katselmus.katselmus.tila.' + state"></span>
           </td>
-          <td data-bind="if: condition">
+          <td data-test-column="condition" data-bind="if: condition">
             <span data-bind="ltext: 'yes'"></span>
           </td>
           <td data-bind="if: notes" class="reviews-table--action">
             <a data-bind="ltext: 'review.show-notes',
+                          attr: {'data-test-id': 'show-review-note-' + $index()},
                           toggleClick: notesVisible"></a></td>
         </tr>
         <!-- ko if: notesVisible -->
-        <tr class="reviews-table__note"><td colspan="7" data-bind="text: notes"></td></tr>
+        <tr class="reviews-table__note">
+          <td colspan="7"
+              class="reviews-table--extra"
+              data-bind="text: notes,
+                         attr: {'data-test-id': 'review-note-' + $index()}"></td>
+        </tr>
         <tr></tr>
         <!-- /ko -->
       </tbody>
     </table>
+    <div data-test-id="reviews-table-end"></div>
   </div>
 </script>

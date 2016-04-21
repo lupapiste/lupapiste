@@ -57,12 +57,12 @@
   (facts "Add statement giver role for Ronja in Sipoo"
     (create-statement-giver sipoo ronja-email)
 
-    (fact "Statement giver is added"
+    (fact "Statement giver is added and sorted"
       (let [resp (query sipoo :get-organizations-statement-givers) => ok?
             givers (:data resp)]
         (count givers) => 2
-        (-> givers first :email) => sonja-email
-        (-> givers second :email) => ronja-email))
+        (-> givers first :email) => ronja-email
+        (-> givers second :email) => sonja-email))
 
     (fact "new statement giver receives email which contains the (html escaped) input text"
       (let [email (last-email)]

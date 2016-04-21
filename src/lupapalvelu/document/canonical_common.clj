@@ -27,6 +27,7 @@
    :verdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :foremanVerdictGiven "p\u00e4\u00e4t\u00f6s toimitettu"
    :constructionStarted "rakennusty\u00f6t aloitettu"
+   :appealed "p\u00e4\u00e4t\u00f6ksest\u00e4 valitettu, valitusprosessin tulosta ei ole"
    :closed "valmis"})
 
 (def ymp-application-state-to-krysp-state
@@ -35,7 +36,11 @@
    :complementNeeded "1 Vireill\u00e4"
    :verdictGiven "ei tiedossa"
    :constructionStarted "ei tiedossa"
+   :appealed "12 P\u00e4\u00e4t\u00f6ksest\u00e4 valitettu"
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
+
+(defn last-history-timestamp [state application]
+  (some #(when (= state (:state %)) (:ts %)) (reverse (application :history))))
 
 (def- state-timestamp-fn
   {:submitted :submitted
@@ -47,7 +52,8 @@
    :closed :closed})
 
 (defn state-timestamp [{state :state :as application}]
-  ((state-timestamp-fn (keyword state)) application))
+  ((or (state-timestamp-fn (keyword state))
+       (partial last-history-timestamp state)) application))
 
 (defn all-state-timestamps [application]
   (into {}
