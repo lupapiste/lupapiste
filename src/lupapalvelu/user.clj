@@ -474,7 +474,7 @@
         (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
           (do
             (warnf "Duplicate key detected when inserting new user: field=%s" field)
-            (fail! :duplicate-key :field field))
+            (fail! :error.duplicate-email))
           (do
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
