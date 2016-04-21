@@ -845,3 +845,8 @@
                           file-objects)]
     (when (seq new-attachments)
       {$push {:attachments {$each new-attachments}}})))
+
+(defn attachment-array-updates [app-id pred k v]
+  {$set (as-> app-id $
+          (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
+          (mongo/generate-array-updates :attachments (:attachments $) pred k v))})
