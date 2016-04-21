@@ -14,6 +14,7 @@ LUPAPISTE.createTaskController = new (function() {
   self.taskType = ko.observable(null);
   self.taskSubtype = ko.observable(null);
   self.taskTypes = ko.observable([]);
+  self.openImmediately = false;
 
   self.taskSubtypes = ko.computed(function() {
     var currentTask = _.find(self.taskTypes(), function(task) {
@@ -39,14 +40,15 @@ LUPAPISTE.createTaskController = new (function() {
     self.taskType(null);
     self.taskTypes([]);
     self.taskSubtype(null);
+    self.openImmediately = false;
   };
 
   // Open the dialog
-  self.createTask = function(app) {
+  self.createTask = function(app, event, openImmediately ) {
     if (typeof app.id === "function") {
       self.reset(app.id(), self.source);
     }
-
+    self.openImmediately = openImmediately;
     ajax.query("task-types-for-application", {id: self.id,  lang: loc.getCurrentLanguage()})
       .success(function(data) {
         self.taskTypes(_.map(data.schemas, function(schema) {
@@ -67,8 +69,9 @@ LUPAPISTE.createTaskController = new (function() {
                                  source: self.source})
       .success(function( res ) {
         // Non-foreman tasks are automatically opened.
-        if(  !_.find( self.taskTypes(), {schemaSubtype: "foreman",
-                                         id: self.taskType()}) ) {
+        if(  self.openImmediately
+             && !_.find( self.taskTypes(), {schemaSubtype: "foreman",
+                                            id: self.taskType()}) ) {
           hub.subscribe( "application-model-updated",
                          _.partial( lupapisteApp.models.application.openTask,
                                     res.taskId ),
