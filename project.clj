@@ -35,7 +35,7 @@
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [org.bouncycastle/bcprov-jdk15on "1.54"]
-                 [pandect "0.3.0" :exclusions [org.bouncycastle/bcprov-jdk15on]]
+                 [pandect "0.5.4" :exclusions [org.bouncycastle/bcprov-jdk15on]]
 
                  ; JSON
                  [cheshire "5.5.0"]
