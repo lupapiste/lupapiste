@@ -68,7 +68,7 @@
   {:pre [text (pos? created)]}
   (->> (update fields :buildings (partial map (partial building->str lang)))
        ((juxt :backend-id :section :extra-info :buildings :organization))
-       (flatten)
+       flatten
        (map (fn-> str (ss/limit 100)))
        (stamper/make-stamp (ss/limit text 100) created transparency)))
 
