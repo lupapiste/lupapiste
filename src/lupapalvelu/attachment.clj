@@ -714,19 +714,18 @@
   [attachments & [application lang]]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
-    (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
-        ; Add all attachments:
-        (doseq [attachment attachments]
-          (append-gridfs-file! zip (-> attachment :versions last)))
+    (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
+      ; Add all attachments:
+      (doseq [attachment attachments]
+        (append-gridfs-file! zip (-> attachment :versions last)))
 
-        (when (and application lang)
-          ; Add submitted PDF, if exists:
-          (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-            (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
-          ; Add current PDF:
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
-        (.finish zip)))
+      (when (and application lang)
+        ; Add submitted PDF, if exists:
+        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
+        ; Add current PDF:
+        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
+      (.finish zip))
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
 
