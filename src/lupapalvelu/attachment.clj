@@ -696,14 +696,18 @@
 
 (defn- append-gridfs-file! [zip {:keys [filename fileId]}]
   (when fileId
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
-    (with-open [in ((:content (mongo/download fileId)))]
-      (io/copy in zip))))
+    (if-let [content (:content (mongo/download fileId))]
+      (with-open [in (content)]
+        (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
+        (io/copy in zip)
+        (.closeEntry zip))
+      (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
 
 (defn- append-stream [zip file-name in]
   (when in
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
-    (io/copy in zip)))
+    (io/copy in zip)
+    (.closeEntry zip)))
 
 (defn get-all-attachments!
   "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
