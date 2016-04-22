@@ -4822,6 +4822,8 @@
 "uusiRakennus.lammitys.lammitystapa._group_label" "sv" "Huvudsakligt uppvärmningssätt"
 "uusiRakennus.lammitys.lammitystapa.ei lämmitystä" "fi" "Ei kiinteää lämmityslaitetta"
 "uusiRakennus.lammitys.lammitystapa.ei lämmitystä" "sv" "Ingen fast värmeanläggning"
+"uusiRakennus.lammitys.lammitystapa.eiLammitysta" "fi" "Ei kiinteää lämmityslaitetta"
+"uusiRakennus.lammitys.lammitystapa.eiLammitysta" "sv" "Ingen fast värmeanläggning"
 "uusiRakennus.lammitys.lammitystapa.ei tiedossa" "fi" "Ei tiedossa"
 "uusiRakennus.lammitys.lammitystapa.ei tiedossa" "sv" "Inte känt"
 "uusiRakennus.lammitys.lammitystapa.ilmakeskus" "fi" "Ilmakeskuslämmitys"
