@@ -427,4 +427,6 @@
 (defn task-ids->attachments
   "All the attachments that belong to the tasks with the given ids."
   [application task-ids]
-  (map (partial tasks/task-attachments application) task-ids))
+  (->> task-ids
+       (map (partial tasks/task-attachments application))
+       flatten))

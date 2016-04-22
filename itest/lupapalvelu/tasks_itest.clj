@@ -11,8 +11,6 @@
 
 (defn- task-by-type [task-type task] (= (str "task-" task-type) (-> task :schema-info :name)))
 
-(apply-remote-minimal)
-
 (let [application (create-and-submit-application pena :municilapity sonja-muni)
       application-id (:id application)
       resp (command sonja :check-for-verdict :id application-id)
@@ -179,6 +177,4 @@
               (count tasks) => expected-count)
 
             (fact "the original task was marked final too"
-              (get-in (second tasks) [:data :katselmus :tila :value]) => "lopullinen"))))))
-
-  )
+              (get-in (second tasks) [:data :katselmus :tila :value]) => "lopullinen")))))))
