@@ -3,7 +3,7 @@
             [clojure.pprint :refer [pprint]]
             [clojure.core.memoize :as memo]
             [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
-            [com.netflix.hystrix.core :refer [defcommand]]
+            [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
             [clojure.java.io :as io]
             [sade.env :as env]
@@ -116,7 +116,7 @@
                  :else :invalid-pages)]
     (statistics/store-pdf-conversion-page-count db-key count)))
 
-(defcommand convert-to-pdf-a
+(hystrix/defcommand convert-to-pdf-a
   "Takes a PDF File and returns a File that is PDF/A"
   {:hystrix/group-key   "Attachment"
    :hystrix/command-key "Convert to PDF/A with PdfTools"

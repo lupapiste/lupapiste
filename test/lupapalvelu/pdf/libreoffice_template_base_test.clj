@@ -18,7 +18,7 @@
                    :applicant    "Testaaja Testi"
                    :address      "Korpikuusen kannon alla 6"
                    :municipality "186"
-                   :documents []
+                   :documents    []
                    :verdicts     [{:id              "a1"
                                    :timestamp       1454562242169
                                    :kuntalupatunnus "20160043"
@@ -29,10 +29,10 @@
                                                                        :voimassaHetki 1613520000000
                                                                        :aloitettava   1550448000000}
 
-                                                      :lupamaaraykset {:kerrosala "100m2"
-                                                                       :maaraykset               [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viem\u00e4risuunnitelma"}]
-                                                                       :vaaditutTyonjohtajat     "Vastaava ty\u00f6njohtaja"
-                                                                       :vaadittuTyonjohtajatieto ["Vastaava ty\u00f6njohtaja" "Toinen ty\u00f6njohtaja"]
+                                                      :lupamaaraykset {:kerrosala                   "100m2"
+                                                                       :maaraykset                  [{:sisalto "Vaaditut erityissuunnitelmat: Vesijohto- ja viem\u00e4risuunnitelma"}]
+                                                                       :vaaditutTyonjohtajat        "Vastaava ty\u00f6njohtaja"
+                                                                       :vaadittuTyonjohtajatieto    ["Vastaava ty\u00f6njohtaja" "Toinen ty\u00f6njohtaja"]
                                                                        :vaaditutErityissuunnitelmat ["Joku erityissuunnitelma" "Joku toinen erityissuunnitelma"]
                                                                        :vaaditutKatselmukset        [{:tarkastuksenTaiKatselmuksenNimi "* KVV-tarkastus" :katselmuksenLaji " muu katselmus "}
                                                                                                      {:tarkastuksenTaiKatselmuksenNimi " * S\u00e4hk\u00f6tarkastus " :katselmuksenLaji " muu katselmus "}
@@ -116,22 +116,22 @@
                    :applicant    "Testaaja Testi"
                    :address      "Korpikuusen kannon alla 6"
                    :municipality "186"
-                   :documents []
+                   :documents    []
                    :verdicts     [{:id              "a1"
                                    :timestamp       1454562242169
                                    :kuntalupatunnus "20160043"
                                    :sopimus         false
-                                   :signatures    [{:created 1424669824461
-                                                    :user    {:role      "applicant"
-                                                              :lastName  "Mallikas"
-                                                              :firstName "Matti"
-                                                              :username  "matti.maiilkas@example.com"}}
-                                                   {:created 1424669824461
-                                                    :user    {:role      "applicant"
-                                                              :lastName  "Mallikas"
-                                                              :firstName "Minna"
-                                                              :username  "minna.maiilkas@example.com"}}
-                                                   ]
+                                   :signatures      [{:created 1424669824461
+                                                      :user    {:role      "applicant"
+                                                                :lastName  "Mallikas"
+                                                                :firstName "Matti"
+                                                                :username  "matti.maiilkas@example.com"}}
+                                                     {:created 1424669824461
+                                                      :user    {:role      "applicant"
+                                                                :lastName  "Mallikas"
+                                                                :firstName "Minna"
+                                                                :username  "minna.maiilkas@example.com"}}
+                                                     ]
                                    :paatokset       [{:id          "a2"
                                                       :paivamaarat {:anto          1454544000000
                                                                     :lainvoimainen 1454544000000
@@ -141,11 +141,11 @@
                                                       :poytakirjat [{:urlHash         "4196f10a7fef9bec325dc567f1b87fbcd10163ce"
                                                                      :status          "1"
                                                                      :paatoksentekija "Tytti M\u00e4ntyoja"
-                                                                     :paatos "Lorem ipsum dolor sit amet"
+                                                                     :paatos          "Lorem ipsum dolor sit amet"
                                                                      :pykala          31
                                                                      :paatospvm       1454284800000
                                                                      :paatoskoodi     "my\u00f6nnetty"}]}]}]
-                   :statements   [{:id "101"
+                   :statements   [{:id        "101"
                                    :person    {:text "Pelastusviranomainen"
                                                :name "Pia Palomies"}
                                    :requested date-02012016
@@ -229,7 +229,76 @@
                                                  :id   "a1"
                                                  }
                                    :id          "2224"}]
-                   :attachments  [{:type     {:type-group "paapiirustus" :type-id "asemapiirros"}
+                   :attachments  [{:type                 {:type-id "muu", :type-group "muut"},
+                                   :state                "requires_authority_action",
+                                   :op                   nil,
+                                   :modified             1461325119200,
+                                   :requestedByAuthority true,
+                                   :applicationState     "submitted",
+                                   :readOnly             false,
+                                   :locked               true,
+                                   :id                   "11",
+                                   :latestVersion
+                                                         {:missing-fonts  [],
+                                                          :created        1461325119200,
+                                                          :size           2832105,
+                                                          :filename       "SomeFile.pdf",
+                                                          :originalFileId "44444",
+                                                          :contentType    "application/pdf",
+                                                          :archivable     true,
+                                                          :version        {:minor 2, :major 0},
+                                                          :stamped        false,
+                                                          :user
+                                                                          {:role      "authority",
+                                                                           :lastName  "Sällström",
+                                                                           :firstName "Nils",
+                                                                           :username  "user4@example.com",
+                                                                           :id        "666"},
+                                                          :fileId         "444"},
+                                   :notNeeded            false,
+                                   :signatures           [],
+                                   :forPrinting          false,
+                                   :contents             nil,
+                                   :target               {:id "101", :type "statement"},
+                                   :versions             [],
+                                   :metadata             {:nakyvyys "julkinen"},
+                                   :required             false}
+                                  {:type                 {:type-id "muu", :type-group "muut"},
+                                   :state                "requires_authority_action",
+                                   :op                   nil,
+                                   :modified             1461325119200,
+                                   :requestedByAuthority true,
+                                   :applicationState     "submitted",
+                                   :readOnly             false,
+                                   :locked               true,
+                                   :id                   "11",
+                                   :latestVersion
+                                                         {:missing-fonts  [],
+                                                          :created        1461325119200,
+                                                          :size           2832105,
+                                                          :filename       "SomeFile2.pdf",
+                                                          :originalFileId "44444",
+                                                          :contentType    "application/pdf",
+                                                          :archivable     true,
+                                                          :version        {:minor 2, :major 0},
+                                                          :stamped        false,
+                                                          :user
+                                                                          {:role      "authority",
+                                                                           :lastName  "Sällström",
+                                                                           :firstName "Nils",
+                                                                           :username  "user4@example.com",
+                                                                           :id        "666"},
+                                                          :fileId         "444"},
+                                   :notNeeded            false,
+                                   :signatures           [],
+                                   :forPrinting          false,
+                                   :contents             nil,
+                                   :target               {:id "a1", :type "verdict"},
+                                   :versions             [],
+                                   :metadata             {:nakyvyys "julkinen"},
+                                   :required             false}
+
+                                  {:type     {:type-group "paapiirustus" :type-id "asemapiirros"}
                                    :versions [{:version {:major 1 :minor 0}
                                                :created date-02012016
                                                :user    {:firstName "Testi"

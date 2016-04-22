@@ -56,16 +56,18 @@
     (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
 
 
-(defn generate-verdict-pdfa [application verdict-id paatos-idx lang]
+(defn generate-verdict-pdfa [application verdict-id paatos-idx lang dst-file]
   (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-idx ", lang: " lang)
   (let [filename (str (localize lang "application.verdict.title") ".fodt")
         tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
     (verdict/write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
-    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
+    (io/copy (:content (convert-to-pdfa filename (io/input-stream tmp-file))) dst-file)
+    (io/delete-file tmp-file :silently)))
 
-(defn generate-statment-pdfa [application id lang]
-  (debug "Generating PDF/A for statement: " id ", lang: " lang)
+(defn generate-statment-pdfa-to-file! [application id lang dst-file]
+  (debug "Generating PDF/A statement(" id ") for application: " (:id application) ", lang: " lang)
   (let [filename (str (localize lang "application.statement.status") ".fodt")
-        tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+        tmp-file (File/createTempFile (str "temp-export-statement-" (name lang) "-") ".fodt")]
     (statement/write-statement-libre-doc application id lang tmp-file)
-    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
+    (io/copy (:content (convert-to-pdfa filename (io/input-stream tmp-file))) dst-file)
+    (io/delete-file tmp-file :silently)))

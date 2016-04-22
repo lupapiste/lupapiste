@@ -1,6 +1,6 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
-            [com.netflix.hystrix.core :refer [defcommand]]
+            [com.netflix.hystrix.core :as hystrix]
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -625,7 +625,7 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
-(defcommand create-preview!
+(hystrix/defcommand create-preview!
   {:hystrix/group-key   "Attachment"
    :hystrix/command-key "Create preview"
    :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 2 60 1000))) setter)

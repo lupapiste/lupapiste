@@ -27,4 +27,5 @@
              (fact {:midje/description (str " Statement libre document anto (" (name lang) ")")} (nth res (+ pos 72)) => #(s/includes? % "01.02.2016"))
              (fact {:midje/description (str " Statement libre document antaja (" (name lang) ")")} (nth res (+ pos 76)) => #(s/includes? % "Pia Palomies"))
              (fact {:midje/description (str " Statement libre document teksti (" (name lang) ")")} (nth res (+ pos 82)) => #(s/includes? % "Lausunto liitteen"))
-             (fact {:midje/description (str " Statement libre document status (" (name lang) ")")} (nth res (+ pos 89)) => #(s/includes? % "ehdoilla"))))))
+             (fact {:midje/description (str " Statement libre document status (" (name lang) ")")} (nth res (+ pos 89)) => #(s/includes? % "ehdoilla"))
+             (fact {:midje/description (str " Statement libre document attachments (" (name lang) ")")} (nth res (+ pos 93)) => #(s/includes? % (str "1 " (i18n/localize lang "unit.kpl"))))))))

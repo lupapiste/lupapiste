@@ -83,6 +83,7 @@
                (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
                (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
                ;;TODO: test rest of the lines
+               (fact {:midje/description (str " verdict libre document attachments ")} (nth res (+ pos 62)) => #(s/includes? % "SomeFile2.pdf"))
                ))))
 
 (facts "Verdict-contract export non-krysp "
@@ -91,7 +92,7 @@
              (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
              (let [res (s/split (slurp tmp-file) #"\r?\n")
                    pos (start-pos res)]
-               (.delete tmp-file)
+               #_(.delete tmp-file)
                (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "userInfo.company.contract")))
                (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
                (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
@@ -99,7 +100,7 @@
                (fact {:midje/description (str " verdict libre document osapuolet 1 ")} (nth res (+ pos 18)) => #(s/includes? % "org-name-fi / Tytti M\u00e4ntyoja"))
                (fact {:midje/description (str " verdict libre document osapuolet 2 ")} (nth res (+ pos 26)) => #(s/includes? % "Testaaja Testi"))
                (fact {:midje/description (str " verdict libre document sis\u00e4lt\u00f6 ")} (nth res (+ pos 34)) => #(s/includes? % "Lorem ipsum dolor sit amet"))
-               (fact {:midje/description (str " verdict libre document signature 1 ")} (nth res (+ pos 61)) => #(s/includes? % "Tytti M\u00e4ntyoja"))
-               (fact {:midje/description (str " verdict libre document signature 2 ")} (nth res (+ pos 74)) => #(s/includes? % "Matti Mallikas"))
-               (fact {:midje/description (str " verdict libre document last signature ")} (nth res (+ pos 87)) => #(s/includes? % "Minna Mallikas"))
+               (fact {:midje/description (str " verdict libre document signature 1 ")} (nth res (+ pos 69)) => #(s/includes? % "Tytti M\u00e4ntyoja"))
+               (fact {:midje/description (str " verdict libre document signature 2 ")} (nth res (+ pos 82)) => #(s/includes? % "Matti Mallikas"))
+               (fact {:midje/description (str " verdict libre document last signature ")} (nth res (+ pos 95)) => #(s/includes? % "Minna Mallikas"))
                ))))

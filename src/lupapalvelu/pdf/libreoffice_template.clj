@@ -103,7 +103,10 @@
     [(if (seq applicants) applicants [applicant])]))
 
 (defn child-attachments [application child-type id]
-  (filter (fn [att] (and (= child-type (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application)))
+  (let [type (case child-type
+               :statements :statement
+               :verdicts :verdict)]
+    (filter (fn [att] (and (= type (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application))))
 
 (defn get-organization-name [application lang]
   (let [organization (org/get-organization (:organization application))

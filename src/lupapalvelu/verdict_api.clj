@@ -123,17 +123,11 @@
              "verdicts.$.sopimus" (:sopimus verdict)
              "verdicts.$.paatokset" (:paatokset verdict)}})))
 
-(defn create-verdict-pdfa! [user application verdict-id lang]
+(defn- create-verdict-pdfa! [user application verdict-id lang]
   (if (env/feature? :paatos-pdfa)
-    (let [application (domain/get-application-no-access-checking (:id application))
-          verdict (first (filter #(= verdict-id (:id %)) (:verdicts application)))]
-      (doall
-        (for [paatos-idx (range 0 (count (:paatokset verdict)))]
-          (let [content (libre/generate-verdict-pdfa application verdict-id paatos-idx lang)
-                temp-file (File/createTempFile "create-verdict-pdfa-" ".pdf")]
-            (io/copy content temp-file)
-            (attachment/attach-file! application (child-to-attachment/build-attachment user application :verdicts verdict-id lang temp-file nil))
-            (io/delete-file temp-file :silently)))))
+    (let [application (domain/get-application-no-access-checking (:id application))]
+        (when (> 1 (count (:paatokset (first (filter #(= verdict-id (:id %)) (:verdicts application)))))) (error "Too many paatokset in verdict( " verdict-id ") in application: " (:id application)))
+        (child-to-attachment/create-attachment-from-children user application :verdicts verdict-id lang))
     (info "feature.paatos-pdfa disabled !")))
 
 (defn- publish-verdict [{timestamp :created application :application lang :lang user :user :as command} {:keys [id kuntalupatunnus sopimus]}]
