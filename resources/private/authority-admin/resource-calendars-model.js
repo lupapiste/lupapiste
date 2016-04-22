@@ -51,6 +51,7 @@ LUPAPISTE.ResourceCalendarsModel = function () {
   function EditCalendarModel() {
     var self = this;
 
+    self.calendarId = ko.observable();
     self.name = ko.observable();
     self.organization = ko.observable();
 
@@ -60,12 +61,13 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     self.init = function(params) {
       self.commandName(params.commandName);
       self.command = params.command;
+      self.calendarId(util.getIn(params, ["source", "id"], -1));
       self.name(util.getIn(params, ["source", "name"], ""));
       self.organization(util.getIn(params, ["source", "organization"], ""));
     };
 
     self.execute = function() {
-      self.command(self.name(), self.organization());
+      self.command(self.calendarId(), self.name(), self.organization());
     };
 
     self.ok = ko.computed(function() {
@@ -76,22 +78,18 @@ LUPAPISTE.ResourceCalendarsModel = function () {
 
   self.items = ko.observableArray();
 
-  self.editCalendar = function(indexFn) {
-    var index = indexFn();
+  self.editCalendar = function() {
     self.editCalendarModel.init({
       source: this,
       commandName: "edit",
-      command: function(name, organization) {
-        /*ajax
-          .command("update-res-link", {index: index, url: url, nameFi: nameFi, nameSv: nameSv})
+      command: function(calendarId, name, organization) {
+        ajax
+          .command("update-calendar", {calendarId: calendarId, name: name, organization: organization})
           .success(function() {
             self.load();
             LUPAPISTE.ModalDialog.close();
           })
-          .call(); */
-
-        // DUMMY DATA EDIT
-        self.items.replace(self.items()[index], { name: name, organization: organization });
+          .call();
 
         LUPAPISTE.ModalDialog.close();
       }

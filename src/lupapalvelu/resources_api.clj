@@ -21,13 +21,20 @@
 (defn- build-url [& path-parts]
   (apply str (env/value :ajanvaraus :host) path-parts))
 
-(defn- api-query [action]
+(defn- api-call [f action opts]
   (let [url (build-url action)]
-    (info "Calling:" url)
-    (http/get url {:as               :json
+    (info "Calling:" url " with " opts)
+    (f url (merge {:as               :json
                    :throw-exceptions false
                    :basic-auth       [(env/value :ajanvaraus :username)
-                                      (env/value :ajanvaraus :password)]})))
+                                      (env/value :ajanvaraus :password)]} opts))))
+
+(defn- api-query [action]
+  (api-call http/get action {}))
+
+(defn- api-put-command [action request-body]
+  (api-call http/put action {:body (clj-http.client/json-encode request-body)
+                             :content-type :json}))
 
 (defquery calendar
   {:parameters [calendarId]
@@ -48,3 +55,11 @@
       (ok :calendars (map ->FrontendCalendar (:body response)))
       (do (error response)
           (fail :resources.backend-error)))))
+
+(defcommand update-calendar
+  {:user-roles #{:authorityAdmin}}
+  [{{:keys [calendarId name organization]} :data}]
+  (let [url (str "/api/resources/" calendarId)
+        response (api-put-command url {:name             name
+                                       :organizationCode organization})]
+    (ok :result (:body response))))
