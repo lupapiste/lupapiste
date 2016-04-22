@@ -403,3 +403,29 @@
                                       (backend-id-mongo-updates application))]
           (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
           validation-errors)))))
+
+(defn- verdict-task?
+  "True if given task is 'rooted' via source chain to the verdict.
+   tasks: tasks of the application
+   verdict-id: Id of the target verdict
+   task: task to be analyzed."
+  [tasks verdict-id {{source-type :type source-id :id} :source :as task}]
+  (case (keyword source-type)
+    :verdict (= verdict-id source-id)
+    :task (verdict-task? tasks verdict-id (some #(when (= (:id %) source-id) %) tasks))
+    false))
+
+(defn deletable-verdict-task-ids
+  "Set of task ids that a) can be deleted and b) belong to the
+  verdict with the given id."
+  [{:keys [tasks attachments]} verdict-id]
+  (->> tasks
+       (filter #(and (not= (-> % :state keyword) :sent)
+                     (verdict-task? tasks verdict-id %)))
+       (map :id)
+       set))
+
+(defn task-ids->attachments
+  "All the attachments that belong to the tasks with the given ids."
+  [{:keys [attachments]} task-ids]
+  (filter #(contains? task-ids (get-in % [:target :id])) attachments))

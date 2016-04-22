@@ -1,6 +1,7 @@
 (ns lupapalvelu.tasks
   (:require [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
+            [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [def-]]
@@ -251,3 +252,4 @@
          (= :task (-> % :info :type))
          (allowed-task-schemas (-> % :info :name)))
       (vals (schemas/get-schemas schema-version)))))
+
