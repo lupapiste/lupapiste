@@ -117,7 +117,7 @@ Stamping page opens, verdict details can be seen
   Select attachment operation option from dropdown  stampAttachments
   Wait Until  Element should be visible  stamping-container
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]  2013-01
-  Page should contain element  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-buildingid-list"]
+  Page should contain element  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@id="stamp-info-include-buildings"]
   Should not be empty  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
   [Teardown]  Logout
 
