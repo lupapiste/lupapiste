@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Sonja can assign application to herself
-Suite Teardown  Logout
+Suite Teardown  Apply minimal fixture now
 Resource       ../../common_resource.robot
 Resource       assignment_resource.robot
 Variables      ../06_attachments/variables.py
@@ -144,3 +144,4 @@ Sonja assigns application to herself
 Sonja cancels the application
   Open application  ${appname}  ${propertyId}
   Close current application as authority
+  Logout
