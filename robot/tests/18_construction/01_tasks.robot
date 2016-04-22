@@ -252,21 +252,9 @@ Sonja comes back and finalizes YA review
   Edit YA katselmus  Aloituskatselmus  14.4.2016  Some Sonja  Description is mandatory for YA reviews.
   # TODO: Sending requires fully formed application
   #Finalize review
-
-Sonja opens R application and fetches new verdict
-  Open application  ${appname}  ${propertyId}
-  Open tab  verdict
-  Fetch verdict
-
-New verdict has overwritten the old tasks.
-  Open tab  tasks
-  Wait Until  Page should contain  Kokoukset, katselmukset ja tarkastukset
-  Task count is  task-katselmus  3
-  Wait until  Page should contain  Vaaditut työnjohtajat
-  Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  3
-  Wait until  Page should contain  Muut lupamääräykset
-  Task count is  task-lupamaarays  3
   [Teardown]  Logout
+
+
 
 
 # TODO: Sonja sets ready past date for YA application (LPK-1054)

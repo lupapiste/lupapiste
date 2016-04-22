@@ -180,9 +180,11 @@
           {:keys [sent state verdicts]} application
           ; Deleting the only given verdict? Return sent or submitted state.
           step-back? (and (= 1 (count verdicts)) (states/verdict-given-states (keyword state)))
+          task-ids (verdict/deletable-verdict-task-ids application verdictId)
+          attachments (concat attachments (verdict/task-ids->attachments application task-ids))
           updates (merge {$pull {:verdicts {:id verdictId}
                                  :comments {:target target}
-                                 :tasks {:source target}}}
+                                 :tasks {:id {$in task-ids}}}}
                     (when step-back? {$set {:state (if (and sent (sm/valid-state? application :sent)) :sent :submitted)}}))]
       (update-application command updates)
       (doseq [{attachment-id :id} attachments]
