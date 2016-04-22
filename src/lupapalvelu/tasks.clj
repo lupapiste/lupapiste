@@ -253,3 +253,5 @@
          (allowed-task-schemas (-> % :info :name)))
       (vals (schemas/get-schemas schema-version)))))
 
+(defn task-attachments [{:keys [attachments]} task-id]
+  (filter #(= task-id (get-in % [:target :id])) attachments))

@@ -416,16 +416,15 @@
     false))
 
 (defn deletable-verdict-task-ids
-  "Set of task ids that a) can be deleted and b) belong to the
+  "Task ids that a) can be deleted and b) belong to the
   verdict with the given id."
   [{:keys [tasks attachments]} verdict-id]
   (->> tasks
        (filter #(and (not= (-> % :state keyword) :sent)
                      (verdict-task? tasks verdict-id %)))
-       (map :id)
-       set))
+       (map :id)))
 
 (defn task-ids->attachments
   "All the attachments that belong to the tasks with the given ids."
-  [{:keys [attachments]} task-ids]
-  (filter #(contains? task-ids (get-in % [:target :id])) attachments))
+  [application task-ids]
+  (map (partial tasks/task-attachments application) task-ids))
