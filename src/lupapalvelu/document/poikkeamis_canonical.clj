@@ -11,17 +11,17 @@
 (defn- get-toimenpide [{toimenpide :toimenpiteet} kerrosalatieto]
   (let [{:keys [kerrosala kayttotarkoitus]} toimenpide]
     (merge kerrosalatieto {:kuvausKoodi (:Toimenpide toimenpide)
-                           :tavoitetilatieto {:Tavoitetila (merge {:paakayttotarkoitusKoodi (:kayttotarkoitus toimenpide)
-                                                                   :asuinhuoneistojenLkm (:huoneistoja toimenpide)
-                                                                   :rakennuksenKerrosluku (:kerroksia toimenpide)
-                                                                   :kokonaisala (:kokonaisala toimenpide)}
+                           :tavoitetilatieto {:Tavoitetila {:paakayttotarkoitusKoodi (:kayttotarkoitus toimenpide)
+                                                            :asuinhuoneistojenLkm (:huoneistoja toimenpide)
+                                                            :rakennuksenKerrosluku (:kerroksia toimenpide)
+                                                            :kokonaisala (:kokonaisala toimenpide)
                                         ; 2.1.3+
-                                                                  (when-not (ss/blank? kerrosala)
-                                                                    {:kerrosala kerrosala})
+                                                            :kerrosala (when-not (ss/blank? kerrosala)
+                                                                         kerrosala)
                                         ; 2.1.2
-                                                                  (when (every? not-empty [kerrosala kayttotarkoitus])
-                                                                    {:kerrosalatieto {:kerrosala {:pintaAla kerrosala
-                                                                                                  :paakayttotarkoitusKoodi kayttotarkoitus}}}))}})))
+                                                            :kerrosalatieto (when (every? not-empty [kerrosala kayttotarkoitus])
+                                                                              {:kerrosala {:pintaAla kerrosala
+                                                                                           :paakayttotarkoitusKoodi kayttotarkoitus}})}}})))
 
 (defn- get-toimenpidefull [{{:keys [toimenpiteet kaytettykerrosala kayttotarkoitusKoodi]} :data :as toimenpide}]
   (let [{:keys [kayttotarkoitusKoodi pintaAla]} kaytettykerrosala
