@@ -8,22 +8,26 @@
   {:Popast
    {:toimituksenTiedot (toimituksen-tiedot application lang)}})
 
-(defn- get-toimenpide [{toimenpide :toimenpiteet} common]
-  (merge common {:kuvausKoodi (:Toimenpide toimenpide)
-                 :tavoitetilatieto {:Tavoitetila {:paakayttotarkoitusKoodi (:kayttotarkoitus toimenpide)
-                                                  :asuinhuoneitojenLkm (:huoneistoja toimenpide)
-                                                  :rakennuksenKerrosluku (:kerroksia toimenpide)
-                                                  :kokonaisala (:kokonaisala toimenpide)
-                                                  ; 2.1.3+
-                                                  :kerrosala (:kerrosala toimenpide)
-                                                  ; 2.1.2
-                                                  :kerrosalatieto {:kerrosala {:pintaAla (:kerrosala toimenpide)
-                                                                               :paakayttotarkoitusKoodi (:kayttotarkoitus toimenpide)}}}}}))
+(defn- get-toimenpide [{toimenpide :toimenpiteet} kerrosalatieto]
+  (let [{:keys [kerrosala kayttotarkoitus]} toimenpide]
+    (merge kerrosalatieto {:kuvausKoodi (:Toimenpide toimenpide)
+                           :tavoitetilatieto {:Tavoitetila (merge {:paakayttotarkoitusKoodi (:kayttotarkoitus toimenpide)
+                                                                   :asuinhuoneistojenLkm (:huoneistoja toimenpide)
+                                                                   :rakennuksenKerrosluku (:kerroksia toimenpide)
+                                                                   :kokonaisala (:kokonaisala toimenpide)}
+                                        ; 2.1.3+
+                                                                  (when-not (ss/blank? kerrosala)
+                                                                    {:kerrosala kerrosala})
+                                        ; 2.1.2
+                                                                  (when (every? not-empty [kerrosala kayttotarkoitus])
+                                                                    {:kerrosalatieto {:kerrosala {:pintaAla kerrosala
+                                                                                                  :paakayttotarkoitusKoodi kayttotarkoitus}}}))}})))
 
-(defn- get-toimenpidefull [{{toimenpiteet :toimenpiteet kaytettykerrosala :kaytettykerrosala} :data :as toimenpide}]
-  (let [kaytettykerrosala-canonical (when-not (ss/blank? (:pintaAla kaytettykerrosala))
-                                      {:kerrosalatieto {:kerrosala {:pintaAla (:pintaAla kaytettykerrosala)
-                                                                    :paakayttotarkoitusKoodi (:kayttotarkoitusKoodi kaytettykerrosala)}}})]
+(defn- get-toimenpidefull [{{:keys [toimenpiteet kaytettykerrosala kayttotarkoitusKoodi]} :data :as toimenpide}]
+  (let [{:keys [kayttotarkoitusKoodi pintaAla]} kaytettykerrosala
+        kaytettykerrosala-canonical (when (every? not-empty [kayttotarkoitusKoodi pintaAla])
+                                      {:kerrosalatieto {:kerrosala {:pintaAla pintaAla
+                                                                    :paakayttotarkoitusKoodi kayttotarkoitusKoodi}}})]
       {:Toimenpide (get-toimenpide (:data toimenpide) kaytettykerrosala-canonical)}))
 
 
@@ -42,21 +46,21 @@
         lisatiedot (:data (first (:lisatiedot documents-by-type)))
         hanke (:data (first (:hankkeen-kuvaus documents-by-type)))]
     (assoc-in
-      root
-      poikkeamisasia-path
-      {:kasittelynTilatieto (get-state application)
-       :kuntakoodi (:municipality application)
-       :luvanTunnistetiedot (lupatunnus application)
-       :osapuolettieto (osapuolet application documents-by-type lang)
-       :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents-by-type) application)
-       :toimenpidetieto (get-toimenpiteet (:rakennushanke documents-by-type))
-       :lausuntotieto (get-statements (:statements application))
-       :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
-                                                     "ruotsi"
-                                                     "suomi")}}
-       :kayttotapaus kayttotapaus
-       :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (:poikkeamat hanke)
-                                   kuvaus-avain (:kuvaus hanke)}}})))
+     root
+     poikkeamisasia-path
+     {:kasittelynTilatieto (get-state application)
+      :kuntakoodi (:municipality application)
+      :luvanTunnistetiedot (lupatunnus application)
+      :osapuolettieto (osapuolet application documents-by-type lang)
+      :rakennuspaikkatieto (get-bulding-places (:poikkeusasian-rakennuspaikka documents-by-type) application)
+      :toimenpidetieto (get-toimenpiteet (:rakennushanke documents-by-type))
+      :lausuntotieto (get-statements (:statements application))
+      :lisatietotieto {:Lisatieto {:asioimiskieli (if (= lang "se")
+                                                    "ruotsi"
+                                                    "suomi")}}
+      :kayttotapaus kayttotapaus
+      :asianTiedot {:Asiantiedot {:vahainenPoikkeaminen (:poikkeamat hanke)
+                                  kuvaus-avain (:kuvaus hanke)}}})))
 
 (defmulti poikkeus-application-to-canonical (fn [application lang] (:permitSubtype application)))
 
