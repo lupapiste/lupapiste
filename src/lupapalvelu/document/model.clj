@@ -224,6 +224,18 @@
     (some->> (inspect-repeating-for-duplicate-rows data fields-to-validate)
              (mapcat build-row-result))))
 
+(defmethod validate-element :poikkeus-olemassa-olevat-rakennukset
+  [info data path element]
+  (let [fields (-> data
+                   tools/unwrapped
+                   (select-keys [:pintaAla :kayttotarkoitusKoodi]))
+        fields (filter #(ss/blank? (last %)) fields)]
+    (when (= (count fields) 1)
+      (let [field-key (ffirst fields)]
+        {:path     (-> (map keyword path) (concat [field-key]))
+        :element  (find-by-name (:body element) [field-key])
+        :document (:document info)
+        :result   [:tip "illegal-value:required"]}))))
 
 ;;
 ;; Neue api:
