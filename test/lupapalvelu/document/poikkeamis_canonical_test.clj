@@ -356,7 +356,7 @@
         (fact "paakayttotarkoitusKoodi" (:paakayttotarkoitusKoodi kerrosala) => "941 talousrakennukset")))
 
     (facts "laajennus"
-      (let [laajennus-tp (-> [laajennus] tools/unwrapped get-toimenpiteet first :Toimenpide)
+           (let [laajennus-tp (-> [laajennus] tools/unwrapped get-toimenpiteet first :Toimenpide)
             kerrosalatieto (:kerrosalatieto laajennus-tp) => truthy
             kerrosala (:kerrosala kerrosalatieto) => truthy
             tavoitetilatieto (:tavoitetilatieto laajennus-tp) => truthy
@@ -376,8 +376,17 @@
         (fact "pinta-ala" (:pintaAla tavoite-kerrosala) => "25")
         (fact "tavoite-kerrosala" (:kerrosala Tavoitetila) => "25") ; 2.1.3
         (fact "paakayttotarkoitusKoodi" (:paakayttotarkoitusKoodi tavoite-kerrosala) => "941 talousrakennukset")))
-
-    ))
+    (facts "laajennus without kerrosala"
+           (let [laajennus-kerrosala (update-in laajennus
+                                                [:data :toimenpiteet :kerrosala :value]
+                                                (constantly ""))
+                 toimenpide (-> [laajennus-kerrosala] tools/unwrapped get-toimenpiteet first :Toimenpide)
+                 kerrosalatieto (:kerrosalatieto toimenpide) => truthy
+                 kerrosala (:kerrosala kerrosalatieto) => truthy
+                 tavoitetilatieto (:tavoitetilatieto toimenpide) => truthy
+                 Tavoitetila (:Tavoitetila tavoitetilatieto) => truthy]
+             (:kerrosala Tavoitetila) => falsey
+             (:kerrosalatieto Tavoitetila) => falsey))))
 
 
 ;Suunnitelutarveratkaisu
