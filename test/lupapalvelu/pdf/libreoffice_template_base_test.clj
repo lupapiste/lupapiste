@@ -284,8 +284,8 @@
                                                           :stamped        false,
                                                           :user
                                                                           {:role      "authority",
-                                                                           :lastName  "Sällström",
-                                                                           :firstName "Nils",
+                                                                           :lastName  "Lastname4",
+                                                                           :firstName "fristname4",
                                                                            :username  "user4@example.com",
                                                                            :id        "666"},
                                                           :fileId         "444"},

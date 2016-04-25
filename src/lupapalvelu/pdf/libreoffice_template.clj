@@ -109,9 +109,7 @@
     (filter (fn [att] (and (= type (keyword (get-in att [:target :type]))) (= id (get-in att [:target :id])))) (:attachments application))))
 
 (defn get-organization-name [application lang]
-  (let [organization (org/get-organization (:organization application))
-        default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
-    (get-in organization [:name lang] default)))
+  (org/get-organization-name (:organization application) lang))
 
 (defn create-libre-doc [template file fields]
   (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]

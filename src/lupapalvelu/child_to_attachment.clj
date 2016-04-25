@@ -70,10 +70,10 @@
   (let [pdf-file (File/createTempFile (str "pdf-generation-" (name lang) "-" (name child-type) "-") ".pdf")
         fis (FileOutputStream. pdf-file)
         attachment-id (get-child-attachment-id app child-type id)]
-    (cond
-      (= child-type :statements) (libre-client/generate-statment-pdfa-to-file! app id lang pdf-file)
-      (= child-type :verdicts)   (libre-client/generate-verdict-pdfa app id 0 lang pdf-file)
-      :else (pdf-export/generate-pdf-with-child app child-type id lang fis))
+    (case child-type
+      :statements (libre-client/generate-statment-pdfa-to-file! app id lang pdf-file)
+      :verdicts   (libre-client/generate-verdict-pdfa app id 0 lang pdf-file)
+      (pdf-export/generate-pdf-with-child app child-type id lang fis))
 
     (build-attachment user app child-type id lang pdf-file attachment-id)))
 

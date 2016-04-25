@@ -18,11 +18,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.user :as user]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
-            [lupapalvelu.child-to-attachment :as child-to-attachment]
-            [clojure.java.io :as io]
-            [lupapalvelu.attachment :as attachment])
-  (:import (java.io File)))
+            [lupapalvelu.child-to-attachment :as child-to-attachment]))
 
 ;;
 ;; Authority Admin operations
