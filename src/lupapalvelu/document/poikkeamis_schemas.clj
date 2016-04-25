@@ -10,6 +10,7 @@
                            :deny-removing-last-document true
                            :repeating false}
                     :body [{:name "kaytettykerrosala" :type :group
+                            :validator :poikkeus-olemassa-olevat-rakennukset
                             :body [{:name "pintaAla" :type :string :size :s :unit :m2 :subtype :number}
                                    {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname :size :l
                                     :body usages/rakennuksen-kayttotarkoitus}]}
@@ -17,7 +18,8 @@
                             :type :group
                             :repeating false
                             :approvable true
-                            :body [{:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l :required true
+                            :body [{:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l
+                                    :required true
                                     :body usages/rakennuksen-kayttotarkoitus}
                                    {:name "Toimenpide" :type :select :sortBy :displayname :size :l :required true
                                     :body [{:name "uusi"}
@@ -31,7 +33,7 @@
                                            {:name "loma-asunnon muuttaminen vakituiseksi"}]}
                                    {:name "huoneistoja" :type :string :subtype :number :size :s}
                                    {:name "kerroksia" :type :string :subtype :number :size :s}
-                                   {:name "kerrosala" :type :string :subtype :number :unit :m2 :size :s :required true}
+                                   {:name "kerrosala" :type :string :subtype :number :unit :m2 :size :s}
                                    {:name "kokonaisala" :type :string :subtype :number :unit :m2 :size :s}]}]})
 
 (def suunnittelutarveratkaisun-lisaosa {:info {:name "suunnittelutarveratkaisun-lisaosa"

@@ -411,7 +411,7 @@
       (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
 
     (when (and password (not (security/valid-password? password)))
-      (fail! :password-too-short :desc "password specified, but it's not valid"))
+      (fail! :error.password.minlengt :desc "password specified, but it's not valid"))
 
     (when (and organization-id (not (organization/get-organization organization-id)))
       (fail! :error.organization-not-found))
