@@ -117,7 +117,7 @@
     (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:x "authorityAdmin"}} {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => truthy))
 
   (fact "invalid passwords are rejected"
-    (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => (partial expected-failure? :password-too-short)
+    (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => (partial expected-failure? :error.password.minlengt)
     (provided (security/valid-password? "z") => false))
 
   (fact "valid passwords are ok"
