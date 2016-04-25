@@ -15,7 +15,7 @@
 
         <div class="tree-content"></div>
 
-        <div class="tree-nav" data-bind="if: $data.goBack && $data.goStart && $data.stack && data.stack().length" >
+        <div class="tree-nav" data-bind="if: $data.goBack && $data.goStart && $data.stack && $data.stack().length" >
           <button class="tree-back secondary" data-bind="click: goBack">
               <i class="lupicon-chevron-left"></i>
               <span data-bind="ltext: 'tree.back'"></span>
