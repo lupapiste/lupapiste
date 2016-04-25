@@ -3,38 +3,38 @@
   <body>
 
     <section id="tree-template" class="page" style="display: none;">
-    
+
       <div class="default-tree-template">
-        
+
         <div class="tree-title">
           <span style="margin-left: 10px;" data-bind="foreach: stack">
             <span data-bind="visible: $index"> / </span>
             <span data-bind="text: text"></span>
           </span>
         </div>
-        
+
         <div class="tree-content"></div>
-        
-        <div class="tree-nav">
-          <button class="tree-back secondary" data-bind="click: goBack, enable: stack().length > 0">
+
+        <div class="tree-nav" data-bind="if: $data.goBack && $data.goStart && $data.stack && data.stack().length" >
+          <button class="tree-back secondary" data-bind="click: goBack">
               <i class="lupicon-chevron-left"></i>
               <span data-bind="ltext: 'tree.back'"></span>
           </button>
-          <button class="tree-start secondary" data-bind="click: goStart, enable: stack().length > 1">
+          <button class="tree-start secondary" data-bind="click: goStart">
               <i class="lupicon-chevron-start"></i>
               <span data-bind="ltext: 'tree.start'"></span>
           </button>
         </div>
-        
+
         <div class="tree-link btn function">
           <span data-bind="text: text"></span>
           <i class="lupicon-chevron-right"></i>
         </div>
-        
+
         <div class="tree-last">
           <span data-bind="text: text"></span>
         </div>
-        
+
       </div>
 
     </section>
