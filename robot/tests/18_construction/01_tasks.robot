@@ -252,8 +252,19 @@ Sonja comes back and finalizes YA review
   Edit YA katselmus  Aloituskatselmus  14.4.2016  Some Sonja  Description is mandatory for YA reviews.
   # TODO: Sending requires fully formed application
   #Finalize review
-  [Teardown]  Logout
 
+Deleting R verdict does not delete its done reviews
+  Open application  ${appname}  ${propertyId}
+  Open tab  verdict
+  Scroll to  h2 span[data-test-id=given-verdict-id-1] ~ i
+  Click element  jquery=h2 span[data-test-id=given-verdict-id-1] ~ i
+  Confirm  dynamic-yes-no-confirm-dialog
+  Open tab  tasks
+  Wait Until  Javascript?  $("[data-test-type=task-katselmus]:visible").length === 5
+  Review row check  0  Aloituskokous  1.5.2016  Sonja Sibbo  Lopullinen  Kyllä
+  Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
+  Review row check  2  Aloituskokous  22.5.2016  Ronja Rules  Lopullinen  ${EMPTY}
+  [Teardown]  Logout
 
 
 

@@ -1262,6 +1262,11 @@ Test id should contain
   [Arguments]  ${id}  ${text}
   Wait until  Element should contain  jquery=[data-test-id=${id}]  ${text}
 
+Javascript?
+  [Arguments]  ${expression}
+  ${result}=  Execute JavaScript  return ${expression};
+  Should be true  ${result}
+
 
 # Frontend error log
 
