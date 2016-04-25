@@ -1,5 +1,8 @@
 (ns lupapalvelu.authorization
-  (:require [lupapalvelu.user :as usr]))
+  (:require [lupapalvelu.user :as usr]
+            [schema.core :refer [defschema] :as sc]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]))
 
 ;;
 ;; Roles
@@ -22,6 +25,38 @@
                          :export default-authz-reader-roles
                          :command default-authz-writer-roles
                          :raw default-authz-writer-roles})
+
+;;
+;; Schema
+;;
+
+(defschema Invite
+  {(sc/optional-key :role)           (apply sc/enum all-authz-roles)
+   (sc/optional-key :path)           (sc/maybe sc/Str) ;; TODO: required field
+   :email                            ssc/Email
+   :application                      sc/Str ;; TODO: app-id schema
+   :created                          ssc/Timestamp
+   :inviter                          usr/SummaryUser
+   :documentName                     (sc/maybe sc/Str)
+   :documentId                       (sc/if ss/blank? ssc/BlankStr ssc/ObjectIdStr) ;; TODO: Remove strings "null"
+   :user                             usr/SummaryUser
+   (sc/optional-key :title)          sc/Bool
+   :text                             (sc/maybe sc/Str)})
+
+(defschema Auth
+  {:id                               (sc/if ss/in-lower-case? ssc/Username ssc/ObjectIdStr) ;; TODO: remove blank ids
+   :username                         ssc/Username
+   :firstName                        sc/Str
+   :lastName                         sc/Str
+   (sc/optional-key :name)           sc/Str
+   (sc/optional-key :y)              ssc/FinnishY   ;; TODO: remove y-tunnus with FI-prefix
+   :role                             (sc/if ss/blank? ssc/BlankStr (apply sc/enum  all-authz-roles)) ;; TODO: Remove blanks
+   (sc/optional-key :type)           (apply sc/enum :company all-authz-roles)
+   (sc/optional-key :unsubscribed)   sc/Bool
+   (sc/optional-key :statementId)    ssc/ObjectIdStr
+   (sc/optional-key :invite)         (sc/if :email Invite {:user {:id ssc/ObjectIdStr}}) ;; TODO: only on schema for invite
+   (sc/optional-key :inviteAccepted) ssc/Timestamp
+   (sc/optional-key :inviter)        (sc/conditional map? usr/SummaryUser ss/blank? ssc/BlankStr string? sc/Str)}) ;; TODO: only SummaryUser
 
 ;;
 ;; Auth utils
