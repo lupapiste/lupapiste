@@ -4297,7 +4297,7 @@
 "suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.viemarijohto" "fi" "Rakennuspaikalle tai alueella on viemärijohto"
 "suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.viemarijohto" "sv" "Det finns avloppsledning till byggplats eller i området"
 "suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.yleiskaavaa" "fi" "Rakennuspaikalla on yleiskaava"
-"suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.yleiskaavaa" "sv" "Dset finns en generalplan på byggplatsen"
+"suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.yleiskaavaa" "sv" "Det finns en generalplan på byggplatsen"
 "suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri._group_label" "fi" "Luonto ja kulttuuri"
 "suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri._group_label" "sv" "Natur och kultur"
 "suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri.kulttuurisesti_merkittava" "fi" "Rakennuspaikka on kulttuurihistoriallisesti merkittävällä alueella tai arvokkaassa maisemassa"
