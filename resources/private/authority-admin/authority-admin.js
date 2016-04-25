@@ -436,16 +436,10 @@
 
   hub.onPageLoad("calendar-admin", function() {
     if (!calendarViewModel) {
-      calendarViewModel = calendarView.create($("#calendar-admin .calendar-table"));
+      var component = $("#calendar-admin .calendar-table");
+      calendarViewModel = calendarView.create(component, new LUPAPISTE.CalendarService());
     }
-    var calendarId = pageutil.subPage();
-    ajax.query("calendar", {calendarId: calendarId})
-      .success(function(data) {
-        calendarViewModel.init({ source: data.calendar,
-                                 opts: { clickTimeline: resourceCalendarsModel.newReservationSlot }
-                               });
-      })
-      .call();
+    hub.send("calendarService::fetchCalendar", {id: pageutil.subPage()});
   });
 
   $(function() {

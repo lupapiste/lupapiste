@@ -248,6 +248,9 @@
 (defn to-xml-datetime [^Long timestamp]
   (format-utc-timestamp timestamp "YYYY-MM-dd'T'HH:mm:ss"))
 
+(defn to-xml-local-datetime [^Long timestamp]
+  (format-timestamp-local-tz timestamp "YYYY-MM-dd'T'HH:mm:ss"))
+
 (defn to-xml-date-from-string [^String date-as-string]
   (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]

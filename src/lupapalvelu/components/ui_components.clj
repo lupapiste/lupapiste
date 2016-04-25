@@ -377,7 +377,7 @@
              :css ["oir.css"]}
 
    :calendar-view {:depends [:common-html]
-                   :js ["calendar-view.js"]
+                   :js ["calendar-view.js" "calendar-service.js"]
                    :html ["calendar-view.html"]}
 
    :authority-admin-app {:depends []

@@ -3,20 +3,9 @@ LUPAPISTE.ResourceCalendarsModel = function () {
 
   var self = this;
 
-  var dummyReservationSlotsFixture = function() {
-    var slots = [],
-        startOfWeek = moment().startOf('isoWeek');
-    slots.push({ startTime: startOfWeek.clone().isoWeekday(2).hour(9).toISOString(),
-                 status: "available",
-                 duration: "PT1H" });
-    return slots;
-  };
-
   function NewReservationSlotModel() {
     var self = this;
 
-    self.weekday = ko.observable();
-    self.weekdayStr = ko.observable();
     self.startTime = ko.observable();
     self.commandName = ko.observable();
     self.command = null;
@@ -26,23 +15,26 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     self.init = function(params) {
       self.commandName(params.commandName);
       self.command = params.command;
-      self.weekday(util.getIn(params, ["source", "weekday"], null));
-      self.weekdayStr(util.getIn(params, ["source", "weekday", "str"], null));
       self.startTime(util.getIn(params, ["source", "startTime"], ""));
     };
   };
 
   self.newReservationSlotModel = new NewReservationSlotModel();
-  self.newReservationSlot = function (weekday, time) {
+  hub.subscribe("calendarView::timelineSlotClicked", function(event) {
+    var weekday = event.weekday;
+    var hour = event.hour;
+    var minutes = event.minutes;
+    var startTime = moment(weekday.startOfDay).hour(hour).minutes(minutes);
     self.newReservationSlotModel.init({
-      source: { startTime: time, weekday: weekday },
+      source: { startTime: startTime },
       commandName: 'create',
       command: function() {
-        LUPAPISTE.ModalDialog.close();
+        var slots = [{start: startTime.valueOf(), end: moment(startTime).add(30, 'm').valueOf()}];
+        hub.send("calendarService::createCalendarSlots", {calendarId: weekday.calendarId, slots: slots, modalClose: true});
       }
     });
     self.openNewReservationSlotDialog();
-  };
+  });
 
   self.openNewReservationSlotDialog = function() {
     LUPAPISTE.ModalDialog.open("#dialog-new-slot");
@@ -101,17 +93,14 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     self.editCalendarModel.init({
       source: this,
       commandName: "add",
-      command: function(name, organization) {
-        /*ajax
-          .command("update-res-link", {index: index, url: url, nameFi: nameFi, nameSv: nameSv})
+      command: function(id, name, organization) {
+        ajax
+          .command("create-calendar", {name: name, organization: organization})
           .success(function() {
             self.load();
             LUPAPISTE.ModalDialog.close();
           })
-          .call(); */
-
-        // DUMMY DATA EDIT
-        self.items.push({ name: name, organization: organization });
+          .call();
 
         LUPAPISTE.ModalDialog.close();
       }
@@ -148,5 +137,4 @@ LUPAPISTE.ResourceCalendarsModel = function () {
       })
       .call();
   };
-
 };

@@ -4,13 +4,28 @@
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [schema.core :as sc :refer [defschema]]
             [sade.http :as http]
-            [sade.env :as env]))
+            [sade.env :as env])
+  (:import (org.joda.time DateTime)))
 
 (defschema FrontendCalendar
   {:id            sc/Int
    :name          sc/Str
-   :organization  sc/Str
-   :slots        [sc/Any]})
+   :organization  sc/Str})
+
+(defschema FrontendCalendarSlot
+  {:id            sc/Int
+   :startTime     sc/Int
+   :endTime       sc/Int
+   :status        (sc/enum :available :reserved)})
+
+(def LocalDateTimeRange
+  {:start DateTime
+   :end   DateTime})
+
+(defschema BackendReservationSlot
+  {:time     LocalDateTimeRange
+   :serviceClassificationCode sc/Str
+   :capacity sc/Int})
 
 (defn ->FrontendCalendar [cal]
   (-> cal
@@ -29,12 +44,27 @@
                    :basic-auth       [(env/value :ajanvaraus :username)
                                       (env/value :ajanvaraus :password)]} opts))))
 
-(defn- api-query [action]
-  (api-call http/get action {}))
+(defn- api-query
+  ([action]
+    (api-call http/get action {}))
+  ([action params]
+    (api-call http/get action {:query-params params})))
+
+(defn- api-post-command [action request-body]
+  (api-call http/post action {:body (clj-http.client/json-encode request-body)
+                              :content-type :json}))
 
 (defn- api-put-command [action request-body]
   (api-call http/put action {:body (clj-http.client/json-encode request-body)
                              :content-type :json}))
+
+(defn- ->BackendReservationSlots [slots]
+  (map (fn [s]
+         (let [{start :start end :end} s]
+           {:time {:start (sade.util/to-xml-local-datetime start)
+                   :end (sade.util/to-xml-local-datetime end)}
+            :serviceClassificationCode "SCC123"
+            :capacity 1})) slots))
 
 (defquery calendar
   {:parameters [calendarId]
@@ -56,10 +86,37 @@
       (do (error response)
           (fail :resources.backend-error)))))
 
+(defcommand create-calendar
+  {:user-roles #{:authorityAdmin}}
+  [{{:keys [name organization]} :data}]
+  (let [url      "/api/resources/"
+        response (api-post-command url {:name             name
+                                        :organizationCode organization})]
+    (ok :result (:body response))))
+
 (defcommand update-calendar
   {:user-roles #{:authorityAdmin}}
   [{{:keys [calendarId name organization]} :data}]
   (let [url (str "/api/resources/" calendarId)
         response (api-put-command url {:name             name
                                        :organizationCode organization})]
+    (ok :result (:body response))))
+
+(defquery calendar-slots
+  {:user-roles #{:authorityAdmin}}
+  [{{:keys [calendarId year week]} :data}]
+  (let [url      (str "/api/reservationslots/calendar/" calendarId)
+        response (api-query url {:year year
+                                 :week week})]
+    (if (= 200 (:status response))
+      (ok :slots (:body response))
+      (do (error response)
+          (fail :resources.backend-error)))))
+
+(defcommand create-calendar-slots
+  {:user-roles #{:authorityAdmin}}
+  [{{:keys [calendarId slots]} :data}]
+  (let [url      (str "/api/reservationslots/calendar/" calendarId)
+        be-slots (->BackendReservationSlots slots)
+        response (api-post-command url be-slots)]
     (ok :result (:body response))))
