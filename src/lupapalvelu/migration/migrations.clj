@@ -2006,6 +2006,51 @@
                  content-type (mime/mime-type filename)]]
         (mongo/update-n :fs.files {:_id id} {$set {:contentType content-type}})))))
 
+(defn remove-FI-prefix-from-auth-y [{company-y :y :as auth}]
+  (if company-y
+    (assoc auth :y (ss/replace company-y "FI" ""))
+    auth))
+
+(defmigration sanitize-auth-company-y
+  {:apply-when (pos? (mongo/count :applications {:auth.y #"FI"}))}
+  (update-applications-array :auth remove-FI-prefix-from-auth-y {:auth.y #"FI"}))
+
+(defn change-empty-role-as-reader [{role :role :as auth}]
+  (if (= role "")
+    (assoc auth :role "reader")
+    auth))
+
+(defmigration sanitize-auth-role
+  {:apply-when (pos? (mongo/count :applications {:auth.role ""}))}
+  (update-applications-array :auth change-empty-role-as-reader {:auth.role ""}))
+
+(defn remove-auth-inviter-nils [{inviter :inviter :as auth}]
+  (if (nil? inviter)
+    (dissoc auth :inviter)
+    auth))
+
+(defmigration sanitize-auth-inviter
+  {:apply-when (pos? (mongo/count :applications {:auth.inviter {$type 10}}))}
+  (update-applications-array :auth remove-auth-inviter-nils {:auth.inviter {$type 10}}))
+
+(defn remove-auth-invite-documentId-null-strings [{{document-id :documentId} :invite :as auth}]
+  (if (= document-id "null")
+    (assoc-in auth [:invite :documentId] nil)
+    auth))
+
+(defmigration sanitize-auth-invite-documentId
+  {:apply-when (pos? (mongo/count :applications {:auth.invite.documentId "null"}))}
+  (update-applications-array :auth remove-auth-invite-documentId-null-strings {:auth.invite.documentId "null"}))
+
+(defn ensure-auth-invite-has-path [{invite :invite :as auth}]
+  (if (and (:email invite) (not (contains? invite :path)))
+    (assoc-in auth [:invite :path] nil)
+    auth))
+
+(defmigration sanitize-auth-invite-path
+  {:apply-when (pos? (mongo/count :applications {:auth {$elemMatch {:invite.email {$exists true} :invite.path {$exists false}}}}))}
+  (update-applications-array :auth ensure-auth-invite-has-path {:auth {$elemMatch {:invite.email {$exists true} :invite.path {$exists false}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
