@@ -342,9 +342,8 @@
                                                                 building-canonical (util/assoc-when
                                                                                     building-canonical
                                                                                     :muuTunnustieto (when-let [op-id (:operationId building)]
-                                                                                                      (list {:MuuTunnus
-                                                                                                             {:tunnus op-id
-                                                                                                              :sovellus "toimenpideId"}}))
+                                                                                                      [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                                                                       {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
                                                                                     :rakennuksenSelite (:description building)) ; v2.2.0
                                                                 ]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
