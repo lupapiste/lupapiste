@@ -58,6 +58,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   function defaultInputClasses() {
     var typeDefaults = {select: "form-input combobox",
+                        string: "form-input",
                         text: "form-input textarea",
                         "inline-string": "form-input inline",
                         "localized-string": "form-string",

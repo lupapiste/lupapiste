@@ -231,11 +231,13 @@
                    (select-keys [:pintaAla :kayttotarkoitusKoodi]))
         fields (filter #(ss/blank? (last %)) fields)]
     (when (= (count fields) 1)
-      (let [field-key (ffirst fields)]
-        {:path     (-> (map keyword path) (concat [field-key]))
-        :element  (find-by-name (:body element) [field-key])
-        :document (:document info)
-        :result   [:tip "illegal-value:required"]}))))
+      (let [field-key (ffirst fields)
+            path      (concat (map keyword path) [field-key])
+            element   (find-by-name (:body element) [field-key])]
+        {:path     path
+         :element  (assoc element :locKey (resolve-element-loc-key info element path))
+         :document (:document info)
+         :result   [:tip "illegal-value:required"]}))))
 
 ;;
 ;; Neue api:

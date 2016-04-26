@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
             [clojure.java.io :refer :all]
+            [net.cgrand.enlive-html :as enlive]
             [sade.xml :as xml]
             [sade.strings :as ss]
             [sade.common-reader :as cr]
@@ -96,7 +97,14 @@
                     (xml/get-text rakennus [:rakennustunnus :rakennuksenSelite]) => "A: kerrostalo-rivitalo-kuvaus"))
 
                 (fact {:midje/description (str "Building ID includes operation ID of " (name op-tag))}
-                  (xml/get-text rakennus [:rakennustunnus :MuuTunnus :tunnus]) =not=> ss/blank?)))))
+                  (let [ids (xml/select rakennus [:rakennustunnus :MuuTunnus])
+                        toimenpide-id (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "toimenpideId"))]))
+                        lupapiste-id  (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "Lupapiste"))]))]
+                    (fact "with sovellus=toimenpideId"
+                      (xml/get-text toimenpide-id [:MuuTunnus :tunnus]) =not=> ss/blank?)
+
+                    (fact "with sovellus=Lupapiste"
+                      (xml/get-text lupapiste-id [:MuuTunnus :tunnus]) =not=> ss/blank?)))))))
 
         (fact "hakija and maksaja parties exist"
           (let [osapuoli-codes (->> (xml/select lp-xml_220 [:osapuolettieto :Osapuoli])
