@@ -327,52 +327,50 @@
     (fact "Building has operation"
       (:operationId building) =not=> s/blank?)
 
-    ;(println building)
+    (upload-attachment-to-target sonja application-id nil true task-id "task") ; Related to task
+    (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
+                                                                                   ".katselmuksen_tai_tarkastuksen_poytakirja"))
 
-       (upload-attachment-to-target sonja application-id nil true task-id "task") ; Related to task
-       (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
-                                                                                      ".katselmuksen_tai_tarkastuksen_poytakirja"))
+    (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.tila.tila" "osittainen"]]) => ok?
 
-       (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.tila.tila" "osittainen"]]) => ok?
+    (fact "Review done fails as missing required info for KRYSP transfer"
+      (command sonja :review-done :id application-id :taskId task-id :lang "fi") => (partial expected-failure? :error.missing-parameters))
 
-       (fact "Review done fails as missing required info for KRYSP transfer"
-         (command sonja :review-done :id application-id :taskId task-id :lang "fi") => (partial expected-failure? :error.missing-parameters))
+    (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]
+                                                                          ["katselmus.pitoPvm" "12.04.2016"]
+                                                                          ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?
 
-       (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]
-                                                                             ["katselmus.pitoPvm" "12.04.2016"]
-                                                                             ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?
+    (fact "After filling required review data, transfer is ok"
+      (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
 
-       (fact "After filling required review data, transfer is ok"
-         (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
+    (final-xml-validation
+      (query-application sonja application-id)
+      0
+      2 ; Two attachments were uploaded above
+      2
+      (fn [xml]
+        (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
+              katselmuksenRakennus (xml/select1 xml [:katselmuksenRakennustieto :KatselmuksenRakennus])
+              liitetieto (xml/select1 katselmus [:liitetieto])]
 
-       (final-xml-validation
-         (query-application sonja application-id)
-         0
-         2 ; Two attachments were uploaded above
-         2
-         (fn [xml]
-             (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
-                   katselmuksenRakennus (xml/select1 xml [:katselmuksenRakennustieto :KatselmuksenRakennus])
-                   liitetieto (xml/select1 katselmus [:liitetieto])]
+          (fact "Operation ID is transferred"
+            (let [ids (xml/select katselmuksenRakennus [:MuuTunnus])
+                  toimenpide-id (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "toimenpideId"))]))
+                  lupapiste-id  (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "Lupapiste"))]))]
 
-               (fact "Operation ID is transferred"
-                 (let [ids (xml/select katselmuksenRakennus [:MuuTunnus])
-                      toimenpide-id (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "toimenpideId"))]))
-                      lupapiste-id  (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "Lupapiste"))]))]
+              (fact "with sovellus=toimenpideId"
+                (xml/get-text toimenpide-id [:MuuTunnus :tunnus]) =not=> s/blank?)
 
-                   (fact "with sovellus=toimenpideId"
-                     (xml/get-text toimenpide-id [:MuuTunnus :tunnus]) =not=> s/blank?)
+              (fact "with sovellus=Lupapiste"
+                (xml/get-text lupapiste-id [:MuuTunnus :tunnus]) =not=> s/blank?)))
 
-                   (fact "with sovellus=Lupapiste"
-                     (xml/get-text lupapiste-id [:MuuTunnus :tunnus]) =not=> s/blank?)))
-
-               (xml/get-text katselmus :osittainen) => "osittainen"
-               (xml/get-text liitetieto :kuvaus) => "Katselmuksen p\u00f6yt\u00e4kirja"
-               (xml/get-text liitetieto ::tyyppi) => "katselmuksen_tai_tarkastuksen_poytakirja"
-               (xml/get-text katselmuksenRakennus :rakennusnro) => (:localShortId building)
-               (xml/get-text katselmuksenRakennus :jarjestysnumero) => (:index building)
-               (xml/get-text katselmuksenRakennus :kiinttun) => (:propertyId building)
-               (xml/get-text katselmuksenRakennus :valtakunnallinenNumero) => (:nationalId building))))))
+          (xml/get-text katselmus :osittainen) => "osittainen"
+          (xml/get-text liitetieto :kuvaus) => "Katselmuksen p\u00f6yt\u00e4kirja"
+          (xml/get-text liitetieto ::tyyppi) => "katselmuksen_tai_tarkastuksen_poytakirja"
+          (xml/get-text katselmuksenRakennus :rakennusnro) => (:localShortId building)
+          (xml/get-text katselmuksenRakennus :jarjestysnumero) => (:index building)
+          (xml/get-text katselmuksenRakennus :kiinttun) => (:propertyId building)
+          (xml/get-text katselmuksenRakennus :valtakunnallinenNumero) => (:nationalId building))))))
 
 (fact* "Fully populated katselmus is transferred to the backing system"
 
