@@ -379,6 +379,18 @@
 (permit/register-function permit/VVVL :verdict-krysp-validator simple-verdicts-validator)
 (permit/register-function permit/KT :verdict-krysp-validator outlier-verdicts-validator)
 
+(defn- ->lp-tunnus [asia]
+  (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
+      (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
+
+(defn- ->kuntalupatunnus [asia]
+  (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
+      (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
+
+(defn ->backend-ids [xml]
+  (->> (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)
+       (map ->kuntalupatunnus)
+       (remove ss/blank?)))
 
 ;; Reads the verdicts
 ;; Arguments:
@@ -390,7 +402,7 @@
   [xml ->function]
   (map
     (fn [asia]
-      (let [verdict-model {:kuntalupatunnus (common/->kuntalupatunnus asia)}
+      (let [verdict-model {:kuntalupatunnus (->kuntalupatunnus asia)}
             verdicts      (->> asia
                            (->function)
                            (cr/cleanup)
@@ -466,7 +478,7 @@
         kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
         asiat (enlive/select xml-no-ns common/case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
-        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (common/->kuntalupatunnus %)) %) asiat)]
+        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
     (when (pos? (count asiat-with-kuntalupatunnus))
       ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
       ;; Log an error if there were many. Use the first one anyway.
@@ -502,8 +514,8 @@
             hakijat (filter #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
 
         (-> (merge
-              {:id                          (common/->lp-tunnus asia)
-               :kuntalupatunnus             (common/->kuntalupatunnus asia)
+              {:id                          (->lp-tunnus asia)
+               :kuntalupatunnus             (->kuntalupatunnus asia)
                :municipality                municipality
                :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)

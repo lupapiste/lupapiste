@@ -56,9 +56,14 @@
 ; field type validation
 
 (facts "dates"
-  (validate-field {} {:type :date} "abba") => [:warn "illegal-value:date"]
-  (validate-field {} {:type :date} "") => nil
-  (validate-field {} {:type :date} "11.12.2013") => nil)
+       (validate-field {} {:type :date} "abba") => [:warn "illegal-value:date"]
+       (validate-field {} {:type :date} "") => nil
+       (validate-field {} {:type :date} "11.12.2013") => nil
+       (validate-field {} {:type :date} "1.2.2013") => nil
+       (validate-field {} {:type :date} "01.02.2013") => nil
+       (validate-field {} {:type :date} "11.12.13") => [:warn "illegal-value:date"]
+       (validate-field {} {:type :date} "41.12.2013") => [:warn "illegal-value:date"]
+       (validate-field {} {:type :date} "1.13.2013") => [:warn "illegal-value:date"])
 
 (facts "times"
   (validate-field {} {:type :time} "abba") => [:warn "illegal-value:time"]

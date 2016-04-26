@@ -52,14 +52,18 @@
   [v] (if (ss/numeric? v) (Integer/parseInt v 10) v))
 
 (defn to-timestamp
-  "Parses yyyy-mm-dd date and converts to timestamp"
-  [v] (cond
-        (nil? v) nil
-        (re-matches #"^\d{4}-\d{2}-\d{2}Z$" v) (coerce/to-long (parse-date v))
-        (re-matches #"^\d{4}-\d{2}-\d{2}$" v)  (coerce/to-long (parse-date :year-month-day v))
-        (re-matches #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?$" v) (coerce/to-long (parse-datetime v))
-        (re-matches #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z?$" v) (coerce/to-long (parse-datetime v))
-        :else v))
+  "Parses yyyy-mm-dd date and converts to timestamp. Only nils, empty
+  strings and valid dates are accepted (and evaluate it to nil and
+  timestamp respectively). Other arguments trigger assertion."
+  [v]
+  {:post [(or (nil? %) (number? %))]}
+  (cond
+    (empty? v) nil
+    (re-matches #"^\d{4}-\d{2}-\d{2}Z$" v) (coerce/to-long (parse-date v))
+    (re-matches #"^\d{4}-\d{2}-\d{2}$" v)  (coerce/to-long (parse-date :year-month-day v))
+    (re-matches #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?$" v) (coerce/to-long (parse-datetime v))
+    (re-matches #"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z?$" v) (coerce/to-long (parse-datetime v))
+    :else v))
 
 (defn convert-booleans
   "Changes recursively all stringy boolean values to booleans"

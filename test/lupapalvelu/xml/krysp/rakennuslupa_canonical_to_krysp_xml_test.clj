@@ -226,6 +226,7 @@
            :toteamisHetki "1.5.1974"} ;huomautukset
           "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
           "Ei poikkeamisia" ;poikkeamat
+          false ; tiedoksianto
           "2.1.2" ;krysp-version
           "begin-of-link" ;begin-of-link
           {:type "task" :id "123"} ;attachment-target
@@ -251,6 +252,7 @@
                                            :toteamisHetki {:value "1.5.1974"}}
                             :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
                             :poikkeamat {:value "Ei poikkeamisia"}
+                            :tiedoksianto {:value false}
                             :tila {:value "pidetty"}}}}
         user
         "fi"

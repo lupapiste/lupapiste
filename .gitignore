@@ -65,3 +65,4 @@ user.properties
 *.pandoc
 /docs/developerguide.html
 node_modules
+/.ctags

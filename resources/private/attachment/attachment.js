@@ -38,7 +38,7 @@ var attachment = (function() {
         repository.load(applicationId, undefined, undefined, true);
       })
       .call();
-      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVertion"});
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVersion"});
     return false;
   }
 
@@ -180,7 +180,8 @@ var attachment = (function() {
     },
 
     previewUrl: ko.pureComputed(function() {
-      return "/api/raw/view-attachment?attachment-id=" + model.latestVersion().fileId;
+      var fileId = util.getIn(model, ["latestVersion", "fileId"]);
+      return "/api/raw/view-attachment?attachment-id=" + fileId;
     }),
 
     rotete: function(rotation) {
@@ -198,6 +199,7 @@ var attachment = (function() {
     },
 
     goBackToApplication: function() {
+      hub.send("track-click", {category:"Attachments", label: "", event:"backToApplication"});
       model.application.open("attachments");
       if (model.dirty) {
         repository.load(model.application.id(), undefined, undefined, true);
@@ -254,6 +256,12 @@ var attachment = (function() {
     return _.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.application.state)) ?
              lupapisteApp.models.currentUser.isAuthority() || _.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
              true;
+  });
+
+  model.previewTracking = ko.computed(function() {
+    if (model.previewVisible()) {
+      hub.send("track-click", {category:"Attachments", label: "", event:"previewVisible"});
+    }
   });
 
   model.previousAttachmentPresent = ko.pureComputed(function() {
@@ -337,18 +345,19 @@ var attachment = (function() {
       .call();
     }));
 
-
     model.subscriptions.push(model.visibility.subscribe(function(data) {
-      ajax.command("set-attachment-visibility", {
-        id: applicationId,
-        attachmentId: model.id(),
-        value: data
-      })
-      .success(function() {
-        model.dirty = true;
-        hub.send("indicator-icon", {style: "positive"});
-      })
-      .call();
+      if (authorizationModel.ok("set-attachment-visibility")) {
+        ajax.command("set-attachment-visibility", {
+          id: applicationId,
+          attachmentId: model.id(),
+          value: data
+        })
+        .success(function() {
+          model.dirty = true;
+          hub.send("indicator-icon", {style: "positive"});
+        })
+        .call();
+      }
     }));
 
 

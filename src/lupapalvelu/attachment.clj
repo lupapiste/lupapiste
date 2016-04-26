@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+            [com.netflix.hystrix.core :as hystrix]
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -30,7 +31,8 @@
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
-           [java.util.concurrent Executors ThreadFactory]))
+           [java.util.concurrent Executors ThreadFactory]
+           [com.netflix.hystrix HystrixCommandProperties]))
 
 (defn thread-factory []
   (let [security-manager (System/getSecurityManager)
@@ -623,16 +625,20 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
-(defn- create-preview!
+(hystrix/defcommand create-preview!
+  {:hystrix/group-key   "Attachment"
+   :hystrix/command-key "Create preview"
+   :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 2 60 1000))) setter)
+   :hystrix/fallback-fn  (constantly nil)}
   [file-id filename content-type content application-id & [db-name]]
   (when (preview/converter content-type)
     (mongo/with-db (or db-name mongo/default-db-name)
-      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
+      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpeg" (preview/placeholder-image) :application application-id)
       (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
                                               (with-open [content ((:content (mongo/download file-id)))]
                                                 (preview/create-preview content content-type)))]
         (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))))
+        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpeg" preview-content :application application-id)))))
 
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
@@ -696,33 +702,36 @@
 
 (defn- append-gridfs-file! [zip {:keys [filename fileId]}]
   (when fileId
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
-    (with-open [in ((:content (mongo/download fileId)))]
-      (io/copy in zip))))
+    (if-let [content (:content (mongo/download fileId))]
+      (with-open [in (content)]
+        (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
+        (io/copy in zip)
+        (.closeEntry zip))
+      (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
 
 (defn- append-stream [zip file-name in]
   (when in
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
-    (io/copy in zip)))
+    (io/copy in zip)
+    (.closeEntry zip)))
 
 (defn get-all-attachments!
   "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
   [attachments & [application lang]]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
-    (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
-        ; Add all attachments:
-        (doseq [attachment attachments]
-          (append-gridfs-file! zip (-> attachment :versions last)))
+    (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
+      ; Add all attachments:
+      (doseq [attachment attachments]
+        (append-gridfs-file! zip (-> attachment :versions last)))
 
-        (when (and application lang)
-          ; Add submitted PDF, if exists:
-          (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-            (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
-          ; Add current PDF:
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
-        (.finish zip)))
+      (when (and application lang)
+        ; Add submitted PDF, if exists:
+        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
+        ; Add current PDF:
+        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
+      (.finish zip))
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
 
@@ -845,3 +854,10 @@
                           file-objects)]
     (when (seq new-attachments)
       {$push {:attachments {$each new-attachments}}})))
+
+(defn attachment-array-updates
+  "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
+  [app-id pred k v]
+  {$set (as-> app-id $
+          (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
+          (mongo/generate-array-updates :attachments (:attachments $) pred k v))})

@@ -3,7 +3,7 @@
             [swiss.arrows :refer [-<>]]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
-            [camel-snake-kebab :as kebab]
+            [camel-snake-kebab.core :as csk]
             [monger.operators :refer :all]
             [monger.query :as query]
             [schema.core :as sc]
@@ -54,7 +54,7 @@
                                                            "rest-api"
                                                            "trusted-etl")
            :email                                 ssc/Email
-           :username                              (ssc/max-length-string 255)
+           :username                              ssc/Username
            :enabled                               sc/Bool
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
@@ -411,7 +411,7 @@
       (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
 
     (when (and password (not (security/valid-password? password)))
-      (fail! :password-too-short :desc "password specified, but it's not valid"))
+      (fail! :error.password.minlengt :desc "password specified, but it's not valid"))
 
     (when (and organization-id (not (organization/get-organization organization-id)))
       (fail! :error.organization-not-found))
@@ -474,7 +474,7 @@
         (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
           (do
             (warnf "Duplicate key detected when inserting new user: field=%s" field)
-            (fail! :duplicate-key :field field))
+            (fail! :error.duplicate-email))
           (do
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
@@ -512,7 +512,7 @@
     (cond
       (or (ss/blank? s) (= s "dummy")) "applicant"
       (= s "oirAuthority") "oir"
-      :else (kebab/->kebab-case s))))
+      :else (csk/->kebab-case s))))
 
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))
@@ -538,7 +538,7 @@
   [email]
   (let [apikey (security/random-password)
         n      (mongo/update-n :users {:email (canonize-email email)} {$set {:private.apikey apikey}})]
-    (when-not (= n 1) (fail! :unknown-user :email email))
+    (when-not (= n 1) (fail! :error.user-not-found))
     apikey))
 
 ;;
@@ -561,7 +561,7 @@
       (do
         (mongo/remove-many :activation {:email email})
         (clear-logins (:username updated-user)))
-      (fail! :unknown-user :email email))
+      (fail! :error.user-not-found))
     nil))
 
 ;;

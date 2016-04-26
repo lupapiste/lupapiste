@@ -3,7 +3,7 @@
             [sade.validators :as sv]
             [sade.util :refer [fn-> fn->>] :as util]
             [schema.core :as sc]
-            [schema.experimental.generators :as sg]
+            [schema-generators.generators :as sg]
             [clj-time.format :as ctf]
             [clj-time.coerce :as ctc]
             [clojure.string :as s]
@@ -94,11 +94,12 @@
 (register-generator ssc/LowerCaseLetter lower-case-letter)
 
 (def email (gen/such-that (ssc/max-length-constraint 255)
-                          (gen/fmap (fn [[name domain]] (str name "@" domain ".com"))
+                          (gen/fmap (fn [[name domain]] (s/lower-case (str name "@" domain ".com")))
                                     (gen/tuple (gen/not-empty gen/string-alphanumeric)
                                                (gen/not-empty gen/string-alphanumeric)))))
 
 (register-generator ssc/Email email)
+(register-generator ssc/Username email)
 
 (def timestamp (gen/fmap (partial + 1450000000000)
                          gen/large-integer))

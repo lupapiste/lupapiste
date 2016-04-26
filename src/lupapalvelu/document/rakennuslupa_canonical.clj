@@ -305,7 +305,7 @@
       "Uusi katselmus"
       "Uusi tarkastus")))
 
-(defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+(defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat tiedoksianto]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
         katselmusTyyppi (katselmusnimi-to-type katselmuksen-nimi tyyppi)
@@ -318,6 +318,7 @@
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
                        :poikkeamat poikkeamat
+                       :verottajanTvLlKytkin tiedoksianto
                        :tarkastuksenTaiKatselmuksenNimi task-name}
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)

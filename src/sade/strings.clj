@@ -39,6 +39,11 @@
 (defn other-than-string? [x]
   (and (not (nil? x)) (not (string? x))))
 
+(defn in-lower-case? [^String s]
+  (if s
+    (= s (.toLowerCase s))
+    false))
+
 (defn suffix
   "Returns a substring from the end of last occurance of separator till the end of s"
   [^String s ^String separator]

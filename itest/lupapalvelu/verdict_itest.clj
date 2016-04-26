@@ -295,7 +295,7 @@
                             :paatoskoodi "Kiinteist\u00f6toimitus"
                             :status "43"})))))
 
-(fact "When checking verdict, if no valid verdict exits, buildingIds are still saved to application"
+(fact "When checking verdict, if no valid verdict exits, buildingIds and backendIds are still saved to application"
   (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         app-id (:id application)
         op1    (:primaryOperation application)]
@@ -303,16 +303,24 @@
                                           {:selector [:rakval:rakennuksenTiedot :rakval:rakennustunnus :rakval:muuTunnustieto :rakval:MuuTunnus :yht:tunnus] :value (:id op1)}])
 
     (let [response (command sonja :check-for-verdict :id app-id)
-          application (query-application mikko app-id)
+          application (query-application sonja app-id)
           op-document (some #(when (= (:id op1) (-> % :schema-info :op :id)) %) (:documents application))]
       (fact "No verdicts found"
         (:ok response) => false
         (:text response) => "info.no-verdicts-found-from-backend")
       (fact "Buildings were still read"
-        (:buildings response) => truthy
         (:buildings application) => sequential?)
       (fact "building id from KRYSP is saved to document"
-        (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M"))))
+        (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")
+      (fact "backend id from KRYSP is saved to verdict"
+        (get-in application [:verdicts 0 :kuntalupatunnus]) => "2013-01"
+        (get-in application [:verdicts 1 :kuntalupatunnus]) => "13-0185-R")
+      (fact "saved verdicts are drafts"
+        (get-in application [:verdicts 0 :draft]) => true
+        (get-in application [:verdicts 1 :draft]) => true
+      (fact "paatokset arrays are empty"
+        (get-in application [:verdicts 0 :paatokset]) => []
+        (get-in application [:verdicts 1 :paatokset]) => [])))))
 
 (fact "In verdicts-extra-reader, buildingIds are updated to documents also"
   (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")

@@ -133,10 +133,25 @@ Sonja cannot regive statement to own statement
   Wait until  Element should not be visible  statement-submit
   [Teardown]  Return from statement
 
-Attachment is generated and not removable
+Attachment is generated
   Open tab  attachments
   Wait until  Element should be visible  //table[@data-test-id='attachments-template-table']//tr[@id='attachment-row-ennakkoluvat_ja_lausunnot-lausunto']
+
+Attachement is not removable from list view
   Element should not be visible  //table[@data-test-id='attachments-template-table']//tr[@data-test-icon='delete-ennakkoluvat_ja_lausunnot.lausunto']
+
+Attachement is not removable from attachment view
+  Wait and click  //table[@data-test-id='attachments-template-table']//a[@data-test-type='ennakkoluvat_ja_lausunnot.lausunto']
+  Wait until  Element should contain  //span[@id='test-attachment-file-name']/a  Lausunto.pdf
+  Element should not be visible  //button[@data-test-id='delete-attachment']
+
+Attachment version is not removable
+  Wait and click  show-attachment-versions
+  Wait until  Element should be visible  //tr[@data-test-id='version-row-0.1']
+  Element should not be visible  //tr[@data-test-id='version-row-0.1']//a[@data-test-id='delete-version']
+
+Return to application
+  Scroll and click test id  back-to-application-from-attachment
 
 Statement status is visible for given statement in summary table
   Open tab  statement

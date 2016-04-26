@@ -379,7 +379,7 @@
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
   (let [caller (usr/get-user-by-email caller-email)]
-    (when-not caller (fail! :not-found :desc (format "can't process invitation token for email %s, authority admin (%s) no longer exists" email caller-email)))
+    (when-not caller (fail! :not-found))
     (usr/change-password email password)
     (infof "invitation was accepted: email=%s, organization=%s" email organization)
     (ok)))
@@ -607,11 +607,12 @@
                     unauthorized))]
    :user-roles #{:anonymous}})
 
-(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
+(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename size]}] :files attachmentType :attachmentType}
   (let [user              (usr/current-user (request/ring-request))
         filename          (mime/sanitize-filename filename)
         attachment-type   (attachment/parse-attachment-type attachmentType)
         attachment-id     (mongo/create-id)
+        content-type      (mime/mime-type filename)
         file-info         {:attachment-type  attachment-type
                            :attachment-id    attachment-id
                            :file-name        filename
@@ -621,7 +622,7 @@
 
     (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
-    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
+    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
     (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
 
