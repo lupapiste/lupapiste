@@ -33,16 +33,16 @@
 
 (defschema Invite
   {(sc/optional-key :role)           (apply sc/enum all-authz-roles)
-   :path                             (sc/maybe sc/Str)                              ;; TODO: Remove nils, fox source
+   (sc/optional-key :path)           sc/Str
    :email                            ssc/Email
    :application                      app/ApplicationId
    :created                          ssc/Timestamp
    :inviter                          usr/SummaryUser
-   :documentName                     (sc/maybe sc/Str)                              ;; TODO: Remove nils, fix source
-   :documentId                       (sc/if ss/blank? ssc/BlankStr ssc/ObjectIdStr) ;; TODO: Remove blanks, fix source
+   (sc/optional-key :documentName)   sc/Str
+   (sc/optional-key :documentId)     ssc/ObjectIdStr
    :user                             usr/SummaryUser
    (sc/optional-key :title)          sc/Bool
-   :text                             (sc/maybe sc/Str)})                            ;; TODO: Remove nils, fix source
+   (sc/optional-key :text)           sc/Str})
 
 (defschema CompanyInvite
   {:user {:id ssc/ObjectIdStr}})
@@ -93,16 +93,16 @@
 
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
   {:pre [(seq inviter) (seq invited) application-id role timestamp]}
-  (let [invite {:application  application-id
-                :text         text
-                :path         path
-                :documentName document-name
-                :documentId   document-id
-                :created      timestamp
-                :email        (:email invited)
-                :role         role
-                :user         (usr/summary invited)
-                :inviter      (usr/summary inviter)}]
+  (let [invite (cond-> {:application  application-id
+                        :created      timestamp
+                        :email        (:email invited)
+                        :role         role
+                        :user         (usr/summary invited)
+                        :inviter      (usr/summary inviter)}
+                 (not (nil? path))               (assoc :path path)
+                 (not (ss/blank? text))          (assoc :text text)
+                 (not (ss/blank? document-name)) (assoc :documentName document-name)
+                 (not (ss/blank? document-id))   (assoc :documentId document-id))]
     (assoc (usr/user-in-role invited :reader) :invite invite)))
 
 ;;

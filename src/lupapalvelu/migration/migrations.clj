@@ -2042,14 +2042,30 @@
   {:apply-when (pos? (mongo/count :applications {:auth.invite.documentId "null"}))}
   (update-applications-array :auth remove-auth-invite-documentId-null-strings {:auth.invite.documentId "null"}))
 
-(defn ensure-auth-invite-has-path [{invite :invite :as auth}]
-  (if (and (:email invite) (not (contains? invite :path)))
-    (assoc-in auth [:invite :path] nil)
+(defn remove-auth-invite-nil-fields [{{:keys [path text documentId documentName] :as invite} :invite :as auth}]
+  (if (:email invite)
+    (cond-> auth
+      (nil? path)              (update :invite #(dissoc % :path))
+      (nil? text)              (update :invite #(dissoc % :text))
+      (ss/blank? documentId)   (update :invite #(dissoc % :documentId))
+      (ss/blank? documentName) (update :invite #(dissoc % :documentName)))
     auth))
 
-(defmigration sanitize-auth-invite-path
-  {:apply-when (pos? (mongo/count :applications {:auth {$elemMatch {:invite.email {$exists true} :invite.path {$exists false}}}}))}
-  (update-applications-array :auth ensure-auth-invite-has-path {:auth {$elemMatch {:invite.email {$exists true} :invite.path {$exists false}}}}))
+(defmigration sanitize-auth-invite-optional-fields
+  {:apply-when (pos? (mongo/count :applications {$or [{:auth.invite.path {$type 10}}
+                                                      {:auth.invite.text {$type 10}}
+                                                      {:auth.invite.documentId {$type 10}}
+                                                      {:auth.invite.documentId ""}
+                                                      {:auth.invite.documentName {$type 10}}
+                                                      {:auth.invite.documentName ""}]}))}
+  (update-applications-array :auth
+                             remove-auth-invite-nil-fields
+                             {$or [{:auth.invite.path {$type 10}}
+                                                      {:auth.invite.text {$type 10}}
+                                                      {:auth.invite.documentId {$type 10}}
+                                                      {:auth.invite.documentId ""}
+                                                      {:auth.invite.documentName {$type 10}}
+                                                      {:auth.invite.documentName ""}]}))
 
 ;;
 ;; ****** NOTE! ******
