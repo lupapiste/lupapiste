@@ -3,13 +3,15 @@
             [clojure.pprint :refer [pprint]]
             [clojure.core.memoize :as memo]
             [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
             [clojure.java.io :as io]
             [sade.env :as env]
             [lupapalvelu.statistics :as statistics]
             [lupapalvelu.organization :as organization])
-  (:import [java.io File IOException FileNotFoundException]
-           [com.lowagie.text.pdf PdfReader]))
+  (:import [java.io File IOException FileNotFoundException InputStream]
+           [com.lowagie.text.pdf PdfReader]
+           [com.netflix.hystrix HystrixCommandProperties]))
 
 (defn- executable-exists? [executable]
   (try
@@ -114,13 +116,18 @@
                  :else :invalid-pages)]
     (statistics/store-pdf-conversion-page-count db-key count)))
 
-(defn convert-to-pdf-a
+(hystrix/defcommand convert-to-pdf-a
   "Takes a PDF File and returns a File that is PDF/A"
+  {:hystrix/group-key   "Attachment"
+   :hystrix/command-key "Convert to PDF/A with PdfTools"
+   :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000))) setter)
+   ;; :hystrix/fallback-fn (fn fetch-request-fallback [pdf-file & [target-file-path]] nil)
+   }
   [pdf-file & [target-file-path]]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
     (try
       (info "Trying to convert PDF to PDF/A")
-      (let [stream? (instance? java.io.InputStream pdf-file)
+      (let [stream? (instance? InputStream pdf-file)
             file-path (if stream?
                         (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")]
                           (io/copy pdf-file temp-file)

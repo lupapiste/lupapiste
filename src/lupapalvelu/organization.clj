@@ -101,7 +101,7 @@
 
 (defn get-organization-attachments-for-operation [organization {operation-name :name}]
   (->> (get-in organization [:operations-attachments (keyword operation-name)])
-       (map (fn [[type-group type-id]] {:type-group (keyword type-group) 
+       (map (fn [[type-group type-id]] {:type-group (keyword type-group)
                                         :type-id    (keyword type-id)}))))
 
 (defn allowed-ip? [ip organization-id]
@@ -162,9 +162,14 @@
           (update-organization id address-updates)))
       (update-organization id updates))))
 
-(defn get-organization-name [organization]
+(defn get-organization-name
+  ([organization]
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
     (get-in organization [:name i18n/*lang*] default)))
+  ([organization-id lang]
+   (let [organization (get-organization organization-id)
+         default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
+     (get-in organization [:name lang] default))))
 
 (defn resolve-organizations
   ([municipality]
@@ -398,7 +403,7 @@
               ; Object  Feature
               ; Class   FeatureType
               ; Field   Attribute
-              
+
               (let [feature-type        (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84)
                     name-property       (or ; try to get name of feature from these properties
                                           (.getProperty feature "nimi")
