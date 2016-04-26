@@ -1,6 +1,7 @@
 (ns lupapalvelu.tasks
   (:require [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
+            [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [def-]]
@@ -157,7 +158,7 @@
     :template "form-grid-docgen-group-template"
     :body task-katselmus-body-ya}
 
-   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
+   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :subtype :foreman :order 10}
     :body [{:name "osapuolena" :type :checkbox}
            {:name "asiointitunnus" :type :string :max-len 17}]}
 
@@ -251,3 +252,6 @@
          (= :task (-> % :info :type))
          (allowed-task-schemas (-> % :info :name)))
       (vals (schemas/get-schemas schema-version)))))
+
+(defn task-attachments [{:keys [attachments]} task-id]
+  (filter #(= task-id (get-in % [:target :id])) attachments))

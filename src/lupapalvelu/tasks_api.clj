@@ -51,7 +51,7 @@
     (fail :error.invalid-task-type)))
 
 (defn- task-is-end-review? [task]
-  (re-matches #"(?i)^(osittainen )?loppukatselmus$" (or (:taskname task) "")))
+  (re-matches #"(?i)^(osittainen )?loppukatselmus$" (or (get-in task [:data :katselmuksenLaji :value]) "")))
 
 (defn- validate-task-is-end-review [{{task-id :taskId} :data} {tasks :tasks}]
   (when-not (task-is-end-review? (util/find-by-id task-id tasks))
@@ -106,7 +106,8 @@
    :states     valid-states
    :pre-checks [(task-state-assertion (tasks/all-states-but :sent))]}
   [{:keys [application created] :as command}]
-  (child-to-attachment/delete-child-attachment application :tasks taskId)
+  (doseq [{:keys [id]} (tasks/task-attachments application taskId)]
+    (attachment/delete-attachment! application id))
   (update-application command
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
@@ -152,6 +153,7 @@
   "Genereate 'subtype' options for readonly elements with sequential body"
   [{info :info body :body}]
   {:schemaName (:name info)
+   :schemaSubtype (:subtype info)
    :types      (some (fn [{:keys [name readonly body]}]
                        (when (and readonly (seq body))
                          (for [option body

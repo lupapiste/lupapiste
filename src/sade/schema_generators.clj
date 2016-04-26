@@ -3,7 +3,7 @@
             [sade.validators :as sv]
             [sade.util :refer [fn-> fn->>] :as util]
             [schema.core :as sc]
-            [schema.experimental.generators :as sg]
+            [schema-generators.generators :as sg]
             [clj-time.format :as ctf]
             [clj-time.coerce :as ctc]
             [clojure.string :as s]

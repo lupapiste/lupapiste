@@ -39,7 +39,7 @@
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [org.bouncycastle/bcprov-jdk15on "1.54"]
-                 [pandect "0.3.0" :exclusions [org.bouncycastle/bcprov-jdk15on]]
+                 [pandect "0.5.4" :exclusions [org.bouncycastle/bcprov-jdk15on]]
 
                  ; JSON
                  [cheshire "5.5.0"]
@@ -59,7 +59,7 @@
                  [clj-time "0.11.0"]
 
                  ; String case manipulation
-                 [camel-snake-kebab "0.1.2"]
+                 [camel-snake-kebab "0.4.0"]
 
                  ; Collection of arrow macros
                  [swiss-arrows "1.0.0"]
@@ -71,7 +71,8 @@
                  [slingshot "0.12.2"]
 
                  ; A Clojure(Script) library for declarative data description and validation
-                 [prismatic/schema "1.0.4"]
+                 [prismatic/schema "1.1.0"]
+                 [prismatic/schema-generators "0.1.0"]
 
                  ; MIME type resolution
                  [com.novemberain/pantomime "2.8.0" :exclusions [org.opengis/geoapi org.bouncycastle/bcprov-jdk15on]]
@@ -110,7 +111,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.24"]
+                 [lupapiste/commons "0.7.25"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)

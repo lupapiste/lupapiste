@@ -252,7 +252,7 @@
                                                 :buildings  (building-reader/->buildings-summary app-xml)) created)]
         (util/deep-merge
           {$set (merge {:verdicts verdicts-with-attachments, :modified created}
-                       {:tasks tasks}
+                  (when-not has-old-verdict-tasks {:tasks tasks})
                   (when extras-reader (extras-reader app-xml application)))}
           (when-not (states/post-verdict-states (keyword (:state application)))
             (application/state-transition-update (sm/verdict-given-state application) created user)))))))
@@ -403,3 +403,30 @@
                                       (backend-id-mongo-updates application))]
           (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
           validation-errors)))))
+
+(defn- verdict-task?
+  "True if given task is 'rooted' via source chain to the verdict.
+   tasks: tasks of the application
+   verdict-id: Id of the target verdict
+   task: task to be analyzed."
+  [tasks verdict-id {{source-type :type source-id :id} :source :as task}]
+  (case (keyword source-type)
+    :verdict (= verdict-id source-id)
+    :task (verdict-task? tasks verdict-id (some #(when (= (:id %) source-id) %) tasks))
+    false))
+
+(defn deletable-verdict-task-ids
+  "Task ids that a) can be deleted and b) belong to the
+  verdict with the given id."
+  [{:keys [tasks attachments]} verdict-id]
+  (->> tasks
+       (filter #(and (not= (-> % :state keyword) :sent)
+                     (verdict-task? tasks verdict-id %)))
+       (map :id)))
+
+(defn task-ids->attachments
+  "All the attachments that belong to the tasks with the given ids."
+  [application task-ids]
+  (->> task-ids
+       (map (partial tasks/task-attachments application))
+       flatten))

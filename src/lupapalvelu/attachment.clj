@@ -702,33 +702,36 @@
 
 (defn- append-gridfs-file! [zip {:keys [filename fileId]}]
   (when fileId
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
-    (with-open [in ((:content (mongo/download fileId)))]
-      (io/copy in zip))))
+    (if-let [content (:content (mongo/download fileId))]
+      (with-open [in (content)]
+        (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
+        (io/copy in zip)
+        (.closeEntry zip))
+      (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
 
 (defn- append-stream [zip file-name in]
   (when in
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
-    (io/copy in zip)))
+    (io/copy in zip)
+    (.closeEntry zip)))
 
 (defn get-all-attachments!
   "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
   [attachments & [application lang]]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
-    (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
-        ; Add all attachments:
-        (doseq [attachment attachments]
-          (append-gridfs-file! zip (-> attachment :versions last)))
+    (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
+      ; Add all attachments:
+      (doseq [attachment attachments]
+        (append-gridfs-file! zip (-> attachment :versions last)))
 
-        (when (and application lang)
-          ; Add submitted PDF, if exists:
-          (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-            (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
-          ; Add current PDF:
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
-        (.finish zip)))
+      (when (and application lang)
+        ; Add submitted PDF, if exists:
+        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
+        ; Add current PDF:
+        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
+      (.finish zip))
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
 
@@ -851,3 +854,10 @@
                           file-objects)]
     (when (seq new-attachments)
       {$push {:attachments {$each new-attachments}}})))
+
+(defn attachment-array-updates
+  "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
+  [app-id pred k v]
+  {$set (as-> app-id $
+          (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
+          (mongo/generate-array-updates :attachments (:attachments $) pred k v))})

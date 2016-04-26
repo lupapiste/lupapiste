@@ -253,6 +253,28 @@
         (some #(= non-given-statement-id (:statementId %)) (:auth application)) => falsey
         ))
 
+(fact "Statement attachement"
+  (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
+        _ (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-pena] :saateText "saate" :dueDate 1450994400000) => ok?
+        application  (query-application ronja application-id)
+        statement-id (some
+                      #(and (-> % :given not) (= pena-id (get-in % [:person :userId])) (:id %))
+                      (:statements application)) => truthy]
+    (upload-attachment-for-statement pena application-id nil true statement-id) => truthy
+
+    (fact "Statement attachment is readOnly"
+      (->> (query-application sonja application-id)
+           :attachments
+           (filter (comp #{statement-id} :id :target))) => (has every? (comp not :readOnly)))
+
+    (command pena :give-statement :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") => ok?
+
+    (fact "Attachment is readonly after statement is given"
+      (->> (query-application sonja application-id)
+           :attachments
+           (filter (comp #{statement-id} :id :target))) => (has every? :readOnly))))
+
+
 (facts "Non-existing user"
       (fact "Non-existing user cannot be added as a statement person (in authority admin view)"
         (command sipoo :create-statement-giver :email non-existing-user-email :text "hello") => (partial expected-failure? "error.user-not-found"))
@@ -325,5 +347,3 @@
       (let [app-pena (query-application pena application-id)]
         (:statements app-pena) => (has every? #(= filtered-statement-keys (-> % keys set)))))
     ))
-
-

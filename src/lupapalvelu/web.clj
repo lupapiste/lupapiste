@@ -622,7 +622,14 @@
           xml-no-ns (sade.common-reader/strip-xml-namespaces xml)
           typeName (sade.xml/select1-attribute-value xml-no-ns [:Query] :typeName)]
       (when (= typeName "yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa")
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-ya.xml")))))))
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/verdict-ya.xml"))))))
+
+  (defpage [:get "/dev/private-krysp"] []
+    (let [request (request/ring-request)
+          user    (basic-authentication request)]
+      (if user
+        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml")))
+        basic-401))))
 
 (env/in-dev
   (defjson [:any "/dev/spy"] []
@@ -714,9 +721,4 @@
                false)]
       (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
 
-  (defpage [:get "/dev/private-krysp"] []
-    (let [request (request/ring-request)
-          user    (basic-authentication request)]
-      (if user
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml")))
-        basic-401))))
+  )

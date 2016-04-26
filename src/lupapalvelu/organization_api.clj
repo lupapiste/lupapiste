@@ -8,7 +8,7 @@
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [noir.request :as request]
-            [camel-snake-kebab :as csk]
+            [camel-snake-kebab.core :as csk]
             [me.raynes.fs :as fs]
             [slingshot.slingshot :refer [try+]]
             [sade.core :refer [ok fail fail! now]]

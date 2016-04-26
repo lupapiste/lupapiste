@@ -10,6 +10,7 @@
                            :deny-removing-last-document true
                            :repeating false}
                     :body [{:name "kaytettykerrosala" :type :group
+                            :validator :poikkeus-olemassa-olevat-rakennukset
                             :body [{:name "pintaAla" :type :string :size :s :unit :m2 :subtype :number}
                                    {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname :size :l
                                     :body usages/rakennuksen-kayttotarkoitus}]}
@@ -18,8 +19,9 @@
                             :repeating false
                             :approvable true
                             :body [{:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l
+                                    :required true
                                     :body usages/rakennuksen-kayttotarkoitus}
-                                   {:name "Toimenpide" :type :select :sortBy :displayname :size :l
+                                   {:name "Toimenpide" :type :select :sortBy :displayname :size :l :required true
                                     :body [{:name "uusi"}
                                            {:name "laajennus"}
                                            {:name "perustus"}
