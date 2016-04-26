@@ -1,6 +1,6 @@
 (ns lupapalvelu.authorization
   (:require [lupapalvelu.user :as usr]
-            [lupapalvelu.application :as app]
+            [lupapalvelu.application-schema :as aps]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
@@ -35,7 +35,7 @@
   {(sc/optional-key :role)           (apply sc/enum all-authz-roles)
    (sc/optional-key :path)           sc/Str
    :email                            ssc/Email
-   :application                      app/ApplicationId
+   :application                      aps/ApplicationId
    :created                          ssc/Timestamp
    :inviter                          usr/SummaryUser
    (sc/optional-key :documentName)   sc/Str

@@ -31,11 +31,7 @@
             [sade.validators :as v]
             [sade.coordinate :as coord]
             [sade.schemas :as ssc]
-            [schema.core :refer [defschema] :as sc]
             [swiss.arrows :refer [-<>>]]))
-
-(defschema ApplicationId
-  (sc/constrained sc/Str (partial re-matches #"LP-\d{3}-\d{4}-\d{5}") "Application id"))
 
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
