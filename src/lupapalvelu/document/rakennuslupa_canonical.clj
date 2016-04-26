@@ -46,7 +46,8 @@
         description-parts (remove ss/blank? [tunnus (operation-description application op-id)])
         defaults (util/assoc-when {:jarjestysnumero nil
                                    :kiinttun (:propertyId application)
-                                   :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}}
+                                   :muuTunnustieto [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                    {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}]}
                    :rakennusnro rakennusnro
                    :rakennuksenSelite (ss/join ": " description-parts)
                    :valtakunnallinenNumero valtakunnallinenNumero)]
