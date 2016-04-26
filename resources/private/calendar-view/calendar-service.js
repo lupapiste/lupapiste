@@ -5,13 +5,7 @@ LUPAPISTE.CalendarService = function() {
   self.calendar = ko.observable();
   self.calendarWeekdays = ko.observableArray();
 
-  function Weekday(calendarId, startOfDay, slots) {
-    var self = this;
-    self.calendarId = calendarId;
-    self.startOfDay = startOfDay;
-    self.str = startOfDay.format("DD.MM."); // TODO -> ko.bindingHandlers.calendarViewDateHeader?
-    self.slots = ko.observableArray(slots);
-  }
+  self.calendarQuery = {};
 
   var doFetchCalendarSlots = function(event) {
     ajax.query("calendar-slots", {calendarId: event.id, week: event.week, year: event.year})
@@ -19,12 +13,16 @@ LUPAPISTE.CalendarService = function() {
         var startOfWeek = moment().isoWeek(event.week).year(event.year).startOf('isoWeek').valueOf();
         var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
           var day = moment(startOfWeek).isoWeekday(i);
-          var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.time.start, 'day'); });
-          return new Weekday(event.id, day,
-            _.map(slotsForDay, function(s) { return { start: s.time.start, end: s.time.end,
-                                                      duration: moment(s.time.end).diff(s.time.start) }; }));
+          var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, 'day'); });
+          return {
+            calendarId: event.id,
+            startOfDay: day.valueOf(),
+            str: day.format("DD.MM."),  // TODO -> ko.bindingHandlers.calendarViewDateHeader?
+            slots: _.map(slotsForDay,
+              function(s) {
+                return _.extend(s, { duration: moment(s.endTime).diff(s.startTime) });
+              })};
         });
-
         self.calendarWeekdays(weekdays);
       })
       .call();
@@ -50,6 +48,7 @@ LUPAPISTE.CalendarService = function() {
         if (event.modalClose) {
           LUPAPISTE.ModalDialog.close();
         }
+        doFetchCalendarSlots({id: data.calendar.id, week: moment().isoWeek(), year: moment().year()});
       })
       .call();
   });

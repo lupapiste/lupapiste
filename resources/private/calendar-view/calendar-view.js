@@ -26,7 +26,7 @@ var calendarView = (function($) {
     self.timelineTimes = ko.observableArray(timelineTimesBuilder());
 
     self.slotPositionTop = function(slot) {
-      var start = moment(slot.start);
+      var start = moment(slot.startTime);
       return ((start.hour() - self.firstFullHour()) * 60 + start.minute()) + 'px';
     };
 
@@ -36,7 +36,7 @@ var calendarView = (function($) {
     };
 
     self.slotViewText = function(slot) {
-      return moment(slot.start).format("H:mm") + " - " + moment(slot.end).format("H:mm") + " Vapaa";
+      return moment(slot.startTime).format("H:mm") + " - " + moment(slot.endTime).format("H:mm") + " Vapaa";
     };
 
     self.clickHandler = function(clazz) {
@@ -46,6 +46,10 @@ var calendarView = (function($) {
             weekday: this.weekday,
             hour: this.slot.hour,
             minutes: this.slot.minutes });
+      } else if (clazz === 'reservation-slot') {
+        hub.send("calendarView::reservationSlotClicked",
+          { calendarId: this.weekday.calendarId,
+            slot: this.slot });
       }
     }
 

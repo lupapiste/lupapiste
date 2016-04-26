@@ -129,7 +129,7 @@
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
-   :moment         {:js ["moment.min.js"]}
+   :moment         {:js ["moment.min.js" "moment-timezone-with-data-2010-2020.min.js"]}
    :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
    ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
    ;:open-layers    {:js ["OpenLayers.debug.js" ]}

@@ -23,15 +23,20 @@
    :end   DateTime})
 
 (defschema BackendReservationSlot
-  {:time     LocalDateTimeRange
-   :service  sc/Str
-   :capacity sc/Int})
+  {:time      LocalDateTimeRange
+   :services [sc/Str]
+   :capacity  sc/Int})
 
-(defn ->FrontendCalendar [cal]
+(defn- ->FrontendCalendar [cal]
   (-> cal
       (select-keys [:id :name])
-      (merge {:organization (:organizationCode cal)
-              :slots []})))
+      (merge {:organization (:organizationCode cal)})))
+
+(defn- ->FrontendReservationSlots [backend-slots]
+  (map (fn [s] {:id        (:id s)
+                :status    :available
+                :startTime (sade.util/to-millis-from-local-datetime-string (-> s :time :start))
+                :endTime   (sade.util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :ajanvaraus :host) path-parts))
@@ -63,7 +68,7 @@
          (let [{start :start end :end} s]
            {:time     {:start (sade.util/to-xml-local-datetime start)
                        :end (sade.util/to-xml-local-datetime end)}
-            :service  "SCC123"
+            :services ["SCC123"]
             :capacity 1})) slots))
 
 (defquery calendar
@@ -109,7 +114,9 @@
         response (api-query url {:year year
                                  :week week})]
     (if (= 200 (:status response))
-      (ok :slots (:body response))
+      (let [be-slots (:body response)
+            slots    (->FrontendReservationSlots be-slots)]
+        (ok :slots slots))
       (do (error response)
           (fail :resources.backend-error)))))
 

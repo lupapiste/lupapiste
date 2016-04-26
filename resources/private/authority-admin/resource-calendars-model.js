@@ -36,6 +36,10 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     self.openNewReservationSlotDialog();
   });
 
+  hub.subscribe("calendarView::reservationSlotClicked", function(event) {
+    console.log(event);
+  });
+
   self.openNewReservationSlotDialog = function() {
     LUPAPISTE.ModalDialog.open("#dialog-new-slot");
   };
