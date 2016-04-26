@@ -275,26 +275,22 @@
   ;; schemas?
 
   (let [reviews (review-reader/xml->reviews app-xml)
-        review-task-name (fn [review] "some-task-name")
-        ;; review-to-task (fn [review]
-        ;;                  ;; sc/check katselmus-task-schema new-task...
-        ;;                  (lupapalvelu.tasks/new-task "task-katselmus" (review-task-name review) review)
-        ;;                  )
         review-to-task #(lupapalvelu.tasks/katselmus->task {} {} application %)
         review-tasks (map review-to-task reviews)
         ]
-    ;; (doseq [review reviews]
-    ;;   (update-application command {$push {:tasks (review-to-task review)}}))
-    (update-application command {$push {:tasks review-tasks}})
+    (println "review-tasks length is" (count review-tasks) "and key counts for elements are" (map (comp count keys) review-tasks))
+    (println "last keys" (keys (last review-tasks)))
+    ;; (clojure.pprint/pprint review-tasks)
+    (update-application command {$push {:tasks {$each review-tasks}}})
     (ok :review-tasks review-tasks)))
 
 (defn do-check-for-verdict-w-review [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [
-             ;; app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
-             ;;             (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
+             app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
+                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
 
              ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml") "utf-8")
-             app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
+             ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
              ]
     (save-reviews-from-xml command app-xml)))

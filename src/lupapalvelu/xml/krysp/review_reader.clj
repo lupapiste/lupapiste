@@ -28,7 +28,8 @@
             katselmukset (map cr/all-of  (select asia [:katselmustieto :Katselmus]))]
         (println "#katselmukset" (count katselmukset))
         (-> katselmukset
-            (sade.util/ensure-sequential :huomautukset)
+            (sade.util/ensure-sequential :muuTunnustieto)
+            (sade.util/ensure-sequential :huomautukset )
             cr/convert-booleans
             cr/cleanup)))))
 

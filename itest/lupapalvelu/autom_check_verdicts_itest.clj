@@ -1,5 +1,6 @@
 (ns lupapalvelu.autom-check-verdicts-itest
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [sade.core :refer [now]]
@@ -9,7 +10,8 @@
             [lupapalvelu.verdict-api]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.batchrun :as batchrun]))
+            [lupapalvelu.batchrun :as batchrun]
+            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]))
 
 (def db-name (str "test_autom-check-verdicts-itest_" (now)))
 
@@ -27,10 +29,14 @@
 
 (facts "Automatic checking for verdicts"
   (mongo/with-db db-name
-    (let [application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
+    (let [
+
+          application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
           application-id-submitted      (:id application-submitted)
+
           application-sent              (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 18")
           application-id-sent           (:id application-sent)
+
           application-verdict-given     (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 19")
           application-id-verdict-given  (:id application-verdict-given)]
 
@@ -72,26 +78,37 @@
           (-> application-sent :history last :state) => "verdictGiven"
           (-> application-verdict-given :history last :state) => "verdictGiven")))))
 
+
+(testable-privates lupapalvelu.tasks-api task-is-review?)
+
 (facts "Automatic checking for reviews"
   (mongo/with-db db-name
-    (let [application-reviewed-eka         (create-reviewed-application "Paatoskuja 17")
-          application-id-reviewed-eka      (:id application-reviewed-eka)
-          application-reviewed-toka        (create-reviewed-application "Paatoskuja 18")
-          application-id-reviewed-toka     (:id application-reviewed-toka)
-          application-kolmas      (create-reviewed-application "Paatoskuja 19")
-          application-id-kolmas  (:id application-kolmas)]
+    (let [application-submitted        (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 17")
+          application-id-submitted     (:id application-submitted)
+          application-verdict-given    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
+          application-id-verdict-given (:id application-verdict-given)
+          ]
+      (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
+      (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
+            application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
+        (:state application-submitted) => "submitted"
+        (:state application-verdict-given) => "verdictGiven")
+      (count (:tasks application-verdict-given)) => 0
 
-      (local-command sonja :approve-application :id application-id-reviewed-toka :lang "fi") => ok?
-      (local-command sonja :approve-application :id application-id-kolmas :lang "fi") => ok?
-      (give-local-verdict sonja application-id-kolmas :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
 
-      (fact "checking verdicts and sending emails to the authorities related to the applications"
-        (count (batchrun/poll-verdicts-for-reviews)) => pos?)
+      (against-background [(app-from-krysp/get-application-xml-by-application-id anything) => (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")]
+        (fact "checking verdicts and sending emails to the authorities related to the applications"
+          (count (batchrun/poll-verdicts-for-reviews)) => pos?
+          (count (filter task-is-review? (:tasks (query-application local-query sonja application-id-verdict-given)))) => pos?)))))
 
-      (let [application-reviewed-eka (query-application local-query sonja application-id-reviewed-eka) => truthy
-            application-reviewed-toka (query-application local-query sonja application-id-reviewed-toka) => truthy
-            application-kolmas (query-application local-query sonja application-id-kolmas) => truthy]
-        (:state application-reviewed-eka) => "submitted"
-        ;;(:state application-reviewed-toka) => "" ;; ??
-        ;;(:state application-kolmas) => "" ;; ??
-        ))))
+    ;; (local-command sonja :approve-application :id application-id-submitted :lang "fi") => ok?
+
+
+
+
+    ;; (let [application-reviewed-eka (query-application local-query sonja application-id-reviewed-eka) => truthy
+    ;;       application-reviewed-toka (query-application local-query sonja application-id-reviewed-toka) => truthy
+    ;;       application-kolmas (query-application local-query sonja application-id-kolmas) => truthy]
+    ;;   (println "eka tasks" (:id application-reviewed-eka))
+    ;;   (:state application-reviewed-eka) => "submitted")))))

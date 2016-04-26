@@ -112,4 +112,3 @@
 (mongocheck :applications (timestamp-is-set :sent #{:sent :complementNeeded}) :state :sent)
 
 (mongocheck :applications (timestamp-is-set :closed #{:closed}) :state :closed)
-

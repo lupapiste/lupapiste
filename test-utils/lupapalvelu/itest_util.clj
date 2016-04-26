@@ -746,10 +746,3 @@
   (-> (query apikey :appeals :id app-id)
       :data
       (get (keyword verdict-id))))
-
- (defn create-reviewed-application [address]
-   (let [application  (create-and-submit-local-application
-                       sonja :propertyId sipoo-property-id :address address)
-         review-fields {:katselmustieto {:onkos "joo kyllä" :mites-meni "ihan hyvin"}}]
-     ;; plan: replicate what happens in ui when you fetch verdict from background, except substitute own xml instead of verdict.xml
-     (conj application review-fields)))

@@ -155,6 +155,7 @@
     (with-application command
       (fn [{:keys [id]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
+          ;;(println "update-application: called mongo/update-by-query w id" id "and changes" (dissoc  changes :schema-info))
           (if return-count? n nil))))))
 
 (defn application->command
@@ -511,4 +512,3 @@
 (defmacro defquery   [& args] `(defaction ~(meta &form) :query ~@args))
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
-

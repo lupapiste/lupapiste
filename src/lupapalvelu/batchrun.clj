@@ -3,7 +3,7 @@
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
-            [clojure.set]
+            [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.authorization :as auth]
@@ -386,8 +386,11 @@
 (defn poll-verdicts-for-reviews []
   ;; modified from fetch-verdicts.
   (let [orgs-by-id (orgs-for-review-fetch)
-        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in (keys orgs-by-id)}})
+        eligible-application-states (set/difference states/post-verdict-states states/terminal-states)
+        apps (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}})
+        reviewless-apps (filter )
         eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+    (println "queried for application in states" eligible-application-states)
     ;; (println "org-ids" org-ids)
     (doall
      (map (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
