@@ -58,10 +58,12 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   function defaultInputClasses() {
     var typeDefaults = {select: "form-input combobox",
+                        string: "form-input",
                         text: "form-input textarea",
                         "inline-string": "form-input inline",
                         "localized-string": "form-string",
-                        "check-string": "check-string"};
+                        "check-string": "check-string",
+                        "paragraph" : "form-paragraph"};
     return _.get( typeDefaults, (self.schema.inputType || self.schema.type), "");
   }
 
@@ -92,10 +94,30 @@ LUPAPISTE.DocgenInputModel = function(params) {
                        max: ko.observable(params.schema.max),
                        min: ko.observable(params.schema.min)};
 
-  self.disabled = ko.observable(params.isDisabled
-                                || !(service.isWhitelisted( self.schema ))
-                                || !self.authModel.ok(service.getUpdateCommand(self.documentId))
-                                || util.getIn(params, ["model", "disabled"]));
+  function authState( state ) {
+    var commands = _.get( self.schema.auth, state );
+    if( _.isArray( commands) && _.size( commands )) {
+      return _.some( commands, self.authModel.ok );
+    }
+  }
+
+  self.disabled = ko.pureComputed( function() {
+    var disabled = params.isDisabled
+          || !(service.isWhitelisted( self.schema ))
+          || !self.authModel.ok(service.getUpdateCommand(self.documentId))
+          || util.getIn(params, ["model", "disabled"]);
+    var authDisabled = authState( "disabled" );
+    if( _.isBoolean( authDisabled ) ) {
+      disabled = disabled || authDisabled;
+    }
+    var authEnabled = authState( "enabled" );
+    if( _.isBoolean( authEnabled ) ) {
+      disabled = disabled || !authEnabled;
+    }
+    return disabled;
+  });
+
+    ko.observable();
   var save = function(val) {
     service.updateDoc(self.documentId,
       [[params.path, val]],

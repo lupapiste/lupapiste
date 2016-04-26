@@ -13,21 +13,35 @@ Open task
   Wait Until  Element should be visible  xpath=//section[@id="task"]/h1/span[contains(., "${name}")]
   Wait Until  Element should be visible  taskAttachments
 
-Edit katselmus
-  [Arguments]  ${state}  ${date}  ${name}  ${notes}
-  Test id disabled  review-done
-  Select From List by test id  katselmus.tila  ${state}
+Edit review date
+  [Arguments]  ${date}
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
-  Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}
-  Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ${notes}
-  Sleep  2s
   Wait for jQuery
-  Test id enabled  review-done
+  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  ${date}
+
+Edit katselmus
+  [Arguments]  ${select}  ${item}  ${date}  ${name}  ${notes}
+  Test id disabled  review-done
+  Select From List by test id  ${select}  ${item}
+  Edit review date  ${date}
+  Wait for jQuery
+  Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}
+  Wait for jQuery
+  Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ${notes}
+  Wait for jQuery
+  Wait until  Test id enabled  review-done
+
+Edit R katselmus
+  [Arguments]  ${state}  ${date}  ${name}  ${notes}
+  Edit katselmus  katselmus.tila  ${state}  ${date}  ${name}  ${notes}
+
+Edit YA katselmus
+  [Arguments]  ${type}  ${date}  ${name}  ${notes}
+  Edit katselmus  katselmuksenLaji  ${type}  ${date}  ${name}  ${notes}
 
 Open review
   [Arguments]  ${index}
-  Click element  jquery=tr[data-test-index=${index}] td[data-test-column=requirement] a
+  Wait until  Click element  jquery=tr[data-test-index=${index}] td[data-test-column=requirement] a
   Wait test id visible  review-done
 
 Return from review
@@ -62,17 +76,20 @@ Test id editable
 
 Show checkboxes
   Execute Javascript  $("table.review-buildings-table tbody input").height(10)
+  Execute Javascript  $("input[data-test-id='katselmus.tiedoksianto']").height(10)
 
 Review checkboxes enabled
   Show checkboxes
   Element should not be visible  jquery=table.review-buildings-table tbody input:disabled
+  Element should not be visible  jquery=input[data-test-id="katselmus.tiedoksianto"]:disabled
 
 Review checkboxes disabled
   Show checkboxes
   Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
+  Element should not be visible  jquery=input[data-test-id="katselmus.tiedoksianto"]:enabled
 
 Review frozen
-  Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3
+  Wait until  Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3
   Test id disabled  review-done
   Element should not be visible  jquery=table.review-buildings-table tbody select:enabled
   Review checkboxes disabled

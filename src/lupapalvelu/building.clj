@@ -5,6 +5,26 @@
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]))
 
+(defn- doc->building-data [{{national-id :value} :valtakunnallinenNumero {short-id :value} :tunnus}]
+  (when (or national-id short-id)
+    {:national-id national-id
+     :short-id    short-id}))
+
+(defn building-ids
+  "Gathers building-id data from documents."
+  [{:keys [documents buildings] :as application}]
+  (->> (map :data documents)
+       (map doc->building-data)
+       (remove nil?)))
+
+(defn building-id-mapping
+  "Returns mapping from building short-id to national-id."
+  [application]
+  (->> (building-ids application)
+       (map (juxt :national-id :short-id))
+       (remove (partial some nil?))
+       (into {})))
+
 (defn buildingId-in-document?
   "Predicate to validate that given operation id matches document's operation id.
    Document schema is checked to contain valtakunnallinenNumero"

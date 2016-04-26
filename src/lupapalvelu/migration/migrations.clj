@@ -2,7 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
-            [clojure.set :refer [rename-keys]]
+            [clojure.set :refer [rename-keys] :as set]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
@@ -17,6 +17,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as op]
@@ -1785,11 +1786,11 @@
 
 (defmigration add-original-file-id-for-attachment-versions
   {:apply-when (pos? (mongo/count :applications
-                                  {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                                  {:attachments.versions {$elemMatch {:fileId {$exists true}
                                                                       :originalFileId {$exists false}}}}))}
   (update-applications-array :attachments
                              add-original-file-id-for-versions-and-latestVersion
-                             {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                             {:attachments.versions {$elemMatch {:fileId {$exists true}
                                                                  :originalFileId {$exists false}}}}))
 
 #_(defmigration rename-hankkeen-kuvaus-rakennuslupa-back-to-hankkeen-kuvaus ;; TODO: migrate, LPK-1448
@@ -1949,6 +1950,61 @@
               (if (map? task-updates)
                 (mongo/update-n collection {:_id id} {$set task-updates})
                 0)))))
+
+(defn remove-empty-buildings [{{rakennus :rakennus} :data :as katselmus-doc}]
+  (let [rakennus-keys (keys rakennus)
+        new-rakennus-map (reduce
+                           (fn [acc index]
+                             (let [{rakennus-data :rakennus} (index acc)
+                                   unwrapped-data (tools/unwrapped rakennus-data)
+                                   all-empty? (every? util/empty-or-nil? (vals unwrapped-data))]
+                               (if all-empty?
+                                 (dissoc acc index)
+                                 acc)))
+                           rakennus
+                           rakennus-keys)]
+    (when-not (= (count rakennus-keys) (count (keys new-rakennus-map)))
+      ; keys have been dissociated, return katselmus document with updated rakennus data
+      (assoc-in katselmus-doc [:data :rakennus] new-rakennus-map))))
+
+
+(defmigration cleanup-empty-buildings-from-tasks
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                {:keys [id tasks]} (mongo/select collection {:tasks {$elemMatch {:schema-info.name "task-katselmus" :state {$ne "sent"}}}} [:tasks])]
+            (let [katselmus-tasks (filter #(and
+                                            (= (get-in % [:schema-info :name]) "task-katselmus")
+                                            (not= "sent" (:state %)))
+                                          tasks)
+                  updated-tasks   (->> (map remove-empty-buildings katselmus-tasks)
+                                       (remove nil?))
+                  task-updates    (when (seq updated-tasks)
+                                    (apply merge
+                                           (map #(mongo/generate-array-updates :tasks
+                                                                               tasks
+                                                                               (fn [task] (= (:id task) (:id %)))
+                                                                               "data.rakennus"
+                                                                               (get-in % [:data :rakennus]))
+                                                updated-tasks)))]
+              (if (map? task-updates)
+                (mongo/update-n collection {:_id id} {$set task-updates})
+                0)))))
+
+(defmigration image-jpeg
+  {:apply-when (pos? (mongo/count :fs.files {:contentType "image/jpg"}))}
+  (mongo/update-n :fs.files {:contentType "image/jpg"} {$set {:contentType "image/jpeg"}} :multi true))
+
+(defmigration fix-content-types
+  (let [content-types (mongo/distinct :fs.files "contentType")
+        all-unallowed-types (set (remove #(re-matches mime/mime-type-pattern %) content-types))
+        localized-unallowed-types #{"application/vnd.ms-outlook" "application/msworks"}
+        unallowed-types (set/difference all-unallowed-types localized-unallowed-types)]
+
+    (reduce + 0
+      (for [f (mongo/select :fs.files {:contentType {$in unallowed-types}})
+           :let [{:keys [id filename]} f
+                 content-type (mime/mime-type filename)]]
+        (mongo/update-n :fs.files {:_id id} {$set {:contentType content-type}})))))
 
 ;;
 ;; ****** NOTE! ******

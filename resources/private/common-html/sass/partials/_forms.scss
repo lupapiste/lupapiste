@@ -402,7 +402,12 @@ input.form-input.inline {
 }
 
 .form-input.textarea {
-  height: $baseline *7;
+  height: $baseline *8;
+  width: 80%;
+}
+
+.form-input.textarea.high {
+  height: $baseline *9;
   width: 80%;
 }
 
@@ -427,6 +432,11 @@ input.form-input.inline {
 
 .form-input.medium {
  width: $cols2;
+}
+
+.form-paragraph {
+  white-space: pre-wrap;
+  padding-left: 1em;
 }
 
 // docgen-spefic styles
@@ -1028,6 +1038,10 @@ $max-columns: 12;
 }
 
 @mixin label-checkbox ($label-cls, $size: $lupicon-size ) {
+  label.#{$label-cls} {
+  width: 100%;
+  display: inline-block;
+}
   .#{$label-cls}:before {
     @include lupicon-font( $size );
     content: "\e603";
@@ -1046,7 +1060,8 @@ $max-columns: 12;
 
   input[type=checkbox]:disabled + .#{$label-cls}:before {
     cursor: initial;
-    opacity: .5;
+    color: $checkbox-color;
+    background-color: $input-disabled-background-color;
   }
 }
 
@@ -1074,8 +1089,17 @@ $max-columns: 12;
 
   .checkbox-wrapper {
     border: 1px solid $checkbox-border-color;
-    padding: 7px;
+    padding: {
+      left: 7px;
+      right: 0;
+      bottom: 7px;
+      top: 7px;
+    }
   }
+  .checkbox-wrapper--disabled {
+    background-color: $input-disabled-background-color;
+  }
+
   .radio-wrapper {
     border: 1px solid $radio-border-color;
     padding: $marginS $marginL $marginS $marginS;
@@ -1126,6 +1150,7 @@ $max-columns: 12;
   }
 
   input[type=checkbox], input[type=radio] {
+    display: inherit;
     opacity: 0;
     width: 0;
     height: 0;

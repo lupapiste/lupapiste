@@ -16,14 +16,23 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo])
+  (:import [org.joda.time DateTimeFieldType]
+           [org.joda.time.format DateTimeFormatterBuilder]))
 
 ;;
 ;; Validation:
 ;;
 
 (def default-max-len 255)
-(def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
+;; Finnish date format d.m.yyyy, where the year must be four digits.
+(def dd-mm-yyyy (-> (DateTimeFormatterBuilder.)
+                    (.appendDayOfMonth 1)
+                    (.appendLiteral ".")
+                    (.appendMonthOfYear 1)
+                    (.appendLiteral ".")
+                    (.appendFixedDecimal (DateTimeFieldType/year) 4)
+                    (.toFormatter)))
 
 (def- latin1 (java.nio.charset.Charset/forName "ISO-8859-1"))
 
@@ -215,6 +224,20 @@
     (some->> (inspect-repeating-for-duplicate-rows data fields-to-validate)
              (mapcat build-row-result))))
 
+(defmethod validate-element :poikkeus-olemassa-olevat-rakennukset
+  [info data path element]
+  (let [fields (-> data
+                   tools/unwrapped
+                   (select-keys [:pintaAla :kayttotarkoitusKoodi]))
+        fields (filter #(ss/blank? (last %)) fields)]
+    (when (= (count fields) 1)
+      (let [field-key (ffirst fields)
+            path      (concat (map keyword path) [field-key])
+            element   (find-by-name (:body element) [field-key])]
+        {:path     path
+         :element  (assoc element :locKey (resolve-element-loc-key info element path))
+         :document (:document info)
+         :result   [:tip "illegal-value:required"]}))))
 
 ;;
 ;; Neue api:

@@ -22,8 +22,7 @@
     </div>
 
     <div class="review-done"
-         data-bind="visible: $root.authorization.ok('review-done'),
-                    if: $root.authorization.ok('review-done') && isReview()">
+         data-bind="visible: $root.authorization.ok('review-can-be-marked-done')">
       <div data-bind="ltext: 'task.review-done.help'"></div>
       <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.reviewSubmitOk() && !$root.processing()" class="positive">
         <i class="lupicon-eye"></i>
@@ -35,7 +34,6 @@
       <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, addAttachmentDisabled: $root.addAttachmentDisabled, authorization: $root.authorization}}"></div>
     </div>
 
-    <!--<div id="taskDocgen" class="docgen-content" ></div>-->
     <!-- ko if: $data.addedToService -->
      <div data-bind="component: {name: 'docgen-group',
                                  params: {schema: $data.schema,
@@ -43,7 +41,7 @@
                                           applicationId: $data.applicationId,
                                           documentId: $data.id,
                                           service: $root.dataService,
-                                          authModel: lupapisteApp.models.applicationAuthModel,
+                                          authModel: $root.authorization,
                                           i18npath: [$data.schema.info.i18name || $data.schema.info.name]}}"></div>
     <!-- /ko -->
   </section>

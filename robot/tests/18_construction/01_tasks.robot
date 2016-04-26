@@ -84,7 +84,7 @@ Approve Aloituskokous
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
   Xpath Should Match X Times  //section[@id="task"]//input[@readonly]  0
-  Edit katselmus  osittainen  1.5.2016  Sonja Sibbo  Hello world!
+  Edit R katselmus  osittainen  1.5.2016  Sonja Sibbo  Hello world!
 
 Return to listing
   Return from review
@@ -92,22 +92,28 @@ Return to listing
   Review row has attachments  0
   Review row note  0  Hello world!
 
-Partial review generates new review
+Invalid date prevents review done
   Open review  0
+  Wait until  Test id editable  review-done
+  Edit review date  1.2.34
+  Wait until  Test id disabled  review-done
+  Edit review date  1.5.2016
+  Wait for jQuery
+  Wait until  Test id editable  review-done
+
+Partial review generates new review
   Finalize review
   Review row check  1  Aloituskokous  ${EMPTY}  ${EMPTY}  ${EMPTY}  ${EMPTY}
 
 The review task cannot be deleted after the review
   Open review  0
-  Click enabled by test id  delete-task
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Element should be visible  jquery=#dynamic-ok-confirm-dialog
-  Confirm  dynamic-ok-confirm-dialog
+  Wait until  List Selection Should Be  xpath=//select[@data-test-id="katselmus.tila"]  Osittainen
+  No such test id  delete-task
   Return from review
 
 The same thing happens if the new review is also partially reviewed
   Open review  1
-  Edit katselmus  osittainen  20.5.2016  Sonja Igen  ${EMPTY}
+  Edit R katselmus  osittainen  20.5.2016  Sonja Igen  ${EMPTY}
   Finalize review
   Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
   No such test id  show-review-note-1
@@ -115,7 +121,7 @@ The same thing happens if the new review is also partially reviewed
 
 Making the latest Aloituskokous final will also finalize the first but not the second
   Open review  2
-  Edit katselmus  lopullinen  22.5.2016  Ronja Rules  Done!
+  Edit R katselmus  lopullinen  22.5.2016  Ronja Rules  Done!
   Finalize review
   Review row check  0  Aloituskokous  1.5.2016  Sonja Sibbo  Lopullinen  Kyllä
   Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
@@ -166,16 +172,30 @@ Add katselmus
   Select From List By Value  choose-task-subtype   muu tarkastus
   Input text  create-task-name  uus muu tarkastus
   Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
-  Task count is  task-katselmus  5
+  Wait Until  Element should be visible  taskAttachments
 
 Katselmuksenlaji is set and disabled
-  Open task  uus muu tarkastus
   Element should be disabled  xpath=//section[@id="task"]//select[@data-test-id='katselmuksenLaji']
   List Selection Should Be  xpath=//section[@id="task"]//select[@data-test-id='katselmuksenLaji']  muu tarkastus
+  Click by test id  back-to-application-from-task
+
+New katselmus is listed
+  Tab should be visible  tasks
+  Task count is  task-katselmus  5
+
+Sonja adds an end review
+  Click enabled by test id  application-new-task
+  Wait until  Element should be visible  dialog-create-task
+  Select From List By Value  choose-task-type   task-katselmus
+  Wait until  Element should be visible  choose-task-subtype
+  Select From List By Value  choose-task-subtype   osittainen loppukatselmus
+  Input text  create-task-name  End review
+  Click enabled by test id  create-task-save
+  Wait Until  Element should be visible  taskAttachments
+  Review checkboxes enabled
+  Return from review
 
 Verify post-verdict attachments - Aloituskokous
-  Click by test id  back-to-application-from-task
   Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
@@ -186,8 +206,6 @@ Katselmus task created in an YA application does not include any Rakennus inform
   Fetch YA verdict
   Open tab  tasks
   Create katselmus task  task-katselmus-ya  uus muu ya-tarkastus
-  Task count is  task-katselmus-ya  1
-  Open task  uus muu ya-tarkastus
   Wait until  Element should not be visible  xpath=//div[@id='taskDocgen']//div[@data-repeating-id='rakennus']
   [Teardown]  Logout
 
@@ -226,8 +244,24 @@ Mikko sets started past date for YA application (LPK-1054)
   Wait Until  Element Text Should Be  jquery=[data-test-id=task-started-by]  Intonen Mikko
   [Teardown]  Logout
 
+Sonja comes back and finalizes YA review
+  Sonja logs in
+  Open application  ${appname-ya}  ${propertyId}
+  Open tab  tasks
+  Open task  uus muu ya-tarkastus
+  Edit YA katselmus  Aloituskatselmus  14.4.2016  Some Sonja  Description is mandatory for YA reviews.
+  # TODO: Sending requires fully formed application
+  #Finalize review
+  [Teardown]  Logout
+
+
+
+
 # TODO: Sonja sets ready past date for YA application (LPK-1054)
 # This would require a well-formed application with all the required fields.
+
+No errors so far
+  There are no frontend errors
 
 *** Keywords ***
 
@@ -240,7 +274,7 @@ Create katselmus task
   Run Keyword If  $taskSubtype  Select From List By Value  choose-task-subtype   ${taskSubtype}
   Input text  create-task-name  ${taskName}
   Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
+  Wait test id visible  review-done
 
 Set date and check
   [Arguments]  ${button}  ${span}  ${date}
@@ -254,4 +288,3 @@ Set date and check
   Wait Until  Element should not be visible  modal-datepicker-date
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element Text Should Be  jquery=[data-test-id=${span}]  ${date}
-

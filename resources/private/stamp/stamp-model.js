@@ -113,14 +113,9 @@ LUPAPISTE.StampModel = function(params) {
   self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
   self.page = self.stampFields.page;
   self.extraInfo = self.stampFields.extraInfo;
-  self.buildingId = ko.observable("");
+  self.includeBuildings = self.stampFields.includeBuildings;
   self.kuntalupatunnus = self.stampFields.kuntalupatunnus;
   self.section = self.stampFields.section;
-
-  self.buildingIdList = self.stampFields.buildingIdList;
-  self.showBuildingList = ko.computed(function() {
-    return self.buildingIdList().length > 0;
-  });
 
   var transparencies = _.map([0,20,40,60,80], function(v) {
     return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
@@ -146,6 +141,7 @@ LUPAPISTE.StampModel = function(params) {
       .command("stamp-attachments", {
         id: self.application.id(),
         text: self.text(),
+        lang: loc.getCurrentLanguage(),
         timestamp: new Date(self.date()).getTime(),
         organization: self.organization(),
         files: _.map(self.selectedFiles(), "id"),
@@ -154,7 +150,7 @@ LUPAPISTE.StampModel = function(params) {
         page: self.page(),
         transparency: self.transparency(),
         extraInfo: self.extraInfo(),
-        buildingId: self.buildingId() ? self.buildingId() : "",
+        includeBuildings: !!self.includeBuildings(),
         kuntalupatunnus: self.kuntalupatunnus(),
         section: getSection()
       })

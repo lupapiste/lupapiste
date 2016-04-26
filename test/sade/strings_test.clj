@@ -135,6 +135,25 @@
   (lower-case "a")   => "a"
   (lower-case "A")   => "a")
 
+(facts "in-lower-case?"
+  (facts "nil"
+    (in-lower-case? nil) => false
+    (in-lower-case? (lower-case nil)) => false)
+
+  (facts "empty"
+    (in-lower-case? "") => true
+    (in-lower-case? (lower-case "")) => true)
+
+  (in-lower-case? "a")   => true
+  (in-lower-case? "aaaaaaaaaaaaaaa")  => true
+
+  (in-lower-case? "A")                => false
+  (in-lower-case? "AAAAAAAAAAAAAAA")  => false
+  (in-lower-case? "AaAaAaAaAaAaAaA")  => false
+
+  (in-lower-case? (lower-case "A"))   => true
+  (in-lower-case? (lower-case "AaAaAaAaAaAaAaA"))   => true)
+
 (fact "trim"
   (trim nil)    => nil
   (trim "")     => ""

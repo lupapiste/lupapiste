@@ -383,6 +383,7 @@
                               :stamp-attachments
                               :id application-id
                               :timestamp ""
+                              :lang "fi"
                               :text "OK"
                               :organization ""
                               :files [(:id attachment)]
@@ -390,7 +391,7 @@
                               :yMargin 0
                               :page "first"
                               :extraInfo ""
-                              :buildingId ""
+                              :includeBuildings true
                               :kuntalupatunnus ""
                               :section "")
         file-id (get-in (:value job) [(-> job :value keys first) :fileId])]
@@ -430,6 +431,7 @@
                               :stamp-attachments
                               :id application-id
                               :timestamp ""
+                              :lang "fi"
                               :text "OK"
                               :organization ""
                               :files [(:id attachment)]
@@ -437,7 +439,7 @@
                               :yMargin 0
                               :page "all"
                               :extraInfo ""
-                              :buildingId ""
+                              :includeBuildings false
                               :kuntalupatunnus ""
                               :section "")]
           resp => ok?

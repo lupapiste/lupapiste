@@ -1,6 +1,7 @@
 (ns lupapalvelu.tasks
   (:require [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
+            [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [def-]]
@@ -27,6 +28,11 @@
                  "osittainen loppukatselmus"
                  "loppukatselmus"
                  "ei tiedossa"])
+
+(def task-states #{:requires_user_action :requires_authority_action :ok :sent})
+
+(defn all-states-but [& states]
+  (apply disj task-states states))
 
 (def- katselmuksenLaji
   {:name "katselmuksenLaji"
@@ -75,7 +81,9 @@
                     :whitelist {:roles [:authority] :otherwise :disabled}
                     :i18nkey "task-katselmus.katselmus.tila"
                     :body [{:name "osittainen"} {:name "lopullinen"}]}
-                   {:name "kayttoonottava" :readonly-after-sent true :type :checkbox :inputType :checkbox-wrapper
+                   {:name "kayttoonottava" :readonly-after-sent true
+                    :type :checkbox :inputType :checkbox-wrapper
+                    :auth {:enabled [:is-end-review]}
                     :whitelist {:roles [:authority] :otherwise :disabled}}
                    ]}]}
    {:name "katselmus" :type :group
@@ -90,7 +98,11 @@
      {:name "pitoPvm" :type :date :required true :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}
      {:name "pitaja" :type :string :required true :readonly-after-sent true
-            :whitelist {:roles [:authority] :otherwise :disabled}}
+      :whitelist {:roles [:authority] :otherwise :disabled}}
+     {:name "tiedoksianto" :type :checkbox :inputType :checkbox-wrapper
+      :readonly-after-sent true
+      :whitelist {:roles [:authority] :otherwise :disabled}
+      :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
       :body [{:name "kuvaus" :type :text :max-len 4000 :css []
               :whitelist {:roles [:authority] :otherwise :disabled} }
@@ -104,7 +116,8 @@
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
-          (update-in (tools/schema-body-without-element-by-name task-katselmus-body "rakennus" "tila" "katselmuksenLaji")
+          (update-in (tools/schema-body-without-element-by-name task-katselmus-body
+                                                                "rakennus" "tila" "katselmuksenLaji" "tiedoksianto")
                      [1 :body 2 :body 0] assoc :required true)))
 
 (schemas/defschemas
@@ -116,9 +129,10 @@
            :section-help "authority-fills"
            :i18nprefix "task-katselmus.katselmuksenLaji"
            } ; Had :i18npath ["katselmuksenLaji"]
-        :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
-           ["rakennus::4"]
+    :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
+           ["katselmus/tiedoksianto::2"]
+           ["rakennus::4"]
            {:h2 "task-katselmus.huomautukset"}
            ["katselmus/huomautukset/kuvaus::3"]
            ["katselmus/huomautukset/maaraAika" "katselmus/huomautukset/toteaja" "katselmus/huomautukset/toteamisHetki"]
@@ -144,14 +158,14 @@
     :template "form-grid-docgen-group-template"
     :body task-katselmus-body-ya}
 
-   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
+   {:info {:name "task-vaadittu-tyonjohtaja" :type :task :subtype :foreman :order 10}
     :body [{:name "osapuolena" :type :checkbox}
            {:name "asiointitunnus" :type :string :max-len 17}]}
 
    {:info {:name "task-lupamaarays" :type :task :order 20}
     :rows [["maarays::3"] ["kuvaus::3"]]
     :template "form-grid-docgen-group-template"
-    :body [{:name "maarays" :type :text :max-len 20000 :readonly true}
+    :body [{:name "maarays" :type :text :inputType :paragraph :max-len 20000 :readonly true}
            {:name "kuvaus"  :type :text :max-len 4000 }
            {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
 
@@ -238,3 +252,6 @@
          (= :task (-> % :info :type))
          (allowed-task-schemas (-> % :info :name)))
       (vals (schemas/get-schemas schema-version)))))
+
+(defn task-attachments [{:keys [attachments]} task-id]
+  (filter #(= task-id (get-in % [:target :id])) attachments))
