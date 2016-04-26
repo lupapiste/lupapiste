@@ -9,7 +9,7 @@
 "stamp.building" "fi" "Rakennus"
 "stamp.building" "sv" "Byggnad"
 "stamp.include-buildings" "fi" "Lisää asemapiirrokseen kaikki rakennustunnukset"
-"stamp.include-buildings" "sv" ""
+"stamp.include-buildings" "sv" "Bifoga alla fastighetsbeteckningar till planritningen"
 "stamp.cancel" "fi" "Peruuta"
 "stamp.cancel" "sv" "Avbryt"
 "stamp.comment" "fi" "Leimattu"
