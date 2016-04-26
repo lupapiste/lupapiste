@@ -192,9 +192,13 @@
              #(update-in % [:child] concat [{:tag :verottajanTvLlKytkin}])))
 
 (def- katselmustieto_220
-  (update-in katselmustieto_216 [:child] mapping-common/update-child-element
-    [:Katselmus :katselmuspoytakirja]
-    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]}))
+  (-> katselmustieto_216
+    (update-in [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus]
+      {:tag :KatselmuksenRakennus :child rakennustunnus_220})
+    (update-in [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuspoytakirja]
+      {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]})))
 
 
 (def rakennuslupa_to_krysp_212
