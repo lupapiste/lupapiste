@@ -1265,7 +1265,7 @@ Test id should contain
 Javascript?
   [Arguments]  ${expression}
   ${result}=  Execute JavaScript  return ${expression};
-  Should be true  ${result}
+  Wait Until  Should be true  ${result}
 
 
 # Frontend error log
