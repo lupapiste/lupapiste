@@ -5,6 +5,7 @@
       [clojure.data.xml :refer :all]
       [midje.sweet :refer :all]
       [midje.util :refer [testable-privates]]
+      [net.cgrand.enlive-html :as enlive]
       [lupapalvelu.itest-util :refer :all]
       [lupapalvelu.factlet :refer :all]
       [lupapalvelu.domain :as domain]
@@ -313,21 +314,26 @@
                       (get-in application [:attachments 0 :sent]) => pos?
                       (:state application) => "verdictGiven"))))
 
-(fact* "Katselmus is transferred to the backing system"
+(fact* "Katselmus is transferred to the backing system with building info"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id :address "Katselmuskatu 17")
         application-id (:id application)
         _ (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
-        task-id (:taskId (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus" :taskSubtype "rakennekatselmus")) => truthy]
+        _ (command sonja :check-for-verdict :id application-id) => ok?
+        application (query-application sonja application-id)
+        task-id (-> application :tasks first :id)
+        building (first (:buildings application))
+        ]
+
+    (fact "Building has operation"
+      (:operationId building) =not=> s/blank?)
+
+    ;(println building)
 
        (upload-attachment-to-target sonja application-id nil true task-id "task") ; Related to task
        (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
                                                                                       ".katselmuksen_tai_tarkastuksen_poytakirja"))
 
-       (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.rakennus.jarjestysnumero" "1"]
-                                                                             ["rakennus.0.rakennus.rakennusnro" "001"]
-                                                                             ["rakennus.0.rakennus.valtakunnallinenNumero" "1234567892"]
-                                                                             ["rakennus.0.rakennus.kiinttun" (:propertyId application)]
-                                                                             ["rakennus.0.tila.tila" "osittainen"]]) => ok?
+       (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.tila.tila" "osittainen"]]) => ok?
 
        (fact "Review done fails as missing required info for KRYSP transfer"
          (command sonja :review-done :id application-id :taskId task-id :lang "fi") => (partial expected-failure? :error.missing-parameters))
@@ -348,13 +354,25 @@
              (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
                    katselmuksenRakennus (xml/select1 xml [:katselmuksenRakennustieto :KatselmuksenRakennus])
                    liitetieto (xml/select1 katselmus [:liitetieto])]
+
+               (fact "Operation ID is transferred"
+                 (let [ids (xml/select katselmuksenRakennus [:MuuTunnus])
+                      toimenpide-id (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "toimenpideId"))]))
+                      lupapiste-id  (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "Lupapiste"))]))]
+
+                   (fact "with sovellus=toimenpideId"
+                     (xml/get-text toimenpide-id [:MuuTunnus :tunnus]) =not=> s/blank?)
+
+                   (fact "with sovellus=Lupapiste"
+                     (xml/get-text lupapiste-id [:MuuTunnus :tunnus]) =not=> s/blank?)))
+
                (xml/get-text katselmus :osittainen) => "osittainen"
                (xml/get-text liitetieto :kuvaus) => "Katselmuksen p\u00f6yt\u00e4kirja"
                (xml/get-text liitetieto ::tyyppi) => "katselmuksen_tai_tarkastuksen_poytakirja"
-               (xml/get-text katselmuksenRakennus :rakennusnro) => "001"
-               (xml/get-text katselmuksenRakennus :jarjestysnumero) => "1"
-               (xml/get-text katselmuksenRakennus :kiinttun) => (:propertyId application)
-               (xml/get-text katselmuksenRakennus :valtakunnallinenNumero) => "1234567892")))))
+               (xml/get-text katselmuksenRakennus :rakennusnro) => (:localShortId building)
+               (xml/get-text katselmuksenRakennus :jarjestysnumero) => (:index building)
+               (xml/get-text katselmuksenRakennus :kiinttun) => (:propertyId building)
+               (xml/get-text katselmuksenRakennus :valtakunnallinenNumero) => (:nationalId building))))))
 
 (fact* "Fully populated katselmus is transferred to the backing system"
 

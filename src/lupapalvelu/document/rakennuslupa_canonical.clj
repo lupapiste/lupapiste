@@ -46,7 +46,8 @@
         description-parts (remove ss/blank? [tunnus (operation-description application op-id)])
         defaults (util/assoc-when {:jarjestysnumero nil
                                    :kiinttun (:propertyId application)
-                                   :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}}
+                                   :muuTunnustieto [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                    {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}]}
                    :rakennusnro rakennusnro
                    :rakennuksenSelite (ss/join ": " description-parts)
                    :valtakunnallinenNumero valtakunnallinenNumero)]
@@ -341,9 +342,8 @@
                                                                 building-canonical (util/assoc-when
                                                                                     building-canonical
                                                                                     :muuTunnustieto (when-let [op-id (:operationId building)]
-                                                                                                      (list {:MuuTunnus
-                                                                                                             {:tunnus op-id
-                                                                                                              :sovellus "toimenpideId"}}))
+                                                                                                      [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                                                                       {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
                                                                                     :rakennuksenSelite (:description building)) ; v2.2.0
                                                                 ]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
