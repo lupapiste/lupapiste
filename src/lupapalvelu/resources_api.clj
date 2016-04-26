@@ -24,7 +24,7 @@
 
 (defschema BackendReservationSlot
   {:time     LocalDateTimeRange
-   :serviceClassificationCode sc/Str
+   :service  sc/Str
    :capacity sc/Int})
 
 (defn ->FrontendCalendar [cal]
@@ -61,9 +61,9 @@
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
          (let [{start :start end :end} s]
-           {:time {:start (sade.util/to-xml-local-datetime start)
-                   :end (sade.util/to-xml-local-datetime end)}
-            :serviceClassificationCode "SCC123"
+           {:time     {:start (sade.util/to-xml-local-datetime start)
+                       :end (sade.util/to-xml-local-datetime end)}
+            :service  "SCC123"
             :capacity 1})) slots))
 
 (defquery calendar

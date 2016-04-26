@@ -13,27 +13,18 @@ LUPAPISTE.CalendarService = function() {
     self.slots = ko.observableArray(slots);
   }
 
-  function ReservationSlot(startTime, endTime) {
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.duration = moment.duration(endTime.diff(startTime));
-    this.positionTop = ((startTime.hour() - 7) * 60 + startTime.minute()) + 'px';
-    this.height = this.duration.asMinutes() + 'px';
-    this.viewText = startTime.format("H:mm") + " - " + this.endTime.format("H:mm") + " Vapaa";
-  }
-
   var doFetchCalendarSlots = function(event) {
     ajax.query("calendar-slots", {calendarId: event.id, week: event.week, year: event.year})
       .success(function(data) {
-        var startOfWeek = moment().isoWeek(event.week).year(event.year).startOf('isoWeek');
+        var startOfWeek = moment().isoWeek(event.week).year(event.year).startOf('isoWeek').valueOf();
         var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
-          var day = startOfWeek.clone().isoWeekday(i);
-          var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, 'day'); });
+          var day = moment(startOfWeek).isoWeekday(i);
+          var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.time.start, 'day'); });
           return new Weekday(event.id, day,
-            _.map(slotsForDay, function(s) { return new ReservationSlot(moment(s.time.start), moment(s.time.end)); }));
+            _.map(slotsForDay, function(s) { return { start: s.time.start, end: s.time.end,
+                                                      duration: moment(s.time.end).diff(s.time.start) }; }));
         });
 
-        console.log(weekdays);
         self.calendarWeekdays(weekdays);
       })
       .call();

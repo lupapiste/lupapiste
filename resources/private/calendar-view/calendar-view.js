@@ -25,6 +25,20 @@ var calendarView = (function($) {
 
     self.timelineTimes = ko.observableArray(timelineTimesBuilder());
 
+    self.slotPositionTop = function(slot) {
+      var start = moment(slot.start);
+      return ((start.hour() - self.firstFullHour()) * 60 + start.minute()) + 'px';
+    };
+
+    self.slotHeight = function(slot) {
+      var duration = moment.duration(slot.duration);
+      return duration.asMinutes() + 'px';
+    };
+
+    self.slotViewText = function(slot) {
+      return moment(slot.start).format("H:mm") + " - " + moment(slot.end).format("H:mm") + " Vapaa";
+    };
+
     self.clickHandler = function(clazz) {
       if (clazz === 'timeline-slot') {
         hub.send("calendarView::timelineSlotClicked",

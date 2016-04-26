@@ -28,7 +28,8 @@
               <!-- /ko -->
               <!-- ko foreach: slots -->
               <div class="reservation-slot" data-bind="click: $root.clickHandler.bind({ slot: $data, weekday: $parent }, 'reservation-slot'),
-                                                       style: { top: positionTop, height: height }, text: viewText"></div>
+                                                       style: { top: $root.slotPositionTop($data), height: $root.slotHeight($data) },
+                                                       text: $root.slotViewText($data)"></div>
               <!-- /ko -->
             </div>
           </td>
