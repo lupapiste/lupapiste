@@ -90,17 +90,35 @@
           ]
       (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
       (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (println "address & id for verdict-given" (:address application-verdict-given) (:id application-verdict-given))
+      (println "address & id for submitted" (:address application-verdict-given) (:id application-submitted))
       (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
             application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
+
         (:state application-submitted) => "submitted"
         (:state application-verdict-given) => "verdictGiven")
       (count (:tasks application-verdict-given)) => 0
 
 
       (against-background [(app-from-krysp/get-application-xml-by-application-id anything) => (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")]
-        (fact "checking verdicts and sending emails to the authorities related to the applications"
+        (fact "checking verdicts for reviews in correct states"
           (count (batchrun/poll-verdicts-for-reviews)) => pos?
-          (count (filter task-is-review? (:tasks (query-application local-query sonja application-id-verdict-given)))) => pos?)))))
+          (println "batchrun returned happily")
+          (let [count-reviews #(count
+                                (filter task-is-review? (:tasks (query-application local-query sonja %))))]
+            (count-reviews application-id-verdict-given) => 10
+            (count-reviews application-id-submitted) => 0)
+
+          ;; (count (filter task-is-review? (:tasks (query-application local-query sonja application-id-verdict-given)))) => pos?
+          ;; (count (filter task-is-review? (:tasks (query-application local-query sonja application-id-submitted)))) => 0
+          ))
+
+      (fact "existing tasks area preserved")
+      (let [resp (local-command sonja :check-for-verdict :id application-id-verdict-given)
+            task-count (:taskCount resp)]
+        (println "resp is" resp)
+        (println "task-count is" task-count))
+      )))
 
     ;; (local-command sonja :approve-application :id application-id-submitted :lang "fi") => ok?
 

@@ -350,8 +350,6 @@
     (fetch-asianhallinta-verdicts)
     (mongo/disconnect!)))
 
-
-
 (defn batchrun-user-for-review-fetch [orgs-by-id]
   ;; modified from fetch-verdicts.
   (let [org-ids (keys orgs-by-id)
@@ -372,7 +370,7 @@
       (if-not (s/blank? url)
         ;; url means there's a defined location (eg sftp) for polling xml verdicts
         (let [command (assoc (application->command app) :user eraajo-user :created (now))
-              result (verdict-api/do-check-for-verdict-w-review command)]
+              result (verdict/do-check-for-verdict-w-review command)]
           (when-not (nil? result) (println "app got non-nil result from va/dcfvwr:" id permitType organization ))
           result))))
   ;; (try
@@ -387,9 +385,8 @@
   (let [orgs-by-id (orgs-for-review-fetch)
         eligible-application-states (set/difference states/post-verdict-states states/terminal-states)
         apps (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}})
-        reviewless-apps (filter )
+        ;; reviewless-apps (filter #(some task-is-review? (:tasks %)) apps) ;; initial too-conservative filter
         eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
     (println "queried for application in states" eligible-application-states)
-    ;; (println "org-ids" org-ids)
     (doall
      (map (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
