@@ -6932,9 +6932,9 @@ div.alleYli-radioGroup {
 }
 /* line 1383, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1383, ../../../private/common-html/sass/partials/_forms.scss */
@@ -10960,376 +10960,6 @@ div.search i {
   float: left;
 }
 
-/* line 1, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins {
-  font-family: "Source Sans Pro", sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  color: #333333;
-}
-/* line 7, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins h1, #bulletins h2, #bulletins h3, #bulletins h4, #bulletins h5 {
-  font-family: "Source Sans Pro", sans-serif;
-  color: #333333;
-  text-transform: none;
-  margin-bottom: 6px;
-}
-/* line 14, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins h1 {
-  font-weight: 900;
-  font-size: 3.75rem;
-}
-/* line 19, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins h2 {
-  font-weight: 300;
-  font-size: 3rem;
-}
-/* line 24, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins h3 {
-  font-weight: 700;
-  font-size: 2rem;
-}
-/* line 29, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins h4 {
-  font-weight: 400;
-  font-size: 1.5rem;
-  text-transform: uppercase;
-}
-/* line 35, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins h5 {
-  font-weight: 700;
-  font-size: 1.125rem;
-}
-/* line 40, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins p {
-  margin-bottom: 20px;
-}
-/* line 44, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .intro {
-  font-weight: 300;
-  font-size: 1.375rem;
-  margin-top: 20px;
-}
-/* line 48, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .intro button {
-  margin-left: 20px;
-}
-/* line 53, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .help-toggle {
-  color: #0fbbf7;
-}
-/* line 56, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .help-toggle .lupicon-circle-question {
-  color: #0fbbf7;
-}
-/* line 58, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .help-toggle .lupicon-circle-question.expanded {
-  color: #0fbbf7;
-}
-/* line 64, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .help-text {
-  border-color: #0fbbf7;
-}
-/* line 69, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .help-arrow:before {
-  border-bottom-color: #0fbbf7;
-}
-/* line 75, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins input:focus {
-  border-color: #0fcff7;
-}
-/* line 84, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .blue-bg {
-  background-color: #0fa8f7;
-}
-/* line 86, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .blue-bg h1, #bulletins .blue-bg p {
-  color: #fff;
-}
-/* line 91, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .gray-bg {
-  background-color: #eeeeee;
-}
-/* line 95, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .content-center {
-  max-width: 1280px;
-  margin: 0 auto;
-  position: relative;
-  padding: 40px 0;
-}
-/* line 102, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .full {
-  width: 100%;
-  min-width: 320px;
-}
-/* line 107, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .slogan, #bulletins .ingress {
-  text-align: center;
-  width: 80%;
-  margin: 0 auto 20px;
-}
-/* line 115, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
-  color: #0fa8f7;
-}
-/* line 117, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
-  color: #0fcff7;
-}
-/* line 122, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .autocomplete-selection-wrapper.active {
-  border-color: #0fcff7;
-}
-/* line 124, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .autocomplete-selection-wrapper.active .tag-chevron {
-  color: #0fcff7;
-}
-/* line 129, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .search .search-icon {
-  color: #0fa8f7;
-}
-/* line 133, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .search.active .search-icon {
-  color: #0fcff7;
-}
-/* line 139, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
-  border-color: #0fcff7;
-}
-/* line 141, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
-  background-color: #0fbbf7;
-}
-/* line 143, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
-  background-color: #0fcff7;
-}
-/* line 152, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .form-grid textarea {
-  display: block;
-}
-/* line 154, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .form-grid textarea:focus {
-  color: #333333;
-  border-color: #0fcff7;
-}
-/* line 160, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .search-button-wrapper {
-  text-align: center;
-}
-/* line 163, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .search-button-wrapper button span:last-child {
-  padding-left: 6px;
-}
-/* line 164, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .search-button-wrapper button span:last-child:before {
-  content: "(";
-}
-/* line 167, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .search-button-wrapper button span:last-child:after {
-  content: ")";
-}
-/* line 176, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .bulletins-search h3 {
-  text-align: center;
-}
-/* line 180, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .bulletins-search .search-field i {
-  color: #0fa8f7;
-}
-/* line 184, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .bulletins-search .search-field.active i {
-  color: #0fcff7;
-}
-/* line 208, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins #application-bulletins-list th.sixth {
-  width: 5%;
-}
-/* line 214, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins #application-bulletins-list th > i {
-  color: #0fa8f7;
-  position: absolute;
-}
-/* line 218, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins #application-bulletins-list tbody > tr {
-  cursor: pointer;
-}
-/* line 224, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .bulletin-comment h5 {
-  display: inline-block;
-}
-/* line 227, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .bulletin-comment .help-toggle {
-  vertical-align: top;
-}
-/* line 230, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .bulletin-comment .user-info {
-  font-style: italic;
-}
-/* line 234, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins ul.bulletin-comment__attachment-list {
-  display: table;
-  list-style: none;
-  padding: 0;
-}
-/* line 238, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins ul.bulletin-comment__attachment-list li {
-  display: table-row;
-  padding: 0;
-}
-/* line 241, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins ul.bulletin-comment__attachment-list li span {
-  display: table-cell;
-  padding-right: 24px;
-}
-/* line 248, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins table.bulletin-attachments tr td {
-  word-wrap: break-word;
-}
-/* line 250, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins table.bulletin-attachments tr td:first-child {
-  padding-left: 12px;
-}
-/* line 256, ../../../private/common-html/sass/partials/_bulletins.scss */
-#bulletins .bulletin-tab-content h3 {
-  margin-bottom: 24px;
-}
-
-/* line 263, ../../../private/common-html/sass/partials/_bulletins.scss */
-#application-bulletin-tab .bulletin-state {
-  font-weight: bold;
-}
-/* line 266, ../../../private/common-html/sass/partials/_bulletins.scss */
-#application-bulletin-tab .bulletin-component {
-  margin-bottom: 24px;
-}
-/* line 269, ../../../private/common-html/sass/partials/_bulletins.scss */
-#application-bulletin-tab .back-button {
-  margin-bottom: 24px;
-}
-/* line 272, ../../../private/common-html/sass/partials/_bulletins.scss */
-#application-bulletin-tab .accordion_content {
-  padding: 12px;
-}
-/* line 275, ../../../private/common-html/sass/partials/_bulletins.scss */
-#application-bulletin-tab table {
-  margin: 0;
-}
-
-/* line 280, ../../../private/common-html/sass/partials/_bulletins.scss */
-.bulletin_text {
-  white-space: pre-wrap;
-}
-
-/* line 1, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment {
-  border: 1px solid #dddddd;
-  margin-bottom: 20px;
-}
-/* line 4, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__header {
-  background-color: #dddddd;
-  height: 40px;
-  padding: 6px 12px;
-  cursor: pointer;
-}
-/* line 10, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__index {
-  margin-right: 6px;
-}
-/* line 12, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__index:after {
-  content: ".";
-}
-/* line 16, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__name {
-  color: #f39129;
-  background-color: none;
-}
-/* line 217, ../../../private/common-html/sass/partials/_buttons.scss */
-.bulletin-comment .bulletin-comment__name:link, .bulletin-comment .bulletin-comment__name:visited {
-  color: #f39129;
-  background-color: none;
-}
-/* line 221, ../../../private/common-html/sass/partials/_buttons.scss */
-.bulletin-comment .bulletin-comment__name:hover {
-  color: #f7ac2e;
-  background-color: none;
-  text-decoration: none;
-}
-/* line 226, ../../../private/common-html/sass/partials/_buttons.scss */
-.bulletin-comment .bulletin-comment__name:active, .bulletin-comment .bulletin-comment__name.active {
-  color: #fbc732;
-  background-color: none;
-}
-/* line 230, ../../../private/common-html/sass/partials/_buttons.scss */
-.bulletin-comment .bulletin-comment__name:disabled, .bulletin-comment .bulletin-comment__name.disabled, .bulletin-comment .bulletin-comment__name.waiting {
-  cursor: default !important;
-  color: white !important;
-  background-color: none !important;
-}
-/* line 20, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__name:after {
-  content: ",";
-}
-/* line 24, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__body {
-  padding: 6px 12px;
-  clear: both;
-}
-/* line 27, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__body pre {
-  white-space: pre-wrap;
-}
-/* line 31, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__attachments {
-  margin-bottom: 6px;
-  display: table;
-}
-/* line 34, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__attachments .bulletin-comment__attachment {
-  display: table-row;
-}
-/* line 36, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__attachments .bulletin-comment__attachment .bulletin-comment_attachment-link {
-  display: table-cell;
-  padding-right: 20px;
-}
-/* line 40, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__attachments .bulletin-comment__attachment .bulletin-comment__attachment-type {
-  display: table-cell;
-}
-/* line 42, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__attachments .bulletin-comment__attachment .bulletin-comment__attachment-type:after {
-  content: ")";
-}
-/* line 45, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment .bulletin-comment__attachments .bulletin-comment__attachment .bulletin-comment__attachment-type:before {
-  content: "(";
-}
-
-/* line 53, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-comment-spinner {
-  color: #dddddd;
-  padding: 0 50%;
-}
-
-/* line 58, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-proclamation-header {
-  overflow: auto;
-  line-height: 40px;
-  vertical-align: middle;
-  margin-bottom: 20px;
-}
-/* line 63, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-proclamation-header .bulletin-proclamation-text {
-  float: left;
-}
-/* line 66, ../../../private/common-html/sass/partials/_bulletin-comments.scss */
-.bulletin-proclamation-header .bulletin-proclamation-sort {
-  float: right;
-}
-
 /* line 6, ../../../private/common-html/sass/partials/__guests.scss */
 .auth-table tr {
   background-color: initial;
@@ -11582,4 +11212,362 @@ div.search i {
 /* line 170, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation .invitation-actions {
   white-space: nowrap;
+}
+
+/* line 176, ../../../private/common-html/sass/views/_applications.scss */
+.filter-controls div {
+  display: inline-block;
+  margin-bottom: 24px;
+}
+/* line 180, ../../../private/common-html/sass/views/_applications.scss */
+.filter-controls label {
+  display: block;
+}
+/* line 183, ../../../private/common-html/sass/views/_applications.scss */
+.filter-controls select {
+  display: block;
+}
+
+/* line 189, ../../../private/common-html/sass/views/_applications.scss */
+#applications-list .indicator-count, .applications-table .indicator-count {
+  padding-left: 0;
+  padding-right: 0;
+  font-weight: bold;
+  color: #f39129;
+  text-align: center;
+  width: 22px;
+  padding: 3px;
+}
+/* line 198, ../../../private/common-html/sass/views/_applications.scss */
+#applications-list div, .applications-table div {
+  padding-top: 3px;
+  height: 30px;
+}
+
+/* line 234, ../../../private/common-html/sass/views/_applications.scss */
+.clearable {
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+/* line 239, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search {
+  padding-right: 17px;
+  /* add space for the 'x' icon*/
+}
+
+/* line 242, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search::-ms-clear {
+  display: none;
+}
+
+/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  display: none;
+  /* now go with the styling */
+  cursor: pointer;
+  font: bold 1em sans-serif;
+  color: #38468F;
+}
+/* line 255, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear:before {
+  color: #f52;
+}
+
+/* application section styles*/
+/*Summary styles*/
+/* line 17, ../../../private/common-html/sass/views/_application.scss */
+.application_summary {
+  background-color: #eeeeee;
+  border-bottom: 2px solid #bbbbbb;
+  min-height: 332px;
+  padding: 6px 0 0 0;
+  position: relative;
+  display: block;
+  float: none;
+}
+/* line 26, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .container {
+  margin-bottom: 0;
+}
+/* line 32, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble {
+  position: relative;
+  min-height: 280px;
+  padding-left: 320px;
+  padding-right: 24%;
+  margin-right: 61px;
+}
+/* line 40, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+/* line 45, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container {
+  left: 0;
+  width: 320px;
+  margin-bottom: 12px;
+}
+/* line 52, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application_actions {
+  right: 0;
+}
+@media (max-width: 991px) {
+  /* line 32, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble {
+    padding: 0;
+  }
+  /* line 59, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+    position: relative;
+    width: auto;
+    float: left;
+  }
+  /* line 64, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application-map-container {
+    float: left;
+    margin-left: 24px;
+  }
+  /* line 70, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application_actions {
+    float: right;
+    margin-right: 24px;
+  }
+}
+/* line 76, ../../../private/common-html/sass/views/_application.scss */
+.application_summary li {
+  display: inline;
+}
+/* line 79, ../../../private/common-html/sass/views/_application.scss */
+.application_summary h1 {
+  margin: 0;
+  color: #fff;
+  line-height: 24px;
+  margin-bottom: 6px;
+}
+/* line 85, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container {
+  position: relative;
+}
+/* line 87, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .map {
+  float: left;
+  margin: 12px;
+}
+/* line 91, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .application-map-actions {
+  position: absolute;
+  z-index: 1000;
+  left: 0;
+  top: 256px;
+  text-align: center;
+  display: block;
+  background: #04c714;
+}
+/* line 100, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .application-map-actions .map-search-button {
+  color: white;
+  padding: 0 24px;
+}
+/* line 107, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info {
+  margin: 0 24px 24px 24px;
+  color: #333333;
+}
+/* line 110, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info h1 {
+  width: 100%;
+  color: #333333;
+}
+/* line 113, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info h1 a {
+  padding-left: 32px;
+  background-position: 8px -4200px;
+}
+/* line 118, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info h2 {
+  color: #333333;
+}
+/* line 121, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info a {
+  font-size: 15px;
+  text-transform: none;
+  height: auto;
+  width: auto;
+}
+/* line 127, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .summary-help {
+  width: 100%;
+  background-color: #eeeeee;
+  font-size: 0.8em;
+  font-style: italic;
+}
+/* line 133, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .help-text p, .application_summary .application_summary_info .summary-help p {
+  width: 100%;
+}
+/* line 137, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .link-permit {
+  display: block;
+}
+/* line 141, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .link-permit-item {
+  color: #f39129;
+  text-decoration: none;
+}
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:link, .application_summary .application_summary_info .link-permit-item:visited {
+  color: #f39129;
+}
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
+/* line 145, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info p, .application_summary .application_summary_info .application_summary_text, .application_summary .application_summary_info ul {
+  vertical-align: top;
+  display: inline-block;
+  display: table-cell;
+  margin-bottom: 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  padding-left: 6px;
+}
+/* line 157, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info select {
+  vertical-align: top;
+}
+/* line 161, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info ul li {
+  display: block;
+}
+/* line 163, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info ul li span {
+  width: auto;
+  display: inline;
+}
+/* line 169, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication {
+  background-color: #f6f6f6;
+  margin: 0 0 0 0;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 32px;
+}
+/* line 189, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div {
+  height: 24px;
+}
+/* line 191, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div span {
+  color: #909090;
+  position: relative;
+  padding: 4px 8px 4px 24px;
+  display: inline-block;
+  margin: 0px -4px 0 0;
+  border: none;
+}
+/* line 198, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div span:first-child {
+  padding: 4px 8px 4px 8px;
+}
+/* line 201, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div span:after {
+  display: inline-block;
+  position: absolute;
+  content: " ";
+  width: 0;
+  height: 0;
+  top: -1px;
+  right: -10px;
+  border-top: 17px solid transparent;
+  border-left: 11px solid #f6f6f6;
+  border-bottom: 17px solid transparent;
+  z-index: 1;
+}
+/* line 216, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div .constructionStarted-box, .application_summary .application_summary_info .state-indication div .inUse-box, .application_summary .application_summary_info .state-indication div .closed-box, .application_summary .application_summary_info .state-indication div .complementNeeded-box, .application_summary .application_summary_info .state-indication div .verdictGiven-box, .application_summary .application_summary_info .state-indication div .foremanVerdictGiven-box, .application_summary .application_summary_info .state-indication div acknowledged-box, .application_summary .application_summary_info .state-indication div .canceled-box, .application_summary .application_summary_info .state-indication div .final-box, .application_summary .application_summary_info .state-indication div .extinct-box, .application_summary .application_summary_info .state-indication div .onHold-box, .application_summary .application_summary_info .state-indication div .appealed-box {
+  display: none;
+}
+/* line 220, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.draft .draft-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 184, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.draft .draft-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 225, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.open .draft-box {
+  display: none;
+}
+/* line 228, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.open .open-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 184, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.open .open-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 233, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.submitted .submitted-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 184, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.submitted .submitted-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 236, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.submitted .draft-box, .application_summary .application_summary_info .state-indication div.submitted .open-box {
+  display: none;
+}
+/* line 241, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.sent .sent-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 184, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.sent .sent-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 244, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.sent .draft-box, .application_summary .application_summary_info .state-indication div.sent .open-box, .application_summary .application_summary_info .state-indication div.sent .submitted-box {
+  display: none;
+}
+/* line 247, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.sent .verdictGiven-box, .application_summary .application_summary_info .state-indication div.sent .foremanVerdictGiven-box, .application_summary .application_summary_info .state-indication div.sent .acknowledged-box {
+  display: inline-block;
+}
+/* line 252, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.complementNeeded .complementNeeded-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 184, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.complementNeeded .complementNeeded-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 255, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.complementNeeded .draft-box, .application_summary .application_summary_info .state-indication div.complementNeeded .open-box, .application_summary .application_summary_info .state-indication div.complementNeeded .submitted-box {
+  display: none;
 }
