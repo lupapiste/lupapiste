@@ -7,10 +7,11 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     var self = this;
 
     self.startTime = ko.observable();
+    self.services = ko.observableArray();
     self.commandName = ko.observable();
     self.command = null;
 
-    self.execute = function() { self.command(); };
+    self.execute = function() { self.command(self.services()); };
 
     self.init = function(params) {
       self.commandName(params.commandName);
@@ -28,8 +29,8 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     self.newReservationSlotModel.init({
       source: { startTime: startTime },
       commandName: 'create',
-      command: function() {
-        var slots = [{start: startTime.valueOf(), end: moment(startTime).add(30, 'm').valueOf()}];
+      command: function(services) {
+        var slots = [{start: startTime.valueOf(), end: moment(startTime).add(30, 'm').valueOf(), services: services}];
         hub.send("calendarService::createCalendarSlots", {calendarId: weekday.calendarId, slots: slots, modalClose: true});
       }
     });
