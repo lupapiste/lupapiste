@@ -289,49 +289,10 @@ $bulletin-breakpoint: 1166px;
   }
 
   .bulletin-preamble {
-    position: relative;
-    min-height: 280px; // at least the size of the map container
-    padding: {
-      left: $map-width;
-      right: 24%;
-    }
-    margin-right: $side-panel-width + 1px;
-    .application-map-container, .application_actions {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-    }
-    .application-map-container {
-      left: 0;
-      width: $map-width;
-      // To prevent accidental map clicks for some
-      // browsers/resolutions.
-      margin-bottom: $marginM;
-    }
-    .application_actions {
-      // Note: no width, because want the stacked buttons
-      // determine their size autonomously.
-      right: 0;
-    }
-    @media (max-width: $bulletin-breakpoint) {
-      padding: 0;
-      .application-map-container, .application_actions {
-        position: relative;
-        width: auto;
-        float: left;
-      }
-      .application-map-container {
-        float: left;
-        margin: {
-          left: $marginL; // Align with summary info.
-        }
-      }
+    @include preamble-common;
+    @include preamble-breakpoint( $bulletin-breakpoint ) {
       .application_summary_info {
         width: initial;
-      }
-      .application_actions {
-        float: right;
-        margin-right: $marginL; // Align with summary info.
       }
     }
   }
