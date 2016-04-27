@@ -22,12 +22,12 @@
 (def post-repliable-states #{:replyable :replied})
 (def pre-repliable-states (clojure.set/difference statement-states post-repliable-states))
 
-(def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
+(def- statement-statuses-limited-options
+  ["puollettu" "ei-puollettu" "ehdollinen"])
 ;; Krysp Yhteiset 2.1.5+ and if no organization backend system.
-(def- statement-statuses-more-options
-  (vec (concat statement-statuses
-               ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa"
-                "lausunto" "kielteinen" "palautettu" "poydalle"])))
+(def- statement-statuses
+  ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa"
+   "lausunto" "kielteinen" "palautettu" "poydalle"])
 
 (defschema StatementGiver
   "Statement giver user summary"
@@ -48,7 +48,7 @@
   {:id                              ssc/ObjectIdStr ;; statement id
    :state                           (apply sc/enum statement-states) ;; handling state of the statement
    (sc/optional-key :saateText)     sc/Str          ;; cover note for statement, written by authority
-   (sc/optional-key :status)        (apply sc/enum statement-statuses-more-options) ;; status indicator
+   (sc/optional-key :status)        (apply sc/enum statement-statuses) ;; status indicator
    (sc/optional-key :text)          sc/Str          ;; statement text written by statement giver
    (sc/optional-key :dueDate)       ssc/Timestamp   ;; due date for statement to be given
    (sc/optional-key :requested)     ssc/Timestamp   ;; when requested
@@ -163,5 +163,5 @@
     (if (and extra-statement-statuses-allowed?
              (or (util/version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5})
                  (ss/blank? url)))
-      (set statement-statuses-more-options)
-      (set statement-statuses))))
+      (set statement-statuses)
+      (set statement-statuses-limited-options))))
