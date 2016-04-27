@@ -26,7 +26,6 @@
         organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
     (dorun (map (partial mongo/insert :organizations) organizations))))
 
-
 (facts "Automatic checking for verdicts"
   (mongo/with-db db-name
     (let [
@@ -81,6 +80,8 @@
 
 (testable-privates lupapalvelu.tasks-api task-is-review?)
 
+
+
 (facts "Automatic checking for reviews"
   (mongo/with-db db-name
     (let [application-submitted        (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 17")
@@ -101,32 +102,21 @@
 
 
       (against-background [(app-from-krysp/get-application-xml-by-application-id anything) => (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")]
-        (fact "checking verdicts for reviews in correct states"
+        (fact "checking for reviews in correct states"
           (count (batchrun/poll-verdicts-for-reviews)) => pos?
           (println "batchrun returned happily")
-          (let [count-reviews #(count
-                                (filter task-is-review? (:tasks (query-application local-query sonja %))))]
+          (let [query-tasks (fn [application-id] (:tasks (query-application local-query sonja application-id)))
+                count-reviews #(count
+                                (filter task-is-review? query-tasks))]
+            (println "count-reviews after poll-verdicts-for-reviews" (count-reviews application-id-verdict-given))
+            (println "task-count by count :tasks is" (count (query-tasks application-id-verdict-given)))
             (count-reviews application-id-verdict-given) => 10
-            (count-reviews application-id-submitted) => 0)
+            (count-reviews application-id-submitted) => 0)))
 
-          ;; (count (filter task-is-review? (:tasks (query-application local-query sonja application-id-verdict-given)))) => pos?
-          ;; (count (filter task-is-review? (:tasks (query-application local-query sonja application-id-submitted)))) => 0
-          ))
+      (fact "existing tasks are (not) preserved"
 
-      (fact "existing tasks area preserved")
-      (let [resp (local-command sonja :check-for-verdict :id application-id-verdict-given)
-            task-count (:taskCount resp)]
-        (println "resp is" resp)
-        (println "task-count is" task-count))
-      )))
-
-    ;; (local-command sonja :approve-application :id application-id-submitted :lang "fi") => ok?
-
-
-
-
-    ;; (let [application-reviewed-eka (query-application local-query sonja application-id-reviewed-eka) => truthy
-    ;;       application-reviewed-toka (query-application local-query sonja application-id-reviewed-toka) => truthy
-    ;;       application-kolmas (query-application local-query sonja application-id-kolmas) => truthy]
-    ;;   (println "eka tasks" (:id application-reviewed-eka))
-    ;;   (:state application-reviewed-eka) => "submitted")))))
+        ;; tbd. check state vs before running poll, now just checking vs after running c-f-v
+        ;; calling check-for-verdict results in query-application returning 9 tasks (of which 3 reviews).
+        ;; otherwise there are 10 tasks, all of which are reviews.
+        (local-command sonja :check-for-verdict :id application-id-verdict-given) => anything
+        (count  (:tasks (query-application local-query sonja %))) =not> 10))))
