@@ -152,16 +152,13 @@
 ;; Statuses
 ;;
 
-
-(defn possible-statement-statuses [application]
-  (let [{permit-type :permitType municipality :municipality} application
-        extra-statement-statuses-allowed? (permit/get-metadata permit-type :extra-statement-selection-values)
-        organization (organization/resolve-organization municipality permit-type)
-        {:keys [version url]} (get-in organization [:krysp (keyword permit-type)])
-        yht-version (if version (mapping-common/get-yht-version permit-type version) "0.0.0")]
+(defn possible-statement-statuses [{permit-type :permitType municipality :municipality :as application}]
+  (let [{:keys [version url]} (-> (organization/resolve-organization municipality permit-type)
+                                  (get-in [:krysp (keyword permit-type)]))
+        yht-version           (mapping-common/get-yht-version permit-type version)]
     ;; Even without url the KRYSP version might exist.
-    (if (and extra-statement-statuses-allowed?
-             (or (util/version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5})
+    (if (and (permit/get-metadata permit-type :extra-statement-selection-values)
+             (or (util/compare-version >= yht-version "2.1.5")
                  (ss/blank? url)))
       (set statement-statuses)
       (set statement-statuses-limited-options))))
