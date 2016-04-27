@@ -4,7 +4,9 @@
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [schema.core :as sc :refer [defschema]]
             [sade.http :as http]
-            [sade.env :as env])
+            [sade.env :as env]
+            [lupapalvelu.user :as user]
+            [clojure.string :as string])
   (:import (org.joda.time DateTime)))
 
 (defschema FrontendCalendar
@@ -71,6 +73,17 @@
             :services ["SCC123"]
             :capacity 1})) slots))
 
+(defn- organization-users-with-calendar
+  [org]
+  (user/find-authorized-users-in-org org :authority))
+
+(defn- find-calendars-for-organizations
+  [orgIds]
+  (let [response (api-query "/api/resources/by-organization" {:organizationCodes orgIds})]
+    (if (= 200 (:status response))
+      (map ->FrontendCalendar (:body response))
+      nil)))
+
 (defquery calendar
   {:parameters [calendarId]
    :input-validators [(partial action/non-blank-parameters [:calendarId])]
@@ -84,12 +97,12 @@
 
 (defquery list-calendars
   {:user-roles #{:authorityAdmin}}
-  [_]
-  (let [response (api-query "/api/resources")]
-    (if (= 200 (:status response))
-      (ok :calendars (map ->FrontendCalendar (:body response)))
-      (do (error response)
-          (fail :resources.backend-error)))))
+  [{user :user}]
+  (let [orgIds    (map name (-> user :orgAuthz keys))
+        calendars (find-calendars-for-organizations orgIds)]
+    (if calendars
+      (ok :calendars calendars)
+      (fail :resources.backend-error))))
 
 (defcommand create-calendar
   {:user-roles #{:authorityAdmin}}
