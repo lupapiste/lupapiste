@@ -60,7 +60,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
-  self.tosFunction = ko.observable();
+  self.tosFunction = ko.observable(null);
   self.metadata = ko.observable();
   self.processMetadata = ko.observable();
 
@@ -122,11 +122,18 @@ LUPAPISTE.ApplicationModel = function() {
     return self.inPostVerdictState() || self.state() === "canceled";
   });
 
+  self.openTask = function( taskId ) {
+    hub.send( "scrollService::push");
+    taskPageController.setApplicationModelAndTaskId(self._js, taskId);
+    pageutil.openPage("task",  self.id() + "/" + taskId);
+  };
+
   self.taskGroups = ko.pureComputed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
     tasks = _.filter(tasks, function(task) {
-      return task["schema-info"].name !== "task-vaadittu-tyonjohtaja";
+      return !_.includes( ["task-vaadittu-tyonjohtaja", "task-katselmus"],
+                          task["schema-info"].name);
     });
     var schemaInfos = _.reduce(tasks, function(m, task){
       var info = task.schema.info;
@@ -144,10 +151,7 @@ LUPAPISTE.ApplicationModel = function() {
           order: schemaInfos[n].order,
           tasks: _.map(groups[n], function(task) {
             task.displayName = taskUtil.shortDisplayName(task);
-            task.openTask = function() {
-              taskPageController.setApplicationModelAndTaskId(self._js, task.id);
-              pageutil.openPage("task",  self.id() + "/" + task.id);
-            };
+            task.openTask = _.partial( self.openTask, task.id);
             task.statusName = LUPAPISTE.statuses[task.state] || "unknown";
 
             return task;
@@ -341,7 +345,6 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.approveApplication = function() {
-
     var approve = function() {
       ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
         .success(function(resp) {
@@ -362,15 +365,45 @@ LUPAPISTE.ApplicationModel = function() {
       hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     };
 
-    if (_(self._js.statements).reject("given").isEmpty()) {
-      // All statements have been given
-      approve();
-    } else {
+    var checkDesigners = function() {
+      var nonApprovedDesigners = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
+          return docModel.schema.info.subtype === "suunnittelija";
+        })
+        .map(function(docModel) {
+          var title = loc([docModel.schemaName, "_group_label"]);
+          var accordionService = lupapisteApp.services.accordionService;
+          var identifierField = accordionService.getIdentifier(docModel.docId);
+          var identifier = identifierField && identifierField.value();
+          var operation = null; // We'll assume designer is never attached to operation
+          var docData = accordionService.getDocumentData(docModel.docId); // The current data
+          var accordionText = docutils.accordionText(docData.accordionPaths, docData.data);
+          var headerDescription = docutils.headerDescription(identifier, operation, accordionText);
+          // Escape HTML special chars
+          return "<li>" + _.escape(title + headerDescription) + "</li>";
+        })
+        .value();
+
+      // All designers have not been approved?
+      if (!_.isEmpty(nonApprovedDesigners)) {
+        var text = loc("application.designers-not-approved-help") + "<ul>" + nonApprovedDesigners.join("") + "</ul>";
+        hub.send("show-dialog", {ltitle: "application.designers-not-approved",
+          size: "medium",
+          component: "yes-no-dialog",
+          componentParams: {text: text, yesFn: approve, lyesTitle: "continue", lnoTitle: "cancel"}});
+      } else {
+        approve();
+      }
+    };
+
+    if (!_(self._js.statements).reject("given").isEmpty()) {
+      // All statements have not been given
       hub.send("show-dialog", {ltitle: "application.approve.statement-not-requested",
-                               size: "medium",
-                               component: "yes-no-dialog",
-                               componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
-                                                 yesFn: approve}});
+        size: "medium",
+        component: "yes-no-dialog",
+        componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
+          yesFn: checkDesigners}});
+    } else {
+      checkDesigners();
     }
     return false;
   };

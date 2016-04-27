@@ -6,6 +6,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             [lupapalvelu.attachment :as att]
+            [sade.strings :as ss]
             [sade.schemas :as ssc])
   (:import [schema.utils.ErrorContainer]))
 
@@ -27,10 +28,26 @@
     (when (seq results)
       results)))
 
+(defn- validate-tasks [ignored-errors {tasks :tasks :as application}]
+  (let [results (filter seq (map (partial validate-doc ignored-errors application) tasks))]
+    (when (seq results)
+      results)))
+
+(defn- validate-state [{state :state :as application}]
+  (when (ss/blank? state)
+    {:result "Missing state"}))
+
 ;; Every document is valid.
 (mongocheck :applications (partial validate-documents []) :documents :state :auth)
 
 (mongocheck :submitted-applications (partial validate-documents ["illegal-hetu"]) :documents :state :auth)
+
+;; Tasks are valid
+
+(mongocheck :applications (partial validate-tasks []) :tasks :state :auth)
+
+;; All applications have state
+(mongocheck :applications validate-state :state)
 
 ;; Latest attachment version and latestVersion match
 (defn validate-latest-version [{id :id versions :versions latestVersion :latestVersion}]
@@ -103,4 +120,3 @@
 (mongocheck :applications (timestamp-is-set :sent #{:sent :complementNeeded}) :state :sent)
 
 (mongocheck :applications (timestamp-is-set :closed #{:closed}) :state :closed)
-

@@ -5,6 +5,7 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../18_construction/task_resource.robot
+Resource        ../common_keywords/approve_helpers.robot
 Variables      ../06_attachments/variables.py
 
 *** Variables ***
@@ -58,7 +59,7 @@ Open permit and show permit on map buttons are visible
 #  - LupapisteApi.integrationSent
 Successful KRYSP generation emits LupapisteApi.integrationSent function call
   Submit application
-  Click enabled by test id  approve-application
+  Approve application
   Wait until  Element text should be  xpath=//div[@id='modal-dialog']//div[@class='header']/span  LupapisteApi.integrationSent
   Permit properties should be visible in dialog
 
@@ -74,6 +75,7 @@ Add post verdict attachment
   Page should not contain  Siirrä liitteet taustajärjestelmään
 
 Transfering attachments emits LupapisteApi.integrationSent function call
+  Scroll to top
   # We have 3 buttons with the same test-id, check & click the first
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id='export-attachments-to-backing-system']
   Scroll to test id  export-attachments-to-backing-system
@@ -91,16 +93,14 @@ Fill review info
   Open tab  tasks
   Open task  Aloituskokous
 
-  Select From List  rakennus.0.rakennus.jarjestysnumero  ei tiedossa
+  Select From List by test id  katselmus.tila  lopullinen
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text with jQuery  .hasDatepicker:first  29.2.2016
-  Input text with jQuery  textarea[name="katselmus.huomautukset.kuvaus"]  ei
-
-  Click enabled by test id  approve-task
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
+  Input text with jQuery  input[data-test-id="katselmus.pitoPvm"]  29.2.2016
+  Input text with jQuery  input[data-test-id="katselmus.pitaja"]  Sonja Sibbo
+  Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ei
 
 Transfering task emits LupapisteApi.integrationSent function call
-  Click enabled by test id  send-task
+  Click enabled by test id  review-done
   Confirm  dynamic-ok-confirm-dialog
   Permit properties should be visible in dialog
 

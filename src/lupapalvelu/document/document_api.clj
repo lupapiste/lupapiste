@@ -15,9 +15,9 @@
             [lupapalvelu.document.tools :as tools]))
 
 
-(def update-doc-states (states/all-application-states-but (conj states/terminal-states :sent :verdictGiven :constructionStarted)))
+(def update-doc-states #{:draft :open :submitted :complementNeeded})
 
-(def approve-doc-states (states/all-application-states-but (conj states/terminal-states :draft :sent :verdictGiven :constructionStarted)))
+(def approve-doc-states #{:open :submitted :complementNeeded})
 
 (defn validate-is-construction-time-doc
   [{{doc-id :doc} :data} {state :state documents :documents}]

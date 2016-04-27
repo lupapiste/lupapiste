@@ -42,7 +42,7 @@
                     </tr>
                 </thead>
                 <tbody data-bind="foreach: combinedData">
-                    <tr class="statement-giver-row">
+                    <tr class="statement-giver-row" data-bind="{attr: {'data-test-email': email()}}">
                         <td>
                             <input class="form-input" type="checkbox"
                                    data-bind="checkedValue: $data,

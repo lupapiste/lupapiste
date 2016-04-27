@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.data.xml :refer :all]
             [clojure.java.io :refer :all]
+            [net.cgrand.enlive-html :as enlive]
             [sade.xml :as xml]
             [sade.strings :as ss]
             [sade.common-reader :as cr]
@@ -96,7 +97,14 @@
                     (xml/get-text rakennus [:rakennustunnus :rakennuksenSelite]) => "A: kerrostalo-rivitalo-kuvaus"))
 
                 (fact {:midje/description (str "Building ID includes operation ID of " (name op-tag))}
-                  (xml/get-text rakennus [:rakennustunnus :MuuTunnus :tunnus]) =not=> ss/blank?)))))
+                  (let [ids (xml/select rakennus [:rakennustunnus :MuuTunnus])
+                        toimenpide-id (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "toimenpideId"))]))
+                        lupapiste-id  (xml/select ids (enlive/has [:sovellus (enlive/text-pred (partial = "Lupapiste"))]))]
+                    (fact "with sovellus=toimenpideId"
+                      (xml/get-text toimenpide-id [:MuuTunnus :tunnus]) =not=> ss/blank?)
+
+                    (fact "with sovellus=Lupapiste"
+                      (xml/get-text lupapiste-id [:MuuTunnus :tunnus]) =not=> ss/blank?)))))))
 
         (fact "hakija and maksaja parties exist"
           (let [osapuoli-codes (->> (xml/select lp-xml_220 [:osapuolettieto :Osapuoli])
@@ -226,6 +234,7 @@
            :toteamisHetki "1.5.1974"} ;huomautukset
           "Tiivi Taavi, Hipsu ja Lala" ;lasnaolijat
           "Ei poikkeamisia" ;poikkeamat
+          false ; tiedoksianto
           "2.1.2" ;krysp-version
           "begin-of-link" ;begin-of-link
           {:type "task" :id "123"} ;attachment-target
@@ -251,6 +260,7 @@
                                            :toteamisHetki {:value "1.5.1974"}}
                             :lasnaolijat {:value "Tiivi Taavi, Hipsu ja Lala"}
                             :poikkeamat {:value "Ei poikkeamisia"}
+                            :tiedoksianto {:value false}
                             :tila {:value "pidetty"}}}}
         user
         "fi"

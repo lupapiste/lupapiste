@@ -46,7 +46,8 @@
         description-parts (remove ss/blank? [tunnus (operation-description application op-id)])
         defaults (util/assoc-when {:jarjestysnumero nil
                                    :kiinttun (:propertyId application)
-                                   :muuTunnustieto {:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}}
+                                   :muuTunnustieto [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                    {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}]}
                    :rakennusnro rakennusnro
                    :rakennuksenSelite (ss/join ": " description-parts)
                    :valtakunnallinenNumero valtakunnallinenNumero)]
@@ -305,7 +306,7 @@
       "Uusi katselmus"
       "Uusi tarkastus")))
 
-(defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
+(defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat tiedoksianto]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
         katselmusTyyppi (katselmusnimi-to-type katselmuksen-nimi tyyppi)
@@ -318,6 +319,7 @@
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
                        :poikkeamat poikkeamat
+                       :verottajanTvLlKytkin tiedoksianto
                        :tarkastuksenTaiKatselmuksenNimi task-name}
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
@@ -340,9 +342,8 @@
                                                                 building-canonical (util/assoc-when
                                                                                     building-canonical
                                                                                     :muuTunnustieto (when-let [op-id (:operationId building)]
-                                                                                                      (list {:MuuTunnus
-                                                                                                             {:tunnus op-id
-                                                                                                              :sovellus "toimenpideId"}}))
+                                                                                                      [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                                                                       {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])
                                                                                     :rakennuksenSelite (:description building)) ; v2.2.0
                                                                 ]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
@@ -350,7 +351,8 @@
                                                                                 (fn [m k v] (if-not (ss/blank? v)
                                                                                               (assoc m k (util/to-xml-date-from-string v))
                                                                                               m))
-                                                                                (select-keys huomautukset [:kuvaus :toteaja])
+                                                                                {:kuvaus (if (ss/blank? (:kuvaus huomautukset)) "-" (:kuvaus huomautukset))
+                                                                                 :toteaja (:toteaja huomautukset)}
                                                                                 (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)

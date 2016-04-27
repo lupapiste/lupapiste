@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
+            [clojure.set :refer [rename-keys] :as set]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
@@ -14,13 +15,16 @@
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as op]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as user]
             [lupapalvelu.migration.attachment-type-mapping :as attachment-type-mapping]
+            [lupapalvelu.tasks :refer [task-doc-validation]]
             [sade.env :as env]
             [sade.excel-reader :as er]
             [sade.coordinate :as coord]))
@@ -1782,11 +1786,11 @@
 
 (defmigration add-original-file-id-for-attachment-versions
   {:apply-when (pos? (mongo/count :applications
-                                  {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                                  {:attachments.versions {$elemMatch {:fileId {$exists true}
                                                                       :originalFileId {$exists false}}}}))}
   (update-applications-array :attachments
                              add-original-file-id-for-versions-and-latestVersion
-                             {:attachments.versions {$elemMatch {:fileId {$exists true} 
+                             {:attachments.versions {$elemMatch {:fileId {$exists true}
                                                                  :originalFileId {$exists false}}}}))
 
 #_(defmigration rename-hankkeen-kuvaus-rakennuslupa-back-to-hankkeen-kuvaus ;; TODO: migrate, LPK-1448
@@ -1816,72 +1820,191 @@
                         (let [applications (mongo/select collection {:documents.schema-info.subtype "suunnittelija"} {:documents 1})]
                           (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/designers-index-update %)) applications))))))
 
+(defn update-attachment-type [mapping type-key attachment]
+  (let [type (->> (type-key attachment) (map (fn [kv-pair] (mapv keyword kv-pair))) (into {}))]
+    (assoc attachment type-key (get mapping type type))))
 
-(when (env/feature? :updated-attachments)
+(defmigration application-attachment-type-update
+  (update-applications-array :attachments
+                             (partial update-attachment-type attachment-type-mapping/attachment-mapping :type)
+                             {:permitType  {$in ["R" "P"]}
+                              :attachments {$gt {$size 0}}}))
 
-  (defn update-attachment-type [mapping type-key attachment]
-    (let [type (->> (type-key attachment) (map (fn [kv-pair] (mapv keyword kv-pair))) (into {}))]
-      (assoc attachment type-key (get mapping type type))))
+(defmigration application-ya-osapuoli-attachment-type-update
+  (update-applications-array :attachments
+                             (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :type)
+                             {:permitType  {$in ["YA"]}
+                              :attachments {$gt {$size 0}}}))
 
-  (defmigration application-attachment-type-update
-    (update-applications-array :attachments
-                               (partial update-attachment-type attachment-type-mapping/attachment-mapping :type)
-                               {:permitType  {$in ["R" "P"]}
-                                :attachments {$gt {$size 0}}}))
+(defmigration update-user-attachments
+  (reduce (fn [cnt user] (+ cnt (mongo/update-n :users {:_id (:id user)}
+                                                {$set {:attachments (->> (:attachments user)
+                                                                         (map (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :attachment-type)))}})))
+          0
+          (mongo/select :users {:attachments {$gt {$size 0}}} {:attachments 1})))
 
-  (defmigration application-ya-osapuoli-attachment-type-update
-    (update-applications-array :attachments
-                               (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :type)
-                               {:permitType  {$in ["YA"]}
-                                :attachments {$gt {$size 0}}}))
+(def r-or-p-operation? (->> (filter (comp #{"R" "P"} :permit-type val) op/operations) keys set))
+(def ya-operation? (->> op/ya-operations keys set))
 
-  (defmigration update-user-attachments
-    (reduce (fn [cnt user] (+ cnt (mongo/update-n :users {:_id (:id user)}
-                                                  {$set {:attachments (->> (:attachments user)
-                                                                           (map (partial update-attachment-type attachment-type-mapping/osapuoli-attachment-mapping :attachment-type)))}})))
-            0
-            (mongo/select :users {:attachments {$gt {$size 0}}} {:attachments 1})))
+(defn update-operations-attachment-type [mapping [type-group type-id]]
+  (let [{new-group :type-group new-id :type-id} (-> {:type-group (keyword type-group) :type-id (keyword type-id)}
+                                                    attachment-type-mapping/attachment-mapping)]
+    (if (and new-group new-id)
+      [new-group  new-id]
+      [type-group type-id])))
 
-  (def r-or-p-operation? (->> (filter (comp #{"R" "P"} :permit-type val) op/operations) keys set))
-  (def ya-operation? (->> op/ya-operations keys set))
-  
-  (defn update-operations-attachment-type [mapping [type-group type-id]]
-    (let [{new-group :type-group new-id :type-id} (-> {:type-group (keyword type-group) :type-id (keyword type-id)}
-                                                      attachment-type-mapping/attachment-mapping)]
-      (if (and new-group new-id)
-        [new-group  new-id]
-        [type-group type-id])))
-  
-  (defn update-operations-attachments-types [mapping operation-pred [operation attachment-types]]
-    (if (operation-pred (keyword operation))
-      [operation (map (partial update-operations-attachment-type mapping) attachment-types)]
-      [operation attachment-types]))
+(defn update-operations-attachments-types [mapping operation-pred [operation attachment-types]]
+  (if (operation-pred (keyword operation))
+    [operation (->> attachment-types (map (partial update-operations-attachment-type mapping)) distinct)]
+    [operation attachment-types]))
 
-  (defmigration organization-operation-attachments-type-update
-    (reduce (fn [cnt org] (+ cnt (mongo/update-n :organizations {:_id (:id org)}
-                                                 {$set {:operations-attachments (->> (:operations-attachments org) 
-                                                                                     (map (partial update-operations-attachments-types attachment-type-mapping/attachment-mapping r-or-p-operation?))
-                                                                                     (map (partial update-operations-attachments-types attachment-type-mapping/osapuoli-attachment-mapping ya-operation?))
-                                                                                     (into {}))}})))
-            0
-            (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1}))))
+(defmigration organization-operation-attachments-type-update
+  (reduce (fn [cnt org] (+ cnt (mongo/update-n :organizations {:_id (:id org)}
+                                               {$set {:operations-attachments (->> (:operations-attachments org)
+                                                                                   (map (partial update-operations-attachments-types attachment-type-mapping/attachment-mapping r-or-p-operation?))
+                                                                                   (map (partial update-operations-attachments-types attachment-type-mapping/osapuoli-attachment-mapping ya-operation?))
+                                                                                   (into {}))}})))
+          0
+          (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1})))
 
-(defmigration add-id-for-verdicts-paatokset
+(defmigration add-id-for-verdicts-paatokset-v2
   (update-applications-array :verdicts
-                             (fn [verdict] (update verdict :paatokset (fn [paatokset] (map #(assoc % :id (mongo/create-id)) paatokset))))
-                             {:verdicts.paatokset.0 {$exists true}}))
+                             (fn [verdict] (update verdict :paatokset (fn [paatokset] (map #(if (:id %) % (assoc % :id (mongo/create-id))) paatokset))))
+                             {:verdicts.paatokset {$elemMatch {:id {$exists false}, :poytakirjat {$exists true}}}}))
 
 (defmigration clean-vaadittuTyonjohtajatieto-in-verdicts
   (update-applications-array :verdicts
-                             (fn [verdict] 
+                             (fn [verdict]
                                (update verdict :paatokset
                                           (fn [paatokset] (map (fn [paatos]
-                                                                 (update-in paatos [:lupamaaraykset :vaadittuTyonjohtajatieto] 
+                                                                 (update-in paatos [:lupamaaraykset :vaadittuTyonjohtajatieto]
                                                                             (fn [tj] (cond (map? tj)    [(get-in tj [:VaadittuTyonjohtaja :tyonjohtajaLaji])]
                                                                                            (vector? tj) (map #(or (get-in % [:VaadittuTyonjohtaja :tyonjohtajaLaji]) %) tj)
                                                                                            :else        tj))))
                                                                paatokset))))
                              {:verdicts.paatokset.lupamaaraykset.vaadittuTyonjohtajatieto {$type 3}}))
+
+(defmigration application-attachment-type-update-v2
+  (update-applications-array :attachments
+                             (partial update-attachment-type attachment-type-mapping/attachment-mapping :type)
+                             {:permitType  {$in ["R" "P"]}
+                              :attachments.type.type-id {$in [:selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
+                                                              :aitapiirustus
+                                                              :vesi_ja_viemariliitoslausunto_tai_kartta
+                                                              :sopimusjaljennos
+                                                              :karttaaineisto
+                                                              :selvitys_rakennuspaikan_korkeusasemasta
+                                                              :riskianalyysi]}}))
+
+(defmigration organization-operation-attachments-type-update-v2
+  (reduce (fn [cnt org] (+ cnt (mongo/update-n :organizations {:_id (:id org)}
+                                               {$set {:operations-attachments (->> (:operations-attachments org)
+                                                                                   (map (partial update-operations-attachments-types attachment-type-mapping/attachment-mapping r-or-p-operation?))
+                                                                                   (into {}))}})))
+          0
+          (mongo/select :organizations {:operations-attachments {$gt {$size 0}}} {:operations-attachments 1})))
+
+(defn update-katselmus-buildings
+  "Assocs missing buildings from buildings array to repeating :rakennus data for katselmus tasks."
+  [buildings {{rakennus :rakennus} :data :as katselmus-doc}]
+  (let [saved-building-indices (map (util/fn-> :rakennus :jarjestysnumero :value) (vals rakennus))
+        unselected-buildings   (remove (fn [{idx :index}] (some #(= idx %) saved-building-indices)) buildings)
+        building-keys          [:index :nationalId :localShortId :propertyId :localId]
+        rakennus-keys          [:jarjestysnumero :valtakunnallinenNumero :rakennusnro :kiinttun :kunnanSisainenPysyvaRakennusnumero]
+        new-rakennus-map       (reduce
+                                 (fn [acc building]
+                                   (let [next-idx-kw (->> (map (comp #(Integer/parseInt %) name) (keys acc))
+                                                          (apply max -1) ; if no keys, starting index (inc -1) => 0
+                                                          inc
+                                                          str
+                                                          keyword)
+                                         rakennus-data (-> (rename-keys building (zipmap building-keys rakennus-keys))
+                                                           (select-keys rakennus-keys))]
+                                     (assoc acc next-idx-kw {:rakennus (tools/wrapped rakennus-data)})))
+                                 rakennus
+                                 unselected-buildings)]
+    (when (seq unselected-buildings)
+      (let [updated-katselmus (assoc-in katselmus-doc [:data :rakennus] new-rakennus-map)]
+        (if (model/has-errors? (task-doc-validation "task-katselmus" updated-katselmus))
+          (errorf "Migration: task-katselmus validation error for doc-id %s" (:id katselmus-doc))
+          updated-katselmus)))))
+
+(defmigration buildings-to-katselmus-tasks
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                {:keys [id tasks buildings]} (mongo/select collection {:tasks {$elemMatch {:schema-info.name "task-katselmus" :state {$ne "sent"}}}} [:tasks :buildings])]
+            (let [katselmus-tasks (filter #(and
+                                            (= (get-in % [:schema-info :name]) "task-katselmus")
+                                            (not= "sent" (:state %)))
+                                          tasks)
+                  updated-tasks   (->> (map (partial update-katselmus-buildings buildings) katselmus-tasks)
+                                       (remove nil?))
+                  task-updates    (when (seq updated-tasks)
+                                    (apply merge
+                                           (map #(mongo/generate-array-updates :tasks
+                                                                               tasks
+                                                                               (fn [task] (= (:id task) (:id %)))
+                                                                               "data.rakennus"
+                                                                               (get-in % [:data :rakennus]))
+                                                updated-tasks)))]
+              (if (map? task-updates)
+                (mongo/update-n collection {:_id id} {$set task-updates})
+                0)))))
+
+(defn remove-empty-buildings [{{rakennus :rakennus} :data :as katselmus-doc}]
+  (let [rakennus-keys (keys rakennus)
+        new-rakennus-map (reduce
+                           (fn [acc index]
+                             (let [{rakennus-data :rakennus} (index acc)
+                                   unwrapped-data (tools/unwrapped rakennus-data)
+                                   all-empty? (every? util/empty-or-nil? (vals unwrapped-data))]
+                               (if all-empty?
+                                 (dissoc acc index)
+                                 acc)))
+                           rakennus
+                           rakennus-keys)]
+    (when-not (= (count rakennus-keys) (count (keys new-rakennus-map)))
+      ; keys have been dissociated, return katselmus document with updated rakennus data
+      (assoc-in katselmus-doc [:data :rakennus] new-rakennus-map))))
+
+
+(defmigration cleanup-empty-buildings-from-tasks
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                {:keys [id tasks]} (mongo/select collection {:tasks {$elemMatch {:schema-info.name "task-katselmus" :state {$ne "sent"}}}} [:tasks])]
+            (let [katselmus-tasks (filter #(and
+                                            (= (get-in % [:schema-info :name]) "task-katselmus")
+                                            (not= "sent" (:state %)))
+                                          tasks)
+                  updated-tasks   (->> (map remove-empty-buildings katselmus-tasks)
+                                       (remove nil?))
+                  task-updates    (when (seq updated-tasks)
+                                    (apply merge
+                                           (map #(mongo/generate-array-updates :tasks
+                                                                               tasks
+                                                                               (fn [task] (= (:id task) (:id %)))
+                                                                               "data.rakennus"
+                                                                               (get-in % [:data :rakennus]))
+                                                updated-tasks)))]
+              (if (map? task-updates)
+                (mongo/update-n collection {:_id id} {$set task-updates})
+                0)))))
+
+(defmigration image-jpeg
+  {:apply-when (pos? (mongo/count :fs.files {:contentType "image/jpg"}))}
+  (mongo/update-n :fs.files {:contentType "image/jpg"} {$set {:contentType "image/jpeg"}} :multi true))
+
+(defmigration fix-content-types
+  (let [content-types (mongo/distinct :fs.files "contentType")
+        all-unallowed-types (set (remove #(re-matches mime/mime-type-pattern %) content-types))
+        localized-unallowed-types #{"application/vnd.ms-outlook" "application/msworks"}
+        unallowed-types (set/difference all-unallowed-types localized-unallowed-types)]
+
+    (reduce + 0
+      (for [f (mongo/select :fs.files {:contentType {$in unallowed-types}})
+           :let [{:keys [id filename]} f
+                 content-type (mime/mime-type filename)]]
+        (mongo/update-n :fs.files {:_id id} {$set {:contentType content-type}})))))
 
 ;;
 ;; ****** NOTE! ******

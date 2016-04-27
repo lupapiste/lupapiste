@@ -171,6 +171,8 @@
 (def all-but-draft-or-terminal (difference all-states #{:draft} terminal-states))
 (def all-application-states-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))
 
+(def pre-verdict-but-draft (difference pre-verdict-states #{:draft}))
+
 (defn- drop-state-set [drop-states]
   (cond
     (and (= 1 (count drop-states)) (coll? (first drop-states))) (drop-state-set (first drop-states))

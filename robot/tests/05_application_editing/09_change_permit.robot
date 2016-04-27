@@ -17,11 +17,10 @@ Sonja prepares the application
   ${applicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${applicationid}
 
-Sonja submits the application, approves it and gives it a verdict
+Sonja submits the application and gives it a verdict
   Submit application
   Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
   Element should be visible  xpath=//button[@data-test-id="approve-application"]
-  Click enabled by test id  approve-application-summaryTab
   Element should not be visible  xpath=//*[@data-test-id='change-permit-create-btn']
   Open tab  verdict
   Fetch verdict

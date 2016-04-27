@@ -186,10 +186,19 @@
     [:Katselmus :katselmuspoytakirja]
     {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
 
-(def- katselmustieto_220
+(def- katselmustieto_216
   (update-in katselmustieto_215 [:child] mapping-common/update-child-element
-    [:Katselmus :katselmuspoytakirja]
-    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]}))
+             [:Katselmus]
+             #(update-in % [:child] concat [{:tag :verottajanTvLlKytkin}])))
+
+(def- katselmustieto_220
+  (-> katselmustieto_216
+    (update-in [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus]
+      {:tag :KatselmuksenRakennus :child rakennustunnus_220})
+    (update-in [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuspoytakirja]
+      {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]})))
 
 
 (def rakennuslupa_to_krysp_212
@@ -308,6 +317,9 @@
       (assoc-in [:attr :xsi:schemaLocation]
                 (mapping-common/schemalocation :R "2.1.6"))
       (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
+                 katselmustieto_216)
+      (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
                  {:tag :osapuolettieto :child [mapping-common/osapuolet_215]})))
 
@@ -374,6 +386,7 @@
                            huomautukset
                            lasnaolijat
                            poikkeamat
+                           tiedoksianto
                            krysp-version
                            begin-of-link
                            attachment-target]
@@ -392,7 +405,7 @@
 
         canonical-without-attachments (katselmus-canonical application lang task-id task-name started buildings user
                                                            katselmuksen-nimi tyyppi osittainen pitaja lupaehtona
-                                                           huomautukset lasnaolijat poikkeamat)
+                                                           huomautukset lasnaolijat poikkeamat tiedoksianto)
         canonical (-> canonical-without-attachments
                     (#(if (seq canonical-attachments)
                       (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] canonical-attachments)
@@ -404,9 +417,20 @@
                        %)))
 
         xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
+
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
+
+(defn- bad-building?
+  "Building can be bad either by choice (no state selected) or by
+  accident (ghost buildings)."
+  [building]
+  (or
+   (nil? building)
+   (= "ei tiedossa" (get-in building [:rakennus :jarjestysnumero]))
+   (util/empty-or-nil? (get-in building [:tila :tila]))
+   (every? ss/blank? (-> building :rakennus vals))))
 
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -416,7 +440,7 @@
         find-building (fn [nid] (some #(when (= (:nationalId %) nid) %) (:buildings application)))
         data (tools/unwrapped (:data katselmus))
         {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
-        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
+        {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila tiedoksianto]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
         buildings    (->> (vals rakennus)
                        (map
@@ -431,10 +455,7 @@
                                    desc (:description (find-building nid))
                                    b (if desc (assoc-in b [:rakennus :description] desc) b)]
                                b))))
-                       (remove
-                         #(or
-                            (nil? %)
-                            (= "ei tiedossa" (get-in % [:rakennus :jarjestysnumero])))))]
+                       (remove bad-building?))]
     (save-katselmus-xml
       application
       lang
@@ -452,6 +473,7 @@
       huomautukset
       lasnaolijat
       poikkeamat
+      tiedoksianto
       krysp-version
       begin-of-link
       {:type "task" :id (:id katselmus)})))
@@ -465,7 +487,7 @@
                                 :kiinttun        propertyId
                                 :rakennusnro     localShortId
                                 :valtakunnallinenNumero nationalId}}]
-    (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil)))
+    (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil nil krysp-version nil nil)))
 
 (defn save-unsent-attachments-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

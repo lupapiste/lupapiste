@@ -322,7 +322,7 @@
         canonical-attachments (when attachment-target (attachments-canon/get-attachments-as-canonical
                                                         {:attachments attachments :title (:title application)}
                                                         begin-of-link attachment-target))
-        
+
         all-canonical-attachments (seq (filter identity canonical-attachments))
 
         canonical-without-attachments (ya-canonical/katselmus-canonical application katselmus lang user)
@@ -331,7 +331,7 @@
                       (assoc-in % [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto] canonical-attachments)
                       %)))
 
-        xml (element-to-xml canonical (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version))
+        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))

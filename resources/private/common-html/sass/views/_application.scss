@@ -480,7 +480,8 @@ $app-gray-darkest: $gray187;
     margin-left: $marginM;
   }
   table {
-    margin-bottom: $marginS;
+    margin-top: $marginM;
+    margin-bottom: $marginM;
   }
 }
 
@@ -547,11 +548,6 @@ $app-gray-darkest: $gray187;
 
 .statement-over-due {
   color: red;
-}
-
-.form-input.textarea.high {
-  height: $baseline *6;
-  width: 80%;
 }
 
 #neighbors {
@@ -932,4 +928,8 @@ $app-gray-darkest: $gray187;
 
 h2 > i.is-right {
   float: right;
+}
+
+div.review-tasks {
+  margin-top: 20px;
 }

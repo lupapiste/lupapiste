@@ -32,9 +32,9 @@
     {:name "sijoitusLuvanTunniste" :type :string :size :l}))   ;; sijoituslupaviitetietoType
 
 (def tyomaasta-vastaava
-  (schema-body-without-element-by-name
-    (schema-body-without-element-by-name party "turvakieltoKytkin")
-    "hetu"))
+  (-> ya-party
+      (schema-body-without-element-by-name "turvakieltoKytkin")
+      (schema-body-without-element-by-name "hetu")))
 
 (def yleiset-alueet-maksaja
   (body

@@ -18,39 +18,42 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.refresh = function(application, authorities) {
     self.applicationId = application.id;
-    var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
-      var paatokset = _.map(verdict.paatokset || [], function(paatos) {
-        var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
-          var myAttachments = _.filter(application.attachments || [], function(attachment) {
-            var target = attachment.target;
-            var idMatch = false;
-            if (target && target.type === "verdict") {
-              if (target.poytakirjaId) {
-                idMatch = target.poytakirjaId === pk.id;
-              } else if (target.urlHash) {
-                idMatch = target.urlHash === pk.urlHash;
-              } else {
-                idMatch = target.id === verdict.id;
+    var verdicts = _(application.verdicts || [])
+      .cloneDeep()
+      .map(function(verdict) {
+        var paatokset = _.map(verdict.paatokset || [], function(paatos) {
+          var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
+            var myAttachments = _.filter(application.attachments || [], function(attachment) {
+              var target = attachment.target;
+              var idMatch = false;
+              if (target && target.type === "verdict") {
+                if (target.poytakirjaId) {
+                  idMatch = target.poytakirjaId === pk.id;
+                } else if (target.urlHash) {
+                  idMatch = target.urlHash === pk.urlHash;
+                } else {
+                  idMatch = target.id === verdict.id;
+                }
               }
-            }
-            return idMatch;
-          }) || [];
-          pk.attachments = myAttachments;
-          return pk;
+              return idMatch;
+            }) || [];
+            pk.attachments = myAttachments;
+            return pk;
+          });
+          paatos.poytakirjat = poytakirjat;
+          paatos.signatures = verdict.signatures;
+          paatos.verdict = verdict;
+          return paatos;
         });
-        paatos.poytakirjat = poytakirjat;
-        paatos.signatures = verdict.signatures;
-        paatos.verdict = verdict;
-        return paatos;
-      });
-      verdict.paatokset = paatokset;
+        verdict.paatokset = paatokset;
 
-      var pk = util.getIn(paatokset, [0, "poytakirjat", 0]) || {};
-      var dates = util.getIn(paatokset, [0, "paivamaarat"]) || {};
-      verdict.canBePublished = verdict.kuntalupatunnus && pk.status && pk.paatoksentekija && dates.anto && dates.lainvoimainen;
+        var pk = util.getIn(paatokset, [0, "poytakirjat", 0]) || {};
+        var dates = util.getIn(paatokset, [0, "paivamaarat"]) || {};
+        verdict.canBePublished = verdict.kuntalupatunnus && pk.status && pk.paatoksentekija && dates.anto && dates.lainvoimainen;
 
-      return verdict;
-    });
+        return verdict;
+      })
+      .filter(function(v) {return !_.isEmpty(v.paatokset);});
 
     self.verdicts(verdicts);
     self.authorities = authorities;
@@ -96,21 +99,31 @@ LUPAPISTE.VerdictsModel = function() {
   };
 
   self.checkVerdict = function(bindings){
-    var applicationId = getApplicationId(bindings);
-    ajax.command("check-for-verdict", {id: applicationId})
-    .processing(self.processing)
-    .pending(self.pending)
-    .success(function(d) {
-      var content = loc("verdict.verdicts-found-from-backend", d.verdictCount, d.taskCount);
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), content);
-      pageutil.showAjaxWait();
-      repository.load(applicationId);
-    })
-    .error(function(d) {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), loc(d.text));
-    })
-    .call();
-    hub.send("track-click", {category:"Application", label: "", event:"chechForVerdict"});
+    function doCheckVerdict() {
+      var applicationId = getApplicationId(bindings);
+      ajax.command("check-for-verdict", {id: applicationId})
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function(d) {
+          var content = loc("verdict.verdicts-found-from-backend", d.verdictCount, d.taskCount);
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), content);
+          pageutil.showAjaxWait();
+          repository.load(applicationId);
+        })
+        .error(function(d) {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), loc(d.text));
+        })
+        .call();
+      hub.send("track-click", {category:"Application", label: "", event:"chechForVerdict"});
+    }
+    if( lupapisteApp.services.verdictAppealService.hasAppeals()) {
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"),
+                                             loc("verdict.confirmfetch"),
+                                             {title: loc("yes"),
+                                              fn: doCheckVerdict});
+    } else {
+      doCheckVerdict();
+    }
   };
 
   self.verdictSigningModel = new LUPAPISTE.VerdictSigningModel("#dialog-sign-verdict");

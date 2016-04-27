@@ -23,7 +23,8 @@
         document {:op {:id "1"}}
         base-result {:jarjestysnumero nil
                      :kiinttun nil
-                     :muuTunnustieto {:MuuTunnus {:sovellus "toimenpideId", :tunnus "1"}}}]
+                     :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId", :tunnus "1"}}
+                                      {:MuuTunnus {:sovellus "Lupapiste", :tunnus "1"}}]}]
     (get-rakennustunnus {} {} document) => base-result
     (get-rakennustunnus {:tunnus "B"} application document) => (assoc base-result :rakennuksenSelite "B: desc")
     (get-rakennustunnus {:tunnus ""} application document) => (assoc base-result :rakennuksenSelite "desc")
@@ -887,7 +888,8 @@
     (fact "rakennustunnus"
       (:rakennustunnus tiedot) => {:jarjestysnumero nil,
                                    :kiinttun "21111111111111"
-                                   :muuTunnustieto {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
+                                   :muuTunnustieto [{:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
+                                                    {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "Lupapiste"}}]
                                    :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
@@ -1267,8 +1269,8 @@
                     authority-user-jussi
                     "Aloitusilmoitus"
                     :katselmus
-                    ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
-                    nil nil nil nil nil nil)
+                    ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat tiedoksianto
+                    nil nil nil nil nil nil nil)
         Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
         kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
@@ -1422,7 +1424,8 @@
                               :toteaja "Jussi"
                               :toteamisHetki "4.04.2014"}
                              "Tiivi Taavi, Hipsu ja Lala"
-                             "Ei poikkeamisia")
+                             "Ei poikkeamisia"
+                             false)
 
                  Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
                  toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
@@ -1468,6 +1471,7 @@
                  katselmuksenLaji (:katselmuksenLaji Katselmus) => "pohjakatselmus"
                  lasnaolijat (:lasnaolijat Katselmus ) => "Tiivi Taavi, Hipsu ja Lala"
                  poikkeamat (:poikkeamat Katselmus) => "Ei poikkeamisia"
+                 tiedoksianto (:verottajanTvLlKytkin Katselmus) => false
                  tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Pohjakatselmus 1"
                  kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"
 
@@ -1478,28 +1482,51 @@
              (:kuvaus huomautus) => "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
              (:maaraAika huomautus) => "2014-05-05"
              (:toteamisHetki huomautus) => "2014-04-04"
-             (:toteaja huomautus) => "Jussi"))
+             (:toteaja huomautus) => "Jussi")
+
+           (fact "If huomautus kuvaus is empty, a dash (-) is put as kuvaus value for huomautus"
+             (let [katselmus-huomautus (katselmus-canonical
+                                         application-rakennuslupa-verdict-given
+                                         "fi"
+                                         "123"
+                                         "Pohjakatselmus 1"
+                                         1354532324658
+                                         [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
+                                           :tila     {:tila "pidetty" :kayttoonottava false}}]
+                                         authority-user-jussi
+                                         "pohjakatselmus"
+                                         :katselmus
+                                         "pidetty"
+                                         "Sonja Silja"
+                                         true
+                                         {:kuvaus ""}
+                                         "Tiivi Taavi, Hipsu ja Lala"
+                                         "Ei poikkeamisia"
+                                         false)]
+               (get-in katselmus-huomautus [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia
+                                            :katselmustieto :Katselmus :huomautukset :huomautus :kuvaus]) => "-")))
 
 (fl/facts* "Katselmus with empty buildings is OK (no buildings in canonical)"
   (let [canonical (katselmus-canonical
-                                           application-rakennuslupa-verdict-given
-                                           "fi"
-                                           "123"
-                                           "Pohjakatselmus 1"
-                                           1354532324658
-                                           []
-                                           authority-user-jussi
-                                           "pohjakatselmus"
-                                           :katselmus
-                                           "pidetty"
-                                           "Sonja Silja"
-                                           true
-                                           {:kuvaus "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
-                                            :maaraAika "05.5.2014"
-                                            :toteaja "Jussi"
-                                            :toteamisHetki "4.04.2014"}
-                                           "Tiivi Taavi, Hipsu ja Lala"
-                                           "Ei poikkeamisia") => truthy
+                   application-rakennuslupa-verdict-given
+                   "fi"
+                   "123"
+                   "Pohjakatselmus 1"
+                   1354532324658
+                   []
+                   authority-user-jussi
+                   "pohjakatselmus"
+                   :katselmus
+                   "pidetty"
+                   "Sonja Silja"
+                   true
+                   {:kuvaus "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
+                    :maaraAika "05.5.2014"
+                    :toteaja "Jussi"
+                    :toteamisHetki "4.04.2014"}
+                   "Tiivi Taavi, Hipsu ja Lala"
+                   "Ei poikkeamisia"
+                   false) => truthy
         Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
         kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy

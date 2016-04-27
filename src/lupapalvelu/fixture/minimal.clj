@@ -414,6 +414,7 @@
     :personId "210281-0002"
     :role "applicant"
     :id "5073c0a1c2e6c470aef589a5"
+    :allowDirectMarketing true
     :street "Mutakatu 7"
     :zip "33560"
     :city "Tampere"}
@@ -437,6 +438,7 @@
     :companyId "1234567-1"
     :fise "f"
     :fiseKelpoisuus "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"
+    :allowDirectMarketing false
     :private {:password "$2a$10$sVFCAX/MB7wDKA2aNp1greq7QlHCU/r3WykMX/JKMWmg7d1cp7HSq"
               :apikey "502cb9e58426c613c8b85abc"}}
    ;; Hakija: pena / pena
@@ -452,6 +454,7 @@
     :zip "10203"
     :city "Piippola"
     :phone "0102030405"
+    :allowDirectMarketing true
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :apikey "502cb9e58426c613c8b85abd"}}
 

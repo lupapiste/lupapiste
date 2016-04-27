@@ -137,6 +137,7 @@
 
     (some-> (mongo/select-one :applications {$and [query-id-part query-user-part]})
             (update :documents (partial map schemas/with-current-schema-info))
+            (update :tasks (partial map schemas/with-current-schema-info))
             (filter-application-content-for user))))
 
 (defn get-application-no-access-checking
@@ -146,7 +147,8 @@
   ([query-or-id projection]
    (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
      (some-> (mongo/select-one :applications query projection)
-             (update :documents (partial map schemas/with-current-schema-info))))))
+             (update :documents (partial map schemas/with-current-schema-info))
+             (update :tasks (partial map schemas/with-current-schema-info))))))
 
 ;;
 ;; authorization
@@ -258,7 +260,7 @@
 
 (defn ->paatos
   "Returns a verdict data structure, compatible with KRYSP schema"
-  [{:keys [verdictId backendId timestamp name given status official text section draft agreement metadata]}]
+  [{:keys [verdictId backendId timestamp name given status official text section draft agreement metadata paatos-id]}]
   (let [verdict-id (or verdictId (mongo/create-id))]
     {:id verdict-id
     :kuntalupatunnus backendId
@@ -266,7 +268,8 @@
     :timestamp timestamp
     :sopimus agreement ; not in KRYSP
     :metadata metadata ; not in KRYSP?
-    :paatokset [{:paivamaarat {:anto             given
+    :paatokset [{:id          (or paatos-id (mongo/create-id))
+                 :paivamaarat {:anto             given
                                :lainvoimainen    official}
                  :poytakirjat [{:paatoksentekija name
                                 :urlHash         verdict-id
@@ -373,5 +376,3 @@
   {:name ""
    :description nil
    :created nil})
-
-

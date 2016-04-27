@@ -45,7 +45,7 @@
      :area         (get-text xml-no-ns :kokonaisala)
      :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))
      :operationId  (some (fn [{{:keys [tunnus sovellus]} :MuuTunnus}]
-                           (when (= sovellus "toimenpideId")
+                           (when (#{"toimenpideId" "Lupapiste"} sovellus)
                              tunnus))
                          (->list (:muuTunnustieto edn)))
      :description (:rakennuksenSelite edn)}))

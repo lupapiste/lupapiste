@@ -2,6 +2,7 @@
 
 Documentation   Mikko can't approve application
 Resource        ../../common_resource.robot
+Resource        ../common_keywords/approve_helpers.robot
 Variables      ../06_attachments/variables.py
 
 *** Test Cases ***
@@ -104,10 +105,7 @@ Party tab has indicators
   Wait Until  Element should be visible  applicationPartyDocumentIndicator
 
 Sonja approves application
-  Open tab  requiredFieldSummary
-  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab"]
-  Element should be visible  xpath=//button[@data-test-id="approve-application"]
-  Click enabled by test id  approve-application
+  Approve application
 
 Sonja cant re-approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']

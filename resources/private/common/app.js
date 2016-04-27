@@ -4,6 +4,10 @@ var LUPAPISTE = LUPAPISTE || {};
   "use strict";
 
   var startPageHref = window.location.href.replace(window.location.hash, "");
+  var mainWindow = !window.parent || window.parent === window;
+  if (mainWindow) {
+    window.name = "lupapiste";
+  }
 
   /**
    * Prototype for Lupapiste Single Page Apps.
@@ -234,7 +238,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var isAuthorizedToTosAndSearch = function() {
       return lupapisteApp.models.globalAuthModel.ok("permanent-archive-enabled") &&
-        lupapisteApp.models.globalAuthModel.ok("store-tos-metadata-for-application");
+        lupapisteApp.models.globalAuthModel.ok("tos-operations-enabled");
     };
 
     self.showArchiveMenuOptions = ko.observable(false);

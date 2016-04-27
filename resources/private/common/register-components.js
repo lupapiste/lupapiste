@@ -10,13 +10,14 @@ jQuery(document).ready(function() {
     {name: "docgen-group", synchronous: true},
     {name: "docgen-repeating-group", synchronous: true},
     {name: "docgen-table", synchronous: true},
-    {name: "docgen-checkbox", model: "docgen-input-model", synchronous: true},
+    {name: "docgen-input", synchronous: true},
+    {name: "docgen-string", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
+    {name: "docgen-checkbox", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
+    {name: "docgen-text", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
     {name: "docgen-select", synchronous: true},
-    {name: "docgen-string", model: "docgen-input-model", synchronous: true},
-    {name: "docgen-localized-string", model: "docgen-input-model", synchronous: true},
-    {name: "docgen-inline-string", model: "docgen-input-model", synchronous: true},
     {name: "docgen-button", synchronous: true},
     {name: "docgen-date", synchronous: true},
+    {name: "docgen-review-buildings", synchronous: true},
     {name: "construction-waste-report", synchronous: true},
     {name: "attachments-multiselect"},
     {name: "authority-select"},
@@ -109,7 +110,18 @@ jQuery(document).ready(function() {
     {name: "company-invite-bubble"},
     {name: "operation-editor"},
     {name: "document-identifier"},
-    {name: "change-state"}
+    {name: "change-state"},
+    {name: "verdict-appeal"},
+    {name: "verdict-appeal-bubble"},
+    {name: "file-upload"},
+    {name: "form-cell"},
+    {name: "cell-text", model: "cell-model"},
+    {name: "cell-span"},
+    {name: "cell-textarea", model: "cell-model"},
+    {name: "cell-date"},
+    {name: "cell-select"},
+    {name: "review-tasks"},
+    {name: "task"}
 ];
 
   _.forEach(components, function(component) {

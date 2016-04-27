@@ -15,22 +15,33 @@ LUPAPISTE.DocumentDataService = function(params) {
     });
   };
 
+  function getDefaults(doc) {
+    var docType = doc.schema.info.type;
+    switch(docType) {
+      case "task":
+        return {updateCommand: "update-task", removeCommand: "remove-document-data", collection: "tasks"};
+      default:
+        return doc.schema.info["construction-time"] ?
+          {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data", collection: "documents"} :
+          {updateCommand: "update-doc",                   removeCommand: "remove-document-data", collection: "documents"};
+
+    }
+  }
   function resolveCommandNames(doc, options) {
-    var docDefaults = doc.schema.info["construction-time"] ?
-      {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data"} :
-      {updateCommand: "update-doc",                   removeCommand: "remove-document-data"};
+    var docDefaults = getDefaults(doc);
     return _.extend(docDefaults, _.pick(options, "updateCommand", "removeCommand"));
   }
 
   self.addDocument = function(doc, options) {
     self.model.remove(self.findDocumentById(doc.id));
     return self.model.push( _.extend({
-        id: doc.id,
-        path: [],
-        name: doc.schema.info.name,
-        schema: doc.schema,
-        isDisabled: options && options.disabled,
-        validationResults: ko.observableArray(doc.validationErrors)
+      id: doc.id,
+      path: [],
+      name: doc.schema.info.name,
+      state: doc.state,
+      schema: doc.schema,
+      isDisabled: options && options.disabled,
+      validationResults: ko.observableArray(doc.validationErrors)
       },
       resolveCommandNames(doc, options),
       createDataModel(_.extend({type: "document"}, doc.schema.info, doc.schema), doc.data, [])
@@ -76,6 +87,11 @@ LUPAPISTE.DocumentDataService = function(params) {
     return doc && doc.updateCommand || "update-doc";
   };
 
+  self.getTargetCollection = function(documentId) {
+    var doc = self.findDocumentById(documentId);
+    return doc && doc.collection || "documents";
+  };
+
   self.removeRepeatingGroup = function(documentId, path, index, indicator) {
     var repeatingModel = self.getInDocument(documentId, path);
     var cb = function() {
@@ -84,7 +100,7 @@ LUPAPISTE.DocumentDataService = function(params) {
     var params = {
       path: path.concat(index)
     };
-    command(self.getRemoveCommand(documentId), documentId, params, {
+    command(self.getRemoveCommand(documentId), self.getTargetCollection(documentId), documentId, params, {
       indicator: indicator,
       cb: cb
     });
@@ -96,20 +112,20 @@ LUPAPISTE.DocumentDataService = function(params) {
         return [update[0].join("."), update[1]];
       })
     };
-    command(self.getUpdateCommand(documentId), documentId, params, {
+    command(self.getUpdateCommand(documentId), self.getTargetCollection(documentId), documentId, params, {
       indicator: indicator,
       cb: cb
     });
   };
 
-  function command(commandName, documentId, params, opts) {
+  function command(commandName, collection, documentId, params, opts) {
     var indicator = opts.indicator || _.noop;
     var cb = opts.cb || _.noop;
     ajax
       .command(commandName, _.extend({
           doc: documentId,
           id: self.applicationId(),
-          collection: "documents"
+          collection: collection
         },
         params)
       )
@@ -133,6 +149,17 @@ LUPAPISTE.DocumentDataService = function(params) {
       })
       .call();
   }
+
+  // Schema support
+
+  // Returns true if either the current user is on the whitelist
+  // (action is allowed) or no whitelist is defined in the given
+  // schema.
+  self.isWhitelisted = function( schema ) {
+    return !(util.getIn(schema, ["whitelist", "otherwise"]) === "disabled"
+            && !_.includes(util.getIn(schema, ["whitelist", "roles"]),
+                           lupapisteApp.models.currentUser.role()));
+  };
 
   //
   // Repeating utilities
@@ -168,7 +195,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   }
 
   function pushToRepeating(repeatingModel, rawModel) {
-    var ind = _.parseInt( _(repeatingModel.model()).map("index").max() ) + 1 || 0;
+    var ind = _(repeatingModel.model()).map("index").map(_.parseInt).max() + 1 || 0;
     var path = repeatingModel.path;
     return repeatingModel.model.push(createRepeatingUnitDataModel(repeatingModel.schema, rawModel, path, ind));
   }
@@ -206,7 +233,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   }
 
   function isGroupType(schema) {
-    return _.includes(["group", "table", "location", "document", "party"], schema.type);
+    return _.includes(["group", "table", "location", "document", "party", "task"], schema.type);
   }
 
   function createDataModel(schema, rawModel, path) {

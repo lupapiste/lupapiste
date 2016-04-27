@@ -2,7 +2,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   "use strict";
   var self = this;
 
-  var service = lupapisteApp.services.documentDataService;
+  self.service = params.service || lupapisteApp.services.documentDataService;
 
   self.documentId = params.documentId;
   self.applicationId = params.applicationId;
@@ -14,7 +14,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
   self.schemaName = params.schema.name;
 
-  self.groups = service.getInDocument(params.documentId, self.path).model;
+  self.groups = self.service.getInDocument(params.documentId, self.path).model;
 
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
@@ -28,16 +28,16 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.groupsRemovable = function(schema) {
     return !_.some(schema.body, "readonly") &&
       !params.isDisabled &&
-      self.authModel.ok(service.getRemoveCommand(params.documentId));
+      self.authModel.ok(self.service.getRemoveCommand(params.documentId));
   };
 
   self.updatable = function() {
-    return self.authModel.ok(service.getUpdateCommand(params.documentId));
+    return self.authModel.ok(self.service.getUpdateCommand(params.documentId));
   };
 
   self.removeGroup = function(group) {
     var removeFn = function () {
-      service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator, self.result);
+      self.service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator, self.result);
     };
     var message = "document.delete." + params.schema.type + ".subGroup.message";
     hub.send("show-dialog", {ltitle: "document.delete.header",
@@ -48,12 +48,12 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   };
 
   self.addGroup = function() {
-    service.addRepeatingGroup(params.documentId, params.path);
+    self.service.addRepeatingGroup(params.documentId, params.path);
   };
 
   self.duplicateLastGroup = function() {
-    var sourceIndex = _.parseInt( _(self.groups()).map("index").max() );
-    service.copyRepeatingGroup(params.documentId, params.path, sourceIndex, self.indicator, self.result);
+    var sourceIndex = _(self.groups()).map("index").map(_.parseInt).max();
+    self.service.copyRepeatingGroup(params.documentId, params.path, sourceIndex, self.indicator, self.result);
   };
 
   var addOneIfEmpty = function(groups) {

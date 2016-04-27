@@ -35,7 +35,6 @@
    :organization-fi (:fi (:name organization))
    :organization-sv (:sv (:name organization))})
 
-
 (notifications/defemail :add-statement-giver
   {:recipients-fn  notifications/from-user
    :subject-key    "application.statements"
@@ -203,13 +202,14 @@
         comment-model  (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created)
         statement   (-> (util/find-by-id statementId (:statements application))
                         (give-statement text status modify-id (:id user)))
+        attachment-updates (attachments-readonly-updates application statementId)
         response (update-application command
                                      {:statements {$elemMatch {:id statementId}}}
                                      (util/deep-merge
                                       comment-model
-                                      {$set {:statements.$ statement}}))
-        updated-app (assoc application :statements (util/update-by-id statement (:statements application)))]
-    (child-to-attachment/create-attachment-from-children user updated-app :statements statementId lang)
+                                      attachment-updates
+                                      {$set {:statements.$ statement}}))]
+    (child-to-attachment/create-attachment-from-children user (domain/get-application-no-access-checking (:id application)) :statements statementId lang)
     (ok :modify-id (:modify-id statement))))
 
 (defcommand request-for-statement-reply

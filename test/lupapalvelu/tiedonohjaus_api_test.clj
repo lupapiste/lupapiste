@@ -2,12 +2,11 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
-            [sade.env :as env]
             [lupapalvelu.tiedonohjaus-api :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.action :refer [execute]])
-  (:import (java.util Date)
-           (java.time LocalDate ZoneId)))
+            [lupapalvelu.action :refer [execute update-application]]
+            [lupapalvelu.tiedonohjaus :as t]
+            [lupapalvelu.organization :as organization]))
 
 (testable-privates lupapalvelu.tiedonohjaus-api store-function-code update-application-child-metadata!)
 
@@ -20,13 +19,13 @@
       (mongo/update-by-id :organizations "753-R" {"$set" {"operations-tos-functions.vapaa-ajan-asuinrakennus" "10 03 00 01"}}) => nil))
 
   (fact "a function code can not be stored for an operation not selected by the organization"
-    (store-function-code "vapaa-ajan-asuinrakennus" "10 03 00 01" {:orgAuthz {:753-R #{:authorityAdmin}}}) => {:ok false :text "Invalid organization or operation"}
+    (store-function-code "vapaa-ajan-asuinrakennus" "10 03 00 01" {:orgAuthz {:753-R #{:authorityAdmin}}}) => {:ok false :text "error.unknown-operation"}
     (provided
       (lupapalvelu.organization/get-organization "753-R") => {:selected-operations ["foobar"]}
       (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "10 03 00 01"}]))
 
   (fact "an invalid function code can not be stored for an operation"
-    (store-function-code "vapaa-ajan-asuinrakennus" "10 03 00 01" {:orgAuthz {:753-R #{:authorityAdmin}}}) => {:ok false :text "Invalid organization or operation"}
+    (store-function-code "vapaa-ajan-asuinrakennus" "10 03 00 01" {:orgAuthz {:753-R #{:authorityAdmin}}}) => {:ok false :text "error.unknown-operation"}
     (provided
       (lupapalvelu.organization/get-organization "753-R") => {:selected-operations ["vapaa-ajan-asuinrakennus"]}
       (lupapalvelu.tiedonohjaus/available-tos-functions "753-R") => [{:code "55 55 55 55"}]))
@@ -250,4 +249,119 @@
                                                                                                   :myyntipalvelu false
                                                                                                   :kieli :fi
                                                                                                   :henkilotiedot :sisaltaa}}]}}) => nil
-        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil))))
+        (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
+
+  (fact "metadata cannot be set to a read-only attachment"
+    (let [command {:application {:organization    "753-R"
+                                 :id              "ABC123"
+                                 :state           "submitted"
+                                 :attachments [{:id "5234" :readOnly true}]}
+                   :created     1000
+                   :user        {:orgAuthz      {:753-R #{:authority :archivist}}
+                                 :organizations ["753-R"]
+                                 :role          :authority}
+                   :action      "store-tos-metadata-for-attachment"
+                   :data        {:metadata {"julkisuusluokka" "julkinen"}
+                                 :id       "ABC123"
+                                 :attachmentId "5234"}}]
+      (execute command) => {:ok false
+                            :text "error.unauthorized"
+                            :desc "Read-only attachments cannot be modified."}))
+
+  (fact "a valid function code can be set to application and it is stored in history array"
+    (let [fc "10 03 00 01"
+          application {:organization    "753-R"
+                       :id              "ABC123"
+                       :state           "submitted"
+                       :history []
+                       :attachments []}
+          command {:application application
+                   :created     1000
+                   :user        {:id            "monni"
+                                 :firstName     "Monni"
+                                 :lastName      "Tiskaa"
+                                 :orgAuthz      {:753-R #{:authority :archivist}}
+                                 :organizations ["753-R"]
+                                 :role          :authority}
+                   :action      "set-tos-function-for-application"
+                   :data        {:id       "ABC123"
+                                 :functionCode "10 03 00 01"}}]
+      (execute command) => {:ok true}
+      (provided
+        (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
+        (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
+        (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
+        (update-application command {"$set"  {:modified        1000
+                                              :tosFunction     fc
+                                              :metadata        {:julkisuusluokka :julkinen}
+                                              :processMetadata {:julkisuusluokka :salainen}
+                                              :attachments     []}
+                                     "$push" {:history {:tosFunction {:code fc
+                                                                      :text "Foobar"}
+                                                        :ts          1000
+                                                        :user        {:id        "monni"
+                                                                      :firstName "Monni"
+                                                                      :lastName  "Tiskaa"
+                                                                      :role      :authority}
+                                                        :correction  nil}}}) => nil)))
+
+  (fact "archivist can set the tos function after verdict as correction"
+    (let [fc "10 03 00 01"
+          application {:organization    "753-R"
+                       :id              "ABC123"
+                       :state           :verdictGiven
+                       :history []
+                       :attachments []}
+          command {:application application
+                   :created     1000
+                   :user        {:id            "monni"
+                                 :firstName     "Monni"
+                                 :lastName      "Tiskaa"
+                                 :orgAuthz      {:753-R #{:authority :archivist}}
+                                 :organizations ["753-R"]
+                                 :role          :authority}
+                   :action      "force-fix-tos-function-for-application"
+                   :data        {:id       "ABC123"
+                                 :functionCode "10 03 00 01"
+                                 :reason "invalid procedure"}}]
+      (execute command) => {:ok true}
+      (provided
+        (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
+        (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
+        (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
+        (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
+        (update-application command {"$set"  {:modified        1000
+                                              :tosFunction     fc
+                                              :metadata        {:julkisuusluokka :julkinen}
+                                              :processMetadata {:julkisuusluokka :salainen}
+                                              :attachments     []}
+                                     "$push" {:history {:tosFunction {:code fc
+                                                                      :text "Foobar"}
+                                                        :ts          1000
+                                                        :user        {:id        "monni"
+                                                                      :firstName "Monni"
+                                                                      :lastName  "Tiskaa"
+                                                                      :role      :authority}
+                                                        :correction  "invalid procedure"}}}) => nil)))
+
+  (fact "normal authority user cannot change tos function after verdict"
+    (let [application {:organization    "753-R"
+                       :id              "ABC123"
+                       :state           :verdictGiven
+                       :history []
+                       :attachments []}
+          command {:application application
+                   :created     1000
+                   :user        {:id            "monni"
+                                 :firstName     "Monni"
+                                 :lastName      "Tiskaa"
+                                 :orgAuthz      {:753-R #{:authority}}
+                                 :organizations ["753-R"]
+                                 :role          :authority}
+                   :action      "force-fix-tos-function-for-application"
+                   :data        {:id       "ABC123"
+                                 :functionCode "10 03 00 01"
+                                 :reason "invalid procedure"}}
+          command2 (assoc command :action "set-tos-function-for-application")]
+      (execute command) => {:ok false :text "error.unauthorized"}
+      (execute command2) => {:ok false :state :verdictGiven :text "error.command-illegal-state"})))

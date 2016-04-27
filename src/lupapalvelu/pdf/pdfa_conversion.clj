@@ -2,14 +2,16 @@
   (:require [clojure.java.shell :as shell]
             [clojure.pprint :refer [pprint]]
             [clojure.core.memoize :as memo]
-            [taoensso.timbre :refer [trace debug debugf info infof warn error fatal]]
+            [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
             [clojure.java.io :as io]
             [sade.env :as env]
             [lupapalvelu.statistics :as statistics]
             [lupapalvelu.organization :as organization])
-  (:import [java.io File IOException FileNotFoundException]
-           [com.lowagie.text.pdf PdfReader]))
+  (:import [java.io File IOException FileNotFoundException InputStream]
+           [com.lowagie.text.pdf PdfReader]
+           [com.netflix.hystrix HystrixCommandProperties]))
 
 (defn- executable-exists? [executable]
   (try
@@ -114,19 +116,31 @@
                  :else :invalid-pages)]
     (statistics/store-pdf-conversion-page-count db-key count)))
 
-(defn convert-to-pdf-a
+(hystrix/defcommand convert-to-pdf-a
   "Takes a PDF File and returns a File that is PDF/A"
+  {:hystrix/group-key   "Attachment"
+   :hystrix/command-key "Convert to PDF/A with PdfTools"
+   :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000))) setter)
+   ;; :hystrix/fallback-fn (fn fetch-request-fallback [pdf-file & [target-file-path]] nil)
+   }
   [pdf-file & [target-file-path]]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
     (try
       (info "Trying to convert PDF to PDF/A")
-      (let [temp-file-path (.getCanonicalPath pdf-file)
-            page-count (get-pdf-page-count temp-file-path)
-            pdf-a-file-path (or target-file-path (str temp-file-path "-pdfa.pdf"))
-            conversion-result (run-pdf-to-pdf-a-conversion temp-file-path pdf-a-file-path)]
+      (let [stream? (instance? InputStream pdf-file)
+            file-path (if stream?
+                        (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")]
+                          (io/copy pdf-file temp-file)
+                          (.getCanonicalPath temp-file))
+                        (.getCanonicalPath pdf-file))
+            page-count (get-pdf-page-count file-path)
+            pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
+            conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path)]
         (store-converted-page-count conversion-result page-count)
         (if (:pdfa? conversion-result)
-          (info "Converted to PDF/A " pdf-a-file-path)
+          (if (pos? (-> conversion-result :output-file .length))
+            (info "Converted to PDF/A " pdf-a-file-path)
+            (throw (Exception. (str "PDF/A conversion resulted in empty file. Original file: " file-path))))
           (info "Could not convert the file to PDF/A"))
         conversion-result)
       (catch Exception e

@@ -18,11 +18,6 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]))
 
-(defn- find-repeating-document [schema-name documents]
-  (some #(and (= schema-name (get-in % [:schema-info :name]))
-              (get-in % [:schema-info :repeating]))
-        documents))
-
 (defn by-id [application collection id]
   (let [docs ((keyword collection) application)]
     (some #(when (= (:id %) id) %) docs)))
@@ -96,49 +91,33 @@
   (when-not (#{"documents" "tasks"} collection)
     (fail :error.unknown-type)))
 
-(defn- get-subschema-by-name [schema sub-schema-name]
-  (some (fn [schema-body]
-          (when (= (:name schema-body) (name sub-schema-name))
-            schema-body))
-        (:body schema)))
-
-(defn- path->schema-path [path]
-  (remove (comp ss/numeric? name) path))
-
-(defn- seek-field-from-schema-path [field-name schema schema-path]
-  (reduce (fn [[schema field-value] path]
-            (let [subschema (get-subschema-by-name schema path)
-                  value (or (get subschema field-name) field-value)]
-              [subschema value]))
-          [schema nil]
-          schema-path))
-
 (defn validate-against-whitelist! [document update-paths user-role]
-  (let [doc-schema            (model/get-document-schema document)
-        schema-paths          (map path->schema-path update-paths)]
-    (doseq [path schema-paths]
-      (let [[_ whitelist] (seek-field-from-schema-path :whitelist doc-schema path)]
+  (let [doc-schema (model/get-document-schema document)]
+    (doseq [path update-paths]
+      (let [{whitelist :whitelist} (model/find-by-name (:body doc-schema) path)]
         (when-not (or (empty? whitelist)
                       (some #{(keyword user-role)} (:roles whitelist)))
           (unauthorized!))))))
 
+(defn- sent? [{state :state}]
+  (and state (= "sent" (name state))))
+
 (defn validate-readonly-updates! [document update-paths]
-  (let [doc-schema            (model/get-document-schema document)
-        schema-paths          (map path->schema-path update-paths)]
-    (doseq [path schema-paths]
-      (let [[_ readonly] (seek-field-from-schema-path :readonly doc-schema path)]
-        (when readonly
+  (let [doc-schema (model/get-document-schema document)]
+    (doseq [path update-paths]
+      (let [{:keys [readonly readonly-after-sent]} (model/find-by-name (:body doc-schema) path)]
+        (when (or readonly (and (sent? document) readonly-after-sent))
           (fail! :error-trying-to-update-readonly-field))))))
 
 (defn validate-readonly-removes! [document remove-paths]
   (let [doc-schema              (model/get-document-schema document)
-        schema-paths            (map path->schema-path remove-paths)
-        validate-all-subschemas (fn validate-all-subschemas [schema]
-                                  (or (:readonly schema)
-                                      (some validate-all-subschemas (:body schema))))]
-    (doseq [path schema-paths]
-      (let [[subschema readonly] (seek-field-from-schema-path :readonly doc-schema path)]
-        (when (or readonly (validate-all-subschemas subschema))
+        validate-all-subschemas (fn validate-all-subschemas [{:keys [readonly readonly-after-sent body]}]
+                                  (or readonly
+                                      (and (sent? document) readonly-after-sent)
+                                      (some validate-all-subschemas body)))]
+    (doseq [path remove-paths]
+      (let [{:keys [readonly readonly-after-sent] :as subschema} (model/find-by-name (:body doc-schema) path)]
+        (when (validate-all-subschemas subschema)
           (fail! :error-trying-to-remove-readonly-field))))))
 
 (defn update! [{application :application timestamp :created {role :role} :user} doc-id updates collection]
@@ -244,37 +223,49 @@
                                   $set  {:modified created}})
       document)))
 
-(defn- update-key-in-schema? [schema [update-key _]]
+(defn update-key-in-schema? [schema [update-key _]]
   (model/find-by-name schema update-key))
 
-(defn set-subject-to-document [application document subject path timestamp]
-  {:pre [(map? document) (map? subject)]}
-  (when (seq subject)
-    (let [path-arr     (if-not (ss/blank? path) (ss/split path #"\.") [])
-          schema       (schemas/get-schema (:schema-info document))
-          with-hetu    (model/has-hetu? (:body schema) path-arr)
-          person       (tools/unwrapped (case (first path-arr)
-                                          "henkilo" (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? true)
-                                          "yritys" (model/->yritys subject :with-empty-defaults? true)
-                                          (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? true)))
-          model        (if (seq path-arr)
-                         (assoc-in {:_selected (first path-arr)} (map keyword path-arr) person)
-                         person)
-          updates      (->> (tools/path-vals model)
-                            ; Path should exist in schema!
-                            (filter (partial update-key-in-schema? (:body schema))))]
-      (when-not schema (fail! :error.schema-not-found))
-      (debugf "merging user %s with best effort into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
-      (persist-model-updates application "documents" document updates timestamp))))
+(defn set-subject-to-document
+  ([application document subject path timestamp]
+    (set-subject-to-document application document subject path timestamp true))
+  ([application document subject path timestamp set-empty-values?]
+    {:pre [(map? document) (map? subject) (util/boolean? set-empty-values?)]}
+    (when (seq subject)
+      (let [path-arr     (if-not (ss/blank? path) (ss/split path #"\.") [])
+            schema       (schemas/get-schema (:schema-info document))
+            with-hetu    (model/has-hetu? (:body schema) path-arr)
+            person       (tools/unwrapped (case (first path-arr)
+                                            "henkilo" (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? set-empty-values?)
+                                            "yritys" (model/->yritys subject :with-empty-defaults? set-empty-values?)
+                                            (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? set-empty-values?)))
+            model        (if (seq path-arr)
+                           (assoc-in {:_selected (first path-arr)} (map keyword path-arr) person)
+                           person)
+            include-update (fn [path-val]
+                             (let [v (second path-val)]
+                               (and
+                                ; Path must exist in schema!
+                                (update-key-in-schema? (:body schema) path-val)
+                                (or (ss/other-than-string? v)
+                                    ; Optionally skip empty values
+                                    set-empty-values?  (not (ss/blank? v))))))
+            updates      (filter include-update (tools/path-vals model))]
+        (when-not schema (fail! :error.schema-not-found))
+        (debugf "merging user %s with best effort into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
+        (persist-model-updates application "documents" document updates timestamp)))))
 
-(defn do-set-user-to-document [application document-id user-id path timestamp]
-  {:pre [application document-id timestamp]}
-  (if-let [document (domain/get-document-by-id application document-id)]
-    (when-not (ss/blank? user-id)
-      (if-let [subject (user/get-user-by-id user-id)]
-        (set-subject-to-document application document subject path timestamp)
-        (fail! :error.user-not-found)))
-    (fail :error.document-not-found)))
+(defn do-set-user-to-document
+  ([application document-id user-id path timestamp]
+    (do-set-user-to-document application document-id user-id path timestamp true))
+  ([application document-id user-id path timestamp set-empty-values?]
+    {:pre [application document-id timestamp]}
+    (if-let [document (domain/get-document-by-id application document-id)]
+      (when-not (ss/blank? user-id)
+        (if-let [subject (user/get-user-by-id user-id)]
+          (set-subject-to-document application document subject path timestamp set-empty-values?)
+          (fail! :error.user-not-found)))
+      (fail :error.document-not-found))))
 
 (defn do-set-company-to-document [application document company-id path user timestamp]
   {:pre [document]}

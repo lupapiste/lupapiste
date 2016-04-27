@@ -58,7 +58,7 @@ $icon-pad: 10px;
   line-height: $height;
 }
 
-[type=submit], .btn, button {
+.btn-base {
   @include btn-height;
   border: none;
   box-sizing: border-box;
@@ -68,7 +68,6 @@ $icon-pad: 10px;
   white-space: nowrap;
   text-align: left;
   text-decoration: none;
-  cursor: pointer;
   padding: {
     left: $btn-spacer;
     top: 0;
@@ -80,7 +79,7 @@ $icon-pad: 10px;
     // Inline-block would be more intuitive and proper
     // alternative, but for some reason it results in
     // one or two pixel vertical gap. This might be somehow
-    // system-related since the the main.css works fine
+    // system-related since the main.css works fine
     // with inline-block on its own.
     display: table-cell;
     margin: 0;
@@ -95,6 +94,11 @@ $icon-pad: 10px;
       right: 0px !important;
     }
   }
+}
+
+[type=submit], .btn, button {
+  @extend .btn-base;
+  cursor: pointer;
 }
 
 i.btn {
@@ -112,7 +116,7 @@ i.btn {
 // This is useful when displaying text with icons,
 // for example.
 .like-btn {
-  @extend .btn;
+  @extend .btn-base;
   cursor: default;
   padding: 0;
   @include small;
@@ -439,7 +443,7 @@ i.toggle {
 
 @mixin stacked {
   display: table;
-  .btn, button {
+  .btn-base, .btn, button {
     width: 100%;
     display: block;
     margin: 0;
@@ -461,7 +465,7 @@ i.toggle {
 
 // Only inner margins
 .inner-margins {
-  .btn, button, div, a {
+  .btn-base, .btn, button, div, a {
     margin-left: $btn-spacer;
   }
   :first-child {
@@ -470,7 +474,7 @@ i.toggle {
 }
 
 .inner-margins.stacked {
-  .btn, button, div, a {
+  .btn-base, .btn, button, div, a {
     margin-left: 0;
     margin-top: $btn-spacer;
   }

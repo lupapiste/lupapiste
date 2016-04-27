@@ -12,9 +12,12 @@
             [sade.util :refer [fn->>] :as util]
             [sade.xml :as xml]
             [sade.env :as env]
-            [lupapalvelu.action :as action]
+            [lupapalvelu.action :refer [update-application] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.appeal-common :as appeal-common]
+            [lupapalvelu.building :as building]
+            [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -26,8 +29,10 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
   (:import [java.net URL]))
 
@@ -94,7 +99,7 @@
 (defschema Poytakirja
   "Schema for verdict record."
   {(sc/optional-key :paatoksentekija) (sc/maybe sc/Str)
-   (sc/optional-key :paatoskoodi)     (sc/maybe sc/Str) ;; (apply sc/enum verdict-codes), data contains invalid values: nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11" 
+   (sc/optional-key :paatoskoodi)     (sc/maybe sc/Str) ;; (apply sc/enum verdict-codes), data contains invalid values: nil "Peruutettu" "14" "annettu lausunto (ent. selitys)" "1" "lausunto/p\u00e4\u00e4tu00f6s (muu kuin rlk)" "11"
    (sc/optional-key :status)          (sc/maybe Status)
    (sc/optional-key :urlHash)         sc/Str
    (sc/optional-key :paatos)          (sc/maybe sc/Str)
@@ -147,6 +152,26 @@
    (sc/optional-key :signatures) [Signature]
    (sc/optional-key :metadata)   (sc/eq nil)})
 
+(defn- backend-id->verdict [backend-id]
+  {:id              (mongo/create-id)
+   :kuntalupatunnus backend-id
+   :timestamp       nil
+   :paatokset       []
+   :draft           true})
+
+(defn verdict-attachment-type
+  ([application] (verdict-attachment-type application "paatosote"))
+  ([{permit-type :permitType :as application} type]
+   (if (and (#{:P :R} (keyword permit-type)) (env/feature? :updated-attachments))
+     {:type-group "paatoksenteko" :type-id type}
+     {:type-group "muut" :type-id type})))
+
+(defn- attachment-type-from-krysp-type [type]
+  (case (ss/lower-case type)
+    "paatos" "paatos"
+    "lupaehto" "lupaehto"
+    "paatosote"))
+
 (defn- get-poytakirja
   "At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
@@ -164,7 +189,7 @@
                        verdict-id)]
       (doall
        (for [att  attachments
-             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki} att
+             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
                    _ (debug "Download " url)
                    filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (try
@@ -175,8 +200,7 @@
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
-                   attachment-type    {:type-group (if (env/feature? :updated-attachments) "paatoksenteko" "muut"), 
-                                       :type-id "paatosote"}
+                   attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type type))
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
@@ -184,7 +208,7 @@
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
          (if (= 200 (:status resp))
-           (attachment/attach-file! current-application 
+           (attachment/attach-file! current-application
                                     {:filename (or header-filename filename)
                                      :size content-length
                                      :content (:body resp)
@@ -223,7 +247,9 @@
         extras-reader (permit/get-verdict-extras-reader (:permitType application))]
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-            tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)]
+            tasks (tasks/verdicts->tasks (assoc application
+                                                :verdicts verdicts-with-attachments
+                                                :buildings  (building-reader/->buildings-summary app-xml)) created)]
         (util/deep-merge
           {$set (merge {:verdicts verdicts-with-attachments, :modified created}
                   (when-not has-old-verdict-tasks {:tasks tasks})
@@ -320,3 +346,87 @@
       nil          (enlive/at xml [:RakennusvalvontaAsia] (enlive/append paatostieto))
       (enlive/at xml [:RakennusvalvontaAsia place] (enlive/before paatostieto)))))
 
+(defn- normalize-special-verdict
+  "Normalizes special foreman/designer verdicts by
+  creating a traditional paatostieto element from the proper special
+  verdict party.
+    application: Application that requests verdict.
+    app-xml:     Verdict xml message
+  Returns either normalized app-xml (without namespaces) or app-xml if
+  the verdict is not special."
+  [application app-xml]
+  (let [xml (cr/strip-xml-namespaces app-xml)]
+    (if (special-foreman-designer-verdict? (meta-fields/enrich-with-link-permit-data application) xml)
+      (verdict-xml-with-foreman-designer-verdicts application xml)
+      app-xml)))
+
+(defn- save-verdicts-from-xml
+  "Saves verdict's from valid app-xml to application. Returns (ok) with updated verdicts and tasks"
+  [{:keys [application] :as command} app-xml]
+  (appeal-common/delete-all command)
+  (let [updates (find-verdicts-from-xml command app-xml)]
+    (when updates
+      (let [doc-updates (doc-transformations/get-state-transition-updates command (sm/verdict-given-state application))]
+        (update-application command (:mongo-query doc-updates) (util/deep-merge (:mongo-updates doc-updates) updates))
+        (t/mark-app-and-attachments-final! (:id application) (:created command))))
+    (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+
+(defn- building-mongo-updates
+  "Get buildings from verdict XML and save to application. Updates also operation documents
+   with building data, if applicable."
+  [application buildings]
+  (when buildings
+    (->> (building/building-updates buildings application)
+         (hash-map $set))))
+
+(defn- backend-id-mongo-updates
+  [{verdicts :verdicts} backend-ids]
+  (some->> backend-ids
+           (remove (set (map :kuntalupatunnus verdicts)))
+           (map backend-id->verdict)
+           (assoc-in {} [$push :verdicts $each])))
+
+(defn do-check-for-verdict [{:keys [application] :as command}]
+  {:pre [(every? command [:application :user :created])]}
+  (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
+                         ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
+                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))]
+    (let [app-xml (normalize-special-verdict application app-xml)
+          organization (organization/get-organization (:organization application))
+          validator-fn (permit/get-verdict-validator (permit/permit-type application))
+          validation-errors (validator-fn app-xml organization)]
+      (if-not validation-errors
+        (save-verdicts-from-xml command app-xml)
+        (let [building-updates   (->> (seq (building-reader/->buildings-summary app-xml))
+                                      (building-mongo-updates application))
+              backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
+                                      (backend-id-mongo-updates application))]
+          (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
+          validation-errors)))))
+
+(defn- verdict-task?
+  "True if given task is 'rooted' via source chain to the verdict.
+   tasks: tasks of the application
+   verdict-id: Id of the target verdict
+   task: task to be analyzed."
+  [tasks verdict-id {{source-type :type source-id :id} :source :as task}]
+  (case (keyword source-type)
+    :verdict (= verdict-id source-id)
+    :task (verdict-task? tasks verdict-id (some #(when (= (:id %) source-id) %) tasks))
+    false))
+
+(defn deletable-verdict-task-ids
+  "Task ids that a) can be deleted and b) belong to the
+  verdict with the given id."
+  [{:keys [tasks attachments]} verdict-id]
+  (->> tasks
+       (filter #(and (not= (-> % :state keyword) :sent)
+                     (verdict-task? tasks verdict-id %)))
+       (map :id)))
+
+(defn task-ids->attachments
+  "All the attachments that belong to the tasks with the given ids."
+  [application task-ids]
+  (->> task-ids
+       (map (partial tasks/task-attachments application))
+       flatten))

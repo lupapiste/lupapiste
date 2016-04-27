@@ -201,6 +201,9 @@ Positive indicator should be visible
 Positive indicator should not be visible
   Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-positive"]
 
+Negative indicator should not be visible
+  Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-negative"]
+
 Negative indicator icon should not be visible
   Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-icon-negative"]
 
@@ -789,6 +792,13 @@ Confirm
   Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  ${modalId}
 
+Deny
+  [Arguments]  ${modalId}
+  Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-no"]
+  Focus  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-no"]
+  Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-no"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-no"]
+
 It is possible to add operation
   Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
 
@@ -966,7 +976,7 @@ Invite company to application
 
 Task count is
   [Arguments]  ${type}  ${amount}
-  Wait until  Xpath Should Match X Times  //*[@data-bind="foreach: taskGroups"]//tbody/tr[@data-test-type="${type}"]  ${amount}
+  Wait until  Xpath Should Match X Times  //table//tbody/tr[@data-test-type="${type}"]  ${amount}
 
 Foreman count is
   [Arguments]  ${amount}
@@ -1187,6 +1197,12 @@ Scroll to
   [Arguments]  ${selector}
   Wait Until  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
 
+Scroll to top
+  Execute javascript  window.scrollTo(0,0)
+
+Scroll to bottom
+  Execute javascript  window.scrollTo(0,888888)
+
 Scroll to test id
   [Arguments]  ${id}
   Scroll to  [data-test-id=${id}]
@@ -1220,7 +1236,7 @@ Test id empty
 Test id disabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Element should be disabled  jquery=[data-test-id=${id}]
+  Wait Until  Element should be disabled  jquery=[data-test-id=${id}]
 
 Test id enabled
   [Arguments]  ${id}
@@ -1232,6 +1248,29 @@ Fill test id
   Wait test id visible  ${id}
   Element Should Be Enabled  jquery=[data-test-id=${id}]
   Input text by test id  ${id}  ${text}
+
+Focus test id
+  [Arguments]  ${id}
+  Focus  jquery=[data-test-id=${id}]
+
+No such test id
+  [Arguments]  ${id}
+  Wait until  Element should not be visible  jquery=[data-test-id=${id}]
+
+
+Test id should contain
+  [Arguments]  ${id}  ${text}
+  Wait until  Element should contain  jquery=[data-test-id=${id}]  ${text}
+
+Javascript? helper
+  [Arguments]  ${expression}
+  ${result}=  Execute JavaScript  return ${expression};
+  Should be true  ${result}
+
+Javascript?
+  [Arguments]  ${expression}
+  Wait Until  Javascript? helper  ${expression}
+
 
 # Frontend error log
 

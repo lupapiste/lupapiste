@@ -10,7 +10,6 @@
             [sade.core :refer :all]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
-           [java.util.zip GZIPOutputStream]
            [org.apache.commons.io IOUtils]
            [com.googlecode.htmlcompressor.compressor HtmlCompressor]
            [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]
@@ -20,7 +19,7 @@
   (when (env/feature? :no-minification)
     (.write out (format "\n\n/*\n * %s\n */\n" n)))
   (when (= kind :js)
-    (.write out "\n;\n\n"))
+    (.write out "\n"))
   out)
 
 (def error-reporter
@@ -39,8 +38,8 @@
   (cond
     (env/feature? :no-minification) (IOUtils/copy in out)
     (= kind :js) (let [c (JavaScriptCompressor. in error-reporter)]
-                   ; no linebreaks, obfuscate locals, no verbose,
-                   (.compress c out -1 true false;
+                   ; linebreaks at 32K, obfuscate locals, no verbose,
+                   (.compress c out 32000 true false
                      ; preserve semicolons, disable optimizations
                      true true))
     (= kind :css) (let [c (CssCompressor. in)]

@@ -63,8 +63,8 @@ LUPAPISTE.ModalDialogModel = function () {
   self.submitEnabled = ko.observable();
 
   self.submitDialog = function() {
-    self.submitFn()();
     self.closeDialog();
+    self.submitFn()();
   };
 
   self.closeDialog = function() {

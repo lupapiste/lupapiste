@@ -1,26 +1,32 @@
 (ns lupapalvelu.appeal-api
-  (:require [sade.core :refer :all]
+  (:require [clojure.set :refer [difference rename-keys]]
+            [sade.core :refer :all]
             [sade.util :as util]
-            [monger.operators :refer [$push $elemMatch $set]]
+            [sade.schemas :as ssc]
+            [schema.core :as sc]
+            [monger.operators :refer [$push $pull $elemMatch $set]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.appeal :as appeal]
             [lupapalvelu.appeal-verdict :as appeal-verdict]
+            [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
-            [sade.schemas :as ssc]
-            [schema.core :as sc]))
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.domain :as domain]))
 
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
-  [{{verdictId :targetId} :data} {:keys [verdicts]}]
-  (when-not (util/find-first #(= verdictId (:id %)) verdicts)
-    (fail :error.verdict-not-found)))
+  [{{verdictId :verdictId} :data} {:keys [verdicts]}]
+  (when verdictId
+    (when-not (util/find-first #(= verdictId (:id %)) verdicts)
+      (fail :error.verdict-not-found))))
 
 (defn- appeal-exists
   "Pre-check to validate that at least one appeal exists before appeal verdict can be created"
-  [_ {:keys [appeals]}]
-  (when (zero? (count appeals))
-    (fail :error.appeals-not-found)))
+  [{{:keys [verdictId]} :data} {:keys [appeals]}]
+  (when verdictId
+    (when (zero? (count (filter #(= verdictId (:target-verdict %)) appeals)))
+     (fail :error.appeals-not-found))))
 
 (defn- appeal-id-exists
   "Pre-check to validate that given ID exists in application"
@@ -36,35 +42,49 @@
     (when-not (util/find-by-id appeal-id appealVerdicts)
       (fail :error.unknown-appeal-verdict))))
 
-(defn appeal-verdicts-after-appeal?
-  "Predicate to check if appeal-verdicts have been made AFTER the given appeal in question has been made.
-   Returns true if at least one appeal-verdict has been given after the appeal."
-  [appeal appeal-verdicts]
-  {:pre [(map? appeal) (sequential? appeal-verdicts)]}
-  (not-every? (partial > (:made appeal)) (map :made appeal-verdicts)))
+(defn- deny-type-change
+  "Pre-check: when appeal is updated, type of appeal can't be changed"
+  [{{appeal-id :appealId type :type} :data} {:keys [appeals]}]
+  (when appeal-id
+    (when-some [appeal (util/find-by-id appeal-id appeals)]
+      (when-not (= type (:type appeal))
+        (fail :error.appeal-type-change-denied)))))
 
-(defn appeals-after-appeal-verdict?
-  "Predicate to check if appeals have been made AFTER the given appeal-verdict in question has been made.
-   Returns true if at least one appeal has been given after the appeal-verdict."
-  [appeal-verdict appeals]
-  {:pre [(map? appeal-verdict) (sequential? appeals)]}
-  (not-every? (partial > (:made appeal-verdict)) (map :made appeals)))
+(defn- latest-for-verdict?
+  "True if the appeal-item (the first param) is later than any of the
+  appeal-items. The check is limited to the same verdict."
+  [{:keys [datestamp target-verdict id]} appeal-items]
+  (let [filtered (filter #(and (not= id (:id %))
+                               (= target-verdict (:target-verdict %))) appeal-items)]
+    (util/is-latest-of? datestamp (map :datestamp filtered))))
+
+(defn- appeal-item-editable?
+  "Appeal-item can be either appeal or appealVerdict. Appeal is
+  editable if it is later than the latest appealVerdict within the
+  same verdict. AppealVerdict is only editable if it is latest
+  appeal-item within the verdict."
+  [{:keys [appealVerdicts appeals]} appeal-item]
+  (let [latest-verdict? (latest-for-verdict? appeal-item appealVerdicts)
+        latest-appeal? (latest-for-verdict? appeal-item appeals)]
+    (if (= (keyword (:type appeal-item)) :appealVerdict)
+      (and latest-verdict? latest-appeal?)
+      latest-verdict?)))
 
 (defn- appeal-editable?
   "Pre-check to check that appeal can be edited."
-  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
-  (when appeal-id
+  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
+  (when (and appeal-id appealVerdicts)
     (if-let [appeal (util/find-by-id appeal-id appeals)]
-      (when (appeal-verdicts-after-appeal? appeal appealVerdicts)
+      (when-not (appeal-item-editable? application appeal)
         (fail :error.appeal-verdict-already-exists))
       (fail :error.unknown-appeal))))
 
 (defn- appeal-verdict-editable?
   "Pre-check to check that appeal-verdict can be edited."
-  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts]}]
+  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
   (when appeal-id
     (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
-      (when (appeals-after-appeal-verdict? appeal-verdict appeals)
+      (when-not (appeal-item-editable? application (assoc appeal-verdict :type :appealVerdict))
         (fail :error.appeal-already-exists))
       (fail :error.unknown-appeal-verdict))))
 
@@ -86,70 +106,132 @@
                           (map #(str (name collection) ".$." (name %)) (keys update-data))
                           (vals update-data))}})
 
+(defn- appeal-item-collection [appeal-type]
+  (case (keyword appeal-type)
+    :appealVerdict           :appealVerdicts
+    (:appeal :rectification) :appeals))
+
+(defn- attachment-updates
+  [{{:keys [attachments]} :application :as command} appeal-id appeal-type file-ids]
+  (when appeal-id
+    (let [appeal-attachments  (filter
+                                (fn [{{target-id :id} :target}]
+                                  (= target-id appeal-id))
+                                attachments)
+          appeal-file-ids     (map (util/fn-> :latestVersion :fileId) appeal-attachments)
+          new-file-ids     (difference (set file-ids) (set appeal-file-ids))
+          new-attachment-updates (attachment/new-appeal-attachment-updates! command appeal-id appeal-type new-file-ids)
+          removable-file-ids (difference (set appeal-file-ids) (set file-ids))
+          removable-attachments (filter
+                                  (fn [{versions :versions}] (some removable-file-ids (map :fileId versions)))
+                                  appeal-attachments)]
+      {:new-updates new-attachment-updates
+       :new-file-ids new-file-ids
+       :removable-attachment-ids (remove nil? (map :id removable-attachments))})))
+
+(defn- appeal-item-update!
+  "Runs appeal-item updates to application. Appeal-item is either appeal or appeal verdict.
+   Parameters:
+     command
+     appealId - appealId parameter from command (nil if creation of new appeal, else ID of the update subject)
+     appeal-item - the data of the appeal item to be updated (schema: Appeal or AppealVerdict)
+     appeal-type - appeal/rectification/appealVerdict
+     fileIds - the fileIds associated with appeal/appeal verdict"
+  [{app :application :as command} appealId appeal-item appeal-type fileIds]
+  (let [collection (appeal-item-collection appeal-type)
+        updates (if appealId
+                  (update-appeal-data-mongo-updates collection appealId appeal-item)
+                  (new-appeal-data-mongo-updates collection appeal-item))
+        {:keys [new-updates
+                new-file-ids
+                removable-attachment-ids]} (attachment-updates command (or (:id appeal-item) appealId) appeal-type fileIds)]
+    (action/update-application
+      command
+      (:mongo-query updates)
+      (util/deep-merge
+        (:mongo-updates updates)
+        new-updates))
+    (when (seq removable-attachment-ids)
+      (run! (partial attachment/delete-attachment! (domain/get-application-no-access-checking (:id app))) removable-attachment-ids))
+    (when (seq new-file-ids)
+      ; Link files to application, as files uploaded by file-upload-api to GridFS are not associated to application initially.
+      (run! (partial attachment/link-file-to-application (:id app)) new-file-ids))))
+
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"
-   :parameters          [id targetId type appellant made]
+   :parameters          [id verdictId type appellant datestamp fileIds]
    :optional-parameters [text appealId]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
    :input-validators    [appeal/input-validator
-                         (partial action/number-parameters [:made])]
+                         (partial action/number-parameters [:datestamp])]
    :pre-checks          [verdict-exists
                          appeal-id-exists
-                         appeal-editable?]}
+                         appeal-editable?
+                         deny-type-change]}
   [command]
-  (if-let [updates (if appealId
-                     (some->> (appeal/appeal-data-for-upsert targetId type appellant made text appealId)
-                              (update-appeal-data-mongo-updates :appeals appealId))
-                     (some->> (appeal/appeal-data-for-upsert targetId type appellant made text)
-                              (new-appeal-data-mongo-updates :appeals)))]
-    (action/update-application
-      command
-      (:mongo-query updates)
-      (:mongo-updates updates))
-    (fail :error.invalid-appeal)))
+  (let [appeal-data (appeal/appeal-data-for-upsert verdictId type appellant datestamp text appealId)]
+    (if appeal-data ; if data is valid
+      (appeal-item-update! command appealId appeal-data (:type appeal-data) fileIds)
+      (fail :error.invalid-appeal))))
 
 (defcommand upsert-appeal-verdict
-  {:parameters          [id targetId giver made]
+  {:parameters          [id verdictId giver datestamp fileIds]
    :optional-parameters [text appealId]
    :user-roles          #{:authority}
    :states              states/post-verdict-states
    :input-validators    [appeal-verdict/input-validator
-                         (partial action/number-parameters [:made])]
+                         (partial action/number-parameters [:datestamp])]
    :pre-checks          [verdict-exists
                          appeal-exists
                          appeal-verdict-id-exists
                          appeal-verdict-editable?]}
   [command]
-  (if-let [updates (if appealId
-                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert targetId giver made text appealId)
-                              (update-appeal-data-mongo-updates :appealVerdicts appealId))
-                     (some->> (appeal-verdict/appeal-verdict-data-for-upsert targetId giver made text)
-                              (new-appeal-data-mongo-updates :appealVerdicts)))]
-    (action/update-application
-      command
-      (:mongo-query updates)
-      (:mongo-updates updates))
-    (fail :error.invalid-appeal-verdict)))
+  (let [verdict-data (appeal-verdict/appeal-verdict-data-for-upsert verdictId giver datestamp text appealId)]
+    (if verdict-data
+      (appeal-item-update! command appealId verdict-data :appealVerdict fileIds)
+      (fail :error.invalid-appeal-verdict))))
 
+(defcommand delete-appeal
+  {:parameters          [id verdictId appealId]
+   :user-roles          #{:authority}
+   :input-validators    [(partial action/string-parameters [:appealId])]
+   :states              states/post-verdict-states
+   :pre-checks          [verdict-exists
+                         appeal-id-exists
+                         appeal-editable?]}
+  [command]
+  (appeal-common/delete-by-id command appealId))
+
+(defcommand delete-appeal-verdict
+  {:parameters          [id verdictId appealId]
+   :user-roles          #{:authority}
+   :input-validators    [(partial action/string-parameters [:appealId])]
+   :states              states/post-verdict-states
+   :pre-checks          [verdict-exists
+                         appeal-verdict-id-exists
+                         appeal-verdict-editable?]}
+  [command]
+  (appeal-common/delete-by-id command appealId))
 
 (defn- process-appeal
   "Process appeal for frontend"
-  [{:keys [appealVerdicts appeals]} appeal-item]
-  (case (keyword (:type appeal-item))
-    :appealVerdict           (assoc appeal-item :editable (false? (appeals-after-appeal-verdict? appeal-item appeals)))
-    (:appeal :rectification) (assoc appeal-item :editable (false? (appeal-verdicts-after-appeal? appeal-item appealVerdicts)))))
+  [application appeal-item]
+  (assoc appeal-item :editable (appeal-item-editable? application appeal-item)))
 
-(defn- add-attachments [{id :id :as appeal}]
-  ; get attacments for appeal here
-  appeal)
+(defn- add-attachments [{:keys [attachments]} {id :id :as appeal}]
+  (->> (filter #(= id (get-in % [:target :id])) attachments)
+       (map :latestVersion)
+       (map #(select-keys % [:fileId :filename :contentType :size]))
+       (map #(rename-keys % {:fileId :id}))
+       (assoc appeal :files)))
 
 (defn- validate-output-format
   "Validate output data for frontend. Logs as ERROR in action pipeline."
   [_ response]
   (assert (contains? response :data))
   (let [data (:data response)]
-    (assert (not-every? #(sc/check ssc/ObjectIdStr %) (keys data)) "Verdict IDs as ObjectID strings")
+    (assert (or (empty? data) (not-every? #(sc/check ssc/ObjectIdStr %) (keys data))) "Verdict IDs as ObjectID strings")
     (doseq [appeal (flatten (vals data))] ; Validate appeals/appeal-verdicts against
       (case (keyword (:type appeal))
         :appealVerdict           (sc/validate appeal-verdict/FrontendAppealVerdict appeal)
@@ -165,7 +247,7 @@
   (let [appeal-verdicts (map #(assoc % :type "appealVerdict") (:appealVerdicts application))
         all-appeals     (concat (:appeals application) appeal-verdicts)
         processed-appeals (->> all-appeals
-                               (map (comp add-attachments
+                               (map (comp (partial add-attachments application)
                                           (partial process-appeal application)))
-                               (sort-by :made))]
+                               (sort-by :datestamp))]
     (ok :data (group-by :target-verdict processed-appeals))))

@@ -84,6 +84,7 @@ var repository = (function() {
   }
 
   function doLoad(id, pending, callback, isLightLoad) {
+    hub.send( "scrollService::push");
     currentQuery = ajax
       .query("application", {id: id, lang: loc.getCurrentLanguage()})
       .pending(pending || _.noop)
@@ -144,6 +145,8 @@ var repository = (function() {
 
           var sortedAttachmentTypes = attachmentUtils.sortAttachmentTypes(application.allowedAttachmentTypes);
           application.allowedAttachmentTypes = sortedAttachmentTypes;
+
+          application.tosFunction = application.tosFunction === undefined ? null : application.tosFunction;
 
           hub.send("application-loaded", {applicationDetails: loading, lightLoad: isLightLoad});
           if (_.isFunction(callback)) {

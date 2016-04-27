@@ -11,15 +11,14 @@
 LUPAPISTE.AccordionToolbarModel = function( params ) {
   "use strict";
   var self = this;
-  var APPROVED = "approved";
+
   var APPROVE  = "approve";
-  var REJECTED = "rejected";
   var REJECT   = "reject";
-  var NEUTRAL  = "neutral";
 
   self.docModel = params.docModel;
   self.docModelOptions = params.docModelOptions;
   self.accordionService = lupapisteApp.services.accordionService;
+  self.approvalModel = params.approvalModel;
   self.auth = self.docModel.authorizationModel;
   self.isOpen = ko.observable();
   self.isOpen.subscribe( params.openCallback );
@@ -29,8 +28,6 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   AccordionState.register( self.docModel.docId, self.isOpen );
 
   self.info = self.docModel.schema.info;
-  var meta = self.docModel.getMeta( [] );
-  var masterApproval = ko.observable( meta ? meta._approved : null );
 
   // Operation data
   var op = self.info.op;
@@ -59,33 +56,10 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
 
-  function buildAccordionText(paths, data) {
-    return _(paths)
-      .map(function(path) {
-        return ko.unwrap(_.get(data, path));
-      })
-      .reject(_.isEmpty)
-      .value()
-      .join(" ");
-  }
-
   self.accordionText = ko.pureComputed(function() {
     // resolve values from given accordionPaths
     var paths = docData && docData.accordionPaths;
-    if (_.isArray(paths)) { // set text only if the document has accordionPaths defined
-      var firstPathValue = paths[0][0];
-      // are we dealing with _selected special case
-      var selectedValue = firstPathValue === docvars.SELECT_ONE_OF_GROUP_KEY ? _.get(docData.data, firstPathValue)() : false;
-      if (selectedValue) {
-        var selectedPaths = _.filter(paths, function(path) { // filter paths according to _selected value
-          return path[0] === selectedValue;
-        });
-        return buildAccordionText(selectedPaths, docData.data);
-
-      } else { // no _selected, use paths as is
-        return buildAccordionText(paths, docData.data);
-      }
-    }
+    return docutils.accordionText(paths, _.get(docData, "data"));
   });
 
   // Required accordion title from operation/schema-info name
@@ -97,88 +71,13 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     // if identifier exists, subscribing to it's "value" observable
     var identifier = self.identifierField && self.identifierField.value();
     var operation  = self.operationDescription();
-    var accordionFieldStr = self.accordionText();
-    var isEmpty = !identifier && !operation && !accordionFieldStr;
-    if (!isEmpty) {
-      var initStr = " - "; // not all are empty, so we separate description from titleLoc with initial '-'
-      var identifierAndOperation = _.filter([identifier, operation]).join(": ");
-      var withAccordionField = identifierAndOperation
-                               ? _.filter([identifierAndOperation, accordionFieldStr]).join(" - ")
-                               : accordionFieldStr;
-      return initStr + withAccordionField;
-    } else {
-      return "";
-    }
+    var accordionText = self.accordionText();
+    return docutils.headerDescription(identifier, operation, accordionText);
   });
 
   self.toggleAccordion = function() {
     self.isOpen( !self.isOpen());
   };
-
-  // Approval resolution
-  // Abundance of alternatives causes some complexity.
-  // APPROVED: either master approval is the latest action or
-  //           master has been approved and all the (known) groups
-  //           are approved, too.
-  // REJECTED: similar to approved.
-  // NEUTRAL: if master is neutral or the groups are ambigious.
-
-  var groupApprovals = ko.observable( {});
-
-  function safeMaster() {
-    return self.docModel.safeApproval( self.docModel.model, masterApproval);
-  }
-  function laterGroups() {
-    var master = safeMaster();
-    return _.pickBy( groupApprovals(),
-                   function( a ) {
-                     return a && a.timestamp > master.timestamp;
-                   } );
-  }
-
-  var lastSent = {};
-  self.approval = ko.pureComputed( function() {
-    var master = safeMaster();
-    var later = laterGroups();
-    var result = _.every( later,
-                          function( a ) {
-                            return a.value === master.value;
-                          })
-               ? master
-               : {value: NEUTRAL};
-    if( !_.isEqual(lastSent, result)) {
-      lastSent = result;
-      // Master (this) has changed, let's notify every group.
-      self.docModel.approvalHubSend( result, []);
-    }
-    return result;
-  });
-
-  // Exclamation icon on the accordion should be visible, if...
-  // 1. The master or any "later group" is REJECTED
-  // 2. The master is NEUTRAL but any group is REJECTED
-  self.isSummaryRejected = ko.pureComputed( function() {
-    function groupRejected( groups) {
-      return _.find( groups, {"value": REJECTED});
-    }
-    var master = safeMaster();
-    return master.value === REJECTED
-        || groupRejected( laterGroups())
-        || (master.value === NEUTRAL && groupRejected( groupApprovals()) );
-  });
-
-
-  // A group sends its approval to the master (this) when
-  // the approval status changes (and also during the initialization).
-  self.docModel.approvalHubSubscribe( function( data ) {
-    var g = _.clone( groupApprovals() );
-    g["path" + data.path.join("-")] = data.approval;
-    groupApprovals( g );
-    // We always respond to the sender regardless whether
-    // the update triggers full broadcast. This is done to make sure
-    // the group receives the master status during initialization.
-    self.docModel.approvalHubSend( self.approval(), [], data.path );
-  });
 
   // Test ids must contain document name in order to avoid
   // hard to track selector conflicts in Robot tests.
@@ -199,16 +98,11 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
 
   // Approval functionality
   self.isApprovable = Boolean(self.info.approvable);
-  self.showStatus = ko.pureComputed( _.partial( self.docModel.isApprovalCurrent,
-                                                self.docModel.model,
-                                                self.approval ));
-  self.isApproved = ko.pureComputed(_.partial(self.docModel.approvalStatus,
-                                              self.approval,
-                                              APPROVED));
-  self.isRejected = ko.pureComputed(_.partial(self.docModel.approvalStatus,
-                                              self.approval,
-                                              REJECTED));
-
+  self.showStatus = self.approvalModel.showStatus;
+  self.isApproved = self.approvalModel.isApproved;
+  self.isRejected = self.approvalModel.isRejected;
+  self.isSummaryRejected = self.approvalModel.isSummaryRejected;
+  self.details = self.approvalModel.details;
 
   self.approveTestId = self.docModel.approvalTestId( [], APPROVE );
   self.rejectTestId = self.docModel.approvalTestId( [], REJECT );
@@ -222,25 +116,12 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.showReject  = ko.pureComputed(_.partial ( showButton, REJECT, self.isRejected ));
   self.showApprove = ko.pureComputed(_.partial ( showButton, APPROVE, self.isApproved ));
 
-  function changeStatus( flag ) {
-    self.docModel.updateApproval( [],
-                                  flag,
-                                  function( approval ) {
-                                    masterApproval( approval );
-                                  } );
-  }
+  self.reject  = _.partial( self.approvalModel.changeStatus, false );
+  self.approve = _.partial( self.approvalModel.changeStatus, true );
 
-  self.reject  = _.partial( changeStatus, false );
-  self.approve = _.partial( changeStatus, true );
-
-  self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
-                                             self.approval));
-
-  self.showToolbar = self.remove.fun
-                  || self.showStatus()
-                  || self.showReject()
-                  || self.showApprove()
-                  || self.hasOperation();
+  self.showToolbar = ko.pureComputed(function() {
+    return self.remove.fun || self.showStatus() || self.showReject() || self.showApprove() || self.hasOperation();
+  });
 
   self.closeEditors = function( data, event ) {
     // Toggle editors visibility with key press

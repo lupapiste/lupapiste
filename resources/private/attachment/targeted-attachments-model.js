@@ -8,9 +8,13 @@ LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType, 
   self.applicationId = null;
   self.attachments = ko.observableArray([]);
 
-  self.refresh = function(application, target) {
+  self.refresh = function(application, target, attachmentType) {
     if (target) {
       self.target = target;
+    }
+
+    if (attachmentType) {
+      self.attachmentType = attachmentType;
     }
 
     self.applicationId = application.id;

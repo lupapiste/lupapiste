@@ -36,7 +36,8 @@
       ajax
         .command("impersonate-authority", {organizationId: self.organizationId, role: self.role(), password: self.password()})
         .success(function() {
-          window.location.href = "/app/fi/" + _.kebabCase(self.role());
+          var redirectLocation = self.role() === "archivist" ? "authority" : self.role();
+          window.location.href = "/app/fi/" + _.kebabCase(redirectLocation);
         })
         .call();
       return false;

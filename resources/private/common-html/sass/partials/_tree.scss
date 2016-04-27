@@ -68,7 +68,7 @@ $tree-height: 320px;
     width: $tree-width;
     float: left;
     text-align: left;
-    li {
+    ul li {
       list-style-type: circle;
       a {
         @include link;

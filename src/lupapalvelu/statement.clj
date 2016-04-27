@@ -5,6 +5,7 @@
             [sade.util :as util]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
@@ -134,14 +135,18 @@
   (->> (assoc reply :saateText text :nothing-to-add false :editor-id user-id)
        (update-statement statement modify-id :state :replyable :reply)))
 
+(defn attachments-readonly-updates [{app-id :id} statement-id]
+  (att/attachment-array-updates app-id (comp #{statement-id} :id :target) :readOnly true))
+
 ;;
 ;; Statement givers
 ;;
 
 (defn fetch-organization-statement-givers [org-id]
   (let [organization (organization/get-organization org-id)
-        permitPersons (or (:statementGivers organization) [])]
-    (ok :data permitPersons)))
+        statement-givers (->> (or (:statementGivers organization) [])
+                              (sort-by (juxt :text :name)))]
+    (ok :data statement-givers)))
 
 ;;
 ;; Statuses

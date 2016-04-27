@@ -9,7 +9,8 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [sade.util :as util]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -30,6 +31,12 @@
 (def available-tos-functions
   (memo/ttl get-tos-functions-from-toj
             :ttl/threshold 10000))
+
+(defn tos-function-with-name [tos-function-code organization]
+  (when (and tos-function-code organization)
+    (->> (available-tos-functions (name organization))
+         (filter #(= tos-function-code (:code %)))
+         (first))))
 
 (defn- get-metadata-for-document-from-toj [organization tos-function document-type]
   (if (and organization tos-function document-type)
@@ -74,16 +81,16 @@
                             (remove nil?)
                             (sort)
                             (last))]
-    (-> (c/from-long paatos-ts)
+    (-> (c/from-long (long paatos-ts))
         (t/plus (t/years years))
         (.toDate))))
 
 (defn- retention-end-date [{{:keys [arkistointi pituus]} :sailytysaika} verdicts]
-  (when (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi))
+  (when (and (= (keyword "m\u00E4\u00E4r\u00E4ajan") (keyword arkistointi)) (seq verdicts))
     (paatospvm-plus-years verdicts pituus)))
 
 (defn- security-end-date [{:keys [salassapitoaika julkisuusluokka]} verdicts]
-  (when (and (#{:osittain-salassapidettava :salainen} (keyword julkisuusluokka)) salassapitoaika)
+  (when (and (#{:osittain-salassapidettava :salainen} (keyword julkisuusluokka)) salassapitoaika (seq verdicts))
     (paatospvm-plus-years verdicts salassapitoaika)))
 
 (defn update-end-dates [metadata verdicts]
@@ -95,15 +102,18 @@
             security-end (assoc :security-period-end security-end))))
 
 (defn document-with-updated-metadata [{:keys [metadata] :as document} organization tos-function application & [type]]
-  (let [document-type (or type (:type document))
-        existing-tila (:tila metadata)
-        existing-nakyvyys (:nakyvyys metadata)
-        new-metadata (metadata-for-document organization tos-function document-type)
-        processed-metadata (cond-> new-metadata
-                                   existing-tila (assoc :tila (keyword existing-tila))
-                                   true (update-end-dates (:verdicts application))
-                                   (and (not (:nakyvyys new-metadata)) existing-nakyvyys) (assoc :nakyvyys existing-nakyvyys))]
-    (assoc document :metadata processed-metadata)))
+  (if (#{:arkistoidaan :arkistoitu} (keyword (:tila metadata)))
+    ; Do not update metadata for documents that are already archived
+    document
+    (let [document-type (or type (:type document))
+          existing-tila (:tila metadata)
+          existing-nakyvyys (:nakyvyys metadata)
+          new-metadata (metadata-for-document organization tos-function document-type)
+          processed-metadata (cond-> new-metadata
+                                     existing-tila (assoc :tila (keyword existing-tila))
+                                     true (update-end-dates (:verdicts application))
+                                     (and (not (:nakyvyys new-metadata)) existing-nakyvyys) (assoc :nakyvyys existing-nakyvyys))]
+      (assoc document :metadata processed-metadata))))
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
   (if (and organization tos-function state)
@@ -137,7 +147,7 @@
               (->> versions
                    (map (fn [ver]
                           {:type     (:type attachment)
-                           :category :attachment
+                           :category :document
                            :version  (:version ver)
                            :ts       (:created ver)
                            :contents (:contents attachment)
@@ -149,14 +159,14 @@
 
 (defn- get-statement-requests-from-application [application]
   (map (fn [stm]
-         {:type     (get-in stm [:person :text])
+         {:text     (get-in stm [:person :text])
           :category :request-statement
           :ts       (:requested stm)
           :user     (str "" (:name stm))}) (:statements application)))
 
 (defn- get-neighbour-requests-from-application [application]
   (map (fn [req] (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
-           {:type     (get-in req [:owner :name])
+           {:text     (get-in req [:owner :name])
             :category :request-neighbor
             :ts       (:created status)
             :user     (full-name (:user status))})) (:neighbors application)))
@@ -164,7 +174,7 @@
 (defn- get-review-requests-from-application [application]
   (reduce (fn [acc task]
             (if (= "task-katselmus" (name (get-in task [:schema-info :name])))
-              (conj acc {:type     (:taskname task)
+              (conj acc {:text     (:taskname task)
                          :category :request-review
                          :ts       (:created task)
                          :user     (full-name (:assignee task))})
@@ -174,30 +184,43 @@
 (defn- get-held-reviews-from-application [application]
   (reduce (fn [acc task]
               (if-let [held (get-in task [:data :katselmus :pitoPvm :modified])]
-              (conj acc {:type     (:taskname task)
+              (conj acc {:text     (:taskname task)
                          :category :review
                          :ts       held
                          :user     (full-name (:assignee task))})
               acc)) [] (:tasks application)))
 
-(defn generate-case-file-data [application]
+(defn- tos-function-changes-from-history [history lang]
+  (->> (filter :tosFunction history)
+       (map (fn [{:keys [tosFunction correction user] :as item}]
+              (merge item {:text (str (:code tosFunction) " " (:name tosFunction)
+                                      (when correction (str ", " (i18n/localize lang "tos.function.fix.reason") ": " correction)))
+                           :category (if correction :tos-function-correction :tos-function-change)
+                           :user (full-name user)})))))
+
+(defn generate-case-file-data [{:keys [history organization] :as application} lang]
   (let [documents (get-documents-from-application application)
         attachments (get-attachments-from-application application)
         statement-reqs (get-statement-requests-from-application application)
         neighbors-reqs (get-neighbour-requests-from-application application)
         review-reqs (get-review-requests-from-application application)
         reviews-held (get-held-reviews-from-application application)
-        all-docs (sort-by :ts (concat documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))]
+        tos-fn-changes (tos-function-changes-from-history history lang)
+        all-docs (sort-by :ts (concat tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
+        state-changes (filter :state history)]
     (map (fn [[{:keys [state ts user]} next]]
-           (let [api-response (toimenpide-for-state (:organization application) (:tosFunction application) state)
-                 action-name (or (:name api-response) "Ei asetettu tiedonohjaussuunnitelmassa")]
+           (let [api-response (toimenpide-for-state organization (:tosFunction application) state)
+                 action-name (cond
+                               (:name api-response) (:name api-response)
+                               (= state "complementNeeded") (i18n/localize lang "caseFile.complementNeeded")
+                               :else (i18n/localize lang "caseFile.stateNotSet"))]
              {:action    action-name
               :start     ts
               :user      (full-name user)
               :documents (filter (fn [{doc-ts :ts}]
                                    (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
                                  all-docs)}))
-         (partition 2 1 nil (:history application)))))
+         (partition 2 1 nil state-changes))))
 
 (defn- document-metadata-final-state [metadata verdicts]
   (-> (assoc metadata :tila :valmis)
@@ -217,14 +240,16 @@
                    :attachments.$.metadata new-metadata}}))))))
 
 (defn mark-app-and-attachments-final! [app-id modified-ts]
-  (let [{:keys [metadata attachments verdicts] :as application} (domain/get-application-no-access-checking app-id)]
+  (let [{:keys [metadata attachments verdicts processMetadata] :as application} (domain/get-application-no-access-checking app-id)]
     (when (seq metadata)
-      (let [new-metadata (document-metadata-final-state metadata verdicts)]
-        (when-not (= metadata new-metadata)
+      (let [new-metadata (document-metadata-final-state metadata verdicts)
+            new-process-metadata (update-end-dates processMetadata verdicts)]
+        (when-not (and (= metadata new-metadata) (= processMetadata new-process-metadata))
           (action/update-application
             (action/application->command application)
             {$set {:modified modified-ts
-                   :metadata new-metadata}}))
+                   :metadata new-metadata
+                   :processMetadata new-process-metadata}}))
         (doseq [attachment attachments]
           (mark-attachment-final! application modified-ts attachment))))))
 

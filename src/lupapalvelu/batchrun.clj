@@ -15,7 +15,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
-            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [sade.util :as util]
@@ -294,7 +294,7 @@
               (logging/with-logging-context {:applicationId id}
                 (if-not (s/blank? url)
                   (let [command (assoc (application->command app) :user eraajo-user :created (now))
-                        result (verdict-api/do-check-for-verdict command)]
+                        result (verdict/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
@@ -318,10 +318,9 @@
               ))) apps))))
 
 (defn check-for-verdicts [& args]
-  (when (env/feature? :automatic-verdicts-checking)
-    (mongo/connect!)
-    (fetch-verdicts)
-    (mongo/disconnect!)))
+  (mongo/connect!)
+  (fetch-verdicts)
+  (mongo/disconnect!))
 
 (defn- get-asianhallinta-ftp-users [organizations]
   (->> (for [org organizations

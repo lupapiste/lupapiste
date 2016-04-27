@@ -1,6 +1,8 @@
 (ns sade.util-test
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [sade.util :refer :all]
+            [sade.strings :as ss]
+            [sade.env :as env]
             [midje.sweet :refer :all]
             [schema.core :as sc]
             [lupapalvelu.document.schemas :as schema])
@@ -265,3 +267,40 @@
     (version-is-greater-or-equal 2.1     {:major 2 :minor 1 :micro 5}) => (throws AssertionError)
     (version-is-greater-or-equal "2.1.4" "2.1.5")                      => (throws AssertionError)
     (version-is-greater-or-equal "2.1.4" {:major 2 :minor 1})          => (throws AssertionError)))
+
+(fact "is-latest-of?"
+  (is-latest-of? 0 [1 2 3]) => false
+  (is-latest-of? 1 [1 2 3]) => false
+  (is-latest-of? 3 [1 2 4]) => false
+  (is-latest-of? 4 [1 2 3]) => true
+
+  (is-latest-of? 2.2 [1 2 3]) => (throws AssertionError)
+  (is-latest-of? 2 nil) =>       (throws AssertionError))
+
+(facts "list-jar"
+  (let [separator env/file-separator
+        path [(System/getProperty "user.home")
+              ".m2" "repository" "org" "clojure" "clojure" (clojure-version)
+              (str "clojure-"(clojure-version) ".jar")]
+        clojure-jar (ss/join separator path)]
+
+    (fact "clojure.jar contains core.clj in 'clojure/' path"
+      (let [files (set (list-jar clojure-jar "clojure/"))]
+        (files "core.clj") => "core.clj"))
+
+    (fact "clojure.jar contains io.clj in '/clojure/java' path"
+      (let [files (set (list-jar clojure-jar "/clojure/java"))]
+        (files "io.clj") => "io.clj"))
+
+    (fact "clojure.jar contains manifest"
+      (fact "empty filter"
+        (let [files (set (list-jar clojure-jar ""))]
+         (files "META-INF/MANIFEST.MF") => "META-INF/MANIFEST.MF"))
+
+      (fact "root filter"
+        (let [files (set (list-jar clojure-jar "/"))]
+          (files "META-INF/MANIFEST.MF") => "META-INF/MANIFEST.MF"))
+
+      (fact "nil filter"
+        (let [files (set (list-jar clojure-jar nil))]
+          (files "META-INF/MANIFEST.MF") => "META-INF/MANIFEST.MF")))))
