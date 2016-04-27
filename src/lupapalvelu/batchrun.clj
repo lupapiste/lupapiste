@@ -313,6 +313,7 @@
               (catch Throwable t
                 (logging/log-event :error {:run-by "Automatic verdicts checking"
                                            :event "Unable to get verdict from backend"
+                                           :exception-message (.getMessage t)
                                            :application-id id
                                            :organization {:id organization :permit-type permitType}}))
               ))) apps))))
@@ -348,7 +349,8 @@
                      (ah-verdict/process-ah-verdict zip-path ftp-user eraajo-user)
                      (catch Throwable e
                        (logging/log-event :error {:run-by "Automatic ah-verdicts checking"
-                                                  :event "Unable to process ah-verdict zip file"})
+                                                  :event "Unable to process ah-verdict zip file"
+                                                  :exception-message (.getMessage e)})
                        ;; (error e "Error processing zip-file in asianhallinta verdict batchrun")
                        (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
