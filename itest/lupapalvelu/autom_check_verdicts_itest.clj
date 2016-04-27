@@ -6,7 +6,7 @@
             [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.integrations-api]
-            [lupapalvelu.verdict-api]
+            [lupapalvelu.verdict]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
@@ -51,7 +51,8 @@
         (count (batchrun/fetch-verdicts)) => pos?)
 
       (fact "batchrun check-for-verdicts logs :error on exception"
-        (batchrun/fetch-verdicts) => count ;; length > 0
+        ;; make sure logging functions are called in expected ways
+        (count  (batchrun/fetch-verdicts)) => anything
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:foo 42}]
@@ -59,13 +60,14 @@
           (lupapalvelu.logging/log-event :error anything) => nil))
 
       (fact "batchrun check-for-verdicts logs failure details"
-        (batchrun/fetch-verdicts) => count
+        ;; make sure logging functions are called in expected ways
+        (batchrun/fetch-verdicts) => anything
         (provided
           (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
           (mongo/select :organizations anything anything) => [{:foo 42}]
           (clojure.string/blank? anything) => false
           (lupapalvelu.logging/log-event :error anything) => nil
-          (lupapalvelu.verdict-api/do-check-for-verdict anything) => (fail :foo)))
+          (lupapalvelu.verdict/do-check-for-verdict anything) => (fail :bar)))
 
       (fact "Verifying the sent emails"
         (Thread/sleep 100) ; batchrun includes a parallel operation
