@@ -10,11 +10,16 @@ LUPAPISTE.DocgenReviewBuildingsModel = function( params ) {
   // The description cell value consists of two parts:
   // Tag and description, either one or both can be
   // missing.
-  function buildingDescription( nationalId ) {
+  function buildingDescription( building ) {
+    var nationalId = building.valtakunnallinenNumero.model();
+    var index = building.jarjestysnumero.model();
     var appData = lupapisteApp.models.application._js;
     var description = "";
-    var build = _.find(appData.buildings,
-                       {nationalId: nationalId });
+    var build = null;
+    if( nationalId || index ) {
+      build = _.find(appData.buildings,
+                     nationalId ? {nationalId: nationalId } : {index: index });
+    }
     if( build ) {
       description = build.description || "";
       var doc = _.find( appData.documents,
@@ -50,10 +55,9 @@ LUPAPISTE.DocgenReviewBuildingsModel = function( params ) {
   self.buildings = _.map( data, function( item ) {
     var build = item.model.rakennus.model;
     var state = item.model.tila.model;
-    var nationalId = build.valtakunnallinenNumero.model();
     return {
-      description: buildingDescription( nationalId ),
-      nationalId: nationalId,
+      description: buildingDescription( build ),
+      nationalId: build.valtakunnallinenNumero.model(),
       propertyId: build.kiinttun.model(),
       kayttoonottava: subSchema(state.kayttoonottava),
       tila: subSchema(state.tila)
