@@ -120,7 +120,7 @@
     (= "tyonjohtaja-ilmoitus" (:permitSubtype application))))
 
 (defn- validate-notice-or-application [{subtype :permitSubtype :as application}]
-  (when (ss/blank? subtype)
+  (when (and (foreman-app? application) (ss/blank? subtype))
     (fail! :error.foreman.type-not-selected)))
 
 (defn- validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
