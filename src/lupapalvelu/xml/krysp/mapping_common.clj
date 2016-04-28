@@ -668,6 +668,18 @@
     [(merge (when ns {:ns ns})
             {:tag (keyword tag)}) (or new-ns ns)]))
 
+(def- lausunto-puolto-new->old
+  {"puollettu"          "puoltaa"
+   "ei-puollettu"       "ei-puolla"
+   "ehdollinen"         "ehdoilla"
+   "p\u00f6yd\u00e4lle" "j\u00e4tetty p\u00f6yd\u00e4lle"})
+
+(defn map-lausuntotieto [lausunto-canonical permit-type ns-version]
+  (if (and (permit/get-metadata permit-type :extra-statement-selection-values)
+           (util/compare-version < (get-yht-version permit-type ns-version) "2.1.5"))
+    (update-in lausunto-canonical [:lausuntotieto :Lausunto :puoltotieto :Puolto :puolto] #(get lausunto-puolto-new->old % "ei tiedossa"))
+    lausunto-canonical))
+
 (defmulti mapper
   "Recursively generates a 'traditional' mapping (with :tag, :ns
   and :child properties) from the shorthand form. As the shorthand

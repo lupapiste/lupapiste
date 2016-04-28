@@ -113,8 +113,15 @@
     "2.2.1" ymparistolupa_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
+(defn- lausunto-map-enum [lausuntotieto krysp-version]
+  (mapv #(update % :Lausunto mapping-common/map-lausuntotieto :YL krysp-version) lausuntotieto))
+
+(defn- common-map-enums [canonical krysp-version]
+  (-> canonical
+      (update-in [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :lausuntotieto] lausunto-map-enum krysp-version)))
+
 (defn ymparistolupa-element-to-xml [canonical krysp-version]
-  (element-to-xml canonical (get-mapping krysp-version)))
+  (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
@@ -145,4 +152,3 @@
       lang)))
 
 (permit/register-function permit/YL :app-krysp-mapper save-application-as-krysp)
-

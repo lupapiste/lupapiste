@@ -250,14 +250,23 @@
 (defn- map-enums-212 [canonical lupa-name-key]
   (map-kayttotarkoitus canonical lupa-name-key))
 
+
+(defn- lausunto-map-enum [lausuntotieto krysp-version]
+  (mapv #(update % :Lausunto mapping-common/map-lausuntotieto :YA krysp-version) lausuntotieto))
+
+(defn- common-map-enums [canonical krysp-version]
+  (-> canonical
+      (update-in [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :lausuntotieto] lausunto-map-enum krysp-version)))
+
 (defn- map-enums
   "Map enumerations in canonical into values supperted by given KRYSP version"
   [canonical lupa-name-key krysp-version]
   {:pre [krysp-version]}
-  (case (name krysp-version)
-    "2.1.2" (map-enums-212 canonical lupa-name-key)
-    canonical ; default: no conversions
-    ))
+  (-> (case (name krysp-version)
+        "2.1.2" (map-enums-212 canonical lupa-name-key)
+        canonical                        ; default: no conversions
+        )
+      (common-map-enums krysp-version)))
 
 (defn yleisetalueet-element-to-xml [canonical lupa-name-key krysp-version]
   (let [canon   (map-enums canonical lupa-name-key krysp-version)
