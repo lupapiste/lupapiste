@@ -1541,8 +1541,8 @@
    {:info {:name "hakija-ya"
            :i18name "osapuoli"
            :order 3
-           :removable false
-           :repeating false
+           :removable true
+           :repeating true
            :deny-removing-last-document true
            :approvable true
            :type :party
