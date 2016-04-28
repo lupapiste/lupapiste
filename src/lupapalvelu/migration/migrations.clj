@@ -2006,6 +2006,67 @@
                  content-type (mime/mime-type filename)]]
         (mongo/update-n :fs.files {:_id id} {$set {:contentType content-type}})))))
 
+(defn remove-FI-prefix-from-auth-y [{company-y :y :as auth}]
+  (if company-y
+    (assoc auth :y (ss/replace company-y "FI" ""))
+    auth))
+
+(defmigration sanitize-auth-company-y
+  {:apply-when (pos? (mongo/count :applications {:auth.y #"FI"}))}
+  (update-applications-array :auth remove-FI-prefix-from-auth-y {:auth.y #"FI"}))
+
+(defn change-empty-role-as-reader [{role :role :as auth}]
+  (if (= role "")
+    (assoc auth :role "reader")
+    auth))
+
+(defmigration sanitize-auth-role
+  {:apply-when (pos? (mongo/count :applications {:auth.role ""}))}
+  (update-applications-array :auth change-empty-role-as-reader {:auth.role ""}))
+
+(defn remove-auth-inviter-nils [{inviter :inviter :as auth}]
+  (if (nil? inviter)
+    (dissoc auth :inviter)
+    auth))
+
+(defmigration sanitize-auth-inviter
+  {:apply-when (pos? (mongo/count :applications {:auth.inviter {$type 10}}))}
+  (update-applications-array :auth remove-auth-inviter-nils {:auth.inviter {$type 10}}))
+
+(defn remove-auth-invite-documentId-null-strings [{{document-id :documentId} :invite :as auth}]
+  (if (= document-id "null")
+    (assoc-in auth [:invite :documentId] nil)
+    auth))
+
+(defmigration sanitize-auth-invite-documentId
+  {:apply-when (pos? (mongo/count :applications {:auth.invite.documentId "null"}))}
+  (update-applications-array :auth remove-auth-invite-documentId-null-strings {:auth.invite.documentId "null"}))
+
+(defn remove-auth-invite-nil-fields [{{:keys [path text documentId documentName] :as invite} :invite :as auth}]
+  (if (:email invite)
+    (cond-> auth
+      (nil? path)              (update :invite #(dissoc % :path))
+      (nil? text)              (update :invite #(dissoc % :text))
+      (ss/blank? documentId)   (update :invite #(dissoc % :documentId))
+      (ss/blank? documentName) (update :invite #(dissoc % :documentName)))
+    auth))
+
+(defmigration sanitize-auth-invite-optional-fields
+  {:apply-when (pos? (mongo/count :applications {$or [{:auth.invite.path {$type 10}}
+                                                      {:auth.invite.text {$type 10}}
+                                                      {:auth.invite.documentId {$type 10}}
+                                                      {:auth.invite.documentId ""}
+                                                      {:auth.invite.documentName {$type 10}}
+                                                      {:auth.invite.documentName ""}]}))}
+  (update-applications-array :auth
+                             remove-auth-invite-nil-fields
+                             {$or [{:auth.invite.path {$type 10}}
+                                                      {:auth.invite.text {$type 10}}
+                                                      {:auth.invite.documentId {$type 10}}
+                                                      {:auth.invite.documentId ""}
+                                                      {:auth.invite.documentName {$type 10}}
+                                                      {:auth.invite.documentName ""}]}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
