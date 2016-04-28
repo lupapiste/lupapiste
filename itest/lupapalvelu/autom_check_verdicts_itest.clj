@@ -6,7 +6,7 @@
             [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.integrations-api]
-            [lupapalvelu.verdict]
+            [lupapalvelu.verdict-api]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
