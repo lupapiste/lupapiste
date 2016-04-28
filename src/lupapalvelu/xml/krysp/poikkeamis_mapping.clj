@@ -122,12 +122,9 @@
     "2.2.1" poikkeamis_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
-(defn- lausunto-map-enum [lausuntotieto krysp-version]
-  (mapv #(update % :Lausunto mapping-common/map-lausuntotieto :P krysp-version) lausuntotieto))
-
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
-      (update-in [:Popast :poikkeamisasiatieto :Poikkeamisasia :lausuntotieto] lausunto-map-enum krysp-version)))
+      (update-in [:Popast :poikkeamisasiatieto :Poikkeamisasia :lausuntotieto] mapping-common/lausuntotieto-map-enum :P krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

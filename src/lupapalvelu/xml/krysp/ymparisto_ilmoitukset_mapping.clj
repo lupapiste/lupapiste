@@ -87,12 +87,9 @@
     "2.2.1" ilmoitus_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
-(defn- lausunto-map-enum [lausuntotieto krysp-version]
-  (mapv #(update % :Lausunto mapping-common/map-lausuntotieto :YI krysp-version) lausuntotieto))
-
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
-      (update-in [:Ilmoitukset :melutarina :Melutarina :lausuntotieto] lausunto-map-enum krysp-version)))
+      (update-in [:Ilmoitukset :melutarina :Melutarina :lausuntotieto] mapping-common/lausuntotieto-map-enum :YI krysp-version)))
 
 (defn ymparistoilmoitus-element-to-xml [canonical krysp-version]
   (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version)))

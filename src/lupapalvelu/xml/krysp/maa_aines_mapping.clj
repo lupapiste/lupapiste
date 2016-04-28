@@ -114,12 +114,9 @@
     "2.2.1" maa-aines_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
-(defn- lausunto-map-enum [lausuntotieto krysp-version]
-  (mapv #(update % :Lausunto mapping-common/map-lausuntotieto :MAL krysp-version) lausuntotieto))
-
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
-      (update-in [:MaaAinesluvat :toimituksenTiedot :maaAineslupaAsiatieto :MaaAineslupaAsia :lausuntotieto] lausunto-map-enum krysp-version)))
+      (update-in [:MaaAinesluvat :toimituksenTiedot :maaAineslupaAsiatieto :MaaAineslupaAsia :lausuntotieto] mapping-common/lausuntotieto-map-enum :MAL krysp-version)))
 
 (defn maa-aines-element-to-xml [canonical krysp-version]
   (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version)))

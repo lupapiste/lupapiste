@@ -536,12 +536,9 @@
 
 (def map-enums-213-218 map-suunnittelija-kuntaroolikoodi-pre220)
 
-(defn- lausunto-map-enum [lausuntotieto krysp-version]
-  (mapv #(update % :Lausunto mapping-common/map-lausuntotieto :R krysp-version) lausuntotieto))
-
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
-      (update-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] lausunto-map-enum krysp-version)))
+      (update-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] mapping-common/lausuntotieto-map-enum :R krysp-version)))
 
 (defn- map-enums
   "Map enumerations in canonical into values supported by given KRYSP version"

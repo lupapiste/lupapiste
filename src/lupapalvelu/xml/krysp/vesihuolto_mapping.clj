@@ -75,12 +75,9 @@
     "2.2.1" vesihuolto-to-krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
-(defn- lausunto-map-enum [lausuntotieto krysp-version]
-  (mapv #(update % :Lausunto mapping-common/map-lausuntotieto :VVVL krysp-version) lausuntotieto))
-
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
-      (update-in [:Vesihuoltolaki :vapautukset :Vapautus :lausuntotieto] lausunto-map-enum krysp-version)))
+      (update-in [:Vesihuoltolaki :vapautukset :Vapautus :lausuntotieto] mapping-common/lausuntotieto-map-enum :VVVL krysp-version)))
 
 (defn vesihuolto-element-to-xml [canonical krysp-version]
   (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version)))

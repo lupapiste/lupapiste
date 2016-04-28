@@ -250,13 +250,9 @@
 (defn- map-enums-212 [canonical lupa-name-key]
   (map-kayttotarkoitus canonical lupa-name-key))
 
-
-(defn- lausunto-map-enum [lausuntotieto krysp-version]
-  (mapv #(update % :Lausunto mapping-common/map-lausuntotieto :YA krysp-version) lausuntotieto))
-
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
-      (update-in [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :lausuntotieto] lausunto-map-enum krysp-version)))
+      (update-in [:YleisetAlueet :yleinenAlueAsiatieto :Tyolupa :lausuntotieto] mapping-common/lausuntotieto-map-enum :YA krysp-version)))
 
 (defn- map-enums
   "Map enumerations in canonical into values supperted by given KRYSP version"
