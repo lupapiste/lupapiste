@@ -2006,6 +2006,33 @@
                  content-type (mime/mime-type filename)]]
         (mongo/update-n :fs.files {:_id id} {$set {:contentType content-type}})))))
 
+(def statement-status->new
+  {"puoltaa"           "puollettu"
+   "ei-puolla"         "ei-puollettu"
+   "ehdoilla"          "ehdollinen"
+   "jatetty-poydalle"  "poydalle"
+
+   "puollettu"         "puollettu"
+   "ei-puollettu"      "ei-puollettu"
+   "ehdollinen"        "ehdollinen"
+   "poydalle"          "poydalle"
+   "ei-huomautettavaa" "ei-huomautettavaa"
+   "ei-lausuntoa"      "ei-lausuntoa"
+   "lausunto"          "lausunto"
+   "kielteinen"        "kielteinen"
+   "palautettu"        "palautettu"})
+
+(defn- update-statement-status [{status :status :as statement}]
+  (if status
+    (update statement :status statement-status->new)
+    statement))
+
+(defmigration map-statement-statuses-into-new-krysp
+  {:apply-when (pos? (mongo/count :applications {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle" nil]}}))}
+  (update-applications-array :statements
+                             update-statement-status
+                             {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle"]}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
