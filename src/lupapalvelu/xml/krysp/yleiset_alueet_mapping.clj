@@ -260,8 +260,7 @@
   {:pre [krysp-version]}
   (-> (case (name krysp-version)
         "2.1.2" (map-enums-212 canonical lupa-name-key)
-        canonical                        ; default: no conversions
-        )
+        canonical)
       (common-map-enums krysp-version)))
 
 (defn yleisetalueet-element-to-xml [canonical lupa-name-key krysp-version]
