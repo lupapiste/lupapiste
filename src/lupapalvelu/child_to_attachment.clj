@@ -66,7 +66,8 @@
 (defn- generate-attachment-from-children!
   "Builds attachment and return attachment data as map"
   [user app child-type id lang]
-  (trace "   generate-attachment-from-children lang=" (name lang) ", type=" (name child-type) ", id=" id ",org: " (:organization app) ", child: " (get-child app child-type id))
+  {:pre [lang child-type]}
+  (tracef "   generate-attachment-from-children lang=%s, type=%s, id=%s,org: %s, child: %s" lang child-type id (:organization app) (get-child app child-type id))
   (let [pdf-file (File/createTempFile (str "pdf-generation-" (name lang) "-" (name child-type) "-") ".pdf")
         fis (FileOutputStream. pdf-file)
         attachment-id (get-child-attachment-id app child-type id)]
