@@ -347,6 +347,9 @@
 (defmethod ->version-array java.lang.String
   [s]
   (->> (ss/split s #"\.") ->version-array))
+(defmethod ->version-array clojure.lang.Keyword
+  [k]
+  (->> (name k) ->version-array))
 
 (defn compare-version [comparator-fn source target]
   (loop [s (->version-array source) t (->version-array target)]
