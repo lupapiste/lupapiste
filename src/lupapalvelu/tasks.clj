@@ -15,8 +15,6 @@
 
 (def task-schemas-version 1)
 
-(def- task-name-max-len 80)
-
 (def task-types ["muu katselmus"
                  "muu tarkastus"
                  "aloituskokous"
@@ -179,10 +177,7 @@
   (util/deep-merge
     (model/new-document (schemas/get-schema task-schemas-version schema-name) created)
     {:source source
-     :taskname (when task-name
-                 (if (> (.length task-name) task-name-max-len)
-                   (str (ss/substring task-name 0 (- task-name-max-len 3)) "...")
-                   task-name))
+     :taskname task-name
      :state state
      :data (if data (-> data tools/wrapped (tools/timestamped created)) {})
      :assignee (select-keys assignee [:id :firstName :lastName])
