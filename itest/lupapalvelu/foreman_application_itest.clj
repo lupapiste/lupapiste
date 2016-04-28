@@ -26,8 +26,8 @@
               link-to-application          (first (application :appsLinkingToUs))
               foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
-          (fact "Initial permit subtype is 'tyonjohtaja-hakemus'"
-                (:permitSubtype foreman-application) => "tyonjohtaja-hakemus")
+          (fact "Initial permit subtype is blank"
+            (:permitSubtype foreman-application) => ss/blank?)
 
           (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
                 (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
