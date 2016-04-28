@@ -343,7 +343,7 @@
   (mapv ->int [major minor micro]))
 (defmethod ->version-array clojure.lang.PersistentVector
   [v]
-  (->> (concat v [0 0 0]) (take 3) (map ->int)))
+  (->> (concat v [0 0 0]) (take 3) (mapv ->int)))
 (defmethod ->version-array java.lang.String
   [s]
   (->> (ss/split s #"\.") ->version-array))
