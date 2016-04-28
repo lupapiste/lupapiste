@@ -29,9 +29,6 @@
           (fact "Initial permit subtype is blank"
             (:permitSubtype foreman-application) => ss/blank?)
 
-          (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
-                (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
-
           (fact "Foreman application contains link to application"
                 (:id foreman-link-permit-data) => application-id)
 
@@ -71,6 +68,12 @@
                   (:foremanRole foreman-application) => ss/blank?
                   (:foreman application-after-update) => "bar foo"
                   (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
+
+          (fact "Can't submit foreman app because subtype is not selected"
+            (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.type-not-selected))
+
+          (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
+                (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
 
           (fact "Can't submit foreman app before original link-permit-app is submitted"
                 (:submittable (query-application apikey foreman-application-id)) => false)
