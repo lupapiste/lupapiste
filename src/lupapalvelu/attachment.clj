@@ -173,7 +173,7 @@
    :originalFileId                       sc/Str             ;; fileId of the unrotated file
    :created                              ssc/Timestamp
    :user                                 (sc/if :id         ;; User who created the version
-                                           user/SummaryUser ;; Only name is used for users without Lupapiste account, eg. neigbours
+                                           user/SummaryUser ;; Only name is used for users without Lupapiste account, eg. neighbours
                                            (select-keys user/User [:firstName :lastName]))
    :filename                             sc/Str             ;; original filename
    :contentType                          sc/Str             ;; MIME type of the file
