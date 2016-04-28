@@ -16,6 +16,10 @@
     (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
                   :permitSubtype "tyonjohtaja-hakemus"}) => states/tj-hakemus-state-graph
     (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                  :permitSubtype ""}) => states/tj-hakemus-state-graph
+    (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
+                  :permitSubtype nil}) => states/tj-hakemus-state-graph
+    (state-graph {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}
                   :permitSubtype "tyonjohtaja-ilmoitus"}) => states/tj-ilmoitus-state-graph))
 
 (facts "can-proceed?"
