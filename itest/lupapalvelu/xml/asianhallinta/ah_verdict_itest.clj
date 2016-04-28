@@ -98,6 +98,8 @@
     (doseq [f old-files]
      (.delete f))))
 
+(def test-file (.replace "/dev/null" "/" env/file-separator))
+
 (facts "Batchrun"
   (mongo/with-db db-name
     (fixture/apply-fixture "minimal"))
@@ -152,15 +154,15 @@
   (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict error result"
     (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
     (provided
-      (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file "/dev/null")]
+      (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file test-file)]
       (ahk/process-ah-verdict anything anything anything) => (sade.core/fail "nope")
-      (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Failed to process ah-verdict", :zip-path "/dev/null"} ) => "bonk"))
+      (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Failed to process ah-verdict", :zip-path test-file} ) => "bonk"))
   (fact "fetch-asianhallinta-verdicts logs proess-ah-verdict ok result"
     (lupapalvelu.batchrun/fetch-asianhallinta-verdicts) => nil
     (provided
-      (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file "/dev/null")]
+      (sade.util/get-files-by-regex anything #".+\.zip$") => [(io/file test-file)]
       (ahk/process-ah-verdict anything anything anything) => (sade.core/ok)
-      (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Succesfully processed ah-verdict", :zip-path "/dev/null"} ) => "bonk")))
+      (lupapalvelu.logging/log-event :info {:run-by "Automatic ah-verdicts checking", :event "Succesfully processed ah-verdict", :zip-path test-file} ) => "bonk")))
 
 (facts "Processing asianhallinta verdicts"
   (mongo/with-db db-name
