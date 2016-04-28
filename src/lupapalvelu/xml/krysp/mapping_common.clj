@@ -677,12 +677,13 @@
          puoltotieto
          "ei tiedossa")))
 
-(defn- map-lausuntotieto [lausunto-canonical]
-  (update-in lausunto-canonical [:Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto] lausunto-puolto-new->old))
+(defn- map-lausuntotieto [{{{{puoltotieto :puoltotieto} :Lausunto} :lausuntotieto} :Lausunto :as lausunto-canonical}]
+  (cond-> lausunto-canonical
+    puoltotieto (update-in [:Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto] lausunto-puolto-new->old)))
 
 (defn lausuntotieto-map-enum [lausuntotieto-canonical permit-type ns-version]
-  (if (and (permit/get-metadata permit-type :extra-statement-selection-values)
-           (util/compare-version < (get-yht-version permit-type ns-version) "2.1.5"))
+  (if (or (not (permit/get-metadata permit-type :extra-statement-selection-values))
+          (util/compare-version < (get-yht-version permit-type ns-version) "2.1.5"))
     (mapv map-lausuntotieto lausuntotieto-canonical)
     lausuntotieto-canonical))
 
