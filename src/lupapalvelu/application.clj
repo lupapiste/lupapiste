@@ -33,7 +33,6 @@
             [sade.schemas :as ssc]
             [swiss.arrows :refer [-<>>]]))
 
-
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 

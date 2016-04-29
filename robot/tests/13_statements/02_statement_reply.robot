@@ -149,7 +149,7 @@ Veikkos statement is not replyable
 Mikko writes reply for Olli's statement
   Wait and click  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//a[@data-test-id='open-statement-reply-1']
   Wait until  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-statement']
-  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-reply']
+  Wait until  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-reply']
   Element should not be visible  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
   Element should be visible  statement-nothing-to-add
   Click element  statement-nothing-to-add
