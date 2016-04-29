@@ -117,7 +117,6 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return disabled;
   });
 
-    ko.observable();
   var save = function(val) {
     service.updateDoc(self.documentId,
       [[params.path, val]],
