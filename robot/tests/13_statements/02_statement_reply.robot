@@ -66,11 +66,11 @@ Only statement tab is visible for Veikko
 Veikko from Tampere can give statement
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  veikko says its fine
-  Select From List By Value  statement-type-select  ehdoilla
+  Select From List By Value  statement-type-select  ehdollinen
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Puoltaa ehdoilla
+  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Ehdollinen
   [Teardown]  logout
 
 Olli types in draft
@@ -81,7 +81,7 @@ Olli types in draft
   Open statement  olli.uleaborg@ouka.fi  1
   Wait Until  Element should be enabled  statement-text
   Input text  statement-text  typed in statement text but not gonna submit the statement.
-  Wait until  Select From List By Value  statement-type-select  puoltaa
+  Wait until  Select From List By Value  statement-type-select  puollettu
   Sleep  2.5
 
 Olli peeks reply request tab
@@ -95,18 +95,16 @@ Olli peeks reply request tab
 Olli gives two statements
   Open statement  olli.uleaborg@ouka.fi  2
   Input text  statement-text  freedom!
-  Wait until  Select From List By Value  statement-type-select  puoltaa
+  Wait until  Select From List By Value  statement-type-select  puollettu
   Wait and click  statement-submit
   Confirm  dynamic-yes-no-confirm-dialog
-  Statement status is  Puoltaa  olli.uleaborg@ouka.fi  2
-  #Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-1']  Puoltaa
+  Statement status is  Puollettu  olli.uleaborg@ouka.fi  2
   Open statement  olli.uleaborg@ouka.fi  3
   Input text  statement-text  freedom again!
-  Wait until  Select From List By Value  statement-type-select  puoltaa
+  Wait until  Select From List By Value  statement-type-select  puollettu
   Wait and click  statement-submit
   Confirm  dynamic-yes-no-confirm-dialog
-  #Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-2']  Puoltaa
-  Statement status is  Puoltaa  olli.uleaborg@ouka.fi  3
+  Statement status is  Puollettu  olli.uleaborg@ouka.fi  3
 
 Olli requests reply for statement
   Open statement  olli.uleaborg@ouka.fi  2
