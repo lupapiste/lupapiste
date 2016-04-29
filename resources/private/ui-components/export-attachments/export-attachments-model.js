@@ -2,6 +2,8 @@ LUPAPISTE.ExportAttachmentsModel = function() {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
   self.authorizationModel = lupapisteApp.models.applicationAuthModel;
   self.appModel = lupapisteApp.models.application;
 
@@ -14,12 +16,12 @@ LUPAPISTE.ExportAttachmentsModel = function() {
     });
   }
 
-  self.exportAttachmentsToBackingSystem = ko.pureComputed(function() {
+  self.exportAttachmentsToBackingSystem = self.disposedPureComputed(function() {
     return self.authorizationModel.ok("move-attachments-to-backing-system") &&
           self.appModel.hasAttachment() && unsentAttachmentFound(ko.mapping.toJS(lupapisteApp.models.application.attachments));
   });
 
-  self.exportAttachmentsToAsianhallinta = ko.pureComputed(function() {
+  self.exportAttachmentsToAsianhallinta = self.disposedPureComputed(function() {
     return self.authorizationModel.ok("attachments-to-asianhallinta") &&
            self.appModel.hasAttachment() && unsentAttachmentFound(ko.mapping.toJS(lupapisteApp.models.application.attachments));
   });
