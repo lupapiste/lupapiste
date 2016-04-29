@@ -338,6 +338,20 @@
                                  "foo@example.com"
                                  "Kaino Solita <kaino@solita.fi>"])))))
 
+    (fact "Create foreman application with the applicant as foreman"
+          (let [{application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+                {foreman-app-id :id} (command apikey :create-foreman-application :id application-id
+                                              :taskId "" :foremanRole "ei tiedossa" :foremanEmail "pena@example.com") => truthy
+                {auth-array :auth} (query-application pena foreman-app-id) => truthy
+                {orig-auth :auth}  (query-application pena application-id)]
+            (fact "Pena is the sole auth and owner of the foreman application"
+                  (count auth-array) => 1
+                  (:username (some #(when (= (:role %) "owner") %) auth-array)) => "pena")
+            (fact "Pena is the sole auth and owner of the original application"
+                  (count orig-auth) => 1
+                  (:username (some #(when (= (:role %) "owner") %) orig-auth)) => "pena")))
+
+
     (fact "Contact person is added to new foreman app, when its auth is added to original application"
       (let [_ (command apikey :invite-with-role :id application-id :email "contact@example.com" :text "" :documentName ""
                      :documentId "" :path "" :role "writer") => ok?
