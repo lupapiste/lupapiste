@@ -2,7 +2,9 @@ LUPAPISTE.CompanyInviteModel = function(params) {
   "use strict";
   var self = this;
 
-  self.isVisible = ko.pureComputed(function() {
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
+  self.isVisible = self.disposedPureComputed(function() {
     return lupapisteApp.models.applicationAuthModel.ok("invite-with-role");
   });
 
