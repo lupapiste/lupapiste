@@ -334,6 +334,29 @@
 (defn relative-local-url? [^String url]
   (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
 
+(defmulti ->version-array type)
+(defmethod ->version-array :default
+  [_]
+  [0 0 0])
+(defmethod ->version-array clojure.lang.PersistentArrayMap
+  [{major :major minor :minor micro :micro :as v :or {major 0 minor 0 micro 0}}]
+  (mapv ->int [major minor micro]))
+(defmethod ->version-array clojure.lang.PersistentVector
+  [v]
+  (->> (concat v [0 0 0]) (take 3) (mapv ->int)))
+(defmethod ->version-array java.lang.String
+  [s]
+  (->> (ss/split s #"\.") ->version-array))
+(defmethod ->version-array clojure.lang.Keyword
+  [k]
+  (->> (name k) ->version-array))
+
+(defn compare-version [comparator-fn source target]
+  (loop [s (->version-array source) t (->version-array target)]
+    (if (and (> (count s) 1) (= (first s) (first t)))
+      (recur (rest s) (rest t))
+      (comparator-fn (first s) (first t)))))
+
 (defn version-is-greater-or-equal
   "True if given version string is greater than version defined in target map, else nil"
   [^String source, ^clojure.lang.IPersistentMap target]
@@ -452,4 +475,3 @@
   [ts timestamps]
   {:pre [(integer? ts) (and (sequential? timestamps) (every? integer? timestamps))]}
   (every? (partial > ts) timestamps))
-

@@ -114,8 +114,12 @@
     "2.2.1" maa-aines_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
+(defn- common-map-enums [canonical krysp-version]
+  (-> canonical
+      (update-in [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :lausuntotieto] mapping-common/lausuntotieto-map-enum :MAL krysp-version)))
+
 (defn maa-aines-element-to-xml [canonical krysp-version]
-  (element-to-xml canonical (get-mapping krysp-version)))
+  (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.

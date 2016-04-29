@@ -2067,6 +2067,52 @@
                                                       {:auth.invite.documentName {$type 10}}
                                                       {:auth.invite.documentName ""}]}))
 
+(def statement-status->new
+  {"puoltaa"           "puollettu"
+   "ei-puolla"         "ei-puollettu"
+   "ehdoilla"          "ehdollinen"
+   "jatetty-poydalle"  "poydalle"
+
+   "puollettu"         "puollettu"
+   "ei-puollettu"      "ei-puollettu"
+   "ehdollinen"        "ehdollinen"
+   "poydalle"          "poydalle"
+   "ei-huomautettavaa" "ei-huomautettavaa"
+   "ei-lausuntoa"      "ei-lausuntoa"
+   "lausunto"          "lausunto"
+   "kielteinen"        "kielteinen"
+   "palautettu"        "palautettu"})
+
+(defn- update-statement-status [{status :status :as statement}]
+  (if status
+    (update statement :status statement-status->new)
+    statement))
+
+(defmigration map-statement-statuses-into-new-krysp
+  {:apply-when (pos? (mongo/count :applications {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle" nil]}}))}
+  (update-applications-array :statements
+                             update-statement-status
+                             {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle"]}}))
+
+(defn- remove-nils-from-statement-fields [{given :given status :status reminder-sent :reminder-sent metadata :metadata :as statement}]
+  (cond-> statement
+    (nil? given) (dissoc :given)
+    (nil? status) (dissoc :status)
+    (nil? reminder-sent) (dissoc :reminder-sent)
+    (nil? metadata) (dissoc :metadata)))
+
+(defmigration sanitize-nils-in-statement-fields
+  {:apply-when (pos? (mongo/count :applications {$or [{:statements.given {$type 10}}
+                                                      {:statements.status {$type 10}}
+                                                      {:statements.reminder-sent {$type 10}}
+                                                      {:statements.metadata {$type 10}}]}))}
+  (update-applications-array :statements
+                             remove-nils-from-statement-fields
+                             {$or [{:statements.given {$type 10}}
+                                   {:statements.status {$type 10}}
+                                   {:statements.reminder-sent {$type 10}}
+                                   {:statements.metadata {$type 10}}]}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

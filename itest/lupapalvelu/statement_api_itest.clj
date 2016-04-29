@@ -167,7 +167,7 @@
           (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
 
         (fact* "Statement is given"
-          (command veikko :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+          (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :text "I will approve" :lang "fi") => ok?)
 
         (fact "Applicant got email"
           (let [emails (sent-emails)
@@ -224,7 +224,7 @@
       (let [application (query-application pena application-id)
             statement   (some #(when (= pena-email (-> % :person :email)) %) (:statements application))]
         (fact* "Statement is given"
-          (command pena :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+          (command pena :give-statement :id application-id :statementId (:id statement) :status "puollettu" :text "I will approve" :lang "fi") => ok?)
         (fact "Applicant statement giver cannot delete his already-given statement"
           (command pena :delete-statement :id application-id :statementId (:id statement)) => (partial expected-failure? "error.statement-already-given"))
 
@@ -267,7 +267,7 @@
            :attachments
            (filter (comp #{statement-id} :id :target))) => (has every? (comp not :readOnly)))
 
-    (command pena :give-statement :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") => ok?
+    (command pena :give-statement :id application-id :statementId statement-id :status "puollettu" :text "I will approve" :lang "fi") => ok?
 
     (fact "Attachment is readonly after statement is given"
       (->> (query-application sonja application-id)
@@ -306,19 +306,19 @@
     ;;   (query sonja :statement-is-replyable :id application-id :statementId statement-id) =not=> ok?)
 
     (fact "statement is given"
-      (command veikko :give-statement :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+      (command veikko :give-statement :id application-id :statementId statement-id :status "puollettu" :text "I will approve" :lang "fi") => ok?)
 
     (fact "statement-is-replyable - should fail when user is not requested for reply"
       (query sonja :statement-is-replyable :id application-id :statementId statement-id) =not=> ok?)
 
     (fact "applicant is not authorized for requesting reply"
-      (command mikko :request-for-statement-reply :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") =not=> ok?)
+      (command mikko :request-for-statement-reply :id application-id :statementId statement-id :status "puollettu" :text "I will approve" :lang "fi") =not=> ok?)
 
     (fact "statement giver is not authorized for requesting reply"
-      (command veikko :request-for-statement-reply :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") =not=> ok?)
+      (command veikko :request-for-statement-reply :id application-id :statementId statement-id :status "puollettu" :text "I will approve" :lang "fi") =not=> ok?)
 
     (fact "authority is able to request for reply"
-      (command sonja :request-for-statement-reply :id application-id :statementId statement-id :status "puoltaa" :text "I will approve" :lang "fi") => ok?)
+      (command sonja :request-for-statement-reply :id application-id :statementId statement-id :status "puollettu" :text "I will approve" :lang "fi") => ok?)
 
     (fact "statement-is-replyable - is replyable when user is requested for reply"
       (query sonja :statement-is-replyable :id application-id :statementId statement-id) => ok?)))

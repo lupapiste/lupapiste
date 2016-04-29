@@ -18,7 +18,7 @@
                                                    :name "Pia Nyman"}
                                        :requested 302
                                        :given     500
-                                       :status    "ehdoilla"
+                                       :status    "ehdollinen"
                                        :text      "Lausunto liitteen\u00e4"
                                        :state     "given"}
                                       {:person    {:text "Rakennussuunnittelu"

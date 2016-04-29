@@ -652,7 +652,7 @@
         give-statement-result (command apikey :give-statement
                                 :id application-id
                                 :statementId statement-id
-                                :status "puoltaa"
+                                :status "puollettu"
                                 :lang "fi"
                                 :text "Annanpa luvan urakalle.")]
     (query-application apikey application-id)))
