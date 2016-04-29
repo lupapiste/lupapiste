@@ -818,7 +818,7 @@
    :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :subtypes [:tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
+                                 :subtypes [(keyword "") :tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
                                  :state-graph-resolver tyonjohtaja-state-machine-resolver
                                  :required ["hankkeen-kuvaus-minimum"]
                                  :attachments []

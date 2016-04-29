@@ -96,7 +96,7 @@
                               <!-- Subtypes: -->
                               <!-- ko if: $root.permitSubtypes().length > 0 -->
                               <div>
-                                <p data-bind="ltext: 'application.permitSubtypes'"></p>
+                                <p><span data-bind="ltext: 'application.permitSubtypes'"></span>:*</p>
                                 <span class="application_summary_text">
                                   <select class="dropdown"
                                           data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
