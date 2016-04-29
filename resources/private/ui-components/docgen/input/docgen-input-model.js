@@ -28,7 +28,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
 
   self.indicator = ko.observable().extend({notify: "always"});
 
-  self.result = ko.pureComputed(function() {
+  self.result = self.disposedPureComputed(function() {
     var myDoc = service.findDocumentById(self.documentId);
     var validation = _.find(myDoc.validationResults(), function(validation) {
       return _.isEqual(validation.path, self.path);
@@ -36,7 +36,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return validation && validation.result;
   });
 
-  self.errorMessage = ko.pureComputed(function() {
+  self.errorMessage = self.disposedPureComputed(function() {
     var errType = self.result() && self.result()[0];
     var message = errType && errType !== "tip" && loc(["error", self.result()[1]]);
     return message;
@@ -67,7 +67,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return _.get( typeDefaults, (self.schema.inputType || self.schema.type), "");
   }
 
-  self.signalClasses = ko.computed(function() {
+  self.signalClasses = self.disposedComputed(function() {
     var classes = [];
     var result = self.result() ? self.result()[0] : undefined;
     if (result) {
@@ -77,15 +77,15 @@ LUPAPISTE.DocgenInputModel = function(params) {
     return classes.join(" ");
   });
 
-  self.labelClasses = ko.computed(function() {
+  self.labelClasses = self.disposedComputed(function() {
     return "form-label " + self.signalClasses();
   });
 
-  self.inputClasses = ko.computed(function() {
+  self.inputClasses = self.disposedComputed(function() {
     return (self.schemaCss || defaultInputClasses()) + " " + self.signalClasses();
   });
 
-  self.readonly = ko.pureComputed(function () {
+  self.readonly = self.disposedPureComputed(function () {
     var doc = service.findDocumentById( self.documentId );
     var readOnlyAfterSent = params.schema["readonly-after-sent"] && doc.state === "sent";
     return readOnlyAfterSent || params.schema.readonly || params.readonly;
@@ -101,7 +101,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
     }
   }
 
-  self.disabled = ko.pureComputed( function() {
+  self.disabled = self.disposedPureComputed( function() {
     var disabled = params.isDisabled
           || !(service.isWhitelisted( self.schema ))
           || !self.authModel.ok(service.getUpdateCommand(self.documentId))
@@ -122,6 +122,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
       [[params.path, val]],
       self.indicator);
   };
-  self.value.subscribe(_.debounce(save, 500));
+
+  self.disposedSubscribe(self.value, _.debounce(save, 500));
 
 };
