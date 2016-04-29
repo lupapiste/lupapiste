@@ -13,9 +13,8 @@
       test-app-P  {:municipality 753 :permitType "P"}
       test-app-YA {:municipality 753 :permitType "YA"}
       test-app-YM {:municipality 753 :permitType "YM"}
-      statuses-small ["puoltaa" "ei-puolla" "ehdoilla"]
-      statuses-large ["puoltaa" "ei-puolla" "ehdoilla"
-                      "ei-huomautettavaa" "ehdollinen" "puollettu"
+      statuses-small ["puollettu" "ei-puollettu" "ehdollinen"]
+      statuses-large ["ei-huomautettavaa" "ehdollinen" "puollettu"
                       "ei-puollettu" "ei-lausuntoa" "lausunto"
                       "kielteinen" "palautettu" "poydalle"]]
 
@@ -126,9 +125,9 @@
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
         (dissoc :modified)
-        (update-draft "some text" "puoltaa" id-a id-1))
-    => (contains #{[:text "some text"] 
-                   [:status "puoltaa"] 
+        (update-draft "some text" "puollettu" id-a id-1))
+    => (contains #{[:text "some text"]
+                   [:status "puollettu"]
                    [:modify-id anything]
                    [:editor-id id-1]
                    [:state :draft]
@@ -137,25 +136,25 @@
   (fact "update-draft - wrong modify-id"
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
-        (update-draft "some text" "puoltaa" id-b id-1))
+        (update-draft "some text" "puollettu" id-b id-1))
     => (throws Exception))
 
   (fact "update-draft - updated statement is missing person should produce validation error"
     (-> (ssg/generate Statement)
         (dissoc :person)
-        (update-draft "some text" "puoltaa" id-b id-1))
+        (update-draft "some text" "puollettu" id-b id-1))
     => (throws Exception))
 
   (fact "give-statement"
     (-> (ssg/generate Statement)
         (assoc :modify-id id-a)
         (dissoc :given)
-        (give-statement "some text" "puoltaa" id-a id-1))
-    => (contains #{[:text "some text"] 
-                   [:status "puoltaa"] 
-                   [:modify-id anything] 
+        (give-statement "some text" "puollettu" id-a id-1))
+    => (contains #{[:text "some text"]
+                   [:status "puollettu"]
+                   [:modify-id anything]
                    [:editor-id id-1]
-                   [:state :given] 
+                   [:state :given]
                    [:given anything]}))
 
   (fact "update-reply-draft"
@@ -164,7 +163,7 @@
         (assoc-in [:reply :saateText] "saate")
         (dissoc :modified)
         (update-reply-draft "reply text" true id-a id-2))
-    => (contains #{[:text "statement text"] 
+    => (contains #{[:text "statement text"]
                    [:modify-id anything]
                    [:editor-id id-1]
                    [:state :replyable]
