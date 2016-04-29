@@ -116,7 +116,7 @@
 
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
-      (update-in [:MaaAinesluvat :toimituksenTiedot :maaAineslupaAsiatieto :MaaAineslupaAsia :lausuntotieto] mapping-common/lausuntotieto-map-enum :MAL krysp-version)))
+      (update-in [:MaaAinesluvat :maaAineslupaAsiatieto :MaaAineslupaAsia :lausuntotieto] mapping-common/lausuntotieto-map-enum :MAL krysp-version)))
 
 (defn maa-aines-element-to-xml [canonical krysp-version]
   (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version)))
