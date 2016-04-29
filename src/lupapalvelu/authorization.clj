@@ -41,7 +41,7 @@
    (sc/optional-key :documentName)   sc/Str
    (sc/optional-key :documentId)     ssc/ObjectIdStr
    :user                             usr/SummaryUser
-   (sc/optional-key :title)          sc/Bool
+   (sc/optional-key :title)          sc/Str
    (sc/optional-key :text)           sc/Str})
 
 (defschema CompanyInvite
