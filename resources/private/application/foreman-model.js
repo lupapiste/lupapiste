@@ -32,7 +32,7 @@ LUPAPISTE.ForemanModel = function() {
   });
 
   self.canInvite = ko.pureComputed(_.partial(lupapisteApp.models.applicationAuthModel.ok, "invite-with-role"));
-
+  self.canSelect = ko.pureComputed(_.partial(lupapisteApp.models.applicationAuthModel.ok, "link-foreman-task"));
   self.indicator = ko.observable();
 
   self.refresh = function(application) {
@@ -106,6 +106,7 @@ LUPAPISTE.ForemanModel = function() {
                      "selectedForeman": ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus),
                      "selectableForemen": ko.observableArray(),
                      "canInvite": self.canInvite,
+                     "selectEnabled": self.canSelect,
                      "indicator": ko.observable()};
 
         data.selectableForemen(_.filter(self.foremanApplications(), function(app) {

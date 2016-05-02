@@ -1,10 +1,8 @@
 (ns lupapalvelu.pdf.libreoffice-template-verdict
   (:require [taoensso.timbre :as log]
             [sade.util :as util]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.pdf.libreoffice-template :refer [xml-escape] :as template]
+            [lupapalvelu.pdf.libreoffice-template :refer [xml-escape get-organization-name applicant-index] :as template]
             [clojure.string :as s]
             [clojure.java.io :as io]))
 
@@ -42,20 +40,6 @@
             (:kerrosala lupamaaraykset) (conj [(i18n/localize lang "verdict.kerrosala") (:kerrosala lupamaaraykset)])
             (:rakennusoikeudellinenKerrosala lupamaaraykset) (conj [(i18n/localize lang "verdict.rakennusoikeudellinenKerrosala") (:rakennusoikeudellinenKerrosala lupamaaraykset)])
             (:kokonaisala lupamaaraykset) (conj [(i18n/localize lang "verdict.kokonaisala") (:kokonaisala lupamaaraykset)]))))
-
-(defn- applicant-name-from-doc [document]
-  (when-let [body (:data document)]
-    (if (= (get-in body [:_selected :value]) "yritys")
-      (let [name (get-in body [:yritys :yritysnimi :value])
-            y-tunnus (get-in body [:yritys :liikeJaYhteisoTunnus :value])]
-        (str name " / (" y-tunnus ")"))
-      (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-        (s/trim (str (:value last-name) \space (:value first-name)))))))
-
-(defn- applicant-index [application]
-  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
-        applicant (:applicant application)]
-    [(if (seq applicants) applicants [applicant])]))
 
 ;; (sc/optional-key :vaadittuTyonjohtajatieto)       [sc/Str]
 (defn- verdict-foremen [application verdict-id paatos-idx]
@@ -99,11 +83,6 @@
 (defn verdict-signatures [verdict paatos]
   (into [[(verdict-paatos-key paatos :paatoksentekija) (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")]]
         (map (fn [sig] [(xml-escape (str (get-in sig [:user :firstName]) " " (get-in sig [:user :lastName]))) (or (util/to-local-date (:created sig)) "-")]) (:signatures verdict))))
-
-(defn- get-organization-name [application lang]
-      (let [organization (org/get-organization (:organization application))
-            default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
-           (get-in organization [:name lang] default)))
 
 (defn write-verdict-libre-doc [application id paatos-idx lang file]
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))

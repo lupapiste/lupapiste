@@ -30,8 +30,9 @@
 (facts "convert-keys-to-timestamps"
   (convert-keys-to-timestamps {:a "1970-01-01"} [:a]) => {:a 0}
   (convert-keys-to-timestamps {:a "1970-01-01" :b "1970-01-02"} [:b]) => {:a "1970-01-01" :b (* 24 60 60 1000)}
-  (convert-keys-to-timestamps {:a "1970-01-01" :b "1970-01"} [:b]) => {:a "1970-01-01" :b "1970-01"}
-  (convert-keys-to-timestamps nil nil => nil))
+  (convert-keys-to-timestamps {:a "1970-01-01" :b "1970-01"} [:b]) => (throws AssertionError)
+  (convert-keys-to-timestamps nil nil => nil)
+  (convert-keys-to-timestamps {:a ""} [:a]) => {:a nil})
 
 (facts "strip-booleans"
   (convert-booleans {:a "true" :b {:c "false" :d "falsey"}}) => {:a true :b {:c false :d "falsey"}})

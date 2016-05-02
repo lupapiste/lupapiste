@@ -122,6 +122,10 @@
     "2.2.1" poikkeamis_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
+(defn- common-map-enums [canonical krysp-version]
+  (-> canonical
+      (update-in [:Popast :poikkeamisasiatieto :Poikkeamisasia :lausuntotieto] mapping-common/lausuntotieto-map-enum :P krysp-version)))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
@@ -143,7 +147,7 @@
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)
                     (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
-        xml (element-to-xml canonical (get-mapping krysp-version))
+        xml (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version))
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 

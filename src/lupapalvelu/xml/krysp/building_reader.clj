@@ -4,7 +4,7 @@
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.validators :as v]
-            [sade.xml :refer [get-text select select1 under has-text xml->edn]]
+            [sade.xml :refer [get-text select select1 under has-text xml->edn parse-string]]
             [lupapalvelu.document.tools :as tools]
             [sade.util :as util]
             [lupapalvelu.document.schemas :as schema]
@@ -45,7 +45,7 @@
      :area         (get-text xml-no-ns :kokonaisala)
      :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))
      :operationId  (some (fn [{{:keys [tunnus sovellus]} :MuuTunnus}]
-                           (when (= sovellus "toimenpideId")
+                           (when (#{"toimenpideId" "Lupapiste"} sovellus)
                              tunnus))
                          (->list (:muuTunnustieto edn)))
      :description (:rakennuksenSelite edn)}))
@@ -214,3 +214,8 @@
 
 (permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
 
+(defn- parse-buildings
+  "Convenience function for debugging KRYSP messages.
+  Return buildings summary for the given file."
+  [fname]
+  (-> fname slurp (parse-string "utf-8") cr/strip-xml-namespaces ->buildings-summary))

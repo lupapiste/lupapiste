@@ -23,7 +23,8 @@
         document {:op {:id "1"}}
         base-result {:jarjestysnumero nil
                      :kiinttun nil
-                     :muuTunnustieto {:MuuTunnus {:sovellus "toimenpideId", :tunnus "1"}}}]
+                     :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId", :tunnus "1"}}
+                                      {:MuuTunnus {:sovellus "Lupapiste", :tunnus "1"}}]}]
     (get-rakennustunnus {} {} document) => base-result
     (get-rakennustunnus {:tunnus "B"} application document) => (assoc base-result :rakennuksenSelite "B: desc")
     (get-rakennustunnus {:tunnus ""} application document) => (assoc base-result :rakennuksenSelite "desc")
@@ -477,7 +478,7 @@
                           :id "516560d6c2e6f603beb85147"}
                  :requested 1368080102631
                  :state "given"
-                 :status "ehdoilla"
+                 :status "ehdollinen"
                  :text "Savupiippu pit\u00e4\u00e4 olla."}
                 {:id "518b3ee60364ff9a63c6d6a2"
                  :person {:text "Paloviranomainen"
@@ -486,7 +487,7 @@
                           :id "516560d6c2e6f603beb85147"}
                  :requested 1368080102631
                  :state "draft"
-                 :status "ehdoilla"
+                 :status "ehdollinen"
                  :text "Lausunto tulossa..."}]
    :neighbors ctc/neighbors
    :primaryOperation (op-info rakennuksen-muuttaminen)
@@ -887,7 +888,8 @@
     (fact "rakennustunnus"
       (:rakennustunnus tiedot) => {:jarjestysnumero nil,
                                    :kiinttun "21111111111111"
-                                   :muuTunnustieto {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
+                                   :muuTunnustieto [{:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "toimenpideId"}}
+                                                    {:MuuTunnus {:tunnus "kerrostalo-rivitalo-id" :sovellus "Lupapiste"}}]
                                    :rakennuksenSelite "A: kerrostalo-rivitalo-kuvaus"})))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
@@ -941,7 +943,7 @@
         lausunto (:lausunto LL) => "Savupiippu pit\u00e4\u00e4 olla."
         lausuntoPvm (:lausuntoPvm LL) => "2013-05-09"
         Puolto (-> LL :puoltotieto :Puolto) => truthy
-        puolto (:puolto Puolto) => "ehdoilla"
+        puolto (:puolto Puolto) => "ehdollinen"
 
         osapuolettieto (:osapuolettieto rakennusvalvontaasia) => truthy
         osapuolet (:Osapuolet osapuolettieto) => truthy

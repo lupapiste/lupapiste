@@ -12,27 +12,31 @@
             [sade.xml :as xml]
             [sade.common-reader :as cr]))
 
+(testable-privates lupapalvelu.xml.krysp.vesihuolto-mapping common-map-enums)
+
 (fact "2.1.3: :tag is set" (has-tag vesihuolto-to-krysp_213) => true)
 (fact "2.2.1: :tag is set" (has-tag vesihuolto-to-krysp_221) => true)
 
+(def canonical (vapautus-canonical vapautus-vesijohdosta-ja-viemarista-hakemus "fi"))
+
 (facts "Vesilupalupa type of permit to canonical and then to xml with schema validation"
+  (fact "2.1.3"
+    (let [xml_213_s (-> (common-map-enums canonical "2.1.3")
+                        (element-to-xml vesihuolto-to-krysp_213)
+                        (indent-str))
+          lp-xml_213    (cr/strip-xml-namespaces (xml/parse xml_213_s))]
 
-  (let [canonical (vapautus-canonical vapautus-vesijohdosta-ja-viemarista-hakemus "fi")
-        xml_213 (element-to-xml canonical vesihuolto-to-krysp_213)
-        xml_221 (element-to-xml canonical vesihuolto-to-krysp_221)
-        xml_213_s     (indent-str xml_213)
-        xml_221_s     (indent-str xml_221)
-        lp-xml_213    (cr/strip-xml-namespaces (xml/parse xml_213_s))
-        lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
+      (validator/validate xml_213_s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.1.3")))
 
-    ;(clojure.pprint/pprint canonical)
-    ;(println xml_221_s)
+  (fact "2.2.1"
+    (let [xml_221_s (-> (common-map-enums canonical "2.2.1")
+                        (element-to-xml vesihuolto-to-krysp_221)
+                        (indent-str))
+          lp-xml_221    (cr/strip-xml-namespaces (xml/parse xml_221_s))]
 
-    (validator/validate xml_213_s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.1.3")
-    (validator/validate xml_221_s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.2.1")
+      (validator/validate xml_221_s (:permitType vapautus-vesijohdosta-ja-viemarista-hakemus) "2.2.1")
 
-    (fact "Hakija"
-      (let [hakija (xml/select1 lp-xml_221 [:Vesihuoltolaki :Vapautus :Vapautushakemus :hakija])]
-        (xml/get-text hakija [:sukunimi]) => "Borga"
-        (fact "maa" (xml/get-text hakija [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN")))
-))
+      (fact "Hakija"
+        (let [hakija (xml/select1 lp-xml_221 [:Vesihuoltolaki :Vapautus :Vapautushakemus :hakija])]
+          (xml/get-text hakija [:sukunimi]) => "Borga"
+          (fact "maa" (xml/get-text hakija [:osoitetieto :Osoite :valtioKansainvalinen]) => "FIN"))))))

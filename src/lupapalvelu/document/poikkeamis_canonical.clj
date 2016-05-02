@@ -25,7 +25,7 @@
 
 (defn- get-toimenpidefull [{{:keys [toimenpiteet kaytettykerrosala kayttotarkoitusKoodi]} :data :as toimenpide}]
   (let [{:keys [kayttotarkoitusKoodi pintaAla]} kaytettykerrosala
-        kaytettykerrosala-canonical (when (every? not-empty [kayttotarkoitusKoodi pintaAla])
+        kaytettykerrosala-canonical (when (some not-empty [kayttotarkoitusKoodi pintaAla])
                                       {:kerrosalatieto {:kerrosala {:pintaAla pintaAla
                                                                     :paakayttotarkoitusKoodi kayttotarkoitusKoodi}}})]
       {:Toimenpide (get-toimenpide (:data toimenpide) kaytettykerrosala-canonical)}))

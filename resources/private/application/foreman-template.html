@@ -57,6 +57,7 @@
                  name="foreman-selection"
                  class="form-input combobox long"
                  data-bind="attr: {'data-test-id': 'foreman-selection-' + $index()},
+                            enable: $data.selectEnabled,
                             options: $data.selectableForemen,
                             optionsText: 'displayName',
                             optionsValue: 'id',

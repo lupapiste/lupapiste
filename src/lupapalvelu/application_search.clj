@@ -141,7 +141,7 @@
         {:primaryOperation.name {$in operations}}
         (when (user/authority? user)
           ; Hide foreman applications in default search, see LPK-923
-          {:permitSubtype {$nin ["tyonjohtaja-hakemus", "tyonjohtaja-ilmoitus"]}}))
+          {:primaryOperation.name {$ne "tyonjohtajan-nimeaminen-v2"}}))
       (when-not (empty? areas)
         (make-area-query areas user))])})
 

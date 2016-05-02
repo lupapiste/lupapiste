@@ -301,7 +301,7 @@
 
         puoltotieto (:puoltotieto annettu-lausunto) => truthy
         Puolto (:Puolto puoltotieto) => truthy
-        puolto (:puolto Puolto) => "puoltaa"
+        puolto (:puolto Puolto) => "puollettu"
         lausuntoId (:id Lausunto) => "52385377da063788effc1e93"
 
         lisatietotieto (:lisatietotieto Poikkeamisasia) => truthy
@@ -484,7 +484,7 @@
 
         puoltotieto (:puoltotieto annettu-lausunto) => truthy
         Puolto (:Puolto puoltotieto) => truthy
-        puolto (:puolto Puolto) => "puoltaa"
+        puolto (:puolto Puolto) => "puollettu"
         lausuntoId (:id Lausunto) => "52385377da063788effc1e93"
 
         lisatietotieto (:lisatietotieto Suunnittelutarveasia) => truthy

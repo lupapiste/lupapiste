@@ -1,6 +1,8 @@
 LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   "use strict";
   var self = this;
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
   self.dialogSelector = "#dialog-verdict-attachment-prints-order";
 
   self.propertyId = lupapisteApp.models.application.propertyId;
@@ -32,7 +34,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   self.authorizationModel = lupapisteApp.models.applicationAuthModel;
 
-  self.ok = ko.computed(function() {
+  self.ok = self.disposedPureComputed(function() {
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
       return util.isNonNegative(a.orderAmount());
     });
@@ -53,7 +55,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
            util.isValidEmailAddress(self.ordererEmail());
   });
 
-  self.printsOrderButtonTitle = ko.computed(function () {
+  self.printsOrderButtonTitle = self.disposedPureComputed(function () {
     return self.attachments().length ? loc("verdict-attachment-prints-order.order-dialog.title") : loc("verdict-attachment-prints-order.verdict-attachments-selected");
   });
 

@@ -127,14 +127,40 @@ Making the latest Aloituskokous final will also finalize the first but not the s
   Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
   Review row check  2  Aloituskokous  22.5.2016  Ronja Rules  Lopullinen  ${EMPTY}
 
-Delete Muu tarkastus
+Add attachment to loppukatselmus
+  Open task  loppukatselmus
+  Wait Until  Title Should Be  ${appname} - Lupapiste
+  Test id disabled  review-done
+  Review active
+  Review checkboxes disabled
+  Scroll and click test id  add-targetted-attachment
+  Select Frame     uploadFrame
+  Wait until       Element should be visible  test-save-new-attachment
+  Select from list by value  jquery=#attachmentType  muut.tutkimus
+  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${TXT_TESTFILE_PATH}
+  Click element    test-save-new-attachment
+  Unselect Frame
+  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Return from review
+
+Check that loppukatselmus attachment is listed
+  Open tab  attachments
+  Has review attachment  tr#attachment-row-muut-tutkimus  /robot.*txt/
+
+Delete loppukatselmus
+  Open tab  tasks
   Wait until  Element should be visible  xpath=//div[@id="application-tasks-tab"]//table[@class="tasks"]//tbody/tr
   Open task  loppukatselmus
   Review checkboxes enabled
   Click enabled by test id  delete-task
   Confirm  dynamic-yes-no-confirm-dialog
 
+The attachment is gone too
+  Open tab  attachments
+  Javascript?  $("tr#attachment-row-muut-tutkimus").length === 0
+
 Listing contains one less task
+  Open tab  tasks
   Tab should be visible  tasks
   Task count is  task-katselmus  4
 
@@ -236,6 +262,12 @@ Mikko can add attachments though
   Wait Until Page Contains  ${PNG_TESTFILE_NAME}
   Return from review
 
+Mikko checks that review attachments are correctly listed
+  Open tab  attachments
+  Javascript?  $("tr#attachment-row-muut-muu").length === 2
+  Has review attachment  tr#attachment-row-muut-muu:first  /robot.*txt/
+  Has review attachment  tr#attachment-row-muut-muu:last  /robot.*png/
+
 Mikko sets started past date for YA application (LPK-1054)
   Open application  ${appname-ya}  ${propertyId}
   Open tab  tasks
@@ -252,9 +284,25 @@ Sonja comes back and finalizes YA review
   Edit YA katselmus  Aloituskatselmus  14.4.2016  Some Sonja  Description is mandatory for YA reviews.
   # TODO: Sending requires fully formed application
   #Finalize review
+
+Deleting R verdict does not delete its done reviews
+  Open application  ${appname}  ${propertyId}
+  Open tab  verdict
+  Scroll to  h2 span[data-test-id=given-verdict-id-1] ~ i
+  Click element  jquery=h2 span[data-test-id=given-verdict-id-1] ~ i
+  Confirm  dynamic-yes-no-confirm-dialog
+  Open tab  tasks
+  Javascript?  $("[data-test-type=task-katselmus]").length === 5
+  Review row check  0  Aloituskokous  1.5.2016  Sonja Sibbo  Lopullinen  Kyllä
+  Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}
+  Review row check  2  Aloituskokous  22.5.2016  Ronja Rules  Lopullinen  ${EMPTY}
+
+Attachments have been updated
+  Open tab  attachments
+  Javascript?  $("tr#attachment-row-katselmukset_ja_tarkastukset-katselmuksen_tai_tarkastuksen_poytakirja").length === 3
+  Javascript?  $("tr#attachment-row-muut-muu").length === 1
+  Has review attachment  tr#attachment-row-muut-muu:first  /robot.*txt/
   [Teardown]  Logout
-
-
 
 
 # TODO: Sonja sets ready past date for YA application (LPK-1054)
