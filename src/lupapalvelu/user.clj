@@ -245,6 +245,12 @@
                 summary-keys
                 (array-map :lastName 1, :firstName 1)))
 
+(defn authority-users-in-organizations [org-ids]
+  (let [query (org-authz-match org-ids "authority")]
+    (mongo/select :users
+                  query
+                  [:id :username :firstName :lastName :email]
+                  (array-map :lastName 1, :firstName 1))))
 ;;
 ;; jQuery data-tables support:
 ;;

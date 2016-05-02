@@ -29,11 +29,6 @@
    :services [sc/Str]
    :capacity  sc/Int})
 
-(defn- ->FrontendCalendar [cal]
-  (-> cal
-      (select-keys [:id :name])
-      (merge {:organization (:organizationCode cal)})))
-
 (defn- ->FrontendReservationSlots [backend-slots]
   (map (fn [s] {:id        (:id s)
                 :status    :available
@@ -73,15 +68,11 @@
             :services ["SCC123"]
             :capacity 1})) slots))
 
-(defn- organization-users-with-calendar
-  [org]
-  (user/find-authorized-users-in-org org :authority))
-
 (defn- find-calendars-for-organizations
   [orgIds]
   (let [response (api-query "/api/resources/by-organization" {:organizationCodes orgIds})]
     (if (= 200 (:status response))
-      (map ->FrontendCalendar (:body response))
+      (group-by :externalRef (:body response))
       nil)))
 
 (defquery calendar
@@ -91,26 +82,35 @@
   [_]
   (let [response (api-query (str "/api/resources/" calendarId))]
     (if (= 200 (:status response))
-      (ok :calendar (->FrontendCalendar (:body response)))
+      (ok :calendar {})
       (do (error response)
           (fail :resources.backend-error)))))
 
-(defquery list-calendars
+(defquery calendar-admin-list-users
   {:user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [orgIds    (map name (-> user :orgAuthz keys))
+        users     (user/authority-users-in-organizations orgIds)
         calendars (find-calendars-for-organizations orgIds)]
     (if calendars
-      (ok :calendars calendars)
+      (let [users (map #(assoc % :calendar (get calendars (str "user-" (:id %)))) users)]
+        (ok :users users))
       (fail :resources.backend-error))))
 
-(defcommand create-calendar
+(defcommand set-user-calendar-enabled
   {:user-roles #{:authorityAdmin}}
-  [{{:keys [name organization]} :data}]
-  (let [url      "/api/resources/"
-        response (api-post-command url {:name             name
-                                        :organizationCode organization})]
-    (ok :result (:body response))))
+  [{{:keys [userId]} :data user :user}]
+  (let [admin-in-organization-id (user/authority-admins-organization-id user)
+        target-user              (user/get-user-by-id userId)
+        #_(validate user is in organisation)
+        url      "/api/resources/"
+        response (api-post-command url {:name             (str (:firstName target-user) " " (:lastName target-user))
+                                        :organizationCode admin-in-organization-id
+                                        :externalRef      (str "user-" userId)})]
+    (if (= 200 (:status response))
+      (ok)
+      (do (error response)
+          (fail :resources.backend-error)))))
 
 (defcommand update-calendar
   {:user-roles #{:authorityAdmin}}

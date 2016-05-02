@@ -45,98 +45,29 @@ LUPAPISTE.ResourceCalendarsModel = function () {
     LUPAPISTE.ModalDialog.open("#dialog-new-slot");
   };
 
-  function EditCalendarModel() {
-    var self = this;
-
-    self.calendarId = ko.observable();
-    self.name = ko.observable();
-    self.organization = ko.observable();
-
-    self.commandName = ko.observable();
-    self.command = null;
-
-    self.init = function(params) {
-      self.commandName(params.commandName);
-      self.command = params.command;
-      self.calendarId(util.getIn(params, ["source", "id"], -1));
-      self.name(util.getIn(params, ["source", "name"], ""));
-      self.organization(util.getIn(params, ["source", "organization"], ""));
-    };
-
-    self.execute = function() {
-      self.command(self.calendarId(), self.name(), self.organization());
-    };
-
-    self.ok = ko.computed(function() {
-      return !_.isBlank(self.name()) && !_.isBlank(self.organization());
-    });
-  }
-  self.editCalendarModel = new EditCalendarModel();
-
   self.items = ko.observableArray();
-
-  self.editCalendar = function() {
-    self.editCalendarModel.init({
-      source: this,
-      commandName: "edit",
-      command: function(calendarId, name, organization) {
-        ajax
-          .command("update-calendar", {calendarId: calendarId, name: name, organization: organization})
-          .success(function() {
-            self.load();
-            LUPAPISTE.ModalDialog.close();
-          })
-          .call();
-
-        LUPAPISTE.ModalDialog.close();
-      }
-    });
-    self.openCalendarEditDialog();
-  };
-
-  self.addCalendar = function() {
-    self.editCalendarModel.init({
-      source: this,
-      commandName: "add",
-      command: function(id, name, organization) {
-        ajax
-          .command("create-calendar", {name: name, organization: organization})
-          .success(function() {
-            self.load();
-            LUPAPISTE.ModalDialog.close();
-          })
-          .call();
-
-        LUPAPISTE.ModalDialog.close();
-      }
-    });
-    self.openCalendarEditDialog();
-  };
-
-  self.rmCalendar = function(indexFn) {
-    // DUMMY DATA EDIT
-    var index = indexFn();
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-            loc("areyousure"),
-            loc("auth-admin.resource.calendar.delete.confirm"),
-              {title: loc("yes"), fn: function() {
-                self.items.splice(index, 1);
-              }}
-            );
-    return false;
-  };
-
-  self.openCalendarEditDialog = function() {
-    LUPAPISTE.ModalDialog.open("#dialog-edit-calendar");
-  };
+  self.initialized = false;
 
   self.init = function(data) {
-    var calendars = data.calendars;
-    self.items(calendars || []);
+    var users = _.map(data.users,
+      function(user) {
+        var calendarEnabledObservable = ko.observable(user.calendar !== null);
+        ko.computed(function() {
+          var enabled = calendarEnabledObservable();
+          if (self.initialized) {
+            ajax.command("set-user-calendar-enabled", {userId: user.id, enabled: enabled})
+              .success(util.showSavedIndicator)
+              .call();
+          }
+        });
+        return _.extend(user, { calendarEnabled: calendarEnabledObservable });
+      });
+    self.items(users || []);
+    self.initialized = true;
   };
 
   self.load = function() {
-    ajax.query("list-calendars")
+    ajax.query("calendar-admin-list-users")
       .success(function(d) {
         self.init(d);
       })
