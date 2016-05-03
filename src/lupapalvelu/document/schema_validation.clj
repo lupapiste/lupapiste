@@ -43,6 +43,7 @@
    (opt :listen)      [sc/Keyword]   ;; Events to listen
    (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
    (opt :auth)        Auth
+   (opt :transform)   sc/Keyword     ;; Value transform. See persistence/transform-value
    })
 
 (defschema Text
