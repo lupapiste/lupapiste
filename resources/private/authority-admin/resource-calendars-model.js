@@ -51,11 +51,11 @@ LUPAPISTE.ResourceCalendarsModel = function () {
   self.init = function(data) {
     var users = _.map(data.users,
       function(user) {
-        var calendarEnabledObservable = ko.observable(user.calendar !== null);
+        var calendarEnabledObservable = ko.observable(_.has(user, 'calendar'));
         ko.computed(function() {
           var enabled = calendarEnabledObservable();
           if (self.initialized) {
-            ajax.command("set-user-calendar-enabled", {userId: user.id, enabled: enabled})
+            ajax.command("set-calendar-enabled-for-authority", {userId: user.id, enabled: enabled})
               .success(util.showSavedIndicator)
               .call();
           }
@@ -67,7 +67,7 @@ LUPAPISTE.ResourceCalendarsModel = function () {
   };
 
   self.load = function() {
-    ajax.query("calendar-admin-list-users")
+    ajax.query("calendars-for-authority-admin")
       .success(function(d) {
         self.init(d);
       })

@@ -439,7 +439,10 @@
       var component = $("#calendar-admin .calendar-table");
       calendarViewModel = calendarView.create(component, new LUPAPISTE.CalendarService());
     }
-    hub.send("calendarService::fetchCalendar", {id: pageutil.subPage()});
+    var path = pageutil.getPagePath();
+    if (path.length > 1) {
+      hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
+    }
   });
 
   $(function() {

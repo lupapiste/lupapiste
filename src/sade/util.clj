@@ -268,7 +268,7 @@
 
 (defn to-millis-from-local-datetime-string [^String datetime-as-string]
   (when-not (ss/blank? datetime-as-string)
-    (let [d (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm" ) datetime-as-string)]
+    (let [d (timeformat/parse (timeformat/formatter-local "YYYY-MM-dd'T'HH:mm" ) datetime-as-string)]
       (tc/to-long d))))
 
 (defn to-RFC1123-datetime [^Long timestamp]

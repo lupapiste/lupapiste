@@ -12,23 +12,26 @@ LUPAPISTE.CalendarService = function() {
   };
 
   var doFetchCalendarSlots = function(event) {
-    if (event.id) {
+    if (event && event.id) {
       self.calendarQuery.calendarId(event.id);
     }
-    if (event.week && event.year) {
+    if (event && event.week && event.year) {
       self.calendarQuery.week(event.week);
       self.calendarQuery.year(event.year);
     }
+
+    var week = self.calendarQuery.week();
+    var year = self.calendarQuery.year();
     ajax.query("calendar-slots", { calendarId: self.calendarQuery.calendarId(),
-                                   week: self.calendarQuery.week,
-                                   year: self.calendarQuery.year })
+                                   week: week,
+                                   year: year })
       .success(function(data) {
-        var startOfWeek = moment().isoWeek(event.week).year(event.year).startOf('isoWeek').valueOf();
+        var startOfWeek = moment().isoWeek(week).year(year).startOf('isoWeek').valueOf();
         var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
           var day = moment(startOfWeek).isoWeekday(i);
           var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, 'day'); });
           return {
-            calendarId: event.id,
+            calendarId: self.calendarQuery.calendarId(),
             startOfDay: day.valueOf(),
             str: day.format("DD.MM."),  // TODO -> ko.bindingHandlers.calendarViewDateHeader?
             slots: _.map(slotsForDay,
@@ -42,7 +45,7 @@ LUPAPISTE.CalendarService = function() {
   };
 
   var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {
-    ajax.query("calendar", {calendarId: event.id})
+    ajax.query("calendar", {calendarId: event.id, userId: event.user})
       .success(function(data) {
         self.calendar(data.calendar);
         self.calendarQuery.calendarId(data.calendar.id);

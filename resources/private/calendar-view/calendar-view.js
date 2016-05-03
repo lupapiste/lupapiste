@@ -42,13 +42,13 @@ var calendarView = (function($) {
     self.clickHandler = function(clazz) {
       if (clazz === 'timeline-slot') {
         hub.send("calendarView::timelineSlotClicked",
-          { calendarId: this.weekday.calendarId,
-            weekday: this.weekday,
+          { calendarId: this.calendarWeekday.calendarId,
+            weekday: this.calendarWeekday,
             hour: this.slot.hour,
             minutes: this.slot.minutes });
       } else if (clazz === 'reservation-slot') {
         hub.send("calendarView::reservationSlotClicked",
-          { calendarId: this.weekday.calendarId,
+          { calendarId: this.calendarWeekday.calendarId,
             slot: this.slot });
       }
     }

@@ -22,7 +22,7 @@
           <td>
             <div style="position: relative;">
               <!-- ko foreach: $root.timelineTimes -->
-              <div class="timeline-slot" data-bind="click: $root.clickHandler.bind({ slot: $data, weekday: $parent }, 'timeline-slot')">
+              <div class="timeline-slot" data-bind="click: $root.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'timeline-slot')">
                 <!--ko text: viewText --><!--/ko-->
               </div>
               <!-- /ko -->

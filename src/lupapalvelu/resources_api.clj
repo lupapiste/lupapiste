@@ -9,11 +9,6 @@
             [clojure.string :as string])
   (:import (org.joda.time DateTime)))
 
-(defschema FrontendCalendar
-  {:id            sc/Int
-   :name          sc/Str
-   :organization  sc/Str})
-
 (defschema FrontendCalendarSlot
   {:id            sc/Int
    :startTime     sc/Int
@@ -68,41 +63,66 @@
             :services ["SCC123"]
             :capacity 1})) slots))
 
+(defn- get-calendar
+  [calendarId userId]
+  (let [response (api-query (str "/api/resources/" calendarId))]
+    (if (= 200 (:status response))
+      (let [calendar     (:body response)
+            external-ref (:externalRef calendar)]
+        (if (.endsWith external-ref userId)
+          {:id           (:id calendar)
+           :organization (:organizationCode calendar)}))
+      (do (error response)
+          (fail! :resources.backend-error)))))
+
 (defn- find-calendars-for-organizations
-  [orgIds]
+  [& orgIds]
   (let [response (api-query "/api/resources/by-organization" {:organizationCodes orgIds})]
     (if (= 200 (:status response))
-      (group-by :externalRef (:body response))
+      (let [calendars (:body response)]
+        (group-by :externalRef calendars))
       nil)))
 
 (defquery calendar
-  {:parameters [calendarId]
-   :input-validators [(partial action/non-blank-parameters [:calendarId])]
+  {:parameters [calendarId userId]
+   :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
    :user-roles #{:authorityAdmin}}
   [_]
-  (let [response (api-query (str "/api/resources/" calendarId))]
-    (if (= 200 (:status response))
-      (ok :calendar {})
-      (do (error response)
-          (fail :resources.backend-error)))))
+  (let [calendar (get-calendar calendarId userId)
+        user     (user/get-user-by-id userId)]
+    (ok :calendar (assoc calendar :name (format "%s %s" (:firstName user) (:lastName user))
+                                  :email (:email user)))))
 
-(defquery calendar-admin-list-users
+(defn- authority-admin-assoc-calendar-to-user [cals user]
+  (let [reference-code-for-user (str "user-" (:id user))
+        calendars-for-user      (get cals reference-code-for-user [])
+        calendar                (first calendars-for-user)]
+    (if calendar
+      (assoc user :calendar {:calendarId   (:id calendar)
+                             :organization (:organizationCode calendar)})
+      user)))
+
+(defquery calendars-for-authority-admin
   {:user-roles #{:authorityAdmin}}
   [{user :user}]
-  (let [orgIds    (map name (-> user :orgAuthz keys))
-        users     (user/authority-users-in-organizations orgIds)
-        calendars (find-calendars-for-organizations orgIds)]
+  (let [admin-in-organization-id (user/authority-admins-organization-id user)
+        users                    (user/authority-users-in-organizations [admin-in-organization-id])
+        calendars                (find-calendars-for-organizations admin-in-organization-id)]
     (if calendars
-      (let [users (map #(assoc % :calendar (get calendars (str "user-" (:id %)))) users)]
+      (let [users (map #(authority-admin-assoc-calendar-to-user calendars %) users)]
         (ok :users users))
       (fail :resources.backend-error))))
 
-(defcommand set-user-calendar-enabled
+(defcommand set-calendar-enabled-for-authority
   {:user-roles #{:authorityAdmin}}
-  [{{:keys [userId]} :data user :user}]
+  [{{:keys [userId enabled]} :data user :user}]
+  (info userId enabled)
+  (if (false? enabled)
+    (fail! :not-implemented))
   (let [admin-in-organization-id (user/authority-admins-organization-id user)
         target-user              (user/get-user-by-id userId)
         #_(validate user is in organisation)
+        #_(validate that the user has no prior calendar)
         url      "/api/resources/"
         response (api-post-command url {:name             (str (:firstName target-user) " " (:lastName target-user))
                                         :organizationCode admin-in-organization-id

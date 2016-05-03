@@ -4,7 +4,7 @@
 <section class="page" id="resources-admin" >
   <div class="container">
     <section>
-      <h2 data-bind="ltext: 'auth-admin.resources-admin'"></h2>
+      <h2 data-bind="ltext: 'auth-admin.resources-admin.calendars.title'"></h2>
 
       <table data-test-id="resources-admin-user-calendars-table">
         <thead>
@@ -20,10 +20,11 @@
           <td>
             <input type="checkbox" class="form-input" id="calendar-enabled"
                    data-bind="checked: calendarEnabled,
-                              enable: lupapisteApp.models.globalAuthModel.ok('create-calendar')" />
-            <!-- ko foreach: calendar -->
-              [<a data-bind="attr: {'href': '#!/calendar-admin/' + id }, ltext: 'view'"></a>]
-            <!-- /ko -->
+                              enable: lupapisteApp.models.globalAuthModel.ok('set-calendar-enabled-for-authority')" />
+            <span data-bind="if: calendarEnabled">
+              [<a data-bind="attr: {'href': '#!/calendar-admin/' + id + '/' + calendar.calendarId },
+                             visible: calendarEnabled, ltext: 'view'"></a>]
+            </span>
           </td>
         </tr>
         </tbody>
