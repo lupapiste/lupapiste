@@ -1529,6 +1529,15 @@ div.review-done {
 }
 
 .huoneistot-table {
+  padding-top: $marginS;
+
+  .form-label {
+    display: inline;
+    width: initial;
+    vertical-align: initial;
+    font-weight: bold;
+  }
+
   .checkbox-wrapper {
     border: none;
   }

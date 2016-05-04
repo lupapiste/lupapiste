@@ -7198,35 +7198,46 @@ div.review-done div {
   margin-bottom: 10px;
 }
 
-/* line 1532, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1531, ../../../private/common-html/sass/partials/_forms.scss */
+.huoneistot-table {
+  padding-top: 6px;
+}
+/* line 1534, ../../../private/common-html/sass/partials/_forms.scss */
+.huoneistot-table .form-label {
+  display: inline;
+  width: initial;
+  vertical-align: initial;
+  font-weight: bold;
+}
+/* line 1541, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .checkbox-wrapper {
   border: none;
 }
-/* line 1535, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1544, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .dropdown {
   height: 30px;
   min-width: 140px;
   lineheight: default;
 }
-/* line 1541, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1550, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table input[type=text] {
   height: 26px;
   min-width: 32px;
 }
-/* line 1547, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1556, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .err {
   color: red !important;
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 1px !important;
 }
-/* line 1553, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1562, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .warn {
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 0px !important;
 }
-/* line 1558, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1567, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .tip {
   border-color: #f6aa59;
   border-width: 1px;

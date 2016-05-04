@@ -33,12 +33,6 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
   self.showMessagePanel = ko.observable(false);
   self.errorMessage = [];
 
-  self.helpMessage = {
-    huoneistonumero: ko.observable(loc(self.i18npath.concat("huoneistonumero", "help").join("."))),
-    huoneistoala: ko.observable(loc(self.i18npath.concat("huoneistoala", "help").join("."))),
-    muutostapa: ko.observable(loc(self.i18npath.concat("muutostapa", "help").join(".")))
-  };
-
   self.selectOptionsTextFn = function(colName) {
     return function(item) {return loc(item.i18nkey || ["huoneistot", colName, item.name].join("."));};
   };

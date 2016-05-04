@@ -6,7 +6,11 @@
 
       <div class="form-table huoneistot-table" data-bind="attr: {id: 'huoneistot'}">
 
-        <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
+        <div>
+          <h3 class="form-label" data-bind="ltext: groupLabel"></h3>
+          <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'huoneistotTable.help' } }"></span>
+        </div>
+        
 
         <!-- ko if: groupHelp -->
         <span class="group-help-text" data-bind="ltext: groupHelp"></span>
@@ -69,7 +73,6 @@
                 <span class="form-entry form-input">
                   <div class="inline">
                     <message-panel params="class: 'errorPanel', show: info[2].showMessagePanel, message: info[2].errorMessage"></message-panel>
-                    <message-panel params="class: 'form-help', show: info[2].showMessagePanel, message: $component.helpMessage.huoneistonumero"></message-panel>
                     <span data-bind="css: schema.body[2].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.huoneistonumero.model,
@@ -155,7 +158,6 @@
                 <span class="form-entry form-input">
                   <div class="inline">
                     <message-panel params="class: 'errorPanel', show: info[6].showMessagePanel, message: info[6].errorMessage"></message-panel>
-                    <message-panel params="class: 'form-help', show: info[6].showMessagePanel, message: $component.helpMessage.huoneistoala"></message-panel>
                     <span data-bind="css: schema.body[6].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.huoneistoala.model,
@@ -243,7 +245,6 @@
                 <span class="form-entry form-input">
                   <div class="inline">
                     <message-panel params="class: 'errorPanel', show: info[12].showMessagePanel, message: info[12].errorMessage"></message-panel>
-                    <message-panel params="class: 'form-help', show: info[12].showMessagePanel, message: $component.helpMessage.muutostapa"></message-panel>
                     <select data-bind="options: schema.body[12].body,
                                        optionsText: $component.selectOptionsTextFn('muutostapa'),
                                        optionsValue: 'name',
