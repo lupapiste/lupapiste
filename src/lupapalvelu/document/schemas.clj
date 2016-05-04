@@ -672,37 +672,37 @@
                   :henkilo-body henkilo-maksaja)
                  {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
+(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.muutostapa"
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})
 
-(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.huoneistoTyyppi" :listen [:muutostapaChanged]
+(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :size :s :label false :i18nkey "huoneistot.huoneistoTyyppi"
                    :body [{:name "asuinhuoneisto"}
                           {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
-                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :t :label false :i18nkey "huoneistot.porras" :listen [:muutostapaChanged] :transform :upper-case}
-                   {:name "huoneistonumero" :type :string :subtype :number :min 0 :min-len 1 :max-len 3 :size :s :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
-                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :t :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged] :transform :lower-case}
-                   {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size :t :label false :i18nkey "huoneistot.huoneluku" :listen [:muutostapaChanged]}
-                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size :s :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
+                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :t :label false :i18nkey "huoneistot.porras" :transform :upper-case}
+                   {:name "huoneistonumero" :type :string :subtype :number :min 0 :min-len 1 :max-len 3 :size :s :required true :label false :i18nkey "huoneistot.huoneistonumero"}
+                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :t :label false :i18nkey "huoneistot.jakokirjain" :transform :lower-case}
+                   {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size :t :label false :i18nkey "huoneistot.huoneluku"}
+                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size :s :label false :i18nkey "huoneistot.keittionTyyppi"
                     :body [{:name "keittio"}
                            {:name "keittokomero"}
                            {:name "keittotila"}
                            {:name "tupakeittio"}
                            {:name "ei tiedossa" :i18nkey "huoneistot.keittionTyyppi.eiTiedossa"}]}
-                   {:name "huoneistoala" :type :string :subtype :decimal :size :s :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala" :listen [:muutostapaChanged]}
-                   {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin" :listen [:muutostapaChanged]}
-                   {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin" :listen [:muutostapaChanged]}
-                   {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin" :listen [:muutostapaChanged]}
-                   {:name "parvekeTaiTerassiKytkin" :type :checkbox :label false :i18nkey "huoneistot.parvekeTaiTerassiKytkin" :listen [:muutostapaChanged]}
-                   {:name "lamminvesiKytkin" :type :checkbox :label false :i18nkey "huoneistot.lamminvesiKytkin" :listen [:muutostapaChanged]}
+                   {:name "huoneistoala" :type :string :subtype :decimal :size :s :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala"}
+                   {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin"}
+                   {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin"}
+                   {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin"}
+                   {:name "parvekeTaiTerassiKytkin" :type :checkbox :label false :i18nkey "huoneistot.parvekeTaiTerassiKytkin"}
+                   {:name "lamminvesiKytkin" :type :checkbox :label false :i18nkey "huoneistot.lamminvesiKytkin"}
                    muutostapa])
 
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
                       :type :table
-                      :uicomponent :docgenTable
+                      :uicomponent :docgenHuoneistot
                       :validator :huoneistot
                       :group-help "huoneistot.groupHelpText"
                       :repeating true

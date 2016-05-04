@@ -10,6 +10,7 @@ jQuery(document).ready(function() {
     {name: "docgen-group", synchronous: true},
     {name: "docgen-repeating-group", synchronous: true},
     {name: "docgen-table", synchronous: true},
+    {name: "docgen-huoneistot-table", synchronous: true},
     {name: "docgen-input", synchronous: true},
     {name: "docgen-string", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},
     {name: "docgen-checkbox", model: "docgen-input-model", template: "docgen-input-template", synchronous: true},

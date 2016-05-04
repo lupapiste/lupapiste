@@ -76,12 +76,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           $(element).find("[data-codes*='" + event.code + "']").removeClass("hidden");
         }));
       }
-      if (listenEvent === "muutostapaChanged") {
-        var prefix = _.dropRight(path.split("."));
-        self.subscriptions.push(hub.subscribe({eventType: listenEvent, path: prefix.join(".")}, function(event) {
-          $(element).prop("disabled", _.isEmpty(event.value));
-        }));
-      }
     });
   }
 
@@ -836,6 +830,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return buildGroupComponent("docgen-table", subSchema, model, path);
   }
 
+  function buildDocgenHuoneistotTable (subSchema, model, path) {
+    return buildGroupComponent("docgen-huoneistot-table", subSchema, model, path);
+  }
+
   function buildConstructionWasteReport (subSchema, model, path) {
     return buildGroupComponent("construction-waste-report", subSchema, model, path);
   }
@@ -1321,6 +1319,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     docgenGroup: buildDocgenGroup,
     docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
+    docgenHuoneistot: buildDocgenHuoneistotTable,
     constructionWasteReport: buildConstructionWasteReport,
     string: buildString,
     hetu: buildString,
@@ -1722,10 +1721,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     },
     hetuChanged: function(event, value) {
       hub.send(event, {value: value});
-    },
-    muutostapaChanged: function(event, value, path) {
-      var prefix = _.dropRight(path.split("."));
-      hub.send(event, {path: prefix.join("."), value: value});
     },
     emitUnknown: function(event) {
       error("Unknown emitter event:", event);
