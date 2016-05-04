@@ -1075,21 +1075,20 @@ $max-columns: 12;
     bottom: 7px;
     top: 7px;
   }
+  input[type=checkbox], input[type=radio] {
+    display: inherit;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    font-size: 0;
+  }
 }
 .checkbox-wrapper--disabled {
   background-color: $input-disabled-background-color;
 }
 
 @include label-checkbox (checkbox-label) {}
-
-input[type=checkbox], input[type=radio] {
-  display: inherit;
-  opacity: 0;
-  width: 0;
-  height: 0;
-  margin: 0;
-  font-size: 0;
-}
 
 .form-grid {
   // overflow-y: hidden;
