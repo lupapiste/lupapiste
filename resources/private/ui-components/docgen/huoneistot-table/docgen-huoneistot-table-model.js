@@ -51,10 +51,6 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
     return disabled;
   });
 
-  self.readonly = ko.observable(false);
-  self.showMessagePanel = ko.observable(false);
-  self.errorMessage = [];
-
   self.selectOptionsTextFn = function(colName) {
     return function(item) {return loc(item.i18nkey || ["huoneistot", colName, item.name].join("."));};
   };

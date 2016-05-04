@@ -40,7 +40,7 @@
                                        value: model.huoneistoTyyppi.model,
                                        valueAllowUnset: true,
                                        optionsCaption: loc('selectone'),
-                                       disable: $component.disabled() || $component.readonly() || !model.muutostapa.model(),
+                                       disable: $component.disabled() || !model.muutostapa.model(),
                                        attr: {'data-test-id': path.join('.')}"
                             class="dropdown form-input short">
                     </select>
@@ -53,16 +53,12 @@
                 <span class="form-entry form-input">
                   <div class="inline">
                     <message-panel params="class: 'errorPanel', show: info[1].showMessagePanel, message: info[1].errorMessage"></message-panel>
-                    <span data-bind="css: schema.body[1].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.porras.model,
                                         disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[1].css(),
                                         event: info[1].events,
-                                        attr: { 'readonly': $component.readonly(),
-                                                'maxlength': schema.body[1]['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'max': schema.body[1].max,
-                                                'min': schema.body[1].min,
+                                        attr: { 'maxlength': schema.body[1]['max-len'] || LUPAPISTE.config.inputMaxLength,
                                                 'data-test-id': path.join('.') + '.porras'}"
                              class="form-input tiny"/>
                     </span>
@@ -75,16 +71,12 @@
                 <span class="form-entry form-input">
                   <div class="inline">
                     <message-panel params="class: 'errorPanel', show: info[2].showMessagePanel, message: info[2].errorMessage"></message-panel>
-                    <span data-bind="css: schema.body[2].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.huoneistonumero.model,
                                         disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[2].css(),
                                         event: info[2].events,
-                                        attr: { 'readonly': $component.readonly,
-                                                'maxlength': schema.body[2]['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'max': schema.body[2].max,
-                                                'min': schema.body[2].min,
+                                        attr: { 'maxlength': schema.body[2]['max-len'] || LUPAPISTE.config.inputMaxLength,
                                                 'data-test-id': path.join('.') + '.huoneistonumero'}"
                              class="form-input tiny"/>
                     </span>
@@ -97,16 +89,12 @@
                 <span class="form-entry form-input">
                   <div class="inline">
                     <message-panel params="class: 'errorPanel', show: info[3].showMessagePanel, message: info[3].errorMessage"></message-panel>
-                    <span data-bind="css: schema.body[3].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.jakokirjain.model,
                                         disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[3].css(),
                                         event: info[3].events,
-                                        attr: { 'readonly': $component.readonly,
-                                                'maxlength': schema.body[3]['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'max': schema.body[3].max,
-                                                'min': schema.body[3].min,
+                                        attr: { 'maxlength': schema.body[3]['max-len'] || LUPAPISTE.config.inputMaxLength,
                                                 'data-test-id': path.join('.') + '.jakokirjain' }"
                              class="form-input tiny"/>
                     </span>
@@ -119,14 +107,12 @@
                 <span class="form-entry form-input">
                   <div class="inline">
                     <message-panel params="class: 'errorPanel', show: info[4].showMessagePanel, message: info[4].errorMessage"></message-panel>
-                    <span data-bind="css: schema.body[4].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.huoneluku.model,
                                         disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[4].css(),
                                         event: info[4].events,
-                                        attr: { 'readonly': $component.readonly,
-                                                'maxlength': schema.body[4]['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                        attr: { 'maxlength': schema.body[4]['max-len'] || LUPAPISTE.config.inputMaxLength,
                                                 'max': schema.body[4].max,
                                                 'min': schema.body[4].min,
                                                 'data-test-id': path.join('.') + '.huoneluku' }"
@@ -147,7 +133,7 @@
                                        value: model.keittionTyyppi.model,
                                        valueAllowUnset: true,
                                        optionsCaption: loc('selectone'),
-                                       disable: $component.disabled() || $component.readonly() || !model.muutostapa.model(),
+                                       disable: $component.disabled() || !model.muutostapa.model(),
                                        css: info[5].css(),
                                        event: info[5].events,
                                        attr: {'data-test-id': path.join('.') + '.keittio'}"
@@ -162,14 +148,12 @@
                 <span class="form-entry form-input">
                   <div class="inline">
                     <message-panel params="class: 'errorPanel', show: info[6].showMessagePanel, message: info[6].errorMessage"></message-panel>
-                    <span data-bind="css: schema.body[6].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.huoneistoala.model,
                                         disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[6].css(),
                                         event: info[6].events,
-                                        attr: { 'readonly': $component.readonly,
-                                                'maxlength': schema.body[6]['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                        attr: { 'maxlength': schema.body[6]['max-len'] || LUPAPISTE.config.inputMaxLength,
                                                 'max': schema.body[6].max,
                                                 'min': schema.body[6].min,
                                                 'data-test-id': path.join('.') + '.huoneistoala' }"
@@ -255,7 +239,7 @@
                                        value: model.muutostapa.model,
                                        valueAllowUnset: true,
                                        optionsCaption: loc('selectone'),
-                                       disable: $component.disabled() || $component.readonly(),
+                                       disable: $component.disabled(),
                                        css: info[12].css(),
                                        event: info[12].events,
                                        attr: {'data-test-id': path.join('.') + '.muutostapa'}"
