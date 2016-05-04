@@ -204,6 +204,7 @@
 
 (def- applicant-doc-schema-name-hakija     "hakija")
 (def- applicant-doc-schema-name-R          "hakija-r")
+(def- applicant-doc-schema-name-R-TJ       "hakija-tj")
 (def- applicant-doc-schema-name-YA         "hakija-ya")
 (def- applicant-doc-schema-name-ilmoittaja "ilmoittaja")
 (def- applicant-doc-schema-name-hakija-KT  "hakija-kt")
@@ -817,7 +818,7 @@
                                  :asianhallinta false}
    :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                  :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
+                                 :applicant-doc-schema applicant-doc-schema-name-R-TJ
                                  :subtypes [(keyword "") :tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
                                  :state-graph-resolver tyonjohtaja-state-machine-resolver
                                  :required ["hankkeen-kuvaus-minimum"]

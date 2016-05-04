@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.schemas
   (:require [clojure.set :as set]
+            [clojure.walk :as walk]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
             [lupapiste-commons.usage-types :as usages]))
@@ -1506,7 +1507,6 @@
            }
        :body party}
 
-
    {:info {:name "hakija-r"
            :i18name "osapuoli"
            :order 3
@@ -1522,6 +1522,22 @@
            :accordion-fields hakija-accordion-paths
            }
     :body party}
+
+   {:info {:name "hakija-tj"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :deny-removing-last-document true
+           :approvable true
+           :type :party
+           :subtype :hakija
+           :group-help "hakija.group.help"
+           :section-help "party.section.help"
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakija-accordion-paths
+           }
+    :body (walk/postwalk (fn [x] (if (map? x) (dissoc x :required) x)) party)}
 
    {:info {:name "hakija-kt"
            :i18name "osapuoli"

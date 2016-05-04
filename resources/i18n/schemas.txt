@@ -4255,6 +4255,8 @@
 "schemas.hakija" "sv" "Sökande"
 "schemas.hakija-r" "fi" "Hakija (hankkeeseen ryhtyvä)"
 "schemas.hakija-r" "sv" "Sökande (åtar sig projektet)"
+"schemas.hakija-tj" "fi" "Hakija (hankkeeseen ryhtyvä)"
+"schemas.hakija-tj" "sv" "Sökande (åtar sig projektet)"
 "schemas.hakija-ya" "fi" "Hakija"
 "schemas.hakija-ya" "sv" "Sökande"
 "schemas.ilmoittaja" "fi" "Ilmoittaja"
