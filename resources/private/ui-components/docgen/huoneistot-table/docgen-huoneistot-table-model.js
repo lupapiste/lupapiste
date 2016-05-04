@@ -35,7 +35,7 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
     }
   }
 
-  self.disabled = ko.pureComputed( function() {
+  self.disabled = self.disposedPureComputed( function() {
     var disabled = params.isDisabled
           || !(self.service.isWhitelisted( self.schema ))
           || !self.authModel.ok(self.service.getUpdateCommand(self.documentId))
@@ -62,26 +62,25 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
   }
 
   function save(item) {
-    console.log(item);
     if (item.model() != null) {
       self.service.updateDoc(self.documentId, [[item.path, item.model()]], indicator);
     }
   }
 
   function cellInfo(doc, item) {
-    var result = ko.pureComputed(function() {
+    var result = self.disposedPureComputed(function() {
       var validation = _.find(doc.validationResults(), function(validation) {
         return _.isEqual(validation.path, item.path);
       });
       return validation && validation.result;
     });
 
-    var errorMessage = ko.pureComputed(function() {
+    var errorMessage = self.disposedPureComputed(function() {
       var errType = result() && result()[0];
       return errType && errType !== "tip" && loc(["error", result()[1]]);
     });
 
-    var signalClasses = ko.pureComputed(function() {
+    var signalClasses = self.disposedPureComputed(function() {
       var classes = [];
       var res = result() ? result()[0] : undefined;
       if (res) {
@@ -105,7 +104,7 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
     };
   }
 
-  self.rows = ko.pureComputed(function() {
+  self.rows = self.disposedPureComputed(function() {
     var doc = self.service.findDocumentById(self.documentId);
     return _.map(self.groups(), function(group) {
       return _.extend(group, {
