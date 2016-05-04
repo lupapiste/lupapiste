@@ -135,7 +135,7 @@
 
 (def mainostus-tai-viitoitus-tapahtuma-valinta
   (body
-    [{:name "_selected" :type :radioGroup
+    [{:name "_selected" :type :radioGroup :default "mainostus-tapahtuma-valinta"
       :body [{:name "mainostus-tapahtuma-valinta"} {:name "viitoitus-tapahtuma-valinta"}]}
      {:name "mainostus-tapahtuma-valinta" :type :group
       :body mainostus-tapahtuma}

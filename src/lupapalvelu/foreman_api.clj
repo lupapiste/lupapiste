@@ -38,7 +38,7 @@
         task                 (util/find-by-id taskId (:tasks application))
 
         foreman-user   (when (v/valid-email? foremanEmail) (user/get-or-create-user-by-email foremanEmail user))
-        foreman-invite (when foreman-user
+        foreman-invite (when (and foreman-user (not (auth/has-auth? foreman-app (:id foreman-user))))
                          (auth/create-invite-auth user foreman-user (:id foreman-app) "foreman" created))
         invite-to-original? (and
                               foreman-user

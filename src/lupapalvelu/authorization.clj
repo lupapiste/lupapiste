@@ -1,5 +1,9 @@
 (ns lupapalvelu.authorization
-  (:require [lupapalvelu.user :as usr]))
+  (:require [lupapalvelu.user :as usr]
+            [lupapalvelu.application-schema :as aps]
+            [schema.core :refer [defschema] :as sc]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]))
 
 ;;
 ;; Roles
@@ -22,6 +26,41 @@
                          :export default-authz-reader-roles
                          :command default-authz-writer-roles
                          :raw default-authz-writer-roles})
+
+;;
+;; Schema
+;;
+
+(defschema Invite
+  {(sc/optional-key :role)           (apply sc/enum all-authz-roles)
+   (sc/optional-key :path)           sc/Str
+   :email                            ssc/Email
+   :application                      aps/ApplicationId
+   :created                          ssc/Timestamp
+   :inviter                          usr/SummaryUser
+   (sc/optional-key :documentName)   sc/Str
+   (sc/optional-key :documentId)     ssc/ObjectIdStr
+   :user                             usr/SummaryUser
+   (sc/optional-key :title)          sc/Str
+   (sc/optional-key :text)           sc/Str})
+
+(defschema CompanyInvite
+  {:user {:id ssc/ObjectIdStr}})
+
+(defschema Auth
+  {:id                               (sc/if ss/in-lower-case? ssc/Username ssc/ObjectIdStr)
+   :username                         ssc/Username
+   :firstName                        sc/Str
+   :lastName                         sc/Str
+   :role                             (apply sc/enum all-authz-roles)
+   (sc/optional-key :type)           (sc/enum :company :owner)
+   (sc/optional-key :name)           sc/Str
+   (sc/optional-key :y)              ssc/FinnishY
+   (sc/optional-key :unsubscribed)   sc/Bool
+   (sc/optional-key :statementId)    ssc/ObjectIdStr
+   (sc/optional-key :invite)         (sc/if :email Invite CompanyInvite)
+   (sc/optional-key :inviteAccepted) ssc/Timestamp
+   (sc/optional-key :inviter)        (sc/if map? usr/SummaryUser ssc/ObjectIdStr)})
 
 ;;
 ;; Auth utils
@@ -54,16 +93,16 @@
 
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
   {:pre [(seq inviter) (seq invited) application-id role timestamp]}
-  (let [invite {:application  application-id
-                :text         text
-                :path         path
-                :documentName document-name
-                :documentId   document-id
-                :created      timestamp
-                :email        (:email invited)
-                :role         role
-                :user         (usr/summary invited)
-                :inviter      (usr/summary inviter)}]
+  (let [invite (cond-> {:application  application-id
+                        :created      timestamp
+                        :email        (:email invited)
+                        :role         role
+                        :user         (usr/summary invited)
+                        :inviter      (usr/summary inviter)}
+                 (not (nil? path))               (assoc :path path)
+                 (not (ss/blank? text))          (assoc :text text)
+                 (not (ss/blank? document-name)) (assoc :documentName document-name)
+                 (not (ss/blank? document-id))   (assoc :documentId document-id))]
     (assoc (usr/user-in-role invited :reader) :invite invite)))
 
 ;;

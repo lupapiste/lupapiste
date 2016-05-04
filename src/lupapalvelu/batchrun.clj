@@ -289,24 +289,34 @@
     (doall
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
-          (try
-            (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+          (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+            (try
               (logging/with-logging-context {:applicationId id}
                 (if-not (s/blank? url)
-
                   (let [command (assoc (application->command app) :user eraajo-user :created (now))
                         result (verdict/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
-                      (notifications/notify! :application-verdict command)))
+                      (notifications/notify! :application-verdict command))
+                    (when (fail? result)
+                      (logging/log-event :error {:run-by "Automatic verdicts checking"
+                                                 :event "Failed to check verdict"
+                                                 :failure result
+                                                 :organization {:id organization :permit-type permitType}
+                                                 }))
+                    )
 
                   (logging/log-event :info {:run-by "Automatic verdicts checking"
                                             :event "No Krysp WFS url defined for organization"
-                                            :organization {:id organization :permit-type permitType}}))))
-            (catch Throwable t
-              (errorf "Unable to get verdict for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
-        apps))))
+                                            :organization {:id organization :permit-type permitType}})))
+              (catch Throwable t
+                (logging/log-event :error {:run-by "Automatic verdicts checking"
+                                           :event "Unable to get verdict from backend"
+                                           :exception-message (.getMessage t)
+                                           :application-id id
+                                           :organization {:id organization :permit-type permitType}}))
+              ))) apps))))
 
 (defn check-for-verdicts [& args]
   (mongo/connect!)
@@ -338,9 +348,14 @@
             result (try
                      (ah-verdict/process-ah-verdict zip-path ftp-user eraajo-user)
                      (catch Throwable e
-                       (error e "Error processing zip-file in asianhallinta verdict batchrun")
+                       (logging/log-event :error {:run-by "Automatic ah-verdicts checking"
+                                                  :event "Unable to process ah-verdict zip file"
+                                                  :exception-message (.getMessage e)})
+                       ;; (error e "Error processing zip-file in asianhallinta verdict batchrun")
                        (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
+        (logging/log-event :info {:run-by "Automatic ah-verdicts checking"
+                                  :event (if (ok? result)  "Succesfully processed ah-verdict" "Failed to process ah-verdict") :zip-path zip-path})
         (when-not (fs/rename zip target)
           (errorf "Failed to rename %s to %s" zip-path target))))))
 

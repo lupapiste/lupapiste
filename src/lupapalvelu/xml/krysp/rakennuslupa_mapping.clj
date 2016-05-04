@@ -192,9 +192,13 @@
              #(update-in % [:child] concat [{:tag :verottajanTvLlKytkin}])))
 
 (def- katselmustieto_220
-  (update-in katselmustieto_216 [:child] mapping-common/update-child-element
-    [:Katselmus :katselmuspoytakirja]
-    {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]}))
+  (-> katselmustieto_216
+    (update-in [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuksenRakennustieto :KatselmuksenRakennus]
+      {:tag :KatselmuksenRakennus :child rakennustunnus_220})
+    (update-in [:child] mapping-common/update-child-element
+      [:Katselmus :katselmuspoytakirja]
+      {:tag :liitetieto :child [{:tag :Liite :child mapping-common/liite-children_216}]})))
 
 
 (def rakennuslupa_to_krysp_212
@@ -532,20 +536,24 @@
 
 (def map-enums-213-218 map-suunnittelija-kuntaroolikoodi-pre220)
 
+(defn- common-map-enums [canonical krysp-version]
+  (-> canonical
+      (update-in [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] mapping-common/lausuntotieto-map-enum :R krysp-version)))
+
 (defn- map-enums
   "Map enumerations in canonical into values supported by given KRYSP version"
   [canonical krysp-version]
   {:pre [krysp-version]}
-  (case (name krysp-version)
-    "2.1.2" (map-enums-212 canonical)
-    "2.1.3" (map-enums-213-218 canonical)
-    "2.1.4" (map-enums-213-218 canonical)
-    "2.1.5" (map-enums-213-218 canonical)
-    "2.1.6" (map-enums-213-218 canonical)
-    "2.1.7" (map-enums-213-218 canonical)
-    "2.1.8" (map-enums-213-218 canonical)
-    canonical ; default: no conversions
-    ))
+  (-> (case (name krysp-version)
+        "2.1.2" (map-enums-212 canonical)
+        "2.1.3" (map-enums-213-218 canonical)
+        "2.1.4" (map-enums-213-218 canonical)
+        "2.1.5" (map-enums-213-218 canonical)
+        "2.1.6" (map-enums-213-218 canonical)
+        "2.1.7" (map-enums-213-218 canonical)
+        "2.1.8" (map-enums-213-218 canonical)
+        canonical)
+      (common-map-enums krysp-version)))
 
 (defn- rakennuslupa-element-to-xml [canonical krysp-version]
   (element-to-xml (map-enums canonical krysp-version) (get-rakennuslupa-mapping krysp-version)))

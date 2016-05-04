@@ -6,6 +6,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.authorization :as auth]
             [sade.strings :as ss]
             [sade.schemas :as ssc])
   (:import [schema.utils.ErrorContainer]))
@@ -43,11 +44,27 @@
 (mongocheck :submitted-applications (partial validate-documents ["illegal-hetu"]) :documents :state :auth)
 
 ;; Tasks are valid
-
 (mongocheck :applications (partial validate-tasks []) :tasks :state :auth)
 
 ;; All applications have state
 (mongocheck :applications validate-state :state)
+
+(def coerce-auth (ssc/json-coercer auth/Auth))
+
+(defn validate-auth-against-schema [{id :id :as auth}]
+  (let [coercion-result (coerce-auth auth)]
+    (when (instance? schema.utils.ErrorContainer coercion-result)
+      {:auth-id id
+       :error "Not valid auth"
+       :coercion-result coercion-result})))
+
+(defn validate-auth-array [{auths :auth}]
+  (->> (map validate-auth-against-schema auths)
+       (remove nil?)
+       seq))
+
+;; All auths are valid
+(mongocheck :applications validate-auth-array :auth)
 
 ;; Latest attachment version and latestVersion match
 (defn validate-latest-version [{id :id versions :versions latestVersion :latestVersion}]

@@ -33,7 +33,7 @@
                            :id "516560d6c2e6f603beb85147"}
                   :requested 1379423095616
                   :state "given"
-                  :status "puoltaa"
+                  :status "puollettu"
                   :text "Lausunto liitteen\u00e4."}
                  {:id "52385377da063788effc1e94"
                   :person {:text "Paloviranomainen"
@@ -42,7 +42,7 @@
                            :id "516560d6c2e6f603beb85147"}
                   :requested 1379423095616
                   :state "draft"
-                  :status "puoltaa"
+                  :status "puollettu"
                   :text "Lausunto tulossa..."}])
 
 (def yrityshakija {:id "52f3676442067dc3ba4f1ba8",

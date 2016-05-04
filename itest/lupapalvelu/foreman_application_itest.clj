@@ -26,11 +26,8 @@
               link-to-application          (first (application :appsLinkingToUs))
               foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
-          (fact "Initial permit subtype is 'tyonjohtaja-hakemus'"
-                (:permitSubtype foreman-application) => "tyonjohtaja-hakemus")
-
-          (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
-                (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
+          (fact "Initial permit subtype is blank"
+            (:permitSubtype foreman-application) => ss/blank?)
 
           (fact "Foreman application contains link to application"
                 (:id foreman-link-permit-data) => application-id)
@@ -71,6 +68,12 @@
                   (:foremanRole foreman-application) => ss/blank?
                   (:foreman application-after-update) => "bar foo"
                   (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
+
+          (fact "Can't submit foreman app because subtype is not selected"
+            (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.type-not-selected))
+
+          (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
+                (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
 
           (fact "Can't submit foreman app before original link-permit-app is submitted"
                 (:submittable (query-application apikey foreman-application-id)) => false)
@@ -334,6 +337,20 @@
                                  "heppu@example.com"
                                  "foo@example.com"
                                  "Kaino Solita <kaino@solita.fi>"])))))
+
+    (fact "Create foreman application with the applicant as foreman"
+          (let [{application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+                {foreman-app-id :id} (command apikey :create-foreman-application :id application-id
+                                              :taskId "" :foremanRole "ei tiedossa" :foremanEmail "pena@example.com") => truthy
+                {auth-array :auth} (query-application pena foreman-app-id) => truthy
+                {orig-auth :auth}  (query-application pena application-id)]
+            (fact "Pena is the sole auth and owner of the foreman application"
+                  (count auth-array) => 1
+                  (:username (some #(when (= (:role %) "owner") %) auth-array)) => "pena")
+            (fact "Pena is the sole auth and owner of the original application"
+                  (count orig-auth) => 1
+                  (:username (some #(when (= (:role %) "owner") %) orig-auth)) => "pena")))
+
 
     (fact "Contact person is added to new foreman app, when its auth is added to original application"
       (let [_ (command apikey :invite-with-role :id application-id :email "contact@example.com" :text "" :documentName ""

@@ -124,3 +124,7 @@ Finalize review
   Confirm  dynamic-ok-confirm-dialog
   Review frozen
   Return from review
+
+Has review attachment
+  [Arguments]  ${row-selector}  ${regex}
+  Javascript?  $("${row-selector} td.attachment-file-info a").text().match( ${regex})

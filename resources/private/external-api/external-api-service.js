@@ -42,7 +42,7 @@ LUPAPISTE.ExternalApiService = function() {
 
   /*
    * LupapisteApi.showPermitsOnMap
-   * Description: Show given permits on map (button in application list view).
+   * Description: Show given permits on backend map (button in application list view).
    * @param {Array<PermitFilter>} data Array of PermitFilter objects
    */
   hub.subscribe("external-api::filtered-permits", function(data) {
@@ -53,7 +53,7 @@ LUPAPISTE.ExternalApiService = function() {
 
   /*
    * LupapisteApi.integrationSent
-   * Description: Function is called when integration (KRYSP) was successully sent.
+   * Description: Permit is emited when integration (KRYSP) message was created successfully.
    * @param {PermitFilter}
    */
   hub.subscribe("external-api::integration-sent", function(data) {

@@ -11,7 +11,7 @@
               <h3 data-bind="text: headerText"></h3>
               <span data-bind="ltext: 'inviter'"></span>
               <span data-bind="fullName: inviter"></span>
-              <p data-bind="visible: text, text: text, attr: {'data-test-id': 'invitation-text-' + $index()}"></p>
+              <p data-bind="visible: $data.text, text: $data.text, attr: {'data-test-id': 'invitation-text-' + $index()}"></p>
             </div>
             <div>
               <span data-bind="dateString: created"></span>

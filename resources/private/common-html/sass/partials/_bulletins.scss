@@ -1,3 +1,5 @@
+$bulletin-breakpoint: 1166px;
+
 #bulletins {
   font-family: $font-body;
   font-weight: 400;
@@ -279,4 +281,19 @@
 
 .bulletin_text {
   white-space: pre-wrap;
+}
+
+#bulletins .application_summary {
+  .application_summary_info {
+    width: 80%;
+  }
+
+  .bulletin-preamble {
+    @include preamble-common;
+    @include preamble-breakpoint( $bulletin-breakpoint ) {
+      .application_summary_info {
+        width: initial;
+      }
+    }
+  }
 }

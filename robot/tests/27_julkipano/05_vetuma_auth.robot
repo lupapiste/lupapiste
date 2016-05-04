@@ -10,6 +10,7 @@ Resource        ../common_keywords/vetuma_helpers.robot
 *** Test Cases ***
 
 User can authenticate via Vetuma
+  [Tags]  integration
   Create bulletins  1
   Go to bulletins page
   Open bulletin by index  1
@@ -25,11 +26,13 @@ User can authenticate via Vetuma
   Element should be visible by test id  bulletin-comment-box-form
 
 User can logout after authentication
+  [Tags]  integration
   Element should be visible  //div[@data-test-id='user-nav-menu']
   Click by test id  vetuma-logout
   Wait Until  Element should not be visible  //div[@data-test-id='user-nav-menu']
 
 User is shown error when authentication via Vetuma canceled
+  [Tags]  integration
   Go to bulletins page
   Open bulletin by index  1
 

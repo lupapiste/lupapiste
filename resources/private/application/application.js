@@ -214,27 +214,46 @@
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
 
-        docgen.displayDocuments("applicationDocgen",
-                                app,
-                                applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
-                                authorizationModel,
-                                {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+        // Parties are always visible
         docgen.displayDocuments("partiesDocgen",
-                                app,
-                                sortedPartyDocs,
-                                authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
-        docgen.displayDocuments("applicationAndPartiesDocgen",
-                                app,
-                                applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
-                                authorizationModel,
-                                {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
-        docgen.displayDocuments("constructionTimeDocgen",
-                                app,
-                                constructionTimeDocs,
-                                authorizationModel,
-                                {dataTestSpecifiers: devMode,
-                                 accordionCollapsed: isAuthority,
-                                 updateCommand: "update-construction-time-doc"});
+            app,
+            sortedPartyDocs,
+            authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+
+        // info tab is visible in pre-verdict and verdict given states
+        if (!applicationModel.inPostVerdictState()) {
+          docgen.displayDocuments("applicationDocgen",
+              app,
+              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
+                  authorizationModel,
+                  {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+        } else {
+          docgen.clear("applicationDocgen");
+        }
+
+        // summary tab is visible in post-verdict and canceled states
+        if (applicationModel.summaryAvailable()) {
+          docgen.displayDocuments("applicationAndPartiesDocgen",
+              app,
+              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
+                  authorizationModel,
+                  {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
+        } else {
+          docgen.clear("applicationAndPartiesDocgen");
+        }
+
+        // show or clear construction time documents
+        if (hasConstructionTimeDocs()) {
+          docgen.displayDocuments("constructionTimeDocgen",
+              app,
+              constructionTimeDocs,
+              authorizationModel,
+              {dataTestSpecifiers: devMode,
+            accordionCollapsed: isAuthority,
+            updateCommand: "update-construction-time-doc"});
+        } else {
+          docgen.clear("constructionTimeDocgen");
+        }
       }
 
       // Options
