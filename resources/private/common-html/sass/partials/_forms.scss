@@ -44,10 +44,12 @@ legend {
     color: red;
     border-color: red;
     border-width: 3px;
+    border-radius: 2px;
   }
   &.warn {
     border-color: red;
     border-width: 3px;
+    border-radius: 2px;
   }
   &.tip {
     border-color: lighten($lp-orange, 10%);
@@ -1065,6 +1067,30 @@ $max-columns: 12;
   }
 }
 
+.checkbox-wrapper {
+  border: 1px solid $checkbox-border-color;
+  padding: {
+    left: 7px;
+    right: 0;
+    bottom: 7px;
+    top: 7px;
+  }
+}
+.checkbox-wrapper--disabled {
+  background-color: $input-disabled-background-color;
+}
+
+@include label-checkbox (checkbox-label) {}
+
+input[type=checkbox], input[type=radio] {
+  display: inherit;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  font-size: 0;
+}
+
 .form-grid {
   // overflow-y: hidden;
   width: 100%;
@@ -1085,19 +1111,6 @@ $max-columns: 12;
   p {
     padding: 0 !important;
     margin: 0 !important;
-  }
-
-  .checkbox-wrapper {
-    border: 1px solid $checkbox-border-color;
-    padding: {
-      left: 7px;
-      right: 0;
-      bottom: 7px;
-      top: 7px;
-    }
-  }
-  .checkbox-wrapper--disabled {
-    background-color: $input-disabled-background-color;
   }
 
   .radio-wrapper {
@@ -1148,17 +1161,6 @@ $max-columns: 12;
     height: $grid-textarea-height;
     padding: $marginS $marginM;
   }
-
-  input[type=checkbox], input[type=radio] {
-    display: inherit;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    font-size: 0;
-  }
-
-  @include label-checkbox (checkbox-label) {}
 
   .radio-label:before {
     @include lupicon-font;
@@ -1523,5 +1525,38 @@ div.review-done {
   div {
     font-size: 16px;
     margin-bottom: 10px;
+  }
+}
+
+.huoneistot-table {
+  .checkbox-wrapper {
+    border: none;
+  }
+  .dropdown {
+    height: 30px;
+    min-width: 140px;
+    lineheight: default;
+  }
+
+  input[type=text] {
+    height: 26px;
+    min-width: 32px;
+  }
+
+
+  .err {
+    color: red !important;
+    border-color: red !important;
+    border-width: 1px !important;
+    border-radius: 1px !important;
+  }
+  .warn {
+    border-color: red !important;
+    border-width: 1px !important;
+    border-radius: 0px !important;
+  }
+  .tip {
+    border-color: lighten($lp-orange, 10%);
+    border-width: 1px;
   }
 }

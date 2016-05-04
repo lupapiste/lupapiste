@@ -836,6 +836,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return buildGroupComponent("docgen-table", subSchema, model, path);
   }
 
+  function buildDocgenHuoneistotTable (subSchema, model, path) {
+    return buildGroupComponent("docgen-huoneistot-table", subSchema, model, path);
+  }
+
   function buildConstructionWasteReport (subSchema, model, path) {
     return buildGroupComponent("construction-waste-report", subSchema, model, path);
   }
@@ -1321,6 +1325,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     docgenGroup: buildDocgenGroup,
     docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
+    docgenHuoneistot: buildDocgenHuoneistotTable,
     constructionWasteReport: buildConstructionWasteReport,
     string: buildString,
     hetu: buildString,
