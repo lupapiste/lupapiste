@@ -3392,6 +3392,8 @@
 "unit.m3" "sv" "m³"
 "unit.mm" "fi" "mm"
 "unit.mm" "sv" "mm"
+"unit.db" "fi" "db(A)"
+"unit.db" "sv" "db(A)"
 "unknown-document" "fi" "Tuntematon dokumentti"
 "unknown-document" "sv" "Okänd dokument"
 "unsubscribeNotifications" "fi" "Peruuta sähköposti-ilmoitukset"
