@@ -2089,7 +2089,7 @@
     statement))
 
 (defmigration map-statement-statuses-into-new-krysp
-  {:apply-when (pos? (mongo/count :applications {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle" nil]}}))}
+  {:apply-when (pos? (mongo/count :applications {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle"]}}))}
   (update-applications-array :statements
                              update-statement-status
                              {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle"]}}))
