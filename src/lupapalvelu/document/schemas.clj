@@ -245,7 +245,7 @@
                             :type :group
                             :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                   {:name "hetu" :type :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto] :emit [:hetuChanged]}
+                                   {:name "hetu" :type :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto] :emit [:hetuChanged] :transform :upper-case}
                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body
@@ -681,9 +681,9 @@
                    :body [{:name "asuinhuoneisto"}
                           {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
-                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :t :label false :i18nkey "huoneistot.porras" :listen [:muutostapaChanged]}
+                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :t :label false :i18nkey "huoneistot.porras" :listen [:muutostapaChanged] :transform :upper-case}
                    {:name "huoneistonumero" :type :string :subtype :number :min 0 :min-len 1 :max-len 3 :size :s :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
-                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :t :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged]}
+                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :t :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged] :transform :lower-case}
                    {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size :t :label false :i18nkey "huoneistot.huoneluku" :listen [:muutostapaChanged]}
                    {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :size :s :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
                     :body [{:name "keittio"}

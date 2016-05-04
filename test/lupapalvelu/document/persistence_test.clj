@@ -124,3 +124,8 @@
     (validate-readonly-removes! {:schema-info {:name "rakennusjateselvitys"}}
       [[:rakennusJaPurkujate :suunniteltuJate :0]])
     => (throws Exception)))
+
+(facts "Transform values"
+       (fact "Default (no transform)" (transform-value :foobar "Foobar") => "Foobar")
+       (fact "Upper-case" (transform-value :upper-case "Foobar") => "FOOBAR")
+       (fact "Lower-case" (transform-value :lower-case "FooBar") => "foobar"))
