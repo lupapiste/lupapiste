@@ -1150,7 +1150,8 @@
 (def rakennuspaikka [{:name "kiinteisto"
                       :type :group
                       :uicomponent :propertyGroup
-                      :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s}
+                      :body [{:name "maaraalaTunnus" :type :maaraalaTunnus :uicomponent :maaraala-tunnus :size :s
+                              :transform :zero-pad-4}
                              ;{:name "luvanNumero" :type :string :size :m :label false :uicomponent :docgen-input :inputType :string :i18nkey "muutHankkeet.luvanNumero"}
                              {:name "tilanNimi" :type :string :readonly true :uicomponent :docgen-input :inputType :string}
                              {:name "rekisterointipvm" :type :string :readonly true :uicomponent :docgen-input :inputType :string}

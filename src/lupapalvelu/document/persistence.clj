@@ -93,6 +93,14 @@
   [_ value]
   (ss/lower-case value))
 
+(defmethod transform-value :zero-pad-4
+  [_ value]
+  (if (and value (re-matches #"[\s0-9]+" value))
+    (try
+      (->> value ss/trim Long/parseLong (format "%04d"))
+      (catch Exception _ value))
+    value))
+
 (defn transform
   "Processes model updates with the schema-defined transforms if defined."
   [document updates]
