@@ -702,7 +702,7 @@
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
                       :type :table
-                      :uicomponent :docgenTable
+                      :uicomponent :docgenHuoneistot
                       :validator :huoneistot
                       :group-help "huoneistot.groupHelpText"
                       :repeating true
