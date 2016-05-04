@@ -155,7 +155,6 @@
     (with-application command
       (fn [{:keys [id]}]
         (let [n (mongo/update-by-query :applications (assoc mongo-query :_id id) changes)]
-          ;;(println "update-application: called mongo/update-by-query w id" id "and changes" (dissoc  changes :schema-info))
           (if return-count? n nil))))))
 
 (defn application->command

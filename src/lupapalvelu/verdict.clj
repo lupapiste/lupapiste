@@ -30,6 +30,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.tasks-api :as tasks-api]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
@@ -432,22 +433,50 @@
        (map (partial tasks/task-attachments application))
        flatten))
 
+(defn- merge-review-tasks
+  "Add review tasks with new IDs"
+  [from-update existing]
+  (let [bg-id #(get-in % [:data :muuTunnus :value])
+        review-task? #(= "task-katselmus" (get-in % [:schema-info :name]))
+        tasks->backend-ids (fn [tasks]
+                             (set (filter (complement ss/blank?)
+                                          (map bg-id tasks))))
+        ;; ids-existing (-> existing #(filter review-task? %) tasks->backend-ids)
+        ids-existing (tasks->backend-ids (filter review-task? existing))
+        ids-from-update (tasks->backend-ids from-update)
+        has-new-id? #(let [i (bg-id %)] (and (contains? ids-from-update i)
+                                             (not (contains? ids-existing i))))]
+
+    ;; (doseq [t existing]
+    ;;     (if-not (get-in t [:schema-info :name])
+    ;;       (println "task missing schema-info name:" t)))
+    ;;(println (map #(get-in % [:schema-info :name]) existing))
+    (assert (every? #(get-in % [:schema-info :name]) existing) "existing tasks have :schema-info :name")
+    (assert (every? #(get-in % [:schema-info :name]) from-update) "new tasks have :schema-info :name")
+    (conj existing (filter has-new-id? from-update))
+    ;;existing
+    ))
 
 (defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-verdict-w-review
   [{:keys [application] :as command} app-xml]
 
-  ;; schemas?
-
   (let [reviews (review-reader/xml->reviews app-xml)
-        review-to-task #(lupapalvelu.tasks/katselmus->task {} {} application %)
+        building-updates (->> (seq (building-reader/->buildings-summary app-xml))
+                              (building-mongo-updates application))
+        source {} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
+        review-to-task #(lupapalvelu.tasks/katselmus->task {} source application %)
         review-tasks (map review-to-task reviews)
-        ]
-    (println "review-tasks length is" (count review-tasks) "and key counts for elements are" (map (comp count keys) review-tasks))
-    (println "last keys" (keys (last review-tasks)))
+        updated-tasks (merge-review-tasks review-tasks (:tasks application))
+        task-updates {$push {:tasks {$each updated-tasks}}}]
+    ;; (println "review-tasks length is" (count review-tasks) "and key counts for elements are" (map (comp count keys) review-tasks))
+    ;; (println "last keys" (keys (last review-tasks)))
     ;; (clojure.pprint/pprint review-tasks)
-    (update-application command {$push {:tasks {$each review-tasks}}})
+    (assert (not (some nil? review-tasks)))
+    (update-application command (util/deep-merge task-updates building-updates))
+    ;; (println "save-reviews-from-xml: mongo update:")
+    ;; (clojure.pprint/pprint (util/deep-merge task-updates building-updates))
     (ok :review-tasks review-tasks)))
 
 (defn do-check-for-verdict-w-review [{:keys [application] :as command}]
@@ -459,4 +488,8 @@
              ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml") "utf-8")
              ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
              ]
+    (doseq [t (:tasks (:application command))]
+      (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
+    (println "tasks count" (count (:tasks (:application command))))
+    (println "application id" (:id (:application command)))
     (save-reviews-from-xml command app-xml)))
