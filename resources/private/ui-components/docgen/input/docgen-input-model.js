@@ -90,9 +90,9 @@ LUPAPISTE.DocgenInputModel = function(params) {
     var readOnlyAfterSent = params.schema["readonly-after-sent"] && doc.state === "sent";
     return readOnlyAfterSent || params.schema.readonly || params.readonly;
   });
-  self.inputOptions = {maxLength: ko.observable(params.schema["max-len"] || LUPAPISTE.config.inputMaxLength),
-                       max: ko.observable(params.schema.max),
-                       min: ko.observable(params.schema.min)};
+  self.inputOptions = {maxLength: params.schema["max-len"] || LUPAPISTE.config.inputMaxLength,
+                       max: params.schema.max,
+                       min: params.schema.min};
 
   function authState( state ) {
     var commands = _.get( self.schema.auth, state );
