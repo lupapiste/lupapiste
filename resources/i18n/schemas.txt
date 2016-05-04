@@ -219,7 +219,7 @@
 "huoneistot.huoneistoala.help" "fi" "Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat."
 "huoneistot.huoneistoala.help" "sv" "Lägenhetsytan är den yta som begränsas dels av väggarna kring lägenheten, dels av de ytor som vetter mot lägenheten på bärande och andra för hela byggnaden nödvändiga byggnadsdelar."
 "huoneistot.huoneistonumero" "fi" "Huoneiston numero"
-"huoneistot.huoneistonumero" "sv" "Lägenhetsnummer"
+"huoneistot.huoneistonumero" "sv" "Lägenhets nummer"
 "huoneistot.huoneistonumero.help" "fi" "Jos kyseessä on yhden asunnon talo, merkitään huoneistonumeroksi  000."
 "huoneistot.huoneistonumero.help" "sv" "Om det gäller ett hus med en bostad anges lägenhetsnummern som 000"
 "huoneistot.huoneistoTyyppi" "fi" "Huoneiston tyyppi"
