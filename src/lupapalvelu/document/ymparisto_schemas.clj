@@ -55,7 +55,35 @@
                      :body [{:name "melu10mdBa" :type :string :size :s}
                             {:name "paivalla" :type :string :size :s}
                             {:name "yolla" :type :string :size :s}
-                            {:name "mittaus" :type :string :size :m}]}))
+                            {:name "mittaus" :type :string :size :m}]}
+                    {:name "leviaminen"
+                     :type :table
+                     :repeating true
+                     :uicomponent :docgenTable
+                     :group-help "meluilmoitus.leviaminen.groupHelpText"
+                     :body [{:name "kohde" :type :string}
+                            {:name "etaisyys" :type :string :subtype :number :unit :m :size :s}
+                            {:name "vaikutus" :type :string :subtype :number :unit :db :size :s}]}
+                    {:name "torjunta-ja-seuranta"
+                     :type :group
+                     :body [{:name "torjuntatoimenpiteet" :type :text :max-len 4000}
+                            {:name "seuranta" :type :text :max-len 4000}]}
+                    {:name "tiedottaminen"
+                     :type :group
+                     :body [{:name "talokohtainen" :type :checkbox}
+                            {:name "huoneistokohtainen" :type :checkbox}
+                            {:name "porraskaytavakohtainen" :type :checkbox}
+                            {:name "laajuus" :type :text :max-len 1000}
+                            {:name "osoitteet"
+                             :type :table
+                             :repeating true
+                             :uicomponent :docgenTable
+                             :body [{:name "katu" :type :string :size :l}
+                                    {:name "numero" :type :string :size :m}]}]}
+                    {:name "lisatiedot"
+                     :type :group
+                     :group-help "meluilmoitus.lisatiedot.groupHelpText"
+                     :body [{:name "arviointimenetelmat" :type :text :max-len 4000}]}))
 
 (def pima (body {:name "kuvaus" :type :text :max-len 4000}))
 
@@ -461,4 +489,3 @@
             :body [{:name "Noudetaan"}
                    {:name "Postitetaan"}]}]}
    ])
-

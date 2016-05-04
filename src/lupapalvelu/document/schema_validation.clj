@@ -75,7 +75,7 @@
   "Integer string type"
   (merge GenString
          {:subtype            (sc/eq :number)
-          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :hehtaaria :y :kuukautta :tuntiaviikko :kpl :hengelle)
+          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :hehtaaria :y :kuukautta :tuntiaviikko :kpl :hengelle :db)
           (opt :min)          sc/Int
           (opt :max)          sc/Int}))
 
