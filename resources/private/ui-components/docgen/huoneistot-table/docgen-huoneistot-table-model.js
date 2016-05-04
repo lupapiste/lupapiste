@@ -28,7 +28,29 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
     required: false
   });
 
-  self.disabled = ko.observable(false);
+  function authState( state ) {
+    var commands = _.get( self.schema.auth, state );
+    if( _.isArray( commands) && _.size( commands )) {
+      return _.some( commands, self.authModel.ok );
+    }
+  }
+
+  self.disabled = ko.pureComputed( function() {
+    var disabled = params.isDisabled
+          || !(self.service.isWhitelisted( self.schema ))
+          || !self.authModel.ok(self.service.getUpdateCommand(self.documentId))
+          || util.getIn(params, ["model", "disabled"]);
+    var authDisabled = authState( "disabled" );
+    if( _.isBoolean( authDisabled ) ) {
+      disabled = disabled || authDisabled;
+    }
+    var authEnabled = authState( "enabled" );
+    if( _.isBoolean( authEnabled ) ) {
+      disabled = disabled || !authEnabled;
+    }
+    return disabled;
+  });
+
   self.readonly = ko.observable(false);
   self.showMessagePanel = ko.observable(false);
   self.errorMessage = [];

@@ -38,7 +38,9 @@
                                        css: info[0].css(),
                                        event: info[0].events,
                                        value: model.huoneistoTyyppi.model,
-                                       disable: $component.disabled() || $component.readonly(),
+                                       valueAllowUnset: true,
+                                       optionsCaption: loc('selectone'),
+                                       disable: $component.disabled() || $component.readonly() || !model.muutostapa.model(),
                                        attr: {'data-test-id': path.join('.')}"
                             class="dropdown form-input short">
                     </select>
@@ -54,10 +56,10 @@
                     <span data-bind="css: schema.body[1].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.porras.model,
-                                        disable: $component.disabled,
+                                        disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[1].css(),
                                         event: info[1].events,
-                                        attr: { 'readonly': $component.readonly,
+                                        attr: { 'readonly': $component.readonly(),
                                                 'maxlength': schema.body[1]['max-len'] || LUPAPISTE.config.inputMaxLength,
                                                 'max': schema.body[1].max,
                                                 'min': schema.body[1].min,
@@ -76,7 +78,7 @@
                     <span data-bind="css: schema.body[2].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.huoneistonumero.model,
-                                        disable: $component.disabled,
+                                        disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[2].css(),
                                         event: info[2].events,
                                         attr: { 'readonly': $component.readonly,
@@ -98,7 +100,7 @@
                     <span data-bind="css: schema.body[3].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.jakokirjain.model,
-                                        disable: $component.disabled,
+                                        disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[3].css(),
                                         event: info[3].events,
                                         attr: { 'readonly': $component.readonly,
@@ -120,7 +122,7 @@
                     <span data-bind="css: schema.body[4].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.huoneluku.model,
-                                        disable: $component.disabled,
+                                        disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[4].css(),
                                         event: info[4].events,
                                         attr: { 'readonly': $component.readonly,
@@ -143,7 +145,9 @@
                                        optionsText: $component.selectOptionsTextFn('keittionTyyppi'),
                                        optionsValue: 'name',
                                        value: model.keittionTyyppi.model,
-                                       disable: $component.disabled() || $component.readonly(),
+                                       valueAllowUnset: true,
+                                       optionsCaption: loc('selectone'),
+                                       disable: $component.disabled() || $component.readonly() || !model.muutostapa.model(),
                                        css: info[5].css(),
                                        event: info[5].events,
                                        attr: {'data-test-id': path.join('.') + '.keittio'}"
@@ -161,7 +165,7 @@
                     <span data-bind="css: schema.body[6].unit ? 'form-input-and-unit' : ''">
                       <input type="text"
                              data-bind="textInput: model.huoneistoala.model,
-                                        disable: $component.disabled,
+                                        disable: $component.disabled() || !model.muutostapa.model(),
                                         css: info[6].css(),
                                         event: info[6].events,
                                         attr: { 'readonly': $component.readonly,
@@ -180,7 +184,7 @@
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
                          data-bind="checked: model.WCKytkin.model,
-                                    disable: $component.disabled,
+                                    disable: $component.disabled() || !model.muutostapa.model(),
                                     css: info[7].css(),
                                     event: info[7].events,
                                     attr: {'id': $component.documentId + '-huoneistot-wc-' + $index()}">
@@ -193,7 +197,7 @@
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
                          data-bind="checked: model.ammeTaiSuihkuKytkin.model,
-                                    disable: $component.disabled,
+                                    disable: $component.disabled() || !model.muutostapa.model(),
                                     css: info[8].css(),
                                     event: info[8].events,
                                     attr: {'id': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}">
@@ -206,7 +210,7 @@
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
                          data-bind="checked: model.saunaKytkin.model,
-                                    disable: $component.disabled,
+                                    disable: $component.disabled() || !model.muutostapa.model(),
                                     css: info[9].css(),
                                     event: info[9].events,
                                     attr: {'id': $component.documentId + '-huoneistot-sauna-' + $index()}">
@@ -219,7 +223,7 @@
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
                          data-bind="checked: model.parvekeTaiTerassiKytkin.model,
-                                    disable: $component.disabled,
+                                    disable: $component.disabled() || !model.muutostapa.model(),
                                     css: info[10].css(),
                                     event: info[10].events,
                                     attr: {'id': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}">
@@ -232,7 +236,7 @@
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
                          data-bind="checked: model.lamminvesiKytkin.model,
-                                    disable: $component.disabled,
+                                    disable: $component.disabled() || !model.muutostapa.model(),
                                     css: info[11].css(),
                                     event: info[11].events,
                                     attr: {'id': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}">
@@ -249,6 +253,8 @@
                                        optionsText: $component.selectOptionsTextFn('muutostapa'),
                                        optionsValue: 'name',
                                        value: model.muutostapa.model,
+                                       valueAllowUnset: true,
+                                       optionsCaption: loc('selectone'),
                                        disable: $component.disabled() || $component.readonly(),
                                        css: info[12].css(),
                                        event: info[12].events,
