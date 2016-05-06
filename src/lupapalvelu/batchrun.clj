@@ -385,7 +385,7 @@
       (if-not (s/blank? url)
         ;; url means there's a defined location (eg sftp) for polling xml verdicts
         (let [command (assoc (application->command app) :user eraajo-user :created (now))
-              result (verdict/do-check-for-verdict-w-review command)]
+              result (verdict/do-check-for-reviews command)]
           result))))
     (catch Throwable t
       (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
