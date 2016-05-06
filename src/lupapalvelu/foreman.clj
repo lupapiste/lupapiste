@@ -154,12 +154,11 @@
     (assoc :opened (if (util/pos? (:opened application)) created nil))))
 
 
-(defn cleanup-hakija-doc [{info :schema-info :as doc}]
-  (let [schema-name (op/get-operation-metadata :tyonjohtajan-nimeaminen-v2 :applicant-doc-schema)
-        schema (schemas/get-schema (assoc info :name schema-name))]
+(defn- cleanup-hakija-doc [{info :schema-info :as doc}]
+  (let [schema-name (op/get-operation-metadata :tyonjohtajan-nimeaminen-v2 :applicant-doc-schema)]
     (-> doc
       (assoc :id (mongo/create-id))
-      (assoc :schema-info (:info schema))
+      (assoc-in [:schema-info :name]  schema-name)
       (assoc-in [:data :henkilo :userId] {:value nil}))))
 
 (defn create-foreman-docs [application foreman-app role]
