@@ -262,21 +262,27 @@
     (fact "can not link foreman application with a second application"
       (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId other-r-app-id) => fail?)
 
+    (fact "applicant can not remove link permit on foreman application"
+      (command mikko :remove-link-permit :id foreman-app-id3) => unauthorized?)
+
     (fact "can not link foreman application with YA application"
-      (fact "Setup: remove old link"
-        (command mikko :remove-link-permit-by-app-id :id foreman-app-id3 :linkPermitId history-base-app-id) => ok?)
+      (fact "Setup: comment for opening application + remove old link"
+        (command mikko :add-comment :id foreman-app-id3 :text "please, remove link permit" :target {:type "application"} :roles [] :openApplication true) => ok?
+        (command sonja :remove-link-permit-by-app-id :id foreman-app-id3 :linkPermitId history-base-app-id) => ok?)
 
       (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId ya-app-id) => fail?)
 
     (fact "can not link foreman applications to each other"
-      (fact "Setup: remove old link"
-        (command mikko :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
+      (fact "Setup: comment for opening application + remove old link"
+        (command mikko :add-comment :id foreman-app-id4 :text "please, remove link permit" :target {:type "application"} :roles [] :openApplication true) => ok?
+        (command sonja :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
       (fact "try to link foreman application"
         (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId foreman-app-id5) => fail?))
 
     (fact "Link permit may be a single paper permit"
-      (fact "Setup: remove old link"
-        (command mikko :remove-link-permit-by-app-id :id foreman-app-id5 :linkPermitId history-base-app-id) => ok?)
+      (fact "Setup: comment for opening application + remove old link"
+        (command mikko :add-comment :id foreman-app-id5 :text "please, remove link permit" :target {:type "application"} :roles [] :openApplication true) => ok?
+        (command sonja :remove-link-permit-by-app-id :id foreman-app-id5 :linkPermitId history-base-app-id) => ok?)
       (fact "1st succeeds"
         (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 1") => ok?)
       (fact "2nd fails"
@@ -388,4 +394,3 @@
         (fact "Teppo is owner" (:username (some #(when (= (:role %) "owner") %) auth-array)) => "teppo@example.com")
         (fact "Teppo is not double authed"
           (count (filter #(= (:username %) "teppo@example.com") auth-array)) => 1)))))
-
