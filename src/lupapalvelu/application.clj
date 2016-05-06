@@ -72,7 +72,7 @@
 (defn authorized-to-remove-link-permit [{user :user} application]
   (when (and (not (user/authority? user))
              (is-link-permit-required application)
-             (zero? (dec (count-link-permits application))))
+             (<= 1 (count-link-permits application)))
     (fail! :error.unauthorized)))
 
 (defn validate-authority-in-drafts
