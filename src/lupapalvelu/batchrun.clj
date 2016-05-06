@@ -397,6 +397,5 @@
         apps (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}})
         ;; reviewless-apps (filter #(some task-is-review? (:tasks %)) apps) ;; initial too-conservative filter
         eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
-    (println "queried for application in states" eligible-application-states)
     (doall
      (map (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))

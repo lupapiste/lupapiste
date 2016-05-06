@@ -1,5 +1,6 @@
 (ns lupapalvelu.tasks
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
+            [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
@@ -215,7 +216,8 @@
               :vaadittuLupaehtona true
               :rakennus (rakennus-data-from-buildings {} buildings)
               :katselmus katselmus-data
-              :muuTunnus (get-in katselmus [:muuTunnustieto :muuTunnus])
+              :muuTunnus (get-in katselmus [:muuTunnustieto :MuuTunnus :tunnus])
+              ;; There's also :MuuTunnus :sovellus - we could form a string like "Facta-8F29F.." or store just the map here, if but seems unlikely that within same organization there would be id clashes between systems
               }
         ]
     (new-task "task-katselmus" task-name data meta source)

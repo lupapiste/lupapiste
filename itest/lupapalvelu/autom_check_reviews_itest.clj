@@ -41,9 +41,8 @@
             ]
 
         (facts "Initial state of reviews before krysp reading is sane"
-          (println "before first local-command")
           (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
-          (println "before first local-verdcit")
+
           (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
           ;; (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
           (println "address & id for verdict-given" (:address application-verdict-given) (:id application-verdict-given))
@@ -77,18 +76,23 @@
                   count-reviews #(count
                                   (filter task-is-review? (query-tasks %)))]
               ;; (println "count-reviews after poll-verdicts-for-reviews" (count-reviews application-id-verdict-given))
-              ;; (println "task-count by count :tasks is" (count (query-tasks application-id-verdict-given)))
-              (count-reviews application-id-verdict-given) => 10
+              (println "task-count by counts :tasks are " (doall (map  #(count (query-tasks %))  [application-id-verdict-given application-id-submitted])))
+
+              (count-reviews application-id-verdict-given) => 2
               (count-reviews application-id-submitted) => 0)))
 
+        (against-background [(app-from-krysp/get-application-xml-by-application-id anything) => (sade.xml/parse-string (slurp "dev-resources/krysp/verdict-r-buildings.xml") "utf-8")]
+          (fact "buildings"
+            ;;
 
+            ))
 
         (fact "existing tasks are (not) preserved"
           ;; tbd. check state vs before running poll, now just checking vs after running c-f-v
           ;; calling check-for-verdict results in query-application returning 9 tasks (of which 3 reviews).
           ;; otherwise there are 10 tasks, all of which are reviews.
           (has-empty-tasks (query-application local-query sonja application-id-verdict-given)) => nil
-          (count  (:tasks (query-application local-query sonja application-id-verdict-given))) => 10
+          (count  (:tasks (query-application local-query sonja application-id-verdict-given))) => 2
           (local-command sonja :check-for-verdict :id application-id-verdict-given :lang "fi") => anything
           (has-empty-tasks (query-application local-query sonja application-id-verdict-given)) => nil
-          (count  (:tasks (query-application local-query sonja application-id-verdict-given))) =not=> 10)))))
+          (count  (:tasks (query-application local-query sonja application-id-verdict-given))) =not=> 2)))))

@@ -445,6 +445,14 @@
         ids-from-update (tasks->backend-ids from-update)
         has-new-id? #(let [i (bg-id %)] (and (contains? ids-from-update i)
                                              (not (contains? ids-existing i))))]
+    ;; (debug "ids-existing" ids-existing)
+    ;; (debug "ids-from-update" ids-from-update)
+
+    ;; (debug "from-update first type" (get-in (first from-update) [:schema-info :name]))
+    ;; (debug "from-update first has-new-id?" (has-new-id? (first from-update)))
+
+    ;; (debug "from-update types" (doall (map :type from-update)))
+    (debugf "merge-review-tasks: existing %s + from-update %s/%s" (count existing) (count from-update) (count (filter has-new-id? from-update)))
     (concat existing (filter has-new-id? from-update))))
 
 (defn save-reviews-from-xml
@@ -455,14 +463,17 @@
   (let [reviews (review-reader/xml->reviews app-xml)
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (->> (seq buildings-summary)
-                              (building-mongo-updates application))
+                              (building-mongo-updates (assoc application :buildings) []))
         source {} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(lupapalvelu.tasks/katselmus->task {} source buildings-summary %)
         review-tasks (map review-to-task reviews)
         updated-tasks (merge-review-tasks review-tasks (:tasks application))
-        task-updates {$push {:tasks {$each updated-tasks}}}]
+        task-updates {$set {:tasks updated-tasks}}]
     (assert (every? not-empty updated-tasks))
     (assert (every? map? updated-tasks))
+    (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
+    (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
+    ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used?
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks))
     (update-application command (util/deep-merge task-updates building-updates))
     (ok :review-tasks review-tasks)))
@@ -472,11 +483,8 @@
   (when-let [
              app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
-             ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml") "utf-8")
-             ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
              ]
-    (doseq [t (:tasks (:application command))]
-      (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
-    (println "tasks count" (count (:tasks (:application command))))
-    (println "application id" (:id (:application command)))
+    ;; (doseq [t (:tasks (:application command))]
+    ;;   (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
+    ;; (debug "do-check-verdict-w-review: application id:" (:id (:application command)) "- tasks count before reading review xml:" (count (:tasks (:application command))) )
     (save-reviews-from-xml command app-xml)))
