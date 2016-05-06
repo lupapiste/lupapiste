@@ -66,13 +66,13 @@
       (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))
 
 (defn validate-link-permits [application]
-  (when (and (is-link-permit-required application) (zero? (count-link-permits application)))
+  (when (and (is-link-permit-required application) (zero? (count-link-permits application))) ; TODO: fix assumption that there can be only zero or one required link permits
     (fail :error.permit-must-have-link-permit)))
 
 (defn authorized-to-remove-link-permit [{user :user} application]
   (when (and (not (user/authority? user))
              (is-link-permit-required application)
-             (<= 1 (count-link-permits application)))
+             (<= 1 (count-link-permits application))) ; TODO: fix assumption that there can be only zero or one required link permits
     (fail! :error.unauthorized)))
 
 (defn validate-authority-in-drafts
