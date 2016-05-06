@@ -1,5 +1,6 @@
 (ns lupapalvelu.autom-check-verdicts-itest
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [sade.core :refer [now fail]]
@@ -9,7 +10,8 @@
             [lupapalvelu.verdict-api]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.batchrun :as batchrun]))
+            [lupapalvelu.batchrun :as batchrun]
+            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]))
 
 (def db-name (str "test_autom-check-verdicts-itest_" (now)))
 
@@ -27,10 +29,14 @@
 
 (facts "Automatic checking for verdicts"
   (mongo/with-db db-name
-    (let [application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
+    (let [
+
+          application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
           application-id-submitted      (:id application-submitted)
+
           application-sent              (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 18")
           application-id-sent           (:id application-sent)
+
           application-verdict-given     (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 19")
           application-id-verdict-given  (:id application-verdict-given)]
 
