@@ -124,3 +124,22 @@
     (validate-readonly-removes! {:schema-info {:name "rakennusjateselvitys"}}
       [[:rakennusJaPurkujate :suunniteltuJate :0]])
     => (throws Exception)))
+
+(facts "Transform values"
+       (fact "Default (no transform)" (transform-value :foobar "Foobar") => "Foobar")
+       (fact "Default (no transform) nil" (transform-value :foobar nil) => nil)
+       (fact "Upper-case" (transform-value :upper-case "Foobar") => "FOOBAR")
+       (fact "Lower-case" (transform-value :lower-case "FooBar") => "foobar")
+       (fact "Upper-case nil" (transform-value :upper-case nil) => nil)
+       (fact "Lower-case nil" (transform-value :lower-case nil) => nil)
+       (fact "Zero-pad-4 1" (transform-value :zero-pad-4 "1") => "0001")
+       (fact "Zero-pad-4  1 " (transform-value :zero-pad-4 " 1 ") => "0001")
+       (fact "Zero-pad-4 12" (transform-value :zero-pad-4 "12") => "0012")
+       (fact "Zero-pad-4  12  " (transform-value :zero-pad-4 " 12  ") => "0012")
+       (fact "Zero-pad-4 1 2" (transform-value :zero-pad-4 "1 2") => "1 2")
+       (fact "Zero-pad-4 1234" (transform-value :zero-pad-4 "1234") => "1234")
+       (fact "Zero-pad-4 12345" (transform-value :zero-pad-4 "12345") => "12345")
+       (fact "Zero-pad-4 hello" (transform-value :zero-pad-4 "hello") => "hello")
+       (fact "Zero-pad-4 nil" (transform-value :zero-pad-4 nil) => nil)
+       (fact "Zero-pad-4 " (transform-value :zero-pad-4 "") => "")
+       (fact "Zero-pad-4 -56" (transform-value :zero-pad-4 "-56") => "-56"))

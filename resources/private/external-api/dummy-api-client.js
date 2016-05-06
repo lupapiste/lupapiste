@@ -9,7 +9,7 @@ function LupapisteApi() {
 }
 
 /**
-* Show permits on map by a filter
+* Show given permits on backend map (button in application list view).
 * @static
 * @param {Array<PermitFilter>} permits Permits from Lupapiste view
 */
@@ -21,7 +21,7 @@ LupapisteApi.showPermitsOnMap = function (permits) {
 };
 
 /**
-* Show point on map
+* Show point on backend map
 * @static
 * @param {PermitFilter} filter Filter for lupapiste api
 */
@@ -33,7 +33,7 @@ LupapisteApi.showPermitOnMap = function (permit) {
 };
 
 /**
-* Opens open permit
+* Opens a permit in backend system.
 * @static
 * @param {PermitFilter} permit
 */
@@ -45,7 +45,8 @@ LupapisteApi.openPermit = function (permit) {
 };
 
 /**
-* Permit is emited when integration (KRYSP) was sent successfully
+* Permit is emited when integration (KRYSP) message was created successfully.
+* Backend may read the message and attachments from Lupapiste.
 * @static
 * @param {PermitFilter} permit
 */

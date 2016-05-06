@@ -2006,14 +2006,18 @@
                  content-type (mime/mime-type filename)]]
         (mongo/update-n :fs.files {:_id id} {$set {:contentType content-type}})))))
 
-(defn remove-FI-prefix-from-auth-y [{company-y :y :as auth}]
-  (if company-y
-    (assoc auth :y (ss/replace company-y "FI" ""))
+(defn remove-FI-prefix-from-auth-y [k auth]
+  (if-let [company-y (get auth k)]
+    (assoc auth k (ss/replace company-y "FI" ""))
     auth))
 
 (defmigration sanitize-auth-company-y
   {:apply-when (pos? (mongo/count :applications {:auth.y #"FI"}))}
-  (update-applications-array :auth remove-FI-prefix-from-auth-y {:auth.y #"FI"}))
+  (update-applications-array :auth (partial remove-FI-prefix-from-auth-y :y) {:auth.y #"FI"}))
+
+(defmigration sanitize-auth-company-username
+  {:apply-when (pos? (mongo/count :applications {:auth.username #"FI"}))}
+  (update-applications-array :auth (partial remove-FI-prefix-from-auth-y :username) {:auth.username #"FI"}))
 
 (defn change-empty-role-as-reader [{role :role :as auth}]
   (if (= role "")
@@ -2089,7 +2093,7 @@
     statement))
 
 (defmigration map-statement-statuses-into-new-krysp
-  {:apply-when (pos? (mongo/count :applications {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle" nil]}}))}
+  {:apply-when (pos? (mongo/count :applications {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle"]}}))}
   (update-applications-array :statements
                              update-statement-status
                              {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle"]}}))
