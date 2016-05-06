@@ -116,8 +116,10 @@
   [id]
   (or (find-company-by-id id) (fail! :company.not-found)))
 
-(defn find-companies []
-  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created] (array-map :name 1)))
+(defn find-companies
+  "Returns all data off all companies"
+  []
+  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :reference :document] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id}))
