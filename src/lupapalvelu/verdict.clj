@@ -439,7 +439,7 @@
   (let [bg-id #(get-in % [:data :muuTunnus :value])
         review-task? #(= "task-katselmus" (get-in % [:schema-info :name]))
         tasks->backend-ids (fn [tasks]
-                             (set (filter (complement ss/blank?)
+                             (set (remove ss/blank?
                                           (map bg-id tasks))))
         ids-existing (tasks->backend-ids (filter review-task? existing))
         ids-from-update (tasks->backend-ids from-update)
@@ -457,7 +457,7 @@
 
 (defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
-  ;; adapted from save-verdicts-from-xml. called from do-check-for-verdict-w-review
+  ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [{:keys [application] :as command} app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
@@ -465,7 +465,7 @@
         building-updates (->> (seq buildings-summary)
                               (building-mongo-updates (assoc application :buildings) []))
         source {} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
-        review-to-task #(lupapalvelu.tasks/katselmus->task {} source buildings-summary %)
+        review-to-task #(tasks/katselmus->task {} source buildings-summary %)
         review-tasks (map review-to-task reviews)
         updated-tasks (merge-review-tasks review-tasks (:tasks application))
         task-updates {$set {:tasks updated-tasks}}]
@@ -478,7 +478,7 @@
     (update-application command (util/deep-merge task-updates building-updates))
     (ok :review-tasks review-tasks)))
 
-(defn do-check-for-verdict-w-review [{:keys [application] :as command}]
+(defn do-check-for-reviews [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [
              app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
@@ -487,4 +487,6 @@
     ;; (doseq [t (:tasks (:application command))]
     ;;   (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
     ;; (debug "do-check-verdict-w-review: application id:" (:id (:application command)) "- tasks count before reading review xml:" (count (:tasks (:application command))) )
-    (save-reviews-from-xml command app-xml)))
+    (if (empty? app-xml)
+      (save-reviews-from-xml command app-xml)
+      (info "empty review xml for" (:id application)))))

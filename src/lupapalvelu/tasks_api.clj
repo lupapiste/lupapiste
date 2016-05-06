@@ -236,8 +236,6 @@
                             (util/strip-empty-maps {:rakennus (tasks/rakennus-data-from-buildings {} (:buildings application))}))
             data (merge rakennus-data {:katselmuksenLaji laji})
             new-task (tasks/new-task schema-name (:taskname task) data meta source)]
-        (println "new-task is...")
-        (clojure.pprint/pprint new-task)
         (update-application command {$push {:tasks new-task}}))
 
       ; Mark the state of the original task to final
