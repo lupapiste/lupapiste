@@ -20,13 +20,11 @@
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         asiat (enlive/select xml-no-ns common/case-elem-selector)]
     (when (pos? (count asiat))
-      (println "pos")
       (when (> (count asiat) 1)
         (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message. Count:" (count asiat)))
 
       (let [asia (first asiat)
             katselmukset (map cr/all-of  (select asia [:katselmustieto :Katselmus]))]
-        (println "#katselmukset" (count katselmukset))
         (-> katselmukset
             (sade.util/ensure-sequential :muuTunnustieto)
             (sade.util/ensure-sequential :huomautukset )

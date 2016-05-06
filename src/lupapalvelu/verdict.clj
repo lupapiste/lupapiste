@@ -441,21 +441,11 @@
         tasks->backend-ids (fn [tasks]
                              (set (filter (complement ss/blank?)
                                           (map bg-id tasks))))
-        ;; ids-existing (-> existing #(filter review-task? %) tasks->backend-ids)
         ids-existing (tasks->backend-ids (filter review-task? existing))
         ids-from-update (tasks->backend-ids from-update)
         has-new-id? #(let [i (bg-id %)] (and (contains? ids-from-update i)
                                              (not (contains? ids-existing i))))]
-
-    ;; (doseq [t existing]
-    ;;     (if-not (get-in t [:schema-info :name])
-    ;;       (println "task missing schema-info name:" t)))
-    ;;(println (map #(get-in % [:schema-info :name]) existing))
-    (assert (every? #(get-in % [:schema-info :name]) existing) "existing tasks have :schema-info :name")
-    (assert (every? #(get-in % [:schema-info :name]) from-update) "new tasks have :schema-info :name")
-    (conj existing (filter has-new-id? from-update))
-    ;;existing
-    ))
+    (concat existing (filter has-new-id? from-update))))
 
 (defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
@@ -470,13 +460,10 @@
         review-tasks (map review-to-task reviews)
         updated-tasks (merge-review-tasks review-tasks (:tasks application))
         task-updates {$push {:tasks {$each updated-tasks}}}]
-    ;; (println "review-tasks length is" (count review-tasks) "and key counts for elements are" (map (comp count keys) review-tasks))
-    ;; (println "last keys" (keys (last review-tasks)))
-    ;; (clojure.pprint/pprint review-tasks)
-    (assert (not (some nil? review-tasks)))
+    (assert (every? not-empty updated-tasks))
+    (assert (every? map? updated-tasks))
+    (assert (every? #(get-in % [:schema-info :name]) updated-tasks))
     (update-application command (util/deep-merge task-updates building-updates))
-    ;; (println "save-reviews-from-xml: mongo update:")
-    ;; (clojure.pprint/pprint (util/deep-merge task-updates building-updates))
     (ok :review-tasks review-tasks)))
 
 (defn do-check-for-verdict-w-review [{:keys [application] :as command}]
@@ -484,7 +471,6 @@
   (when-let [
              app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
-
              ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/verdict-rakval-from-kuntalupatunnus-query.xml") "utf-8")
              ;; app-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
              ]
