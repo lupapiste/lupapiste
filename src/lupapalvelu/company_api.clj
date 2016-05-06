@@ -48,7 +48,7 @@
                           [(-> company-admins first :company :id), (map u/summary company-admins)]))
                    (into {}))]
       (ok :companies (map (fn [company] (assoc company :admins (get admins (:id company) []))) (c/find-companies))))
-    (ok :companies (c/find-companies))))
+    (ok :companies (map (fn [company] (select-keys company [:id :name :y :address1 :zip :po])) (c/find-companies)))))
 
 (defcommand company-update
   {:parameters [company updates]
