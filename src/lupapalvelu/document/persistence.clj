@@ -81,9 +81,38 @@
                        (after-update-triggered-updates application collection document updated-doc))
        :post-results  post-results})))
 
+(defmulti transform-value (fn [transform _] transform))
+
+(defmethod transform-value :default [_ value] value)
+
+(defmethod transform-value :upper-case
+  [_ value]
+  (ss/upper-case value))
+
+(defmethod transform-value :lower-case
+  [_ value]
+  (ss/lower-case value))
+
+(defmethod transform-value :zero-pad-4
+  [_ value]
+  (if (and value (re-matches #"[\s0-9]+" value))
+    (try
+      (->> value ss/trim Long/parseLong (format "%04d"))
+      (catch Exception _ value))
+    value))
+
+(defn transform
+  "Processes model updates with the schema-defined transforms if defined."
+  [document updates]
+  (let [doc-schema (model/get-document-schema document)]
+    (for [[path value] updates
+          :let [{transform :transform} (model/find-by-name (:body doc-schema) path)]]
+      [path (transform-value transform value)])))
+
 (defn persist-model-updates [application collection document model-updates timestamp & meta-data]
   (let [command (application->command application)
-        {:keys [mongo-query mongo-updates post-results]} (apply validated-model-updates application collection document model-updates timestamp meta-data)]
+        {:keys [mongo-query mongo-updates post-results]} (apply validated-model-updates application collection document
+                                                                (transform document model-updates) timestamp meta-data)]
     (update-application command mongo-query mongo-updates)
     (ok :results post-results)))
 
