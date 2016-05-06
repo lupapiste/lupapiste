@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.schemas
   (:require [clojure.set :as set]
-            [clojure.walk :as walk]
+            [sade.util :as util]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
             [lupapiste-commons.usage-types :as usages]))
@@ -475,9 +475,7 @@
 (def designer-basic (body
                       (schema-body-without-element-by-name henkilotiedot turvakielto)
                       {:name "yritys" :type :group
-                       :body (clojure.walk/postwalk (fn [c] (if (and (map? c) (contains? c :required))
-                                                              (assoc c :required false)
-                                                              c)) yritys-minimal)}
+                       :body (util/postwalk-map #(dissoc % :required) yritys-minimal)}
                       simple-osoite
                       yhteystiedot))
 
@@ -1537,7 +1535,7 @@
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
            :accordion-fields hakija-accordion-paths
            }
-    :body (walk/postwalk (fn [x] (if (map? x) (dissoc x :required) x)) party)}
+    :body (util/postwalk-map #(dissoc % :required) party)}
 
    {:info {:name "hakija-kt"
            :i18name "osapuoli"
