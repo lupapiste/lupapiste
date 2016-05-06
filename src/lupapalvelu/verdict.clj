@@ -434,7 +434,7 @@
        flatten))
 
 (defn- merge-review-tasks
-  "Add review tasks with new IDs"
+  "Add review tasks with new IDs to existing tasks map"
   [from-update existing]
   (let [bg-id #(get-in % [:data :muuTunnus :value])
         review-task? #(= "task-katselmus" (get-in % [:schema-info :name]))
@@ -453,10 +453,11 @@
   [{:keys [application] :as command} app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
-        building-updates (->> (seq (building-reader/->buildings-summary app-xml))
+        buildings-summary (building-reader/->buildings-summary app-xml)
+        building-updates (->> (seq buildings-summary)
                               (building-mongo-updates application))
         source {} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
-        review-to-task #(lupapalvelu.tasks/katselmus->task {} source application %)
+        review-to-task #(lupapalvelu.tasks/katselmus->task {} source buildings-summary %)
         review-tasks (map review-to-task reviews)
         updated-tasks (merge-review-tasks review-tasks (:tasks application))
         task-updates {$push {:tasks {$each updated-tasks}}}]
