@@ -2117,9 +2117,25 @@
                                    {:statements.reminder-sent {$type 10}}
                                    {:statements.metadata {$type 10}}]}))
 
+; Updating only non-submitted applications, the change has no value for others
+(defmigration hakija-tj
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
+                                                 :documents.schema-info.name "hakija-r"
+                                                 :state {$in [:draft :open]}}))}
+  (letfn [(pred [doc] (= "hakija-r" (get-in doc [:schema-info :name])))]
+    (reduce + 0
+      (for [{:keys [id documents]} (mongo/select :applications
+                                     {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
+                                     :documents.schema-info.name "hakija-r"
+                                     :state {$in [:draft :open]}}
+                                     [:documents])]
+        (let [updates {$set (mongo/generate-array-updates :documents documents pred "schema-info.name" "hakija-tj")}]
+          (mongo/update-n :applications {:_id id} updates))))))
+
 ;;
 ;; ****** NOTE! ******
-;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
+;;  When you are writing a new migration that goes through subcollections
+;;  in the collections "Applications" and "Submitted-applications"
 ;;  do not manually write like this
 ;;     (doseq [collection [:applications :submitted-applications] ...)
 ;;  but use the "update-applications-array" function existing in this namespace.

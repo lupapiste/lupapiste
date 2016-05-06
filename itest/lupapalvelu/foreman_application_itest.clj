@@ -52,7 +52,7 @@
 
                 (fact "Hakija docs are equal, expect the userId"
                       (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
-                            foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-r")))]
+                            foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-tj")))]
 
                         hakija-doc-data => map?
                         foreman-hakija-doc-data => map?
