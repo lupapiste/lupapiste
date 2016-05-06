@@ -263,7 +263,7 @@
       (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId other-r-app-id) => fail?)
 
     (fact "applicant can not remove link permit on foreman application"
-      (command mikko :remove-link-permit :id foreman-app-id3) => unauthorized?)
+      (command mikko :remove-link-permit-by-app-id :id foreman-app-id3 :linkPermitId history-base-app-id) => unauthorized?)
 
     (fact "can not link foreman application with YA application"
       (fact "Setup: comment for opening application + remove old link"
