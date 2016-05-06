@@ -990,6 +990,8 @@
 "auth-admin.resource.calendar.add" "sv" "Lägg till kalendar"
 "auth-admin.resource.calendar.create-slot" "fi" "Lisää varattavia aikoja"
 "auth-admin.resource.calendar.create-slot" "sv" "Lägg till bokningsbara tider"
+"auth-admin.resource.calendar.inuse" "fi" "Kalenteri käytössä"
+"auth-admin.resource.calendar.inuse" "sv" "Kalender i bruk"
 "auth-admin.resource.calendar.name" "fi" "Nimi"
 "auth-admin.resource.calendar.name" "sv" "Namn"
 "auth-admin.resources-admin" "fi" "Kalenterien hallinta"

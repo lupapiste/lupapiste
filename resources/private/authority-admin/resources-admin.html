@@ -10,21 +10,26 @@
         <thead>
         <tr>
           <th data-bind="ltext: 'auth-admin.resource.calendar.name'"></th>
-          <th data-bind="ltext: 'auth-admin.actions'"></th>
+          <th data-bind="ltext: 'auth-admin.resource.calendar.inuse'"></th>
         </tr>
         </thead>
         <tbody data-bind="foreach: calendars.items">
         <tr>
-          <td><!-- ko text: lastName --><!--/ko--> <!-- ko text: firstName --><!--/ko-->
-              (<!-- ko text: email --><!--/ko-->)</td>
+          <td>
+            <a data-bind="attr: {'href': '#!/calendar-admin/' + id + '/' + calendarId() },
+                          visible: calendarEnabled">
+              <span data-bind="text: lastName"></span>  <span data-bind="text: firstName"></span>
+              (<span data-bind="text: email"></span>)
+            </a>
+            <span data-bind="ifnot: calendarEnabled">
+              <span data-bind="text: lastName"></span>  <span data-bind="text: firstName"></span>
+              (<span data-bind="text: email"></span>)
+            </span>
+          </td>
           <td>
             <input type="checkbox" class="form-input" id="calendar-enabled"
                    data-bind="checked: calendarEnabled,
                               enable: lupapisteApp.models.globalAuthModel.ok('set-calendar-enabled-for-authority')" />
-            <span data-bind="if: calendarEnabled">
-              [<a data-bind="attr: {'href': '#!/calendar-admin/' + id + '/' + calendar.calendarId },
-                             visible: calendarEnabled, ltext: 'view'"></a>]
-            </span>
           </td>
         </tr>
         </tbody>

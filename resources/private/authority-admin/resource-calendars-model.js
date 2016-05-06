@@ -51,16 +51,22 @@ LUPAPISTE.ResourceCalendarsModel = function () {
   self.init = function(data) {
     var users = _.map(data.users,
       function(user) {
-        var calendarEnabledObservable = ko.observable(_.has(user, 'calendar'));
+        var calendarEnabledObservable = ko.observable(_.has(user, 'calendarId'));
+        var calendarIdForLink = ko.observable(user.calendarId || '');
         ko.computed(function() {
           var enabled = calendarEnabledObservable();
           if (self.initialized) {
+            console.log("inside", user);
             ajax.command("set-calendar-enabled-for-authority", {userId: user.id, enabled: enabled})
-              .success(util.showSavedIndicator)
+              .success(function(response) {
+                  util.showSavedIndicator(response);
+                  calendarIdForLink(response.calendarId);
+                })
               .call();
           }
         });
-        return _.extend(user, { calendarEnabled: calendarEnabledObservable });
+        return _.extend(user, { calendarEnabled: calendarEnabledObservable,
+                                calendarId: calendarIdForLink, });
       });
     self.items(users || []);
     self.initialized = true;

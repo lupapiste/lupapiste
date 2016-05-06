@@ -98,8 +98,7 @@
         calendars-for-user      (get cals reference-code-for-user [])
         calendar                (first calendars-for-user)]
     (if calendar
-      (assoc user :calendar {:calendarId   (:id calendar)
-                             :organization (:organizationCode calendar)})
+      (assoc user :calendarId   (:id calendar))
       user)))
 
 (defquery calendars-for-authority-admin
@@ -128,7 +127,7 @@
                                         :organizationCode admin-in-organization-id
                                         :externalRef      (str "user-" userId)})]
     (if (= 200 (:status response))
-      (ok)
+      (ok :calendarId (:body response))
       (do (error response)
           (fail :resources.backend-error)))))
 
