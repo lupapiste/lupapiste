@@ -11,7 +11,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
     - [Ruby](https://www.ruby-lang.org)
     - [Compass](http://compass-style.org/): `gem install compass`
     - [Node.js](https://nodejs.org)
-    - [Bless](http://blesscss.com): `npm install bless -g`
+    - [Bless](http://blesscss.com): `npm install bless@3.0.3 -g`
 - Python 2.x ja [Robot Framework](http://robotframework.org/) selaintestausta varten
   - `pip install robotframework`
   - `pip install robotframework-selenium2library`
