@@ -87,7 +87,7 @@
 
 (def finnish-zip? (partial matches? #"^\d{5}$"))
 
-(def maara-alatunnus-pattern #"^M?([0-9]{4})$")
+(def maara-alatunnus-pattern #"^M?([0-9]{1,4})$")
 
 (def kiinteistotunnus? (partial matches? #"^[0-9]{14}$"))
 

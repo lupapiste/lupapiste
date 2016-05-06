@@ -574,7 +574,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :linkPermitId])]
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but (conj states/terminal-states :sent))
-   :pre-checks [a/validate-authority-in-drafts]} ;; Pitaako olla myos 'sent'-tila?
+   :pre-checks [a/validate-authority-in-drafts ;; Pitaako olla myos 'sent'-tila?
+                a/authorized-to-remove-link-permit]}
   [{application :application}]
   (if (mongo/remove :app-links (a/make-mongo-id-for-link-permit id linkPermitId))
     (ok)

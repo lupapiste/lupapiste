@@ -7,6 +7,7 @@ Cancel via vetuma
 
 Authenticate via Osuuspankki via Vetuma
   [Arguments]  ${initButton}
+  Wait Until  Element should be visible  ${initButton}
   Wait Until  Click element   ${initButton}
   Wait Until  Element Should Be Visible  xpath=//img[@alt='Pankkitunnistus']
   Click element  xpath=//img[@alt='Pankkitunnistus']

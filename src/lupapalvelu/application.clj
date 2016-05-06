@@ -57,17 +57,23 @@
 ;; Validators
 ;;
 
+(defn- count-link-permits [application]
+  (count (or (:linkPermitData application)
+             (:linkPermitData (meta-fields/enrich-with-link-permit-data application)))))
+
 (defn- is-link-permit-required [application]
   (or (= :muutoslupa (keyword (:permitSubtype application)))
       (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))
 
-(defn validate-link-permits [{:keys [linkPermitData] :as application}]
-  (let [{:keys [linkPermitData] :as application} (if linkPermitData
-                                                   application
-                                                   (meta-fields/enrich-with-link-permit-data application))
-        linkPermits (count linkPermitData)]
-    (when (and (is-link-permit-required application) (zero? linkPermits))
-      (fail :error.permit-must-have-link-permit))))
+(defn validate-link-permits [application]
+  (when (and (is-link-permit-required application) (zero? (count-link-permits application))) ; TODO: fix assumption that there can be only zero or one required link permits
+    (fail :error.permit-must-have-link-permit)))
+
+(defn authorized-to-remove-link-permit [{user :user} application]
+  (when (and (not (user/authority? user))
+             (is-link-permit-required application)
+             (<= 1 (count-link-permits application))) ; TODO: fix assumption that there can be only zero or one required link permits
+    (fail! :error.unauthorized)))
 
 (defn validate-authority-in-drafts
   "Validator: Restrict authority access in draft application.

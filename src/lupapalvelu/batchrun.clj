@@ -3,7 +3,7 @@
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
-            [clojure.set]
+            [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.authorization :as auth]
@@ -364,3 +364,38 @@
     (mongo/connect!)
     (fetch-asianhallinta-verdicts)
     (mongo/disconnect!)))
+
+(defn batchrun-user-for-review-fetch [orgs-by-id]
+  ;; modified from fetch-verdicts.
+  (let [org-ids (keys orgs-by-id)
+        eraajo-user (user/batchrun-user org-ids)]
+    eraajo-user))
+
+(defn orgs-for-review-fetch []
+  (let [orgs-with-wfs-url-defined-for-r (organization/get-organizations
+                                                   {:krysp.R.url {$exists true}}
+                                                   {:krysp 1})
+        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-r)]
+    orgs-by-id))
+
+(defn fetch-reviews-for-application [orgs-by-id eraajo-user {:keys [id permitType organization] :as app}]
+  (try
+    (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+    (logging/with-logging-context {:applicationId id}
+      (if-not (s/blank? url)
+        ;; url means there's a defined location (eg sftp) for polling xml verdicts
+        (let [command (assoc (application->command app) :user eraajo-user :created (now))
+              result (verdict/do-check-for-reviews command)]
+          result))))
+    (catch Throwable t
+      (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
+
+(defn poll-verdicts-for-reviews []
+  ;; modified from fetch-verdicts.
+  (let [orgs-by-id (orgs-for-review-fetch)
+        eligible-application-states (set/difference states/post-verdict-states states/terminal-states)
+        apps (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}})
+        ;; reviewless-apps (filter #(some task-is-review? (:tasks %)) apps) ;; initial too-conservative filter
+        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+    (doall
+     (map (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))

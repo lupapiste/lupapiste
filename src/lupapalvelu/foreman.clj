@@ -7,9 +7,10 @@
             [lupapalvelu.company :as company]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
+            [lupapalvelu.operations :as op]
             [monger.operators :refer :all]))
 
 (defn other-project-document [application timestamp]
@@ -93,7 +94,7 @@
 
 (defn- reduce-to-highlights [history-group]
   (let [history-group (sort-by :created history-group)
-        difficulty-values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
+        difficulty-values (vec (map :name (:body schemas/patevyysvaatimusluokka)))]
     (reduce (fn [highlights group]
               (if (pos? (util/compare-difficulty :difficulty difficulty-values (first highlights) group))
                 (cons group highlights)
@@ -153,10 +154,12 @@
     (assoc :opened (if (util/pos? (:opened application)) created nil))))
 
 
-(defn cleanup-hakija-doc [doc]
-  (-> doc
+(defn- cleanup-hakija-doc [{info :schema-info :as doc}]
+  (let [schema-name (op/get-operation-metadata :tyonjohtajan-nimeaminen-v2 :applicant-doc-schema)]
+    (-> doc
       (assoc :id (mongo/create-id))
-      (assoc-in [:data :henkilo :userId] {:value nil})))
+      (assoc-in [:schema-info :name]  schema-name)
+      (assoc-in [:data :henkilo :userId] {:value nil}))))
 
 (defn create-foreman-docs [application foreman-app role]
   (let [hankkeen-kuvaus      (-> (domain/get-documents-by-subtype (:documents application) "hankkeen-kuvaus") first (get-in [:data :kuvaus :value]))

@@ -17,7 +17,6 @@
               <th data-bind="ltext: 'organization.scope'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.application.enabled'"></th>
-              <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.email'"></th>
               <th data-bind="ltext: 'organization.krysp.ftp-user'"></th>
               <th>Palvelu avataan</th>
@@ -35,14 +34,13 @@
                   [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
                 </td>
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
-                  <span data-bind="text: $data['permanent-archive-enabled'] || false"></span>
+                  <span data-bind="text: $data['permanent-archive-enabled'] ? 'arkisto' : '-'"></span>
                 </td>
               <!-- /ko -->
               <td><abbr data-bind="text: $data.municipality, attr: {'title': loc(['municipality',$data.municipality])}"></abbr></td>
               <td><abbr data-bind="text: $data.permitType, attr: {'title':loc($data.permitType)}"></abbr></td>
-              <td data-bind="text: $data['inforequest-enabled'] || false, attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
-              <td data-bind="text: $data['new-application-enabled'] || false, attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
-              <td data-bind="text: $data['open-inforequest'] || false, attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['inforequest-enabled'] ? ($data['open-inforequest'] ? 'vain avoin neuvonta': 'neuvonta') : '-', attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="text: $data['new-application-enabled'] ? 'hakemukset' : '-', attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: util.getIn(organization, ['krysp', $data.permitType, 'ftpUser']), attr: {'data-test-id': 'krysp-ftpUser-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="dateString: $data['opening']"></td>
