@@ -434,21 +434,21 @@
     linkToVendorBackendModel.load();
   });
 
-  hub.onPageLoad("calendar-admin", function() {
-    if (!calendarViewModel) {
-      var component = $("#calendar-admin .calendar-table");
-      calendarViewModel = calendarView.create(component, new LUPAPISTE.CalendarService());
-    }
-    var path = pageutil.getPagePath();
-    if (path.length > 1) {
-      hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
-    }
-  });
+  if (features.enabled("ajanvaraus")) {
+    hub.onPageLoad("calendar-admin", function() {
+      if (!calendarViewModel) {
+        var component = $("#calendar-admin .calendar-table");
+        calendarViewModel = calendarView.create(component, new LUPAPISTE.CalendarService());
+      }
+      var path = pageutil.getPagePath();
+      if (path.length > 1) {
+        hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
+      }
+    });
+  }
 
   $(function() {
     organizationModel.load();
-    resourceCalendarsModel.load();
-
     $("#applicationTabs").applyBindings({});
     $("#users").applyBindings({
       organizationUsers:   organizationUsers,
@@ -477,12 +477,16 @@
     $("#areas").applyBindings({
       organization:        organizationModel
     });
-    $("#resources-admin").applyBindings({
-      calendars:           resourceCalendarsModel
-    });
-    $("#calendar-admin").applyBindings({
-      calendars:           resourceCalendarsModel
-    });
+    if (features.enabled("ajanvaraus")) {
+      resourceCalendarsModel.load();
+      $("#resources-admin").applyBindings({
+        calendars:           resourceCalendarsModel
+      });
+      $("#calendar-admin").applyBindings({
+        calendars:           resourceCalendarsModel
+      });
+    }
+
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();
   });
