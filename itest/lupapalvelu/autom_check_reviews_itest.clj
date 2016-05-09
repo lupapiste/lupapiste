@@ -45,8 +45,6 @@
 
           (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
           ;; (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
-          (println "address & id for verdict-given" (:address application-verdict-given) (:id application-verdict-given))
-          (println "address & id for submitted" (:address application-verdict-given) (:id application-submitted))
           (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
                 application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
 
@@ -71,13 +69,9 @@
           (fact "checking for reviews in correct states"
 
             (count (batchrun/poll-verdicts-for-reviews)) => pos?
-            ;; (println "batchrun returned happily")
             (let [query-tasks (fn [application-id] (:tasks (query-application local-query sonja application-id)))
                   count-reviews #(count
                                   (filter task-is-review? (query-tasks %)))]
-              ;; (println "count-reviews after poll-verdicts-for-reviews" (count-reviews application-id-verdict-given))
-              (println "task-count by counts :tasks are " (doall (map  #(count (query-tasks %))  [application-id-verdict-given application-id-submitted])))
-
               (count-reviews application-id-verdict-given) => 2
               (count-reviews application-id-submitted) => 0)))
 

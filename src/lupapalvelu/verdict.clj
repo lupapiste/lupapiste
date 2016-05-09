@@ -463,8 +463,8 @@
   (let [reviews (review-reader/xml->reviews app-xml)
         buildings-summary (building-reader/->buildings-summary app-xml)
         building-updates (->> (seq buildings-summary)
-                              (building-mongo-updates (assoc application :buildings) []))
-        source {} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
+                              (building-mongo-updates (assoc application :buildings [])))
+        source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {} source buildings-summary %)
         review-tasks (map review-to-task reviews)
         updated-tasks (merge-review-tasks review-tasks (:tasks application))
@@ -487,6 +487,6 @@
     ;; (doseq [t (:tasks (:application command))]
     ;;   (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
     ;; (debug "do-check-verdict-w-review: application id:" (:id (:application command)) "- tasks count before reading review xml:" (count (:tasks (:application command))) )
-    (if (empty? app-xml)
+    (if (not-empty app-xml)
       (save-reviews-from-xml command app-xml)
       (info "empty review xml for" (:id application)))))
