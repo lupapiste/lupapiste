@@ -1,5 +1,9 @@
-@import url('main-blessed1.css?z=1462370656399');
+@import url('main-blessed1.css?z=1462805467962');
 
+/* line 252, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.sent .draft-box, .application_summary .application_summary_info .state-indication div.sent .open-box, .application_summary .application_summary_info .state-indication div.sent .submitted-box {
+  display: none;
+}
 /* line 255, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .verdictGiven-box, .application_summary .application_summary_info .state-indication div.sent .foremanVerdictGiven-box, .application_summary .application_summary_info .state-indication div.sent .acknowledged-box {
   display: inline-block;
