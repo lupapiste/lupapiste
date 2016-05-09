@@ -42,7 +42,7 @@
 
 (apply-remote-minimal)
 
-(testable-privates lupapalvelu.application is-link-permit-required)
+(testable-privates lupapalvelu.application required-link-permits)
 
 (defn- populate-task [{:keys [id tasks]} task-id apikey]
        (let [task (some #(when (= (:id %) task-id) %) tasks)
@@ -77,8 +77,9 @@
                 :drawings drawings))
 
 (defn- generate-link-permit [{id :id :as application} apikey]
-       (when (is-link-permit-required application)
-             (fact "Lisataan hakemukselle viitelupa" (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
+  (when (pos? (required-link-permits application))
+    (fact "Add required link permit"
+      (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
 
 (defn- validate-attachment [liite expected-type application]
        (let [permit-type (keyword (permit/permit-type application))
