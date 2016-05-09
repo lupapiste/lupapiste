@@ -1,4 +1,4 @@
-LUPAPISTE.ResourceCalendarsModel = function () {
+LUPAPISTE.AuthAdminCalendarsModel = function () {
   "use strict";
 
   var self = this;

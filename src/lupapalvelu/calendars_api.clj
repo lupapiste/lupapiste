@@ -1,4 +1,4 @@
-(ns lupapalvelu.resources-api
+(ns lupapalvelu.calendars-api
   (:require [sade.core :refer :all]
             [taoensso.timbre :as timbre :refer [info error]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]

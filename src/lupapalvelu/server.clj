@@ -62,7 +62,7 @@
             [lupapalvelu.guest-api]
             [lupapalvelu.archiving-api]
             [lupapalvelu.appeal-api]
-            [lupapalvelu.resources-api]))
+            [lupapalvelu.calendars-api]))
 
 
 

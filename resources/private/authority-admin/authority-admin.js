@@ -13,7 +13,7 @@
       linkToVendorBackendModel,
       usersList = null,
       editRolesDialogModel,
-      resourceCalendarsModel,
+      calendarsModel,
       calendarViewModel;
 
   function toAttachmentData(groupId, attachmentId) {
@@ -386,7 +386,7 @@
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
   editAttachmentsModel = new EditAttachmentsModel();
-  resourceCalendarsModel = new LUPAPISTE.ResourceCalendarsModel();
+  calendarsModel = new LUPAPISTE.AuthAdminCalendarsModel();
 
   wfsModel = new LUPAPISTE.WFSModel();
   statementGiversModel = new StatementGiversModel();
@@ -478,12 +478,12 @@
       organization:        organizationModel
     });
     if (features.enabled("ajanvaraus")) {
-      resourceCalendarsModel.load();
-      $("#resources-admin").applyBindings({
-        calendars:           resourceCalendarsModel
+      calendarsModel.load();
+      $("#organization-calendars").applyBindings({
+        calendars:           calendarsModel
       });
       $("#calendar-admin").applyBindings({
-        calendars:           resourceCalendarsModel
+        calendars:           calendarsModel
       });
     }
 
