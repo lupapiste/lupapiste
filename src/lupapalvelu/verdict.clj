@@ -465,7 +465,7 @@
         building-updates (->> (seq buildings-summary)
                               (building-mongo-updates (assoc application :buildings [])))
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
-        review-to-task #(tasks/katselmus->task {} source buildings-summary %)
+        review-to-task #(tasks/katselmus->task {} source {:buildings buildings-summary} %)
         review-tasks (map review-to-task reviews)
         updated-tasks (merge-review-tasks review-tasks (:tasks application))
         task-updates {$set {:tasks updated-tasks}}]

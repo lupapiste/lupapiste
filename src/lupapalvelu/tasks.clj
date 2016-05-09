@@ -205,7 +205,7 @@
     initial-rakennus
     buildings))
 
-(defn katselmus->task [meta source buildings katselmus]
+(defn katselmus->task [meta source {:keys [buildings]} katselmus]
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
         katselmus-data {:tila (get katselmus :osittainen)
                         :pitaja (get katselmus :pitaja)
