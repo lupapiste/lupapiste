@@ -334,14 +334,16 @@
     (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
                                                                                    ".katselmuksen_tai_tarkastuksen_poytakirja"))
 
-    (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.tila.tila" "osittainen"]]) => ok?
+    (fact "Set state for building that was reviewed"
+      (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.tila.tila" "osittainen"]]) => ok?)
 
     (fact "Review done fails as missing required info for KRYSP transfer"
       (command sonja :review-done :id application-id :taskId task-id :lang "fi") => (partial expected-failure? :error.missing-parameters))
 
-    (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]
-                                                                          ["katselmus.pitoPvm" "12.04.2016"]
-                                                                          ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?
+    (fact "Set state for the review"
+      (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]
+                                                                           ["katselmus.pitoPvm" "12.04.2016"]
+                                                                           ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?)
 
     (fact "After filling required review data, transfer is ok"
       (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
