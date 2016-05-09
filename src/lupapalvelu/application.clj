@@ -2,36 +2,32 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warnf error fatal]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
-            [clojure.string :as s]
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
             [monger.operators :refer [$set $push]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
-            [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.company :as c]
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.company :as com]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]
-            [lupapalvelu.state-machine :as state-machine]
+            [lupapalvelu.state-machine :as sm]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.property :as p]
-            [sade.strings :as ss]
+            [sade.property :as prop]
             [sade.util :as util]
-            [sade.validators :as v]
             [sade.coordinate :as coord]
-            [sade.schemas :as ssc]
-            [swiss.arrows :refer [-<>>]]))
+            [sade.schemas :as ssc]))
 
 (defn get-operations [application]
   (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
@@ -39,18 +35,18 @@
 (defn resolve-valid-subtypes
   "Returns a set of valid permit and operation subtypes for the application."
   [{permit-type :permitType op :primaryOperation}]
-  (let [op-subtypes (operations/get-primary-operation-metadata {:primaryOperation op} :subtypes)
+  (let [op-subtypes (op/get-primary-operation-metadata {:primaryOperation op} :subtypes)
         permit-subtypes (permit/permit-subtypes permit-type)]
     (concat op-subtypes permit-subtypes)))
 
 (defn history-entry [to-state timestamp user]
-  {:state to-state, :ts timestamp, :user (user/summary user)})
+  {:state to-state, :ts timestamp, :user (usr/summary user)})
 
 (defn tos-history-entry [tos-function timestamp user & [correction-reason]]
   {:pre [(map? tos-function)]}
   {:tosFunction tos-function
    :ts timestamp
-   :user (user/summary user)
+   :user (usr/summary user)
    :correction correction-reason})
 
 ;;
@@ -65,7 +61,7 @@
   (let [muutoslupa? (= :muutoslupa (keyword (:permitSubtype application)))]
     (->> (get-operations application)
          (map :name)
-         (map operations/required-link-permits)
+         (map op/required-link-permits)
          (reduce + (if muutoslupa? 1 0)))))
 
 (defn validate-link-permits [application]
@@ -73,7 +69,7 @@
     (fail :error.permit-must-have-link-permit)))
 
 (defn authorized-to-remove-link-permit [{user :user} application]
-  (when (and (not (user/authority? user))
+  (when (and (not (usr/authority? user))
              (<= (required-link-permits application) (count-link-permits application)))
     unauthorized))
 
@@ -81,7 +77,7 @@
   "Validator: Restrict authority access in draft application.
    To be used in commands' :pre-checks vector."
   [{user :user} {state :state}]
-  (when (and (= :draft (keyword state)) (user/authority? user))
+  (when (and (= :draft (keyword state)) (usr/authority? user))
     unauthorized))
 
 (defn validate-has-subtypes [_ application]
@@ -140,14 +136,14 @@
 (defn mark-indicators-seen-updates [application user timestamp]
   (merge
     (apply merge (map (partial mark-collection-seen-update user timestamp) collections-to-be-seen))
-    (when (user/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
-    (when (user/authority? user) {:_attachment_indicator_reset timestamp})))
+    (when (usr/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
+    (when (usr/authority? user) {:_attachment_indicator_reset timestamp})))
 
 ; Masking
 (defn- person-id-masker-for-user [user {authority :authority :as application}]
   (cond
-    (user/same-user? user authority) identity
-    (user/authority? user) model/mask-person-id-ending
+    (usr/same-user? user authority) identity
+    (usr/authority? user) model/mask-person-id-ending
     :else (comp model/mask-person-id-birthday model/mask-person-id-ending)))
 
 (defn with-masked-person-ids [application user]
@@ -232,7 +228,7 @@
 ;; Meta fields with default values.
 (def- operation-meta-fields-to-enrich {:optional []})
 (defn- enrich-primary-operation-with-metadata [app]
-  (let [enrichable-fields (-> (operations/get-primary-operation-metadata app)
+  (let [enrichable-fields (-> (op/get-primary-operation-metadata app)
                               (select-keys (keys operation-meta-fields-to-enrich)))
         fields-with-defaults (merge operation-meta-fields-to-enrich enrichable-fields)]
     (update app :primaryOperation merge fields-with-defaults)))
@@ -241,7 +237,7 @@
   (->> app
        ensure-operations
        enrich-primary-operation-with-metadata
-       attachment/post-process-attachments
+       att/post-process-attachments
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys
@@ -254,12 +250,12 @@
 ;;
 
 (defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
-  (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer attachment/Type)) set)
-        types          (->> (organization/get-organization-attachments-for-operation organization operation)
-                            (remove (difference existing-types attachment/operation-specific-attachment-types)))
-        ops            (map #(when (attachment/operation-specific-attachment-types %) operation) types)
+  (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
+        types          (->> (org/get-organization-attachments-for-operation organization operation)
+                            (remove (difference existing-types att/operation-specific-attachment-types)))
+        ops            (map #(when (att/operation-specific-attachment-types %) operation) types)
         metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
-    (map (partial attachment/make-attachment created target true false false applicationState) ops types metadatas)))
+    (map (partial att/make-attachment created target true false false applicationState) ops types metadatas)))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
@@ -272,7 +268,7 @@
 
 (defn make-documents [user created op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
-  (let [op-info (operations/operations (keyword (:name op)))
+  (let [op-info (op/operations (keyword (:name op)))
         op-schema-name (:schema op-info)
         schema-version (:schema-version application)
         default-schema-datas (util/assoc-when {}
@@ -309,7 +305,7 @@
                       (cons op-doc))]                      ;; new docs
     (if-not user
       new-docs
-      (conj new-docs (make (schemas/get-schema schema-version (operations/get-applicant-doc-schema-name application)))))))
+      (conj new-docs (make (schemas/get-schema schema-version (op/get-applicant-doc-schema-name application)))))))
 
 
 (defn make-op [op-name created]
@@ -328,13 +324,13 @@
 
 (defn make-application [id operation-name x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
   {:pre [id operation-name address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
-  (let [permit-type (operations/permit-type-of-operation operation-name)
-        owner (merge (user/user-in-role user :owner :type :owner)
+  (let [permit-type (op/permit-type-of-operation operation-name)
+        owner (merge (usr/user-in-role user :owner :type :owner)
                      {:unsubscribed (= (keyword operation-name) :aiemmalla-luvalla-hakeminen)})
         op (make-op operation-name created)
         state (cond
                 info-request? :info
-                (or (user/authority? user) (user/rest-user? user)) :open
+                (or (usr/authority? user) (usr/rest-user? user)) :open
                 :else :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
@@ -363,7 +359,7 @@
                        :address             address
                        :propertyId          property-id
                        :title               address
-                       :auth                (if-let [company (some-> user :company :id c/find-company-by-id c/company->auth)]
+                       :auth                (if-let [company (some-> user :company :id com/find-company-by-id com/company->auth)]
                                               [owner company]
                                               [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
@@ -377,15 +373,15 @@
 
 (defn do-create-application
   [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
-  (let [municipality      (p/municipality-id-by-property-id propertyId)
-        permit-type       (operations/permit-type-of-operation operation)
-        organization      (organization/resolve-organization municipality permit-type)
-        scope             (organization/resolve-organization-scope municipality permit-type organization)
+  (let [municipality      (prop/municipality-id-by-property-id propertyId)
+        permit-type       (op/permit-type-of-operation operation)
+        organization      (org/resolve-organization municipality permit-type)
+        scope             (org/resolve-organization-scope municipality permit-type organization)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
-    (when-not (or (user/applicant? user) (user/user-is-authority-in-organization? user organization-id))
+    (when-not (or (usr/applicant? user) (usr/user-is-authority-in-organization? user organization-id))
       (unauthorized!))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
@@ -414,8 +410,8 @@
         link-application (some-> link-permit-id
                      domain/get-application-no-access-checking
                      meta-fields/enrich-with-link-permit-data)
-        max-incoming-link-permits (operations/get-primary-operation-metadata link-application :max-incoming-link-permits)
-        allowed-link-permit-types (operations/get-primary-operation-metadata application :allowed-link-permit-types)]
+        max-incoming-link-permits (op/get-primary-operation-metadata link-application :max-incoming-link-permits)
+        allowed-link-permit-types (op/get-primary-operation-metadata application :allowed-link-permit-types)]
 
     (when link-application
       (if (and max-incoming-link-permits (>= (count (:appsLinkingToUs link-application)) max-incoming-link-permits))
@@ -485,7 +481,7 @@
   "Namesake query implementation."
   [{:keys [state] :as application}]
   (let [state (keyword state)
-        graph (state-machine/state-graph application)
+        graph (sm/state-graph application)
         [verdict-state] (filter #{:foremanVerdictGiven :verdictGiven} (keys graph))
         target (if (= state :appealed) :appealed verdict-state)]
     (set (cons state (remove #{:canceled} (target graph))))))
@@ -499,5 +495,5 @@
 
 (defn application-org-authz-users
   [{org-id :organization :as application} & org-authz]
-  (->> (apply user/find-authorized-users-in-org org-id org-authz)
+  (->> (apply usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
