@@ -36,6 +36,7 @@
       [sade.env :as env]
       [sade.xml :as xml]
       [sade.util :as util]
+      [sade.strings :as ss]
       [sade.core :refer [def- now]]
       [lupapalvelu.application :as ns-app])
     (:import [java.net URI]))
@@ -104,11 +105,8 @@
              ]
 
             (if (.endsWith linkkiliitteeseen "_Lausunto.pdf")
-              (do
-                (fact "linkki liiteeseen contains '_test-attachment.txt'"
-                  linkkiliitteeseen => #".+_Lausunto.pdf$")
-                (fact "Liitetiedosto on PDF"
-                  attachment-string => #"PDF"))
+              (fact {:midje/description (str (ss/suffix linkkiliitteeseen "/") " is a PDF")}
+                (.contains attachment-string "PDF") => true)
               (do
                 (fact "linkki liiteeseen contains '_test-attachment.txt'"
                   linkkiliitteeseen => #".+_test-attachment.txt$")
