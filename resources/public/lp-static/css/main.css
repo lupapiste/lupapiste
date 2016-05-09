@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1462520231647');
+@import url('main-blessed1.css?z=1462779160696');
 
 /* line 255, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .verdictGiven-box, .application_summary .application_summary_info .state-indication div.sent .foremanVerdictGiven-box, .application_summary .application_summary_info .state-indication div.sent .acknowledged-box {
@@ -2924,40 +2924,40 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   transition: opacity 0.2s linear;
 }
 
-/* line 1, ../../../private/common-html/sass/views/_resources.scss */
+/* line 1, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin > .container > div {
   padding: 0px 24px;
 }
 
-/* line 5, ../../../private/common-html/sass/views/_resources.scss */
+/* line 5, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table {
   width: 72.5em;
   min-height: 144px;
 }
-/* line 9, ../../../private/common-html/sass/views/_resources.scss */
+/* line 9, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table {
   width: 96%;
 }
-/* line 11, ../../../private/common-html/sass/views/_resources.scss */
+/* line 11, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table td {
   background: #f6f6f6;
   padding: 6px;
   width: 19%;
 }
-/* line 16, ../../../private/common-html/sass/views/_resources.scss */
+/* line 16, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table td:nth-child(even) {
   background: white;
 }
-/* line 20, ../../../private/common-html/sass/views/_resources.scss */
+/* line 20, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table td div.timeline-slot {
   height: 30px;
   border-bottom: 1px solid #ccc;
 }
-/* line 23, ../../../private/common-html/sass/views/_resources.scss */
+/* line 23, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table td div.timeline-slot:hover {
   background: #dddddd;
 }
-/* line 28, ../../../private/common-html/sass/views/_resources.scss */
+/* line 28, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table td .reservation-slot {
   position: absolute;
   background-color: #fbc732;
