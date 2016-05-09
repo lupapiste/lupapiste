@@ -83,15 +83,6 @@
         (group-by :externalRef calendars))
       nil)))
 
-(defquery calendar
-  {:parameters [calendarId userId]
-   :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
-   :user-roles #{:authorityAdmin}}
-  [_]
-  (let [calendar (get-calendar calendarId userId)
-        user     (user/get-user-by-id userId)]
-    (ok :calendar (assoc calendar :name (format "%s %s" (:firstName user) (:lastName user))
-                                  :email (:email user)))))
 
 (defn- authority-admin-assoc-calendar-to-user [cals user]
   (let [reference-code-for-user (str "user-" (:id user))
@@ -101,8 +92,20 @@
       (assoc user :calendarId   (:id calendar))
       user)))
 
+(defquery calendar
+  {:parameters [calendarId userId]
+   :feature :ajanvaraus
+   :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
+   :user-roles #{:authorityAdmin}}
+  [_]
+  (let [calendar (get-calendar calendarId userId)
+        user     (user/get-user-by-id userId)]
+    (ok :calendar (assoc calendar :name (format "%s %s" (:firstName user) (:lastName user))
+                                  :email (:email user)))))
+
 (defquery calendars-for-authority-admin
-  {:user-roles #{:authorityAdmin}}
+  {:user-roles #{:authorityAdmin}
+   :feature :ajanvaraus}
   [{user :user}]
   (let [admin-in-organization-id (user/authority-admins-organization-id user)
         users                    (user/authority-users-in-organizations [admin-in-organization-id])
@@ -113,7 +116,8 @@
       (fail :resources.backend-error))))
 
 (defcommand set-calendar-enabled-for-authority
-  {:user-roles #{:authorityAdmin}}
+  {:user-roles #{:authorityAdmin}
+   :feature :ajanvaraus}
   [{{:keys [userId enabled]} :data user :user}]
   (info userId enabled)
   (if (false? enabled)
@@ -132,7 +136,8 @@
           (fail :resources.backend-error)))))
 
 (defcommand update-calendar
-  {:user-roles #{:authorityAdmin}}
+  {:user-roles #{:authorityAdmin}
+   :feature :ajanvaraus}
   [{{:keys [calendarId name organization]} :data}]
   (let [url (str "/api/resources/" calendarId)
         response (api-put-command url {:name             name
@@ -140,7 +145,8 @@
     (ok :result (:body response))))
 
 (defquery calendar-slots
-  {:user-roles #{:authorityAdmin}}
+  {:user-roles #{:authorityAdmin}
+   :feature :ajanvaraus}
   [{{:keys [calendarId year week]} :data}]
   (let [url      (str "/api/reservationslots/calendar/" calendarId)
         response (api-query url {:year year
@@ -153,7 +159,8 @@
           (fail :resources.backend-error)))))
 
 (defcommand create-calendar-slots
-  {:user-roles #{:authorityAdmin}}
+  {:user-roles #{:authorityAdmin}
+   :feature :ajanvaraus}
   [{{:keys [calendarId slots]} :data}]
   (let [url      (str "/api/reservationslots/calendar/" calendarId)
         be-slots (->BackendReservationSlots slots)
