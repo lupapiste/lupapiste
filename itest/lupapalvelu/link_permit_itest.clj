@@ -48,7 +48,7 @@
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         test-application-id       (:id test-application)]
 
-    (fact "New ya-jatkoaika requires link permit"
+    #_(fact "New ya-jatkoaika requires link permit"
       (let [new-application-id (create-app-id apikey :operation "ya-jatkoaika" :propertyId property-id) ]
         (query apikey :link-permit-required :id new-application-id) => ok?))
 
