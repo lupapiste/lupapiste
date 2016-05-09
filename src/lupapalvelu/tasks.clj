@@ -106,11 +106,11 @@
              {:name "maaraAika" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}
              {:name "toteaja" :type :string :whitelist {:roles [:authority] :otherwise :disabled}}
              {:name "toteamisHetki" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}]}
-     {:name "lasnaolijat" :type :string :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
+     {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}
-     {:name "poikkeamat" :type :string :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
+     {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}]}
-   {:name "muuTunnus" :type :string
+   {:name "muuTunnus" :type :text
     :readonly true :hidden true}])
 
 (def- task-katselmus-body-ya
@@ -210,15 +210,15 @@
         katselmus-data {:tila (get katselmus :osittainen)
                         :pitaja (get katselmus :pitaja)
                         :pitoPvm (get katselmus :pitoPvm)
-                        :lasnaolijat (get katselmus :lasnaOlijat)
-                        :huomautukset {:kuvaus (get-in katselmus [:huomautukset :huomautus] "")}
-                        :poikkeamat (get katselmus :poikkeamat)
+                        :lasnaolijat (get katselmus :lasnaOlijat "")
+                        :huomautukset {:kuvaus (get-in katselmus [:huomautukset :huomautus :kuvaus] "")}
+                        :poikkeamat (get katselmus :poikkeamat "")
                         }
         data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
               :vaadittuLupaehtona true
               :rakennus (rakennus-data-from-buildings {} buildings)
               :katselmus katselmus-data
-              :muuTunnus (get-in katselmus [:muuTunnustieto :MuuTunnus :tunnus])
+              :muuTunnus (get-in katselmus [:muuTunnustieto :MuuTunnus :tunnus] "")
               ;; There's also :MuuTunnus :sovellus - we could form a string like "Facta-8F29F.." or store just the map here, if but seems unlikely that within same organization there would be id clashes between systems
               }]
     (new-task "task-katselmus" task-name data meta source)))
