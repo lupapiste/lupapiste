@@ -224,6 +224,7 @@
    :body                       [(sc/conditional (type-pred :group) (sc/recursive #'Group)
                                                 (type-pred :table) Table
                                                 :else              Input)]
+   (opt :subtype)              sc/Keyword
    (opt :i18nkey)              sc/Str       ;;
    (opt :group-help)           sc/Str       ;; Localization key for help text displayd right after group label
    (opt :uicomponent)          sc/Keyword   ;; Component name for special components

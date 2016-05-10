@@ -77,9 +77,22 @@
 (defn- index-sorted-values [doc]
   (map second (sort-by #(util/->int (first %)) doc)))
 
+(defmulti filter-fields-by-group-subtype (fn [_ group-schema & _]
+                                           (:subtype group-schema)))
+
+(defmethod filter-fields-by-group-subtype :default [fields & _] fields)
+
+(defmethod filter-fields-by-group-subtype :foreman-tasks
+  [fields _ doc]
+  ;; Only include those foreman tasks that correspond to the the selected role.
+  (let [code (->> schemas/kuntaroolikoodi-tyonjohtaja-v2 first :body
+                  (some #(when (= (:name %) (-> doc :kuntaRoolikoodi :value))
+                           (:code %))))]
+    (filter #(contains? (set (:codes %)) code) fields)))
+
 (defn- collect-single-group
   "Build a map from the data of a single group. Groups can be in document root or inside other groups"
-  [group-schema group-doc locstring]
+  [group-schema group-doc locstring doc]
   (let [subgroups (->> (:body group-schema)
                        (filter is-printable-group-type)
                        (remove :exclude-from-pdf)
@@ -87,6 +100,7 @@
         group-schema-body (remove #(= schemas/select-one-of-key (:name %)) (:body group-schema)) ; remove _selected radioGroup
         fields (->> (filter is-field-type group-schema-body)
                     (remove :exclude-from-pdf))
+        fields (filter-fields-by-group-subtype fields group-schema doc)
         group-title (:name group-schema)
         i18name (:i18name group-schema)
         locstring (cond
@@ -121,7 +135,7 @@
 (defn- collect-groups
   "Iterate over data groups in document, building a data map of each group"
   [group-schemas doc locstring]
-  (map #(collect-single-group % (group-data % doc) locstring) group-schemas))
+  (map #(collect-single-group % (group-data % doc) locstring doc) group-schemas))
 
 (defn- collect-single-document
   "Build a map of the data of a single document. Entry point for recursive traversal of document data."
