@@ -250,7 +250,7 @@
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
-        if (doc.metadata().tila() !== "arkistoitu") {
+        if (!doc.metadata().tila || doc.metadata().tila() !== "arkistoitu") {
           doc.sendToArchive(true);
         }
       });
@@ -357,7 +357,10 @@
         .command("force-fix-tos-function-for-application", data)
         .success(function() {
           self.tosFunctionCorrectionReason(null);
-          repository.load(ko.unwrap(params.application.id));
+          repository.load(ko.unwrap(params.application.id), null, function(newApplication) {
+            docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
+            docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
+          });
         })
         .call();
     };
