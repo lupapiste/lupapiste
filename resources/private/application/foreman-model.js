@@ -117,7 +117,7 @@ LUPAPISTE.ForemanModel = function() {
                                             taskId: data.taskId,
                                             foremanAppId: val ? val : ""})
             .error(function(err) {
-              self.indicator({type: "err"});
+              hub.send("indicator", {style: "negative", message: err.text});
               self.error(err.text);
             })
             .call();
