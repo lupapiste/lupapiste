@@ -115,13 +115,14 @@
                               <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("tos-operations-enabled") -->
                               <div>
                                 <p data-bind="ltext: 'tos.function'"></p>
+                                <span class="application_summary_text">
                                 <select class="dropdown dropdown--full-width"
                                         data-bind="options: $root.tosFunctions,
                                                    optionsText: 'name',
                                                    optionsValue: 'code',
                                                    value: $root.application.tosFunction,
                                                    valueAllowUnset: true,
-                                                   enable: $root.authorization.ok('set-tos-function-for-application')" ></select>
+                                                   enable: $root.authorization.ok('set-tos-function-for-application')" ></select></span>
                               </div>
                               <!-- /ko -->
 
