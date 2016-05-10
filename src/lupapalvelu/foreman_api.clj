@@ -116,7 +116,8 @@
    :states states/all-states
    :parameters [id taskId foremanAppId]
    :input-validators [(partial action/non-blank-parameters [:id :taskId])]
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [application/validate-authority-in-drafts
+                foreman/ensure-foreman-not-linked]}
   [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]
     (if task

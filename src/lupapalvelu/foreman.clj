@@ -13,6 +13,14 @@
             [lupapalvelu.operations :as op]
             [monger.operators :refer :all]))
 
+(defn ensure-foreman-not-linked [{{foreman-app-id :foremanAppId task-id :taskId} :data} {tasks :tasks}]
+  (when (and (not (ss/blank? foreman-app-id))
+             (->> (filter (comp #{:task-vaadittu-tyonjohtaja} keyword :name :schema-info) tasks)
+                  (remove (comp #{task-id} :id))
+                  (map (comp :value :asiointitunnus :data))
+                  (some #{foreman-app-id})))
+    (fail :error.foreman-already-linked)))
+
 (defn other-project-document [application timestamp]
   (let [building-doc (domain/get-document-by-name application "uusiRakennus")
         kokonaisala (get-in building-doc [:data :mitat :kokonaisala :value])]
