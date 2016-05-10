@@ -116,9 +116,6 @@ LUPAPISTE.ForemanModel = function() {
             .command("link-foreman-task", { id: self.application().id,
                                             taskId: data.taskId,
                                             foremanAppId: val ? val : ""})
-            .success(function() {
-              self.indicator({type: "saved"});
-            })
             .error(function(err) {
               self.indicator({type: "err"});
               self.error(err.text);
