@@ -10,7 +10,7 @@
                "reminders"                  'lupapalvelu.batchrun/send-reminder-emails
                "check-verdicts"             'lupapalvelu.batchrun/check-for-verdicts
                "check-ah-verdicts"          'lupapalvelu.batchrun/check-for-asianhallinta-verdicts
-               "check-reviews"          'lupapalvelu.batchrun/check-for-reviews
+               "check-reviews"              'lupapalvelu.batchrun/poll-verdicts-for-reviews
                "fix-prev-permit-addresses"  'lupapalvelu.prev-permit/fix-prev-permit-addresses
                "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants
                "cleanup-uploaded-files"     'lupapalvelu.file-upload/cleanup-uploaded-files})
