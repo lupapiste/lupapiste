@@ -147,11 +147,21 @@
       (do (error response)
           (fail! :resources.backend-error)))))
 
-(defn- activate-calendar
+(defn- activate-resource
   [{:keys [id]}]
   (let [url      (str "/api/resources/" id "/activate")
         response (api-post-command url)]
     (info "Activating calendar" id)
+    (if (= 200 (:status response))
+      id
+      (do (error response)
+          (fail! :resources.backend-error)))))
+
+(defn- deactivate-resource
+  [{:keys [id]}]
+  (let [url      (str "/api/resources/" id "/deactivate")
+        response (api-post-command url)]
+    (info "Deactivating calendar" id)
     (if (= 200 (:status response))
       id
       (do (error response)
@@ -163,18 +173,30 @@
         existing-calendar (find-calendar-for-user-and-organization userId organization)]
     (when-not (user/user-is-authority-in-organization? (user/with-org-auth target-user) organization)
       (error "Tried to enable a calendar with invalid user-organization pairing: " userId organization)
-      (fail! :error.unknown-operation))
+      (unauthorized!))
     (if existing-calendar
-      (activate-calendar existing-calendar)
+      (activate-resource existing-calendar)
       (create-calendar userId target-user organization))))
+
+(defn- disable-calendar
+  [userId organization]
+  (let [target-user       (user/get-user-by-id userId)
+        existing-calendar (find-calendar-for-user-and-organization userId organization)]
+    (when-not (user/user-is-authority-in-organization? (user/with-org-auth target-user) organization)
+      (error "Tried to disable a calendar with invalid user-organization pairing: " userId organization)
+      (unauthorized!))
+    (when-not existing-calendar
+      (error "Tried to disable a calendar with invalid user-organization pairing: " userId organization)
+      (fail! :error.unknown))
+    (deactivate-resource existing-calendar)))
 
 (defcommand set-calendar-enabled-for-authority
   {:user-roles #{:authorityAdmin}
    :feature :ajanvaraus}
   [{{:keys [userId enabled]} :data user :user}]
   (if enabled
-    (ok :calendarId (enable-calendar userId (user/authority-admins-organization-id user)))
-    (fail! :not-implemented)))
+    (ok :calendarId (enable-calendar userId (user/authority-admins-organization-id user)) :enabled true)
+    (ok :calendarId (disable-calendar userId (user/authority-admins-organization-id user)) :disabled true)))
 
 (defquery calendar-slots
   {:user-roles #{:authorityAdmin}
