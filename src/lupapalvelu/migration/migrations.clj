@@ -2117,17 +2117,14 @@
                                    {:statements.reminder-sent {$type 10}}
                                    {:statements.metadata {$type 10}}]}))
 
-; Updating only non-submitted applications, the change has no value for others
-(defmigration hakija-tj
+(defmigration hakija-tj-v2
   {:apply-when (pos? (mongo/count :applications {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
-                                                 :documents.schema-info.name "hakija-r"
-                                                 :state {$in [:draft :open]}}))}
+                                                 :documents.schema-info.name "hakija-r"}))}
   (letfn [(pred [doc] (= "hakija-r" (get-in doc [:schema-info :name])))]
     (reduce + 0
       (for [{:keys [id documents]} (mongo/select :applications
                                      {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
-                                     :documents.schema-info.name "hakija-r"
-                                     :state {$in [:draft :open]}}
+                                      :documents.schema-info.name "hakija-r"}
                                      [:documents])]
         (let [updates {$set (mongo/generate-array-updates :documents documents pred "schema-info.name" "hakija-tj")}]
           (mongo/update-n :applications {:_id id} updates))))))
