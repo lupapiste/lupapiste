@@ -93,7 +93,7 @@ LUPAPISTE.ForemanModel = function() {
         var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
         var linkedForemanApp = _.find(self.foremanApplications(), { "id": asiointitunnus});
         var selectedForeman = ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus);
-        var selectableForemen = ko.computed(function() {
+        var selectableForemen = ko.pureComputed(function() {
           return _.filter(self.foremanApplications(), function(app) {
             return !_.includes(linkedForemanApps(), app.id) || app.id === selectedForeman();
           });
