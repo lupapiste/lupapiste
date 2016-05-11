@@ -398,7 +398,7 @@
         ;; reviewless-apps (filter #(some task-is-review? (:tasks %)) apps) ;; initial too-conservative filter
         eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
     (doall
-     (map (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
+     (pmap (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
 
 (defn check-for-reviews [& args]
   (mongo/connect!)
