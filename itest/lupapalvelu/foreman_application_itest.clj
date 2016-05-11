@@ -87,21 +87,34 @@
                        (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.notice-not-submittable))
                  (command sonja :check-for-verdict :id application-id) => ok?
                  (fact "ok after link-permit has verdict"
-                       (command apikey :submit-application :id foreman-application-id) => ok?)) (fact "Link foreman application to task"
-                                                                                                      (let [apikey                       mikko
-                                                                                                            application (create-and-submit-application apikey)
-                                                                                                            _ (command sonja :check-for-verdict :id (:id application))
-                                                                                                            application (query-application apikey (:id application))
-                                                                                                            {foreman-application-id :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "" :foremanEmail "")
-                                                                                                            tasks (:tasks application)
-                                                                                                            foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks))]
-                                                                                                        (command apikey :link-foreman-task :id (:id application) :taskId (:id foreman-task) :foremanAppId foreman-application-id) => ok?
-                                                                                                        (let [app (query-application apikey (:id application))
-                                                                                                              updated-tasks (:tasks app)
-                                                                                                              updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]
-                                                                                                          (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id)))
+                       (command apikey :submit-application :id foreman-application-id) => ok?))
+          (facts "Link foreman application to task"
+            (let [apikey                       mikko
+                  application (create-and-submit-application apikey)
+                  _ (command sonja :check-for-verdict :id (:id application))
+                  application (query-application apikey (:id application))
+                  {foreman-application-id-1 :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "" :foremanEmail "")
+                  {foreman-application-id-2 :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "" :foremanEmail "")
+                  tasks (:tasks application)
+                  foreman-tasks (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks)]
 
-    ; delete verdict for next steps
+              (fact "link first foreman"
+                (command apikey :link-foreman-task :id (:id application) :taskId (:id (first foreman-tasks)) :foremanAppId foreman-application-id-1) => ok?
+                (let [app (query-application apikey (:id application))
+                      updated-tasks (:tasks app)
+                      updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]
+                  (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id-1))
+
+              (fact "cannot link same foreman to another task"
+                (command apikey :link-foreman-task :id (:id application) :taskId (:id (second foreman-tasks)) :foremanAppId foreman-application-id-1) => (partial expected-failure? "error.foreman-already-linked"))
+
+              (fact "linked foreman can be changed on task"
+                (command apikey :link-foreman-task :id (:id application) :taskId (:id (first foreman-tasks)) :foremanAppId foreman-application-id-2) => ok?)
+
+              (fact "another foreman can now be linked to first task"
+                (command apikey :link-foreman-task :id (:id application) :taskId (:id (second foreman-tasks)) :foremanAppId foreman-application-id-1) => ok?)))
+
+          ;; delete verdict for next steps
           (let [app (query-application mikko application-id)
                 verdict-id (-> app :verdicts first :id)
                 verdict-id2 (-> app :verdicts second :id)]
