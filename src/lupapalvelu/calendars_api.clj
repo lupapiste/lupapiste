@@ -5,24 +5,7 @@
             [schema.core :as sc :refer [defschema]]
             [sade.http :as http]
             [sade.env :as env]
-            [lupapalvelu.user :as user]
-            [clojure.string :as string])
-  (:import (org.joda.time DateTime)))
-
-(defschema FrontendCalendarSlot
-  {:id            sc/Int
-   :startTime     sc/Int
-   :endTime       sc/Int
-   :status        (sc/enum :available :reserved)})
-
-(def LocalDateTimeRange
-  {:start DateTime
-   :end   DateTime})
-
-(defschema BackendReservationSlot
-  {:time      LocalDateTimeRange
-   :services [sc/Str]
-   :capacity  sc/Int})
+            [lupapalvelu.user :as user]))
 
 (defn- ->FrontendReservationSlots [backend-slots]
   (map (fn [s] {:id        (:id s)
@@ -43,20 +26,29 @@
 
 (defn- api-query
   ([action]
-    (api-call http/get action {}))
+   (api-call http/get action {}))
   ([action params]
-    (api-call http/get action {:query-params params})))
+   (api-call http/get action {:query-params params})))
 
 (defn- api-post-command
-  ([action]
-   (api-post-command action {}))
-  ([action request-body]
-    (api-call http/post action {:body (clj-http.client/json-encode request-body)
-                                :content-type :json})))
+  [action request-body]
+  (api-call http/post action {:body (clj-http.client/json-encode request-body)
+                                :content-type :json}))
 
 (defn- api-put-command [action request-body]
   (api-call http/put action {:body (clj-http.client/json-encode request-body)
                              :content-type :json}))
+
+(defn- post-command
+  ([url]
+   (post-command url []))
+  ([url request-body]
+   (let [response (api-post-command url request-body)]
+     (when-not (= 200 (:status response))
+       (error response)
+       (fail! :resources.backend-error))
+     (:body response))))
+
 
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
@@ -137,35 +129,22 @@
 
 (defn- create-calendar
   [userId target-user organization]
-  (let [url          "/api/resources/"
-        response    (api-post-command url {:name             (str (:firstName target-user) " " (:lastName target-user))
-                                           :organizationCode organization
-                                           :externalRef      (calendar-ref-for-user userId)})]
-    (info "Creating a new calendar" userId organization)
-    (if (= 200 (:status response))
-      (:body response)
-      (do (error response)
-          (fail! :resources.backend-error)))))
+  (info "Creating a new calendar" userId organization)
+  (post-command "/api/resources" {:name             (str (:firstName target-user) " " (:lastName target-user))
+                                  :organizationCode organization
+                                  :externalRef      (calendar-ref-for-user userId)}))
 
 (defn- activate-resource
   [{:keys [id]}]
-  (let [url      (str "/api/resources/" id "/activate")
-        response (api-post-command url)]
-    (info "Activating calendar" id)
-    (if (= 200 (:status response))
-      id
-      (do (error response)
-          (fail! :resources.backend-error)))))
+  (info "Activating calendar" id)
+  (post-command (str "/api/resources/" id "/activate"))
+  id)
 
 (defn- deactivate-resource
   [{:keys [id]}]
-  (let [url      (str "/api/resources/" id "/deactivate")
-        response (api-post-command url)]
-    (info "Deactivating calendar" id)
-    (if (= 200 (:status response))
-      id
-      (do (error response)
-          (fail! :resources.backend-error)))))
+  (info "Deactivating calendar" id)
+  (post-command (str "/api/resources/" id "/deactivate"))
+  id)
 
 (defn- enable-calendar
   [userId organization]
@@ -186,7 +165,7 @@
       (error "Tried to disable a calendar with invalid user-organization pairing: " userId organization)
       (unauthorized!))
     (when-not existing-calendar
-      (error "Tried to disable a calendar with invalid user-organization pairing: " userId organization)
+      (info "Tried to disable a calendar but no such calendar could not be found:" userId organization)
       (fail! :error.unknown))
     (deactivate-resource existing-calendar)))
 
@@ -200,11 +179,9 @@
 
 (defquery calendar-slots
   {:user-roles #{:authorityAdmin}
-   :feature :ajanvaraus}
+   :feature    :ajanvaraus}
   [{{:keys [calendarId year week]} :data}]
-  (let [url      (str "/api/reservationslots/calendar/" calendarId)
-        response (api-query url {:year year
-                                 :week week})]
+  (let [response (api-query (str "/api/reservationslots/calendar/" calendarId) {:year year :week week})]
     (if (= 200 (:status response))
       (let [be-slots (:body response)
             slots    (->FrontendReservationSlots be-slots)]
@@ -214,9 +191,8 @@
 
 (defcommand create-calendar-slots
   {:user-roles #{:authorityAdmin}
-   :feature :ajanvaraus}
+   :feature    :ajanvaraus}
   [{{:keys [calendarId slots]} :data}]
-  (let [url      (str "/api/reservationslots/calendar/" calendarId)
-        be-slots (->BackendReservationSlots slots)
-        response (api-post-command url be-slots)]
-    (ok :result (:body response))))
+  (->> (->BackendReservationSlots slots)
+       (post-command (str "/api/reservationslots/calendar/" calendarId))
+       (ok :result)))
