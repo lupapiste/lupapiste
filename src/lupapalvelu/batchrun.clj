@@ -3,7 +3,7 @@
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
-            [clojure.set]
+            [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.authorization :as auth]
@@ -289,24 +289,34 @@
     (doall
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
-          (try
-            (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+          (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+            (try
               (logging/with-logging-context {:applicationId id}
                 (if-not (s/blank? url)
-
                   (let [command (assoc (application->command app) :user eraajo-user :created (now))
                         result (verdict/do-check-for-verdict command)]
                     (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
-                      (notifications/notify! :application-verdict command)))
+                      (notifications/notify! :application-verdict command))
+                    (when (fail? result)
+                      (logging/log-event :error {:run-by "Automatic verdicts checking"
+                                                 :event "Failed to check verdict"
+                                                 :failure result
+                                                 :organization {:id organization :permit-type permitType}
+                                                 }))
+                    )
 
                   (logging/log-event :info {:run-by "Automatic verdicts checking"
                                             :event "No Krysp WFS url defined for organization"
-                                            :organization {:id organization :permit-type permitType}}))))
-            (catch Throwable t
-              (errorf "Unable to get verdict for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
-        apps))))
+                                            :organization {:id organization :permit-type permitType}})))
+              (catch Throwable t
+                (logging/log-event :error {:run-by "Automatic verdicts checking"
+                                           :event "Unable to get verdict from backend"
+                                           :exception-message (.getMessage t)
+                                           :application-id id
+                                           :organization {:id organization :permit-type permitType}}))
+              ))) apps))))
 
 (defn check-for-verdicts [& args]
   (mongo/connect!)
@@ -338,9 +348,14 @@
             result (try
                      (ah-verdict/process-ah-verdict zip-path ftp-user eraajo-user)
                      (catch Throwable e
-                       (error e "Error processing zip-file in asianhallinta verdict batchrun")
+                       (logging/log-event :error {:run-by "Automatic ah-verdicts checking"
+                                                  :event "Unable to process ah-verdict zip file"
+                                                  :exception-message (.getMessage e)})
+                       ;; (error e "Error processing zip-file in asianhallinta verdict batchrun")
                        (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
+        (logging/log-event :info {:run-by "Automatic ah-verdicts checking"
+                                  :event (if (ok? result)  "Succesfully processed ah-verdict" "Failed to process ah-verdict") :zip-path zip-path})
         (when-not (fs/rename zip target)
           (errorf "Failed to rename %s to %s" zip-path target))))))
 
@@ -349,3 +364,38 @@
     (mongo/connect!)
     (fetch-asianhallinta-verdicts)
     (mongo/disconnect!)))
+
+(defn batchrun-user-for-review-fetch [orgs-by-id]
+  ;; modified from fetch-verdicts.
+  (let [org-ids (keys orgs-by-id)
+        eraajo-user (user/batchrun-user org-ids)]
+    eraajo-user))
+
+(defn orgs-for-review-fetch []
+  (let [orgs-with-wfs-url-defined-for-r (organization/get-organizations
+                                                   {:krysp.R.url {$exists true}}
+                                                   {:krysp 1})
+        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-r)]
+    orgs-by-id))
+
+(defn fetch-reviews-for-application [orgs-by-id eraajo-user {:keys [id permitType organization] :as app}]
+  (try
+    (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+    (logging/with-logging-context {:applicationId id}
+      (if-not (s/blank? url)
+        ;; url means there's a defined location (eg sftp) for polling xml verdicts
+        (let [command (assoc (application->command app) :user eraajo-user :created (now))
+              result (verdict/do-check-for-reviews command)]
+          result))))
+    (catch Throwable t
+      (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
+
+(defn poll-verdicts-for-reviews []
+  ;; modified from fetch-verdicts.
+  (let [orgs-by-id (orgs-for-review-fetch)
+        eligible-application-states (set/difference states/post-verdict-states states/terminal-states)
+        apps (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}})
+        ;; reviewless-apps (filter #(some task-is-review? (:tasks %)) apps) ;; initial too-conservative filter
+        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+    (doall
+     (map (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))

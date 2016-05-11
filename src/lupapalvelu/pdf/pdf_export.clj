@@ -15,6 +15,9 @@
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream File]
            [javax.imageio ImageIO]))
 
+; *** Deprecated ****
+; This whole class is deprecated. Use libre-template instead.
+
 ; ----------------------- combining schema and data
 
 (def- not-nil? (complement nil?))
@@ -202,6 +205,7 @@
     (loc "applicant") (clojure.string/join ", " (:_applicantIndex app))
     (loc "selectm.source.label.edit-selected-operations") (get-operations app)))
 
+; Deprecated, statement is replaced with replaced with libre-template
 (defn- collect-statement-fields [statements]
   (map
     (fn [{:keys [requested given status text dueDate reply] {giver :name} :person :as stm}]

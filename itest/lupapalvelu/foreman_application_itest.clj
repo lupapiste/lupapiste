@@ -26,11 +26,8 @@
               link-to-application          (first (application :appsLinkingToUs))
               foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
-          (fact "Initial permit subtype is 'tyonjohtaja-hakemus'"
-                (:permitSubtype foreman-application) => "tyonjohtaja-hakemus")
-
-          (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
-                (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
+          (fact "Initial permit subtype is blank"
+            (:permitSubtype foreman-application) => ss/blank?)
 
           (fact "Foreman application contains link to application"
                 (:id foreman-link-permit-data) => application-id)
@@ -55,7 +52,7 @@
 
                 (fact "Hakija docs are equal, expect the userId"
                       (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
-                            foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-r")))]
+                            foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-tj")))]
 
                         hakija-doc-data => map?
                         foreman-hakija-doc-data => map?
@@ -71,6 +68,12 @@
                   (:foremanRole foreman-application) => ss/blank?
                   (:foreman application-after-update) => "bar foo"
                   (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
+
+          (fact "Can't submit foreman app because subtype is not selected"
+            (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.type-not-selected))
+
+          (fact "Update subtype to 'tyonjohtaja-ilmoitus'"
+                (command apikey :change-permit-sub-type :id foreman-application-id :permitSubtype "tyonjohtaja-ilmoitus") => ok?)
 
           (fact "Can't submit foreman app before original link-permit-app is submitted"
                 (:submittable (query-application apikey foreman-application-id)) => false)
@@ -259,21 +262,27 @@
     (fact "can not link foreman application with a second application"
       (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId other-r-app-id) => fail?)
 
+    (fact "applicant can not remove link permit on foreman application"
+      (command mikko :remove-link-permit-by-app-id :id foreman-app-id3 :linkPermitId history-base-app-id) => unauthorized?)
+
     (fact "can not link foreman application with YA application"
-      (fact "Setup: remove old link"
-        (command mikko :remove-link-permit-by-app-id :id foreman-app-id3 :linkPermitId history-base-app-id) => ok?)
+      (fact "Setup: comment for opening application + remove old link"
+        (command mikko :add-comment :id foreman-app-id3 :text "please, remove link permit" :target {:type "application"} :roles [] :openApplication true) => ok?
+        (command sonja :remove-link-permit-by-app-id :id foreman-app-id3 :linkPermitId history-base-app-id) => ok?)
 
       (command mikko :add-link-permit :id foreman-app-id3 :linkPermitId ya-app-id) => fail?)
 
     (fact "can not link foreman applications to each other"
-      (fact "Setup: remove old link"
-        (command mikko :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
+      (fact "Setup: comment for opening application + remove old link"
+        (command mikko :add-comment :id foreman-app-id4 :text "please, remove link permit" :target {:type "application"} :roles [] :openApplication true) => ok?
+        (command sonja :remove-link-permit-by-app-id :id foreman-app-id4 :linkPermitId history-base-app-id) => ok?)
       (fact "try to link foreman application"
         (command mikko :add-link-permit :id foreman-app-id4 :linkPermitId foreman-app-id5) => fail?))
 
     (fact "Link permit may be a single paper permit"
-      (fact "Setup: remove old link"
-        (command mikko :remove-link-permit-by-app-id :id foreman-app-id5 :linkPermitId history-base-app-id) => ok?)
+      (fact "Setup: comment for opening application + remove old link"
+        (command mikko :add-comment :id foreman-app-id5 :text "please, remove link permit" :target {:type "application"} :roles [] :openApplication true) => ok?
+        (command sonja :remove-link-permit-by-app-id :id foreman-app-id5 :linkPermitId history-base-app-id) => ok?)
       (fact "1st succeeds"
         (command mikko :add-link-permit :id foreman-app-id5 :linkPermitId "other ID 1") => ok?)
       (fact "2nd fails"
@@ -335,6 +344,20 @@
                                  "foo@example.com"
                                  "Kaino Solita <kaino@solita.fi>"])))))
 
+    (fact "Create foreman application with the applicant as foreman"
+          (let [{application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+                {foreman-app-id :id} (command apikey :create-foreman-application :id application-id
+                                              :taskId "" :foremanRole "ei tiedossa" :foremanEmail "pena@example.com") => truthy
+                {auth-array :auth} (query-application pena foreman-app-id) => truthy
+                {orig-auth :auth}  (query-application pena application-id)]
+            (fact "Pena is the sole auth and owner of the foreman application"
+                  (count auth-array) => 1
+                  (:username (some #(when (= (:role %) "owner") %) auth-array)) => "pena")
+            (fact "Pena is the sole auth and owner of the original application"
+                  (count orig-auth) => 1
+                  (:username (some #(when (= (:role %) "owner") %) orig-auth)) => "pena")))
+
+
     (fact "Contact person is added to new foreman app, when its auth is added to original application"
       (let [_ (command apikey :invite-with-role :id application-id :email "contact@example.com" :text "" :documentName ""
                      :documentId "" :path "" :role "writer") => ok?
@@ -371,4 +394,3 @@
         (fact "Teppo is owner" (:username (some #(when (= (:role %) "owner") %) auth-array)) => "teppo@example.com")
         (fact "Teppo is not double authed"
           (count (filter #(= (:username %) "teppo@example.com") auth-array)) => 1)))))
-

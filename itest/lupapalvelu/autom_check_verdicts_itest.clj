@@ -1,15 +1,17 @@
 (ns lupapalvelu.autom-check-verdicts-itest
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [sade.core :refer [now]]
+            [sade.core :refer [now fail]]
             [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.integrations-api]
             [lupapalvelu.verdict-api]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.fixture.core :as fixture]
-            [lupapalvelu.batchrun :as batchrun]))
+            [lupapalvelu.batchrun :as batchrun]
+            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]))
 
 (def db-name (str "test_autom-check-verdicts-itest_" (now)))
 
@@ -27,10 +29,14 @@
 
 (facts "Automatic checking for verdicts"
   (mongo/with-db db-name
-    (let [application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
+    (let [
+
+          application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
           application-id-submitted      (:id application-submitted)
+
           application-sent              (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 18")
           application-id-sent           (:id application-sent)
+
           application-verdict-given     (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 19")
           application-id-verdict-given  (:id application-verdict-given)]
 
@@ -49,6 +55,25 @@
 
       (fact "checking verdicts and sending emails to the authorities related to the applications"
         (count (batchrun/fetch-verdicts)) => pos?)
+
+      (fact "batchrun check-for-verdicts logs :error on exception"
+        ;; make sure logging functions are called in expected ways
+        (count  (batchrun/fetch-verdicts)) => anything
+        (provided
+          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select :organizations anything anything) => [{:foo 42}]
+          (clojure.string/blank? nil) =throws=> (IllegalArgumentException.)
+          (lupapalvelu.logging/log-event :error anything) => nil))
+
+      (fact "batchrun check-for-verdicts logs failure details"
+        ;; make sure logging functions are called in expected ways
+        (batchrun/fetch-verdicts) => anything
+        (provided
+          (mongo/select :applications anything) => [{:id "FOO-42", :permitType "foo", :organization "bar"}]
+          (mongo/select :organizations anything anything) => [{:foo 42}]
+          (clojure.string/blank? anything) => false
+          (lupapalvelu.logging/log-event :error anything) => nil
+          (lupapalvelu.verdict/do-check-for-verdict anything) => (fail :bar)))
 
       (fact "Verifying the sent emails"
         (Thread/sleep 100) ; batchrun includes a parallel operation

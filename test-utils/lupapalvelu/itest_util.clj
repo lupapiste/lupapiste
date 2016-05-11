@@ -337,6 +337,10 @@
   ([apikey id notice]
     (command apikey :add-authority-notice :id id :authorityNotice notice)))
 
+(defn print-and-return [tag v]
+  (println tag v)
+  v)
+
 (defn query-application
   "Fetch application from server.
    Asserts that application is found and that the application data looks sane.
@@ -368,8 +372,8 @@
             (:documents %)
             (:attachments %)
             (every? (fn [a] (or (empty? (:versions a)) (= (:latestVersion a) (last (:versions a))))) (:attachments %))]}
-    (let [{:keys [application ok]} (f apikey :application :id id)]
-      (assert ok)
+    (let [{:keys [application ok text]} (f apikey :application :id id)]
+      (assert ok (str "not ok: " text))
       application)))
 
 (defn query-bulletin
@@ -434,12 +438,12 @@
     (query-application apikey id)))
 
 (defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
-  (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id)
+  (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id :lang "fi")
         verdict-id (or (:verdictId new-verdict-resp))]
     (if-not (ok? new-verdict-resp)
       new-verdict-resp
       (do
-       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "")
+       (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "" :lang "fi")
        (assoc
          (f apikey :publish-verdict :id application-id :verdictId verdict-id)
          :verdict-id verdict-id)))))
@@ -490,6 +494,7 @@
 
 (defn local-command [apikey command-name & args]
   (binding [*request* (make-local-request apikey)]
+    ;; (println "sending local-command" (if (map? (first args)) (first args) (apply hash-map args)) *request*)
     (web/execute-command (name command-name) (if (map? (first args)) (first args) (apply hash-map args)) *request*)))
 
 (defn local-query [apikey query-name & args]
@@ -652,7 +657,7 @@
         give-statement-result (command apikey :give-statement
                                 :id application-id
                                 :statementId statement-id
-                                :status "puoltaa"
+                                :status "puollettu"
                                 :lang "fi"
                                 :text "Annanpa luvan urakalle.")]
     (query-application apikey application-id)))

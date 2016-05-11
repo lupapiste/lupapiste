@@ -242,7 +242,7 @@
                         (when (env/dev-mode?)
                           ["dummy-api-client.js"]))}
 
-   :verdict-attachment-prints {:depends [:common-html]
+   :verdict-attachment-prints {:depends [:common-html :ui-components]
                                :html ["verdict-attachment-prints-order-template.html"
                                       "verdict-attachment-prints-order-history-template.html"
                                       "verdict-attachment-prints-multiselect.html"]

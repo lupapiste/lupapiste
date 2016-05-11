@@ -517,7 +517,7 @@
  <office:master-styles>
   <style:master-page style:name="Standard" style:page-layout-name="pm1">
    <style:footer>
-    <text:p text:style-name="P1"><text:span text:style-name="T1">FOOTER_DATE</text:span> <text:span text:style-name="T1">FOOTER_PAGE </text:span><text:page-number text:select-page="current">2</text:page-number> / <text:page-count>2</text:page-count></text:p>
+    <text:p text:style-name="P1"><text:span text:style-name="T1">FOOTER_DATE</text:span> <text:span text:style-name="T1">FOOTER_PAGE</text:span><text:page-number text:select-page="current">2</text:page-number> / <text:page-count>2</text:page-count></text:p>
    </style:footer>
   </style:master-page>
  </office:master-styles>

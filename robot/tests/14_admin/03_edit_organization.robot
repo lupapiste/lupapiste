@@ -25,17 +25,16 @@ Admin edits organization with id 753-R
   Wait until  Element should be visible  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
   Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
   Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="application-enabled-753-R"]/input
-  Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="open-inforequest-753-R"]/input
+  Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
   Input text by test id  open-inforequest-email-753-R  root@localhost
   Click enabled by test id  save-753-R
   Wait Until  Positive indicator should be visible
   Go back
 
 Organization 753-R has now inforequest and application enabled
-  Wait Until  Element should be visible  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="application-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-753-R"]  true
+  Wait Until  Element should be visible  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  neuvonta
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="application-enabled-753-R"]  hakemukset
   Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
 
 Admin sets application disabled
@@ -49,10 +48,9 @@ Admin sets application disabled
   Go back
 
 Organization 753-R has now inforequest enabled and application disabled
-  Wait Until  Element should be visible  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="application-enabled-753-R"]  false
-  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-753-R"]  true
+  Wait Until  Element should be visible  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  neuvonta
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="application-enabled-753-R"]  -
   Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
   [Teardown]  Logout
 

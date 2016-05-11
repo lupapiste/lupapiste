@@ -1,19 +1,16 @@
 (ns lupapalvelu.pdf.libreoffice-template-verdict-test
   (:require
-    [clojure.java.io :refer [writer reader resource]]
     [clojure.string :as s]
-    [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+    [taoensso.timbre :refer [trace debug]]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
-    [sade.util :as util]
-    [sade.core :as sade]
     [lupapalvelu.organization :refer :all]
     [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
     [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
-    [lupapalvelu.pdf.libre-template-test :refer :all])
-  (:import (java.io File StringWriter)))
+    [lupapalvelu.pdf.libreoffice-template-base-test :refer :all])
+  (:import (java.io File)))
 
-(def applicant-index #'lupapalvelu.pdf.libreoffice-template-verdict/applicant-index)
+(def applicant-index #'lupapalvelu.pdf.libreoffice-template/applicant-index)
 (fact "Applicant index"
       (applicant-index application2) => '[["Testaaja Testi"]])
 
@@ -59,10 +56,6 @@
                paatos (nth (:paatokset verdict) 0)]
              (verdict-signatures verdict paatos) => '[["Tytti M\u00e4ntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
 
-
-(defn- start-pos [res]
-  (first (first (filter #(s/includes? (second %) "</draw:frame>") (map-indexed vector res)))))
-
 (background
   (get-organization "753-R") => {:name {:fi "org-name-fi"}})
 
@@ -90,6 +83,7 @@
                (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
                (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
                ;;TODO: test rest of the lines
+               (fact {:midje/description (str " verdict libre document attachments ")} (nth res (+ pos 62)) => #(s/includes? % "SomeFile2.pdf"))
                ))))
 
 (facts "Verdict-contract export non-krysp "
@@ -97,16 +91,16 @@
            (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
              (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
              (let [res (s/split (slurp tmp-file) #"\r?\n")
-                   pos (start-pos res)]
-               (.delete tmp-file)
-               (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "userInfo.company.contract")))
-               (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
-               (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
-               (fact {:midje/description (str " verdict libre document sijainti ")} (nth res (+ pos 4)) => #(s/includes? % "Korpikuusen kannon alla 6"))
-               (fact {:midje/description (str " verdict libre document osapuolet 1 ")} (nth res (+ pos 18)) => #(s/includes? % "org-name-fi / Tytti M\u00e4ntyoja"))
-               (fact {:midje/description (str " verdict libre document osapuolet 2 ")} (nth res (+ pos 26)) => #(s/includes? % "Testaaja Testi"))
-               (fact {:midje/description (str " verdict libre document sis\u00e4lt\u00f6 ")} (nth res (+ pos 34)) => #(s/includes? % "Lorem ipsum dolor sit amet"))
-               (fact {:midje/description (str " verdict libre document signature 1 ")} (nth res (+ pos 61)) => #(s/includes? % "Tytti M\u00e4ntyoja"))
-               (fact {:midje/description (str " verdict libre document signature 2 ")} (nth res (+ pos 74)) => #(s/includes? % "Matti Mallikas"))
-               (fact {:midje/description (str " verdict libre document last signature ")} (nth res (+ pos 87)) => #(s/includes? % "Minna Mallikas"))
+                   doc-start-row (start-pos res)]
+               #_(.delete tmp-file)
+               (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res doc-start-row) => #(s/includes? % (localize lang "userInfo.company.contract")))
+               (fact {:midje/description (str " verdict libre document id ")} (nth res (+ doc-start-row 1)) => #(s/includes? % "LP-000-0000-0000"))
+               (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ doc-start-row 2)) => #(s/includes? % "20160043"))
+               (fact {:midje/description (str " verdict libre document sijainti ")} (nth res (+ doc-start-row 4)) => #(s/includes? % "Korpikuusen kannon alla 6"))
+               (fact {:midje/description (str " verdict libre document osapuolet 1 ")} (nth res (+ doc-start-row 18)) => #(s/includes? % "org-name-fi / Tytti M\u00e4ntyoja"))
+               (fact {:midje/description (str " verdict libre document osapuolet 2 ")} (nth res (+ doc-start-row 26)) => #(s/includes? % "Testaaja Testi"))
+               (fact {:midje/description (str " verdict libre document sis\u00e4lt\u00f6 ")} (nth res (+ doc-start-row 34)) => #(s/includes? % "Lorem ipsum dolor sit amet"))
+               (fact {:midje/description (str " verdict libre document signature 1 ")} (nth res (+ doc-start-row 69)) => #(s/includes? % "Tytti M\u00e4ntyoja"))
+               (fact {:midje/description (str " verdict libre document signature 2 ")} (nth res (+ doc-start-row 82)) => #(s/includes? % "Matti Mallikas"))
+               (fact {:midje/description (str " verdict libre document last signature ")} (nth res (+ doc-start-row 95)) => #(s/includes? % "Minna Mallikas"))
                ))))

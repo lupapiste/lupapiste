@@ -3,6 +3,7 @@
         id="authority-select-template">
   <p data-bind="ltext: 'application.assignee'"></p>
   <!-- ko if: canEdit -->
+  <span class="application_summary_text">
   <select data-test-id="assignee-select"
           class="dropdown dropdown--full-width"
           data-bind="disable: pending,
@@ -12,7 +13,7 @@
                      optionsValue: 'id',
                      optionsCaption: loc('choose'),
                      valueAllowUnset: true,
-                     optionsAfterRender: disableAuthorities"></select>
+                     optionsAfterRender: disableAuthorities"></select></span>
   <!-- /ko -->
   <!-- ko ifnot: canEdit -->
   <span data-bind="text: fullName( oldAssignee )"

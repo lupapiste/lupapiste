@@ -204,6 +204,7 @@
 
 (def- applicant-doc-schema-name-hakija     "hakija")
 (def- applicant-doc-schema-name-R          "hakija-r")
+(def- applicant-doc-schema-name-R-TJ       "hakija-tj")
 (def- applicant-doc-schema-name-YA         "hakija-ya")
 (def- applicant-doc-schema-name-ilmoittaja "ilmoittaja")
 (def- applicant-doc-schema-name-hakija-KT  "hakija-kt")
@@ -817,8 +818,8 @@
                                  :asianhallinta false}
    :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                  :permit-type permit/R
-                                 :applicant-doc-schema applicant-doc-schema-name-R
-                                 :subtypes [:tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
+                                 :applicant-doc-schema applicant-doc-schema-name-R-TJ
+                                 :subtypes [(keyword "") :tyonjohtaja-hakemus :tyonjohtaja-ilmoitus]
                                  :state-graph-resolver tyonjohtaja-state-machine-resolver
                                  :required ["hankkeen-kuvaus-minimum"]
                                  :attachments []
@@ -1040,20 +1041,23 @@
 (doseq [[k op] operations]
   (let [v (sc/check Operation op)]
     (assert (nil? v) (str k \space v))))
+
 ;;
 ;; Functions
 ;;
 
-(def link-permit-required-operations
-  (reduce (fn [result [operation metadata]]
-            (if (pos? (:min-outgoing-link-permits metadata))
-              (conj result operation)
-              result)) #{} operations))
-
 (defn get-operation-metadata
   "First form returns all metadata for operation. Second form returns value of given metadata."
-  ([operation-name] (when operation-name (operations (keyword operation-name))))
-  ([operation-name metadata-key] (when operation-name ((keyword metadata-key) (operations (keyword operation-name))))))
+  ([operation-name] (get-in operations [(keyword operation-name)]))
+  ([operation-name metadata-key] (get-in operations [(keyword operation-name) (keyword metadata-key)])))
+
+(def link-permit-required-operations
+  (->> (filter (comp pos? :min-outgoing-link-permits val) operations)
+       keys
+       set))
+
+(defn required-link-permits [operation-name]
+  (get-operation-metadata operation-name :min-outgoing-link-permits))
 
 (defn get-primary-operation-metadata
   ([{op :primaryOperation}] (get-operation-metadata (:name op)))

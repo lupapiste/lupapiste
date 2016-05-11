@@ -36,7 +36,7 @@
     (:limit account-type)))
 
 (def Company {:name                          (ssc/min-max-length-string 1 64)
-              :y                             ssc/FinnishY                  
+              :y                             ssc/FinnishY
               :accountType                   (apply sc/enum "custom" (map (comp name :name) account-types))
               :customAccountLimit            (sc/maybe sc/Int)
               (sc/optional-key :reference)   (sc/maybe (ssc/max-length-string 64))
@@ -116,8 +116,10 @@
   [id]
   (or (find-company-by-id id) (fail! :company.not-found)))
 
-(defn find-companies []
-  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit] (array-map :name 1)))
+(defn find-companies
+  "Returns all data off all companies"
+  []
+  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :reference :document] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id}))
@@ -299,10 +301,10 @@
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
         auth      (assoc (company->auth company)
-                    :id "" ; prevents access to application before accepting invite
-                    :role ""
+                    :id      "" ; prevents access to application before accepting invite
+                    :role    "reader"
                     :inviter (usr/summary caller)
-                    :invite {:user {:id company-id}})
+                    :invite  {:user {:id company-id}})
         admins    (find-company-admins company-id)
         application-id (:id application)
         token-id  (company-invitation-token caller company-id application-id)
@@ -330,5 +332,5 @@
       (update-application
        (application->command application)
        {:auth {$elemMatch {:invite.user.id company-id}}}
-       {$set  {:auth.$  (-> company (company->auth) (assoc :inviter inviter :inviteAccepted (now)))}}))
+       {$set  {:auth.$ (-> company company->auth (assoc :inviter inviter :inviteAccepted (now)))}}))
     (ok)))

@@ -150,6 +150,8 @@ Mikko adds party hakija-r using button
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  2
 
 Mikko fills his name as applicant, accordion text is updated
+  # Ensure elements are visible:
+  Scroll to top
   Input text  ${hakijaXpath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']  Mikko
   Input text  ${hakijaXpath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']  Intonen
   Focus  ${hakijaXpath}//input[@data-docgen-path='_selected']

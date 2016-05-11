@@ -2006,9 +2006,136 @@
                  content-type (mime/mime-type filename)]]
         (mongo/update-n :fs.files {:_id id} {$set {:contentType content-type}})))))
 
+(defn remove-FI-prefix-from-auth-y [k auth]
+  (if-let [company-y (get auth k)]
+    (assoc auth k (ss/replace company-y "FI" ""))
+    auth))
+
+(defmigration sanitize-auth-company-y
+  {:apply-when (pos? (mongo/count :applications {:auth.y #"FI"}))}
+  (update-applications-array :auth (partial remove-FI-prefix-from-auth-y :y) {:auth.y #"FI"}))
+
+(defmigration sanitize-auth-company-username
+  {:apply-when (pos? (mongo/count :applications {:auth.username #"FI"}))}
+  (update-applications-array :auth (partial remove-FI-prefix-from-auth-y :username) {:auth.username #"FI"}))
+
+(defn change-empty-role-as-reader [{role :role :as auth}]
+  (if (= role "")
+    (assoc auth :role "reader")
+    auth))
+
+(defmigration sanitize-auth-role
+  {:apply-when (pos? (mongo/count :applications {:auth.role ""}))}
+  (update-applications-array :auth change-empty-role-as-reader {:auth.role ""}))
+
+(defn remove-auth-inviter-nils [{inviter :inviter :as auth}]
+  (if (nil? inviter)
+    (dissoc auth :inviter)
+    auth))
+
+(defmigration sanitize-auth-inviter
+  {:apply-when (pos? (mongo/count :applications {:auth.inviter {$type 10}}))}
+  (update-applications-array :auth remove-auth-inviter-nils {:auth.inviter {$type 10}}))
+
+(defn remove-auth-invite-documentId-null-strings [{{document-id :documentId} :invite :as auth}]
+  (if (= document-id "null")
+    (assoc-in auth [:invite :documentId] nil)
+    auth))
+
+(defmigration sanitize-auth-invite-documentId
+  {:apply-when (pos? (mongo/count :applications {:auth.invite.documentId "null"}))}
+  (update-applications-array :auth remove-auth-invite-documentId-null-strings {:auth.invite.documentId "null"}))
+
+(defn remove-auth-invite-nil-fields [{{:keys [path text documentId documentName] :as invite} :invite :as auth}]
+  (if (:email invite)
+    (cond-> auth
+      (nil? path)              (update :invite #(dissoc % :path))
+      (nil? text)              (update :invite #(dissoc % :text))
+      (ss/blank? documentId)   (update :invite #(dissoc % :documentId))
+      (ss/blank? documentName) (update :invite #(dissoc % :documentName)))
+    auth))
+
+(defmigration sanitize-auth-invite-optional-fields
+  {:apply-when (pos? (mongo/count :applications {$or [{:auth.invite.path {$type 10}}
+                                                      {:auth.invite.text {$type 10}}
+                                                      {:auth.invite.documentId {$type 10}}
+                                                      {:auth.invite.documentId ""}
+                                                      {:auth.invite.documentName {$type 10}}
+                                                      {:auth.invite.documentName ""}]}))}
+  (update-applications-array :auth
+                             remove-auth-invite-nil-fields
+                             {$or [{:auth.invite.path {$type 10}}
+                                                      {:auth.invite.text {$type 10}}
+                                                      {:auth.invite.documentId {$type 10}}
+                                                      {:auth.invite.documentId ""}
+                                                      {:auth.invite.documentName {$type 10}}
+                                                      {:auth.invite.documentName ""}]}))
+
+(def statement-status->new
+  {"puoltaa"           "puollettu"
+   "ei-puolla"         "ei-puollettu"
+   "ehdoilla"          "ehdollinen"
+   "jatetty-poydalle"  "poydalle"
+
+   "puollettu"         "puollettu"
+   "ei-puollettu"      "ei-puollettu"
+   "ehdollinen"        "ehdollinen"
+   "poydalle"          "poydalle"
+   "ei-huomautettavaa" "ei-huomautettavaa"
+   "ei-lausuntoa"      "ei-lausuntoa"
+   "lausunto"          "lausunto"
+   "kielteinen"        "kielteinen"
+   "palautettu"        "palautettu"})
+
+(defn- update-statement-status [{status :status :as statement}]
+  (if status
+    (update statement :status statement-status->new)
+    statement))
+
+(defmigration map-statement-statuses-into-new-krysp
+  {:apply-when (pos? (mongo/count :applications {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle"]}}))}
+  (update-applications-array :statements
+                             update-statement-status
+                             {:statements.status {$in ["puoltaa" "ei-puolla" "ehdoilla" "jatetty-poydalle"]}}))
+
+(defn- remove-nils-from-statement-fields [{given :given status :status reminder-sent :reminder-sent metadata :metadata :as statement}]
+  (cond-> statement
+    (nil? given) (dissoc :given)
+    (nil? status) (dissoc :status)
+    (nil? reminder-sent) (dissoc :reminder-sent)
+    (nil? metadata) (dissoc :metadata)))
+
+(defmigration sanitize-nils-in-statement-fields
+  {:apply-when (pos? (mongo/count :applications {$or [{:statements.given {$type 10}}
+                                                      {:statements.status {$type 10}}
+                                                      {:statements.reminder-sent {$type 10}}
+                                                      {:statements.metadata {$type 10}}]}))}
+  (update-applications-array :statements
+                             remove-nils-from-statement-fields
+                             {$or [{:statements.given {$type 10}}
+                                   {:statements.status {$type 10}}
+                                   {:statements.reminder-sent {$type 10}}
+                                   {:statements.metadata {$type 10}}]}))
+
+; Updating only non-submitted applications, the change has no value for others
+(defmigration hakija-tj
+  {:apply-when (pos? (mongo/count :applications {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
+                                                 :documents.schema-info.name "hakija-r"
+                                                 :state {$in [:draft :open]}}))}
+  (letfn [(pred [doc] (= "hakija-r" (get-in doc [:schema-info :name])))]
+    (reduce + 0
+      (for [{:keys [id documents]} (mongo/select :applications
+                                     {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
+                                     :documents.schema-info.name "hakija-r"
+                                     :state {$in [:draft :open]}}
+                                     [:documents])]
+        (let [updates {$set (mongo/generate-array-updates :documents documents pred "schema-info.name" "hakija-tj")}]
+          (mongo/update-n :applications {:_id id} updates))))))
+
 ;;
 ;; ****** NOTE! ******
-;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
+;;  When you are writing a new migration that goes through subcollections
+;;  in the collections "Applications" and "Submitted-applications"
 ;;  do not manually write like this
 ;;     (doseq [collection [:applications :submitted-applications] ...)
 ;;  but use the "update-applications-array" function existing in this namespace.

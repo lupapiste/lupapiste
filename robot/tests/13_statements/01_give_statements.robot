@@ -99,7 +99,7 @@ Sonja types in draft
   Open statement  sonja.sibbo@sipoo.fi
   Wait Until  Element should be enabled  statement-text
   Input text  statement-text  typed in statement text but not gonna submit the statement.
-  Wait until  Select From List By Value  statement-type-select  puoltaa
+  Wait until  Select From List By Value  statement-type-select  puollettu
   Positive indicator icon should be visible
   Reload Page
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
@@ -119,7 +119,7 @@ Sonja can give statement to own request
   Open statement  sonja.sibbo@sipoo.fi
   Wait until  Element text should be  xpath=//div[@data-test-id='header-statement-edit']//span[@data-bind='text: person.text']  ERITYISLAUSUNTO
   Input text  statement-text  salibandy on the rocks.
-  Select From List By Value  statement-type-select  puoltaa
+  Select From List By Value  statement-type-select  puollettu
   Wait and click  statement-submit
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element should be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']
@@ -155,7 +155,7 @@ Return to application
 
 Statement status is visible for given statement in summary table
   Open tab  statement
-  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Puoltaa
+  Wait Until  Element text should be  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-4']  Puollettu
 
 ...but not for draft
   Element should not be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']//span[@data-test-id='statement-status-3']
@@ -190,11 +190,11 @@ Veikko from Tampere can give statement
   Open statement  veikko.viranomainen@tampere.fi
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  uittotunnelin vieressa on tilaa.
-  Select From List By Value  statement-type-select  ehdoilla
+  Select From List By Value  statement-type-select  ehdollinen
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
   Confirm  dynamic-yes-no-confirm-dialog
-  Statement status is  Puoltaa ehdoilla  veikko.viranomainen@tampere.fi
+  Statement status is  Ehdollinen  veikko.viranomainen@tampere.fi
   Logout
 
 Sonja can see statement indicator

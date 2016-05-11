@@ -58,6 +58,8 @@ Update link
   Wait Until  Element Should Be Visible  dialog-edit-link
   Input Text  jquery=#dialog-edit-link #link-url  ${url}
   Click element  //div[@id='dialog-edit-link']//button[1]
+  Wait for jQuery
+  Wait Until  Page Should Contain  ${url}
 
 Remove link
   [Arguments]  ${name}

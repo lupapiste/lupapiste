@@ -23,6 +23,10 @@
                  [com.taoensso/timbre "4.0.2"]
                  [org.slf4j/slf4j-log4j12 "1.7.21"]
 
+                 ;;Hystrix
+                 [com.netflix.hystrix/hystrix-clj "1.5.2"]
+                 [com.netflix.hystrix/hystrix-metrics-event-stream "1.5.2"]
+
                  ; markup processing
                  [enlive "1.1.6"]
                  [endophile "0.1.2" :exclusions [hiccup]]

@@ -14,7 +14,12 @@
               <th>Osoite</th>
               <th>P&auml;&auml;k&auml;ytt&auml;j&auml;t</th>
               <th>Tilityyppi</th>
-              <th>K&auml;ytt&auml;j&auml;m&auml;r&auml;</th>
+              <th>K&auml;ytt&auml;j&auml;raja</th>
+              <th>V&auml;litt&auml;j&auml;tunnus</th>
+              <th>OVT</th>
+              <th>Viite</th>
+              <th>Sopimus</th>
+              <th>Luotu</th>
               <th>Toiminnot</th>
             </tr>
           </thead>
@@ -33,6 +38,15 @@
               </td>
               <td data-bind="text: loc('register.company.' + company.accountType + '.title')"></td>
               <td data-bind="text: company.userLimit"></td>
+              <td data-bind="text: company.pop"></td>
+              <td data-bind="text: company.ovt"></td>
+              <td data-bind="text: company.reference"></td>
+              <td>
+              <!-- ko if: company.document -->
+              <a data-bind="attr: {href:company.document} ">onnistuu.fi</a>
+              <!-- /ko -->
+              </td>
+              <td data-bind="dateTimeString: company.created"></td>
               <td><a data-bind="click: company.openDialog" data-test-id="company-edit">Muokkaa</a></td>
             </tr>
           </tbody>

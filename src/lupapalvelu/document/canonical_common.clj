@@ -87,10 +87,7 @@
         r))
     #{} lausuntotieto))
 
-(def- puolto-mapping {:ehdoilla "ehdoilla"
-                      :ei-puolla "ei puolla"
-                      :puoltaa "puoltaa"
-                      :ei-huomautettavaa "ei huomautettavaa"
+(def- puolto-mapping {:ei-huomautettavaa "ei huomautettavaa"
                       :ehdollinen "ehdollinen"
                       :puollettu "puollettu"
                       :ei-puollettu "ei puollettu"
@@ -118,8 +115,7 @@
 
 (defn get-statements [statements]
   ;Returing vector because this element to be Associative
-  (vec (map get-statement statements)))
-
+  (mapv get-statement statements))
 
 (defn muu-select-map
   "If 'sel-val' is \"other\" considers 'muu-key' and 'muu-val', else considers 'sel-key' and 'sel-val'.

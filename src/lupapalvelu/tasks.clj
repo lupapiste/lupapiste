@@ -1,5 +1,6 @@
 (ns lupapalvelu.tasks
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
+            [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
@@ -14,8 +15,6 @@
             [lupapalvelu.document.tools :as tools]))
 
 (def task-schemas-version 1)
-
-(def- task-name-max-len 80)
 
 (def task-types ["muu katselmus"
                  "muu tarkastus"
@@ -86,7 +85,6 @@
                     :whitelist {:roles [:authority] :otherwise :disabled}}
                    ]}]}
    {:name "katselmus" :type :group
-
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
     [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
@@ -111,7 +109,9 @@
      {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}}
      {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width :css [] :readonly-after-sent true
-      :whitelist {:roles [:authority] :otherwise :disabled}}]}])
+      :whitelist {:roles [:authority] :otherwise :disabled}}]}
+   {:name "muuTunnus" :type :text
+    :readonly true :hidden true}])
 
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
@@ -178,10 +178,7 @@
   (util/deep-merge
     (model/new-document (schemas/get-schema task-schemas-version schema-name) created)
     {:source source
-     :taskname (when task-name
-                 (if (> (.length task-name) task-name-max-len)
-                   (str (ss/substring task-name 0 (- task-name-max-len 3)) "...")
-                   task-name))
+     :taskname task-name
      :state state
      :data (if data (-> data tools/wrapped (tools/timestamped created)) {})
      :assignee (select-keys assignee [:id :firstName :lastName])
@@ -208,11 +205,22 @@
     initial-rakennus
     buildings))
 
-(defn- katselmus->task [meta source {buildings :buildings} katselmus]
+(defn katselmus->task [meta source {:keys [buildings]} katselmus]
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
+        katselmus-data {:tila (get katselmus :osittainen)
+                        :pitaja (get katselmus :pitaja)
+                        :pitoPvm (get katselmus :pitoPvm)
+                        :lasnaolijat (get katselmus :lasnaOlijat "")
+                        :huomautukset {:kuvaus (get-in katselmus [:huomautukset :huomautus :kuvaus] "")}
+                        :poikkeamat (get katselmus :poikkeamat "")
+                        }
         data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
               :vaadittuLupaehtona true
-              :rakennus (rakennus-data-from-buildings {} buildings)}]
+              :rakennus (rakennus-data-from-buildings {} buildings)
+              :katselmus katselmus-data
+              :muuTunnus (get-in katselmus [:muuTunnustieto :MuuTunnus :tunnus] "")
+              ;; There's also :MuuTunnus :sovellus - we could form a string like "Facta-8F29F.." or store just the map here, if but seems unlikely that within same organization there would be id clashes between systems
+              }]
     (new-task "task-katselmus" task-name data meta source)))
 
 (defn- verdict->tasks [verdict meta application]
