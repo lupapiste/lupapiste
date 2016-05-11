@@ -399,3 +399,8 @@
         eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
     (doall
      (map (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
+
+(defn check-for-reviews [& args]
+  (mongo/connect!)
+  (poll-verdicts-for-reviews)
+  (mongo/disconnect!))
