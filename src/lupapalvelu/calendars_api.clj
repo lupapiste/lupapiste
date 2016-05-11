@@ -47,9 +47,12 @@
   ([action params]
     (api-call http/get action {:query-params params})))
 
-(defn- api-post-command [action request-body]
-  (api-call http/post action {:body (clj-http.client/json-encode request-body)
-                              :content-type :json}))
+(defn- api-post-command
+  ([action]
+   (api-post-command action {}))
+  ([action request-body]
+    (api-call http/post action {:body (clj-http.client/json-encode request-body)
+                                :content-type :json})))
 
 (defn- api-put-command [action request-body]
   (api-call http/put action {:body (clj-http.client/json-encode request-body)
@@ -62,6 +65,9 @@
                        :end (sade.util/to-xml-local-datetime end)}
             :services ["SCC123"]
             :capacity 1})) slots))
+
+(defn- calendar-ref-for-user [userId]
+  (str "user-" userId))
 
 (defn- get-calendar
   [calendarId userId]
@@ -83,13 +89,27 @@
         (group-by :externalRef calendars))
       nil)))
 
+(defn- find-calendars-for-user
+  [userId]
+  (let [response (api-query (str "/api/resources/by-external-ref/" (calendar-ref-for-user userId)))]
+    (if (= 200 (:status response))
+      (:body response)
+      nil)))
+
+(defn- find-calendar-for-user-and-organization
+  [userId orgId]
+  (->> (find-calendars-for-user userId)
+       (filter #(= (:organizationCode %) orgId))
+       first))
 
 (defn- authority-admin-assoc-calendar-to-user [cals user]
-  (let [reference-code-for-user (str "user-" (:id user))
+  (let [reference-code-for-user (calendar-ref-for-user (:id user))
         calendars-for-user      (get cals reference-code-for-user [])
         calendar                (first calendars-for-user)]
     (if calendar
-      (assoc user :calendarId   (:id calendar))
+      (cond
+        (:active calendar) (assoc user :calendarId (:id calendar))
+        :else              (assoc user :calendarPassive true))
       user)))
 
 (defquery calendar
@@ -115,34 +135,46 @@
         (ok :users users))
       (fail :resources.backend-error))))
 
+(defn- create-calendar
+  [userId target-user organization]
+  (let [url          "/api/resources/"
+        response    (api-post-command url {:name             (str (:firstName target-user) " " (:lastName target-user))
+                                           :organizationCode organization
+                                           :externalRef      (calendar-ref-for-user userId)})]
+    (info "Creating a new calendar" userId organization)
+    (if (= 200 (:status response))
+      (:body response)
+      (do (error response)
+          (fail! :resources.backend-error)))))
+
+(defn- activate-calendar
+  [{:keys [id]}]
+  (let [url      (str "/api/resources/" id "/activate")
+        response (api-post-command url)]
+    (info "Activating calendar" id)
+    (if (= 200 (:status response))
+      id
+      (do (error response)
+          (fail! :resources.backend-error)))))
+
+(defn- enable-calendar
+  [userId organization]
+  (let [target-user       (user/get-user-by-id userId)
+        existing-calendar (find-calendar-for-user-and-organization userId organization)]
+    (when-not (user/user-is-authority-in-organization? (user/with-org-auth target-user) organization)
+      (error "Tried to enable a calendar with invalid user-organization pairing: " userId organization)
+      (fail! :error.unknown-operation))
+    (if existing-calendar
+      (activate-calendar existing-calendar)
+      (create-calendar userId target-user organization))))
+
 (defcommand set-calendar-enabled-for-authority
   {:user-roles #{:authorityAdmin}
    :feature :ajanvaraus}
   [{{:keys [userId enabled]} :data user :user}]
-  (info userId enabled)
-  (if (false? enabled)
-    (fail! :not-implemented))
-  (let [admin-in-organization-id (user/authority-admins-organization-id user)
-        target-user              (user/get-user-by-id userId)
-        #_(validate user is in organisation)
-        #_(validate that the user has no prior calendar)
-        url      "/api/resources/"
-        response (api-post-command url {:name             (str (:firstName target-user) " " (:lastName target-user))
-                                        :organizationCode admin-in-organization-id
-                                        :externalRef      (str "user-" userId)})]
-    (if (= 200 (:status response))
-      (ok :calendarId (:body response))
-      (do (error response)
-          (fail :resources.backend-error)))))
-
-(defcommand update-calendar
-  {:user-roles #{:authorityAdmin}
-   :feature :ajanvaraus}
-  [{{:keys [calendarId name organization]} :data}]
-  (let [url (str "/api/resources/" calendarId)
-        response (api-put-command url {:name             name
-                                       :organizationCode organization})]
-    (ok :result (:body response))))
+  (if enabled
+    (ok :calendarId (enable-calendar userId (user/authority-admins-organization-id user)))
+    (fail! :not-implemented)))
 
 (defquery calendar-slots
   {:user-roles #{:authorityAdmin}
