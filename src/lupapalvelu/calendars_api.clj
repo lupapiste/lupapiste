@@ -183,9 +183,7 @@
   [{{:keys [calendarId year week]} :data}]
   (let [response (api-query (str "/api/reservationslots/calendar/" calendarId) {:year year :week week})]
     (if (= 200 (:status response))
-      (let [be-slots (:body response)
-            slots    (->FrontendReservationSlots be-slots)]
-        (ok :slots slots))
+      (ok :slots (->FrontendReservationSlots (:body response)))
       (do (error response)
           (fail :resources.backend-error)))))
 
