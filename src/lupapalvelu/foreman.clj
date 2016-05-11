@@ -277,7 +277,7 @@
        (hash-map :application foreman-app :recipients)
        (notif/notify! :invite)))
 
-(defn- invite-notifications! [foreman-app auths command]
+(defn- invite-notifications! [{auths :auth :as foreman-app} command]
   (let [invite-auths (remove (comp #{:owner} :role) auths)]
     ;; Non-company invites
     (->> (remove (comp #{"company"} :type) invite-auths)
@@ -297,7 +297,7 @@
   (try
     (when (and foreman-user (not (auth/has-auth? linked-app (:id foreman-user))))
       (invite-to-linked-app! linked-app foreman-user command))
-    (invite-notifications! linked-app (:auth foreman-app) command)
+    (invite-notifications! foreman-app command)
     (catch Exception e
       (error "Error when inviting to foreman application:" e))))
 
