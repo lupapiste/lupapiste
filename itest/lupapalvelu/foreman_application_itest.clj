@@ -50,14 +50,14 @@
                 (fact "Tyonjohtaja doc has value from the command"
                       (get-in foreman-doc [:data :kuntaRoolikoodi :value]) => "ei tiedossa")
 
-                (fact "Hakija docs are equal, expect the userId"
+                (fact "Hakija docs are equal, except the userId"
                       (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
                             foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-tj")))]
 
                         hakija-doc-data => map?
                         foreman-hakija-doc-data => map?
 
-                        (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
+                        (dissoc foreman-hakija-doc-data :userId) => (dissoc hakija-doc-data :userId))))
 
           (fact "Foreman name index is updated"
                 (command apikey :update-doc :id (:id foreman-application) :doc (:id foreman-doc) :collection "documents"
