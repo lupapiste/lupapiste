@@ -107,7 +107,7 @@
                                           (remove #(get-in % [:autoupdated :value]))
                                           (concat other-applications)
                                           (zipmap (map (comp keyword str) (range))))))
-        documents (util/update-by-id tyonjohtaja-doc (:documents application))]
+        documents (util/replace-by-id tyonjohtaja-doc (:documents application))]
     (update-application command {$set {:documents documents}}))
   (ok))
 
