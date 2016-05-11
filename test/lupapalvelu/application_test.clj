@@ -20,7 +20,7 @@
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
 (testable-privates lupapalvelu.application-api add-operation-allowed?)
-(testable-privates lupapalvelu.application is-link-permit-required)
+(testable-privates lupapalvelu.application required-link-permits)
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
@@ -43,13 +43,23 @@
     (schemas/get-schema 1 "b") => {:info {:type :party :repeating false}}
     (schemas/get-schema 1 "c") => {:info {:type :foo :repeating true}}))
 
-(facts "is-link-permit-required works correctly"
-  (fact "Muutoslupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)
-  (fact "Aloitusilmoitus requires" (is-link-permit-required {:primaryOperation {:name "aloitusoikeus"}}) => truthy)
-  (fact "Poikkeamis not requires" (is-link-permit-required {:primaryOperation {:name "poikkeamis"}}) => falsey)
-  (fact "Poikkeamis not requires" (is-link-permit-required {:secondaryOperations [{:name "poikkeamis"}]}) => falsey)
-  (fact "ya-jatkoaika requires" (is-link-permit-required {:primaryOperation {:name "ya-jatkoaika"}}) => truthy)
-  (fact "ya-jatkoaika requires" (is-link-permit-required {:secondaryOperations [{:name "ya-jatkoaika"}]}) => truthy))
+(facts required-link-permits
+  (fact "Muutoslupa"
+    (required-link-permits {:permitSubtype "muutoslupa"}) => 1)
+  (fact "Aloitusilmoitus"
+    (required-link-permits {:primaryOperation {:name "aloitusoikeus"}}) => 1)
+  (fact "Poikkeamis"
+    (required-link-permits {:primaryOperation {:name "poikkeamis"}}) => 0)
+  (fact "ya-jatkoaika, primary"
+    (required-link-permits {:primaryOperation {:name "ya-jatkoaika"}}) => 1)
+  (fact "ya-jatkoaika, secondary"
+    (required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"}]}) => 1)
+  (fact "ya-jatkoaika x 2"
+    (required-link-permits {:secondaryOperations [{:name "ya-jatkoaika"} {:name "ya-jatkoaika"}]}) => 2)
+  (fact "muutoslupa+ya-jatkoaika"
+    (required-link-permits {:permitSubtype "muutoslupa" :secondaryOperations [{:name "ya-jatkoaika"}]}) => 2)
+  (fact "muutoslupa+aloitusilmoitus+ya-jatkoaika"
+    (required-link-permits {:permitSubtype "muutoslupa" :primaryOperation {:name "aloitusoikeus"} :secondaryOperations [{:name "ya-jatkoaika"}]}) => 3))
 
 (facts "Add operation allowed"
        (let [not-allowed-for #{;; R-operations, adding not allowed

@@ -73,7 +73,7 @@
                               <!-- /ko -->
 
                               <!-- Operations: -->
-                              <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
+                              <!-- ko if: permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
                               <div>
                                 <p data-bind="ltext: 'application.operations.secondary'"></p>
                                 <!-- ko if: operationsCount() && operationsCount().length > 0 -->
@@ -94,13 +94,14 @@
                               <!-- /ko -->
 
                               <!-- Subtypes: -->
-                              <!-- ko if: $root.permitSubtypes().length > 0 -->
+                              <!-- ko if: permitSubtypes().length > 0 -->
                               <div>
-                                <p><span data-bind="ltext: 'application.permitSubtypes'"></span>:*</p>
+                                <p class="form-label" data-bind="text: loc('application.permitSubtypes') + ':', css: {tip:permitSubtypeMandatory}"></p>
                                 <span class="application_summary_text">
                                   <select class="dropdown"
-                                          data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
+                                          data-bind="options: permitSubtypes, value: permitSubtype,
                                                      enable: $root.authorization.ok('change-permit-sub-type'),
+                                                     css: {mandatory: permitSubtypeMandatory},
                                                      optionsText: function(item) {return item ? loc('permitSubtype.' + item) : loc('choose'); }"
                                           id="permitSubtypeSelect">
                                   </select>
@@ -114,13 +115,14 @@
                               <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("tos-operations-enabled") -->
                               <div>
                                 <p data-bind="ltext: 'tos.function'"></p>
+                                <span class="application_summary_text">
                                 <select class="dropdown dropdown--full-width"
                                         data-bind="options: $root.tosFunctions,
                                                    optionsText: 'name',
                                                    optionsValue: 'code',
                                                    value: $root.application.tosFunction,
                                                    valueAllowUnset: true,
-                                                   enable: $root.authorization.ok('set-tos-function-for-application')" ></select>
+                                                   enable: $root.authorization.ok('set-tos-function-for-application')" ></select></span>
                               </div>
                               <!-- /ko -->
 
@@ -374,7 +376,7 @@
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
-                            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
+                            <li data-bind="if: $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
                                            css: {'active': $parent.selectedTabName() === 'archival'}">
                                 <a data-bind="click: changeTab" href="#" data-target="archival" data-test-id="application-open-archival-tab" class="link-btn">
                                     <span data-bind="ltext: 'arkistointi'"></span>

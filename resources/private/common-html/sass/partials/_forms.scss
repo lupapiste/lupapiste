@@ -1062,8 +1062,18 @@ $max-columns: 12;
 
   input[type=checkbox]:disabled + .#{$label-cls}:before {
     cursor: initial;
-    color: $checkbox-color;
-    background-color: $input-disabled-background-color;
+    color: $checkbox-color;    
+  }
+}
+
+@mixin hide-radio-check-input {
+  input[type=checkbox], input[type=radio] {
+    display: inherit;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    font-size: 0;
   }
 }
 
@@ -1075,15 +1085,9 @@ $max-columns: 12;
     bottom: 7px;
     top: 7px;
   }
-  input[type=checkbox], input[type=radio] {
-    display: inherit;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    font-size: 0;
-  }
+   @include hide-radio-check-input
 }
+
 .checkbox-wrapper--disabled {
   background-color: $input-disabled-background-color;
 }
@@ -1115,13 +1119,12 @@ $max-columns: 12;
   .radio-wrapper {
     border: 1px solid $radio-border-color;
     padding: $marginS $marginL $marginS $marginS;
-  }
-  .radio-wrapper {
     label {
       cursor: pointer;
     }
+    @include hide-radio-check-input
   }
-
+  
   .col--no-margin {
     padding: 0 !important;
     .checkbox-wrapper {

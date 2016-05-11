@@ -43,6 +43,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.secondaryOperations = ko.observable();
   self.primaryOperation = ko.observable();
   self.allOperations = ko.observable();
+
   self.permitSubtype = ko.observable();
   self.permitSubtypeHelp = ko.pureComputed(function() {
     var opName = util.getIn(self, ["primaryOperation", "name"]);
@@ -50,6 +51,10 @@ LUPAPISTE.ApplicationModel = function() {
       return "help." + opName + ".subtype";
     }
     return undefined;
+  });
+  self.permitSubtypes = ko.observableArray([]);
+  self.permitSubtypeMandatory = ko.pureComputed(function() {
+    return !self.permitSubtype() && !_.isEmpty(self.permitSubtypes());
   });
 
   self.operationsCount = ko.observable();
@@ -308,6 +313,12 @@ LUPAPISTE.ApplicationModel = function() {
        fn: function() {
             ajax.command("submit-application", {id: self.id()})
               .success(self.reload)
+              .onError("error.foreman.type-not-selected", function() {
+                hub.send("show-dialog", {ltitle: "error.dialog.title",
+                                         size: "medium",
+                                         component: "ok-dialog",
+                                         componentParams: {ltext: "error.foreman.type-not-selected"}});
+              })
               .onError("error.foreman.notice-not-submittable", function() {
                 hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
                                          size: "medium",

@@ -36,13 +36,14 @@
       [sade.env :as env]
       [sade.xml :as xml]
       [sade.util :as util]
+      [sade.strings :as ss]
       [sade.core :refer [def- now]]
       [lupapalvelu.application :as ns-app])
     (:import [java.net URI]))
 
 (apply-remote-minimal)
 
-(testable-privates lupapalvelu.application is-link-permit-required)
+(testable-privates lupapalvelu.application required-link-permits)
 
 (defn- populate-task [{:keys [id tasks]} task-id apikey]
        (let [task (some #(when (= (:id %) task-id) %) tasks)
@@ -77,8 +78,9 @@
                 :drawings drawings))
 
 (defn- generate-link-permit [{id :id :as application} apikey]
-       (when (is-link-permit-required application)
-             (fact "Lisataan hakemukselle viitelupa" (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
+  (when (pos? (required-link-permits application))
+    (fact "Add required link permit"
+      (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
 
 (defn- validate-attachment [liite expected-type application]
        (let [permit-type (keyword (permit/permit-type application))
@@ -103,11 +105,8 @@
              ]
 
             (if (.endsWith linkkiliitteeseen "_Lausunto.pdf")
-              (do
-                (fact "linkki liiteeseen contains '_test-attachment.txt'"
-                  linkkiliitteeseen => #".+_Lausunto.pdf$")
-                (fact "Liitetiedosto on PDF"
-                  attachment-string => #"PDF"))
+              (fact {:midje/description (str (ss/suffix linkkiliitteeseen "/") " is a PDF")}
+                (.contains attachment-string "PDF") => true)
               (do
                 (fact "linkki liiteeseen contains '_test-attachment.txt'"
                   linkkiliitteeseen => #".+_test-attachment.txt$")
@@ -335,14 +334,16 @@
     (upload-attachment-to-target sonja application-id nil true task-id "task" (str (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut")
                                                                                    ".katselmuksen_tai_tarkastuksen_poytakirja"))
 
-    (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.tila.tila" "osittainen"]]) => ok?
+    (fact "Set state for building that was reviewed"
+      (command sonja :update-task :id application-id :doc task-id :updates [["rakennus.0.tila.tila" "osittainen"]]) => ok?)
 
     (fact "Review done fails as missing required info for KRYSP transfer"
       (command sonja :review-done :id application-id :taskId task-id :lang "fi") => (partial expected-failure? :error.missing-parameters))
 
-    (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]
-                                                                          ["katselmus.pitoPvm" "12.04.2016"]
-                                                                          ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?
+    (fact "Set state for the review"
+      (command sonja :update-task :id application-id :doc task-id :updates [["katselmus.tila" "osittainen"]
+                                                                           ["katselmus.pitoPvm" "12.04.2016"]
+                                                                           ["katselmus.pitaja" "Sonja Sibbo"]]) => ok?)
 
     (fact "After filling required review data, transfer is ok"
       (command sonja :review-done :id application-id :taskId task-id :lang "fi") => ok?)
