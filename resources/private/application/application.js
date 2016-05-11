@@ -56,7 +56,6 @@
   var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
-  var permitSubtypes = ko.observableArray([]);
   var tosFunctions = ko.observableArray([]);
   var hasConstructionTimeDocs = ko.observable();
 
@@ -182,7 +181,7 @@
       initAuthoritiesSelectList(applicationDetails.authorities);
 
       // permit subtypes
-      permitSubtypes(applicationDetails.permitSubtypes);
+      applicationModel.permitSubtypes(applicationDetails.permitSubtypes);
 
       // Organization's TOS functions
       initAvailableTosFunctions(applicationDetails.application.organization);
@@ -470,7 +469,6 @@
       // observables
       application: applicationModel,
       authorities: authorities,
-      permitSubtypes: permitSubtypes,
       hasConstructionTimeDocs: hasConstructionTimeDocs,
       // models
       addLinkPermitModel: addLinkPermitModel,

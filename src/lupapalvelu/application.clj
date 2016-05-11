@@ -65,12 +65,12 @@
          (reduce + (if muutoslupa? 1 0)))))
 
 (defn validate-link-permits [application]
-  (when (< (required-link-permits application) (count-link-permits application))
+  (when (> (required-link-permits application) (count-link-permits application))
     (fail :error.permit-must-have-link-permit)))
 
 (defn authorized-to-remove-link-permit [{user :user} application]
   (when (and (not (usr/authority? user))
-             (<= (required-link-permits application) (count-link-permits application)))
+             (>= (required-link-permits application) (count-link-permits application)))
     unauthorized))
 
 (defn validate-authority-in-drafts
