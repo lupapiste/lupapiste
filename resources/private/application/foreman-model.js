@@ -123,6 +123,7 @@ LUPAPISTE.ForemanModel = function() {
               self.indicator({type: "saved"});
             })
             .error(function(err) {
+              data.selectedForeman(undefined);
               hub.send("indicator", {style: "negative", message: err.text});
               self.error(err.text);
             })
