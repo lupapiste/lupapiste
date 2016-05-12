@@ -62,11 +62,10 @@
                                                  {current-state :state :as application}]
   (when-not (ss/blank? attachmentId)
     (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
-      (when-not (if (= (keyword current-state) :sent)
-                  (statement/delete-attachment-allowed? attachmentId application)
-                  (or (not (states/post-verdict-states (keyword current-state)))
-                      (states/post-verdict-states (keyword create-state))
-                      (user/authority? user)))
+      (when-not (or (not (states/post-verdict-states (keyword current-state)))
+                    (states/post-verdict-states (keyword create-state))
+                    (user/authority? user)
+                    (statement/delete-attachment-allowed? attachmentId application))
         (fail :error.pre-verdict-attachment)))))
 
 (defn- validate-meta [{{meta :meta} :data}]

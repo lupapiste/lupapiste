@@ -212,7 +212,10 @@
               (command ronja :give-statement :id application-id :statementId statement-id
                        :status "puollettu" :text "I will approve" :lang "fi") => {:ok false, :text "error.unsupported-permit-type"})))
 
-(defn statement-modify-id [])
+(defn statement-attachment-id [apikey app-id]
+  (let [{:keys [attachments]} (query-application apikey app-id)]
+    (some (fn [{:keys [target id]}]
+            (and (= (-> target :type keyword) :statement) id)) attachments)))
 
 (facts "For environmental applications statements can be requested and given in sent state"
        (let [{ymp-id :id state :state} (create-and-send-application olli :operation "vvvl-vesijohdosta" :propertyId oulu-property-id :address "Guang Hua Lu 88")
@@ -233,11 +236,21 @@
                  (let [{:keys [attachments]} (query-application sonja ymp-id)
                        att-id (some (fn [{:keys [target id]}]
                                       (and (= (-> target :type keyword) :statement) id)) attachments)]
-                   (command sonja :delete-attachment :id ymp-id :attachmentId att-id) => ok?))
+                   (command sonja :delete-attachment :id ymp-id
+                            :attachmentId (statement-attachment-id sonja ymp-id)) => ok?))
+           (fact "Sonja can add attachment again"
+                 (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
            (fact "Sonja can give statement"
                  (command sonja :give-statement :id ymp-id :statementId statement-id
                           :modify-id (:modify-id (designated-statement sonja ymp-id))
-                          :status "puollettu" :text "Fine by me" :lang "fi") => ok?))))
+                          :status "puollettu" :text "Fine by me" :lang "fi") => ok?)
+           (fact "Given statement cannot be edited"
+                 (command sonja :save-statement-as-draft :id ymp-id :statementId statement-id
+                          :modify-id (:modify-id (designated-statement sonja ymp-id))
+                          :status "puollettu" :text "Will fail" :lang "fi")=> fail?)
+           (fact "Sonja cannot delete attachment"
+                 (command sonja :delete-attachment :id ymp-id
+                          :attachmentId (statement-attachment-id sonja ymp-id))))))
 
 
 (facts "Applicant type person can be requested for statement"
