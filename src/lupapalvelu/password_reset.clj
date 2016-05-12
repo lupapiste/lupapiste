@@ -14,10 +14,11 @@
   {:model-fn (fn [{token :token} conf recipient]
                {:caller recipient
                 :link-fi (reset-link "fi" token)
-                :link-sv (reset-link "sv" token)})})
+                :link-sv (reset-link "sv" token)})
+   :recipients-fn notifications/from-user})
 
 (notifications/defemail :reset-password
-  (assoc base-email-conf :subject-key "reset.email.title" :recipients-fn notifications/from-user))
+  (assoc base-email-conf :subject-key "reset.email.title"))
 
 (defn reset-password [{:keys [email] :as user}]
   {:pre [email (not (user/dummy? user))]}
