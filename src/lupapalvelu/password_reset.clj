@@ -11,15 +11,17 @@
   (str (env/value :host) "/app/" lang "/welcome#!/setpw/" token))
 
 (def base-email-conf
-  {:model-fn (fn [{{token :token} :data} conf recipient]
-               {:link-fi (reset-link "fi" token), :link-sv (reset-link "sv" token)})})
+  {:model-fn (fn [{token :token} conf recipient]
+               {:caller recipient
+                :link-fi (reset-link "fi" token)
+                :link-sv (reset-link "sv" token)})})
 
 (notifications/defemail :reset-password
-  (assoc base-email-conf :subject-key "reset.email.title" :recipients-fn notifications/from-data))
+  (assoc base-email-conf :subject-key "reset.email.title" :recipients-fn notifications/from-user))
 
 (defn reset-password [{:keys [email] :as user}]
   {:pre [email (not (user/dummy? user))]}
   (let [token (token/make-token :password-reset nil {:email email} :ttl ttl/reset-password-token-ttl)]
     (infof "password reset request: email=%s, token=%s" email token)
-    (notifications/notify! :reset-password {:data {:email email :token token}})
+    (notifications/notify! :reset-password {:user user :token token})
     token))
