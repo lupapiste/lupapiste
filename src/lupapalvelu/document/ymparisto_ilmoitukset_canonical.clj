@@ -55,7 +55,7 @@
                                                                                                             :ulkoilmakonsertti
                                                                                                             :muu))
                                                                                                  (str (-> meluilmo :data :tapahtuma :nimi) " - " (-> meluilmo :data :tapahtuma :kuvaus))}))}
-                                             :toiminnanKesto (map convert-kesto-row kestot)
+                                             :toiminnanKesto (first (map convert-kesto-row kestot))
                                              :melutiedot {:koneidenLkm (-> meluilmo :data :rakentaminen :koneet)
                                                           :melutaso {:db (:melu10mdBa melu)
                                                                      :paiva (:paivalla melu)
