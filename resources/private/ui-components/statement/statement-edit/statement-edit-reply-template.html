@@ -39,7 +39,8 @@
                  class="form-input checkbox"
                  data-bind="checked: nothingToAdd,
                             disable: !enabled()">
-          <label for="statement-nothing-to-add" class="checkbox-label">
+          <label for="statement-nothing-to-add" class="checkbox-label"
+                 data-test-id="statement-nothing-to-add">
             <span data-bind="ltext: 'statement.nothing-to-add.label'">Ei lisattavaa</span>
           </label>
         </div>

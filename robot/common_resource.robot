@@ -1281,6 +1281,13 @@ Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
 
+Checkbox wrapper selected
+  [Arguments]  ${id}
+  Javascript?  $("input#${id}:checked").length
+
+Checkbox wrapper not selected
+  [Arguments]  ${id}
+  Javascript?  $("input#${id}:checked").length === 0
 
 # Frontend error log
 
