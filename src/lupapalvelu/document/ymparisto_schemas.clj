@@ -5,16 +5,19 @@
 #_(def sijainti (body simple-osoite
                  {:name "karttapiirto" :type :text :max-len 4000}))
 
-(def kesto (body {:name "kesto" :type :group
+(def kesto (body {:name "kesto" :type :table :repeating true :uicomponent :docgenTable
                   :body [{:name "alku" :type :date}
                          {:name "loppu" :type :date}
-                         {:name "arki", :type :group, :body [{:name "arkiAlkuAika" :type :string :size :s} {:name "arkiLoppuAika" :type :string :size :s}]}
-                         {:name "lauantai", :type :group, :body [{:name "lauantaiAlkuAika" :type :string :size :s} {:name "lauantaiLoppuAika" :type :string :size :s}]}
-                         {:name "sunnuntai", :type :group, :body [{:name "sunnuntaiAlkuAika" :type :string :size :s} {:name "sunnuntaiLoppuAika" :type :string :size :s}]}]}))
+                         {:name "arkiAlkuAika" :type :string :size :s}
+                         {:name "arkiLoppuAika" :type :string :size :s}
+                         {:name "lauantaiAlkuAika" :type :string :size :s}
+                         {:name "lauantaiLoppuAika" :type :string :size :s}
+                         {:name "sunnuntaiAlkuAika" :type :string :size :s}
+                         {:name "sunnuntaiLoppuAika" :type :string :size :s}]}))
 
-
-(def kesto-mini
-  (schema-body-without-element-by-name kesto "arki" "lauantai" "sunnuntai"))
+(def kesto-mini (body {:name "kesto" :type :group
+                       :body [{:name "alku" :type :date}
+                              {:name "loppu" :type :date}]}))
 
 (def maatila (body {:name "omistaja"
                     :type :group
@@ -465,7 +468,7 @@
            :approvable true}
     :body (body
             koeluontoinen-toiminta
-            (update-in kesto-mini [0 :body] (fn [body] (map #(assoc % :required true) body))))}
+            (update-in (vec kesto-mini) [0 :body] (fn [body] (map #(assoc % :required true) body))))}
    {:info {:name "maastoliikennelaki-kilpailut-ja-harjoitukset"
            :approvable true
            :order 1}

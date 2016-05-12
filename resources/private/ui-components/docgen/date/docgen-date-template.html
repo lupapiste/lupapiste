@@ -9,16 +9,15 @@
   <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
   <span>
     <input type="text"
-           data-bind="textInput: value,
+           data-bind="datepicker: datepickerValue,
+                      datepickerOptions: datepickerOptions,
                       css: inputClasses,
                       event: events,
                       disable: disabled,
                       attr: { readonly: readonly,
-                              'data-test-id': path.join('.'),
-                              id: dateInputId}"/>
+                              'data-test-id': path.join('.')}"/>
 
   </span>
   <span data-bind="saveIndicator: indicator, label: false"></span>
-  <span data-bind="template: {afterRender: bindDatepicker}"></span>
 </script>
 
