@@ -1,6 +1,6 @@
 # Moi {{caller.firstName}},
 
-Pääset vaihtamaan salasanasi oheisen linkin kautta:
+P&auml;&auml;set vaihtamaan salasanasi oheisen linkin kautta:
 
 {{link-fi}}
 
