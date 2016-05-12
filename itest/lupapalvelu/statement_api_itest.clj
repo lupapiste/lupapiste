@@ -49,9 +49,6 @@
                   (-> % :person :email)) %)
         (:statements (query-application apikey application-id))))
 
-(defn- designated-statement-id [apikey application-id]
-  (:id (designated-statement apikey application-id)))
-
 (fact "authorityAdmin can't query get-statement-givers"
     (query sipoo :get-statement-givers) => unauthorized?)
 
@@ -204,7 +201,7 @@
                              (count)) => 1)))))
 
 (facts "For non-environmental applications statements are disabled in sent state"
-      (let [statement-id (designated-statement-id ronja application-id)]
+       (let [statement-id (:id (designated-statement ronja application-id))]
         (command sonja :approve-application :id application-id :lang "fi") => ok?
         (fact "Application state is sent"
               (->> application-id (query-application sonja) :state keyword) => :sent)
@@ -218,12 +215,18 @@
             (and (= (-> target :type keyword) :statement) id)) attachments)))
 
 (facts "For environmental applications statements can be requested and given in sent state"
-       (let [{ymp-id :id state :state} (create-and-send-application olli :operation "vvvl-vesijohdosta" :propertyId oulu-property-id :address "Guang Hua Lu 88")
+       (let [{ymp-id :id} (create-and-submit-application mikko
+                                                         :operation "vvvl-vesijohdosta"
+                                                         :propertyId oulu-property-id
+                                                         :address "Guang Hua Lu 88")
              statement-giver-sonja (create-statement-giver oulu sonja-email) => ok?]
-
-         (fact "Application state is sent" (keyword state) => :sent)
+         (fact "Olli approves application"
+               (command olli :approve-application :id ymp-id :lang "fi") => ok?)
+         (fact "Application state is sent"
+               (->> ymp-id  (query-application mikko) :state keyword) => :sent)
          (fact "Olli requests statement from Sonja"
-               (command olli :request-for-statement :functionCode nil :id ymp-id :selectedPersons [statement-giver-sonja]
+               (command olli :request-for-statement :functionCode nil :id ymp-id
+                        :selectedPersons [statement-giver-sonja]
                         :saateText "saate" :dueDate 1450994400000) => ok?)
          (let [{statement-id :id modify-id :modify-id} (designated-statement sonja ymp-id)]
            (fact "Sonja can save statement draft"
@@ -250,7 +253,19 @@
                           :status "puollettu" :text "Will fail" :lang "fi")=> fail?)
            (fact "Sonja cannot delete attachment"
                  (command sonja :delete-attachment :id ymp-id
-                          :attachmentId (statement-attachment-id sonja ymp-id))))))
+                          :attachmentId (statement-attachment-id sonja ymp-id)))
+           (fact "Olli requests reply from Mikko to Sonja's statement"
+                 (command olli :request-for-statement-reply :id ymp-id :statementId statement-id
+                          :lang "fi") => ok?)
+           (fact "Mikko can save draft reply"
+                 (command mikko :save-statement-reply-as-draft :id ymp-id :statementId statement-id
+                          :modify-id (:modify-id (designated-statement sonja ymp-id))
+                          :text "I disagree!" :lang "fi") => ok?)
+           (fact "Mikko can send the reply"
+                 (command mikko :reply-statement :id ymp-id :statementId statement-id
+                          :modify-id (:modify-id (designated-statement sonja ymp-id))
+                          :text "I disagree strongly!"
+                          :lang "fi") => ok?))))
 
 
 (facts "Applicant type person can be requested for statement"
@@ -377,7 +392,7 @@
       (command veikko :request-for-statement-reply :id application-id :statementId statement-id :status "puollettu" :text "I will approve" :lang "fi") =not=> ok?)
 
     (fact "authority is able to request for reply"
-      (command sonja :request-for-statement-reply :id application-id :statementId statement-id :status "puollettu" :text "I will approve" :lang "fi") => ok?)
+          (command sonja :request-for-statement-reply :id application-id :statementId statement-id :status "puollettu" :text "I will approve" :lang "fi") => ok?)
 
     (fact "statement-is-replyable - is replyable when user is requested for reply"
       (query sonja :statement-is-replyable :id application-id :statementId statement-id) => ok?)))

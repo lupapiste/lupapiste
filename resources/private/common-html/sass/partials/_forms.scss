@@ -1043,7 +1043,7 @@ $max-columns: 12;
   label.#{$label-cls} {
   width: 100%;
   display: inline-block;
-}
+}  
   .#{$label-cls}:before {
     @include lupicon-font( $size );
     content: "\e603";
@@ -1589,4 +1589,8 @@ div.review-done {
     border-color: lighten($lp-orange, 10%);
     border-width: 1px;
   }
+}
+
+.checkbox-wrapper.checkbox-wrapper--break {
+  margin-bottom: $marginL;
 }

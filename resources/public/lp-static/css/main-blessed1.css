@@ -7285,6 +7285,11 @@ div.review-done div {
   border-width: 1px;
 }
 
+/* line 1594, ../../../private/common-html/sass/partials/_forms.scss */
+.checkbox-wrapper.checkbox-wrapper--break {
+  margin-bottom: 24px;
+}
+
 /* line 4, ../../../private/common-html/sass/partials/_tables.scss */
 table {
   width: 100%;
@@ -11609,10 +11614,4 @@ span.icon_clear:before {
 /* line 233, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.open .draft-box {
   display: none;
-}
-/* line 236, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .application_summary_info .state-indication div.open .open-box {
-  color: white;
-  background-color: #2ca92c;
-  display: inline-block;
 }

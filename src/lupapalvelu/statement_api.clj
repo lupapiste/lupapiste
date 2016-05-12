@@ -296,3 +296,11 @@
    :user-authz-roles #{:statementGiver}
    :description "Pseudo query for showing Add attachment button."}
   [_])
+
+(defquery statements-after-approve-allowed
+  {:parameters [:id]
+   :pre-checks [statement-in-sent-state-allowed]
+   :states      #{:submitted :complementNeeded}
+   :user-roles  #{:authority}
+   :description "Pseudo query for determining whether show a warning for statement drafts upon application approval."}
+  [_])
