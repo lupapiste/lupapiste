@@ -15,3 +15,4 @@ Ditt anv&auml;ndarkonto har kopplats till organisationen **{{org-fi}}**s myndigh
 Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https://www.lupapiste.fi/ohjeet](https://www.lupapiste.fi/ohjeet) och vanliga fr&aring;gor [https://www.lupapiste.fi/usein-kysytyt-kysymykset](https://www.lupapiste.fi/usein-kysytyt-kysymykset).
 
 Vid problem &auml;r du v&auml;lkommen att kontakta tuki@lupapiste.fi.
+
