@@ -1094,6 +1094,28 @@ $max-columns: 12;
 
 @include label-checkbox (checkbox-label) {}
 
+@mixin input-fields() {
+  padding: 0 $marginM;
+  box-sizing: border-box;
+  min-height: $grid-input-height;
+  height: $grid-input-height;
+  font-size: $grid-font-size;
+  color: $input-color;
+  border: 1px solid $input-border-color;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance:none;
+  
+  &:focus {
+    color: $input-focus-color;
+    border-color: $input-focus-border-color;
+  }
+  &:disabled {
+    border-color: $input-disabled-border-color;
+    background-color: $input-disabled-background-color;    
+  }
+}
+
 .form-grid {
   // overflow-y: hidden;
   width: 100%;
@@ -1141,22 +1163,9 @@ $max-columns: 12;
   }
 
   input[type=text], input[type=password], select, textarea {
-    padding: 0 $marginM;
-    min-height: $grid-input-height;
-    height: $grid-input-height;
+    @include input-fields;
+    
     width: 100%;
-    box-sizing: border-box;
-    font-size: $grid-font-size;
-    color: $input-color;
-    border: 1px solid $input-border-color;
-    -webkit-appearance: none;
-    -webkit-border-radius: 0px;
-    -moz-appearance:none;
-
-    &:focus {
-      color: $input-focus-color;
-      border-color: $input-focus-border-color;
-    }
   }
 
   textarea {
@@ -1164,6 +1173,7 @@ $max-columns: 12;
     padding: $marginS $marginM;
   }
 
+  
   .radio-label:before {
     @include lupicon-font;
     content: "\e634";
@@ -1504,6 +1514,15 @@ select.dropdown--plain {
     background-color: white;
 
   }
+}
+
+.grid-style-input {
+  @include input-fields;
+}
+
+textarea.grid-style-input {
+  height: $grid-textarea-height;
+  padding: $marginS $marginM;
 }
 
 .no-wrap-whitespace {

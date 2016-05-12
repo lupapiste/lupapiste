@@ -138,7 +138,8 @@
 (defcommand request-for-statement
   {:parameters [functionCode id selectedPersons]
    :user-roles #{:authority}
-   :states #{:open :submitted :complementNeeded}
+   :states #{:open :submitted :complementNeeded :sent}
+   :pre-checks [statement-in-sent-state-allowed]
    :input-validators [(partial action/vector-parameters-with-map-items-with-required-keys [:selectedPersons] [:email :name :text])
                       validate-selected-persons]
    :notified true
@@ -158,19 +159,20 @@
 (defcommand delete-statement
   {:parameters [id statementId]
    :input-validators [(partial action/non-blank-parameters [:id :statementId])]
-   :states     #{:open :submitted :complementNeeded}
+   :states     #{:open :submitted :complementNeeded :sent}
    :user-roles #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :pre-checks [statement-not-given
-                authority-or-statement-owner-applicant]}
+                authority-or-statement-owner-applicant
+                statement-in-sent-state-allowed]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
 (defcommand save-statement-as-draft
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-owner statement-not-given]
-   :states           #{:open :submitted :complementNeeded}
+   :pre-checks       [statement-owner statement-not-given statement-in-sent-state-allowed]
+   :states           #{:open :submitted :complementNeeded :sent}
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :description "statement owners can save statements as draft before giving final statement."}
@@ -187,8 +189,8 @@
 (defcommand give-statement
   {:parameters  [:id statementId status text :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :status :text :lang])]
-   :pre-checks  [statement-owner statement-not-given]
-   :states      #{:open :submitted :complementNeeded}
+   :pre-checks  [statement-owner statement-not-given statement-in-sent-state-allowed]
+   :states      #{:open :submitted :complementNeeded :sent}
    :user-roles  #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :notified    true
@@ -215,8 +217,8 @@
 (defcommand request-for-statement-reply
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-given replies-enabled reply-not-visible]
-   :states           #{:open :submitted :complementNeeded}
+   :pre-checks       [statement-given replies-enabled reply-not-visible statement-in-sent-state-allowed]
+   :states           #{:open :submitted :complementNeeded :sent}
    :user-roles       #{:authority}
    :description      "request for reply for statement when statement is given and organization has enabled statement replies"}
   [{application :application user :user {:keys [text]} :data :as command}]
@@ -230,8 +232,8 @@
 (defcommand save-statement-reply-as-draft
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-replyable]
-   :states           #{:open :submitted :complementNeeded}
+   :pre-checks       [statement-replyable statement-in-sent-state-allowed]
+   :states           #{:open :submitted :complementNeeded :sent}
    :user-roles       #{:applicant}
    :user-authz-roles auth/default-authz-writer-roles
    :description      "save reply for the statement as draft"}
@@ -246,8 +248,8 @@
 (defcommand reply-statement
   {:parameters       [:id statementId :lang]
    :input-validators [(partial action/non-blank-parameters [:id :statementId :lang])]
-   :pre-checks       [statement-replyable]
-   :states           #{:open :submitted :complementNeeded}
+   :pre-checks       [statement-replyable statement-in-sent-state-allowed]
+   :states           #{:open :submitted :complementNeeded :sent}
    :user-roles       #{:applicant}
    :user-authz-roles auth/default-authz-writer-roles
    :description      "reply to statement"}
@@ -286,3 +288,11 @@
    :pre-checks       [replies-enabled reply-not-visible]}
   [_])
 
+(defquery statement-attachment-allowed
+  {:parameters  [:id]
+   :pre-checks  [statement-owner statement-not-given statement-in-sent-state-allowed]
+   :states      #{:draft :open :submitted :complementNeeded :sent}
+   :user-roles  #{:authority :applicant}
+   :user-authz-roles #{:statementGiver}
+   :description "Pseudo query for showing Add attachment button."}
+  [_])

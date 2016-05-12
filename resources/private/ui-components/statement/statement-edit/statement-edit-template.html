@@ -40,7 +40,7 @@
             <img src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
           </label>
           <select id="statement-type-select"
-                  class="form-input combobox select"
+                  class="form-input dropdown"
                   data-bind="options: statuses,
                              optionsValue: 'id',
                              optionsText: 'name',
@@ -52,11 +52,12 @@
         <div>
           <label class="form-label" for="statement-text" data-bind="ltext: 'statement.' + tab + '.text'"></label>
           <textarea
-            data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')},
-                       textInput: text,
-                       readonly: !enabled()"
-            id="statement-text"
-            rows="15">
+             data-bind="attr: {placeholder: loc('statement.' + tab + '.message.placeholder')},
+                        textInput: text,
+                        readonly: !enabled()"
+             id="statement-text"
+             rows="15"
+             class="grid-style-input">
           </textarea>
         </div>
       </form>
