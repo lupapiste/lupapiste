@@ -236,7 +236,8 @@
 
 (facts "foreman history"
   (apply-remote-minimal) ; clean mikko before history tests
-  (let [{history-base-app-id :id} (create-app mikko :operation "kerrostalo-rivitalo")
+  (let [{history-base-app-id :id} (create-and-submit-application mikko :operation "kerrostalo-rivitalo")
+        _                    (give-verdict sonja history-base-app-id :verdictId "321-2016")
         {other-r-app-id :id} (create-app mikko :operation "kerrostalo-rivitalo")
         {ya-app-id :id}      (create-app mikko :operation "ya-kayttolupa-muu-tyomaakaytto")
         foreman-app-id1      (create-foreman-application history-base-app-id mikko mikko-id "KVV-ty\u00F6njohtaja" "B"); -> should be visible
