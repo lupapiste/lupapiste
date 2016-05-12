@@ -62,8 +62,8 @@
 
 (defn- zip-files! [file fpaths]
   (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
-    (io/copy (fsc/make-zip-stream filename-content-pairs)
-             (fs/file file))
+    (with-open [zip (fsc/make-zip-stream filename-content-pairs)]
+      (io/copy zip (fs/file file)))
     file))
 
 (defn- build-zip! [fpaths]
