@@ -12,14 +12,28 @@
 
 (apply-remote-minimal)
 
+(defn create-and-open-app [apikey & args]
+  (let [{application-id :id :as resp} (apply create-app apikey args)]
+    (comment-application apikey application-id true)
+    resp))
+
+(defn create-foreman-app [apikey authority application-id]
+  (let [{foreman-application-id :id} (command authority :create-foreman-application :id application-id
+                                              :taskId "" :foremanRole "ei tiedossa" :foremanEmail "")]
+   (command authority :invite-with-role
+            :id foreman-application-id :email (email-for-key apikey) :text ""
+            :documentName "" :documentId "" :path "" :role "writer")
+   (command apikey :approve-invite :id foreman-application-id)
+   (query-application apikey foreman-application-id)))
+
 (facts* "Foreman application"
         (let [apikey                       mikko
-              {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
+              email                        (email-for-key apikey)
+              {application-id :id}         (create-and-open-app apikey :operation "kerrostalo-rivitalo") => truthy
               application                  (query-application apikey application-id)
               _                            (generate-documents application apikey)
-              {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa" :foremanEmail "") => truthy
-
-              foreman-application          (query-application apikey foreman-application-id)
+              {foreman-application-id :id
+               :as foreman-application}    (create-foreman-app apikey sonja application-id)
               foreman-link-permit-data     (first (foreman-application :linkPermitData))
               foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
               application                  (query-application apikey application-id)
@@ -93,8 +107,8 @@
                   application (create-and-submit-application apikey)
                   _ (command sonja :check-for-verdict :id (:id application))
                   application (query-application apikey (:id application))
-                  {foreman-application-id-1 :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "" :foremanEmail "")
-                  {foreman-application-id-2 :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "" :foremanEmail "")
+                  {foreman-application-id-1 :id} (create-foreman-app apikey sonja (:id application))
+                  {foreman-application-id-2 :id} (create-foreman-app apikey sonja (:id application))
                   tasks (:tasks application)
                   foreman-tasks (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks)]
 
@@ -140,18 +154,15 @@
                        (comment-application apikey foreman-application-id) => fail?))
 
           (facts "updating other foreman projects to current foreman application"
-                 (let [{application1-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-                       {foreman-application1-id :id} (command apikey :create-foreman-application :id application1-id :taskId "" :foremanRole "" :foremanEmail "") => truthy
-
-                       {application2-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-                       {foreman-application2-id :id} (command apikey :create-foreman-application :id application2-id :taskId "" :foremanRole "" :foremanEmail "") => truthy
-
+                 (let [{application1-id :id}         (create-and-open-app apikey :operation "kerrostalo-rivitalo") => truthy
+                       {foreman-application1-id :id} (create-foreman-app apikey sonja application1-id) => truthy
+                       {application2-id :id}         (create-and-open-app apikey :operation "kerrostalo-rivitalo") => truthy
+                       {foreman-application2-id :id} (create-foreman-app apikey sonja application2-id)
                        foreman-application1          (query-application apikey foreman-application1-id)
                        foreman-application2          (query-application apikey foreman-application2-id)
 
                        foreman-doc1                  (domain/get-document-by-name foreman-application1 "tyonjohtaja-v2")
                        foreman-doc2                  (domain/get-document-by-name foreman-application2 "tyonjohtaja-v2")]
-
                    (fact "other project is updated into current foreman application"
                          (command apikey :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
                          (command apikey :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
