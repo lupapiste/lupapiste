@@ -2135,15 +2135,18 @@
          (->> (dissoc kesto :alku :loppu) vals)))
 
 (defn- change-kesto-doc-as-repeating [doc]
-  (if (get-in doc [:data :kesto :arki])
+  (if (and (= (get-in doc [:schema-info :name]) "ymp-ilm-kesto")
+           (get-in doc [:data :kesto :arki]))
     (update-in doc [:data :kesto] (fn->> flatten-kesto (hash-map :0)))
     doc))
 
 (defmigration change-meluilmoitus-kesto-as-repeating
-  {:apply-when (pos? (mongo/count :applications {:documents.data.kesto.arki {$exists true}}))}
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                                         :schema-info.name "ymp-ilm-kesto"}}}))}
   (update-applications-array :documents
                              change-kesto-doc-as-repeating
-                             {:documents.data.kesto.arki {$exists true}}))
+                             {:documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                      :schema-info.name "ymp-ilm-kesto"}}}))
 
 ;;
 ;; ****** NOTE! ******
