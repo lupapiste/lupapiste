@@ -98,12 +98,12 @@
                                                                              :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
                                                                                                              :sukunimi {:value "Mallikas"}}}}}}
                                                     {:schema-info {:name :tyoaika}
-                                                     :data        {:tyoaika-alkaa-pvm {:value "01.12.2016"}
+                                                     :data        {:tyoaika-alkaa-pvm   {:value "01.12.2016"}
                                                                    :tyoaika-paattyy-pvm {:value "02.12.2016"}}}])]
            (verdict/write-verdict-libre-doc data "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
-             #_(.delete tmp-file)
+             (.delete tmp-file)
              (fact {:midje/description (str " verdict title id (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (template/build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
              (fact {:midje/description (str " verdict id (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_ID") => (template/build-user-field "LP-000-0000-0000" "LPAVALUE_ID"))
              (fact {:midje/description (str " verdict title municipality (" (name lang) ")")} (get-user-field user-fields "LPATITLE_MUNICIPALITY") => (template/build-user-field (localize lang "application.muncipality") "LPATITLE_MUNICIPALITY"))
@@ -115,25 +115,15 @@
              (fact {:midje/description (str " verdict title yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_YHTEYSHENKILO") => (template/build-user-field (localize lang "verdict.yhteyshenkilo") "LPTITLE_YHTEYSHENKILO"))
              (fact {:midje/description (str " verdict yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_YHTEYSHENKILO") => (template/build-user-field "Mikko Mallikas" "LPVALUE_YHTEYSHENKILO"))
              (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA_ALKAA") => (template/build-user-field "01.12.2016" "LPVALUE_LUPA_AIKA_ALKAA"))
-             (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA_PAATTYY") => (template/build-user-field "02.12.2016" "LPVALUE_LUPA_AIKA_PAATTYY"))
+             (fact {:midje/description (str " verdict loppuu (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA_PAATTYY") => (template/build-user-field "02.12.2016" "LPVALUE_LUPA_AIKA_PAATTYY"))))))
+
+(facts "YA contract publish export "
+       (doseq [lang i18n/languages]
+         (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
+           (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
+           (let [res (s/split (slurp tmp-file) #"\r?\n")
+                 user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
+             #_(.delete tmp-file)
+             (fact {:midje/description (str " verdict title  date(" (name lang) ")")} (get-user-field user-fields "LPTITLE_CONTRACT_DATE") => (template/build-user-field (localize lang "verdict.contract.date") "LPTITLE_CONTRACT_DATE"))
 
              ))))
-
-#_(facts "Verdict-contract publish export "
-         (doseq [lang i18n/languages]
-           (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
-             (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
-             (let [res (s/split (slurp tmp-file) #"\r?\n")
-                   doc-start-row (start-pos res)]
-               #_(.delete tmp-file)
-               (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res doc-start-row) => #(s/includes? % (localize lang "userInfo.company.contract")))
-               (fact {:midje/description (str " verdict libre document id ")} (nth res (+ doc-start-row 1)) => #(s/includes? % "LP-000-0000-0000"))
-               (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ doc-start-row 2)) => #(s/includes? % "20160043"))
-               (fact {:midje/description (str " verdict libre document sijainti ")} (nth res (+ doc-start-row 4)) => #(s/includes? % "Korpikuusen kannon alla 6"))
-               (fact {:midje/description (str " verdict libre document osapuolet 1 ")} (nth res (+ doc-start-row 18)) => #(s/includes? % "org-name-fi / Tytti M\u00e4ntyoja"))
-               (fact {:midje/description (str " verdict libre document osapuolet 2 ")} (nth res (+ doc-start-row 26)) => #(s/includes? % "Testaaja Testi"))
-               (fact {:midje/description (str " verdict libre document sis\u00e4lt\u00f6 ")} (nth res (+ doc-start-row 34)) => #(s/includes? % "Lorem ipsum dolor sit amet"))
-               (fact {:midje/description (str " verdict libre document signature 1 ")} (nth res (+ doc-start-row 69)) => #(s/includes? % "Tytti M\u00e4ntyoja"))
-               (fact {:midje/description (str " verdict libre document signature 2 ")} (nth res (+ doc-start-row 82)) => #(s/includes? % "Matti Mallikas"))
-               (fact {:midje/description (str " verdict libre document last signature ")} (nth res (+ doc-start-row 95)) => #(s/includes? % "Minna Mallikas"))
-               ))))
