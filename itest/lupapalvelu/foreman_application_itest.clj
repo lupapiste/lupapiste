@@ -398,6 +398,11 @@
                            :documentId "" :path "" :role "writer") => ok?
                 _ (command apikey :remove-doc :id application-id :docId hakija1) => ok? ; remove one applicant
                 _ (give-verdict sonja application-id :verdictId "321-2016")
+
+                ; This foreman application is created only to cause an invite to the original application
+                _  (command apikey :create-foreman-application :id application-id
+                            :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
+
                 _ (sent-emails)         ; reset email box
                 {foreman-app-id :id} (command apikey :create-foreman-application :id application-id
                                               :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
