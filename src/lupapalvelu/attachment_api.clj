@@ -58,16 +58,19 @@
     (fail :error.unauthorized
           :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority.")))
 
-(defn- attachment-editable-by-application-state [{{attachmentId :attachmentId} :data user :user :as command}
-                                                 {current-state :state :as application}]
-  (when-not (ss/blank? attachmentId)
-    (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
-      (when-not (if (= (keyword current-state) :sent)
-                  (statement/delete-attachment-allowed? attachmentId application)
-                  (or (not (states/post-verdict-states (keyword current-state)))
-                      (states/post-verdict-states (keyword create-state))
-                      (user/authority? user)))
-        (fail :error.pre-verdict-attachment)))))
+(defn- attachment-editable-by-application-state
+  ([command application]
+   (attachment-editable-by-application-state false command application))
+  ([authority-sent? {{attachmentId :attachmentId} :data user :user :as command} {current-state :state :as application}]
+   (when-not (ss/blank? attachmentId)
+     (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
+       (when-not (if (= (keyword current-state) :sent)
+                   (or (and authority-sent? (user/authority? user))
+                       (statement/delete-attachment-allowed? attachmentId application))
+                   (or (not (states/post-verdict-states (keyword current-state)))
+                       (states/post-verdict-states (keyword create-state))
+                       (user/authority? user)))
+         (fail :error.pre-verdict-attachment))))))
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
@@ -334,7 +337,7 @@
    :user-authz-roles auth/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
                 statement/upload-attachment-allowed
-                attachment-editable-by-application-state
+                (partial attachment-editable-by-application-state true)
                 validate-attachment-type
                 a/validate-authority-in-drafts
                 attachment-id-is-present-in-application-or-not-set
