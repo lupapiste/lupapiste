@@ -225,5 +225,5 @@
     (assoc
       (company/company->auth company)
       :id "" ; prevents access to application before accepting invite
-      :role ""
+      :role "reader"
       :invite {:user {:id company-id}})))
