@@ -1,5 +1,5 @@
 (ns lupapalvelu.pdf.libreoffice-template-verdict
-  (:require [taoensso.timbre :as log]
+  (:require [taoensso.timbre :as timbre]
             [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.pdf.libreoffice-template :refer [xml-escape get-organization-name applicant-index] :as template]
@@ -64,8 +64,8 @@
   (if-let [krysp-other-requirements (:vaaditutKatselmukset (get-lupamaaraykset application verdict-id paatos-idx))]
     (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))])
          krysp-other-requirements)
-    (map (fn [child] [(i18n/localize (name lang) (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value])))])
-         (filter-tasks application verdict-id "task-katselmus"))))
+    (map (fn [child] [(str (i18n/localize (name lang) (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value]))) " (" (:taskname child) ")")])
+         (concat (filter-tasks application verdict-id "task-katselmus-ya") (filter-tasks application verdict-id "task-katselmus")))))
 
 ;(sc/optional-key :maaraykset)                     [Maarays]
 (defn- verdict-maaraykset [application verdict-id paatos-idx]
@@ -80,21 +80,35 @@
 (defn- verdict-paatos-key [paatos key]
   (s/join "\n" (map (fn [val] (str (key val))) (:poytakirjat paatos))))
 
-(defn verdict-signatures [verdict paatos]
+(defn- verdict-signatures [verdict paatos]
   (into [[(verdict-paatos-key paatos :paatoksentekija) (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")]]
         (map (fn [sig] [(xml-escape (str (get-in sig [:user :firstName]) " " (get-in sig [:user :lastName]))) (or (util/to-local-date (:created sig)) "-")]) (:signatures verdict))))
+
+(defn- get-vastuuhenkilo [application]
+  (let [henkilo (template/get-document-data application :tyomaastaVastaava [:henkilo :henkilotiedot])
+        henkilo-nimi (str (get-in henkilo [:etunimi :value]) " " (get-in henkilo [:sukunimi :value]))
+        yritys (template/get-document-data application :tyomaastaVastaava [:yritys :yritysnimi :value])]
+    (if (s/blank? henkilo-nimi) yritys henkilo-nimi)))
+
+(defn- get-yhteyshenkilo [application]
+  (let [henkilo (template/get-document-data application :tyomaastaVastaava [:yritys :yhteyshenkilo :henkilotiedot])]
+    (str (get-in henkilo [:etunimi :value]) " " (get-in henkilo [:sukunimi :value]))))
 
 (defn write-verdict-libre-doc [application id paatos-idx lang file]
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
         paatos (nth (:paatokset verdict) paatos-idx)]
     (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
-    (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-contract-template.fodt" "private/lupapiste-verdict-template2.fodt"))
+    (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-contract-template.fodt" "private/lupapiste-ya-verdict-template.fodt"))
                                file
                                (assoc (template/common-field-map application lang)
                                  "FIELD001" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
+                                 "LPAVALUE_APPLICANT" (:applicant application)
+
+                                 "LPTITLE" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
 
                                  "LPTITLE_KUNTA" (i18n/localize lang "verdict.id")
-                                 "FIELD012" (str (:kuntalupatunnus verdict))
+                                 "LPTITLE_KUNTALUPA" (i18n/localize lang "linkPermit.dialog.kuntalupatunnus")
+                                 "LPVALUE_KUNTALUPA" ""
 
                                  "LPTITLE_SIJAINTI" (i18n/localize lang "applications.location")
 
@@ -109,6 +123,18 @@
 
                                  "LPTITLE_TEKSTI" (i18n/localize lang "verdict.text")
                                  "LPVALUE_TEKSTI" (verdict-paatos-key paatos :paatos)
+
+                                 "LPTITLE_YHTEYSHENKILO" (i18n/localize lang "verdict.yhteyshenkilo")
+                                 "LPVALUE_YHTEYSHENKILO" (get-yhteyshenkilo application)
+
+                                 "LPTITLE_VASTUU" (i18n/localize lang "verdict.vastuuhenkilo")
+                                 "LPVALUE_VASTUU" (get-vastuuhenkilo application)
+
+                                 "LPTITLE_LUPA_AIKA" (i18n/localize lang "tyoaika._group_label")
+
+                                 "LPVALUE_LUPA_AIKA_ALKAA" (template/get-document-data application :tyoaika [:tyoaika-alkaa-pvm :value])
+                                 "LPVALUE_LUPA_AIKA_PAATTYY" (template/get-document-data application :tyoaika [:tyoaika-paattyy-pvm :value])
+
 
                                  ;;                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraukset")
                                  ;;                                 "LUPAMAARAYKSETTABLE" (verdict-lupamaaraykset application id paatos-idx lang)
