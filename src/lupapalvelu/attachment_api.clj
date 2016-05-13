@@ -65,8 +65,8 @@
       (when-not (if (= (keyword current-state) :sent)
                   (statement/delete-attachment-allowed? attachmentId application)
                   (or (not (states/post-verdict-states (keyword current-state)))
-                     (states/post-verdict-states (keyword create-state))
-                     (user/authority? user)))
+                      (states/post-verdict-states (keyword create-state))
+                      (user/authority? user)))
         (fail :error.pre-verdict-attachment)))))
 
 (defn- validate-meta [{{meta :meta} :data}]

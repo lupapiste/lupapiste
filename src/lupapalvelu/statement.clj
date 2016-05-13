@@ -5,6 +5,7 @@
             [sade.util :as util]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
+            [sade.validators :as v]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.organization :as organization]
@@ -158,6 +159,16 @@
 (defn attachments-readonly-updates [{app-id :id} statement-id]
   (att/attachment-array-updates app-id (comp #{statement-id} :id :target) :readOnly true))
 
+(defn validate-selected-persons [{{selectedPersons :selectedPersons} :data}]
+  (let [non-blank-string-keys (when (some
+                                      #(some (fn [k] (or (-> % k string? not) (-> % k ss/blank?))) [:email :name :text])
+                                      selectedPersons)
+                                (fail :error.missing-parameters))
+        has-invalid-email (when (some
+                                  #(not (v/email-and-domain-valid? (:email %)))
+                                  selectedPersons)
+                            (fail :error.email))]
+    (or non-blank-string-keys has-invalid-email)))
 ;;
 ;; Statement givers
 ;;
