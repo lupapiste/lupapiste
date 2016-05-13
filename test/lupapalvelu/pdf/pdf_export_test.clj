@@ -185,17 +185,17 @@
                        )
                     (.delete file))))))
 
-(def foreman-roles-and-tasks {"vastaava työnjohtaja"      ["rakennuksenMuutosJaKorjaustyo"
+(def foreman-roles-and-tasks {"vastaava ty\u00f6njohtaja"      ["rakennuksenMuutosJaKorjaustyo"
                                                            "uudisrakennustyoMaanrakennustoineen"
                                                            "uudisrakennustyoIlmanMaanrakennustoita"
                                                            "linjasaneeraus"
                                                            "maanrakennustyot"
                                                            "rakennuksenPurkaminen"]
-                              "KVV-työnjohtaja"           ["sisapuolinenKvvTyo"
+                              "KVV-ty\u00f6njohtaja"           ["sisapuolinenKvvTyo"
                                                            "ulkopuolinenKvvTyo"]
-                              "IV-työnjohtaja"            ["ivLaitoksenAsennustyo"
+                              "IV-ty\u00f6njohtaja"            ["ivLaitoksenAsennustyo"
                                                            "ivLaitoksenKorjausJaMuutostyo"]
-                              "erityisalojen työnjohtaja" []})
+                              "erityisalojen ty\u00f6njohtaja" []})
 
 (defn loc-tasks [role]
   (with-lang :fi (doall (map #(loc (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." %))
@@ -227,9 +227,9 @@
              (fact {:midje/description loc-role} (re-find (re-pattern (str "(?m)" loc-role)) pdf-content) => truthy)
              (facts {:midje/description (str loc-role " tasks")}
                     (doseq [good loc-good-tasks]
-                      (fact {:midje/description good} (re-find (re-pattern (str "(?m)" good "\\s+Kyllä")) pdf-content) => truthy))
+                      (fact {:midje/description good} (re-find (re-pattern (str "(?m)" good "\\s+Kyll\u00e4")) pdf-content) => truthy))
                     (doseq [bad loc-bad-tasks]
-                      (fact {:midje/description bad} (re-find (re-pattern (str "(?m)" bad "\\s+Kyllä")) pdf-content) => falsey)))))))
+                      (fact {:midje/description bad} (re-find (re-pattern (str "(?m)" bad "\\s+Kyll\u00e4")) pdf-content) => falsey)))))))
 
 (facts "Foreman roles and tasks"
        (doall (map foreman-pdf-content-check (keys foreman-roles-and-tasks))))
