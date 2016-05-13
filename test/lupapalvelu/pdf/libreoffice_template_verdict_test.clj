@@ -41,7 +41,7 @@
        (fact {:midje/description (str " krysp")}
              (verdict-muutMaaraykset application1 "a1" 0) => '[])
        (fact {:midje/description (str " non-krysp")}
-             (verdict-muutMaaraykset application2 "a1" 0) => '[["Joku lupam\u00e4\u00e4r\u00e4ys"]]))
+             (verdict-muutMaaraykset application2 "a1" 0) => '[["Jotain pitais tehda (Joku lupam\u00e4\u00e4r\u00e4ys)"]]))
 
 (facts "Verdict vaaditutKatselmukset "
        (def verdict-vaaditutKatselmukset #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-vaaditutKatselmukset)

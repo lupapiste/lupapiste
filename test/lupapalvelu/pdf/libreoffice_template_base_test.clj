@@ -232,7 +232,7 @@
                                                  :id   "a1"
                                                  }
                                    :id          "2224"}
-                                  {:data        {}
+                                  {:data        {:maarays {:value "Jotain pitais tehda"}}
                                    :state       "requires_user_action"
                                    :taskname    "Joku lupam\u00e4\u00e4r\u00e4ys"
                                    :schema-info {:name    "task-lupamaarays"

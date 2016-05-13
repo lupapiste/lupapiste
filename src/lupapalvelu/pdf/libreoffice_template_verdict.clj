@@ -57,7 +57,7 @@
   (into []
         (if-let [krysp-other-requirements (:muutMaaraykset (get-lupamaaraykset application verdict-id paatos-idx))]
           (map (fn [row] [(str row)]) krysp-other-requirements)
-          (map (fn [row] [(str (:taskname row))]) (filter-tasks application verdict-id "task-lupamaarays")))))
+          (map (fn [row] [(str (get-in row [:data :maarays :value]) " (" (:taskname row) ")")]) (filter-tasks application verdict-id "task-lupamaarays")))))
 
 ;;(sc/optional-key :vaaditutKatselmukset)           [Katselmus]
 (defn- verdict-vaaditutKatselmukset [application verdict-id paatos-idx lang]
