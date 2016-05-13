@@ -6,7 +6,6 @@ Jos ep&auml;ilette v&auml;&auml;rink&auml;ytt&ouml;&auml;, ottakaa viipym&auml;t
 
 ---
 
-
 Hej {{name}},
 
 Till din k&auml;nnedom har e-postadressen och anv&auml;ndarnamnet {{old-email}} &auml;ndrats i Lupapiste-tj&auml;nsten. Den nya e-postadressen &auml;r {{new-email}}.

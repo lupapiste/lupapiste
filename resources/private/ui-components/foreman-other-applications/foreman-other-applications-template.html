@@ -47,6 +47,7 @@
               <td><span class="form-entry form-input"
                         data-bind="component: { name: uicomponent,
                                                 params: { schema: $data,
+                                                          isDisabled: $component.disableWhileUpdating(),
                                                           path: $parent.path.concat(name),
                                                           i18npath: i18npath,
                                                           applicationId: applicationId,

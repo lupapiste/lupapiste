@@ -97,7 +97,7 @@
   [id col]
   (some (fn [m] (when (= id (:id m)) m)) col))
 
-(defn update-by-id
+(defn replace-by-id
   "Return col of maps where elements are replaced by item when element :id matches item :id"
   [item col]
   (map #(if (= (:id item) (:id %)) item %) col))

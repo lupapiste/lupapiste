@@ -3,7 +3,7 @@
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [clojure.set :refer [rename-keys] :as set]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.property :as p]
@@ -2117,20 +2117,36 @@
                                    {:statements.reminder-sent {$type 10}}
                                    {:statements.metadata {$type 10}}]}))
 
-; Updating only non-submitted applications, the change has no value for others
-(defmigration hakija-tj
+(defmigration hakija-tj-v2
   {:apply-when (pos? (mongo/count :applications {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
-                                                 :documents.schema-info.name "hakija-r"
-                                                 :state {$in [:draft :open]}}))}
+                                                 :documents.schema-info.name "hakija-r"}))}
   (letfn [(pred [doc] (= "hakija-r" (get-in doc [:schema-info :name])))]
     (reduce + 0
       (for [{:keys [id documents]} (mongo/select :applications
                                      {:primaryOperation.name "tyonjohtajan-nimeaminen-v2"
-                                     :documents.schema-info.name "hakija-r"
-                                     :state {$in [:draft :open]}}
+                                      :documents.schema-info.name "hakija-r"}
                                      [:documents])]
         (let [updates {$set (mongo/generate-array-updates :documents documents pred "schema-info.name" "hakija-tj")}]
           (mongo/update-n :applications {:_id id} updates))))))
+
+(defn- flatten-kesto [kesto]
+  (apply merge
+         (select-keys kesto [:alku :loppu])
+         (->> (dissoc kesto :alku :loppu) vals)))
+
+(defn- change-kesto-doc-as-repeating [doc]
+  (if (and (= (get-in doc [:schema-info :name]) "ymp-ilm-kesto")
+           (get-in doc [:data :kesto :arki]))
+    (update-in doc [:data :kesto] (fn->> flatten-kesto (hash-map :0)))
+    doc))
+
+(defmigration change-meluilmoitus-kesto-as-repeating
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                                         :schema-info.name "ymp-ilm-kesto"}}}))}
+  (update-applications-array :documents
+                             change-kesto-doc-as-repeating
+                             {:documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                      :schema-info.name "ymp-ilm-kesto"}}}))
 
 ;;
 ;; ****** NOTE! ******

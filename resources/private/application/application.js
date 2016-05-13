@@ -77,7 +77,11 @@
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
       .success(function(resp) {
         util.showSavedIndicator(resp);
-        applicationModel.reload();
+        applicationModel.lightReload();
+      })
+      .onError("error.missing-parameters", function(resp) {
+        util.showSavedIndicator(resp);
+        applicationModel.lightReload();
       })
       .call();
   }

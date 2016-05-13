@@ -3,6 +3,7 @@
             [clojure.string :as s]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.application :as app]
             [lupapalvelu.batchrun :as batch]
             [lupapalvelu.xml.asianhallinta.verdict :as ahk]
             [lupapalvelu.factlet :refer :all]
@@ -10,6 +11,7 @@
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.integrations-api]
+            [lupapalvelu.verdict-api] ; for notification definition
             [me.raynes.fs.compression :as fsc]
             [me.raynes.fs :as fs]
             [lupapalvelu.mongo :as mongo]
@@ -17,6 +19,7 @@
             [sade.common-reader :as cr]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.email]
             [sade.dummy-email-server :as dummy-email])
   (:import (java.io File ByteArrayOutputStream)))
 
@@ -62,8 +65,8 @@
 
 (defn- zip-files! [file fpaths]
   (let [filename-content-pairs (map (juxt fs/base-name slurp-bytes) fpaths)]
-    (io/copy (fsc/make-zip-stream filename-content-pairs)
-             (fs/file file))
+    (with-open [zip (fsc/make-zip-stream filename-content-pairs)]
+      (io/copy zip (fs/file file)))
     file))
 
 (defn- build-zip! [fpaths]
@@ -106,7 +109,7 @@
   (setup-target-folder!)
 
   (against-background
-    [(lupapalvelu.application/make-application-id anything) => "LP-297-2015-00001"]
+    [(app/make-application-id anything) => "LP-297-2015-00001"]
     (fact "Successful batchrun"
       (mongo/with-db db-name
         (let [zip (fs/copy
@@ -129,7 +132,7 @@
             (count (:verdicts (query-application local-query pena app-id))) => 1)))))
 
   (against-background
-    [(lupapalvelu.application/make-application-id anything) => "LP-297-2015-00002"]
+    [(app/make-application-id anything) => "LP-297-2015-00002"]
     (fact "Batchrun with unsuccessful verdict save (no xml inside zip)"
       (mongo/with-db db-name
         (let [zip (fs/copy
@@ -237,7 +240,7 @@
                   (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
                   email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant")))))))))
   (against-background
-    (lupapalvelu.application/make-application-id anything) => "LP-297-2015-00001"))
+    (app/make-application-id anything) => "LP-297-2015-00001"))
 
 (facts "unit tests"
   (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path]))]

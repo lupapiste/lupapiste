@@ -67,6 +67,7 @@
 (def sipoo-ya    (apikey-for "sipoo-ya"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
+(def oulu        (apikey-for "ymp-admin@oulu.fi"))
 (def dummy       (apikey-for "dummy"))
 (def admin       (apikey-for "admin"))
 (def admin-id    (id-for "admin"))

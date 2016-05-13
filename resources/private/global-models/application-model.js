@@ -313,6 +313,12 @@ LUPAPISTE.ApplicationModel = function() {
        fn: function() {
             ajax.command("submit-application", {id: self.id()})
               .success(self.reload)
+              .onError("error.foreman.type-not-selected", function() {
+                hub.send("show-dialog", {ltitle: "error.dialog.title",
+                                         size: "medium",
+                                         component: "ok-dialog",
+                                         componentParams: {ltext: "error.foreman.type-not-selected"}});
+              })
               .onError("error.foreman.notice-not-submittable", function() {
                 hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
                                          size: "medium",
@@ -400,7 +406,8 @@ LUPAPISTE.ApplicationModel = function() {
       }
     };
 
-    if (!_(self._js.statements).reject("given").isEmpty()) {
+    if (!( lupapisteApp.models.applicationAuthModel.ok( "statements-after-approve-allowed")
+           || _(self._js.statements).reject("given").isEmpty())) {
       // All statements have not been given
       hub.send("show-dialog", {ltitle: "application.approve.statement-not-requested",
         size: "medium",

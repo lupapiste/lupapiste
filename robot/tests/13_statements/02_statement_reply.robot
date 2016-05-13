@@ -149,9 +149,9 @@ Mikko writes reply for Olli's statement
   Wait until  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-statement']
   Wait until  Element should be visible  xpath=//li[@data-test-id='statement-tab-selector-reply']
   Element should not be visible  xpath=//li[@data-test-id='statement-tab-selector-reply-request']
-  Element should be visible  statement-nothing-to-add
-  Click element  statement-nothing-to-add
-  Checkbox should be selected  statement-nothing-to-add
+  Wait test id visible  statement-nothing-to-add
+  Scroll and click test id  statement-nothing-to-add
+  Checkbox wrapper selected  statement-nothing-to-add
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
   Confirm  dynamic-yes-no-confirm-dialog
@@ -161,11 +161,11 @@ Mikko writes reply for another Olli's statement
   # Mikko sees 2 statemens from Olli
   Open statement  olli.uleaborg@ouka.fi  2
   Wait and click  xpath=//li[@data-test-id='statement-tab-selector-reply']
-  Wait until  Element should be visible  statement-nothing-to-add
-  Click element  statement-nothing-to-add
-  Checkbox should be selected  statement-nothing-to-add
-  Click element  statement-nothing-to-add
-  Checkbox should not be selected  statement-nothing-to-add
+  Wait test id visible  statement-nothing-to-add
+  Scroll and click test id  statement-nothing-to-add
+  Checkbox wrapper selected  statement-nothing-to-add
+  Scroll and click test id  statement-nothing-to-add
+  Checkbox wrapper not selected  statement-nothing-to-add
   Wait until  Input text  statement-reply-text  this is my reply
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit

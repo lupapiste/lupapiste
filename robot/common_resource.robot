@@ -808,6 +808,16 @@ Submit application
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
 
+Approve application ok
+  Click enabled by test id  approve-application
+  Confirm ok dialog
+  Wait until  Application state should be  sent
+
+Approve application yes
+  Click enabled by test id  approve-application
+  Confirm yes no dialog
+  Wait until  Application state should be  sent
+
 Notification dialog should be open
   Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
 
@@ -1271,6 +1281,13 @@ Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
 
+Checkbox wrapper selected
+  [Arguments]  ${id}
+  Javascript?  $("input#${id}:checked").length
+
+Checkbox wrapper not selected
+  [Arguments]  ${id}
+  Javascript?  $("input#${id}:checked").length === 0
 
 # Frontend error log
 

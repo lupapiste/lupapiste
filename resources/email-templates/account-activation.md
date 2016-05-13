@@ -2,7 +2,7 @@
 
 Tervetuloa Lupapisteen k&auml;ytt&auml;j&auml;ksi. Aktivoi k&auml;ytt&auml;j&auml;tunnuksesi t&auml;st&auml; linkist&auml;:
 
-{{link}}
+  {{link}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
@@ -18,7 +18,7 @@ Jos et ole rekister&ouml;itynyt Lupapisteeseen, voit j&auml;tt&auml;&auml; t&aum
 
 V&auml;lkommen till Lupapiste. Aktivera ditt anv&auml;ndar-ID genom att klicka p&aring; denna l&auml;nk:
 
-{{link}}
+  {{link}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 

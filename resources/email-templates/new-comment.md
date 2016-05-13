@@ -2,7 +2,7 @@
 
 Uusi kommentti lis&auml;tty keskusteluun:
 
-{{link-fi}}
+  {{link-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
@@ -12,6 +12,6 @@ Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 En ny kommentar har inkommit till diskusionet:
 
-{{link-sv}}
+  {{link-sv}}
 
 Ifall l&auml;nken inte fungerar kan du kopiera adressen till webbl&auml;sarens adressf&auml;lt.
