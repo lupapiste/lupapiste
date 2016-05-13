@@ -98,11 +98,13 @@
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
         paatos (nth (:paatokset verdict) paatos-idx)]
     (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
-    (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-contract-template.fodt" "private/lupapiste-ya-verdict-template.fodt"))
+    (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-ya-contract-template.fodt" "private/lupapiste-ya-verdict-template.fodt"))
                                file
                                (assoc (template/common-field-map application lang)
                                  "FIELD001" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
                                  "LPAVALUE_APPLICANT" (:applicant application)
+
+                                 "LPTITLE_CONTRACT_DATE" (i18n/localize lang "verdict.contract.date")
 
                                  "LPTITLE" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
 

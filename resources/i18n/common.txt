@@ -4062,3 +4062,5 @@
 "verdict.vastuuhenkilo" "sv" ""
 "verdict.yhteyshenkilo" "fi" "Yhteyshenkilö"
 "verdict.yhteyshenkilo" "sv" ""
+"verdict.contract.date" "fi" "Sopimuksen päivämäärä"
+"verdict.contract.date" "sv" ""
