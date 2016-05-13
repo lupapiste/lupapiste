@@ -73,14 +73,15 @@
        (stamper/make-stamp (ss/limit text 100) created transparency)))
 
 (defn- stamp-attachments!
-  [file-infos {:keys [job-id application info-fields] :as context}]
-  (let [stamp-without-buildings (info-fields->stamp context (dissoc info-fields :buildings))
-        stamp-with-buildings (info-fields->stamp context info-fields)]
+  [file-infos {:keys [job-id application info-fields] {:keys [include-buildings]} :options :as context}]
+  (let [stamp-without-buildings   (info-fields->stamp context (dissoc info-fields :buildings))
+        stamp-with-buildings      (info-fields->stamp context info-fields)]
     (doseq [file-info file-infos]
       (try
         (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
         (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
-        (let [stamp (if (asemapiirros? file-info) stamp-with-buildings stamp-without-buildings)
+        (let [stamp (cond (and (asemapiirros? file-info) include-buildings) stamp-with-buildings
+                          :else stamp-without-buildings)
               new-file-id (stamp-attachment! stamp file-info context)]
           (job/update job-id assoc (:attachment-id file-info) {:status :done :fileId new-file-id}))
         (catch Throwable t
