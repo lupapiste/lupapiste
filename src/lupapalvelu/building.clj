@@ -5,16 +5,17 @@
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]))
 
-(defn- doc->building-data [{{national-id :value} :valtakunnallinenNumero {short-id :value} :tunnus}]
+(defn- doc->building-data [{{{national-id :value} :valtakunnallinenNumero {short-id :value} :tunnus} :data
+                            {{operation-id :id} :op} :schema-info}]
   (when (or national-id short-id)
-    {:national-id national-id
+    {:operation-id operation-id
+     :national-id national-id
      :short-id    short-id}))
 
 (defn building-ids
   "Gathers building-id data from documents."
-  [{:keys [documents buildings] :as application}]
-  (->> (map :data documents)
-       (map doc->building-data)
+  [{:keys [documents] :as application}]
+  (->> (map doc->building-data documents)
        (remove nil?)))
 
 (defn building-id-mapping
