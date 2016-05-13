@@ -18,7 +18,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
   - IE:llä ajettavia testejä varten ajuri osoitteesta  http://selenium-release.storage.googleapis.com/index.html
   - Chromella ajettavia testejä varten ajuri osoitteesta http://chromedriver.storage.googleapis.com/index.html
 - [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
-  PDF-tiedostojen kääntämistä ja korjaamista varten
+  PDF-tiedostojen kääntämistä ja korjaamista varten. [Apuja OS X -ongelmin](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
 
 Valinnaisesti:
 

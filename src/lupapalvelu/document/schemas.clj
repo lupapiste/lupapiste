@@ -591,6 +591,7 @@
 (def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
                                               :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                               :type :group
+                                              :subtype :foreman-tasks  ;; Used in pdf-export together with :codes.
                                               :listen [:filterByCode]
                                               :layout :vertical
                                               :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}
