@@ -86,8 +86,8 @@
   [fields _ doc]
   ;; Only include those foreman tasks that correspond to the the selected role.
   (let [code (->> schemas/kuntaroolikoodi-tyonjohtaja-v2 first :body
-                  (some #(when (= (:name %) (-> doc :kuntaRoolikoodi :value))
-                           (:code %))))]
+                  (util/find-first #(= (:name %) (-> doc :kuntaRoolikoodi :value)))
+                  :code)]
     (filter #(contains? (set (:codes %)) code) fields)))
 
 (defn- collect-single-group
