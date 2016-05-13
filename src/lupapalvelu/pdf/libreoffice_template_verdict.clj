@@ -110,7 +110,7 @@
 
                                  "LPTITLE_KUNTA" (i18n/localize lang "verdict.id")
                                  "LPTITLE_KUNTALUPA" (i18n/localize lang "linkPermit.dialog.kuntalupatunnus")
-                                 "LPVALUE_KUNTALUPA" ""
+                                 "LPVALUE_KUNTALUPA" (:kuntalupatunnus verdict)
 
                                  "LPTITLE_SIJAINTI" (i18n/localize lang "applications.location")
 

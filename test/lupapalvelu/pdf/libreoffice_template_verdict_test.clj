@@ -106,8 +106,10 @@
              (.delete tmp-file)
              (fact {:midje/description (str " verdict title id (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (template/build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
              (fact {:midje/description (str " verdict id (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_ID") => (template/build-user-field "LP-000-0000-0000" "LPAVALUE_ID"))
-             (fact {:midje/description (str " verdict title municipality (" (name lang) ")")} (get-user-field user-fields "LPATITLE_MUNICIPALITY") => (template/build-user-field (localize lang "application.muncipality") "LPATITLE_MUNICIPALITY"))
-             (fact {:midje/description (str " verdict municipality (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_MUNICIPALITY") => (template/build-user-field (localize lang (str "municipality." (:municipality application2))) "LPAVALUE_MUNICIPALITY"))
+             (fact {:midje/description (str " verdict title kuntalupa (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (template/build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
+             (fact {:midje/description (str " verdict kuntalupa (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_ID") => (template/build-user-field "LP-000-0000-0000" "LPAVALUE_ID"))
+             (fact {:midje/description (str " verdict title municipality (" (name lang) ")")} (get-user-field user-fields "LPTITLE_KUNTALUPA") => (template/build-user-field (localize lang "linkPermit.dialog.kuntalupatunnus") "LPTITLE_KUNTALUPA"))
+             (fact {:midje/description (str " verdict municipality (" (name lang) ")")} (get-user-field user-fields "LPVALUE_KUNTALUPA") => (template/build-user-field "20160043" "LPVALUE_KUNTALUPA"))
              ;;TODO: test rest of common "LPA" application fields
 
              (fact {:midje/description (str " verdict title vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_VASTUU") => (template/build-user-field (localize lang "verdict.vastuuhenkilo") "LPTITLE_VASTUU"))
