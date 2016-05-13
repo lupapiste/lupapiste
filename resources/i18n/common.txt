@@ -4078,3 +4078,7 @@
 "archivalSummary.markArchived.guide" "sv" ""
 "archivalSummary.markArchived.button" "fi" "Merkitse hakemusvaihe arkistoiduksi"
 "archivalSummary.markArchived.button" "sv" ""
+"verdict.vastuuhenkilo" "fi" "Vastuuhenkilö"
+"verdict.vastuuhenkilo" "sv" ""
+"verdict.yhteyshenkilo" "fi" "Yhteyshenkilö"
+"verdict.yhteyshenkilo" "sv" ""

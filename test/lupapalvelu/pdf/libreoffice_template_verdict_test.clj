@@ -7,6 +7,7 @@
     [lupapalvelu.organization :refer :all]
     [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
     [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
+    [lupapalvelu.pdf.libreoffice-template :as template]
     [lupapalvelu.pdf.libreoffice-template-base-test :refer :all])
   (:import (java.io File)))
 
@@ -47,47 +48,79 @@
        (fact {:midje/description (str "verdict-reviews krysp")}
              (verdict-vaaditutKatselmukset application1 "a1" 0 :fi) => '[[" muu katselmus " "* KVV-tarkastus"] [" muu katselmus " " * S\u00e4hk\u00f6tarkastus "] [" muu katselmus " " * Rakennetarkastus "] [" loppukatselmus " ""] [" muu katselmus " " Aloitusilmoitus "]])
        (fact {:midje/description (str "verdict-reviews non-krysp")}
-             (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[("Muu katselmus")]))
+             (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[["Muu katselmus (YA paikan tarkastaminen)"] ["Muu katselmus (rakennuksen paikan tarkastaminen)"]]))
 
 (facts "Verdict signatures "
        (def verdict-signatures #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-signatures)
        (fact
          (let [verdict (first (filter #(= "a1" (:id %)) (:verdicts application2)))
                paatos (nth (:paatokset verdict) 0)]
-             (verdict-signatures verdict paatos) => '[["Tytti M\u00e4ntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
+           (verdict-signatures verdict paatos) => '[["Tytti M\u00e4ntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
+
+(facts "Verdict vastuuhenkilö "
+       (def get-vastuuhenkilo #'lupapalvelu.pdf.libreoffice-template-verdict/get-vastuuhenkilo)
+       (fact {:midje/description " yritys "}
+             (get-vastuuhenkilo (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
+                                                                 :data        {:henkilo {:henkilotiedot {:etunimi  {:value ""}
+                                                                                                         :sukunimi {:value ""}}}
+                                                                               :yritys  {:yritysnimi    {:value "Yritys Oy Ab"}
+                                                                                         :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
+                                                                                                                         :sukunimi {:value "Mallikas"}}}}}}])) => "Yritys Oy Ab")
+       (fact {:midje/description " henkilo "}
+             (get-vastuuhenkilo (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
+                                                                 :data        {:henkilo {:henkilotiedot {:etunimi  {:value "Veikko"}
+                                                                                                         :sukunimi {:value "Vastaava"}}}
+                                                                               :yritys  {:yritysnimi    {:value "Yritys Oy Ab"}
+                                                                                         :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
+                                                                                                                         :sukunimi {:value "Mallikas"}}}}}}])) => "Veikko Vastaava"))
+(facts "Verdict yhteyshenkilo "
+       (def get-yhteyshenkilo #'lupapalvelu.pdf.libreoffice-template-verdict/get-yhteyshenkilo)
+       (fact (get-yhteyshenkilo (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
+                                                                 :data        {:henkilo {:henkilotiedot {:etunimi  {:value ""}
+                                                                                                         :sukunimi {:value ""}}}
+                                                                               :yritys  {:yritysnimi    {:value "Yritys Oy Ab"}
+                                                                                         :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
+                                                                                                                         :sukunimi {:value "Mallikas"}}}}}}])) => "Mikko Mallikas"))
 
 (background
   (get-organization "753-R") => {:name {:fi "org-name-fi"}})
 
-(facts "Verdict export krysp "
+(defn get-user-field [fields key]
+  (first (filter #(s/ends-with? % (str "text:name=\"" key "\"/>")) fields)))
+
+(facts "YA Verdict publish export "
        (doseq [lang i18n/languages]
-         (let [tmp-file (File/createTempFile (str "verdict-krysp-" (name lang) "-") ".fodt")]
-           (verdict/write-verdict-libre-doc application1 "a1" 0 lang tmp-file)
+         (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")
+               data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
+                                                     :data        {:henkilo {:henkilotiedot {:etunimi  {:value ""}
+                                                                                             :sukunimi {:value ""}}}
+                                                                   :yritys  {:yritysnimi    {:value "Yritys Oy Ab"}
+                                                                             :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
+                                                                                                             :sukunimi {:value "Mallikas"}}}}}}
+                                                    {:schema-info {:name :tyoaika}
+                                                     :data        {:tyoaika-alkaa-pvm {:value "01.12.2016"}
+                                                                   :tyoaika-paattyy-pvm {:value "02.12.2016"}}}])]
+           (verdict/write-verdict-libre-doc data "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
-                 pos (start-pos res)]
-             (.delete tmp-file)
-             (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
-             (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
-             (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
-             ;;TODO: test rest of the lines
+                 user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
+             #_(.delete tmp-file)
+             (fact {:midje/description (str " verdict title id (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (template/build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
+             (fact {:midje/description (str " verdict id (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_ID") => (template/build-user-field "LP-000-0000-0000" "LPAVALUE_ID"))
+             (fact {:midje/description (str " verdict title municipality (" (name lang) ")")} (get-user-field user-fields "LPATITLE_MUNICIPALITY") => (template/build-user-field (localize lang "application.muncipality") "LPATITLE_MUNICIPALITY"))
+             (fact {:midje/description (str " verdict municipality (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_MUNICIPALITY") => (template/build-user-field (localize lang (str "municipality." (:municipality application2))) "LPAVALUE_MUNICIPALITY"))
+             ;;TODO: test rest of common "LPA" application fields
+
+             (fact {:midje/description (str " verdict title vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_VASTUU") => (template/build-user-field (localize lang "verdict.vastuuhenkilo") "LPTITLE_VASTUU"))
+             (fact {:midje/description (str " verdict vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_VASTUU") => (template/build-user-field "Yritys Oy Ab" "LPVALUE_VASTUU"))
+             (fact {:midje/description (str " verdict title yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_YHTEYSHENKILO") => (template/build-user-field (localize lang "verdict.yhteyshenkilo") "LPTITLE_YHTEYSHENKILO"))
+             (fact {:midje/description (str " verdict yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_YHTEYSHENKILO") => (template/build-user-field "Mikko Mallikas" "LPVALUE_YHTEYSHENKILO"))
+             (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA_ALKAA") => (template/build-user-field "01.12.2016" "LPVALUE_LUPA_AIKA_ALKAA"))
+             (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA_PAATTYY") => (template/build-user-field "02.12.2016" "LPVALUE_LUPA_AIKA_PAATTYY"))
+
              ))))
 
-(facts "Verdict export non-krysp "
+#_(facts "Verdict-contract publish export "
          (doseq [lang i18n/languages]
-           (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
-             (verdict/write-verdict-libre-doc application2 "a1" 0 lang tmp-file)
-             (let [res (s/split (slurp tmp-file) #"\r?\n")
-                   pos (start-pos res)]
-               (.delete tmp-file)
-               (fact {:midje/description (str " verdict libre document title (" (name lang) ")")} (nth res pos) => #(s/includes? % (localize lang "application.verdict.title")))
-               (fact {:midje/description (str " verdict libre document id ")} (nth res (+ pos 1)) => #(s/includes? % "LP-000-0000-0000"))
-               (fact {:midje/description (str " verdict libre document kuntalupatunnus ")} (nth res (+ pos 2)) => #(s/includes? % "20160043"))
-               ;;TODO: test rest of the lines
-               (fact {:midje/description (str " verdict libre document attachments ")} (nth res (+ pos 62)) => #(s/includes? % "SomeFile2.pdf"))
-               ))))
-
-(facts "Verdict-contract export non-krysp "
-       (doseq [lang i18n/languages]
            (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
              (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
              (let [res (s/split (slurp tmp-file) #"\r?\n")
