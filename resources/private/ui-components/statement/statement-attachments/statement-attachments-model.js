@@ -30,12 +30,12 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   });
 
   self.canDeleteAttachment = function(attachment) {
-    return authModel.ok("delete-attachment") &&
+    return authModel.ok("statement-attachment-allowed") &&
            (!attachment.requestedByAuthority || lupapisteApp.models.currentUser.isAuthority());
   };
 
   self.canAddAttachment = function() {
-    return authModel.ok("upload-attachment") && authModel.ok("give-statement");
+    return authModel.ok("statement-attachment-allowed");
   };
 
   function deleteAttachmentFromServer(attachmentId) {

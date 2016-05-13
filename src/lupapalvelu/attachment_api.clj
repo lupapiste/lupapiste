@@ -47,11 +47,6 @@
   (when-not (or (ss/blank? attachmentId) (some #(= (:id %) attachmentId) attachments))
     (fail :error.attachment.id)))
 
-(defn- if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
-  (when (and (not (user/authority? user))
-             (state-set (keyword state)))
-    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
-
 (defn attachment-not-readOnly [{{attachmentId :attachmentId} :data} application]
   (when (-> (attachment/get-attachment-info application attachmentId) :readOnly true?)
     (fail :error.unauthorized
@@ -63,13 +58,19 @@
     (fail :error.unauthorized
           :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority.")))
 
-(defn- attachment-editable-by-application-state [{{attachmentId :attachmentId} :data user :user} {current-state :state :as application}]
-  (when-not (ss/blank? attachmentId)
-    (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
-      (when-not (or (not (states/post-verdict-states (keyword current-state)))
-                    (states/post-verdict-states (keyword create-state))
-                    (user/authority? user))
-        (fail :error.pre-verdict-attachment)))))
+(defn- attachment-editable-by-application-state
+  ([command application]
+   (attachment-editable-by-application-state false command application))
+  ([authority-sent? {{attachmentId :attachmentId} :data user :user :as command} {current-state :state :as application}]
+   (when-not (ss/blank? attachmentId)
+     (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
+       (when-not (if (= (keyword current-state) :sent)
+                   (or (and authority-sent? (user/authority? user))
+                       (statement/delete-attachment-allowed? attachmentId application))
+                   (or (not (states/post-verdict-states (keyword current-state)))
+                       (states/post-verdict-states (keyword create-state))
+                       (user/authority? user)))
+         (fail :error.pre-verdict-attachment))))))
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
@@ -191,12 +192,14 @@
 ;;
 
 (defcommand delete-attachment
-  {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
+  {:description "Delete attachment with all it's versions. Does not
+  delete comments. Non-atomic operation: first deletes files, then
+  updates document."
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
-   :states      (states/all-states-but (conj states/terminal-states :answered :sent))
+   :states      (states/all-states-but (conj states/terminal-states :answered))
    :pre-checks  [a/validate-authority-in-drafts
                  attachment-not-readOnly
                  attachment-not-required
@@ -333,8 +336,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
-                (partial if-not-authority-state-must-not-be #{:sent})
-                attachment-editable-by-application-state
+                statement/upload-attachment-allowed
+                (partial attachment-editable-by-application-state true)
                 validate-attachment-type
                 a/validate-authority-in-drafts
                 attachment-id-is-present-in-application-or-not-set
@@ -379,7 +382,7 @@
    :user-authz-roles auth/all-authz-writer-roles
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
-   :pre-checks  [(partial if-not-authority-state-must-not-be #{:sent})
+   :pre-checks  [(partial attachment/if-not-authority-state-must-not-be #{:sent})
                  attachment-editable-by-application-state
                  validate-attachment-type
                  a/validate-authority-in-drafts

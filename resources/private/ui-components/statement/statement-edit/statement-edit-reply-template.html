@@ -33,13 +33,14 @@
 
     <div class="statement-info" data-bind="visible: replyVisible">
       <form>
-        <div class="form-entry">
+        <div class="checkbox-wrapper checkbox-wrapper--break">
           <input id="statement-nothing-to-add"
                  type="checkbox"
                  class="form-input checkbox"
                  data-bind="checked: nothingToAdd,
                             disable: !enabled()">
-          <label for="statement-nothing-to-add" class="form-label">
+          <label for="statement-nothing-to-add" class="checkbox-label"
+                 data-test-id="statement-nothing-to-add">
             <span data-bind="ltext: 'statement.nothing-to-add.label'">Ei lisattavaa</span>
           </label>
         </div>
@@ -50,7 +51,8 @@
                        textInput: text,
                        readonly: !enabled()"
             id="statement-reply-text"
-            rows="15">
+             rows="15"
+             class="grid-style-input">
           </textarea>
         </div>
       </form>

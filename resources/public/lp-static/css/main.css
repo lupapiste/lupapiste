@@ -1,5 +1,39 @@
-@import url('main-blessed1.css?z=1462805467962');
+@import url('main-blessed1.css?z=1463062817167');
 
+/* line 236, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.open .open-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 192, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.open .open-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 241, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.submitted .submitted-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 192, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.submitted .submitted-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 244, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.submitted .draft-box, .application_summary .application_summary_info .state-indication div.submitted .open-box {
+  display: none;
+}
+/* line 249, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.sent .sent-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 192, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.sent .sent-box:after {
+  border-left: 11px solid #2ca92c;
+}
 /* line 252, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .draft-box, .application_summary .application_summary_info .state-indication div.sent .open-box, .application_summary .application_summary_info .state-indication div.sent .submitted-box {
   display: none;
