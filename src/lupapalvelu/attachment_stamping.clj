@@ -27,6 +27,7 @@
         source     (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size :archivable])
            :re-stamp? re-stamp?
+           :operation-id (get-in attachment [:op :id])
            :attachment-id (:id attachment)
            :attachment-type (:type attachment))))
 
@@ -59,6 +60,14 @@
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))
 
+(defn- operation-specific? [{attachment-type :attachment-type}]
+  (->> (map (juxt key (comp keyword val)) attachment-type)
+       (into {})
+       (contains? attachment/operation-specific-attachment-types)))
+
+(defn- select-buildings-by-operation [buildings operation-id]
+  (filter (comp #{operation-id} :operation-id) buildings))
+
 (defn- building->str [lang {:keys [short-id national-id]}]
   (when-not (or (ss/blank? short-id) (ss/blank? national-id))
     (i18n/with-lang lang
@@ -75,12 +84,18 @@
 (defn- stamp-attachments!
   [file-infos {:keys [job-id application info-fields] {:keys [include-buildings]} :options :as context}]
   (let [stamp-without-buildings   (info-fields->stamp context (dissoc info-fields :buildings))
-        stamp-with-buildings      (info-fields->stamp context info-fields)]
+        stamp-with-buildings      (info-fields->stamp context info-fields)
+        operation-ids             (->> (map :operation-id file-infos) (remove nil?) distinct)
+        operation-specific-stamps (->> (map (partial update info-fields :buildings select-buildings-by-operation) operation-ids)
+                                       (map (partial info-fields->stamp context))
+                                       (zipmap operation-ids))]
     (doseq [file-info file-infos]
       (try
         (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
         (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
-        (let [stamp (cond (and (asemapiirros? file-info) include-buildings) stamp-with-buildings
+        (let [operation-id (:operation-id file-info)
+              stamp (cond (and (asemapiirros? file-info) include-buildings) stamp-with-buildings
+                          (and (operation-specific? file-info) operation-id) (operation-specific-stamps operation-id)
                           :else stamp-without-buildings)
               new-file-id (stamp-attachment! stamp file-info context)]
           (job/update job-id assoc (:attachment-id file-info) {:status :done :fileId new-file-id}))
