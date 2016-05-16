@@ -151,8 +151,7 @@
    :user-roles #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :pre-checks [statement/statement-not-given
-                statement/authority-or-statement-owner-applicant
-                statement/statement-in-sent-state-allowed]}
+                statement/authority-or-statement-owner-applicant]}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 

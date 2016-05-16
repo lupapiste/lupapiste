@@ -201,13 +201,25 @@
                              (count)) => 1)))))
 
 (facts "For non-environmental applications statements are disabled in sent state"
-       (let [statement-id (:id (designated-statement ronja application-id))]
-        (command sonja :approve-application :id application-id :lang "fi") => ok?
+       (fact "Request statement from Ronja"
+             (command sonja :request-for-statement :functionCode nil :id application-id
+                      :selectedPersons [(get-statement-giver-by-email sipoo ronja-email)]
+                      :saateText "saate" :dueDate 1450994400000) => ok?)
+       (let [{statement-id :id modify-id :modify-id} (designated-statement ronja application-id)]
+         (fact "Ronja saves draft"
+               (command ronja :save-statement-as-draft :id application-id :statementId statement-id
+                          :modify-id modify-id
+                          :status "puollettu" :text "I will approve" :lang "fi"))
+         (fact "Sonja approves application"
+               (command sonja :approve-application :id application-id :lang "fi") => ok?)
         (fact "Application state is sent"
               (->> application-id (query-application sonja) :state keyword) => :sent)
         (fact "Ronja cannot give statement"
               (command ronja :give-statement :id application-id :statementId statement-id
-                       :status "puollettu" :text "I will approve" :lang "fi") => {:ok false, :text "error.unsupported-permit-type"})))
+                       :modify-id (:modify-id (designated-statement ronja application-id))
+                       :status "puollettu" :text "I will approve" :lang "fi") => {:ok false, :text "error.unsupported-permit-type"})
+        (fact "Ronja can delete statement draft"
+              (command ronja :delete-statement :id application-id :statementId statement-id) => ok?)))
 
 (defn statement-attachment-id [apikey app-id]
   (let [{:keys [attachments]} (query-application apikey app-id)]
