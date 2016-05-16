@@ -486,6 +486,8 @@
 "kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.vuotoja-tapahtunut-vuonna" "sv" "Läckage har inträffat år"
 "kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.ylitayttoja-tapahtunut-vuonna" "fi" "Ylitäyttöjä tapahtunut vuonna"
 "kaytostapoistetun-sailion-jattaminen-maaperaan.tiedot-sailiosta.ylitayttoja-tapahtunut-vuonna" "sv" "Överfyllning har inträffat år"
+"kaytostapoistetun-sailion-jattaminen-maaperaan._group_label" "fi" "Käytöstäpoistetun säiliön jättäminen maaperään"
+"kaytostapoistetun-sailion-jattaminen-maaperaan._group_label" "sv" "Kvarlämnande i jorden av cistern som tagits ur bruk"
 "kayttotark-muutos._group_label" "fi" "Koko rakennuksen käyttötarkoituksen muutos tai merkittävä korjaaminen"
 "kayttotark-muutos._group_label" "sv" "Ändring av hela användningsändamålet av byggnaden eller betydande renovering"
 "kerrostalo-rivitalo._group_label" "fi" "Asuinkerrostalon tai rivitalon rakentaminen"
