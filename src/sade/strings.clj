@@ -130,6 +130,8 @@
 
 (def ^{:doc "Alias to clojure.string/blank?"} blank? s/blank?)
 
+(defn not-blank? [s] (not (blank? s)))
+
 (def ^{:doc "Arguments: [coll] or [separator coll]. Alias to clojure.string/join"} join s/join)
 
 ;; File name handling

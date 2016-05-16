@@ -69,9 +69,10 @@
   (filter (comp #{operation-id} :operation-id) buildings))
 
 (defn- building->str [lang {:keys [short-id national-id]}]
-  (when-not (or (ss/blank? short-id) (ss/blank? national-id))
+  (when (ss/not-blank? national-id)
     (i18n/with-lang lang
-      (str (i18n/loc "stamp.building") " " short-id " : " national-id))))
+      (cond->> national-id
+        (ss/not-blank? short-id) (str (i18n/loc "stamp.building") " " short-id " : ")))))
 
 (defn- info-fields->stamp [{:keys [text created transparency lang]} fields]
   {:pre [text (pos? created)]}

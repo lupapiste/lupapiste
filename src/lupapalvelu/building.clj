@@ -3,11 +3,12 @@
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
+            [sade.strings :as ss]
             [sade.util :as util]))
 
 (defn- doc->building-data [{{{national-id :value} :valtakunnallinenNumero {short-id :value} :tunnus} :data
                             {{operation-id :id} :op} :schema-info}]
-  (when (or national-id short-id)
+  (when (ss/not-blank? national-id)
     {:operation-id operation-id
      :national-id national-id
      :short-id    short-id}))
