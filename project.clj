@@ -1,7 +1,7 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/data.zip "0.1.2"]
+                 [org.clojure/data.zip "0.1.1"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [org.clojure/tools.trace "0.7.9"]
