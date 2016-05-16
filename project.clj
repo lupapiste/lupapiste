@@ -1,7 +1,7 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/data.zip "0.1.1"]
+                 [org.clojure/data.zip "0.1.2"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [org.clojure/tools.trace "0.7.9"]
@@ -71,7 +71,7 @@
                  [slingshot "0.12.2"]
 
                  ; A Clojure(Script) library for declarative data description and validation
-                 [prismatic/schema "1.1.0"]
+                 [prismatic/schema "1.1.1"]
                  [prismatic/schema-generators "0.1.0"]
 
                  ; MIME type resolution
@@ -84,7 +84,6 @@
                  [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
                  [com.google.zxing/javase "2.2"] ; QR codes
-                 [com.levigo.jbig2/levigo-jbig2-imageio "1.6.5"]
 
                  ; MS Office document processing
                  [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
@@ -111,7 +110,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.25"]
+                 [lupapiste/commons "0.7.28"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -122,8 +121,7 @@
                                   [ring-mock "0.1.5"]
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.5"]
-                                  [lupapiste/pdfboxing "0.2.0"]
-]
+                                  [pdfboxing "0.1.9"]]
                    :plugins [[lein-midje "3.1.1"]
                              [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
