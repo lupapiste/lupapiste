@@ -125,7 +125,7 @@
            (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
-             #_(.delete tmp-file)
+             (.delete tmp-file)
              (fact {:midje/description (str " verdict title  date(" (name lang) ")")} (get-user-field user-fields "LPTITLE_CONTRACT_DATE") => (template/build-user-field (localize lang "verdict.contract.date") "LPTITLE_CONTRACT_DATE"))
 
              ))))
