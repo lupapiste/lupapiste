@@ -120,7 +120,7 @@
 
 (defn statement-in-sent-state-allowed [_ {:keys [state] :as application}]
   (when (= (keyword state) :sent)
-    (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all}
+    (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all}
                                _
                                application)))
 

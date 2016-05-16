@@ -230,5 +230,11 @@ Luukas logs in but cannot edit statement
   Open tab  statement
   Open statement  luukas.lukija@sipoo.fi  
   Wait until  Element should not be visible  statement-submit
-  Element should not be visible  jquery=i.lupicon-remove
+  Element should not be visible  jquery=#statement-submit
+  [Teardown]  Return from statement  
+
+Luukas can still delete (empty) statement
+  Scroll and click test id  delete-statement-3
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Element should not be visible  jquery=tr.statement-row i.lupicon-remove
   [Teardown]  Logout  
