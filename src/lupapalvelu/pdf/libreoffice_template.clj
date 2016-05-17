@@ -1,6 +1,6 @@
 (ns
-  ^{:author "michaelho"
-    :doc    "For creating PDF/A documents from Libre Office Flat Open Document Format files used as templates. "}
+  ^{:doc    "For creating PDF/A documents from Libre Office Flat Open Document Format files used as templates.
+             Read resources/private/lupapiste-template.fodt with Libre Office for more information."}
   lupapalvelu.pdf.libreoffice-template
   (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [sade.util :as util]
