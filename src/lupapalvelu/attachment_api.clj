@@ -12,6 +12,7 @@
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment-type :as att-type]
             [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.attachment-accessibility :as access]
             [lupapalvelu.attachment-stamping :as stamping]
@@ -94,8 +95,8 @@
 
 (defn- allowed-attachment-type-for-application? [attachment-type application]
   {:pre [(map? attachment-type)]}
-  (let [allowed-types (attachment/get-attachment-types-for-application application)]
-    (attachment/allowed-attachment-types-contain? allowed-types attachment-type)))
+  (let [allowed-types (att-type/get-attachment-types-for-application application)]
+    (att-type/allowed-attachment-types-contain? allowed-types attachment-type)))
 
 (defn- validate-attachment-type [{{attachment-type :attachmentType} :data} application]
   (when attachment-type
@@ -112,7 +113,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{application :application}]
-  (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
+  (ok :attachmentTypes (att-type/get-attachment-types-for-application application)))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
@@ -123,7 +124,7 @@
    :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
 
-  (let [attachment-type (attachment/parse-attachment-type attachmentType)]
+  (let [attachment-type (att-type/parse-attachment-type attachmentType)]
     (if (allowed-attachment-type-for-application? attachment-type application)
       (let [metadata (-> (tiedonohjaus/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
                          (tiedonohjaus/update-end-dates (:verdicts application)))]

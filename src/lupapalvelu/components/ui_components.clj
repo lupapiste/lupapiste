@@ -9,7 +9,8 @@
             [cheshire.core :as json]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-bulletins :as bulletins]
-            [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.attachment :refer [attachment-scales, attachment-sizes]]
+            [lupapalvelu.attachment-type :as att-type]
             [lupapalvelu.attachment-metadata :as attachment-meta]
             [lupapalvelu.company :as company]
             [lupapalvelu.components.core :as c]
@@ -56,7 +57,7 @@
                  :build                 (:build-number env/buildinfo)
                  :cookie                (env/value :cookie)
                  :wannaJoinUrl          (env/value :oir :wanna-join-url)
-                 :userAttachmentTypes   (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
+                 :userAttachmentTypes   (map #(str "osapuolet." (name %)) att-type/osapuolet)
                  :attachmentScales      attachment-scales
                  :attachmentSizes       attachment-sizes
                  :accountTypes          company/account-types

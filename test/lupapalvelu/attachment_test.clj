@@ -7,6 +7,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.attachment-type :as att-type]
             [lupapalvelu.attachment-metadata :refer :all]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.states :as states]
@@ -61,12 +62,6 @@
   (fact (encode-filename "12345\t678\t90")                    => (just ascii-pattern))
   (fact (encode-filename "12345\n678\r\n90")                  => (just ascii-pattern)))
 
-(facts "Test parse-attachment-type"
-  (fact (parse-attachment-type "foo.bar")  => {:type-group :foo, :type-id :bar})
-  (fact (parse-attachment-type "foo.")     => nil)
-  (fact (parse-attachment-type "")         => nil)
-  (fact (parse-attachment-type nil)        => nil))
-
 (def test-attachments [{:id "1", :latestVersion {:version {:major 9, :minor 7}}}])
 
 (facts "Facts about next-attachment-version"
@@ -74,15 +69,6 @@
   (fact (next-attachment-version {:major 1 :minor 1} {:role :dude})       => {:major 2 :minor 0})
   (fact (next-attachment-version nil {:role :authority})  => {:major 0 :minor 1})
   (fact (next-attachment-version nil {:role :dude})       => {:major 1 :minor 0}))
-
-(facts "Facts about allowed-attachment-types-contain?"
-  (let [allowed-types [["a" ["1" "2"]] [:b [:3 :4]]]]
-    (fact (allowed-attachment-types-contain? allowed-types {:type-group :a :type-id :1}) => truthy)
-    (fact (allowed-attachment-types-contain? allowed-types {:type-group :a :type-id :2}) => truthy)
-    (fact (allowed-attachment-types-contain? allowed-types {:type-group :b :type-id :3}) => truthy)
-    (fact (allowed-attachment-types-contain? allowed-types {:type-group :b :type-id :4}) => truthy)
-    (fact (allowed-attachment-types-contain? allowed-types {:type-group :b :type-id :5}) => falsey)
-    (fact (allowed-attachment-types-contain? allowed-types {:type-group :c :type-id :1}) => falsey)))
 
 (fact "version number"
   (version-number {:version {:major 1 :minor 16}}) => 1016)
@@ -159,35 +145,16 @@
     (create-sent-timestamp-update-statements attachments ["12" "23"] 123) => {"attachments.1.sent" 123
                                                                               "attachments.2.sent" 123}))
 
-(fact "attachment type IDs are unique"
-  (let [known-duplicates (set (conj attachment-types-osapuoli
-                                :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
-                                :ote_alueen_peruskartasta
-                                :ote_asemakaavasta
-                                :ote_kauppa_ja_yhdistysrekisterista
-                                :asemapiirros
-                                :ote_yleiskaavasta
-                                :jaljennos_perunkirjasta
-                                :valokuva :rasitesopimus
-                                :valtakirja
-                                :muu
-                                :paatos
-                                :paatosote))
-        all-except-commons (remove known-duplicates all-attachment-type-ids)
-        all-unique (set all-except-commons)]
-
-    (count all-except-commons) => (count all-unique)))
-
 (fact "All attachments are localized"
   (let [attachment-group-type-paths (->>
-                                      (vals attachment-types-by-permit-type)
+                                      (vals att-type/attachment-types-by-permit-type)
                                       set
                                       (apply concat)
                                       (partition 2)
                                       (map (fn [[g ts]] (map (fn [t] [g t]) ts)))
                                       (apply concat))]
     (fact "Meta: collected all types"
-      (set (map second attachment-group-type-paths)) => all-attachment-type-ids)
+      (set (map second attachment-group-type-paths)) => att-type/all-attachment-type-ids)
 
     (doseq [lang ["fi" "sv"]
             path attachment-group-type-paths
@@ -272,14 +239,14 @@
 (defspec make-version-new-attachment 20
   (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
                  file-id         (ssg/generator ssc/ObjectIdStr)
-                 archivability   (ssg/generator (sc/maybe {:archivable sc/Bool 
-                                                           :archivabilityError (apply sc/enum archivability-errors) 
+                 archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
+                                                           :archivabilityError (apply sc/enum archivability-errors)
                                                            :missing-fonts [sc/Str]}))
-                 general-options (ssg/generator {:filename sc/Str 
-                                                :content-type sc/Str 
-                                                :size sc/Int 
-                                                :now ssc/Timestamp 
-                                                :user user/SummaryUser 
+                 general-options (ssg/generator {:filename sc/Str
+                                                :content-type sc/Str
+                                                :size sc/Int
+                                                :now ssc/Timestamp
+                                                :user user/SummaryUser
                                                 :stamped (sc/maybe sc/Bool)})]
                 (let [options (merge {:file-id file-id :original-file-id file-id} archivability general-options)
                       version (make-version attachment options)]
@@ -305,9 +272,9 @@
                                                            (ssg/generator Version)
                                                            (gen/vector-distinct ssg/object-id {:num-elements 2})
                                                            (ssg/generator {:filename sc/Str
-                                                                           :content-type sc/Str 
-                                                                           :size sc/Int 
-                                                                           :now ssc/Timestamp 
+                                                                           :content-type sc/Str
+                                                                           :size sc/Int
+                                                                           :now ssc/Timestamp
                                                                            :user user/SummaryUser})))]
                 (let [version (make-version attachment options)]
                   (and (= (:version version) (get-in attachment [:latestVersion :version]))
@@ -323,9 +290,9 @@
   (prop/for-all [application    (ssg/generator {:state sc/Keyword})
                  attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
-                 options        (ssg/generator {:now ssc/Timestamp 
+                 options        (ssg/generator {:now ssc/Timestamp
                                                 :target (sc/maybe Target)
-                                                :user user/SummaryUser 
+                                                :user user/SummaryUser
                                                 :stamped (sc/maybe sc/Bool)
                                                 :comment? sc/Bool
                                                 :comment-text sc/Str})]
@@ -347,10 +314,10 @@
                                                           [(-> (assoc-in att [:versions 1] ver)
                                                                (assoc :latestVersion ver))
                                                            ver]))
-                                                      (gen/tuple (ssg/generator Attachment {Version   nil 
+                                                      (gen/tuple (ssg/generator Attachment {Version   nil
                                                                                             [Version] (gen/vector-distinct (ssg/generator Version) {:min-elements 3})})
                                                                  (gen/vector-distinct ssg/object-id {:num-elements 2})))
-                 options (ssg/generator {:now ssc/Timestamp 
+                 options (ssg/generator {:now ssc/Timestamp
                                          :user user/SummaryUser})]
                 (let [updates (build-version-updates application attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))

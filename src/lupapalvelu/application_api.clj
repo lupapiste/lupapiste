@@ -14,7 +14,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment-type :as att-type]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
@@ -52,7 +52,7 @@
    :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application user]}]
   (if application
-    (let [app (assoc application :allowedAttachmentTypes (att/get-attachment-types-for-application application))]
+    (let [app (assoc application :allowedAttachmentTypes (att-type/get-attachment-types-for-application application))]
       (ok :application (app/post-process-app app user)
           :authorities (if (usr/authority? user)
                          (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users app "authority"))

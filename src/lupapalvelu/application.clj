@@ -9,6 +9,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment-type :as att-type]
             [lupapalvelu.company :as com]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -252,8 +253,8 @@
 (defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
   (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
         types          (->> (org/get-organization-attachments-for-operation organization operation)
-                            (remove (difference existing-types att/operation-specific-attachment-types)))
-        ops            (map #(when (att/operation-specific-attachment-types %) operation) types)
+                            (remove (difference existing-types att-type/operation-specific-attachment-types)))
+        ops            (map #(when (att-type/operation-specific-attachment-types %) operation) types)
         metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
     (map (partial att/make-attachment created target true false false applicationState) ops types metadatas)))
 
