@@ -139,7 +139,7 @@
 
 (defn- validate-notice-or-application [{subtype :permitSubtype :as application}]
   (when (and (foreman-app? application) (ss/blank? subtype))
-    (fail! :error.foreman.type-not-selected)))
+    (fail :error.foreman.type-not-selected)))
 
 (defn- validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
   (when (notice? application)
@@ -148,10 +148,10 @@
                                               (get
                                                 (mongo/select-one :applications {:_id (:id link)} {:state 1})
                                                 :state)))
-        (fail! :error.foreman.notice-not-submittable)))))
+        (fail :error.foreman.notice-not-submittable)))))
 
 (defn validate-application
-  "Validates foreman applications"
+  "Validates foreman applications. Returns nil if application is OK, or fail map."
   [application]
   (when (foreman-app? application)
     (or
