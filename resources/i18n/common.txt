@@ -4058,3 +4058,5 @@
 "tos.function.fix.select" "sv" "Ny uppgiftsklass"
 "korjaa" "fi" "Korjaa"
 "korjaa" "sv" "Repareras"
+"Konvertoi PDF/A-muotoon" "fi" "Konvertoi PDF/A-muotoon"
+"Konvertoi PDF/A-muotoon" "sv" ""
