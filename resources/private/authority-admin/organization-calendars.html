@@ -34,12 +34,44 @@
         </tr>
         </tbody>
       </table>
+    </section>
 
+    <section>
+      <h2 data-bind="text: 'Organisaation ajanvaraustyypit'"></h2>
+      <table data-test-id="organization-reservation-types">
+        <thead>
+        <tr>
+          <th data-bind="text: 'Ajanvaraustyyppi'"></th>
+          <th data-bind="ltext: 'auth-admin.actions'"></th>
+        </tr>
+        </thead>
+        <tbody data-bind="foreach: reservationTypes.items">
+        <tr>
+          <td data-bind="text: $data.name"></td>
+          <td>FIXME</td>
+        </tr>
+        </tbody>
+      </table>
+      <a href="#" data-bind="click: reservationTypes.openNewReservationTypeDialog, text: 'auth-admin.calendar.add-reservation-type'"
+      data-test-id="add-reservation-type" class="modal btn btn-primary"></a>
     </section>
 
   </div>
 
   <!-- DIALOGS -->
+
+  <div id="dialog-new-reservation-type" class="window autosized">
+    <div class="dialog-header">
+      <p data-bind="text: 'auth-admin.calendar.add-reservation-type'"></p>
+      <p class="dialog-close close lupicon-remove"></p>
+    </div>
+    <div class="dialog-content">
+      <div data-bind="with: reservationTypes.newReservationTypeModel">
+        <p>Ajanvaraustyypin nimi: <input type="text" data-bind="value: name"/></p>
+        <button data-bind="click: execute, ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
+      </div>
+    </div>
+  </div>
 
 </section>
 </body>

@@ -194,3 +194,21 @@
   (->> (->BackendReservationSlots slots)
        (post-command (str "/api/reservationslots/calendar/" calendarId))
        (ok :result)))
+
+(defcommand add-reservation-type-for-organization
+  {:user-roles #{:authorityAdmin}
+   :feature    :ajanvaraus}
+  [{{:keys [reservation-type]} :data user :user}]
+  (let [admin-in-organization-id (user/authority-admins-organization-id user)]
+    (info "Adding reservation type" reservation-type "for organization" admin-in-organization-id)
+    (ok :reservationTypes (post-command "/api/reservation-types/" {:reservationType   reservation-type
+                                                                    :organization      admin-in-organization-id}))))
+
+(defquery reservation-types-for-organization
+  {:user-roles #{:authorityAdmin}
+   :feature    :ajanvaraus}
+  [{user :user}]
+  (let [admin-in-organization-id (user/authority-admins-organization-id user)]
+    (info "Get reservation types for organization" admin-in-organization-id)
+    ;; FIXME: Unwrap body from api-query response
+    (ok :reservationTypes (:body (api-query "/api/reservation-types/by-organization" {:organization admin-in-organization-id})))))
