@@ -73,12 +73,22 @@
     });
   };
 
+  var openAttachmentIds = [];
+
   var addAdditionalFieldsToAttachments = function(attachments, applicationId) {
     return _.map(attachments, function(attachment) {
       if (!_.isFunction(attachment.metadata)) {
         attachment.metadata = ko.observable(attachment.metadata);
       }
-      attachment.showAdditionalControls = ko.observable(false);
+      if (attachment.id) {
+        var idIndex = openAttachmentIds.indexOf(ko.unwrap(attachment.id));
+        attachment.showAdditionalControls = ko.observable(idIndex !== -1);
+        if (idIndex > -1) {
+          openAttachmentIds.splice(idIndex, 1);
+        }
+      } else {
+        attachment.showAdditionalControls = ko.observable(false);
+      }
       attachment.retentionDescription = ko.pureComputed(function() {
         var retention = attachment.metadata() ? attachment.metadata().sailytysaika : null;
         if (retention && retention.arkistointi()) {
@@ -121,9 +131,11 @@
             .call();
         });
       }
-      attachment.archivable = util.getIn(attachment, ["latestVersion", "archivable"]) ? attachment.latestVersion.archivable() : false;
-      attachment.archivabilityError = util.getIn(attachment, ["latestVersion", "archivabilityError"]) ? attachment.latestVersion.archivabilityError() : null;
+      var lv = attachment.latestVersion;
+      attachment.archivable = lv && _.isFunction(lv.archivable) ? lv.archivable() : false;
+      attachment.archivabilityError = lv && _.isFunction(lv.archivabilityError) ? lv.archivabilityError() : null;
       attachment.sendToArchive = ko.observable(false);
+      attachment.convertableToPdfA = lv && _.isFunction(lv.archivable) ? !lv.archivable() && lv.contentType() === "application/pdf" : false;
       return attachment;
     });
   };
@@ -361,6 +373,17 @@
             docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
             docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
           });
+        })
+        .call();
+    };
+
+    self.convertToPdfA = function(attachment) {
+      var id = ko.unwrap(attachment.id);
+      openAttachmentIds.push(id);
+      ajax
+        .command("convert-to-pdfa", {id: ko.unwrap(params.application.id), attachmentId: id})
+        .success(function() {
+          repository.load(ko.unwrap(params.application.id));
         })
         .call();
     };
