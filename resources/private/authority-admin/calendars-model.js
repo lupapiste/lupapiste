@@ -48,25 +48,26 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
   self.items = ko.observableArray();
   self.initialized = false;
 
+  function setEnabled(user, value) {
+    if (self.initialized) {
+      ajax.command("set-calendar-enabled-for-authority", {userId: user.id, enabled: value})
+        .success(function(response) {
+          util.showSavedIndicator(response);
+          user.calendarId(response.calendarId);
+        })
+        .call();
+    }
+  };
+
   self.init = function(data) {
     var users = _.map(data.users,
       function(user) {
         var calendarEnabledObservable = ko.observable(_.has(user, 'calendarId'));
         var calendarIdForLink = ko.observable(user.calendarId || '');
-        ko.computed(function() {
-          var enabled = calendarEnabledObservable();
-          if (self.initialized) {
-            console.log("inside", user);
-            ajax.command("set-calendar-enabled-for-authority", {userId: user.id, enabled: enabled})
-              .success(function(response) {
-                  util.showSavedIndicator(response);
-                  calendarIdForLink(response.calendarId);
-                })
-              .call();
-          }
-        });
-        return _.extend(user, { calendarEnabled: calendarEnabledObservable,
-                                calendarId: calendarIdForLink, });
+        var user = _.extend(user, { calendarEnabled: calendarEnabledObservable,
+                                    calendarId: calendarIdForLink });
+        user.calendarEnabled.subscribe(_.partial(setEnabled, user));
+        return user;
       });
     self.items(users || []);
     self.initialized = true;
