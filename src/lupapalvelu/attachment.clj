@@ -698,7 +698,7 @@
    Returns attachment version."
   [application options]
   (->> (upload-file! application options)
-       (merge options {:now (:created options) :stamped false})
+       (merge options {:now (:created options) :stamped (get options :stamped false)})
        (set-attachment-version! application (get-or-create-attachment! application options))))
 
 (defn get-attachments-by-operation

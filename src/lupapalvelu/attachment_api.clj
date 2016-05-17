@@ -565,3 +565,35 @@
   (update-application command
                       {:attachments {$elemMatch {:id attachmentId}}}
                       {$set {:attachments.$.metadata.nakyvyys value}}))
+
+(defcommand convert-to-pdfa
+  {:parameters       [id attachmentId]
+   :user-roles       #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]
+   :pre-checks       [(fn [{{attachment-id :attachmentId} :data} {attachments :attachments}]
+                        (let [attachment (util/find-first #(= (:id %) attachment-id) attachments)
+                              {:keys [archivable contentType]} (last (:versions attachment))]
+                          (when (or archivable (not= "application/pdf" contentType))
+                            (fail :error.attachment.id))))]
+   :states           (lupapalvelu.states/all-application-states-but :draft)}
+  [{:keys [application]}]
+  (if-let [attachment (attachment/get-attachment-info application attachmentId)]
+    (let [{:keys [contentType fileId filename user created stamped]} (last (:versions attachment))
+          temp-pdf (File/createTempFile fileId ".tmp")
+          upload-options (merge
+                           base-upload-options
+                           {:content temp-pdf
+                            :attachment-id attachmentId
+                            :upload-pdfa-only true
+                            :filename filename
+                            :content-type contentType
+                            :created created
+                            :user user
+                            :stamped stamped})]
+      (try
+        (with-open [content ((:content (mongo/download fileId)))]
+          (io/copy content temp-pdf)
+          (upload! application (assoc upload-options :size (.length temp-pdf))))
+        (finally
+          (io/delete-file temp-pdf :silently))))
+    (fail :error.unknown)))
