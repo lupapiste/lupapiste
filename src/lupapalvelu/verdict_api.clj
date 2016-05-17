@@ -38,10 +38,6 @@
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
-(notifications/defemail :application-verdict
-  {:subject-key    "verdict"
-   :tab            "verdict"})
-
 (def give-verdict-states (clojure.set/union #{:submitted :complementNeeded :sent} states/verdict-given-states))
 
 (defquery verdict-attachment-type
