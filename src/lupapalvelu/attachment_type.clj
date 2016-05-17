@@ -9,19 +9,16 @@
 (def osapuolet attachment-types/osapuolet-v2)
 
 (def- attachment-types-by-permit-type-unevaluated
-  (cond-> {:R    'attachment-types/Rakennusluvat
-           :P    'attachment-types/Rakennusluvat
-           :YA   'attachment-types/YleistenAlueidenLuvat
-           :YI   'attachment-types/Ymparistoilmoitukset
-           :YL   'attachment-types/Ymparistolupa
-           :YM   'attachment-types/MuutYmparistoluvat
-           :VVVL 'attachment-types/Ymparistoilmoitukset
-           :MAL  'attachment-types/Maa-ainesluvat
-           :MM   'attachment-types/Kiinteistotoimitus
-           :KT   'attachment-types/Kiinteistotoimitus}
-    (env/feature? :updated-attachments) (merge {:R  'attachment-types/Rakennusluvat-v2
-                                                :P  'attachment-types/Rakennusluvat-v2
-                                                :YA 'attachment-types/YleistenAlueidenLuvat-v2})))
+  {:R    'attachment-types/Rakennusluvat-v2
+   :P    'attachment-types/Rakennusluvat-v2
+   :YA   'attachment-types/YleistenAlueidenLuvat-v2
+   :YI   'attachment-types/Ymparistoilmoitukset
+   :YL   'attachment-types/Ymparistolupa
+   :YM   'attachment-types/MuutYmparistoluvat
+   :VVVL 'attachment-types/Ymparistoilmoitukset
+   :MAL  'attachment-types/Maa-ainesluvat
+   :MM   'attachment-types/Kiinteistotoimitus
+   :KT   'attachment-types/Kiinteistotoimitus})
 
 (def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
 

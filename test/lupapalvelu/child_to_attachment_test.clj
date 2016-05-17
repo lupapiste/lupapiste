@@ -107,9 +107,7 @@
              (fact ":contents"
                    (:contents att) => "Matti Malli")
              (fact ":attachment-type"
-               (:attachment-type att) => (if (env/feature? :updated-attachments)
-                                           {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
-                                           {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}))
+               (:attachment-type att) => {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"})
              (fact ":archivable"
                    (:archivable att) => false)
              (fact ":read-only"
@@ -129,9 +127,7 @@
              (fact ":contents"
                    (:contents att) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus"))
              (fact ":attachment-type"
-               (:attachment-type att) => (if (env/feature? :updated-attachments)
-                                           {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
-                                           {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}))
+               (:attachment-type att) => {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"})
              (fact ":archivable"
                    (:archivable att) => false)
              (fact ":read-only"
@@ -143,4 +139,3 @@
 
              (fact ":read-only of attachment with other type than :neighbors or :statements"
                    (:read-only att-other) => false)))))
-
