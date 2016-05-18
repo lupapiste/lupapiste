@@ -4,7 +4,7 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
-            [lupapalvelu.document.poikkeamis-canonical-test :refer [poikkari-hakemus]]
+            [lupapalvelu.document.poikkeamis-canonical-test :refer [poikkari-hakemus suunnitelutarveratkaisu]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.poikkeamis-mapping :as mapping]
             [lupapalvelu.xml.validator :as  validator]
@@ -22,11 +22,12 @@
 (fact ":tag is set, 2.2.0" (has-tag mapping/poikkeamis_to_krysp_220) => true)
 (fact ":tag is set, 2.2.1" (has-tag mapping/poikkeamis_to_krysp_221) => true)
 
-(def canonical (poikkeus-application-to-canonical poikkari-hakemus "fi"))
+(def poikkeus-canonical (poikkeus-application-to-canonical poikkari-hakemus "fi"))
+(def poikkeus-krysp-path [:Popast :poikkeamisasiatieto :Poikkeamisasia])
 
 (facts "Poikkeuslupa to canonical and then to poikkeuslupa xml with schema validation"
   (facts "2.1.2"
-    (let [xml_212_s (-> (common-map-enums canonical "2.1.2")
+    (let [xml_212_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.1.2")
                         (element-to-xml mapping/poikkeamis_to_krysp_212)
                         (indent-str))]
 
@@ -43,7 +44,7 @@
 
 
   (facts "2.1.4"
-    (let [xml_214_s (-> (common-map-enums canonical "2.1.4")
+    (let [xml_214_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.1.4")
                         (element-to-xml mapping/poikkeamis_to_krysp_214)
                         (indent-str))]
 
@@ -58,7 +59,7 @@
 
 
   (facts "2.1.5"
-    (let [xml_215_s (-> (common-map-enums canonical "2.1.5")
+    (let [xml_215_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.1.5")
                         (element-to-xml mapping/poikkeamis_to_krysp_215)
                         (indent-str))]
 
@@ -68,7 +69,7 @@
 
 
   (facts "2.2.0"
-    (let [xml_220_s (-> (common-map-enums canonical "2.2.0")
+    (let [xml_220_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.2.0")
                         (element-to-xml mapping/poikkeamis_to_krysp_220)
                         (indent-str))]
 
@@ -77,7 +78,7 @@
       (validator/validate xml_220_s (:permitType poikkari-hakemus) "2.2.0"))) ; throws exception
 
   (facts "2.2.1"
-    (let [xml_221_s (-> (common-map-enums canonical "2.2.1")
+    (let [xml_221_s (-> (common-map-enums poikkeus-canonical poikkeus-krysp-path "2.2.1")
                         (element-to-xml mapping/poikkeamis_to_krysp_221)
                         (indent-str))]
 
@@ -94,42 +95,77 @@
           (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")))))
 
 
-(def canonical-no-toimenpidetieto (util/dissoc-in canonical [:Popast :poikkeamisasiatieto :Poikkeamisasia :toimenpidetieto]))
+(def canonical-no-toimenpidetieto (util/dissoc-in poikkeus-canonical [:Popast :poikkeamisasiatieto :Poikkeamisasia :toimenpidetieto]))
 
 (facts "Poikkeaminen without toimenpidetieto is valid"
   (fact "2.1.2"
-    (let [xml_212_s (-> (common-map-enums canonical-no-toimenpidetieto "2.1.2")
+    (let [xml_212_s (-> (common-map-enums canonical-no-toimenpidetieto poikkeus-krysp-path "2.1.2")
                         (element-to-xml mapping/poikkeamis_to_krysp_212)
                         (indent-str))]
 
       (validator/validate xml_212_s (:permitType poikkari-hakemus) "2.1.2") => nil))
 
   (fact "2.1.4"
-    (let [xml_214_s (-> (common-map-enums canonical-no-toimenpidetieto "2.1.4")
+    (let [xml_214_s (-> (common-map-enums canonical-no-toimenpidetieto poikkeus-krysp-path "2.1.4")
                         (element-to-xml mapping/poikkeamis_to_krysp_214)
                         (indent-str))]
 
       (validator/validate xml_214_s (:permitType poikkari-hakemus) "2.1.4") => nil))
 
   (fact "2.1.5"
-    (let [xml_215_s (-> (common-map-enums canonical-no-toimenpidetieto "2.1.5")
+    (let [xml_215_s (-> (common-map-enums canonical-no-toimenpidetieto poikkeus-krysp-path "2.1.5")
                         (element-to-xml mapping/poikkeamis_to_krysp_215)
                         (indent-str))]
 
       (validator/validate xml_215_s (:permitType poikkari-hakemus) "2.1.5") => nil))
 
   (fact "2.2.0"
-    (let [xml_220_s (-> (common-map-enums canonical-no-toimenpidetieto "2.2.0")
+    (let [xml_220_s (-> (common-map-enums canonical-no-toimenpidetieto poikkeus-krysp-path "2.2.0")
                         (element-to-xml mapping/poikkeamis_to_krysp_220)
                         (indent-str))]
 
       (validator/validate xml_220_s (:permitType poikkari-hakemus) "2.2.0") => nil))
 
   (facts "2.2.1"
-    (let [xml_221_s (-> (common-map-enums canonical-no-toimenpidetieto "2.2.1")
+    (let [xml_221_s (-> (common-map-enums canonical-no-toimenpidetieto poikkeus-krysp-path "2.2.1")
                         (element-to-xml mapping/poikkeamis_to_krysp_221)
                         (indent-str))]
 
-      (validator/validate xml_221_s (:permitType poikkari-hakemus) "2.2.1") => nil))
+      (validator/validate xml_221_s (:permitType poikkari-hakemus) "2.2.1") => nil)))
 
-)
+(def suunnittelu-canonical (poikkeus-application-to-canonical suunnitelutarveratkaisu "fi"))
+(def suunnittelu-krysp-path [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia])
+
+(facts "Suunnittelutarveratkaisu"
+  (facts "2.1.2"
+    (let [xml_212_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.1.2")
+                        (element-to-xml mapping/poikkeamis_to_krysp_212)
+                        (indent-str))]
+
+      (fact "Mapping"
+        ;; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
+        (mapping-to-krysp/save-application-as-krysp suunnitelutarveratkaisu "fi" suunnitelutarveratkaisu {:krysp {:P {:ftpUser "dev_sipoo" :version "2.1.2"}}}))
+
+      (fact "Validate"
+        (validator/validate xml_212_s (:permitType suunnitelutarveratkaisu) "2.1.2")) ; throws exception
+
+      (fact "Check xml"
+        (-> (cr/strip-xml-namespaces (xml/parse xml_212_s))
+            (xml/get-text [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla])) => "200")))
+
+  (facts "2.2.1"
+    (let [xml_221_s (-> (common-map-enums suunnittelu-canonical suunnittelu-krysp-path "2.2.1")
+                        (element-to-xml mapping/poikkeamis_to_krysp_221)
+                        (indent-str))]
+
+      (mapping-to-krysp/save-application-as-krysp suunnitelutarveratkaisu "fi" suunnitelutarveratkaisu {:krysp {:P {:ftpUser "dev_sipoo" :version "2.2.1"}}})
+
+      (validator/validate xml_221_s (:permitType suunnitelutarveratkaisu) "2.2.1") ; throws exception
+
+      (facts "Check xml"
+        (let [lp-xml     (cr/strip-xml-namespaces (xml/parse xml_221_s))
+              ilmoittaja (xml/select (cr/strip-xml-namespaces (xml/parse xml_221_s)))]
+          (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosalatieto :kerrosala :pintaAla]) => nil
+          (xml/get-text lp-xml [:toimenpidetieto :Toimenpide :tavoitetilatieto :kerrosala]) => "200"
+          (xml/get-text lp-xml [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli :henkilo :osoite :valtioKansainvalinen]) => "FIN"
+          (xml/get-text lp-xml [:rakennuspaikkatieto :Rakennuspaikka :kaavatilanne]) => "maakuntakaava")))))
