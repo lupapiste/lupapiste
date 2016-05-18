@@ -122,32 +122,29 @@
     "2.2.1" poikkeamis_to_krysp_221
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
-(defn- common-map-enums [canonical krysp-version]
-  (-> canonical
-      (update-in [:Popast :poikkeamisasiatieto :Poikkeamisasia :lausuntotieto] mapping-common/lausuntotieto-map-enum :P krysp-version)))
+(defn- common-map-enums [canonical krysp-path krysp-version]
+  (update-in canonical (conj krysp-path :lausuntotieto) mapping-common/lausuntotieto-map-enum :P krysp-version))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [subtype    (keyword (:permitSubtype application))
-        krysp-polku (cond
-                      (= subtype lupapalvelu.permit/poikkeamislupa)
-                      [:Popast :poikkeamisasiatieto :Poikkeamisasia]
-                      (= subtype lupapalvelu.permit/suunnittelutarveratkaisu)
-                      [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia]
-                      :default nil)
-        krysp-polku-lausuntoon (conj krysp-polku :lausuntotieto)
+        krysp-path (condp = subtype
+                      permit/poikkeamislupa [:Popast :poikkeamisasiatieto :Poikkeamisasia]
+                      permit/suunnittelutarveratkaisu [:Popast :suunnittelutarveasiatieto :Suunnittelutarveasia]
+                      nil)
+        krysp-path-statement (conj krysp-path :lausuntotieto)
         canonical-without-attachments  (poikkeus-application-to-canonical application lang)
         statement-given-ids (common/statements-ids-with-status
-                              (get-in canonical-without-attachments krysp-polku-lausuntoon))
+                              (get-in canonical-without-attachments krysp-path-statement))
         statement-attachments (attachments-canon/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
-        canonical-with-statement-attachments  (attachments-canon/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
+        canonical-with-statement-attachments  (attachments-canon/add-statement-attachments canonical-without-attachments statement-attachments krysp-path-statement)
         canonical (assoc-in
                     canonical-with-statement-attachments
-                    (conj krysp-polku :liitetieto)
+                    (conj krysp-path :liitetieto)
                     (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
-        xml (element-to-xml (common-map-enums canonical krysp-version) (get-mapping krysp-version))
+        xml (element-to-xml (common-map-enums canonical krysp-path krysp-version) (get-mapping krysp-version))
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
