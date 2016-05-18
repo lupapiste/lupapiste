@@ -407,7 +407,6 @@
                 {foreman-app-id :id} (command apikey :create-foreman-application :id application-id
                                               :taskId "" :foremanRole "ei tiedossa" :foremanEmail "heppu@example.com") => truthy
                {auth-array :auth} (query-application pena foreman-app-id) => truthy]
-            (clojure.pprint/pprint auth-array)
             (has-auth? "contact@example.com" auth-array) => true
             (has-auth? "foo@example.com" auth-array) => false
 
