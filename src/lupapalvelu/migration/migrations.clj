@@ -2148,6 +2148,15 @@
                              {:documents {$elemMatch {:data.kesto.arki {$exists true}
                                                       :schema-info.name "ymp-ilm-kesto"}}}))
 
+(defmigration add-archived-timestamps
+  {:apply-when (pos? (mongo/count :applications {:archived {$exists false}}))}
+  (mongo/update-by-query :applications {:archived {$exists false}} {$set {:archived {:application nil
+                                                                                     :completed nil}}}))
+
+(defmigration add-archiving-start-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:permanent-archive-in-use-since {$exists false}}))}
+  (mongo/update-by-query :organizations {:permanent-archive-in-use-since {$exists false}} {$set {:permanent-archive-in-use-since 0}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
