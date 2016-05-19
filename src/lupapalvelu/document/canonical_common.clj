@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.canonical-common
-  (:require [clojure.walk :as walk]
+  (:require [taoensso.timbre :refer [warnf]]
+            [clojure.walk :as walk]
             [cljts.io :as jts]
             [swiss.arrows :refer [-<>]]
             [sade.core :refer :all]
@@ -10,6 +11,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.statement :as statement]))
 
 
@@ -360,60 +362,67 @@
     (util/assoc-when yritys-canonical :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
-(defn- get-kuntaRooliKoodi [party party-type]
+(defn- get-kuntaRooliKoodi [party party-type subtype]
   (if (contains? kuntaRoolikoodit party-type)
     (kuntaRoolikoodit party-type)
     (let [code (or (get-in party [:kuntaRoolikoodi])
                    ; Old applications have kuntaRoolikoodi under patevyys group (LUPA-771)
                    (get-in party [:patevyys :kuntaRoolikoodi])
-                   default-role)]
+                   (get kuntaRoolikoodit (keyword subtype) default-role))]
       (if (ss/blank? code) default-role code))))
 
-(defn get-osapuoli-data [osapuoli party-type]
-  (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
-        yritys-type-osapuoli? (= "yritys" selected-value)
-        henkilo        (if yritys-type-osapuoli?
-                         (get-in osapuoli [:yritys :yhteyshenkilo])
-                         (:henkilo osapuoli))]
-    (when (-> henkilo :henkilotiedot :sukunimi)
-      (let [kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type)
-            omistajalaji   (muu-select-map
-                             :muu (:muu-omistajalaji osapuoli)
-                             :omistajalaji (:omistajalaji osapuoli))]
-        (merge
-          {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
-           :kuntaRooliKoodi kuntaRoolicode
-           :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin))
-           ;; Only explicit check allows direct marketing
-           :suoramarkkinointikieltoKytkin (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
-           :henkilo (merge
-                      (get-name (:henkilotiedot henkilo))
-                      (get-yhteystiedot-data (:yhteystiedot henkilo))
-                      (when-not yritys-type-osapuoli?
-                        {:henkilotunnus (get-in henkilo [:henkilotiedot :hetu])
-                         :osoite (get-simple-osoite (:osoite henkilo))
-                         :vainsahkoinenAsiointiKytkin (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)}))}
-          (when yritys-type-osapuoli?
-            {:yritys (get-yritys-data (:yritys osapuoli))})
-          (when omistajalaji {:omistajalaji omistajalaji}))))))
+(defn get-osapuoli-data
+  ([osapuoli party-type]
+    (get-osapuoli-data osapuoli party-type nil))
+  ([osapuoli party-type subtype]
+   (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
+         yritys-type-osapuoli? (= "yritys" selected-value)
+         henkilo        (if yritys-type-osapuoli?
+                          (get-in osapuoli [:yritys :yhteyshenkilo])
+                          (:henkilo osapuoli))]
+     (when (-> henkilo :henkilotiedot :sukunimi)
+       (let [kuntaRoolicode (get-kuntaRooliKoodi osapuoli party-type subtype)
+             omistajalaji   (muu-select-map
+                              :muu (:muu-omistajalaji osapuoli)
+                              :omistajalaji (:omistajalaji osapuoli))]
+         (merge
+           {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
+            :kuntaRooliKoodi kuntaRoolicode
+            :turvakieltoKytkin (true? (-> henkilo :henkilotiedot :turvakieltoKytkin))
+            ;; Only explicit check allows direct marketing
+            :suoramarkkinointikieltoKytkin (-> henkilo :kytkimet :suoramarkkinointilupa true? not)
+            :henkilo (merge
+                       (get-name (:henkilotiedot henkilo))
+                       (get-yhteystiedot-data (:yhteystiedot henkilo))
+                       (when-not yritys-type-osapuoli?
+                         {:henkilotunnus (get-in henkilo [:henkilotiedot :hetu])
+                          :osoite (get-simple-osoite (:osoite henkilo))
+                          :vainsahkoinenAsiointiKytkin (-> henkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)}))}
+           (when yritys-type-osapuoli?
+             {:yritys (get-yritys-data (:yritys osapuoli))})
+           (when omistajalaji {:omistajalaji omistajalaji})))))))
 
 (defn get-parties-by-type [documents-by-type tag-name party-type doc-transformer]
   (for [doc (documents-by-type party-type)
-        :let [osapuoli (:data doc)]
+        :let [osapuoli (:data doc)
+              subtype  (get-in doc [:schema-info :subtype])]
         :when (seq osapuoli)]
-    {tag-name (doc-transformer osapuoli party-type)}))
+    {tag-name (doc-transformer osapuoli party-type subtype)}))
 
-(defn get-parties [{:keys [schema-version]} documents]
+(defn get-parties [{:keys [schema-version] :as app} documents]
   (let [hakija-schema-names (schemas/get-hakija-schema-names schema-version)
-        hakija-key (some #(when (hakija-schema-names (name %)) %) (keys documents))]
+        hakija-key (some #(when (hakija-schema-names (name %)) %) (keys documents))
+        applicant-schema-name (op/get-applicant-doc-schema-name app)]
+    (when-not (= hakija-key (keyword applicant-schema-name))
+      (warnf "%s is not correct applicant schema (%s) for app %s" hakija-key applicant-schema-name (:id app)))
     (filter #(seq (:Osapuoli %))
       (into
         (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
         (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
 
-(defn get-suunnittelija-data [suunnittelija party-type]
+(defn get-suunnittelija-data [suunnittelija party-type & [subtype]]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
-    (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type)
+    (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type subtype)
           codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                  :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
           patevyys (:patevyys suunnittelija)
@@ -504,8 +513,8 @@
     (select-keys  tasks (get role-tasks role))))
 
 
-(defn get-tyonjohtaja-data [application lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti :FISEkelpoisuus)
+(defn get-tyonjohtaja-data [application lang tyonjohtaja party-type & [subtype]]
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type subtype) :suunnittelijaRoolikoodi :FISEpatevyyskortti :FISEkelpoisuus)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
         ;; Thus cannot use just this as koulutus:
@@ -516,7 +525,7 @@
                    "muu"
                    (:koulutusvalinta patevyys))
         {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
-        rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
+        rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja nil)]
     (merge
       foremans
       {:tyonjohtajaRooliKoodi rooli
@@ -536,21 +545,19 @@
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn get-tyonjohtaja-v2-data [application lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :FISEpatevyyskortti :FISEkelpoisuus)
+(defn get-tyonjohtaja-v2-data [application lang tyonjohtaja party-type & [subtype]]
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type subtype) :suunnittelijaRoolikoodi :FISEpatevyyskortti :FISEkelpoisuus)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         koulutus (if (= "other" (:koulutusvalinta patevyys))
                    "muu"
                    (:koulutusvalinta patevyys))
         {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
-        rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
+        rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja nil)]
     (merge
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-       :koulutus (if (= "other" (:koulutusvalinta patevyys))
-                   "muu"
-                   (:koulutusvalinta patevyys))
+       :koulutus koulutus
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
        :vaadittuPatevyysluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
