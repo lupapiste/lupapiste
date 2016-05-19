@@ -6,6 +6,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [def-]]
+            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -194,22 +195,32 @@
                        inc
                        str
                        keyword)
+            default-tila {:tila ""
+                          :kayttoonottava false}
             rakennus {:rakennus {:jarjestysnumero                    (:index build)
                                  :kiinttun                           (:propertyId build)
                                  :rakennusnro                        (:localShortId build)
                                  :valtakunnallinenNumero             (:nationalId build)
                                  :kunnanSisainenPysyvaRakennusnumero (:localId build)}
-                      :tila {:tila ""
-                             :kayttoonottava false} }]
+                      :tila (get build :task-tila default-tila)}]
+        (if (:task-tila build)
+          (debugf "rakennus-data-from-buildings: got tila from building"))
         (assoc acc index rakennus)))
     initial-rakennus
     buildings))
 
 (defn katselmus->task [meta source {:keys [buildings]} katselmus]
+  ;; (debugf "type of :muuTunnustieto is %s (value=%s)" (type (:muuTunnustieto katselmus)) (:muuTunnustieto katselmus))
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
+        get-muuTunnus (fn [katselmus]
+                        ;; get first {:sovellus "BackendName" :tunnus "BackendIdNumber"} that doesn't have :sovellus "lupapiste" and combine to a single string like "BackendName-BackendIdNumber"
+                        (let [MuuTunnus (-> (util/find-first #(not= "lupapiste" (-> % :MuuTunnus :sovellus sade.strings/lower-case)) (:muuTunnustieto katselmus))
+                                            :MuuTunnus)
+                              sovellus-and-tunnus (str  (:tunnus MuuTunnus) "-" (:sovellus MuuTunnus))]
+                          sovellus-and-tunnus))
         katselmus-data {:tila (get katselmus :osittainen)
                         :pitaja (get katselmus :pitaja)
-                        :pitoPvm (get katselmus :pitoPvm)
+                        :pitoPvm (util/to-local-date (get katselmus :pitoPvm))
                         :lasnaolijat (get katselmus :lasnaOlijat "")
                         :huomautukset {:kuvaus (get-in katselmus [:huomautukset :huomautus :kuvaus] "")}
                         :poikkeamat (get katselmus :poikkeamat "")
@@ -218,10 +229,12 @@
               :vaadittuLupaehtona true
               :rakennus (rakennus-data-from-buildings {} buildings)
               :katselmus katselmus-data
-              :muuTunnus (get-in katselmus [:muuTunnustieto :MuuTunnus :tunnus] "")
-              ;; There's also :MuuTunnus :sovellus - we could form a string like "Facta-8F29F.." or store just the map here, if but seems unlikely that within same organization there would be id clashes between systems
-              }]
-    (new-task "task-katselmus" task-name data meta source)))
+              :muuTunnus (get-muuTunnus katselmus)
+              }
+        task (new-task "task-katselmus" task-name data meta source)
+        ]
+    ;; (debugf ":muuTunnus type is %s" (type  (:muuTunnus data)))
+    task))
 
 (defn- verdict->tasks [verdict meta application]
   (map
@@ -262,3 +275,43 @@
 
 (defn task-attachments [{:keys [attachments]} task-id]
   (filter #(= task-id (get-in % [:target :id])) attachments))
+
+
+(defn generate-task-pdfa [application {info :schema-info :as task} user lang]
+  (when (= "task-katselmus" (:name info))
+    (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
+
+(defn- update-building [old-buildings new-building]
+  ;; old-buildings comes from an existing task's :data :rakennus map
+  ;; new-building is element of application top-level :buildings seq
+  (let [match-old-by-id (fn [top-key task-key]
+                          (util/find-first (fn [old-building]
+                                        (let [task-value (-> old-building :rakennus task-key :value)
+                                              top-value (-> new-building top-key)
+                                              ]
+                                          ;; (debugf "comparing keys rakennukset %s vs :buildings %s - values: %s v %s" task-key top-key task-value top-value)
+                                          (and (not= nil task-value)
+                                               (not= nil top-value)
+                                               (= top-value task-value))))
+                                      (vals old-buildings)))
+        matching-old (or (match-old-by-id :nationalId :valtakunnallinenNumero)
+                         (match-old-by-id :localId :kunnanSisainenPysyvaRakennusnumero)
+                         (match-old-by-id :index :jarjestysnumero))
+        update-from-old (fn [new-building old-rakennus]
+                          (assoc new-building :task-tila (:tila old-rakennus)))
+        ]
+    (if-not (nil? matching-old)
+      (update-from-old new-building matching-old)
+      ;; else
+      new-building)))
+
+(defn update-task-buildings [new-buildings task]
+  ;; Normally task's buildings (:data :rakennus) are updated by tasks/rakennus-data-from-buildings called in katselmus->task.  here we call it
+  ;; again once for each task, since it can optionally reapply the task rakennus :tila data to the right buildings if supplied
+  ;; with a suitably decorated :buildings map.
+
+  (let [old-buildings (-> task :data :rakennus)
+        new-buildings-with-states (map (fn [new-building] (update-building old-buildings new-building)) new-buildings)
+        task-rakennus (rakennus-data-from-buildings {} new-buildings-with-states)
+        ]
+    (assoc-in task [:data :rakennus] task-rakennus)))
