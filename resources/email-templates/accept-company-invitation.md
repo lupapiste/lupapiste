@@ -1,7 +1,7 @@
 # Moi!
 
 [Lupapiste](https://www.lupapiste.fi/)-palvelun k&auml;ytt&auml;j&auml; {{caller.firstName}} {{caller.lastName}} on
-l&auml;hett&auml;nyt yrityksellenne (TÄHÄN YRITYSTILIN NIMI) kutsun osallistua Lupapisteessä hakemuksen k&auml;sittelyyn.
+l&auml;hett&auml;nyt yrityksellenne {{company.name}} kutsun osallistua Lupapisteessä hakemuksen k&auml;sittelyyn.
 
 Klikkaa allaolevaa linkki&auml; liitt&auml;&auml;ksesi Yritystilisi käyttäjät hakemuksen k&auml;sittelyyn.
 
@@ -13,7 +13,8 @@ Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 # Hej!
 
-[Lupapiste](https://www.lupapiste.fi/)-anv&auml;ndaren {{caller.firstName}} {{caller.lastName}} har skickat ert f&ouml;retag (TÄHÄN YRITYSTILIN NIMI) en inbjudan att delta i behandlingen av en ans&ouml;kan i Lupapiste.
+[Lupapiste](https://www.lupapiste.fi/)-anv&auml;ndaren {{caller.firstName}} {{caller.lastName}} har skickat
+ert f&ouml;retag {{company.name}} en inbjudan att delta i behandlingen av en ans&ouml;kan i Lupapiste.
 
 Klicka p&aring; l&auml;nken nedan f&ouml;r att delta i behandlingen av ans&ouml;kan.
 
