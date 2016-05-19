@@ -17,7 +17,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
-            [lupapalvelu.geojson :as geo]))
+            [lupapalvelu.geojson :as geo]
+            [lupapalvelu.organization :as organization]))
 
 ;; Operations
 
@@ -103,10 +104,15 @@
     (:id (user/get-user-by-email handler))
     handler))
 
-(defn- archival-query [organization]
-  {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed"]}} {:archived.application nil}]}
-        {$and [{:state "closed"} {:archived.completed nil}]}]}
-  )
+(defn- archival-query [user]
+  (let [from-ts (->> (user/organization-ids-by-roles user #{:archivist})
+                     (organization/earliest-archive-enabled-ts))
+        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed"]}} {:archived.application nil}]}
+                         {$and [{:state "closed"} {:archived.completed nil}]}]}]
+    (if from-ts
+      {$and [base-query
+             {:created {$gte from-ts}}]}
+      base-query)))
 
 (defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas]} user]
   {$and
