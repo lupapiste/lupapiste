@@ -22,6 +22,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
@@ -37,6 +38,10 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
   (:import [java.net URL]))
+
+(notifications/defemail :application-verdict
+                        {:subject-key    "verdict"
+                         :tab            "verdict"})
 
 (def verdict-codes ["my\u00f6nnetty"
                     "hyv\u00e4ksytty"

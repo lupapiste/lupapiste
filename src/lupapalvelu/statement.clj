@@ -5,6 +5,7 @@
             [sade.util :as util]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
+            [sade.validators :as v]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.organization :as organization]
@@ -117,6 +118,26 @@
          (sc/validate Statement))
     (fail! :error.statement-updated-after-last-save :statementId (:id statement))))
 
+(defn statement-in-sent-state-allowed [_ {:keys [state] :as application}]
+  (when (= (keyword state) :sent)
+    (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all}
+                               _
+                               application)))
+
+(defn upload-attachment-allowed [{{:keys [target]} :data :as command}
+                                 {:keys [state] :as application}]
+  (if (and (= (-> target :type keyword) :statement) (= (keyword state) :sent))
+    (statement-in-sent-state-allowed command application)
+    (att/if-not-authority-state-must-not-be #{:sent} command application)))
+
+(defn delete-attachment-allowed? [attachment-id {:keys [state statements] :as application}]
+  (when (and (= (keyword state) :sent) (not (statement-in-sent-state-allowed nil application)))
+    (let [{target :target} (att/get-attachment-info application attachment-id)]
+      (when (= (-> target :type keyword) :statement)
+        (some (fn [{stat-id :id stat-state :state}]
+                (and (= stat-id (:id target))
+                     (not= (keyword stat-state) :given))) statements)))))
+
 (defn update-draft [statement text status modify-id editor-id]
   (update-statement statement modify-id :state :draft :text text :status status :editor-id editor-id))
 
@@ -138,6 +159,16 @@
 (defn attachments-readonly-updates [{app-id :id} statement-id]
   (att/attachment-array-updates app-id (comp #{statement-id} :id :target) :readOnly true))
 
+(defn validate-selected-persons [{{selectedPersons :selectedPersons} :data}]
+  (let [non-blank-string-keys (when (some
+                                      #(some (fn [k] (or (-> % k string? not) (-> % k ss/blank?))) [:email :name :text])
+                                      selectedPersons)
+                                (fail :error.missing-parameters))
+        has-invalid-email (when (some
+                                  #(not (v/email-and-domain-valid? (:email %)))
+                                  selectedPersons)
+                            (fail :error.email))]
+    (or non-blank-string-keys has-invalid-email)))
 ;;
 ;; Statement givers
 ;;

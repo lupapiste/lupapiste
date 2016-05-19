@@ -142,7 +142,7 @@ Foreman state has reset on base app
 
 Change subtype back to foreman application
   Open foreman application  1
-  Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
+  Wait until  Select from list by value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
 
 Verdict could be given

@@ -11,3 +11,4 @@ Mik&auml;li tarvitset toiminnallesi jatkoaikaa, tee siit&auml; hakemus Lupapiste
 Du har i Lupapiste-tj&auml;nsten en ans&ouml;kan som g&auml;ller allm&auml;nna omr&aring;den {{link-sv}} p&aring; adressen {{address}}.
 Ans&ouml;kningen har en anteckning om att lovet upph&ouml;r {{work-time-expires-date}}.
 Om du beh&ouml;ver f&ouml;rl&auml;ngd tid f&ouml;r din verksamhet kan du ans&ouml;ka om det i Lupapiste.
+

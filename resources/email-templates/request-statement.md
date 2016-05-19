@@ -2,7 +2,7 @@
 
 Sinulta on pyydetty lausuntoa lupahakemukseen
 
-{{link-fi}}
+  {{link-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
@@ -20,7 +20,7 @@ Lausuntopyynn&ouml;n saate / F&ouml;ljetext f&ouml;r beg&auml;ran om utl&aring;t
 
 Du har ombetts ge utl&aring;tande om en ans&ouml;kan
 
-{{link-sv}}
+  {{link-sv}}
 
 om tillst&aring;nd.
 

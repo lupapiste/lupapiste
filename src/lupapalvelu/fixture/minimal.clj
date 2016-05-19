@@ -281,7 +281,8 @@
     :lastName "Admin"
     :phone "121212"
     :username "ymp-admin@oulu.fi"
-    :private {:password "$2a$10$JA1Ec/bEUBrKLzeZX3aKNeyXcfCtjDdWyUQPTlL0rldhFhjq5Drje"}}
+    :private {:password "$2a$10$JA1Ec/bEUBrKLzeZX3aKNeyXcfCtjDdWyUQPTlL0rldhFhjq5Drje"
+              :apikey "YEU26a6TXHlapM18QGYST7WBYEU26a6TXHlapM18"}}
 
    ;; Olli Ule\u00E5borg - Oulun lupa-arkkitehti:  olli / olli
    ;; Viranomaisena myos Naantalissa

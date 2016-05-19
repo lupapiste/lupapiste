@@ -48,7 +48,8 @@
                           :pdfa-casefile
                           :get-building-info-from-wfs
                           :authority-notice
-                          :application-guests}
+                          :application-guests
+                          :statement-attachment-allowed}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)

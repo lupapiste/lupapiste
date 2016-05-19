@@ -44,10 +44,10 @@
         </thead>
         <tbody data-bind="foreach: $data.foremen">
           <tr data-bind="attr: {'data-test-name': $data.name}">
-            <td class="task-state" data-bind="attr: {'data-test-state': $data.statusName}">
+            <td class="task-state" data-bind="attr: {'data-test-state': $data.statusName()}">
               <i data-bind="attr: {
-                            'class': LUPAPISTE.statusIcon(statusName),
-                            'title': loc(['foreman', 'task', statusName, 'title'])}"></i>
+                            'class': LUPAPISTE.statusIcon(statusName()),
+                            'title': loc(['foreman', 'task', statusName(), 'title'])}"></i>
             </td>
             <td>
               <span data-bind="text: $data.name"></span>
@@ -62,6 +62,7 @@
                             optionsText: 'displayName',
                             optionsValue: 'id',
                             optionsCaption: loc('choose'),
+                            valueAllowUnset: true,
                             value: $data.selectedForeman">
               </select>
 

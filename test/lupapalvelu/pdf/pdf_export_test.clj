@@ -1,5 +1,6 @@
 (ns lupapalvelu.pdf.pdf-export-test
   (:require [clojure.string :as str]
+            [sade.util :as util]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
@@ -19,6 +20,7 @@
                        "ottamis-suunnitelman-laatija"
                        "kaupunkikuvatoimenpide"
                        "task-katselmus"
+                       "tyonjohtaja"
                        "approval-model-with-approvals"
                        "approval-model-without-approvals"})
 
@@ -182,3 +184,52 @@
                       (fact "Pdf data type " (nth rows 22) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus"))
                        )
                     (.delete file))))))
+
+(def foreman-roles-and-tasks {"vastaava ty\u00f6njohtaja"      ["rakennuksenMuutosJaKorjaustyo"
+                                                           "uudisrakennustyoMaanrakennustoineen"
+                                                           "uudisrakennustyoIlmanMaanrakennustoita"
+                                                           "linjasaneeraus"
+                                                           "maanrakennustyot"
+                                                           "rakennuksenPurkaminen"]
+                              "KVV-ty\u00f6njohtaja"           ["sisapuolinenKvvTyo"
+                                                           "ulkopuolinenKvvTyo"]
+                              "IV-ty\u00f6njohtaja"            ["ivLaitoksenAsennustyo"
+                                                           "ivLaitoksenKorjausJaMuutostyo"]
+                              "erityisalojen ty\u00f6njohtaja" []})
+
+(defn loc-tasks [role]
+  (with-lang :fi (doall (map #(loc (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." %))
+                       (get foreman-roles-and-tasks role)))))
+
+(defn foreman-pdf-content-check [role]
+  (facts {:midje/description (str "Foreman role " role " should have these tasks: " (get foreman-roles-and-tasks role))}
+         (let [loc-role       (with-lang :fi (loc (str "osapuoli.tyonjohtaja.kuntaRoolikoodi." role)))
+               loc-good-tasks (loc-tasks role)
+               loc-bad-tasks  (->> (keys foreman-roles-and-tasks)
+                                   (remove #(= role %))
+                                   (map loc-tasks)
+                                   (reduce concat))
+               schema-names   (remove ignored-schemas (keys (schemas/get-schemas 1)))
+               dummy-docs     (map test-util/dummy-doc schema-names)
+               foreman-pred   #(= (-> % :schema-info :name) "tyonjohtaja-v2")
+               foreman-doc    (assoc-in (util/find-first foreman-pred dummy-docs) [:data :kuntaRoolikoodi :value] role)
+               dummy-docs     (cons foreman-doc (remove foreman-pred dummy-docs))
+               application    (merge domain/application-skeleton {:id "LP-88"
+                                                                  :address "Dongzhimen"
+                                                                  :documents dummy-docs
+                                                                  :municipality "888"
+                                                                  :state "draft"})
+               file           (File/createTempFile "export-test-foreman" ".pdf")]
+           (pdf-export/generate application "fi" file)
+           (fact "File exists " (.exists file))
+           (let [pdf-content (pdfbox/extract (.getAbsolutePath file))]
+             (.delete file)
+             (fact {:midje/description loc-role} (re-find (re-pattern (str "(?m)" loc-role)) pdf-content) => truthy)
+             (facts {:midje/description (str loc-role " tasks")}
+                    (doseq [good loc-good-tasks]
+                      (fact {:midje/description good} (re-find (re-pattern (str "(?m)" good "\\s+Kyll\u00e4")) pdf-content) => truthy))
+                    (doseq [bad loc-bad-tasks]
+                      (fact {:midje/description bad} (re-find (re-pattern (str "(?m)" bad "\\s+Kyll\u00e4")) pdf-content) => falsey)))))))
+
+(facts "Foreman roles and tasks"
+       (doall (map foreman-pdf-content-check (keys foreman-roles-and-tasks))))

@@ -259,6 +259,11 @@
   {:pre [(string? filename)]}
   (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf"))
 
+(defn if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
+  (when (and (not (user/authority? user))
+             (state-set (keyword state)))
+    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
+
 ;;
 ;; Api
 ;;
@@ -693,7 +698,7 @@
    Returns attachment version."
   [application options]
   (->> (upload-file! application options)
-       (merge options {:now (:created options) :stamped false})
+       (merge options {:now (:created options) :stamped (get options :stamped false)})
        (set-attachment-version! application (get-or-create-attachment! application options))))
 
 (defn get-attachments-by-operation

@@ -1,10 +1,6 @@
 (ns lupapalvelu.verdict-api
-  (:require [clojure.walk :as walk]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
-            [pandect.core :as pandect]
+  (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [monger.operators :refer :all]
-            [sade.common-reader :as cr]
-            [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail! ok?]]
@@ -14,9 +10,6 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.tiedonohjaus :as t]
@@ -25,10 +18,7 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.appeal-common :as appeal-common]
             [lupapalvelu.child-to-attachment :as child-to-attachment]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [clojure.java.io :as io]
-            [sade.env :as env])
-  (:import (java.io File)))
+            [sade.env :as env]))
 
 ;;
 ;; KRYSP verdicts
@@ -37,10 +27,6 @@
 (defn application-has-verdict-given-state [_ application]
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
-
-(notifications/defemail :application-verdict
-  {:subject-key    "verdict"
-   :tab            "verdict"})
 
 (def give-verdict-states (clojure.set/union #{:submitted :complementNeeded :sent} states/verdict-given-states))
 

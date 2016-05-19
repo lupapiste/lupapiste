@@ -22,6 +22,6 @@ Solita admin search Ronja and resets her password
 
 Ronja receives an email
   Open last email
-  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='to']  ronja.sibbo@sipoo.fi
+  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='to']  Ronja Sibbo <ronja.sibbo@sipoo.fi>
   Click element  xpath=//a
   Wait until     Element should be visible  xpath=//section[@id='setpw']

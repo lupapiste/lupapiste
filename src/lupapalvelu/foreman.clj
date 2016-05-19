@@ -51,10 +51,12 @@
                        (get-foreman-hetu foreman-application)
                        foreman-hetu)]
     (when-not (ss/blank? foreman-hetu)
-      (mongo/select :applications {"primaryOperation.name" "tyonjohtajan-nimeaminen-v2"
-                                   :state {$nin ["canceled"]}
-                                   :documents {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
-                                                           "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
+      (mongo/select :applications
+                    {"primaryOperation.name" "tyonjohtajan-nimeaminen-v2"
+                     :state {$nin ["canceled"]}
+                     :documents {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
+                                             "data.henkilotiedot.hetu.value" foreman-hetu}}}
+                    [:created :documents :municipality]))))
 
 (defn get-foreman-project-applications
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
@@ -65,7 +67,7 @@
         foreman-app-ids (map :id foreman-apps)
         links           (mongo/select :app-links {:link {$in foreman-app-ids}})
         linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
-    (mongo/select :applications {:_id {$in linked-app-ids}})))
+    (mongo/select :applications {:_id {$in linked-app-ids}} [:documents :address :primaryOperation])))
 
 (defn- get-linked-app-operations [foreman-app-id link]
   (let [other-id  (first (remove #{foreman-app-id} (:link link)))]
@@ -137,7 +139,7 @@
 
 (defn- validate-notice-or-application [{subtype :permitSubtype :as application}]
   (when (and (foreman-app? application) (ss/blank? subtype))
-    (fail! :error.foreman.type-not-selected)))
+    (fail :error.foreman.type-not-selected)))
 
 (defn- validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
   (when (notice? application)
@@ -146,10 +148,10 @@
                                               (get
                                                 (mongo/select-one :applications {:_id (:id link)} {:state 1})
                                                 :state)))
-        (fail! :error.foreman.notice-not-submittable)))))
+        (fail :error.foreman.notice-not-submittable)))))
 
 (defn validate-application
-  "Validates foreman applications"
+  "Validates foreman applications. Returns nil if application is OK, or fail map."
   [application]
   (when (foreman-app? application)
     (or
@@ -237,7 +239,7 @@
     (assoc
       (company/company->auth company)
       :id "" ; prevents access to application before accepting invite
-      :role ""
+      :role "reader"
       :invite {:user {:id company-id}})))
 
 
