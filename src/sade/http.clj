@@ -31,6 +31,9 @@
 (defn put [uri & options]
   (logged-call http/put uri (apply merge-to-defaults options)))
 
+(defn delete [uri & options]
+  (logged-call http/delete uri (apply merge-to-defaults options)))
+
 (def blacklisted #"^((set-)?cookie|server|host|connection|x-.+|access-control-.+)")
 
 (defn dissoc-blacklisted [m]

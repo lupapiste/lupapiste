@@ -39,6 +39,10 @@
   (api-call http/put action {:body (clj-http.client/json-encode request-body)
                              :content-type :json}))
 
+(defn- api-delete-command [action request-body]
+  (api-call http/delete action {:body (clj-http.client/json-encode request-body)
+                                :content-type :json}))
+
 (defn- post-command
   ([url]
    (post-command url []))
@@ -49,6 +53,15 @@
        (fail! :resources.backend-error))
      (:body response))))
 
+(defn- delete-command
+  ([url]
+   (delete-command url []))
+  ([url request-body]
+   (let [response (api-delete-command url request-body)]
+     (when-not (= 200 (:status response))
+       (error response)
+       (fail! :resources.backend-error))
+     (:body response))))
 
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
@@ -168,6 +181,13 @@
       (info "Tried to disable a calendar but no such calendar could not be found:" userId organization)
       (fail! :error.unknown))
     (deactivate-resource existing-calendar)))
+
+(env/in-dev
+  (defn delete-calendar
+    [userId]
+    (let [calendars (find-calendars-for-user userId)]
+      (doseq [id (map :id calendars)]
+        (delete-command (str "/api/resources/" id))))))
 
 (defcommand set-calendar-enabled-for-authority
   {:user-roles #{:authorityAdmin}
