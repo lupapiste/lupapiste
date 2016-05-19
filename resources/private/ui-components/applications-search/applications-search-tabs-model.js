@@ -10,6 +10,10 @@ LUPAPISTE.ApplicationsSearchTabsModel = function(params) {
                                   "inforequest",
                                   "canceled"]);
 
+  if (lupapisteApp.models.globalAuthModel.ok("archiving-operations-enabled")) {
+    self.tabs.push("readyForArchival");
+  }
+
   self.selectedTab = self.dataProvider.applicationType;
 
   self.selectTab = function(item) {

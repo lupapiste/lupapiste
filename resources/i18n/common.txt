@@ -4066,3 +4066,5 @@
 "korjaa" "sv" "Repareras"
 "Konvertoi PDF/A-muotoon" "fi" "Konvertoi PDF/A-muotoon"
 "Konvertoi PDF/A-muotoon" "sv" ""
+"applications.filter.readyForArchival" "fi" "Arkistoitavat"
+"applications.filter.readyForArchival" "sv" ""

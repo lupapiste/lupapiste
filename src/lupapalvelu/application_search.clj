@@ -103,6 +103,11 @@
     (:id (user/get-user-by-email handler))
     handler))
 
+(defn- archival-query [organization]
+  {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed"]}} {:archived.application nil}]}
+        {$and [{:state "closed"} {:archived.completed nil}]}]}
+  )
+
 (defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas]} user]
   {$and
    (filter seq
@@ -126,6 +131,7 @@
           "canceled"           {:state "canceled"}
           "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
           "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
+          "readyForArchival"   (archival-query user)
           {:state {$nin ["draft" "canceled"]}}))
       (when-not (empty? handlers)
         (if ((set handlers) no-handler)
