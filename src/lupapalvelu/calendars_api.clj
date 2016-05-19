@@ -218,10 +218,10 @@
 (defcommand add-reservation-type-for-organization
   {:user-roles #{:authorityAdmin}
    :feature    :ajanvaraus}
-  [{{:keys [reservation-type]} :data user :user}]
+  [{{:keys [reservationType]} :data user :user}]
   (let [admin-in-organization-id (user/authority-admins-organization-id user)]
-    (info "Adding reservation type" reservation-type "for organization" admin-in-organization-id)
-    (ok :reservationTypes (post-command "/api/reservation-types/" {:reservationType   reservation-type
+    (info "Adding reservation type" reservationType "for organization" admin-in-organization-id)
+    (ok :reservationTypes (post-command "/api/reservation-types/" {:reservationType   reservationType
                                                                     :organization      admin-in-organization-id}))))
 
 (defquery reservation-types-for-organization
