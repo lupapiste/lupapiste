@@ -7,9 +7,9 @@ Suite Setup     Initialize
 Suite Teardown  Logout
 
 *** Keywords ***
-Mikko creates an application and invites foreman
+Sonja creates an application and invites foreman
   Create project application
-  Mikko invites foreman to application
+  Sonja invites foreman to application
 
 Open linking dialog
   Click enabled by test id  application-add-link-permit-btn
@@ -17,10 +17,10 @@ Open linking dialog
   Wait Until  Element should be visible  xpath=//select[@data-test-id="choose-linkPermit-select"]
 
 *** Test Cases ***
-Mikko inits applications
-  Mikko logs in
-  Mikko creates an application and invites foreman
-  Mikko creates an application and invites foreman
+Sonja inits applications
+  Sonja logs in
+  Sonja creates an application and invites foreman
+  Sonja creates an application and invites foreman
 
 Submit the base app
   Click by test id  test-application-link-permit-lupapistetunnus
@@ -43,7 +43,7 @@ Foreman gets error message when trying to submit foreman notice before link perm
   Wait Until  Element should be visible  xpath=//div[@id='modal-dialog-content']
   Element should contain  xpath=//div[@id='modal-dialog-content']/div[@class='header']/span[@class="title"]  Työnjohtajan ilmoitus
   Confirm notification dialog
-  Wait Until  Application state should be  draft
+  Wait Until  Application state should be  open
 
 Foreman application can be submitted
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
