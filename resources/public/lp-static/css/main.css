@@ -1,5 +1,202 @@
-@import url('main-blessed1.css?z=1463062817167');
+@import url('main-blessed1.css?z=1463644867900');
 
+@media (max-width: 991px) {
+  /* line 80, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble {
+    padding: 0;
+  }
+  /* line 45, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+    position: relative;
+    width: auto;
+    float: left;
+  }
+  /* line 50, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application-map-container {
+    float: left;
+    margin-left: 24px;
+  }
+  /* line 56, ../../../private/common-html/sass/views/_application.scss */
+  .application_summary .preamble .application_actions {
+    float: right;
+    margin-right: 24px;
+  }
+}
+/* line 84, ../../../private/common-html/sass/views/_application.scss */
+.application_summary li {
+  display: inline;
+}
+/* line 87, ../../../private/common-html/sass/views/_application.scss */
+.application_summary h1 {
+  margin: 0;
+  color: #fff;
+  line-height: 24px;
+  margin-bottom: 6px;
+}
+/* line 93, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container {
+  position: relative;
+}
+/* line 95, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .map {
+  float: left;
+  margin: 12px;
+}
+/* line 99, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .application-map-actions {
+  position: absolute;
+  z-index: 1000;
+  left: 0;
+  top: 256px;
+  text-align: center;
+  display: block;
+  background: #04c714;
+}
+/* line 108, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application-map-container .application-map-actions .map-search-button {
+  color: white;
+  padding: 0 24px;
+}
+/* line 115, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info {
+  margin: 0 24px 24px 24px;
+  color: #333333;
+}
+/* line 118, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info h1 {
+  width: 100%;
+  color: #333333;
+}
+/* line 121, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info h1 a {
+  padding-left: 32px;
+  background-position: 8px -4200px;
+}
+/* line 126, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info h2 {
+  color: #333333;
+}
+/* line 129, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info a {
+  font-size: 15px;
+  text-transform: none;
+  height: auto;
+  width: auto;
+}
+/* line 135, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .summary-help {
+  width: 100%;
+  background-color: #eeeeee;
+  font-size: 0.8em;
+  font-style: italic;
+}
+/* line 141, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .help-text p, .application_summary .application_summary_info .summary-help p {
+  width: 100%;
+}
+/* line 145, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .link-permit {
+  display: block;
+}
+/* line 149, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .link-permit-item {
+  color: #f39129;
+  text-decoration: none;
+}
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:link, .application_summary .application_summary_info .link-permit-item:visited {
+  color: #f39129;
+}
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.application_summary .application_summary_info .link-permit-item:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
+/* line 153, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info p, .application_summary .application_summary_info .application_summary_text, .application_summary .application_summary_info ul {
+  vertical-align: top;
+  display: inline-block;
+  display: table-cell;
+  margin-bottom: 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  padding-left: 6px;
+}
+/* line 165, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info select {
+  vertical-align: top;
+}
+/* line 169, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info ul li {
+  display: block;
+}
+/* line 171, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info ul li span {
+  width: auto;
+  display: inline;
+}
+/* line 177, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication {
+  background-color: #f6f6f6;
+  margin: 0 0 0 0;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 32px;
+}
+/* line 197, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div {
+  height: 24px;
+}
+/* line 199, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div span {
+  color: #909090;
+  position: relative;
+  padding: 4px 8px 4px 24px;
+  display: inline-block;
+  margin: 0px -4px 0 0;
+  border: none;
+}
+/* line 206, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div span:first-child {
+  padding: 4px 8px 4px 8px;
+}
+/* line 209, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div span:after {
+  display: inline-block;
+  position: absolute;
+  content: " ";
+  width: 0;
+  height: 0;
+  top: -1px;
+  right: -10px;
+  border-top: 17px solid transparent;
+  border-left: 11px solid #f6f6f6;
+  border-bottom: 17px solid transparent;
+  z-index: 1;
+}
+/* line 224, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div .constructionStarted-box, .application_summary .application_summary_info .state-indication div .inUse-box, .application_summary .application_summary_info .state-indication div .closed-box, .application_summary .application_summary_info .state-indication div .complementNeeded-box, .application_summary .application_summary_info .state-indication div .verdictGiven-box, .application_summary .application_summary_info .state-indication div .foremanVerdictGiven-box, .application_summary .application_summary_info .state-indication div acknowledged-box, .application_summary .application_summary_info .state-indication div .canceled-box, .application_summary .application_summary_info .state-indication div .final-box, .application_summary .application_summary_info .state-indication div .extinct-box, .application_summary .application_summary_info .state-indication div .onHold-box, .application_summary .application_summary_info .state-indication div .appealed-box {
+  display: none;
+}
+/* line 228, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.draft .draft-box {
+  color: white;
+  background-color: #2ca92c;
+  display: inline-block;
+}
+/* line 192, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.draft .draft-box:after {
+  border-left: 11px solid #2ca92c;
+}
+/* line 233, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .application_summary_info .state-indication div.open .draft-box {
+  display: none;
+}
 /* line 236, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.open .open-box {
   color: white;
