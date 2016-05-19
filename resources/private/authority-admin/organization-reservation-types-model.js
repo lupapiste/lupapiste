@@ -68,9 +68,9 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
     self.openReservationTypeDialog();
   };
 
-  self.rmLink = function() {
+  self.deleteReservationType = function(reservationType) {
     ajax
-      .command("remove-reservation-type", {name: this.reservationType})
+      .command("delete-reservation-type", {reservationTypeId: reservationType.id})
       .success(self.load)
       .call();
   };

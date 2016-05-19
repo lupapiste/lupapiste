@@ -52,8 +52,8 @@
             <span>
               [<a href="#" data-bind="click: $parent.reservationTypes.editReservationType.bind($data, $index), ltext: 'edit'"
                   data-test-id="edit" class="modal"></a>]
-              <!--[<a href="#" data-bind="click: reservationTypes.delete($data, $index), ltext: 'remove'"-->
-                  <!--data-test-id="remove" class="modal"></a>]-->
+              [<a href="#" data-bind="click: $parent.reservationTypes.deleteReservationType.bind($data), ltext: 'remove'"
+                  data-test-id="remove" class="modal"></a>]
             </span>
           </td>
         </tr>

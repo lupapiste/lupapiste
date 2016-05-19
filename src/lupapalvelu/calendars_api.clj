@@ -248,3 +248,9 @@
    :feature    :ajanvaraus}
   [{{:keys [reservationTypeId name]} :data user :user}]
   (ok :reservationTypes (put-command (str "/api/reservation-types/" reservationTypeId) {:name name})))
+
+(defcommand delete-reservation-type
+  {:user-roles #{:authorityAdmin}
+   :feature    :ajanvaraus}
+  [{{:keys [reservationTypeId]} :data user :user}]
+  (ok :reservationTypes (delete-command (str "/api/reservation-types/" reservationTypeId))))
