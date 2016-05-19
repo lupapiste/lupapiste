@@ -24,7 +24,7 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role "authorityAdmin"
-    :orgAuthz {:753-R #{:authorityAdmin}}
+    :orgAuthz {:753-R-TESTI #{:authorityAdmin}}
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
@@ -37,7 +37,7 @@
     :role "authority"
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
-    :orgAuthz {:753-R #{:authority :approver}
+    :orgAuthz {:753-R-TESTI #{:authority :approver}
                :753-YA #{:authority :approver}
                :998-R-TESTI-2 #{:authority :approver}}
     :firstName "Sonja"
