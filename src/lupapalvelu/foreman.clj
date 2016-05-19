@@ -271,6 +271,7 @@
         token-id   (company/company-invitation-token user company-id (:id foreman-app))]
     (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
                                                :caller     user
+                                               :company    (company/find-company! {:id company-id})
                                                :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
                                                :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})))
 
