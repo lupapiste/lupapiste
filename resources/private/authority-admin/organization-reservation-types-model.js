@@ -42,9 +42,6 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
             self.load();
             LUPAPISTE.ModalDialog.close();
           })
-          .error(function (err) {
-            console.info(err);
-          })
           .call();
       }
     });
@@ -58,8 +55,8 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         console.info(reservationType)
         ajax
           .command("add-reservation-type-for-organization", {reservationType: reservationType})
-          .success(function(data) {
-            self.items(data.reservationTypes);
+          .success(function() {
+            self.load();
             LUPAPISTE.ModalDialog.close();
           })
           .call();
