@@ -3,21 +3,81 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
 
   var self = this;
 
-  self.newReservationType = ko.observable();
+  self.reservationType = ko.observable();
+  self.items = ko.observableArray();
 
-  self.addReservationType = function () {
-    ajax.command("add-reservation-type-for-organization", { reservationType: self.newReservationType() })
-      .success(function (data) {
-        self.items(data.reservationTypes);
-      })
-      .call();
+  function EditReservationTypeModel() {
+    var self = this;
+
+    self.name = ko.observable();
+    self.id = ko.observable();
+    self.commandName = ko.observable();
+    self.command = null;
+
+    self.init = function(params) {
+      self.commandName(params.commandName);
+      self.command = params.command;
+      self.id(util.getIn(params, ["source", "id"], ""));
+      self.name(util.getIn(params, ["source", "name"], ""));
+    };
+
+    self.execute = function() {
+      self.commandName() === "edit" ? self.command(self.id(), self.name()) : self.command(self.name());
+    };
+
+    self.ok = ko.computed(function() {
+      return !_.isBlank(self.name());
+    });
   }
+  self.editReservationTypeModel = new EditReservationTypeModel();
 
-  self.openNewReservationTypeDialog = function () {
-    LUPAPISTE.ModalDialog.open("#dialog-new-reservation-type");
+  self.editReservationType = function() {
+    self.editReservationTypeModel.init({
+      source: this,
+      commandName: "edit",
+      command: function(id, reservationType) {
+        ajax
+          .command("update-reservation-type", {reservationTypeId: id, name: reservationType})
+          .success(function() {
+            self.load();
+            LUPAPISTE.ModalDialog.close();
+          })
+          .error(function (err) {
+            console.info(err);
+          })
+          .call();
+      }
+    });
+    self.openReservationTypeDialog();
   };
 
-  self.items = ko.observableArray();
+  self.addReservationType = function() {
+    self.editReservationTypeModel.init({
+      commandName: "add",
+      command: function(reservationType) {
+        console.info(reservationType)
+        ajax
+          .command("add-reservation-type-for-organization", {reservationType: reservationType})
+          .success(function(data) {
+            self.items(data.reservationTypes);
+            LUPAPISTE.ModalDialog.close();
+          })
+          .call();
+      }
+    });
+    self.openReservationTypeDialog();
+  };
+
+  self.rmLink = function() {
+    ajax
+      .command("remove-reservation-type", {name: this.reservationType})
+      .success(self.load)
+      .call();
+  };
+
+  self.openReservationTypeDialog = function() {
+    LUPAPISTE.ModalDialog.open("#dialog-edit-reservation-type");
+  };
 
   self.load = function () {
     ajax.query("reservation-types-for-organization")

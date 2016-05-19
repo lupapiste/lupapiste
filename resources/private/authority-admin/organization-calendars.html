@@ -48,11 +48,18 @@
         <tbody data-bind="foreach: reservationTypes.items">
         <tr>
           <td data-bind="text: $data.name"></td>
-          <td>FIXME</td>
+          <td>
+            <span>
+              [<a href="#" data-bind="click: $parent.reservationTypes.editReservationType.bind($data, $index), ltext: 'edit'"
+                  data-test-id="edit" class="modal"></a>]
+              <!--[<a href="#" data-bind="click: reservationTypes.delete($data, $index), ltext: 'remove'"-->
+                  <!--data-test-id="remove" class="modal"></a>]-->
+            </span>
+          </td>
         </tr>
         </tbody>
       </table>
-      <a href="#" data-bind="click: reservationTypes.openNewReservationTypeDialog, ltext: 'auth-admin.organization.add-reservation-type'"
+      <a href="#" data-bind="click: reservationTypes.addReservationType, ltext: 'auth-admin.organization.reservation-types.add'"
       data-test-id="add-reservation-type" class="modal btn btn-primary"></a>
     </section>
 
@@ -60,16 +67,16 @@
 
   <!-- DIALOGS -->
 
-  <div id="dialog-new-reservation-type" class="window autosized">
+  <div id="dialog-edit-reservation-type" class="window autosized" data-bind="with: reservationTypes.editReservationTypeModel">
     <div class="dialog-header">
-      <p data-bind="ltext: 'auth-admin.organization.add-reservation-type'"></p>
+      <p data-bind="ltext: commandName"></p>
       <p class="dialog-close close lupicon-remove"></p>
     </div>
     <div class="dialog-content">
       <div>
         <p data-bind="ltext: 'auth-admin.organization.reservation-type.name'"></p>
-        <input type="text" data-bind="textInput: reservationTypes.newReservationType" class="form-input text long" autofocus="autofocus"/>
-        <button data-bind="click: reservationTypes.addReservationType, ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
+        <input type="text" data-bind="textInput: name" class="form-input text long" autofocus="autofocus" maxlength="256"/>
+        <button data-bind="click: execute, enable: ok(), ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
       </div>
     </div>
   </div>

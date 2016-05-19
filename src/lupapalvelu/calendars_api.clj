@@ -53,6 +53,16 @@
        (fail! :resources.backend-error))
      (:body response))))
 
+(defn- put-command
+  ([url]
+   (put-command url []))
+  ([url request-body]
+   (let [response (api-put-command url request-body)]
+     (when-not (= 200 (:status response))
+       (error response)
+       (fail! :resources.backend-error))
+     (:body response))))
+
 (defn- delete-command
   ([url]
    (delete-command url []))
@@ -232,3 +242,9 @@
     (info "Get reservation types for organization" admin-in-organization-id)
     ;; FIXME: Unwrap body from api-query response
     (ok :reservationTypes (:body (api-query "/api/reservation-types/by-organization" {:organization admin-in-organization-id})))))
+
+(defcommand update-reservation-type
+  {:user-roles #{:authorityAdmin}
+   :feature    :ajanvaraus}
+  [{{:keys [reservationTypeId name]} :data user :user}]
+  (ok :reservationTypes (put-command (str "/api/reservation-types/" reservationTypeId) {:name name})))
