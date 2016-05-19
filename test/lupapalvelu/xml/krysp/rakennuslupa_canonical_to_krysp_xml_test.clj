@@ -11,6 +11,7 @@
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical katselmus-canonical]]
             [lupapalvelu.document.rakennuslupa-canonical-test :refer [application-rakennuslupa
                                                                       application-tyonjohtajan-nimeaminen
+                                                                      application-tyonjohtajan-nimeaminen-v2
                                                                       application-suunnittelijan-nimeaminen
                                                                       jatkolupa-application
                                                                       aloitusoikeus-hakemus]]
@@ -186,7 +187,7 @@
     (do-test application-rakennuslupa :validate-tyonjohtaja-type :v1 :validate-pysyva-tunnus? true :validate-operations? true))
 
   (fact "Ty\u00f6njohtaja application -> canonical -> xml"
-    (do-test application-tyonjohtajan-nimeaminen :validate-tyonjohtaja-type :v2))
+    (do-test application-tyonjohtajan-nimeaminen-v2 :validate-tyonjohtaja-type :v2))
 
   (fact "Suunnittelija application -> canonical -> xml"
     (do-test application-suunnittelijan-nimeaminen))
@@ -271,14 +272,14 @@
 
 
 (facts "Tyonjohtajan sijaistus"
-  (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi")
+  (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen-v2 "fi")
         xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
         xml_215 (rakennuslupa-element-to-xml canonical "2.1.5")
         xml_213_s (indent-str xml_213)
         xml_215_s (indent-str xml_215)]
 
-    (validator/validate xml_213_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.3")
-    (validator/validate xml_215_s (:permitType application-tyonjohtajan-nimeaminen) "2.1.5")
+    (validator/validate xml_213_s (:permitType application-tyonjohtajan-nimeaminen-v2) "2.1.3")
+    (validator/validate xml_215_s (:permitType application-tyonjohtajan-nimeaminen-v2) "2.1.5")
 
     (facts "2.1.3"
       (let [lp-xml (cr/strip-xml-namespaces (xml/parse xml_213_s))
