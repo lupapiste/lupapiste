@@ -438,6 +438,7 @@
 
   if (features.enabled("ajanvaraus")) {
     hub.onPageLoad("calendar-admin", function() {
+      reservationTypesModel.load();
       if (!calendarViewModel) {
         var component = $("#calendar-admin .calendar-table");
         calendarViewModel = calendarView.create(component, new LUPAPISTE.CalendarService());
@@ -490,7 +491,8 @@
         reservationTypes:    reservationTypesModel
       });
       $("#calendar-admin").applyBindings({
-        calendars:           calendarsModel
+        calendars:           calendarsModel,
+        reservationTypes:    reservationTypesModel
       });
     }
 

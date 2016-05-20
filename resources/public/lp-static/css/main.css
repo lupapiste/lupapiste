@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1462968224742');
+@import url('main-blessed1.css?z=1463661638951');
 
 /* line 252, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .draft-box, .application_summary .application_summary_info .state-indication div.sent .open-box, .application_summary .application_summary_info .state-indication div.sent .submitted-box {
@@ -2935,34 +2935,88 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 
 /* line 5, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table {
-  width: 72.5em;
+  width: 100%;
   min-height: 144px;
 }
 /* line 9, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table .nav-actions {
+  width: 96%;
+  text-align: right;
+}
+/* line 11, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table .nav-actions .month {
+  float: left;
+  margin-left: 5%;
+  padding-left: 12px;
+  font-size: 18px;
+  font-weight: bold;
+}
+/* line 18, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table .nav-actions .nav-links {
+  vertical-align: top;
+}
+/* line 24, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table {
   width: 96%;
 }
-/* line 11, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 26, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table tr {
+  border: none;
+}
+/* line 30, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table th {
+  background: white;
+  font-size: 18px;
+  font-weight: normal;
+}
+/* line 35, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table th.date-today {
+  background: #dddddd;
+  border: 1px solid #dddddd;
+}
+/* line 41, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table td {
   background: #f6f6f6;
-  padding: 6px;
-  width: 19%;
+  padding: 0;
+  margin: 6px;
+  width: 18%;
+  border: 1px solid #dddddd;
 }
-/* line 16, ../../../private/common-html/sass/views/_calendars.scss */
-#calendar-admin .calendar-table table td:nth-child(even) {
+/* line 48, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td:first-child {
+  font-size: 18px;
+  font-weight: normal;
+  background: white;
+  width: 5%;
+  border: none;
+}
+/* line 56, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td.date-today {
+  background: #dddddd;
+}
+/* line 58, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td.date-today div.timeline-slot {
+  background: #eeeeee;
+}
+/* line 64, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td.date div.timeline-slot:nth-child(even) {
   background: white;
 }
-/* line 20, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 69, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.timestamp {
+  height: 60px;
+}
+/* line 73, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table td div.timeline-slot {
-  height: 30px;
+  height: 60px;
   border-bottom: 1px solid #ccc;
 }
-/* line 23, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 77, ../../../private/common-html/sass/views/_calendars.scss */
 #calendar-admin .calendar-table table td div.timeline-slot:hover {
   background: #dddddd;
 }
-/* line 28, ../../../private/common-html/sass/views/_calendars.scss */
-#calendar-admin .calendar-table table td .reservation-slot {
+/* line 83, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot {
   position: absolute;
   background-color: #fbc732;
   width: 100%;

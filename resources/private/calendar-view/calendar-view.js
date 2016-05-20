@@ -8,6 +8,12 @@ var calendarView = (function($) {
 
     self.calendar = calendarService.calendar;
     self.calendarWeekdays = calendarService.calendarWeekdays;
+    self.week = calendarService.calendarQuery.week;
+    self.year = calendarService.calendarQuery.year;
+
+    self.month = function() {
+      return moment().set({'year': self.year(), 'isoWeek': self.week()}).valueOf();
+    };
 
     self.calendarId = ko.observable();
 
@@ -18,7 +24,6 @@ var calendarView = (function($) {
       var times = [];
       ko.utils.arrayForEach(ko.utils.range(self.firstFullHour(), self.lastFullHour()), function(hour) {
         times.push({ hour: hour, minutes:  0, viewText: hour + ":00" });
-        times.push({ hour: hour, minutes: 30, viewText: hour + ":30" });
       });
       return times;
     };
@@ -51,7 +56,20 @@ var calendarView = (function($) {
           { calendarId: this.calendarWeekday.calendarId,
             slot: this.slot });
       }
-    }
+    };
+
+    self.gotoToday = function() {
+      hub.send("calendarService::fetchCalendarSlots", { week: moment().isoWeek(), year: moment().year() });
+    };
+
+    self.gotoPreviousWeek = function() {
+      console.log("CLICK PREVIOUS");
+      hub.send("calendarService::fetchCalendarSlots", { increment: -1 });
+    };
+
+    self.gotoFollowingWeek = function() {
+      hub.send("calendarService::fetchCalendarSlots", { increment: 1 });
+    };
 
     component.applyBindings(self);
   }

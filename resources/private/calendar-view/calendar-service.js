@@ -18,6 +18,11 @@ LUPAPISTE.CalendarService = function() {
     if (event && event.week && event.year) {
       self.calendarQuery.week(event.week);
       self.calendarQuery.year(event.year);
+    } else if (event && event.increment) {
+      var newStartOfWeek = moment().year(self.calendarQuery.year()).isoWeek(self.calendarQuery.week()).add(event.increment, 'weeks');
+      self.calendarQuery.year(newStartOfWeek.year());
+      self.calendarQuery.week(newStartOfWeek.isoWeek());
+      console.log(event, newStartOfWeek.toString());
     }
 
     var week = self.calendarQuery.week();
@@ -26,6 +31,7 @@ LUPAPISTE.CalendarService = function() {
                                    week: week,
                                    year: year })
       .success(function(data) {
+        var now = moment();
         var startOfWeek = moment().isoWeek(week).year(year).startOf('isoWeek').valueOf();
         var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
           var day = moment(startOfWeek).isoWeekday(i);
@@ -33,7 +39,7 @@ LUPAPISTE.CalendarService = function() {
           return {
             calendarId: self.calendarQuery.calendarId(),
             startOfDay: day.valueOf(),
-            str: day.format("DD.MM."),  // TODO -> ko.bindingHandlers.calendarViewDateHeader?
+            today: day.isSame(now, 'day'),
             slots: _.map(slotsForDay,
               function(s) {
                 return _.extend(s, { duration: moment(s.endTime).diff(s.startTime) });
