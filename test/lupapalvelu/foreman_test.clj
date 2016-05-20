@@ -53,8 +53,8 @@
 (facts "Creating invites for foreman application"
   (let [test-auths [{:invite {:user {:id "C-123"}}}
                     {:username "testi@example.com"}
-                    {:username "pena@example.com"}
-                    {:username "contact@person.com"}]
+                    {:username "pena"}
+                    {:username "kaino@solita.fi"}]
         ; Unwrapped documents!
         non-authed-henkilo-doc {:schema-info {:subtype "hakija"}
                                 :data {:_selected "henkilo"
@@ -67,7 +67,7 @@
                                        :yritys {:companyId "C-123"}}}
         contact-person-doc     {:schema-info {:subtype "hakija"}
                                 :data {:_selected "yritys"
-                                       :yritys {:yhteyshenkilo {:yhteystiedot {:email "contact@person.com"}}}}}]
+                                       :yritys {:yhteyshenkilo {:yhteystiedot {:email "kaino@solita.fi"}}}}}]
     (facts "Henkilo invite"
       (henkilo-invite nil test-auths) => (throws AssertionError)
       (henkilo-invite {} test-auths) => (throws AssertionError)
@@ -94,7 +94,7 @@
           companyid-doc
           (-> (drop 1 test-auths) (conj {:id "C-123"}))) => {:company-id "C-123"})
       (fact "Contact person in yritys results in contact person invite"
-        (yritys-invite contact-person-doc test-auths) => {:email "contact@person.com"
+            (yritys-invite contact-person-doc test-auths) => {:email "kaino@solita.fi"
                                                           :role "writer"})
       (fact "No invite for contact person if not present in auth array"
         (yritys-invite contact-person-doc (drop-last test-auths)) => nil))))
