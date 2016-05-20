@@ -253,8 +253,9 @@
 (defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
   (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
         types          (->> (org/get-organization-attachments-for-operation organization operation)
-                            (remove (difference existing-types att-type/operation-specific-attachment-types)))
-        ops            (map #(when (att-type/operation-specific-attachment-types %) operation) types)
+                            (map (partial apply att-type/attachment-type))
+                            (filter #(or (get-in [:metadata :operation-specific]) (not (att-type/contains? existing-types %)))))
+        ops            (map #(when (get-in % [:metadata :operation-specific]) operation) types)
         metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
     (map (partial att/make-attachment created target true false false applicationState) ops types metadatas)))
 

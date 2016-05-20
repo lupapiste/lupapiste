@@ -178,7 +178,6 @@
   (mongo/update-by-id :fs.files fileId {$set {:metadata.application app-id
                                               :metadata.linked true}}))
 
-
 (defn- by-file-ids [file-ids {versions :versions :as attachment}]
   (some (comp (set file-ids) :fileId) versions))
 
@@ -200,7 +199,7 @@
 
 (defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents read-only? source]]
   (cond-> {:id (or attachment-id (mongo/create-id))
-           :type attachment-type
+           :type (select-keys attachment-type [:type-id :type-group])
            :modified now
            :locked locked?
            :readOnly (boolean read-only?)
@@ -226,10 +225,17 @@
   [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
   (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
 
+(defn default-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
+  (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
+                     (tos/update-end-dates verdicts))]
+    (if (seq metadata)
+      metadata
+      {:nakyvyys :julkinen})))
+
 (defn- create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
   [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
-  (let [metadata (att-type/default-metadata-for-attachment-type attachment-type application)]
+  (let [metadata (default-metadata-for-attachment-type attachment-type application)]
     (make-attachment now
                      target
                      required?
@@ -269,7 +275,7 @@
 
 (defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
-  (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (att-type/default-metadata-for-attachment-type type application)}) attachment-types)
+  (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (default-metadata-for-attachment-type type application)}) attachment-types)
         attachments (make-attachments now (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
     (update-application
       (application->command application)

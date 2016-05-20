@@ -1,10 +1,21 @@
 (ns lupapalvelu.attachment-type
+  (:refer-clojure :exclude [contains?])
   (:require [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.tiedonohjaus :as tos]
+            [lupapalvelu.operations :as op]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.strings :as ss]))
+            [sade.util :refer [fn->] :as util]
+            [sade.strings :as ss]
+            [sade.schemas :as ssc]
+            [schema.core :refer [defschema] :as sc]))
+
+(defschema AttachmentType
+  {:type-id     sc/Keyword
+   :type-group  sc/Keyword
+   :metadata   {(sc/optional-key :permitType)     sc/Keyword
+                :operation-specific               sc/Bool
+                (sc/optional-key :for-operations) #{(apply sc/enum (keys op/operations))}}})
 
 (def osapuolet attachment-types/osapuolet-v2)
 
@@ -20,34 +31,71 @@
    :MM   'attachment-types/Kiinteistotoimitus
    :KT   'attachment-types/Kiinteistotoimitus})
 
-(def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
+(defn equals? [& types]
+  (boolean (and (:type-id (first types))
+                (:type-group (first types))
+                (->> (map (juxt (comp keyword :type-id) (comp keyword :type-group)) types)
+                     (apply =)))))
+
+(defn contains? [attachment-type-coll attachment-type]
+  (boolean (some (partial equals? attachment-type) attachment-type-coll)))
+
+(def- foreman-application-types
+  [{:type-id :tutkintotodistus :type-group :osapuolet}
+   {:type-id :patevyystodistus :type-group :osapuolet}
+   {:type-id :cv               :type-group :osapuolet}
+   {:type-id :valtakirja       :type-group :hakija}
+   {:type-id :muu              :type-group :muut}])
+
+(defn- for-operations [attachment-type]
+  (cond-> #{}
+    (contains? foreman-application-types attachment-type) (conj :tyonjohtajan-nimeaminen-v2 :tyonjohtajan-nimeaminen)))
+
+(def- operation-specific-types
+  [{:type-id :pohjapiirros       :type-group :paapiirustus}
+   {:type-id :leikkauspiirros    :type-group :paapiirustus}
+   {:type-id :julkisivupiirros   :type-group :paapiirustus}
+   {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
+   {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
+   {:type-id :energiatodistus    :type-group :muut}
+   {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
+   {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}
+   {:type-id :pohjapiirustus     :type-group :paapiirustus}
+   {:type-id :leikkauspiirustus  :type-group :paapiirustus}
+   {:type-id :julkisivupiirustus :type-group :paapiirustus}
+   {:type-id :muu_paapiirustus   :type-group :paapiirustus}
+   {:type-id :energiatodistus    :type-group :energiatodistus}
+   {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}])
+
+(defn attachment-type
+  ([{type-group :type-group type-id :type-id :as attachment-type}]
+   (->> (update attachment-type :metadata util/assoc-when
+                :operation-specific (contains? operation-specific-types attachment-type)
+                :for-operations     (not-empty (for-operations attachment-type)))
+        (sc/validate AttachmentType)))
+  ([type-group type-id]
+   (attachment-type {:type-group type-group :type-id type-id}))
+  ([permit-type type-group type-id]
+   (attachment-type {:type-id type-id :type-group type-group :metadata {:permitType permit-type}})))
+
+(defn- ->attachment-type-array [[permit-type attachment-types]]
+  (->> (partition 2 attachment-types)
+       (mapcat #(map (partial attachment-type permit-type (first %)) (second %)))))
+
+(def attachment-types-by-permit-type
+  (->> (eval attachment-types-by-permit-type-unevaluated)
+       (map (juxt key ->attachment-type-array))
+       (into {})))
 
 (def all-attachment-type-ids
-  (->> (vals attachment-types-by-permit-type)
-       (apply concat)
-       (#(flatten (map second (partition 2 %))))
+  (->> (mapcat val attachment-types-by-permit-type)
+       (map :type-id)
        (set)))
 
 (def all-attachment-type-groups
-  (->> (vals attachment-types-by-permit-type)
-       (apply concat)
-       (#(map first (partition 2 %)))
+  (->> (mapcat val attachment-types-by-permit-type)
+       (map :type-group)
        (set)))
-
-(def operation-specific-attachment-types #{{:type-id :pohjapiirros       :type-group :paapiirustus}
-                                           {:type-id :leikkauspiirros    :type-group :paapiirustus}
-                                           {:type-id :julkisivupiirros   :type-group :paapiirustus}
-                                           {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
-                                           {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
-                                           {:type-id :energiatodistus    :type-group :muut}
-                                           {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
-                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}
-                                           {:type-id :pohjapiirustus     :type-group :paapiirustus}
-                                           {:type-id :leikkauspiirustus  :type-group :paapiirustus}
-                                           {:type-id :julkisivupiirustus :type-group :paapiirustus}
-                                           {:type-id :muu_paapiirustus   :type-group :paapiirustus}
-                                           {:type-id :energiatodistus    :type-group :energiatodistus}
-                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}})
 
 (defn attachment-type-for-appeal [appeal-type]
   (case (keyword appeal-type)
@@ -58,25 +106,21 @@
     :rectification  {:type-group :muutoksenhaku
                      :type-id    :oikaisuvaatimus}))
 
-(defn get-attachment-types-by-permit-type
-  "Returns partitioned list of allowed attachment types or throws exception"
-  [permit-type]
-  {:pre [permit-type]}
-  (if-let [types (get attachment-types-by-permit-type (keyword permit-type))]
-    (partition 2 types)
-    (fail! (str "unsupported permit-type: " (name permit-type)))))
+(defn- attachment-types-by-operation [operation]
+  (let [types (-> operation op/permit-type-of-operation keyword attachment-types-by-permit-type)]
+    (or (not-empty (filter (fn-> (get-in [:metadata :for-operations]) (apply [(keyword operation)])) types))
+        types)))
+
+(defn get-attachment-types-for-operation [operation]
+  (memoize (attachment-types-by-operation operation)))
 
 (defn get-attachment-types-for-application
-  [application]
+  [{:keys [permitType primaryOperation secondaryOperations] :as application}]
   {:pre [application]}
-  (get-attachment-types-by-permit-type (:permitType application)))
-
-(defn default-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
-  (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
-                     (tos/update-end-dates verdicts))]
-    (if (seq metadata)
-      metadata
-      {:nakyvyys :julkinen})))
+  (->> (cons primaryOperation secondaryOperations)
+       (map :name)
+       (mapcat get-attachment-types-for-operation)
+       (distinct)))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
@@ -86,10 +130,19 @@
 (defn allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
   (let [type-group (keyword type-group)
         type-id (keyword type-id)]
-    (if-let [types (some (fn [[group-name group-types]] (if (= (keyword group-name) type-group) group-types)) allowed-types)]
+    (if-let [types (some (fn [[group group-types]] (when (= (keyword group) type-group) group-types)) allowed-types)]
       (some #(= (keyword %) type-id) types))))
 
-;; Helper for reporting purposes
+(defn allowed-attachment-type-for-application? [attachment-type application]
+  {:pre [(map? attachment-type)]}
+  (let [allowed-types (or (not-empty (get-attachment-types-for-application application))
+                          (-> application :permitType keyword attachment-types-by-permit-type))]
+    (contains? allowed-types attachment-type)))
+
+;;
+;; Helpers for reporting purposes
+;;
+
 (defn localised-attachments-by-permit-type [permit-type]
   (let [localize-attachment-section
         (fn [lang [title attachment-names]]

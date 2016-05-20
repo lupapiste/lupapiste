@@ -51,7 +51,7 @@
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
   [{scope :scope}]
-  (reduce #(assoc %1 %2 (att-type/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
+  (select-keys att-type/attachment-types-by-permit-type (map (comp keyword :permitType) scope)))
 
 (defn- organization-operations-with-attachments
   "Returns a map where key is permit type, value is a list of operations for the permit type"
@@ -305,14 +305,13 @@
                       (fn [{{:keys [operation attachments]} :data, user :user}]
                         (let [organization (o/get-organization (user/authority-admins-organization-id user))
                               selected-operations (set (:selected-operations organization))
-                              permit-type (get-in operations/operations [(keyword operation) :permit-type] )
-                              allowed-types (when permit-type (att-type/get-attachment-types-by-permit-type permit-type))
+                              allowed-types (att-type/get-attachment-types-for-operation operation)
                               attachment-types (map (fn [[group id]] {:type-group group :type-id id}) attachments)]
                           (cond
                             (not (selected-operations operation)) (do
                                                                     (error "Unknown operation: " (logging/sanitize 100 operation))
                                                                     (fail :error.unknown-operation))
-                            (not (every? (partial att-type/allowed-attachment-types-contain? allowed-types) attachment-types)) (fail :error.unknown-attachment-type))))]}
+                            (not-every? (partial att-type/contains? allowed-types) attachment-types) (fail :error.unknown-attachment-type))))]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})
   (ok))

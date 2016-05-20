@@ -93,14 +93,9 @@
     (when (and size (not (contains? (set attachment/attachment-sizes) (keyword size))))
       (fail :error.illegal-attachment-size :parameters size))))
 
-(defn- allowed-attachment-type-for-application? [attachment-type application]
-  {:pre [(map? attachment-type)]}
-  (let [allowed-types (att-type/get-attachment-types-for-application application)]
-    (att-type/allowed-attachment-types-contain? allowed-types attachment-type)))
-
 (defn- validate-attachment-type [{{attachment-type :attachmentType} :data} application]
   (when attachment-type
-    (when-not (allowed-attachment-type-for-application? attachment-type application)
+    (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
 
 ;;
@@ -125,13 +120,14 @@
   [{:keys [application user created] :as command}]
 
   (let [attachment-type (att-type/parse-attachment-type attachmentType)]
-    (if (allowed-attachment-type-for-application? attachment-type application)
+    (if (att-type/allowed-attachment-type-for-application? attachment-type application)
       (let [metadata (-> (tiedonohjaus/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
                          (tiedonohjaus/update-end-dates (:verdicts application)))]
         (attachment/update-attachment-data! command attachmentId {:type attachment-type :metadata metadata} created))
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.illegal-attachment-type)))))
+
 ;;
 ;; Operations
 ;;
@@ -177,7 +173,7 @@
    :parameters  [id attachmentTypes]
 
    :pre-checks [(fn [{{attachment-types :attachmentTypes} :data} application]
-                  (when (and attachment-types (not (every? #(allowed-attachment-type-for-application? % application) attachment-types)))
+                  (when (and attachment-types (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
                     (fail :error.unknown-attachment-type)))
                 a/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
