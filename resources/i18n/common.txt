@@ -1633,7 +1633,7 @@
 "help.AddForeman.authorityInfo" "fi" "Jos sinulla on tarve nimetä työnjohtaja ennen päätöstä, ota yhteyttä viranomaiseen."
 "help.AddForeman" "sv" "Arbetsledaren meddelas alltid med en separat anmälan."
 "help.AddForeman.buttonInfo" "sv" "Tryck knappen nedan, om du vill meddela arbetsledare redan i samband med tillståndsansökan."
-"help.AddForeman.disabledInfo" "fi" "Otappa kuule yhteyttä nimismieheen."
+"help.AddForeman.authorityInfo" "sv" "Om du anser nödvändigt att utnämna arbetsledare före beslutet, kontakta myndigheten."
 "help.AddPermit" "fi" "Valitsemasi toimenpiteen täytyy liittyä aikaisempaan lupaan. Lisää aikaisempi lupa viiteluvaksi alla olevalla napilla."
 "help.AddPermit" "sv" "Den valda åtgärden måste höra till ett tidigare tillstånd. Lägg till det tidigare tillståndet som refernstillstånd med knappen nedan."
 "help.application.summary" "fi" "Tältä välilehdeltä näet luvan perusteena olleen hakemuksen lomaketiedot. Jos tietoihin tulee rakentamisen aikana muutoksia, ota yhteyttä viranomaiseen keskusteluketjun kautta."
