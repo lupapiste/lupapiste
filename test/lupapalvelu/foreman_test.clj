@@ -52,14 +52,14 @@
 
 (facts "Creating invites for foreman application"
   (let [test-auths [{:invite {:user {:id "C-123"}}}
-                    {:username "testi@example.com"}
-                    {:username "pena"}
-                    {:username "kaino@solita.fi"}]
+                    {:username "testi@example.com" :id "alsdkfjalsdjflsdf"}
+                    {:username "pena" :id "777777777777777777000020"}
+                    {:username "kaino@solita.fi" :id "kainosolita"}]
         ; Unwrapped documents!
         non-authed-henkilo-doc {:schema-info {:subtype "hakija"}
                                 :data {:_selected "henkilo"
                                        :henkilo {:yhteystiedot {:email "heppu@example.com"}}}}
-        authed-henkilo-doc     {:schema-info {:subtype "hakija"}
+        authed-henkilo-doc {:schema-info {:subtype "hakija"}
                                 :data {:_selected "henkilo"
                                        :henkilo {:yhteystiedot {:email "pena@example.com"}}}}
         companyid-doc          {:schema-info {:subtype "hakija"}
