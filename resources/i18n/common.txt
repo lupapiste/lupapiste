@@ -4068,3 +4068,7 @@
 "Konvertoi PDF/A-muotoon" "sv" ""
 "applications.filter.readyForArchival" "fi" "Arkistoitavat"
 "applications.filter.readyForArchival" "sv" ""
+"authorityAdmin.archive.heading" "fi" "Sähköinen arkisto"
+"authorityAdmin.archive.heading" "sv" "Elektroniskt arkiv"
+"authorityAdmin.archive.startDate" "fi" "Sähköisen arkistoinnin aloituspäivämäärä"
+"authorityAdmin.archive.startDate" "sv" ""

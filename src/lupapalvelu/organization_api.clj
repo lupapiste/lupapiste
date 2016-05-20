@@ -342,6 +342,15 @@
   (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
   (ok))
 
+(defcommand set-organization-permanent-archive-start-date
+  {:parameters [date]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial number-parameters [:date])]}
+  [{user :user}]
+  (when (pos? date)
+    (o/update-organization (user/authority-admins-organization-id user) {$set {:permanent-archive-in-use-since date}})
+    (ok)))
+
 (defn split-emails [emails] (ss/split emails #"[\s,;]+"))
 
 (def email-list-validators [(partial action/string-parameters [:emails])

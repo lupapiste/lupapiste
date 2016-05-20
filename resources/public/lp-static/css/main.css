@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1463742871014');
+@import url('main-blessed1.css?z=1463752156055');
 
 @media (max-width: 991px) {
   /* line 80, ../../../private/common-html/sass/views/_application.scss */
@@ -1932,6 +1932,15 @@ table.admin-settings td.value .save-indicator {
 .form-error-message {
   padding: 2px 2px 2px 2px;
   color: red;
+}
+
+/* line 83, ../../../private/common-html/sass/views/_authority_admin.scss */
+.permanent-archive-date-input label {
+  margin-right: 6px;
+}
+/* line 86, ../../../private/common-html/sass/views/_authority_admin.scss */
+.permanent-archive-date-input input {
+  width: 100px;
 }
 
 /* line 2, ../../../private/common-html/sass/views/_neighbor.scss */
