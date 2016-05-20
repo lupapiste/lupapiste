@@ -496,12 +496,14 @@
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {} source {:buildings buildings-summary} %)
         review-tasks (map review-to-task reviews)
-        validation-errors [] ;;(map (partial tasks/task-doc-validation "task-katselmus") review-tasks)
+        validation-errors (doall  (map (partial tasks/task-doc-validation "task-katselmus") review-tasks))
 
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
-        added-tasks-with-updated-buildings (map (partial tasks/update-task-buildings buildings-summary) (second updated-existing-and-added-tasks)) ;; for pdf generation
-        updated-tasks-with-updated-buildings (map (partial tasks/update-task-buildings buildings-summary) updated-tasks)
+        update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
+        added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
+        updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
+
         task-updates {$set {:tasks updated-tasks}}]
 
     ;; (println "muuTunnus of review-tasks:" (map #(-> % :data :muuTunnus) review-tasks))
@@ -510,6 +512,7 @@
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
     (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used?
+    (println (map #(get-in % [:schema-info :name]) updated-tasks))
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks))
     (if (some seq validation-errors)
       (do
@@ -523,10 +526,12 @@
 
 (defn do-check-for-reviews [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
+  (println "yee1")
   (when-let [
              app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
              ]
+  (println "yee2")
     ;; (doseq [t (:tasks (:application command))]
     ;;   (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
     ;; (debug "do-check-verdict-w-review: application id:" (:id (:application command)) "- tasks count before reading review xml:" (count (:tasks (:application command))) )

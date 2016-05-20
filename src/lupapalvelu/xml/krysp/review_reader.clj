@@ -16,6 +16,10 @@
             [lupapalvelu.building :as building]))
 
 
+(defn spy [x]
+  (clojure.pprint/pprint (first  x))
+  x)
+
 (defn xml->reviews [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         asiat (enlive/select xml-no-ns common/case-elem-selector)]
@@ -25,6 +29,7 @@
 
       (let [asia (first asiat)
             katselmukset (map cr/all-of  (select asia [:katselmustieto :Katselmus]))
+
             massage (fn [katselmus]
                       (-> katselmus
                           (util/ensure-sequential :muuTunnustieto)

@@ -339,6 +339,7 @@
         aloitus-review-task (nth katselmus-tasks 0)
         non-empty (complement clojure.string/blank?)]
     (fact "xml has 10 reviews" (count reviews) => 10)
+    (println (get-in aloitus-review-task [:data :katselmus :huomautukset]))
     (fact "huomautukset" (get-in aloitus-review-task [:data :katselmus :huomautukset :kuvaus :value]) => non-empty)
     (fact "pitaja" (get-in aloitus-review-task [:data :katselmuksenLaji :value]) => "aloituskokous")
     (fact "tunnustieto" (get-in aloitus-review-task [:data :muuTunnus]) => truthy)))
