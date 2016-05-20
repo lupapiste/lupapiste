@@ -249,3 +249,8 @@
               metadata (generate-archive-metadata application user attachment)]
           (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))
     {:error :error.invalid-metadata-for-archive}))
+
+(defn mark-application-archived [application now archived-ts-key]
+  (action/update-application
+    (action/application->command application)
+    {$set {(str "archived." (name archived-ts-key)) now}}))

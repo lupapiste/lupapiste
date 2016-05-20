@@ -45,6 +45,17 @@
                           (id-set case-file-doc-id) (assoc case-file-doc-id (get-in application [:processMetadata :tila])))]
     (ok :state state-map)))
 
+(defcommand mark-pre-verdict-phase-archived
+  {:parameters       [:id]
+   :input-validators [(partial non-blank-parameters [:id])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states
+   :feature          :arkistointi
+   :pre-checks       [check-user-is-archivist]}
+  [{:keys [application created]}]
+  (archiving/mark-application-archived application created :application)
+  (ok))
+
 (defquery archiving-operations-enabled
   {:user-roles #{:authority}
    :states     states/all-application-states

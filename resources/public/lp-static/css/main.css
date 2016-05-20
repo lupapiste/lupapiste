@@ -1,3 +1,4 @@
+<<<<<<< f48621c9699e5259d25a166b738dc25d1109686b
 @import url('main-blessed1.css?z=1463752156055');
 
 @media (max-width: 991px) {
@@ -189,6 +190,10 @@
   background-color: #2ca92c;
   display: inline-block;
 }
+=======
+@import url('main-blessed1.css?z=1463751984515');
+
+>>>>>>> Add a button for manually marking application phase as archived
 /* line 192, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.draft .draft-box:after {
   border-left: 11px solid #2ca92c;
