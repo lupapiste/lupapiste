@@ -3758,7 +3758,7 @@
 "verdict.muutoksenhaku.tekijat" "sv" "Aktör(er)"
 "verdict.muutoksenhaku.tekijat.placeholder" "fi" "Kirjoita..."
 "verdict.muutoksenhaku.tekijat.placeholder" "sv" "Skriv..."
-"verdict.muutoksenhaku.pvm" "fi" "Päivämääärä"
+"verdict.muutoksenhaku.pvm" "fi" "Päivämäärä"
 "verdict.muutoksenhaku.pvm" "sv" "Datum"
 "verdict.muutoksenhaku.extra" "fi" "Lisätietoa"
 "verdict.muutoksenhaku.extra" "sv" "Tilläggsuppgifter"
