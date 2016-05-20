@@ -11,6 +11,7 @@ var calendarView = (function($) {
     self.week = calendarService.calendarQuery.week;
     self.year = calendarService.calendarQuery.year;
 
+    // helper function for the view
     self.month = function() {
       return moment().set({'year': self.year(), 'isoWeek': self.week()}).valueOf();
     };
@@ -41,7 +42,8 @@ var calendarView = (function($) {
     };
 
     self.slotViewText = function(slot) {
-      return moment(slot.startTime).format("H:mm") + " - " + moment(slot.endTime).format("H:mm") + " Vapaa";
+      return (slot.status == "available" ? "Vapaa aika: " : "") +
+        _.map(slot.reservationTypes, function(d) { return d.name; }).join();
     };
 
     self.clickHandler = function(clazz) {
@@ -63,7 +65,6 @@ var calendarView = (function($) {
     };
 
     self.gotoPreviousWeek = function() {
-      console.log("CLICK PREVIOUS");
       hub.send("calendarService::fetchCalendarSlots", { increment: -1 });
     };
 

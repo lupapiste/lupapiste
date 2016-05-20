@@ -9,7 +9,8 @@
 
 (defn- ->FrontendReservationSlots [backend-slots]
   (map (fn [s] {:id        (:id s)
-                :status    :available
+                :status    (if (:fullyBooked s) :booked :available)
+                :reservationTypes (map #(select-keys % [:id :name]) (:reservationTypes s))
                 :startTime (sade.util/to-millis-from-local-datetime-string (-> s :time :start))
                 :endTime   (sade.util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
 
@@ -26,9 +27,13 @@
 
 (defn- api-query
   ([action]
-   (api-call http/get action {}))
+   (api-query action {}))
   ([action params]
-   (api-call http/get action {:query-params params})))
+   (let [response (api-call http/get action {:query-params params})]
+     (when-not (= 200 (:status response))
+       (error response)
+       (fail! :resources.backend-error))
+     (:body response))))
 
 (defn- api-post-command
   [action request-body]
@@ -73,12 +78,12 @@
        (fail! :resources.backend-error))
      (:body response))))
 
-(defn- ->BackendReservationSlots [slots]
+(defn- ->BackendReservationSlots [slots] ; FIXME BROKEN, To be fixed when soon
   (map (fn [s]
          (let [{start :start end :end} s]
            {:time     {:start (sade.util/to-xml-local-datetime start)
                        :end (sade.util/to-xml-local-datetime end)}
-            :services ["SCC123"]
+            :services [""]
             :capacity 1})) slots))
 
 (defn- calendar-ref-for-user [userId]
@@ -86,30 +91,20 @@
 
 (defn- get-calendar
   [calendarId userId]
-  (let [response (api-query (str "/api/resources/" calendarId))]
-    (if (= 200 (:status response))
-      (let [calendar     (:body response)
-            external-ref (:externalRef calendar)]
-        (if (.endsWith external-ref userId)
-          {:id           (:id calendar)
-           :organization (:organizationCode calendar)}))
-      (do (error response)
-          (fail! :resources.backend-error)))))
+  (let [calendar (api-query (str "/api/resources/" calendarId))
+        external-ref (:externalRef calendar)]
+    (if (.endsWith external-ref userId)
+      {:id           (:id calendar)
+       :organization (:organizationCode calendar)}
+      nil)))
 
 (defn- find-calendars-for-organizations
   [& orgIds]
-  (let [response (api-query "/api/resources/by-organization" {:organizationCodes orgIds})]
-    (if (= 200 (:status response))
-      (let [calendars (:body response)]
-        (group-by :externalRef calendars))
-      nil)))
+  (group-by :externalRef (api-query "/api/resources/by-organization" {:organizationCodes orgIds})))
 
 (defn- find-calendars-for-user
   [userId]
-  (let [response (api-query (str "/api/resources/by-external-ref/" (calendar-ref-for-user userId)))]
-    (if (= 200 (:status response))
-      (:body response)
-      nil)))
+  (api-query (str "/api/resources/by-external-ref/" (calendar-ref-for-user userId))))
 
 (defn- find-calendar-for-user-and-organization
   [userId orgId]
@@ -211,11 +206,9 @@
   {:user-roles #{:authorityAdmin}
    :feature    :ajanvaraus}
   [{{:keys [calendarId year week]} :data}]
-  (let [response (api-query (str "/api/reservationslots/calendar/" calendarId) {:year year :week week})]
-    (if (= 200 (:status response))
-      (ok :slots (->FrontendReservationSlots (:body response)))
-      (do (error response)
-          (fail :resources.backend-error)))))
+  (->> (api-query (str "/api/reservationslots/calendar/" calendarId) {:year year :week week})
+       ->FrontendReservationSlots
+       (ok :slots)))
 
 (defcommand create-calendar-slots
   {:user-roles #{:authorityAdmin}
@@ -240,8 +233,7 @@
   [{user :user}]
   (let [admin-in-organization-id (user/authority-admins-organization-id user)]
     (info "Get reservation types for organization" admin-in-organization-id)
-    ;; FIXME: Unwrap body from api-query response
-    (ok :reservationTypes (:body (api-query "/api/reservation-types/by-organization" {:organization admin-in-organization-id})))))
+    (ok :reservationTypes (api-query "/api/reservation-types/by-organization" {:organization admin-in-organization-id}))))
 
 (defcommand update-reservation-type
   {:user-roles #{:authorityAdmin}
