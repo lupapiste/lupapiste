@@ -349,6 +349,9 @@
 
 (fact "Test userfield replacement" (replace-user-field user-field-line {"LPATITLE_ID" "xxx"}) => "    <text:user-field-decl office:value-type=\"string\" office:string-value=\"xxx\" text:name=\"LPATITLE_ID\"/>")
 
+(defn build-user-field [value name]
+   (str "    <text:user-field-decl office:value-type=\"string\" office:string-value=\"" (xml-escape value) "\" text:name=\"" name "\"/>"))
+
 (fact "get-document-data"
       (get-document-data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
                                                           :data        {:henkilo {:henkilotiedot {:etunimi  {:value "etu"}

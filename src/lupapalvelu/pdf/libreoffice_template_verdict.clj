@@ -2,8 +2,9 @@
   (:require [taoensso.timbre :as timbre]
             [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.pdf.libreoffice-template :refer [xml-escape get-organization-name applicant-index] :as template]
+            [lupapalvelu.pdf.libreoffice-template :refer [get-organization-name applicant-index] :as template]
             [clojure.string :as s]
+            [lupapalvelu.domain :as domain]
             [clojure.java.io :as io]))
 
 (defn- get-lupamaaraykset [application verdict-id paatos-idx]
@@ -82,13 +83,14 @@
 
 (defn- verdict-signatures [verdict paatos]
   (into [[(verdict-paatos-key paatos :paatoksentekija) (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")]]
-        (map (fn [sig] [(xml-escape (str (get-in sig [:user :firstName]) " " (get-in sig [:user :lastName]))) (or (util/to-local-date (:created sig)) "-")]) (:signatures verdict))))
+        (map (fn [sig] [(str (get-in sig [:user :firstName]) " " (get-in sig [:user :lastName])) (or (util/to-local-date (:created sig)) "-")]) (:signatures verdict))))
 
 (defn- get-vastuuhenkilo [application]
-  (let [henkilo (template/get-document-data application :tyomaastaVastaava [:henkilo :henkilotiedot])
-        henkilo-nimi (str (get-in henkilo [:etunimi :value]) " " (get-in henkilo [:sukunimi :value]))
-        yritys (template/get-document-data application :tyomaastaVastaava [:yritys :yritysnimi :value])]
-    (if (s/blank? henkilo-nimi) yritys henkilo-nimi)))
+  (if (= (template/get-document-data application :tyomaastaVastaava [:_selected :value]) "yritys")
+    (template/get-document-data application :tyomaastaVastaava [:yritys :yritysnimi :value])
+    (let [henkilo (template/get-document-data application :tyomaastaVastaava [:henkilo :henkilotiedot])
+          henkilo-nimi (str (get-in henkilo [:etunimi :value]) " " (get-in henkilo [:sukunimi :value]))]
+      henkilo-nimi)))
 
 (defn- get-yhteyshenkilo [application]
   (let [henkilo (template/get-document-data application :tyomaastaVastaava [:yritys :yhteyshenkilo :henkilotiedot])]

@@ -767,55 +767,55 @@
       </office:binary-data>
      </draw:image>
     </draw:frame>FIELD001</text:h>
-   <text:h text:style-name="P12" text:outline-level="2">FIELD002</text:h>
+   <text:h text:style-name="P12" text:outline-level="2">LPAVALUE_ADDRESS</text:h>
    <text:p text:style-name="P15"/>
    <table:table table:name="Table1" table:style-name="Table1">
     <table:table-column table:style-name="Table1.A"/>
     <table:table-column table:style-name="Table1.B"/>
     <table:table-row>
      <table:table-cell table:style-name="Table1.A1" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD003A</text:h>
-      <text:p text:style-name="P8">FIELD003B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_MUNICIPALITY</text:h>
+      <text:p text:style-name="P8">LPAVALUE_MUNICIPALITY</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B1" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD004A</text:h>
-      <text:p text:style-name="P8">FIELD004B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_STATE</text:h>
+      <text:p text:style-name="P8">LPAVALUE_STATE</text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table1.A2" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD005A</text:h>
-      <text:p text:style-name="P8">FIELD005B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_PROPERTYID</text:h>
+      <text:p text:style-name="P8">LPAVALUE_PROPERTYID</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B2" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD006A</text:h>
-      <text:p text:style-name="P8">FIELD006B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_SUBMITTED</text:h>
+      <text:p text:style-name="P8">LPAVALUE_SUBMITTED</text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table1.A2" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD007A</text:h>
-      <text:p text:style-name="P8">FIELD007B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_ID</text:h>
+      <text:p text:style-name="P8">LPAVALUE_ID</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B2" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD008A</text:h>
-      <text:p text:style-name="P8">FIELD008B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_AUTHORITY</text:h>
+      <text:p text:style-name="P8">LPAVALUE_AUTHORITY</text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table1.A2" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD009A</text:h>
-      <text:p text:style-name="P8">FIELD009B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_ADDRESS</text:h>
+      <text:p text:style-name="P8">LPAVALUE_ADDRESS</text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B2" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD010A</text:h>
-      <text:p text:style-name="P8">FIELD010B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_APPLICANT</text:h>
+      <text:p text:style-name="P8">LPAVALUE_APPLICANT</text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table1.B2" table:number-columns-spanned="2" office:value-type="string">
-      <text:h text:style-name="P14" text:outline-level="3">FIELD011A</text:h>
-      <text:p text:style-name="P8">FIELD011B</text:p>
+      <text:h text:style-name="P14" text:outline-level="3">LPATITLE_OPERATIONS</text:h>
+      <text:p text:style-name="P8">LPAVALUE_OPERATIONS</text:p>
      </table:table-cell>
      <table:covered-table-cell/>
     </table:table-row>

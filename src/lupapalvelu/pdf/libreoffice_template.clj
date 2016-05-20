@@ -1,5 +1,5 @@
 (ns
-  ^{:doc    "For creating PDF/A documents from Libre Office Flat Open Document Format files used as templates.
+  ^{:doc "For creating PDF/A documents from Libre Office Flat Open Document Format files used as templates.
              Read resources/private/lupapiste-template.fodt with Libre Office for more information."}
   lupapalvelu.pdf.libreoffice-template
   (:require [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
@@ -17,16 +17,11 @@
   (sx/escape-xml (str text)))
 ;;(s/escape (str text) {\< "&lt;", \> "&gt;", \& "&amp;"}))
 
-(defn build-user-field
-  ([space type value-type value name]
-   (str space "<text:user-field-decl office:value-type=\"" type "\" office:" value-type "value=\"" (xml-escape value) "\" text:name=\"" name "\"/>"))
-  ([value name] (build-user-field "    " "string" "string-" value name)))
-
 (defn replace-user-field [line data]
   (let [match (re-find (re-matcher #"(\s*?)<text:user-field-decl office:value-type=\"(.*?)\" office:(.*?)value=\"(.*?)\" text:name=\"(.*?)\"\/>" line))
         key (nth match 5)]
     (if (and match (contains? data key))
-      (build-user-field (nth match 1) (nth match 2) (nth match 3) (get data key) key)
+      (str (nth match 1) "<text:user-field-decl office:value-type=\"" (nth match 2) "\" office:" (nth match 3) "value=\"" (xml-escape (get data key)) "\" text:name=\"" key "\"/>")
       line)))
 
 (defn xml-table-row [& cols]
@@ -37,7 +32,7 @@
                                                                                    :content [(xml-escape p)]}) (s/split val #"\n"))}) cols)})))
 ;; Deprecated, use User Fields in templates
 (defn- replace-text [line field value]
-  (s/replace line field (str value)))
+  (s/replace line field (xml-escape (str value))))
 
 (defn- localized-text [lang value]
   (if (nil? value) "" (xml-escape (i18n/localize lang value))))
@@ -52,64 +47,36 @@
   (s/join ", " (map (fn [[op c]] (str (if (> c 1) (str c " \u00D7 ")) (i18n/loc "operations" op)))
                     (frequencies (map :name (remove nil? (conj (seq secondaryOperations) primaryOperation)))))))
 
-;TODO: Give more descriptive names like "LPATITLE_ADDRESS" and "LPAVALUE_ADDRESS" and re-do templates
 (defn common-field-map [application lang]
   {"FOOTER_PAGE"           (localized-text lang "application.export.page")
    "FOOTER_DATE"           (util/to-local-datetime (System/currentTimeMillis))
 
    "LPATITLE_ID"           (localized-text lang "verdict-attachment-prints-order.order-dialog.lupapisteId")
-   "LPAVALUE_ID"           (xml-escape (:id application))
+   "LPAVALUE_ID"           (:id application)
 
    "LPATITLE_MUNICIPALITY" (localized-text lang "application.muncipality")
    "LPAVALUE_MUNICIPALITY" (localized-text lang (str "municipality." (:municipality application)))
 
    "LPATITLE_ADDRESS"      (localized-text lang "application.address")
-   "LPAVALUE_ADDRESS"      (xml-escape (:address application))
+   "LPAVALUE_ADDRESS"      (:address application)
 
    "LPATITLE_PROPERTYID"   (localized-text lang "kiinteisto.kiinteisto.kiinteistotunnus")
-   "LPAVALUE_PROPERTYID"   (xml-escape (if (nil? (:propertyId application)) (i18n/localize lang "application.export.empty") (p/to-human-readable-property-id (:propertyId application))))
+   "LPAVALUE_PROPERTYID"   (if (nil? (:propertyId application)) (i18n/localize lang "application.export.empty") (p/to-human-readable-property-id (:propertyId application)))
 
    "LPATITLE_SUBMITTED"    (localized-text lang "submitted")
-   "LPAVALUE_SUBMITTED"    (xml-escape (or (util/to-local-date (:submitted application)) "-"))
+   "LPAVALUE_SUBMITTED"    (or (util/to-local-date (:submitted application)) "-")
 
    "LPATITLE_AUTHORITY"    (localized-text lang "applications.authority")
-   "LPAVALUE_AUTHORITY"    (xml-escape (get-authority lang application))
+   "LPAVALUE_AUTHORITY"    (get-authority lang application)
 
    "LPATITLE_APPLICANT"    (localized-text lang "applicant")
-   "LPAVALUE_APPLICANT"    (xml-escape (s/join ", " (:_applicantIndex application)))
+   "LPAVALUE_APPLICANT"    (s/join ", " (:_applicantIndex application))
 
    "LPATITLE_OPERATIONS"   (localized-text lang "selectm.source.label.edit-selected-operations")
-   "LPAVALUE_OPERATIONS"   (xml-escape (get-operations application))
+   "LPAVALUE_OPERATIONS"   (get-operations application)
 
-   ;;TODO: remove these old common fields below, once all templates have been updated
-   "FIELD002"              (xml-escape (:address application))
-
-   "FIELD003A"             (localized-text lang "application.muncipality")
-   "FIELD003B"             (localized-text lang (str "municipality." (:municipality application)))
-
-   "FIELD004A"             (localized-text lang "application.export.state")
-   "FIELD004B"             (localized-text lang (:state application))
-
-   "FIELD005A"             (localized-text lang "kiinteisto.kiinteisto.kiinteistotunnus")
-   "FIELD005B"             (xml-escape (if (nil? (:propertyId application)) (i18n/localize lang "application.export.empty") (p/to-human-readable-property-id (:propertyId application))))
-
-   "FIELD006A"             (localized-text lang "submitted")
-   "FIELD006B"             (xml-escape (or (util/to-local-date (:submitted application)) "-"))
-
-   "FIELD007A"             (localized-text lang "verdict-attachment-prints-order.order-dialog.lupapisteId")
-   "FIELD007B"             (xml-escape (:id application))
-
-   "FIELD008A"             (localized-text lang "applications.authority")
-   "FIELD008B"             (xml-escape (get-authority lang application))
-
-   "FIELD009A"             (localized-text lang "application.address")
-   "FIELD009B"             (xml-escape (:address application))
-
-   "FIELD010A"             (localized-text lang "applicant")
-   "FIELD010B"             (xml-escape (s/join ", " (:_applicantIndex application)))
-
-   "FIELD011A"             (localized-text lang "selectm.source.label.edit-selected-operations")
-   "FIELD011B"             (xml-escape (get-operations application))})
+   "LPATITLE_STATE"        (localized-text lang "application.export.state")
+   "LPAVALUE_STATE"        (localized-text lang (:state application))})
 
 (defn- write-line [line data wrtr]
   (.write wrtr (str (reduce (fn [s [k v]] (if (s/includes? s (str ">" k "<")) (replace-text s k v) (replace-user-field s data))) line data) "\n")))
@@ -153,7 +120,7 @@
   (org/get-organization-name (:organization application) lang))
 
 (defn get-document-data [application type data]
-  (-> (domain/get-document-by-name application type) (get :data) (get-in data)))
+  (-> (domain/get-document-by-name application type) :data (get-in data)))
 
 (defn create-libre-doc [template file fields]
   (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]
