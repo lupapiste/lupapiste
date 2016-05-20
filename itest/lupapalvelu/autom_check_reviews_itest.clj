@@ -74,15 +74,6 @@
               ;; (println "buildings for submitted:" (:buildings (query-application local-query sonja application-id-submitted)))
               ;; (println "buildings for verdict-given:" (:buildings (query-application local-query sonja application-id-verdict-given)))
               (println "all tasks count:" (count  (query-tasks application-id-verdict-given)))
-              ;;(println "review tasks:")
-              ;;(println (map #(select-keys % [:taskname :data]) (filter task-is-review? (query-tasks application-id-verdict-given))))
-
-              ;; seeing task maps come back with :validationError keys here, like ":katselmus :tila required" about keys
-              ;; that are under task :data :katselmus and not top-level. wonder where this validation is happening..
-              ;; i'm calling task-doc-validation in verdict/save-reviews-from-xml but not triggering
-              ;; logging statements there and throwing away the validation results after logging.
-              ;; also seems they appear under the :data :katselmus keys (eg :katselmus :tila :pitaja {:value nil :validationResult [...]"illegal-value:required"[...])
-            ;; (clojure.pprint/pprint (filter task-is-review? (query-tasks application-id-verdict-given)))
 
               (comment let [tasks (:tasks (query-application local-query sonja application-id-verdict-given))
                     task-buildings (map #(get-in % [:data :rakennus]) tasks)]

@@ -248,24 +248,24 @@
                                             :MuuTunnus)
                               sovellus-and-tunnus (str  (:tunnus MuuTunnus) "-" (:sovellus MuuTunnus))]
                           sovellus-and-tunnus))
+        first-huomautus (first (get-in katselmus [:huomautukset]))
         katselmus-data {:tila (get katselmus :osittainen)
                         :pitaja (get katselmus :pitaja)
                         :pitoPvm (util/to-local-date (get katselmus :pitoPvm))
                         :lasnaolijat (get katselmus :lasnaOlijat "")
-                        :huomautukset {:kuvaus (get-in katselmus [:huomautukset :huomautus :kuvaus] "")}
+                        :huomautukset {:kuvaus (or (-> first-huomautus :huomautus :kuvaus)
+                                                   "")}
                         :poikkeamat (get katselmus :poikkeamat "")
                         }
         data {:katselmuksenLaji (get katselmus :katselmuksenLaji "muu katselmus")
               :vaadittuLupaehtona true
               :rakennus (merge-rakennustieto rakennustieto
                                              (rakennus-data-from-buildings {} buildings))
-              ;;:rakennus (rakennus-data-from-buildings {} buildings)
               :katselmus katselmus-data
               :muuTunnus (get-muuTunnus katselmus)
               }
         task (new-task "task-katselmus" task-name data meta source)
         ]
-    ;; (debugf ":muuTunnus type is %s" (type  (:muuTunnus data)))
     task))
 
 (defn- verdict->tasks [verdict meta application]
