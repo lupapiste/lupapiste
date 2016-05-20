@@ -61,8 +61,7 @@
   (= :asemapiirros (keyword type)))
 
 (defn- operation-specific? [{attachment-type :attachment-type}]
-  (->> (map (juxt key (comp keyword val)) attachment-type)
-       (into {})
+  (->> (util/convert-values attachment-type keyword)
        (contains? attachment/operation-specific-attachment-types)))
 
 (defn- select-buildings-by-operation [buildings operation-id]
