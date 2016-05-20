@@ -679,7 +679,7 @@
     <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_ID"/>
     <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPATITLE_ADDRESS"/>
     <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_STATE"/>
-    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPAVALUE_STATE"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_STATE"/>
     <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPTITLE_SomeColumnTitle"/>
     <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_PROPERTYID"/>
     <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPAVALUE_PROPERTYID"/>
@@ -1031,7 +1031,7 @@
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B1" office:value-type="string">
       <text:h text:style-name="P16" text:outline-level="3"><text:user-field-get text:name="LPATITLE_STATE">  </text:user-field-get></text:h>
-      <text:p text:style-name="Text_20_body"><text:user-field-get text:name="LPAVALUE_STATE">  </text:user-field-get></text:p>
+      <text:p text:style-name="Text_20_body"><text:user-field-get text:name="LPATITLE_STATE">  </text:user-field-get></text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
