@@ -6,17 +6,17 @@ Resource        keywords.robot
 Suite Setup     Initialize
 
 *** Keywords ***
-Mikko invites foreman and goes back to application
-  Mikko invites foreman to application
+Sonja invites foreman and goes back to application
+  Sonja invites foreman to application
   Go back to project application
 
 *** Test Cases ***
-Mikko creates applications
-  Mikko logs in
+Sonja creates applications
+  Sonja logs in
   Create project application
   Submit application
 
-  Repeat Keyword  5  Mikko invites foreman and goes back to application
+  Repeat Keyword  5  Sonja invites foreman and goes back to application
 
 Foreman sets his information to several applications
   Foreman logs in
@@ -35,9 +35,6 @@ Foreman history is not visible to applicant
   Page Should Not Contain Element  xpath=//foreman-history
   Page Should Not Contain  Työnjohtajan historia
   Page Should Not Contain  TYÖNJOHTAJAN HISTORIA
-
-Escalate to authorities
-  Open to authorities  Apuva
   [Teardown]  logout
 
 Switch to authority

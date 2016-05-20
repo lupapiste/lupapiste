@@ -286,9 +286,13 @@
     {:organization (if (ss/blank? org-id)
                      {$exists true}
                      org-id)
-     :documents {$elemMatch {:data.availableMaterials {$exists true }
-                             :data.contact {$nin ["" nil]}}}}
-    [:documents])
+     :documents {$elemMatch {:schema-info.name "rakennusjateselvitys"
+                             :data.availableMaterials {$exists true }
+                             :data.contact {$nin ["" nil]}}}
+     :state {$nin ["draft" "open" "canceled"]}}
+    {:documents.schema-info.name 1
+     :documents.data.contact 1
+     :documents.data.availableMaterials 1})
    ;; 2. Create materials, contact, modified map.
    (map (fn [{docs :documents}]
           (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")

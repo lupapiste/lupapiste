@@ -24,7 +24,8 @@
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/email-validator :foremanEmail)]
    :states states/all-application-states
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [application/validate-authority-in-drafts
+                application/validate-only-authority-before-verdict-given]}
   [{:keys [created user application] :as command}]
   (let [foreman-user   (when (v/valid-email? foremanEmail)
                          (user/get-or-create-user-by-email foremanEmail user))

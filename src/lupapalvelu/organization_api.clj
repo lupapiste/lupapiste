@@ -1,5 +1,6 @@
 (ns lupapalvelu.organization-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [clojure.core.memoize :as memo]
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
@@ -592,6 +593,7 @@
    :optional-parameters [org lang]
    :input-validators [o/valid-feed-format o/valid-org o/valid-language]
    :user-roles #{:anonymous}}
-  (o/waste-ads (ss/upper-case org)
-               (-> fmt ss/lower-case keyword)
-               (-> (or lang :fi) ss/lower-case keyword)))
+  ((memo/ttl o/waste-ads :ttl/threshold 900000)             ; 15 min
+    (ss/upper-case org)
+    (-> fmt ss/lower-case keyword)
+    (-> (or lang :fi) ss/lower-case keyword)))

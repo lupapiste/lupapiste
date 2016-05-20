@@ -162,6 +162,9 @@
                 </a>
               </div>
             </div>
+            <div data-bind="if: convertableToPdfA">
+              <button class="btn-primary" data-bind="click: $component.convertToPdfA, ltext: 'Konvertoi PDF/A-muotoon'"></button>
+            </div>
           </div>
         </div>
       </div>
@@ -221,7 +224,6 @@
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'esikatselu'"></div>
               <div class="contents preview-image">
-              <div data-bind="ltext: "></div>
                 <a data-bind="attr: {href: '/api/raw/' + previewAction + '?lang=fi&id=' + $root.application.id()}" target="_blank">
                   <span data-bind="ltext: 'attachment.pdf'"></span>
                 </a>

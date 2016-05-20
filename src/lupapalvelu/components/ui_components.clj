@@ -23,7 +23,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.xml.validator :as validator]))
 
-(def themes #{"louhi"})
+(def themes #{"louhi", "facta"})
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
