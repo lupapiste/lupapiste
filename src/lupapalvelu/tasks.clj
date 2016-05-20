@@ -347,6 +347,4 @@
                                          (update-building old-buildings new-building)) new-buildings)
         task-rakennus (rakennus-data-from-buildings {} new-buildings-with-states)
         ]
-    (println "task rakennus before u-t-b" old-buildings) ;; has tilas
-    (println "task rakennus after u-t-b" task-rakennus) ;; tilas gone
     (assoc-in task [:data :rakennus] task-rakennus)))

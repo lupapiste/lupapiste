@@ -1,5 +1,5 @@
 (ns lupapalvelu.verdict
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
             [net.cgrand.enlive-html :as enlive]
@@ -461,8 +461,10 @@
         has-new-id? #(let [i (bg-id %)] (and (contains? ids-from-update i)
                                              (not (contains? ids-existing i))))
         from-update-with-new-id (filter has-new-id? from-update)
-        same-name-and-type? (fn [a b]
-                              (let [na (:taskname a)
+        same-name-and-type? (fn [wrapped-a wrapped-b]
+                              (let [a (tools/unwrapped wrapped-a)
+                                    b (tools/unwrapped wrapped-b)
+                                    na (:taskname a)
                                     nb (:taskname b)
                                     laji #(-> % :data :katselmuksenLaji)
                                     la (laji a)
@@ -511,12 +513,11 @@
     (assert (every? map? updated-tasks))
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
     (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
-    ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used?
-    (println (map #(get-in % [:schema-info :name]) updated-tasks))
+    ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks))
     (if (some seq validation-errors)
       (do
-        (infof "verdict->tasks: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
+        (errorf "verdict->tasks: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
         (fail :error.invalid-task-type)))
     (do
       (doseq [added-task added-tasks-with-updated-buildings]
@@ -526,12 +527,10 @@
 
 (defn do-check-for-reviews [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (println "yee1")
   (when-let [
              app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
              ]
-  (println "yee2")
     ;; (doseq [t (:tasks (:application command))]
     ;;   (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
     ;; (debug "do-check-verdict-w-review: application id:" (:id (:application command)) "- tasks count before reading review xml:" (count (:tasks (:application command))) )
