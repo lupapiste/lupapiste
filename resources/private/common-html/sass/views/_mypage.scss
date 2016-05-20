@@ -1,9 +1,11 @@
-#mypage .accordion-container {
+#mypage .accordion-container,
+#company .accordion-container {
   .button-group {
     margin: 20px;
     position: relative;
   }
   padding:0 $marginL;
+
   .architect-toggle, .allowDirectMarketing-toggle {
     height: 55px;
     margin: 9px 0;

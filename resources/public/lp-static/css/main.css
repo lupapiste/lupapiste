@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1463655517969');
+@import url('main-blessed1.css?z=1463742871014');
 
 @media (max-width: 991px) {
   /* line 80, ../../../private/common-html/sass/views/_application.scss */
@@ -1710,37 +1710,48 @@ td.comment-text {
 }
 
 /* line 1, ../../../private/common-html/sass/views/_mypage.scss */
-#mypage .accordion-container {
+#mypage .accordion-container,
+#company .accordion-container {
   padding: 0 24px;
 }
-/* line 2, ../../../private/common-html/sass/views/_mypage.scss */
-#mypage .accordion-container .button-group {
+/* line 3, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .button-group,
+#company .accordion-container .button-group {
   margin: 20px;
   position: relative;
 }
-/* line 7, ../../../private/common-html/sass/views/_mypage.scss */
-#mypage .accordion-container .architect-toggle, #mypage .accordion-container .allowDirectMarketing-toggle {
+/* line 9, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .architect-toggle, #mypage .accordion-container .allowDirectMarketing-toggle,
+#company .accordion-container .architect-toggle,
+#company .accordion-container .allowDirectMarketing-toggle {
   height: 55px;
   margin: 9px 0;
   display: block;
   width: 100%;
 }
-/* line 13, ../../../private/common-html/sass/views/_mypage.scss */
-#mypage .accordion-container .architect-toggle label, #mypage .accordion-container .architect-toggle input, #mypage .accordion-container .allowDirectMarketing-toggle label, #mypage .accordion-container .allowDirectMarketing-toggle input {
+/* line 15, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .architect-toggle label, #mypage .accordion-container .architect-toggle input, #mypage .accordion-container .allowDirectMarketing-toggle label, #mypage .accordion-container .allowDirectMarketing-toggle input,
+#company .accordion-container .architect-toggle label,
+#company .accordion-container .architect-toggle input,
+#company .accordion-container .allowDirectMarketing-toggle label,
+#company .accordion-container .allowDirectMarketing-toggle input {
   display: inline;
   width: 3.75em;
 }
-/* line 17, ../../../private/common-html/sass/views/_mypage.scss */
-#mypage .accordion-container .architect-toggle input, #mypage .accordion-container .allowDirectMarketing-toggle input {
+/* line 19, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .architect-toggle input, #mypage .accordion-container .allowDirectMarketing-toggle input,
+#company .accordion-container .architect-toggle input,
+#company .accordion-container .allowDirectMarketing-toggle input {
   margin-right: 12px;
   display: inline;
 }
-/* line 22, ../../../private/common-html/sass/views/_mypage.scss */
-#mypage .accordion-container .form-group {
+/* line 24, ../../../private/common-html/sass/views/_mypage.scss */
+#mypage .accordion-container .form-group,
+#company .accordion-container .form-group {
   padding: 12px;
 }
 
-/* line 30, ../../../private/common-html/sass/views/_mypage.scss */
+/* line 32, ../../../private/common-html/sass/views/_mypage.scss */
 #mypage-register-company p a, #mypage-company p a {
   color: #f39129;
   text-decoration: none;
