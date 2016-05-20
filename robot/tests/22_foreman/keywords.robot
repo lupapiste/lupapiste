@@ -34,7 +34,7 @@ Open foreman accordions
   Open accordions  parties
   Execute Javascript  $("button[data-test-id=accordion-application-foreman-header]:not(.toggled)").click();
 
-Mikko invites foreman to application
+Sonja invites foreman to application
   Open tab  parties
   Open foreman accordions
   Click by test id  invite-foreman-button

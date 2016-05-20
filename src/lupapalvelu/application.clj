@@ -73,6 +73,14 @@
              (>= (required-link-permits application) (count-link-permits application)))
     unauthorized))
 
+(defn validate-only-authority-before-verdict-given
+  "Validator: Restrict applicant access before the application verdict
+  is given. To be used in commands' :pre-checks vector"
+  [{user :user} {state :state}]
+  (when-not (or (states/post-verdict-states (keyword state))
+                (usr/authority? user))
+    unauthorized))
+
 (defn validate-authority-in-drafts
   "Validator: Restrict authority access in draft application.
    To be used in commands' :pre-checks vector."

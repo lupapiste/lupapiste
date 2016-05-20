@@ -6952,9 +6952,9 @@ input[type=checkbox]:disabled + .checkbox-label:before {
 }
 /* line 1397, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100.0%;
-  min-width: 100.0%;
-  max-width: 100.0%;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 /* line 1397, ../../../private/common-html/sass/partials/_forms.scss */
@@ -7288,6 +7288,11 @@ div.review-done div {
 /* line 1594, ../../../private/common-html/sass/partials/_forms.scss */
 .checkbox-wrapper.checkbox-wrapper--break {
   margin-bottom: 24px;
+}
+
+/* line 1598, ../../../private/common-html/sass/partials/_forms.scss */
+.foreman-info {
+  padding-left: 6px;
 }
 
 /* line 4, ../../../private/common-html/sass/partials/_tables.scss */
