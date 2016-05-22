@@ -97,3 +97,10 @@ table.admin-settings {
     width: 100px;
   }
 }
+
+table.selected-operations-table {
+  div.checkbox-wrapper {
+    text-align: center;
+    border: none;
+  } 
+}
