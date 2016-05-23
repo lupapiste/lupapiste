@@ -743,14 +743,14 @@
   [{:keys [attachments] :as application} op-id]
   (filter #(= (:id (:op %)) op-id) attachments))
 
-(defn- append-gridfs-file! [zip {:keys [filename fileId]}]
-  (when fileId
-    (if-let [content (:content (mongo/download fileId))]
+(defn- append-gridfs-file! [zip {:keys [filename file-id]}]
+  (when file-id
+    (if-let [content (:content (mongo/download file-id))]
       (with-open [in (content)]
-        (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
+        (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" filename))))
         (io/copy in zip)
         (.closeEntry zip))
-      (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
+      (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename file-id))))
 
 (defn- append-stream [zip file-name in]
   (when in
