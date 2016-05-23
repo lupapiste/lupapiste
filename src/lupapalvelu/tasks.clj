@@ -1,5 +1,5 @@
 (ns lupapalvelu.tasks
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -316,7 +316,8 @@
 (defn- update-building [old-buildings new-building]
   ;; old-buildings comes from an existing task's :data :rakennus map
   ;; new-building is element of application top-level :buildings seq
-  ;; new-rakennukset is data from new xml that may contain updated per-building, per-review state
+  ;; new-rakennukset is :buildings format data from new xml that may be decroated with per-building, per-review state under :task-tila
+  ;; top-key = keys for top-level :buildings map, task-key = keys for task :rakennus
   (let [match-old-by-id (fn [top-key task-key]
                           (util/find-first (fn [old-building]
                                         (let [task-value (-> old-building :rakennus task-key :value)
@@ -339,12 +340,17 @@
 
 (defn update-task-buildings [new-buildings task]
   ;; Normally task's buildings (:data :rakennus) are updated by tasks/rakennus-data-from-buildings called in katselmus->task.  here we call it
-  ;; again once for each task, since it can optionally reapply the task rakennus :tila data to the right buildings if supplied
-  ;; with a suitably decorated :buildings map.
+  ;; again once for each task, to apply the task rakennus :tila data to the right buildings if supplied
+  ;; with a ":task-tila"-decorated :buildings map.
 
   (let [old-buildings (-> task :data :rakennus)
         new-buildings-with-states (map (fn [new-building]
                                          (update-building old-buildings new-building)) new-buildings)
         task-rakennus (rakennus-data-from-buildings {} new-buildings-with-states)
         ]
+    (if (> (count task-rakennus) (count new-buildings-with-states))
+      (errorf "too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states))
+      ;; else
+      (debugf "enough buildings: task has %s, :buildings %s" (count task-rakennus) (count new-buildings-with-states))
+      )
     (assoc-in task [:data :rakennus] task-rakennus)))
