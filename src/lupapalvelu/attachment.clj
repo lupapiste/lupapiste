@@ -201,6 +201,7 @@
    :state                                (apply sc/enum attachment-states) ;; attachment state
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
+   (sc/optional-key :ram-link)           ssc/ObjectIdStr    ;; reference from ram attachment to base attachment
    :required                             sc/Bool            ;;
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;
@@ -334,7 +335,7 @@
   [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
   (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
 
-(defn- default-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
+(defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
                      (tos/update-end-dates verdicts))]
     (if (seq metadata)
@@ -344,7 +345,7 @@
 (defn- create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
   [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
-  (let [metadata (default-metadata-for-attachment-type attachment-type application)]
+  (let [metadata (default-tos-metadata-for-attachment-type attachment-type application)]
     (make-attachment now
                      target
                      required?
@@ -384,7 +385,7 @@
 
 (defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
-  (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (default-metadata-for-attachment-type type application)}) attachment-types)
+  (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (default-tos-metadata-for-attachment-type type application)}) attachment-types)
         attachments (make-attachments now (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
@@ -392,6 +393,22 @@
        $push {:attachments {$each attachments}}})
     (tos/update-process-retention-period (:id application) now)
     (map :id attachments)))
+
+(defn create-ram-attachment! [{attachments :attachments :as application} attachment-id now]
+  {:pre [(map? application)]}
+  (let [{:keys [op target type contents scale size] :as base-attachment} (util/find-by-id attachment-id attachments)
+        ram-attachment (->> (default-tos-metadata-for-attachment-type type application)
+                            (make-attachment now target false false false (:state application) op type)
+                            (merge {:ram-link attachment-id}))]
+    (update-application
+     (application->command application)
+      {$set {:modified now}
+       $push {:attachments (cond-> ram-attachment
+                             contents (assoc :contents contents)
+                             scale (assoc :scale scale)
+                             size (assoc :size size))}})
+    (tos/update-process-retention-period (:id application) now)
+    (:id ram-attachment)))
 
 (defn- delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)

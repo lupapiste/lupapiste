@@ -187,6 +187,24 @@
     (ok :applicationId id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
+(defcommand create-ram-attachment
+  {:description "Create RAM attachment based on existing attachment"
+   :parameters  [id attachmentId]
+   :pre-checks [(fn [{{attachment-id :attachmentId} :data} {attachments :attachments}]
+                  (when-not (util/find-by-id attachment-id attachments)
+                    (fail :error.attachment.id)))
+                (fn [{{attachment-id :attachmentId} :data} {attachments :attachments}]
+                  (when (some (comp #{attachment-id} :ram-link) attachments)
+                    (fail :error.ram-link-already-exists)))]
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]
+   :user-roles #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-writer-roles
+   :states states/post-verdict-states}
+  [{application :application {attachment-id :attachmentId} :data created :created}]
+  (if-let [attachment-ids (attachment/create-ram-attachment! application attachment-id created)]
+    (ok :applicationId id :attachmentIds attachment-ids)
+    (fail :error.attachment-placeholder)))
+
 ;;
 ;; Delete
 ;;
