@@ -6,7 +6,7 @@
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
-            [sade.util :as util]
+            [sade.util :refer [=as-kw not=as-kw] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -588,8 +588,8 @@
 (defn allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
   (let [type-group (keyword type-group)
         type-id (keyword type-id)]
-    (if-let [types (some (fn [[group-name group-types]] (if (= (keyword group-name) type-group) group-types)) allowed-types)]
-      (some #(= (keyword %) type-id) types))))
+    (if-let [types (some (fn [[group-name group-types]] (if (=as-kw group-name type-group) group-types)) allowed-types)]
+      (some #(=as-kw % type-id) types))))
 
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
@@ -702,7 +702,7 @@
     (info "Danger: Libreoffice PDF/A conversion feature disabled."))
   (if (and libreoffice-client/enabled?
            (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
-           (or (= (keyword type-group) :paatoksenteko) (= (keyword type-group) :muut))
+           (or (=as-kw type-group :paatoksenteko) (=as-kw type-group :muut))
            (#{:paatos :paatosote} (keyword type-id)))
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
