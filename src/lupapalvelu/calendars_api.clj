@@ -14,6 +14,15 @@
                 :startTime (sade.util/to-millis-from-local-datetime-string (-> s :time :start))
                 :endTime   (sade.util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
 
+(defn- ->BackendReservationSlots [slots]
+  (map (fn [s]
+         (let [{start :start end :end reservationTypes :reservationTypes} s]
+           {:time             {:start (sade.util/to-xml-local-datetime start)
+                               :end   (sade.util/to-xml-local-datetime end)}
+            :reservationTypes reservationTypes
+            :capacity 1}))
+       slots))
+
 (defn- build-url [& path-parts]
   (apply str (env/value :ajanvaraus :host) path-parts))
 
@@ -78,14 +87,6 @@
        (fail! :resources.backend-error))
      (:body response))))
 
-(defn- ->BackendReservationSlots [slots] ; FIXME BROKEN, To be fixed when soon
-  (map (fn [s]
-         (let [{start :start end :end} s]
-           {:time     {:start (sade.util/to-xml-local-datetime start)
-                       :end (sade.util/to-xml-local-datetime end)}
-            :services [""]
-            :capacity 1})) slots))
-
 (defn- calendar-ref-for-user [userId]
   (str "user-" userId))
 
@@ -121,29 +122,6 @@
         (:active calendar) (assoc user :calendarId (:id calendar))
         :else              (assoc user :calendarPassive true))
       user)))
-
-(defquery calendar
-  {:parameters [calendarId userId]
-   :feature :ajanvaraus
-   :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
-   :user-roles #{:authorityAdmin}}
-  [_]
-  (let [calendar (get-calendar calendarId userId)
-        user     (user/get-user-by-id userId)]
-    (ok :calendar (assoc calendar :name (format "%s %s" (:firstName user) (:lastName user))
-                                  :email (:email user)))))
-
-(defquery calendars-for-authority-admin
-  {:user-roles #{:authorityAdmin}
-   :feature :ajanvaraus}
-  [{user :user}]
-  (let [admin-in-organization-id (user/authority-admins-organization-id user)
-        users                    (user/authority-users-in-organizations [admin-in-organization-id])
-        calendars                (find-calendars-for-organizations admin-in-organization-id)]
-    (if calendars
-      (let [users (map #(authority-admin-assoc-calendar-to-user calendars %) users)]
-        (ok :users users))
-      (fail :resources.backend-error))))
 
 (defn- create-calendar
   [userId target-user organization]
@@ -187,6 +165,7 @@
       (fail! :error.unknown))
     (deactivate-resource existing-calendar)))
 
+; Käytetään toistaiseksi vain itestien siivoukseen. Siksi in-dev.
 (env/in-dev
   (defn delete-calendar
     [userId]
@@ -194,13 +173,38 @@
       (doseq [id (map :id calendars)]
         (delete-command (str "/api/resources/" id))))))
 
-(defcommand set-calendar-enabled-for-authority
+(defquery calendar
+  {:parameters [calendarId userId]
+   :feature :ajanvaraus
+   :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
+   :user-roles #{:authorityAdmin}}
+  [_]
+  (let [calendar (get-calendar calendarId userId)
+        user     (user/get-user-by-id userId)]
+    (ok :calendar (assoc calendar :name (format "%s %s" (:firstName user) (:lastName user))
+                                  :email (:email user)))))
+
+(defquery calendars-for-authority-admin
   {:user-roles #{:authorityAdmin}
    :feature :ajanvaraus}
-  [{{:keys [userId enabled]} :data user :user}]
-  (if enabled
-    (ok :calendarId (enable-calendar userId (user/authority-admins-organization-id user)) :enabled true)
-    (ok :calendarId (disable-calendar userId (user/authority-admins-organization-id user)) :disabled true)))
+  [{user :user}]
+  (let [admin-in-organization-id (user/authority-admins-organization-id user)
+        users                    (user/authority-users-in-organizations [admin-in-organization-id])
+        calendars                (find-calendars-for-organizations admin-in-organization-id)]
+    (if calendars
+      (let [users (map #(authority-admin-assoc-calendar-to-user calendars %) users)]
+        (ok :users users))
+      (fail :resources.backend-error))))
+
+(defcommand set-calendar-enabled-for-authority
+  {:user-roles #{:authorityAdmin}
+   :feature    :ajanvaraus}
+  [{{:keys [userId enabled]} :data adminUser :user}]
+  (let [orgId (user/authority-admins-organization-id adminUser)]
+    (info "Set calendar enabled status" userId "in organization" orgId "as" enabled)
+    (if enabled
+      (ok :calendarId (enable-calendar userId orgId) :enabled true)
+      (ok :calendarId (disable-calendar userId orgId) :disabled true))))
 
 (defquery calendar-slots
   {:user-roles #{:authorityAdmin}
@@ -214,7 +218,9 @@
   {:user-roles #{:authorityAdmin}
    :feature    :ajanvaraus}
   [{{:keys [calendarId slots]} :data}]
-  (->> (->BackendReservationSlots slots)
+  (info "Creating new calendar slots in calendar #" calendarId)
+  (->> slots
+       ->BackendReservationSlots
        (post-command (str "/api/reservationslots/calendar/" calendarId))
        (ok :result)))
 

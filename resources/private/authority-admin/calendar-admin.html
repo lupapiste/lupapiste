@@ -25,8 +25,11 @@
       <div data-bind="with: $root.calendars.newReservationSlotModel">
         <p>Lisätään varattavia aikoja alkaen klo <span data-bind="text: startTime"></span></p>
         <p>Tapahtumalajit:</p>
-        <div data-bind="foreach: ['Katselmus','Suunnittelukokous','Tapaaminen']">
-          <p><input type="checkbox" data-bind="checkedValue: $data, checked: $parent.services"><span data-bind="text: $data"/></p>
+        <div data-bind="foreach: $root.reservationTypes.items">
+          <p>
+            <input type="checkbox" data-bind="checkedValue: $data.id, checked: $parent.reservationTypes">
+            <span data-bind="text: $data.name"/>
+          </p>
         </div>
         <button data-bind="click: execute, ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
       </div>

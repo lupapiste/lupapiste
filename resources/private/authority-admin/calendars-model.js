@@ -7,11 +7,11 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
     var self = this;
 
     self.startTime = ko.observable();
-    self.services = ko.observableArray();
+    self.reservationTypes = ko.observableArray();
     self.commandName = ko.observable();
     self.command = null;
 
-    self.execute = function() { self.command(self.services()); };
+    self.execute = function() { self.command(self.reservationTypes()); };
 
     self.init = function(params) {
       self.commandName(params.commandName);
@@ -29,8 +29,8 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
     self.newReservationSlotModel.init({
       source: { startTime: startTime },
       commandName: 'create',
-      command: function(services) {
-        var slots = [{start: startTime.valueOf(), end: moment(startTime).add(30, 'm').valueOf(), services: services}];
+      command: function(reservationTypes) {
+        var slots = [{start: startTime.valueOf(), end: moment(startTime).add(30, 'm').valueOf(), reservationTypes: reservationTypes}];
         hub.send("calendarService::createCalendarSlots", {calendarId: weekday.calendarId, slots: slots, modalClose: true});
       }
     });

@@ -84,6 +84,24 @@
         position: absolute;
         width: 100%;
         padding: $marginS;
+
+        &.booked {
+          color: white;
+          background: $green-dark;
+
+          a {
+            color: white;
+          }
+        }
+
+        &.accepted {
+          color: white;
+          background: $orange-dark;
+
+          a {
+            color: white;
+          }
+        }
       }
     }
 

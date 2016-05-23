@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1463731322885');
+@import url('main-blessed1.css?z=1463986327969');
 
 /* line 252, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .draft-box, .application_summary .application_summary_info .state-indication div.sent .open-box, .application_summary .application_summary_info .state-indication div.sent .submitted-box {
@@ -3020,6 +3020,24 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   position: absolute;
   width: 100%;
   padding: 6px;
+}
+/* line 88, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot.booked {
+  color: white;
+  background: #2ca92c;
+}
+/* line 92, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot.booked a {
+  color: white;
+}
+/* line 97, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot.accepted {
+  color: white;
+  background: #f39129;
+}
+/* line 101, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot.accepted a {
+  color: white;
 }
 
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */
