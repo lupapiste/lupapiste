@@ -91,7 +91,7 @@
 
 (facts "YA Verdict publish export "
        (doseq [lang i18n/languages]
-         (let [tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")
+         (let [tmp-file (File/createTempFile (str "verdict-ya-" (name lang) "-") ".fodt")
                data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
                                                      :data        {:_selected {:value "yritys"}
                                                                    :henkilo   {:henkilotiedot {:etunimi  {:value ""}
@@ -118,8 +118,39 @@
              (fact {:midje/description (str " verdict vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_VASTUU") => (build-user-field "Yritys Oy Ab" "LPVALUE_VASTUU"))
              (fact {:midje/description (str " verdict title yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_YHTEYSHENKILO") => (build-user-field (localize lang "verdict.yhteyshenkilo") "LPTITLE_YHTEYSHENKILO"))
              (fact {:midje/description (str " verdict yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_YHTEYSHENKILO") => (build-user-field "Mikko Mallikas" "LPVALUE_YHTEYSHENKILO"))
-             (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA_ALKAA") => (build-user-field "01.12.2016" "LPVALUE_LUPA_AIKA_ALKAA"))
-             (fact {:midje/description (str " verdict loppuu (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA_PAATTYY") => (build-user-field "02.12.2016" "LPVALUE_LUPA_AIKA_PAATTYY"))))))
+             (fact {:midje/description (str " verdict title alkaa (" (name lang) ")")} (get-user-field user-fields "LPTITLE_LUPA_AIKA") => (build-user-field (i18n/localize lang "tyoaika._group_label") "LPTITLE_LUPA_AIKA"))
+             (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA") => (build-user-field "01.12.2016 - 02.12.2016" "LPVALUE_LUPA_AIKA"))
+             ))))
+
+(facts "R Verdict publish export "
+       (doseq [lang i18n/languages]
+         (let [tmp-file (File/createTempFile (str "verdict-r-" (name lang) "-") ".fodt")
+               data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
+                                                     :data        {:_selected {:value "yritys"}
+                                                                   :henkilo   {:henkilotiedot {:etunimi  {:value ""}
+                                                                                               :sukunimi {:value ""}}}
+                                                                   :yritys    {:yritysnimi    {:value "Yritys Oy Ab"}
+                                                                               :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
+                                                                                                               :sukunimi {:value "Mallikas"}}}}}}])]
+           (verdict/write-verdict-libre-doc data "a1" 0 lang tmp-file)
+           (let [res (s/split (slurp tmp-file) #"\r?\n")
+                 user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
+             (.delete tmp-file)
+             (fact {:midje/description (str " verdict title id (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
+             (fact {:midje/description (str " verdict id (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_ID") => (build-user-field "LP-000-0000-0000" "LPAVALUE_ID"))
+             (fact {:midje/description (str " verdict title kuntalupa (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
+             (fact {:midje/description (str " verdict kuntalupa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_KUNTALUPA") => (build-user-field "20160043" "LPVALUE_KUNTALUPA"))
+             (fact {:midje/description (str " verdict title municipality (" (name lang) ")")} (get-user-field user-fields "LPTITLE_KUNTALUPA") => (build-user-field (localize lang "linkPermit.dialog.kuntalupatunnus") "LPTITLE_KUNTALUPA"))
+             (fact {:midje/description (str " verdict municipality (" (name lang) ")")} (get-user-field user-fields "LPVALUE_KUNTALUPA") => (build-user-field "20160043" "LPVALUE_KUNTALUPA"))
+             ;;TODO: test rest of common "LPA" application fields
+
+             (fact {:midje/description (str " verdict title vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_VASTUU") => (build-user-field (localize lang "verdict.vastuuhenkilo") "LPTITLE_VASTUU"))
+             (fact {:midje/description (str " verdict vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_VASTUU") => (build-user-field "Yritys Oy Ab" "LPVALUE_VASTUU"))
+             (fact {:midje/description (str " verdict title yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_YHTEYSHENKILO") => (build-user-field (localize lang "verdict.yhteyshenkilo") "LPTITLE_YHTEYSHENKILO"))
+             (fact {:midje/description (str " verdict yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_YHTEYSHENKILO") => (build-user-field "Mikko Mallikas" "LPVALUE_YHTEYSHENKILO"))
+             (fact {:midje/description (str " verdict title alkaa (" (name lang) ")")} (get-user-field user-fields "LPTITLE_LUPA_AIKA") => (build-user-field "" "LPTITLE_LUPA_AIKA"))
+             (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA") => (build-user-field "" "LPVALUE_LUPA_AIKA"))
+             ))))
 
 (facts "YA contract publish export "
        (doseq [lang i18n/languages]

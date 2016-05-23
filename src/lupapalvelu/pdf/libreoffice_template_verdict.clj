@@ -98,13 +98,17 @@
 
 (defn write-verdict-libre-doc [application id paatos-idx lang file]
   (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
-        paatos (nth (:paatokset verdict) paatos-idx)]
+        paatos (nth (:paatokset verdict) paatos-idx)
+        start-time (template/get-document-data application :tyoaika [:tyoaika-alkaa-pvm :value])
+        end-time (template/get-document-data application :tyoaika [:tyoaika-paattyy-pvm :value])]
     (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
     (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-ya-contract-template.fodt" "private/lupapiste-ya-verdict-template.fodt"))
                                file
                                (assoc (template/common-field-map application lang)
-                                 "FIELD001" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
+
                                  "LPAVALUE_APPLICANT" (:applicant application)
+
+                                 "LPATITLE_OPERATIONS" (i18n/localize lang "verdict.export.operations")
 
                                  "LPTITLE_CONTRACT_DATE" (i18n/localize lang "verdict.contract.date")
 
@@ -134,10 +138,9 @@
                                  "LPTITLE_VASTUU" (i18n/localize lang "verdict.vastuuhenkilo")
                                  "LPVALUE_VASTUU" (get-vastuuhenkilo application)
 
-                                 "LPTITLE_LUPA_AIKA" (i18n/localize lang "tyoaika._group_label")
+                                 "LPTITLE_LUPA_AIKA" (if (s/blank? start-time) "" (i18n/localize lang "tyoaika._group_label"))
 
-                                 "LPVALUE_LUPA_AIKA_ALKAA" (template/get-document-data application :tyoaika [:tyoaika-alkaa-pvm :value])
-                                 "LPVALUE_LUPA_AIKA_PAATTYY" (template/get-document-data application :tyoaika [:tyoaika-paattyy-pvm :value])
+                                 "LPVALUE_LUPA_AIKA" (if (s/blank? start-time) ""  (str start-time " - " end-time))
 
 
                                  ;;                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraukset")
