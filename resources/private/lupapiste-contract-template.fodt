@@ -1191,7 +1191,7 @@
        zgAAAABJRU5ErkJggg==
       </office:binary-data>
      </draw:image>
-    </draw:frame>FIELD001<text:tab/><text:tab/><text:span text:style-name="T3">LPVALUE_VERDICT_GIVEN</text:span></text:h>
+    </draw:frame>LPTITLE<text:tab/><text:tab/><text:span text:style-name="T3">LPVALUE_VERDICT_GIVEN</text:span></text:h>
    <text:p text:style-name="Text_20_body"><text:span text:style-name="T43">LPATITLE_ID</text:span> <text:s/><text:span text:style-name="T40">LPAVALUE_ID</text:span></text:p>
    <text:p text:style-name="P28"><text:span text:style-name="T41">LPTITLE_KUNTA</text:span> <text:span text:style-name="T40">FIELD012</text:span></text:p>
    <text:p text:style-name="Text_20_body"><text:span text:style-name="T43">LPATITLE_OPERATIONS</text:span> <text:span text:style-name="T27">LPAVALUE_OPERATIONS</text:span></text:p>

@@ -4090,3 +4090,5 @@
 "verdict.yhteyshenkilo" "sv" ""
 "verdict.contract.date" "fi" "Sopimuksen päivämäärä"
 "verdict.contract.date" "sv" ""
+"verdict.export.operations" "fi" "Asia"
+"verdict.export.operations" "sv" ""
