@@ -198,7 +198,7 @@
                     (fail :error.ram-link-already-exists)))]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles auth/default-authz-writer-roles
    :states states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-ids (attachment/create-ram-attachment! application attachment-id created)]
