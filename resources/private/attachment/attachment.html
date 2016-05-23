@@ -33,7 +33,7 @@
                   <span data-bind="ltext: 'document.approve'"></span>
               </button>
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()"
-                      class="negative caps">Tarkennettavaa</button>
+                      class="negative caps"></button>
               <button class="secondary" data-test-id="change-attachment-type"
                       data-bind="click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized">
                   <span data-bind="ltext: 'attachment.changeType'"></span>
