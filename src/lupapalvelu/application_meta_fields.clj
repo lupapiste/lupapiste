@@ -11,7 +11,8 @@
             [lupapalvelu.user :as user]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 
 (defn in-post-verdict-state? [_ app] (contains? states/post-verdict-states (keyword (:state app))))
@@ -178,12 +179,16 @@
   (if-let [links (seq (when application-id (mongo/select :app-links {:link {$in [application-id]}})))]
 
     ;; Link permit data was found
-    (let [our-link-permits (filter #(= (:type ((keyword application-id) %)) "application") links)
+    (let [find-link-permit-id (fn [{link :link}]
+                                (util/find-first #(not= application-id %) link))
+          link-applications (->> (mongo/select :applications
+                                               {:_id {$in (mapv find-link-permit-id links)}}
+                                               {:primaryOperation 1 :permitSubtype 1})
+                                 (reduce #(assoc %1 (:id %2) %2) {}))
+          our-link-permits (filter #(= (:type ((keyword application-id) %)) "application") links)
           apps-linking-to-us (filter #(= (:type ((keyword application-id) %)) "linkpermit") links)
           convert-fn (fn [link-data]
-                       (let [link-array (:link link-data)
-                             link-permit-id ((if (-> link-array (.indexOf application-id) zero?) second first)
-                                              link-array)
+                       (let [link-permit-id (find-link-permit-id link-data)
                              link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
 
                          (if (= (:type ((keyword application-id) link-data)) "application")
@@ -192,18 +197,16 @@
                            ;;       viela kauempaa, eli viiteluvan viiteluvalta. Eli looppia tahan?
                            ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
 
-                           ;
-                           ; FIXME fetch data with 1 query instead of N
-                           ;
                            (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
-                                                      (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
-                                                          :primaryOperation :name))]
-                             {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
+                                                      (get-in link-applications [link-permit-id :primaryOperation :name]))]
+                             {:id link-permit-id :type link-permit-type :operation link-permit-app-op :permitSubtype ""})
 
-                           (let [link-permit-app-op (when (= (:type ((keyword link-permit-id) link-data)) "application")
-                                                      (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
-                                                        :primaryOperation :name))]
-                             {:id link-permit-id :type link-permit-type :operation link-permit-app-op}))))]
+                           (let [{:keys [primaryOperation permitSubtype]} (when (= (:type ((keyword link-permit-id) link-data)) "application")
+                                                                            (link-applications link-permit-id))]
+                             {:id link-permit-id
+                              :type link-permit-type
+                              :operation (:name primaryOperation)
+                              :permitSubtype permitSubtype}))))]
 
       (assoc application
         :linkPermitData  (when (seq our-link-permits) (mapv convert-fn our-link-permits))
