@@ -471,8 +471,16 @@
       (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
       (not (nil? missing-fonts)) (assoc :missing-fonts missing-fonts))))
 
+(defn- ->approval [state user timestamp file-id]
+  {:value (if (= :ok state) :approved :rejected)
+   :user (select-keys user [:id :firstName :lastName])
+   :timestamp timestamp
+   :fileId file-id})
+
 (defn- build-version-updates [application attachment version-model {:keys [now target state user stamped comment? comment-text]
-                                                                    :or   {comment? true state :requires_authority_action} :as options}]
+                                                                    :or   {comment? true, state :requires_authority_action} :as options}]
+  {:pre [(map? application) (map? attachment) (map? version-model) (number? now) (map? user) (keyword? state)]}
+
   (let [version-index  (or (-> (map :originalFileId (:versions attachment))
                                (zipmap (range))
                                (some [(:originalFileId version-model)]))
@@ -488,6 +496,9 @@
        {$set {:attachments.$.target target}})
      (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
        {$set {:attachments.$.latestVersion version-model}})
+     (if (and (usr/authority? user) (not= state :requires_authority_action))
+       {$set {:attachments.$.approved (->approval state user now (:fileId version-model))}}
+       {$unset {:attachments.$.approved 1}})
      {$set {:modified now
             :attachments.$.modified now
             :attachments.$.state  state
@@ -625,19 +636,27 @@
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-  [application attachment-id fileId originalFileId]
-  (let [latest-version (latest-version-after-removing-file (get-attachment-info application attachment-id) fileId)]
-    (infof "1/3 deleting files [%s] of attachment %s" (ss/join ", " (set [fileId originalFileId])) attachment-id)
-    (run! delete-attachment-file-and-preview! (set [fileId originalFileId]))
-    (infof "2/3 deleted file %s of attachment %s" fileId attachment-id)
+  [application attachment-id file-id original-file-id]
+  (let [attachment (get-attachment-info application attachment-id)
+        latest-version (latest-version-after-removing-file attachment file-id)]
+    (infof "1/3 deleting files [%s] of attachment %s" (ss/join ", " (set [file-id original-file-id])) attachment-id)
+    (run! delete-attachment-file-and-preview! (set [file-id original-file-id]))
+    (infof "2/3 deleted file %s of attachment %s" file-id attachment-id)
     (update-application
      (application->command application)
      {:attachments {$elemMatch {:id attachment-id}}}
-     {$pull {:attachments.$.versions {:fileId fileId}
-             :attachments.$.signatures {:fileId fileId}}
-      $set  (merge {:attachments.$.latestVersion latest-version}
-                   (when (nil? latest-version) {:attachments.$.auth []}))})
-    (infof "3/3 deleted meta-data of file %s of attachment" fileId attachment-id)))
+     (merge
+       (when (= file-id (-> attachment :versions last :fileId))
+         ; Deleting latest versions resets approval
+         {$unset {:attachments.$.approved 1}})
+       {$pull {:attachments.$.versions {:fileId file-id}
+              :attachments.$.signatures {:fileId file-id}}
+        $set  (merge {:attachments.$.latestVersion latest-version}
+                     (when (nil? latest-version)
+                       ; No latest version: reset auth and state
+                       {:attachments.$.auth []
+                        :attachments.$.state :requires_user_action}))}))
+    (infof "3/3 deleted meta-data of file %s of attachment" file-id attachment-id)))
 
 (defn get-attachment-file-as!
   "Returns the attachment file if user has access to application and the attachment, otherwise nil."
@@ -909,9 +928,6 @@
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
   (if-let [attachment-id (:id (get-attachment-info-by-file-id application file-id))]
     (let [data {:state new-state,
-                :approved {:value (if (= :ok new-state) :approved :rejected)
-                           :user (select-keys user [:id :firstName :lastName])
-                           :timestamp created
-                           :fileId file-id}}]
+                :approved (->approval new-state user created file-id)}]
       (update-attachment-data! command attachment-id data created :set-app-modified? true :set-attachment-modified? false))
     (fail :error.attachment.id)))
