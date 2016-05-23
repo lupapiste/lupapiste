@@ -66,6 +66,8 @@
                                       :version 1}
    :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}
                                              :suoramarkkinointilupa {:value false}})}})
+(def- hakija-tj-henkilo
+  (assoc-in hakija-henkilo [:schema-info :name] "hakija-tj"))
 
 (def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija-r"
@@ -512,12 +514,26 @@
                                    :permitSubtype "tyonjohtaja-hakemus"
                                    :documents [hakija-henkilo
                                                maksaja-henkilo
-                                               tyonjohtaja-v2
+                                               tyonjohtaja
                                                hankkeen-kuvaus-minimum]
                                    :linkPermitData [link-permit-data-kuntalupatunnus]
                                    :appsLinkingToUs [app-linking-to-us]}))
 
 (ctc/validate-all-documents application-tyonjohtajan-nimeaminen)
+
+
+(def application-tyonjohtajan-nimeaminen-v2
+  (merge application-tyonjohtajan-nimeaminen  {:id "LP-753-2013-00003"
+                                               :submitted 1426247899491
+                                               :primaryOperation {:name "tyonjohtajan-nimeaminen-v2"
+                                                                  :id "5272668be8db5aaa01084601"
+                                                                  :created 1383229067483}
+                                               :documents [hakija-tj-henkilo
+                                                           maksaja-henkilo
+                                                           tyonjohtaja-v2
+                                                           hankkeen-kuvaus-minimum]}))
+
+(ctc/validate-all-documents application-tyonjohtajan-nimeaminen-v2)
 
 (def application-suunnittelijan-nimeaminen
   (merge application-rakennuslupa {:id "LP-753-2013-00003"
@@ -1127,64 +1143,82 @@
         puolto (-> rakennusvalvontaasia :lausuntotieto first :Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto) => truthy]
     puolto => "palautettu"))
 
+(defn check-common-tyonjohtaja-canonical [case application]
+  (fact {:midje/description (str case " canonical")}
+    (fl/facts* "Canonical model is correct"
+      (let [canonical (application-to-canonical application "fi") => truthy
+            rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+            rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
+            rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
 
-(fl/facts* "Canonical model for tyonjohtajan nimeaminen is correct"
-  (let [canonical (application-to-canonical application-tyonjohtajan-nimeaminen "fi") => truthy
-        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
-        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
-        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
+            viitelupatieto (first (:viitelupatieto rakennusvalvontaasia)) => truthy
+            viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
+            viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => falsey
 
-        viitelupatieto (first (:viitelupatieto rakennusvalvontaasia)) => truthy
-        viitelupatieto-LupaTunnus (:LupaTunnus viitelupatieto) => truthy
-        viitelupatieto-MuuTunnus (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus) => falsey
+            luvanTunnisteTiedot-MuuTunnus (-> rakennusvalvontaasia
+                                              :luvanTunnisteTiedot
+                                              :LupaTunnus
+                                              :muuTunnustieto
+                                              :MuuTunnus) => truthy
 
-        luvanTunnisteTiedot-MuuTunnus (-> rakennusvalvontaasia
-                                        :luvanTunnisteTiedot
-                                        :LupaTunnus
-                                        :muuTunnustieto
-                                        :MuuTunnus) => truthy
+            osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => sequential?
 
-        osapuolet-vec (-> rakennusvalvontaasia :osapuolettieto :Osapuolet :osapuolitieto) => truthy
+            ;; henkilotyyppinen maksaja
+            rooliKoodi-laskun-maksaja "Rakennusvalvonta-asian laskun maksaja"
+            maksaja-filter-fn #(= (-> % :Osapuoli :kuntaRooliKoodi) rooliKoodi-laskun-maksaja)
+            maksaja-Osapuoli (:Osapuoli (first (filter maksaja-filter-fn osapuolet-vec)))
+            maksaja-Osapuoli-henkilo (:henkilo maksaja-Osapuoli)
+            maksaja-Osapuoli-yritys (:yritys maksaja-Osapuoli)
 
-        ;; henkilotyyppinen maksaja
-        rooliKoodi-laskun-maksaja "Rakennusvalvonta-asian laskun maksaja"
-        maksaja-filter-fn #(= (-> % :Osapuoli :kuntaRooliKoodi) rooliKoodi-laskun-maksaja)
-        maksaja-Osapuoli (:Osapuoli (first (filter maksaja-filter-fn osapuolet-vec)))
-        maksaja-Osapuoli-henkilo (:henkilo maksaja-Osapuoli)
-        maksaja-Osapuoli-yritys (:yritys maksaja-Osapuoli)
+            ;; henkilotyyppinen hakija
+            rooliKoodi-hakija "Rakennusvalvonta-asian hakija"
+            hakija-filter-fn #(= (-> % :Osapuoli :kuntaRooliKoodi) rooliKoodi-hakija)
+            hakija-Osapuoli (:Osapuoli (first (filter hakija-filter-fn osapuolet-vec)))
+            hakija-Osapuoli-henkilo (:henkilo hakija-Osapuoli)
+            hakija-Osapuoli-yritys (:yritys hakija-Osapuoli)
 
-        kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
-        Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
-        vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
-        rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy
+            kayttotapaus (:kayttotapaus rakennusvalvontaasia) => truthy
+            Asiantiedot (-> rakennusvalvontaasia :asianTiedot :Asiantiedot) => truthy
+            vahainen-poikkeaminen (:vahainenPoikkeaminen Asiantiedot) => falsey
+            rakennusvalvontasian-kuvaus (:rakennusvalvontaasianKuvaus Asiantiedot) => truthy
 
-        viitelupatieto-LupaTunnus_2 (:LupaTunnus (get-viitelupatieto link-permit-data-lupapistetunnus))]
+            viitelupatieto-LupaTunnus_2 (:LupaTunnus (get-viitelupatieto link-permit-data-lupapistetunnus))]
 
-    (facts "Maksaja is correct"
-      (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-Osapuoli) => "Rakennusvalvonta-asian laskun maksaja")
-      (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-Osapuoli) => "maksaja")
-      (fact "turvakieltoKytkin" (:turvakieltoKytkin maksaja-Osapuoli) => true)
-      (validate-person maksaja-Osapuoli-henkilo)
-      (fact "yritys is nil" maksaja-Osapuoli-yritys => nil))
+        (facts "Maksaja is correct"
+          (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-Osapuoli) => "Rakennusvalvonta-asian laskun maksaja")
+          (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-Osapuoli) => "maksaja")
+          (fact "turvakieltoKytkin" (:turvakieltoKytkin maksaja-Osapuoli) => true)
+          (validate-person maksaja-Osapuoli-henkilo)
+          (fact "yritys is nil" maksaja-Osapuoli-yritys => nil))
 
-    (facts "\"kuntalupatunnus\" type of link permit data"
-      (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => falsey)
-      (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :sovellus) => falsey)
-      (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => (:id link-permit-data-kuntalupatunnus))
-      (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus) => "edellinen rakennusvalvonta-asia"))
+        (facts "Hakija is correct"
+          (fact "kuntaRooliKoodi" (:kuntaRooliKoodi hakija-Osapuoli) => "Rakennusvalvonta-asian hakija")
+          (fact "VRKrooliKoodi" (:VRKrooliKoodi hakija-Osapuoli) => "hakija")
+          (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-Osapuoli) => true)
+          (validate-person hakija-Osapuoli-henkilo)
+          (fact "yritys is nil" hakija-Osapuoli-yritys => nil))
 
-    (facts "\"lupapistetunnus\" type of link permit data"
-      (fact "viitelupatieto-2-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :tunnus) => (:id link-permit-data-lupapistetunnus))
-      (fact "viitelupatieto-2-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
-      (fact "viitelupatieto-2-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus_2) => falsey)
-      (fact "viitelupatieto-2-viittaus" (:viittaus viitelupatieto-LupaTunnus_2) => "edellinen rakennusvalvonta-asia"))
+        (facts "\"kuntalupatunnus\" type of link permit data"
+          (fact "viitelupatieto-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :tunnus) => falsey)
+          (fact "viitelupatieto-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus :muuTunnustieto :MuuTunnus :sovellus) => falsey)
+          (fact "viitelupatieto-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus) => (:id link-permit-data-kuntalupatunnus))
+          (fact "viitelupatieto-viittaus" (:viittaus viitelupatieto-LupaTunnus) => "edellinen rakennusvalvonta-asia"))
+
+        (facts "\"lupapistetunnus\" type of link permit data"
+          (fact "viitelupatieto-2-MuuTunnus-Tunnus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :tunnus) => (:id link-permit-data-lupapistetunnus))
+          (fact "viitelupatieto-2-MuuTunnus-Sovellus" (-> viitelupatieto-LupaTunnus_2 :muuTunnustieto :MuuTunnus :sovellus) => "Lupapiste")
+          (fact "viitelupatieto-2-kuntalupatunnus" (:kuntalupatunnus viitelupatieto-LupaTunnus_2) => falsey)
+          (fact "viitelupatieto-2-viittaus" (:viittaus viitelupatieto-LupaTunnus_2) => "edellinen rakennusvalvonta-asia"))
 
 
-    (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => (:id application-tyonjohtajan-nimeaminen))
-    (fact "luvanTunnisteTiedot-MuuTunnus-Sovellus" (:sovellus luvanTunnisteTiedot-MuuTunnus) => "Lupapiste")
+        (fact "luvanTunnisteTiedot-MuuTunnus-Tunnus" (:tunnus luvanTunnisteTiedot-MuuTunnus) => (:id application))
+        (fact "luvanTunnisteTiedot-MuuTunnus-Sovellus" (:sovellus luvanTunnisteTiedot-MuuTunnus) => "Lupapiste")
 
-    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
-    (fact "kayttotapaus" kayttotapaus => "Uuden ty\u00f6njohtajan nime\u00e4minen")))
+        (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
+        (fact "kayttotapaus" kayttotapaus => "Uuden ty\u00f6njohtajan nime\u00e4minen")))))
+
+(check-common-tyonjohtaja-canonical "Tyonjohtaja V1" application-tyonjohtajan-nimeaminen)
+(check-common-tyonjohtaja-canonical "Tyonjohtaja V2" application-tyonjohtajan-nimeaminen-v2)
 
 
 (fl/facts* "Canonical model for suunnittelijan nimeaminen is correct"

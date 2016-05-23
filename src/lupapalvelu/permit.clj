@@ -45,7 +45,7 @@
 
        (throw (AssertionError. (str "Permit '" ~description "' has invalid meta data: " invalid-meta#))))
      (do
-     (def ~permit-name ~(str description) ~(str permit-name))
+       (def ~permit-name ~(str description) ~(str permit-name))
        (swap! permit-type-defs util/deep-merge {~permit-name ~m}))))
 
 (defpermit R  "Rakennusluvat"

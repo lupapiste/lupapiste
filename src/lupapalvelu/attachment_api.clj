@@ -443,12 +443,12 @@
                           :y-margin (util/->long yMargin)
                           :page     (keyword page)
                           :transparency (util/->long (or transparency 0))
+                          :options      {:include-buildings includeBuildings}
                           :info-fields  {:backend-id   kuntalupatunnus
                                          :section      section
                                          :extra-info   extraInfo
                                          :organization org
-                                         :buildings    (when includeBuildings
-                                                         (building/building-ids application))}})]
+                                         :buildings    (building/building-ids application)}})]
     (ok :job job)))
 
 (defquery stamp-attachments-job

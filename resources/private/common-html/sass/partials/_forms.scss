@@ -1043,7 +1043,7 @@ $max-columns: 12;
   label.#{$label-cls} {
   width: 100%;
   display: inline-block;
-}  
+}
   .#{$label-cls}:before {
     @include lupicon-font( $size );
     content: "\e603";
@@ -1062,7 +1062,7 @@ $max-columns: 12;
 
   input[type=checkbox]:disabled + .#{$label-cls}:before {
     cursor: initial;
-    color: $checkbox-color;    
+    color: $checkbox-color;
   }
 }
 
@@ -1105,14 +1105,14 @@ $max-columns: 12;
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
   -moz-appearance:none;
-  
+
   &:focus {
     color: $input-focus-color;
     border-color: $input-focus-border-color;
   }
   &:disabled {
     border-color: $input-disabled-border-color;
-    background-color: $input-disabled-background-color;    
+    background-color: $input-disabled-background-color;
   }
 }
 
@@ -1146,7 +1146,7 @@ $max-columns: 12;
     }
     @include hide-radio-check-input
   }
-  
+
   .col--no-margin {
     padding: 0 !important;
     .checkbox-wrapper {
@@ -1164,7 +1164,7 @@ $max-columns: 12;
 
   input[type=text], input[type=password], select, textarea {
     @include input-fields;
-    
+
     width: 100%;
   }
 
@@ -1173,7 +1173,7 @@ $max-columns: 12;
     padding: $marginS $marginM;
   }
 
-  
+
   .radio-label:before {
     @include lupicon-font;
     content: "\e634";
@@ -1593,4 +1593,8 @@ div.review-done {
 
 .checkbox-wrapper.checkbox-wrapper--break {
   margin-bottom: $marginL;
+}
+
+.foreman-info {
+  padding-left: $marginS;
 }

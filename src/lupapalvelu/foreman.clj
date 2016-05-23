@@ -16,7 +16,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.operations :as op]
             [monger.operators :refer :all]))
 
@@ -198,14 +198,20 @@
          (remove nil?)
          (assoc foreman-app :documents))))
 
+(defn- applicant-user-auth [applicant path auth]
+  (when-let [applicant-user (-> applicant
+                                (get-in path)
+                                usr/canonize-email
+                                usr/get-user-by-email)]
+    ;; Create invite for applicant if authed
+    (when (some (partial usr/same-user? applicant-user) auth)
+      {:email (:email applicant-user)
+       :role "writer"})))
+
 (defn- henkilo-invite [applicant auth]
   {:pre [(= "henkilo" (get-in applicant [:data :_selected]))
          (sequential? auth)]}
-  (when-let [email (user/canonize-email (get-in applicant [:data :henkilo :yhteystiedot :email]))]
-    ;; Create invite for applicant if authed
-    (when (some #(= email (:username %)) auth)
-      {:email email
-       :role "writer"})))
+  (applicant-user-auth applicant [:data :henkilo :yhteystiedot :email] auth))
 
 (defn- yritys-invite [applicant auth]
   {:pre [(= "yritys" (get-in applicant [:data :_selected]))
@@ -216,15 +222,7 @@
       #(when (= company-id (or (:id %) (get-in % [:invite :user :id])))
          {:company-id company-id})
       auth)
-
-    (when-let [contact-email (user/canonize-email
-                               (get-in applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email]))]
-      ;; invite the filled contact person if authed
-      (some
-        #(when (= contact-email (:username %))
-           {:email contact-email
-            :role "writer"})
-        auth))))
+    (applicant-user-auth applicant [:data :yritys :yhteyshenkilo :yhteystiedot :email] auth)))
 
 (defn applicant-invites [documents auth]
   (->> (domain/get-applicant-documents documents)
@@ -246,7 +244,7 @@
 (defn- invite->auth [inv app-id inviter timestamp]
   (if (:company-id inv)
     (create-company-auth (:company-id inv))
-    (let [invited (user/get-or-create-user-by-email (:email inv) inviter)]
+    (let [invited (usr/get-or-create-user-by-email (:email inv) inviter)]
       (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
 
 (defn copy-auths-from-linked-app [foreman-app foreman-user linked-app user created]
@@ -271,6 +269,7 @@
         token-id   (company/company-invitation-token user company-id (:id foreman-app))]
     (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
                                                :caller     user
+                                               :company    (company/find-company! {:id company-id})
                                                :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
                                                :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})))
 

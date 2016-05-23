@@ -421,6 +421,13 @@
     (test-application-create-successful resp app-id)
     (query-application apikey app-id)))
 
+(defn create-and-open-application
+  "Creates a new application, opens it, and returns the application map"
+  [apikey & args]
+  (let [id (apply create-app-id apikey args)]
+    (comment-application apikey id true)
+    (query-application apikey id)))
+
 (defn create-and-submit-application
   "Returns the application map"
   [apikey & args]
