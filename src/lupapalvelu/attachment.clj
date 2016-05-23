@@ -199,6 +199,12 @@
    (sc/optional-key :readOnly)           sc/Bool            ;;
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
    :state                                (apply sc/enum attachment-states) ;; attachment state
+   (sc/optional-key :approved)           {:value (sc/enum :ok :requires_user_action)
+                                          :user {:id sc/Str
+                                                 :firstName sc/Str
+                                                 :lastName sc/Str}
+                                          :timestamp ssc/Timestamp
+                                          :fileId ssc/ObjectIdStr }
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
    (sc/optional-key :ram-link)           sc/Str            ;; reference from ram attachment to base attachment
@@ -900,3 +906,14 @@
   {$set (as-> app-id $
           (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
           (mongo/generate-array-updates :attachments (:attachments $) pred k v))})
+
+(defn set-attachment-state! [{:keys [created user application] :as command} file-id new-state]
+  {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
+  (if-let [attachment-id (:id (get-attachment-info-by-file-id application file-id))]
+    (let [data {:state new-state,
+                :approved {:value new-state
+                           :user (select-keys user [:id :firstName :lastName])
+                           :timestamp created
+                           :fileId file-id}}]
+      (update-attachment-data! command attachment-id data created :set-app-modified? true :set-attachment-modified? false)))
+  (fail :error.attachment.id))
