@@ -199,10 +199,8 @@
    (sc/optional-key :readOnly)           sc/Bool            ;;
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
    :state                                (apply sc/enum attachment-states) ;; attachment state
-   (sc/optional-key :approved)           {:value (sc/enum :ok :requires_user_action)
-                                          :user {:id sc/Str
-                                                 :firstName sc/Str
-                                                 :lastName sc/Str}
+   (sc/optional-key :approved)           {:value (sc/enum :approved :rejected)
+                                          :user {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
                                           :timestamp ssc/Timestamp
                                           :fileId ssc/ObjectIdStr }
    :target                               (sc/maybe Target)  ;;
