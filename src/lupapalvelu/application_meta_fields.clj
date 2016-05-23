@@ -198,12 +198,15 @@
                            (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
                                                       (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
                                                           :primaryOperation :name))]
-                             {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
+                             {:id link-permit-id :type link-permit-type :operation link-permit-app-op :permitSubtype ""})
 
-                           (let [link-permit-app-op (when (= (:type ((keyword link-permit-id) link-data)) "application")
-                                                      (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
-                                                        :primaryOperation :name))]
-                             {:id link-permit-id :type link-permit-type :operation link-permit-app-op}))))]
+                           (let [{:keys [primaryOperation permitSubtype]} (when (= (:type ((keyword link-permit-id) link-data)) "application")
+                                                                             (mongo/by-id "applications" link-permit-id {:primaryOperation 1
+                                                                                                                         :permitSubtype 1}))]
+                             {:id link-permit-id
+                              :type link-permit-type
+                              :operation (:name primaryOperation)
+                              :permitSubtype permitSubtype}))))]
 
       (assoc application
         :linkPermitData  (when (seq our-link-permits) (mapv convert-fn our-link-permits))
