@@ -748,6 +748,7 @@
 "attachment.legend.ok" "sv" "Bilaga som myndigheten preliminärt godkänt. Egentligt godkännande ges senare i den formella behandlingen av tillståndet."
 "attachment.missing-fonts" "fi" "Seuraavat kirjasintyypit täytyy sisällyttää asiakirjaan arkistointia varten"
 "attachment.missing-fonts" "sv" "För arkivering måste följande fonter ingå i dokumentet"
+"attachment.new-ram" "fi" "Uusi RAM-liite"
 "attachment.noName" "fi" "Nimetön"
 "attachment.noName" "sv" "Namnlös"
 "attachment.noPreview" "fi" "Ei esikatselua"

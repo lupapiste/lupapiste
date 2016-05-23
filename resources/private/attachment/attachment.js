@@ -146,6 +146,10 @@ var attachment = (function() {
       }
     },
 
+    newRamAttachment: function() {
+
+    },
+
     showChangeTypeDialog: function() {
       model.previewDisabled(true);
       model.changeTypeDialogModel.init(model.attachmentType());
