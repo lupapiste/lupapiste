@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf]]
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
@@ -373,7 +373,8 @@
 
 (defn orgs-for-review-fetch []
   (let [orgs-with-wfs-url-defined-for-r (organization/get-organizations
-                                                   {:krysp.R.url {$exists true}}
+                                         {:krysp.R.url {$exists true},
+                                          :krysp.R.version {$gte "2.1.5"}}
                                                    {:krysp 1})
         orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-r)]
     orgs-by-id))
@@ -381,7 +382,8 @@
 (defn fetch-reviews-for-application [orgs-by-id eraajo-user {:keys [id permitType organization] :as app}]
   (try
     (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
-    (logging/with-logging-context {:applicationId id}
+      (debugf "fetch-reviews-for-application: processing application id %s" id)
+      (logging/with-logging-context {:applicationId id}
       (if-not (s/blank? url)
         ;; url means there's a defined location (eg sftp) for polling xml verdicts
         (let [command (assoc (application->command app) :user eraajo-user :created (now))
@@ -390,12 +392,13 @@
     (catch Throwable t
       (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
 
-(defn poll-verdicts-for-reviews []
-  ;; modified from fetch-verdicts.
+(defn poll-verdicts-for-reviews [& args]
   (let [orgs-by-id (orgs-for-review-fetch)
-        eligible-application-states (set/difference states/post-verdict-states states/terminal-states)
-        apps (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}})
-        ;; reviewless-apps (filter #(some task-is-review? (:tasks %)) apps) ;; initial too-conservative filter
+        eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})
+        apps (if (= 1 (count args))
+               (mongo/select :applications {:_id (first args)})
+               ;; else
+               (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}}))
         eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
     (doall
      (pmap (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
@@ -403,4 +406,9 @@
 (defn check-for-reviews [& args]
   (mongo/connect!)
   (poll-verdicts-for-reviews)
+  (mongo/disconnect!))
+
+(defn check-review-for-id [& args]
+  (mongo/connect!)
+  (poll-verdicts-for-reviews (first args))
   (mongo/disconnect!))

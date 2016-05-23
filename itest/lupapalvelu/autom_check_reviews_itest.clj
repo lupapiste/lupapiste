@@ -78,12 +78,14 @@
                   poll-result (batchrun/poll-verdicts-for-reviews)
                   app-after (query-application local-query sonja application-id-verdict-given)
                   task-summary (fn [application]
-                                 (let [noschema #(dissoc % :schema-info)
-                                       pruned (map #(-> % noschema tools/unwrapped) (:tasks application))
+                                 (let [without-schema #(dissoc % :schema-info)
+                                       pruned (map #(-> % without-schema tools/unwrapped) (:tasks application))
                                        rakennukset (map #(get-in % [:data :rakennus]) pruned)
                                        ]
-                                   (println "task-summary: rakennukset counts" (map count rakennukset ))
-                                   (println "task-summary: buildings count" (count (:buildings application)))
+                                   ;; (println "task-summary: rakennukset counts" (map count rakennukset ))
+                                   ;; (println "rakennukset" rakennukset)
+                                   ;; (println "task-summary: buildings count" (count (:buildings application)))
+                                   ;; (println "buildings" (-> application :buildings tools/unwrapped))
                                    pruned))]
               ;; (clojure.pprint/pprint (clojure.data/diff (task-summary app-before) (task-summary app-after)))
               ;; (task-summary app-before)

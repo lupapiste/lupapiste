@@ -509,6 +509,9 @@
         task-updates {$set {:tasks updated-tasks}}]
 
     ;; (println "muuTunnus of review-tasks:" (map #(-> % :data :muuTunnus) review-tasks))
+    ;; (doseq [task (filter #(= "task-katselmus" (-> % :schema-info :name)) updated-tasks)]
+    ;;   (assert (= (count (:buildings buildings-summary))
+    ;;              (-> task :data :rakennus count))))
     (assert (every? not-empty updated-tasks))
     (assert (every? map? updated-tasks))
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
@@ -524,6 +527,7 @@
         (tasks/generate-task-pdfa application added-task (:user command) (:lang command "fi")))
       (update-application command (util/deep-merge task-updates building-updates))
       (ok))))
+
 
 (defn do-check-for-reviews [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}
