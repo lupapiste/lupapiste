@@ -85,9 +85,6 @@ Sonja invites foreman Teppo to application
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Set Suite Variable  ${foremanAppId}  ${foremanAppId}
-
-Sonja invites Pena to the foreman application
-  Invite pena@example.com to application
   [Teardown]  logout
 
 Pena sees sent invitation on the original application
