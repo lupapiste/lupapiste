@@ -93,9 +93,9 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
         }
       });
 
-  self.parentDispose = _.isFunction(self.dispose) ? self.dispose : _.noop;
+  var parentDispose = _.isFunction(self.dispose) ? self.dispose : _.noop;
   self.dispose = function() {
-    self.parentDispose();
+    parentDispose();
     _.each(self, function(property) {
       if (_.isFunction(_.get(property, "dispose"))) {
         property.dispose();
