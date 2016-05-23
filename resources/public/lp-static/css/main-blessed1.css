@@ -6952,9 +6952,9 @@ input[type=checkbox]:disabled + .checkbox-label:before {
 }
 /* line 1397, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1397, ../../../private/common-html/sass/partials/_forms.scss */
@@ -10724,6 +10724,15 @@ ul.no-bullets {
   box-sizing: border-box;
   display: inline-block;
   margin: 0;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.mark-as-archived {
+  margin-top: 3em;
+}
+/* line 193, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.mark-as-archived p {
+  margin-bottom: 0.5em;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_applications_search.scss */

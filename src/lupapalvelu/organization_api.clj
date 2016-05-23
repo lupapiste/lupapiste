@@ -12,7 +12,7 @@
             [camel-snake-kebab.core :as csk]
             [me.raynes.fs :as fs]
             [slingshot.slingshot :refer [try+]]
-            [sade.core :refer [ok fail fail! now]]
+            [sade.core :refer [ok fail fail! now unauthorized]]
             [sade.env :as env]
             [sade.municipality :as muni]
             [sade.property :as p]
@@ -341,6 +341,18 @@
   [{user :user}]
   (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
   (ok))
+
+(defcommand set-organization-permanent-archive-start-date
+  {:parameters [date]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial number-parameters [:date])]
+   :pre-checks [(fn [{:keys [user]} _]
+                  (when-not (o/some-organization-has-archive-enabled? [(user/authority-admins-organization-id user)])
+                    unauthorized))]}
+  [{user :user}]
+  (when (pos? date)
+    (o/update-organization (user/authority-admins-organization-id user) {$set {:permanent-archive-in-use-since date}})
+    (ok)))
 
 (defn split-emails [emails] (ss/split emails #"[\s,;]+"))
 

@@ -17,7 +17,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
-            [lupapalvelu.geojson :as geo]))
+            [lupapalvelu.geojson :as geo]
+            [lupapalvelu.organization :as organization]))
 
 ;; Operations
 
@@ -103,6 +104,16 @@
     (:id (user/get-user-by-email handler))
     handler))
 
+(defn- archival-query [user]
+  (let [from-ts (->> (user/organization-ids-by-roles user #{:archivist})
+                     (organization/earliest-archive-enabled-ts))
+        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed"]}} {:archived.application nil}]}
+                         {$and [{:state "closed"} {:archived.completed nil}]}]}]
+    (if from-ts
+      {$and [base-query
+             {:created {$gte from-ts}}]}
+      base-query)))
+
 (defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas]} user]
   {$and
    (filter seq
@@ -126,6 +137,7 @@
           "canceled"           {:state "canceled"}
           "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
           "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
+          "readyForArchival"   (archival-query user)
           {:state {$nin ["draft" "canceled"]}}))
       (when-not (empty? handlers)
         (if ((set handlers) no-handler)

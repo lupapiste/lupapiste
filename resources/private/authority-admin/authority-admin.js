@@ -442,7 +442,8 @@
       editRoles:           editRolesDialogModel
       });
     $("#applications").applyBindings({
-      organization:        organizationModel
+      organization:        organizationModel,
+      authorization:       lupapisteApp.models.globalAuthModel
     });
     $("#operations").applyBindings({
       organization:        organizationModel,

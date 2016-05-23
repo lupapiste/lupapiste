@@ -44,6 +44,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
   self.permanentArchiveEnabled = ko.observable(true);
+  self.permanentArchiveInUseSince = ko.observable();
   self.features = ko.observable();
   self.allowedRoles = ko.observable([]);
 
@@ -136,6 +137,16 @@ LUPAPISTE.OrganizationModel = function () {
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
+    self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));
+    ko.computed(function() {
+      var startDate = self.permanentArchiveInUseSince();
+      if (self.initialized && startDate) {
+        ajax.command("set-organization-permanent-archive-start-date", {date: startDate.getTime()})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
+      }
+    });
 
     // Operation attachments
     //

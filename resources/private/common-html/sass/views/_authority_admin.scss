@@ -78,3 +78,12 @@ table.admin-settings {
   padding: 2px 2px 2px 2px;
   color: red;
 }
+
+.permanent-archive-date-input {
+  label {
+    margin-right: $marginS;
+  }
+  input {
+    width: 100px;
+  }
+}

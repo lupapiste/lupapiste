@@ -175,7 +175,7 @@
     :role "authority"
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
-    :orgAuthz {:753-R #{:authority :approver}
+    :orgAuthz {:753-R #{:authority :approver :tos-editor :tos-publisher :archivist}
                :753-YA #{:authority :approver}
                :998-R-TESTI-2 #{:authority :approver}}
     :firstName "Sonja"
@@ -563,7 +563,8 @@
                                 :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
                        :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled true}
+                       :permanent-archive-enabled true
+                       :permanent-archive-in-use-since 1451613600000}
 
                       ;; Sipoo R
                       {:id "753-R"
@@ -613,7 +614,8 @@
                        :kopiolaitos-orderer-email "tilaaja@example.com"
                        :kopiolaitos-orderer-phone "0501231234"
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "YM" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false
+                       :permanent-archive-enabled true
+                       :permanent-archive-in-use-since 1451613600000
                        :tags [{:id "111111111111111111111111" :label "yl\u00E4maa"} {:id "222222222222222222222222" :label "ullakko"}]
                        :areas {:type "FeatureCollection"
                                :features [{:id "sipoo_keskusta",
