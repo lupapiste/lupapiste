@@ -58,6 +58,11 @@
     (fail :error.unauthorized
           :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority.")))
 
+(defn- has-versions [{{attachmentId :attachmentId} :data user :user} application]
+  (when (and (ss/not-blank? attachmentId)
+             (empty? (:versions (attachment/get-attachment-info application attachmentId))))
+    (fail :error.attachment.no-versions)))
+
 (defn- attachment-editable-by-application-state
   ([command application]
    (attachment-editable-by-application-state false command application))
@@ -167,23 +172,23 @@
 
 (defcommand approve-attachment
   {:description "Authority can approve attachment, moves to ok"
-   :parameters  [id attachmentId]
-   :input-validators [(partial action/non-blank-parameters [:attachmentId])]
+   :parameters  [id fileId]
+   :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:authority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts]}
-  [{:keys [created] :as command}]
-  (attachment/update-attachment-data! command attachmentId {:state :ok} created :set-app-modified? true :set-attachment-modified? false))
+   :pre-checks  [has-versions, a/validate-authority-in-drafts]}
+  [command]
+  (attachment/set-attachment-state! command fileId :ok))
 
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
-   :parameters  [id attachmentId]
-   :input-validators [(partial action/non-blank-parameters [:attachmentId])]
+   :parameters  [id fileId]
+   :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:authority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts]}
-  [{:keys [created] :as command}]
-  (attachment/update-attachment-data! command attachmentId {:state :requires_user_action} created :set-app-modified? true :set-attachment-modified? false))
+   :pre-checks  [has-versions, a/validate-authority-in-drafts]}
+  [command]
+  (attachment/set-attachment-state! command fileId :requires_user_action))
 
 ;;
 ;; Create
