@@ -909,9 +909,9 @@
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
   (if-let [attachment-id (:id (get-attachment-info-by-file-id application file-id))]
     (let [data {:state new-state,
-                :approved {:value new-state
+                :approved {:value (if (= :ok new-state) :approved :rejected)
                            :user (select-keys user [:id :firstName :lastName])
                            :timestamp created
                            :fileId file-id}}]
-      (update-attachment-data! command attachment-id data created :set-app-modified? true :set-attachment-modified? false)))
-  (fail :error.attachment.id))
+      (update-attachment-data! command attachment-id data created :set-app-modified? true :set-attachment-modified? false))
+    (fail :error.attachment.id)))
