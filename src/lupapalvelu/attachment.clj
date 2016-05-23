@@ -18,7 +18,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
@@ -131,7 +131,7 @@
 (defschema AttachmentAuthUser
   "User summary for authorized users in attachment.
    Only name and role is used for users without Lupapiste account."
-  (let [SummaryAuthUser (assoc user/SummaryUser :role (sc/enum "stamper" "uploader"))]
+  (let [SummaryAuthUser (assoc usr/SummaryUser :role (sc/enum "stamper" "uploader"))]
     (sc/if :id
       SummaryAuthUser
       (select-keys SummaryAuthUser [:firstName :lastName :role]))))
@@ -163,7 +163,7 @@
 
 (defschema Signature
   "Signature for attachment version"
-  {:user                                 user/SummaryUser   ;;
+  {:user                                 usr/SummaryUser   ;;
    :created                              ssc/Timestamp      ;;
    :fileId                               sc/Str             ;; used as 'foreign key' to attachment version
    :version                              VersionNumber})    ;; version number of the signed attachment version
@@ -175,8 +175,8 @@
    :originalFileId                       sc/Str             ;; fileId of the unrotated file
    :created                              ssc/Timestamp
    :user                                 (sc/if :id         ;; User who created the version
-                                           user/SummaryUser ;; Only name is used for users without Lupapiste account, eg. neighbours
-                                           (select-keys user/User [:firstName :lastName]))
+                                           usr/SummaryUser ;; Only name is used for users without Lupapiste account, eg. neighbours
+                                           (select-keys usr/User [:firstName :lastName]))
    :filename                             sc/Str             ;; original filename
    :contentType                          sc/Str             ;; MIME type of the file
    :size                                 (sc/maybe sc/Int)  ;; file size
@@ -261,7 +261,7 @@
   (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf"))
 
 (defn if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
-  (when (and (not (user/authority? user))
+  (when (and (not (usr/authority? user))
              (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
@@ -432,7 +432,7 @@
   (mongo/delete-file-by-id (str file-id "-preview")))
 
 (defn next-attachment-version [{:keys [major minor] :or {major 0 minor 0}} user]
-  (if (user/authority? user)
+  (if (usr/authority? user)
     {:major major, :minor (inc minor)}
     {:major (inc major), :minor 0}))
 
@@ -456,7 +456,7 @@
              :fileId         file-id
              :originalFileId (or original-file-id file-id)
              :created        now
-             :user           (user/summary user)
+             :user           (usr/summary user)
              ;; File name will be presented in ASCII when the file is downloaded.
              ;; Conversion could be done here as well, but we don't want to lose information.
              :filename       filename
@@ -488,7 +488,7 @@
             :attachments.$.modified now
             :attachments.$.state  state
             (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
-      $addToSet {:attachments.$.auth (user/user-in-role (user/summary user) user-role)}})))
+      $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
 
 (defn- remove-old-files! [{old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
   (some->> (filter (comp #{original-file-id} :originalFileId) old-versions)
@@ -545,7 +545,7 @@
         latest-version-index (-> attachment :versions count dec)
         latest-version-path (str "attachments.$.versions." latest-version-index ".")
         old-file-id (get-in attachment [:latestVersion :fileId])
-        user-summary (user/summary user)]
+        user-summary (usr/summary user)]
 
     (when-not (= old-file-id file-id)
       (delete-attachment-file-and-preview! old-file-id))
@@ -569,7 +569,7 @@
    Otherwise a new attachment is created."
   [application {:keys [attachment-id attachment-type op created user target locked required contents read-only source] :as options}]
   {:pre [(map? application)]}
-  (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? user))
+  (let [requested-by-authority? (and (ss/blank? attachment-id) (usr/authority? user))
         find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id} [:attachments]))]
     (cond
       (ss/blank? attachment-id) (create-attachment! application attachment-type op created target locked required requested-by-authority? nil contents read-only source)

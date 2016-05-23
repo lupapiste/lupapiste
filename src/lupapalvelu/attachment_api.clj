@@ -19,7 +19,7 @@
             [lupapalvelu.building :as building]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
@@ -54,7 +54,7 @@
 
 (defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user} application]
   (when (and (-> (attachment/get-attachment-info application attachmentId) :required true?)
-             (not (user/authority? user)))
+             (not (usr/authority? user)))
     (fail :error.unauthorized
           :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority.")))
 
@@ -65,11 +65,11 @@
    (when-not (ss/blank? attachmentId)
      (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
        (when-not (if (= (keyword current-state) :sent)
-                   (or (and authority-sent? (user/authority? user))
+                   (or (and authority-sent? (usr/authority? user))
                        (statement/delete-attachment-allowed? attachmentId application))
                    (or (not (states/post-verdict-states (keyword current-state)))
                        (states/post-verdict-states (keyword create-state))
-                       (user/authority? user)))
+                       (usr/authority? user)))
          (fail :error.pre-verdict-attachment))))))
 
 (defn- validate-meta [{{meta :meta} :data}]
@@ -510,12 +510,12 @@
    :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
-    (if (user/get-user-with-password (:username u) password)
+    (if (usr/get-user-with-password (:username u) password)
       ; check, if user has access to (at least one of) the requested attachmentIds
       (if-let [attachments (seq (attachment/get-attachments-infos application attachmentIds))]
         ; OK, get all attachments of application so indices are correct
         (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
-              signature {:user (user/summary u)
+              signature {:user (usr/summary u)
                          :created (:created command)}
               updates (reduce (fn [m {attachment-id :id {version :version file-id :fileId} :latestVersion}]
                                 (merge m (mongo/generate-array-updates
