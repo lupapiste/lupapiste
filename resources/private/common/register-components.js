@@ -4,6 +4,7 @@ jQuery(document).ready(function() {
   var components = [
     {name: "modal-dialog"},
     {name: "message-panel"},
+    {name: "approval", synchronous: true},
     {name: "fill-info", synchronous: true},
     {name: "foreman-history", synchronous: true},
     {name: "foreman-other-applications", synchronous: true},
