@@ -410,6 +410,17 @@
     (tos/update-process-retention-period (:id application) now)
     (:id ram-attachment)))
 
+(defn resolve-ram-links [attachments attachment-id]
+  (let [links-to   (loop [res [] id attachment-id] ;; links-to includes current attachment
+                     (if-let [attachment (and id (util/find-by-id id attachments))]
+                       (recur (cons attachment res) (:ram-link attachment))
+                       res))
+        links-from (loop [res [] id attachment-id]
+                     (if-let [attachment (and id (util/find-first (comp #{id} :ram-link) attachments))]
+                       (recur (conj res attachment) (:id attachment))
+                       res))]
+    (concat links-to links-from)))
+
 (defn- delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)
   (mongo/delete-file-by-id (str file-id "-preview")))
