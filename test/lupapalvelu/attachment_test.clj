@@ -392,16 +392,29 @@
       (resolve-ram-links [attachment1 attachment2] (:id attachment1)) => [attachment1 attachment2]))
 
   (fact "no linking"
-    (let [attachments (vec (repeatedly 5 (fn [] (assoc (ssg/generate Attachment) :ram-link nil))))]
+    (let [ids         (gen/sample ssg/object-id 5)
+          attachments (mapv (fn [id] {:id id :ram-link nil}) ids)]
       (resolve-ram-links attachments (:id (nth attachments 2))) => [(nth attachments 2)]))
 
   (fact "complete ram link chain"
     (let [ids         (gen/sample ssg/object-id 5)
-          attachments (map (fn [[link id]] (assoc (ssg/generate Attachment) :id id :ram-link link)) (partition 2 1 ids))]
+          attachments (map (fn [[link id]] {:id id :ram-link link}) (partition 2 1 ids))]
       (resolve-ram-links attachments (nth ids 2)) => attachments))
 
   (fact "inclomplete ram link chain"
     (let [ids         (gen/sample ssg/object-id 5)
-          attachments (-> (mapv (fn [[link id]] (assoc (ssg/generate Attachment) :id id :ram-link link)) (partition 2 1 ids))
+          attachments (-> (mapv (fn [[link id]] {:id id :ram-link link}) (partition 2 1 ids))
                           (assoc-in [3 :ram-link] nil))]
-      (resolve-ram-links attachments (nth ids 1)) => (take 3 attachments))))
+      (resolve-ram-links attachments (nth ids 1)) => (take 3 attachments)))
+
+  (fact "self-linked - should not get in endless loop"
+    (let [id          (ssg/generate ssc/ObjectIdStr)
+          attachment  {:id id :ram-link id}]
+      (resolve-ram-links [attachment] id) => [attachment]))
+
+  (fact "link ring - should not get in endless loop"
+    (let [ids         (gen/sample ssg/object-id 5)
+          attachments (map (fn [[link id]] {:id id :ram-link link}) (partition 2 1 ids ids)) ; padded with first id
+          result      (resolve-ram-links attachments (nth ids 2))]
+      (count result) => (count attachments)
+      (set result)   => (just attachments))))
