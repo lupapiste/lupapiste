@@ -521,12 +521,13 @@
     (if (some seq validation-errors)
       (do
         (errorf "verdict->tasks: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
-        (fail :error.invalid-task-type)))
-    (do
-      (doseq [added-task added-tasks-with-updated-buildings]
-        (tasks/generate-task-pdfa application added-task (:user command) (:lang command "fi")))
-      (update-application command (util/deep-merge task-updates building-updates))
-      (ok))))
+        (fail :error.invalid-task-type))
+      ;; else
+      (do
+        (doseq [added-task added-tasks-with-updated-buildings]
+          (tasks/generate-task-pdfa application added-task (:user command) (:lang command "fi")))
+        (update-application command (util/deep-merge task-updates building-updates))
+        (ok)))))
 
 
 (defn do-check-for-reviews [{:keys [application] :as command}]
