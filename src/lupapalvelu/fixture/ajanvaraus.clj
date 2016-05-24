@@ -1,4 +1,4 @@
-(ns lupapalvelu.fixture.ajanvaraus-itest
+(ns lupapalvelu.fixture.ajanvaraus
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :refer :all]
             [sade.core :refer :all]

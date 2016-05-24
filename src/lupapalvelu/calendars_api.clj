@@ -5,20 +5,21 @@
             [schema.core :as sc :refer [defschema]]
             [sade.http :as http]
             [sade.env :as env]
-            [lupapalvelu.user :as user]))
+            [sade.util :as util]
+            [lupapalvelu.user :as usr]))
 
 (defn- ->FrontendReservationSlots [backend-slots]
   (map (fn [s] {:id        (:id s)
                 :status    (if (:fullyBooked s) :booked :available)
                 :reservationTypes (map #(select-keys % [:id :name]) (:reservationTypes s))
-                :startTime (sade.util/to-millis-from-local-datetime-string (-> s :time :start))
-                :endTime   (sade.util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
+                :startTime (util/to-millis-from-local-datetime-string (-> s :time :start))
+                :endTime   (util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
 
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
          (let [{start :start end :end reservationTypes :reservationTypes} s]
-           {:time             {:start (sade.util/to-xml-local-datetime start)
-                               :end   (sade.util/to-xml-local-datetime end)}
+           {:time             {:start (util/to-xml-local-datetime start)
+                               :end   (util/to-xml-local-datetime end)}
             :reservationTypes reservationTypes
             :capacity 1}))
        slots))
@@ -32,7 +33,8 @@
     (f url (merge {:as               :json
                    :throw-exceptions false
                    :basic-auth       [(env/value :ajanvaraus :username)
-                                      (env/value :ajanvaraus :password)]} opts))))
+                                      (env/value :ajanvaraus :password)]}
+                  opts))))
 
 (defn- api-query
   ([action]
@@ -94,10 +96,9 @@
   [calendarId userId]
   (let [calendar (api-query (str "/api/resources/" calendarId))
         external-ref (:externalRef calendar)]
-    (if (.endsWith external-ref userId)
+    (when (.endsWith external-ref userId)
       {:id           (:id calendar)
-       :organization (:organizationCode calendar)}
-      nil)))
+       :organization (:organizationCode calendar)})))
 
 (defn- find-calendars-for-organizations
   [& orgIds]
@@ -144,9 +145,9 @@
 
 (defn- enable-calendar
   [userId organization]
-  (let [target-user       (user/get-user-by-id userId)
+  (let [target-user       (usr/get-user-by-id userId)
         existing-calendar (find-calendar-for-user-and-organization userId organization)]
-    (when-not (user/user-is-authority-in-organization? (user/with-org-auth target-user) organization)
+    (when-not (usr/user-is-authority-in-organization? (usr/with-org-auth target-user) organization)
       (error "Tried to enable a calendar with invalid user-organization pairing: " userId organization)
       (unauthorized!))
     (if existing-calendar
@@ -155,9 +156,9 @@
 
 (defn- disable-calendar
   [userId organization]
-  (let [target-user       (user/get-user-by-id userId)
+  (let [target-user       (usr/get-user-by-id userId)
         existing-calendar (find-calendar-for-user-and-organization userId organization)]
-    (when-not (user/user-is-authority-in-organization? (user/with-org-auth target-user) organization)
+    (when-not (usr/user-is-authority-in-organization? (usr/with-org-auth target-user) organization)
       (error "Tried to disable a calendar with invalid user-organization pairing: " userId organization)
       (unauthorized!))
     (when-not existing-calendar
@@ -180,7 +181,7 @@
    :user-roles #{:authorityAdmin}}
   [_]
   (let [calendar (get-calendar calendarId userId)
-        user     (user/get-user-by-id userId)]
+        user     (usr/get-user-by-id userId)]
     (ok :calendar (assoc calendar :name (format "%s %s" (:firstName user) (:lastName user))
                                   :email (:email user)))))
 
@@ -188,8 +189,8 @@
   {:user-roles #{:authorityAdmin}
    :feature :ajanvaraus}
   [{user :user}]
-  (let [admin-in-organization-id (user/authority-admins-organization-id user)
-        users                    (user/authority-users-in-organizations [admin-in-organization-id])
+  (let [admin-in-organization-id (usr/authority-admins-organization-id user)
+        users                    (usr/authority-users-in-organizations [admin-in-organization-id])
         calendars                (find-calendars-for-organizations admin-in-organization-id)]
     (if calendars
       (let [users (map #(authority-admin-assoc-calendar-to-user calendars %) users)]
@@ -200,7 +201,7 @@
   {:user-roles #{:authorityAdmin}
    :feature    :ajanvaraus}
   [{{:keys [userId enabled]} :data adminUser :user}]
-  (let [orgId (user/authority-admins-organization-id adminUser)]
+  (let [orgId (usr/authority-admins-organization-id adminUser)]
     (info "Set calendar enabled status" userId "in organization" orgId "as" enabled)
     (if enabled
       (ok :calendarId (enable-calendar userId orgId) :enabled true)
@@ -228,7 +229,7 @@
   {:user-roles #{:authorityAdmin}
    :feature    :ajanvaraus}
   [{{:keys [reservationType]} :data user :user}]
-  (let [admin-in-organization-id (user/authority-admins-organization-id user)]
+  (let [admin-in-organization-id (usr/authority-admins-organization-id user)]
     (info "Adding reservation type" reservationType "for organization" admin-in-organization-id)
     (ok :reservationTypes (post-command "/api/reservation-types/" {:reservationType   reservationType
                                                                     :organization      admin-in-organization-id}))))
@@ -237,7 +238,7 @@
   {:user-roles #{:authorityAdmin}
    :feature    :ajanvaraus}
   [{user :user}]
-  (let [admin-in-organization-id (user/authority-admins-organization-id user)]
+  (let [admin-in-organization-id (usr/authority-admins-organization-id user)]
     (info "Get reservation types for organization" admin-in-organization-id)
     (ok :reservationTypes (api-query "/api/reservation-types/by-organization" {:organization admin-in-organization-id}))))
 

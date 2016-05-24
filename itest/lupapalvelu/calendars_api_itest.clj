@@ -4,7 +4,7 @@
            [lupapalvelu.fixture.minimal :as minimal]
            [lupapalvelu.user :as u]))
 
-(apply-remote-fixture "ajanvaraus-itest")
+(apply-remote-fixture "ajanvaraus")
 
 (fact "non-authority-admin users should not be able to use the calendar admin API"
   (query pena :calendars-for-authority-admin) => fail?)
