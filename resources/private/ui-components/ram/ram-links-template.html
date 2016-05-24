@@ -2,7 +2,7 @@
         id="ram-links-template">
   <!-- ko if: showLinks -->
   <h3 data-bind="ltext: 'attachment.ram.links'"></h3>
-  <table>
+  <table data-test-id="ram-links-table">
     <thead>
       <tr>
         <th data-bind="ltext: 'attachment.file'"></th>
@@ -14,12 +14,16 @@
     </thead>
     <tbody data-bind="foreach: links">
       <tr>
-        <td data-bind="text: _.get( $data, 'latestVersion.filename', '-')"></td>
-        <td data-bind="version: _.get( $data, 'latestVersion.version')"></td>
+        <td data-bind="text: _.get( $data, 'latestVersion.filename', '-'),
+                       attr: {'data-test-id': 'ram-link-filename-' + $index()}"></td>
+        <td data-bind="version: _.get( $data, 'latestVersion.version'),
+                       attr: {'data-test-id': 'ram-link-version-' + $index()}"></td>
         <td data-bind="dateTimeString: modified"></td>
-        <td data-bind="fullName: _.get( $data, 'latestVersion.user', {})"></td>
+        <td data-bind="fullName: _.get( $data, 'latestVersion.user', {}),
+                       attr: {'data-test-id': 'ram-link-name-' + $index()}"></td>
         <td data-bind="if: id != $parent.attachmentId">
-          <a data-bind="attr: {href: $parent.service.attachmentUrl( id )}"
+          <a data-bind="attr: {href: $parent.service.attachmentUrl( id ),
+                        'data-test-id': 'ram-link-link-' + $index()}"
              class="button primary">
             <i class="lupicon-external-link"></i>
           </a>
