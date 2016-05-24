@@ -506,12 +506,17 @@
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
 
-        task-updates {$set {:tasks updated-tasks}}]
+        task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
 
-    ;; (println "muuTunnus of review-tasks:" (map #(-> % :data :muuTunnus) review-tasks))
-    ;; (doseq [task (filter #(= "task-katselmus" (-> % :schema-info :name)) updated-tasks)]
-    ;;   (assert (= (count (:buildings buildings-summary))
-    ;;              (-> task :data :rakennus count))))
+
+    (doseq [task (filter #(and (= "task-katselmus" (-> % :schema-info :name))
+                               (-> % :data :rakennus)) updated-tasks)]
+      (if-not (= (count buildings-summary)
+                 (-> task :data :rakennus count))
+              (errorf "buildings count %s != task rakennus count %s for id %s"
+                      (count buildings-summary)
+                      (-> task :data :rakennus count) (:id application))))
+
     (assert (every? not-empty updated-tasks))
     (assert (every? map? updated-tasks))
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))

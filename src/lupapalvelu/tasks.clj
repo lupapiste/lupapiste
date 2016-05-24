@@ -332,7 +332,7 @@
                          (match-old-by-id :localId :kunnanSisainenPysyvaRakennusnumero)
                          (match-old-by-id :index :jarjestysnumero))
         update-from-old (fn [new-building old-rakennus]
-                          (assoc new-building :task-tila (:tila old-rakennus)))]
+                          (assoc new-building :task-tila (tools/unwrapped  (:tila old-rakennus))))]
     (if-not (nil? matching-old)
       (update-from-old new-building matching-old)
       ;; else
@@ -351,6 +351,8 @@
     (if (> (count task-rakennus) (count new-buildings-with-states))
       (errorf "too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states))
       ;; else
-      (debugf "enough buildings: task has %s, :buildings %s" (count task-rakennus) (count new-buildings-with-states))
+      ;;(debugf "enough buildings: task has %s, :buildings %s" (count task-rakennus) (count new-buildings-with-states))
       )
-    (assoc-in task [:data :rakennus] task-rakennus)))
+    ;;(println "new buildings: " task-rakennus)
+    ;;(println "old buildings: " task-rakennus)
+    (assoc-in task [:data :rakennus] (tools/wrapped task-rakennus))))
