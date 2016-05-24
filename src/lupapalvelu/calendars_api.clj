@@ -16,10 +16,10 @@
 
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
-         (let [{start :start end :end reservationTypes :reservationTypes} s]
+         (let [{start :start end :end reservationTypeIds :reservationTypes} s]
            {:time             {:start (sade.util/to-xml-local-datetime start)
                                :end   (sade.util/to-xml-local-datetime end)}
-            :reservationTypes reservationTypes
+            :reservationTypeIds reservationTypeIds
             :capacity 1}))
        slots))
 
