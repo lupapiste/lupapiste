@@ -137,7 +137,7 @@ Attachment is generated
   Open tab  attachments
   Wait until  Element should be visible  //table[@data-test-id='attachments-template-table']//tr[@id='attachment-row-ennakkoluvat_ja_lausunnot-lausunto']
 
-Attachement is not removable from list view
+Attachment is not removable from list view
   Element should not be visible  //table[@data-test-id='attachments-template-table']//tr[@data-test-icon='delete-ennakkoluvat_ja_lausunnot.lausunto']
 
 Attachement is not removable from attachment view
@@ -206,6 +206,35 @@ There is no possibility to delete the generated statement pdf attachment
   Open tab  attachments
   Wait until  Element should be visible  xpath=//tr[@id="attachment-row-ennakkoluvat_ja_lausunnot-lausunto"]
   Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-ennakkoluvat_ja_lausunnot.lausunto"]
+  [Teardown]  Logout
 
-*** Keywords ***
+Mikko logs in and submits application
+  Mikko logs in
+  Open application  ${appname}  ${appPropertyId}
+  Submit application
+  [Teardown]  Logout  
 
+Sonja logs in and approves application
+  Sonja logs in
+  Open application  ${appname}  ${appPropertyId}
+  Approve application yes
+
+Sonja cannot invite any more statement givers
+  Open tab  statement
+  No such test id  add-statement
+  [Teardown]  Logout
+
+Luukas logs in but cannot edit statement
+  Luukas logs in
+  Open application  ${appname}  ${appPropertyId}
+  Open tab  statement
+  Open statement  luukas.lukija@sipoo.fi  
+  Wait until  Element should not be visible  statement-submit
+  Element should not be visible  jquery=#statement-submit
+  [Teardown]  Return from statement  
+
+Luukas can still delete (empty) statement
+  Scroll and click test id  delete-statement-3
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Element should not be visible  jquery=tr.statement-row i.lupicon-remove
+  [Teardown]  Logout  

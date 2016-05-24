@@ -4,6 +4,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.params = params;
   self.rows = ko.observableArray();
   self.autoupdatedRows = ko.observableArray();
+  self.disableWhileUpdating = ko.observable(false);
 
   var service = lupapisteApp.services.documentDataService;
 
@@ -55,6 +56,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   }));
 
   self.subscriptionIds.push(hub.subscribe("hetuChanged", function(data) {
+    self.disableWhileUpdating(true);
     ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: data.value || ""})
     .success(function() {
       repository.load(self.params.applicationId);

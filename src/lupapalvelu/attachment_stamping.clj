@@ -27,10 +27,11 @@
         source     (if re-stamp? (second versions) (first versions))]
     (assoc (select-keys source [:contentType :fileId :filename :size :archivable])
            :re-stamp? re-stamp?
+           :operation-id (get-in attachment [:op :id])
            :attachment-id (:id attachment)
            :attachment-type (:type attachment))))
 
-(defn- stamp-attachment! [stamp file-info {:keys [application user now] :as context}]
+(defn- update-stamp-to-attachment! [stamp file-info {:keys [application user now] :as context}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])
         file (File/createTempFile "lupapiste.stamp." ".tmp")
@@ -59,10 +60,20 @@
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))
 
+(defn- operation-specific? [{attachment-type :attachment-type}]
+  (->> (util/convert-values attachment-type keyword)
+       (contains? attachment/operation-specific-attachment-types)))
+
+(defn- select-buildings-by-operation [buildings operation-id]
+  (filter (comp #{operation-id} :operation-id) buildings))
+
 (defn- building->str [lang {:keys [short-id national-id]}]
-  (when-not (or (ss/blank? short-id) (ss/blank? national-id))
+  (when (ss/not-blank? national-id)
     (i18n/with-lang lang
-      (str (i18n/loc "stamp.building") " " short-id " : " national-id))))
+      (ss/join " " (cons (i18n/loc "stamp.building")
+                         (if (ss/not-blank? short-id)
+                           [short-id ":" national-id]
+                           [national-id]))))))
 
 (defn- info-fields->stamp [{:keys [text created transparency lang]} fields]
   {:pre [text (pos? created)]}
@@ -72,20 +83,44 @@
        (map (fn-> str (ss/limit 100)))
        (stamper/make-stamp (ss/limit text 100) created transparency)))
 
+(defn- make-stamp-without-buildings [context info-fields]
+  (->> (dissoc info-fields :buildings)
+       (info-fields->stamp context)))
+
+(defn- make-stamp-with-buildings [context info-fields]
+  (->> (update info-fields :buildings (partial remove (comp ss/blank? :short-id)))
+       (info-fields->stamp context)))
+
+(defn- make-operation-specific-stamps [context info-fields operation-ids]
+  (let [info-without-short-id (update info-fields :buildings (partial map #(dissoc % :short-id)))]
+    (->> (map (partial update info-without-short-id :buildings select-buildings-by-operation) operation-ids)
+         (map (partial info-fields->stamp context))
+         (zipmap operation-ids))))
+
+(defn- stamp-attachment! [stamp file-info context job-id application-id]
+  (try
+    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
+    (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
+    (->> (update-stamp-to-attachment! stamp file-info context)
+         (hash-map :status :done :fileId)
+         (job/update job-id assoc (:attachment-id file-info)))
+    (catch Throwable t
+      (errorf t "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
+      (job/update job-id assoc (:attachment-id file-info) {:status :error :fileId (:fileId file-info)}))))
+
 (defn- stamp-attachments!
-  [file-infos {:keys [job-id application info-fields] :as context}]
-  (let [stamp-without-buildings (info-fields->stamp context (dissoc info-fields :buildings))
-        stamp-with-buildings (info-fields->stamp context info-fields)]
-    (doseq [file-info file-infos]
-      (try
-        (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
-        (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
-        (let [stamp (if (asemapiirros? file-info) stamp-with-buildings stamp-without-buildings)
-              new-file-id (stamp-attachment! stamp file-info context)]
-          (job/update job-id assoc (:attachment-id file-info) {:status :done :fileId new-file-id}))
-        (catch Throwable t
-          (errorf t "failed to stamp attachment: application=%s, file=%s" (:id application) (:fileId file-info))
-          (job/update job-id assoc (:attachment-id file-info) {:status :error :fileId (:fileId file-info)}))))))
+  [file-infos {:keys [job-id application info-fields] {:keys [include-buildings]} :options :as context}]
+  (let [stamp-without-buildings   (make-stamp-without-buildings context info-fields)
+        stamp-with-buildings      (make-stamp-with-buildings context info-fields)
+        operation-specific-stamps (->> (map :operation-id file-infos)
+                                       (remove ss/blank?)
+                                       distinct
+                                       (make-operation-specific-stamps context info-fields))]
+    (doseq [{op-id :operation-id :as file-info} file-infos]
+      (-> (cond (and (asemapiirros? file-info) include-buildings) stamp-with-buildings
+                (and (operation-specific? file-info) op-id) (operation-specific-stamps op-id)
+                :else stamp-without-buildings)
+          (stamp-attachment! file-info context job-id (:id application))))))
 
 (defn- stamp-job-status [data]
   (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))

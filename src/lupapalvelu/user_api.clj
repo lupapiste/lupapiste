@@ -100,7 +100,7 @@
 
 
 (notifications/defemail :invite-authority
-  (assoc pw-reset/base-email-conf :subject-key "authority-invite.title" :recipients-fn notifications/from-user))
+  (assoc pw-reset/base-email-conf :subject-key "authority-invite.title"))
 
 (notifications/defemail :notify-authority-added
   {:model-fn (fn [{name :data} conf recipient] {:org-fi (:fi name), :org-sv (:sv name)}),
@@ -109,7 +109,7 @@
 
 (defn- notify-new-authority [new-user created-by]
   (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
-    (notifications/notify! :invite-authority {:user new-user, :data {:token token}})))
+    (notifications/notify! :invite-authority {:user new-user, :token token})))
 
 (defn- notify-authority-added [email organization-id]
   (let [user (usr/get-user-by-email email)

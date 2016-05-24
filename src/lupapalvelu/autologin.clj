@@ -27,8 +27,10 @@
       (rest parts))))
 
 (defn- valid-hash? [hash username ip ts secret]
-  (let [expected-hash (pandect/sha256-hmac (str username ip ts) secret)]
-    (boolean (or (= hash expected-hash) (error "Expected hash" expected-hash "of" username ip ts "- got" hash )))))
+  (if secret
+    (let [expected-hash (pandect/sha256-hmac (str username ip ts) secret)]
+      (boolean (or (= hash expected-hash) (error "Expected hash" expected-hash "of" username ip ts "- got" hash ))))
+    false))
 
 (def five-min-in-ms (* 5 60 1000))
 

@@ -19,77 +19,24 @@
             [sade.validators :as v]
             [monger.operators :refer :all]))
 
-(defn invites-to-auths [inv app-id inviter timestamp]
-  (if (:company-id inv)
-    (foreman/create-company-auth (:company-id inv))
-    (let [invited (user/get-or-create-user-by-email (:email inv) inviter)]
-      (auth/create-invite-auth inviter invited app-id (:role inv) timestamp))))
-
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole foremanEmail]
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/email-validator :foremanEmail)]
    :states states/all-application-states
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [application/validate-authority-in-drafts
+                application/validate-only-authority-before-verdict-given]}
   [{:keys [created user application] :as command}]
-  (let [foreman-app          (foreman/new-foreman-application command)
-        new-application-docs (foreman/create-foreman-docs application foreman-app foremanRole)
-        foreman-app          (assoc foreman-app :documents new-application-docs)
-        task                 (util/find-by-id taskId (:tasks application))
-
-        foreman-user   (when (v/valid-email? foremanEmail) (user/get-or-create-user-by-email foremanEmail user))
-        foreman-invite (when (and foreman-user (not (auth/has-auth? foreman-app (:id foreman-user))))
-                         (auth/create-invite-auth user foreman-user (:id foreman-app) "foreman" created))
-        invite-to-original? (and
-                              foreman-user
-                              (not (auth/has-auth? application (:id foreman-user))))
-
-        applicant-invites (->>
-                            (foreman/applicant-invites new-application-docs (:auth application))
-                            (remove #(= (:email %) (:email user)))) ;; LPK-1331, Don't double-invite the user of command, if applicant
-        auths             (remove nil?
-                                 (conj
-                                   (map #(invites-to-auths % (:id foreman-app) user created) applicant-invites)
-                                   foreman-invite))
-        grouped-auths (group-by #(if (not= "company" (:type %))
-                                   :other
-                                   :company) auths)
-
-        foreman-app (update-in foreman-app [:auth] (partial apply conj) auths)]
-
+  (let [foreman-user   (when (v/valid-email? foremanEmail)
+                         (user/get-or-create-user-by-email foremanEmail user))
+        foreman-app    (-> (foreman/new-foreman-application command)
+                           (foreman/update-foreman-docs application foremanRole)
+                           (foreman/copy-auths-from-linked-app foreman-user application user created)
+                           (foreman/add-foreman-invite-auth foreman-user user created))]
     (application/do-add-link-permit foreman-app (:id application))
     (application/insert-application foreman-app)
-
-    (when task
-      (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
-        (doc-persistence/persist-model-updates application "tasks" task updates created)))
-
-    ; Send notifications for authed
-    (try
-      (when invite-to-original?
-        (update-application command
-          {:auth {$not {$elemMatch {:invite.user.username (:email foreman-user)}}}}
-          {$push {:auth (auth/create-invite-auth user foreman-user (:id application) "foreman" created)}
-           $set  {:modified created}})
-        (notif/notify! :invite {:application application :recipients [foreman-user]}))
-
-      ; Invite notifications
-      (let [recipients (for [auth (:other grouped-auths)
-                             :let [user (get-in auth [:invite :user])]]
-                         (set/rename-keys user {:username :email}))]
-        (notif/notify! :invite {:application foreman-app :recipients recipients}))
-
-      ; Company invites
-      (doseq [auth (:company grouped-auths)
-              :let [company-id (-> auth :invite :user :id)
-                    token-id (company/company-invitation-token user company-id (:id foreman-app))]]
-        (notif/notify! :accept-company-invitation {:admins     (company/find-company-admins company-id)
-                                                   :caller     user
-                                                   :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                                   :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)}))
-      (catch Exception e
-        (error "Error when inviting to foreman application:" e)))
-
+    (foreman/update-foreman-task-on-linked-app! application foreman-app taskId command)
+    (foreman/send-invite-notifications! foreman-app foreman-user application command)
     (ok :id (:id foreman-app) :auth (:auth foreman-app))))
 
 (defcommand update-foreman-other-applications
@@ -107,7 +54,7 @@
                                           (remove #(get-in % [:autoupdated :value]))
                                           (concat other-applications)
                                           (zipmap (map (comp keyword str) (range))))))
-        documents (util/update-by-id tyonjohtaja-doc (:documents application))]
+        documents (util/replace-by-id tyonjohtaja-doc (:documents application))]
     (update-application command {$set {:documents documents}}))
   (ok))
 
@@ -116,7 +63,8 @@
    :states states/all-states
    :parameters [id taskId foremanAppId]
    :input-validators [(partial action/non-blank-parameters [:id :taskId])]
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [application/validate-authority-in-drafts
+                foreman/ensure-foreman-not-linked]}
   [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]
     (if task

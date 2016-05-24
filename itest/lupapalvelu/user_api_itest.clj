@@ -360,6 +360,7 @@
         resp   (http-post (str (server-address) "/api/reset-password") params) => http200?
         email  (last-email)]
     (-> resp decode-response :body) => ok?
-    (:to email) => (email-for "pena")
+    (:to email) => (contains (email-for "pena"))
+    (:to email) => #"Pena Panaani <.+@.+>"
     (:subject email) => "Lupapiste: Salasanan vaihto"
     (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/")))

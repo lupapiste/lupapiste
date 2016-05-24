@@ -6,7 +6,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
 
 - [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 - [Leiningen](https://github.com/technomancy/leiningen) 2.5+
-- [MongoDB](https://www.mongodb.org/downloads) (testattu 2.6 ja 3.0 versioilla)
+- [MongoDB](https://www.mongodb.org/downloads) (testattu 2.6 - 3.2 versioilla)
 - CSS ja [Sass](http://sass-lang.com):
     - [Ruby](https://www.ruby-lang.org)
     - [Compass](http://compass-style.org/): `gem install compass`
@@ -18,7 +18,7 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
   - IE:llä ajettavia testejä varten ajuri osoitteesta  http://selenium-release.storage.googleapis.com/index.html
   - Chromella ajettavia testejä varten ajuri osoitteesta http://chromedriver.storage.googleapis.com/index.html
 - [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
-  PDF-tiedostojen kääntämistä ja korjaamista varten
+  PDF-tiedostojen kääntämistä ja korjaamista varten. [Apuja OS X -ongelmin](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
 
 Valinnaisesti:
 

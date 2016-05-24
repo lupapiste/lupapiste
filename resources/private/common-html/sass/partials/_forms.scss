@@ -1062,7 +1062,7 @@ $max-columns: 12;
 
   input[type=checkbox]:disabled + .#{$label-cls}:before {
     cursor: initial;
-    color: $checkbox-color;    
+    color: $checkbox-color;
   }
 }
 
@@ -1094,6 +1094,28 @@ $max-columns: 12;
 
 @include label-checkbox (checkbox-label) {}
 
+@mixin input-fields() {
+  padding: 0 $marginM;
+  box-sizing: border-box;
+  min-height: $grid-input-height;
+  height: $grid-input-height;
+  font-size: $grid-font-size;
+  color: $input-color;
+  border: 1px solid $input-border-color;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance:none;
+
+  &:focus {
+    color: $input-focus-color;
+    border-color: $input-focus-border-color;
+  }
+  &:disabled {
+    border-color: $input-disabled-border-color;
+    background-color: $input-disabled-background-color;
+  }
+}
+
 .form-grid {
   // overflow-y: hidden;
   width: 100%;
@@ -1124,7 +1146,7 @@ $max-columns: 12;
     }
     @include hide-radio-check-input
   }
-  
+
   .col--no-margin {
     padding: 0 !important;
     .checkbox-wrapper {
@@ -1141,28 +1163,16 @@ $max-columns: 12;
   }
 
   input[type=text], input[type=password], select, textarea {
-    padding: 0 $marginM;
-    min-height: $grid-input-height;
-    height: $grid-input-height;
-    width: 100%;
-    box-sizing: border-box;
-    font-size: $grid-font-size;
-    color: $input-color;
-    border: 1px solid $input-border-color;
-    -webkit-appearance: none;
-    -webkit-border-radius: 0px;
-    -moz-appearance:none;
+    @include input-fields;
 
-    &:focus {
-      color: $input-focus-color;
-      border-color: $input-focus-border-color;
-    }
+    width: 100%;
   }
 
   textarea {
     height: $grid-textarea-height;
     padding: $marginS $marginM;
   }
+
 
   .radio-label:before {
     @include lupicon-font;
@@ -1506,6 +1516,15 @@ select.dropdown--plain {
   }
 }
 
+.grid-style-input {
+  @include input-fields;
+}
+
+textarea.grid-style-input {
+  height: $grid-textarea-height;
+  padding: $marginS $marginM;
+}
+
 .no-wrap-whitespace {
   white-space: nowrap;
 }
@@ -1570,4 +1589,12 @@ div.review-done {
     border-color: lighten($lp-orange, 10%);
     border-width: 1px;
   }
+}
+
+.checkbox-wrapper.checkbox-wrapper--break {
+  margin-bottom: $marginL;
+}
+
+.foreman-info {
+  padding-left: $marginS;
 }

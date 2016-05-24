@@ -5,6 +5,13 @@
             [sade.util :as util]
             [sade.strings :as ss]))
 
+(defn- convert-kesto-row [[ind row]]
+  (apply merge
+         {:alkuPvm (util/to-xml-date-from-string (:alku row))
+          :loppuPvm (util/to-xml-date-from-string (:loppu row))}
+         (-> (dissoc row :alku :loppu)
+             (util/convert-values util/to-xml-time-from-string))))
+
 (defn meluilmoitus-canonical [application lang]
   (let [unwrapped-docs {:documents (tools/unwrapped (:documents application))}
         documents (canonical-common/documents-by-type-without-blanks unwrapped-docs)
@@ -13,8 +20,7 @@
         rakentamisen-kuvaus (-> meluilmo :data :rakentaminen :kuvaus)
         muu-rakentaminen (-> meluilmo :data :rakentaminen :muu-rakentaminen)
         muu-rakentaminen? (not (ss/blank? muu-rakentaminen))
-        kesto (-> (:ymp-ilm-kesto documents) first :data :kesto)
-        kello (apply merge (filter map? (vals kesto)))
+        kestot (-> (:ymp-ilm-kesto documents) first :data :kesto)
         melu (-> meluilmo :data :melu)
         hakija-key (keyword (operations/get-applicant-doc-schema-name application))]
     {:Ilmoitukset {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
@@ -49,13 +55,9 @@
                                                                                                             :ulkoilmakonsertti
                                                                                                             :muu))
                                                                                                  (str (-> meluilmo :data :tapahtuma :nimi) " - " (-> meluilmo :data :tapahtuma :kuvaus))}))}
-                                             :toiminnanKesto (merge
-                                                               {:alkuPvm (util/to-xml-date-from-string (:alku kesto))
-                                                                :loppuPvm (util/to-xml-date-from-string (:loppu kesto))}
-                                                               (util/convert-values kello util/to-xml-time-from-string))
+                                             :toiminnanKesto (first (map convert-kesto-row kestot))
                                              :melutiedot {:koneidenLkm (-> meluilmo :data :rakentaminen :koneet)
                                                           :melutaso {:db (:melu10mdBa melu)
                                                                      :paiva (:paivalla melu)
                                                                      :yo (:yolla melu)
-                                                                     :mittaaja (:mittaus melu)
-                                                                     }}}}}}))
+                                                                     :mittaaja (:mittaus melu)}}}}}}))

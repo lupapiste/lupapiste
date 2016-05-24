@@ -11,11 +11,15 @@
                       :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}
                       :data (tools/wrapped
                               {:kesto
-                               {:alku "03.02.2014"
-                                :loppu "7.2.2014"
-                                :arki {:arkiAlkuAika "7:00", :arkiLoppuAika "21:30:00"}
-                                :lauantai {:lauantaiAlkuAika "8:00", :lauantaiLoppuAika "20:00:00.0"}
-                                :sunnuntai {:sunnuntaiAlkuAika "12:00", :sunnuntaiLoppuAika "18:00"}}})})
+                               {:0 {:alku "03.02.2014"
+                                    :loppu "7.2.2014"
+                                    :arkiAlkuAika "7:00", :arkiLoppuAika "21:30:00"
+                                    :lauantaiAlkuAika "8:00", :lauantaiLoppuAika "20:00:00.0"
+                                    :sunnuntaiAlkuAika "12:00", :sunnuntaiLoppuAika "18:00"}
+                                :3 {:alku "03.02.2016"
+                                    :loppu "7.2.2016"
+                                    :arkiAlkuAika "17:00", :arkiLoppuAika "21:30:00"
+                                    :sunnuntaiAlkuAika "12:00", :sunnuntaiLoppuAika "18:00"}}})})
 
 (def- meluilmo
   {:id "52ef4ef14206428d3c0394b5"

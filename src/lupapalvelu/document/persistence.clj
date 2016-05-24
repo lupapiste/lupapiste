@@ -58,7 +58,7 @@
       (constantly nil))))
 
 (defn after-update-triggered-updates [application collection original-doc updated-doc]
-  (->> (update application (keyword collection) (partial util/update-by-id updated-doc))
+  (->> (update application (keyword collection) (partial util/replace-by-id updated-doc))
        ((get-after-update-trigger-fn original-doc))))
 
 (defn validated-model-updates
@@ -313,5 +313,3 @@
       (when-not company (fail! :error.company-not-found))
       (debugf "merging company %s into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
       (persist-model-updates application "documents" document updates timestamp))))
-
-

@@ -4,7 +4,7 @@ Sinut on kutsuttu viranomaiseksi Lupapiste-palveluun. Oheisen linkin kautta p&au
 
 Jatka klikkaamalla linkki&auml;:
 
-{{link-fi}}
+  {{link-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
@@ -22,7 +22,7 @@ du har bjudits in som myndighet i tj&auml;nsten Lupapiste. Genom l&auml;nken ned
 
 Forts&auml;tt genom att klicka p&aring; l&auml;nken:
 
-{{link-sv}}
+  {{link-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 

@@ -67,6 +67,7 @@
 (def sipoo-ya    (apikey-for "sipoo-ya"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
+(def oulu        (apikey-for "ymp-admin@oulu.fi"))
 (def dummy       (apikey-for "dummy"))
 (def admin       (apikey-for "admin"))
 (def admin-id    (id-for "admin"))
@@ -419,6 +420,13 @@
   (let [{app-id :id :as resp} (apply create-app apikey args)]
     (test-application-create-successful resp app-id)
     (query-application apikey app-id)))
+
+(defn create-and-open-application
+  "Creates a new application, opens it, and returns the application map"
+  [apikey & args]
+  (let [id (apply create-app-id apikey args)]
+    (comment-application apikey id true)
+    (query-application apikey id)))
 
 (defn create-and-submit-application
   "Returns the application map"

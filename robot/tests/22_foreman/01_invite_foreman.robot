@@ -54,7 +54,30 @@ Pena sets Solita as hakija
   Wait until  Select From List  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
 
-Pena invites foreman Teppo to application
+Pena cannot create foreman applications before verdict is given
+  Element should be visible  xpath=//div[@data-test-id="invite-foreman-authority-info"]
+  Element should not be visible  xpath=//button[@data-test-id="invite-foreman-button"]
+  Element should not be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
+
+Pena sets himself the applicant
+  Click by test id  hakija-r_append_btn
+  Wait until  Select From List  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]  Panaani Pena
+  Wait Until  Textfield Value Should Be  xpath=(//section[@data-doc-type="hakija-r"])[2]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Pena
+
+Pena inputs comment in order to open the application
+  Input comment and open to authorities  Avataan
+  [Teardown]  logout
+
+Sonja can invite foremen to application
+  Sonja logs in
+  Open application  ${appname}  753-416-25-22
+  Open tab  parties
+  Open foreman accordions
+  Element should not be visible  xpath=//div[@data-test-id="invite-foreman-authority-info"]
+  Element should be visible  xpath=//button[@data-test-id="invite-foreman-button"]
+  Element should be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
+
+Sonja invites foreman Teppo to application
   Click by test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
@@ -62,9 +85,11 @@ Pena invites foreman Teppo to application
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Set Suite Variable  ${foremanAppId}  ${foremanAppId}
+  [Teardown]  logout
 
 Pena sees sent invitation on the original application
-  Go back to project application
+  Pena logs in
+  Open project application
   Open tab  parties
   Open foreman accordions
   Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
@@ -76,7 +101,8 @@ Pena sees sent invitations on the foreman application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${foremanAppId}
   Open tab  parties
   Open foreman accordions
-  Wait until  Xpath Should Match X Times  //table//tr[@class="party"]  3
+  Wait and click  xpath=//button[@data-test-id='confirm-yes']
+  Wait until  Xpath Should Match X Times  //table//tr[@class="party"]  4
   Go to  ${LOGOUT URL}
   [Teardown]  logout
 
@@ -104,38 +130,30 @@ Application is submitted
   Submit application
   [Teardown]  logout
 
-Authority can view draft foreman application, but can't use commands
-  # LPK-289
-  Sonja logs in
-  Open project application
-  Wait Until  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
-  Click by test id  test-application-app-linking-to-us
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
-  Element should be disabled  xpath=//section[@data-doc-type="hankkeen-kuvaus-minimum"]//textarea
-  Open tab  parties
-  Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]
-  Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
-  Open tab  attachments
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  1
-  Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse...
-  Open tab  requiredFieldSummary
-  Element should not be visible  xpath=//div[@id="application-requiredFieldSummary-tab"]//button[@data-test-id="application-submit-btn"]
-  # Application actions only exportPDF is visible
-  Element should be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-pdf-btn"]
-  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="add-operation"]
-  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-add-link-permit-btn"]
-  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-btn"]
-  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-authority-btn"]
-
-
 Original application is approved and given a verdict
+  Sonja logs in
+  Open application by id  ${foremanAppId}
+  Open tab  requiredFieldSummary
   Click by test id  test-application-link-permit-lupapistetunnus
   Project application is open
   Approve application
   Open tab  verdict
   Submit empty verdict
+  [Teardown]  logout
+
+Pena can create foreman applications after verdict is given for the original application
+  Pena logs in
+  Open project application
+  Open tab  parties
+  Open foreman accordions
+  Element should not be visible  xpath=//div[@data-test-id="invite-foreman-authority-info"]
+  Wait until  Element should be visible  xpath=//button[@data-test-id="invite-foreman-button"]
+  Wait until  Element should be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
+  [Teardown]  logout
 
 Add työnjohtaja task to original application
+  Sonja logs in
+  Open project application
   Add työnjohtaja task to current application  Ylitarkastaja
   Add työnjohtaja task to current application  Alitarkastaja
   Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  2
@@ -180,6 +198,41 @@ Pena can invite additional foremans to application with verdict
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
+
+Pena invites foreman Mikko to application
+  Open project application
+  Open tab  parties
+  Open foreman accordions
+  Click by test id  invite-foreman-button
+  Input Text  invite-foreman-email  mikko@example.com
+  Click by test id  application-invite-foreman
+  Wait until  Click by test id  application-invite-foreman-close-dialog
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
+  ${foremanAppId2} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
+  Set Suite Variable  ${foremanAppId2}  ${foremanAppId2}
+  [Teardown]  logout
+
+Authority can view draft foreman application, but can't use commands
+  # LPK-289
+  Sonja logs in
+  Open application by id  ${foremanAppId2}
+  Wait until  Element should be visible  xpath=//section[@data-doc-type="hankkeen-kuvaus-minimum"]
+  Open accordions  info
+  Element should be disabled  xpath=//section[@data-doc-type="hankkeen-kuvaus-minimum"]//textarea
+  Open tab  parties
+  Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]
+  Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
+  Open tab  attachments
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  1
+  Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse...
+  Open tab  requiredFieldSummary
+  Element should not be visible  xpath=//div[@id="application-requiredFieldSummary-tab"]//button[@data-test-id="application-submit-btn"]
+  # Application actions only exportPDF is visible
+  Element should be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-pdf-btn"]
+  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="add-operation"]
+  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-add-link-permit-btn"]
+  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-btn"]
+  Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-cancel-authority-btn"]
   [Teardown]  logout
 
 *** Keywords ***
@@ -197,4 +250,3 @@ Invite Mikko
   Click by test id  application-invite-submit
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
-

@@ -24,12 +24,7 @@ LUPAPISTE.ForemanModel = function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
       !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "primaryOperation", "name"]));
   });
-  self.linkedForemanApps = ko.observableArray();
-  self.selectableForemen = ko.pureComputed(function() {
-    return _.filter(self.foremanApplications(), function(app) {
-      return !_.includes(self.linkedForemanApps(), app.id);
-    });
-  });
+  var linkedForemanApps = ko.observableArray();
 
   self.canInvite = ko.pureComputed(_.partial(lupapisteApp.models.applicationAuthModel.ok, "invite-with-role"));
   self.canSelect = ko.pureComputed(_.partial(lupapisteApp.models.applicationAuthModel.ok, "link-foreman-task"));
@@ -85,51 +80,55 @@ LUPAPISTE.ForemanModel = function() {
 
     function loadForemanTasks() {
       var foremanTasks = _.filter(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
-      var foremen = [];
-      var asiointitunnukset = [];
+      var asiointitunnukset = _(foremanTasks)
+        .map(function(task) {
+          return util.getIn(task, ["data", "asiointitunnus", "value"]);
+        })
+        .filter()
+        .value();
 
-      _.forEach(foremanTasks, function(task) {
+      linkedForemanApps(asiointitunnukset);
+
+      var foremen = _.map(foremanTasks, function(task) {
         var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
-        if (asiointitunnus) {
-          asiointitunnukset.push(asiointitunnus);
-        }
+        var selectedForeman = ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus);
+        var statusName = ko.pureComputed(function() {
+          var linkedForemanApp = _.find(self.foremanApplications(), { "id": selectedForeman()});
+          return linkedForemanApp ? linkedForemanApp.statusName : "missing";
+        });
+        var selectableForemen = ko.pureComputed(function() {
+          return _.filter(self.foremanApplications(), function(app) {
+            return !_.includes(linkedForemanApps(), app.id) || app.id === selectedForeman();
+          });
+        });
+
+        return { name: task.taskname,
+                 taskId: task.id,
+                 statusName: statusName,
+                 selectedForeman: selectedForeman,
+                 selectableForemen: selectableForemen,
+                 canInvite: self.canInvite,
+                 selectEnabled: self.canSelect,
+                 indicator: ko.observable() };
       });
 
-      self.linkedForemanApps(asiointitunnukset);
-      _.forEach(foremanTasks, function(task) {
-        var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
-        var linkedForemanApp = _.find(self.foremanApplications(), { "id": asiointitunnus});
-
-        var data = { "name": task.taskname,
-                     "taskId": task.id,
-                     "statusName": linkedForemanApp ? linkedForemanApp.statusName : "missing",
-                     "selectedForeman": ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus),
-                     "selectableForemen": ko.observableArray(),
-                     "canInvite": self.canInvite,
-                     "selectEnabled": self.canSelect,
-                     "indicator": ko.observable()};
-
-        data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
-          return !_.includes(asiointitunnukset, app.id) || app.id === asiointitunnus;
-        }));
-
+      _.forEach(foremen, function(data) {
         data.selectedForeman.subscribe(function(val) {
+          linkedForemanApps(_(foremen).invokeMap("selectedForeman").filter().value());
           ajax
             .command("link-foreman-task", { id: self.application().id,
                                             taskId: data.taskId,
                                             foremanAppId: val ? val : ""})
-            .success(function() {
+            .success(function() { 
               self.indicator({type: "saved"});
-              repository.load(self.application().id);
             })
             .error(function(err) {
-              self.indicator({type: "err"});
+              data.selectedForeman(undefined);
+              hub.send("indicator", {style: "negative", message: err.text});
               self.error(err.text);
             })
             .call();
         });
-
-        foremen.push(data);
       });
       self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
                           "foremen": foremen });

@@ -259,6 +259,11 @@
   {:pre [(string? filename)]}
   (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf"))
 
+(defn if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
+  (when (and (not (user/authority? user))
+             (state-set (keyword state)))
+    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
+
 ;;
 ;; Api
 ;;

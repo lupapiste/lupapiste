@@ -3,7 +3,7 @@
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [clojure.set :refer [rename-keys] :as set]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils abs fn->>] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.property :as p]
@@ -2128,6 +2128,34 @@
                                      [:documents])]
         (let [updates {$set (mongo/generate-array-updates :documents documents pred "schema-info.name" "hakija-tj")}]
           (mongo/update-n :applications {:_id id} updates))))))
+
+(defn- flatten-kesto [kesto]
+  (apply merge
+         (select-keys kesto [:alku :loppu])
+         (->> (dissoc kesto :alku :loppu) vals)))
+
+(defn- change-kesto-doc-as-repeating [doc]
+  (if (and (= (get-in doc [:schema-info :name]) "ymp-ilm-kesto")
+           (get-in doc [:data :kesto :arki]))
+    (update-in doc [:data :kesto] (fn->> flatten-kesto (hash-map :0)))
+    doc))
+
+(defmigration change-meluilmoitus-kesto-as-repeating
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                                         :schema-info.name "ymp-ilm-kesto"}}}))}
+  (update-applications-array :documents
+                             change-kesto-doc-as-repeating
+                             {:documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                      :schema-info.name "ymp-ilm-kesto"}}}))
+
+(defmigration add-archived-timestamps
+  {:apply-when (pos? (mongo/count :applications {:archived {$exists false}}))}
+  (mongo/update-by-query :applications {:archived {$exists false}} {$set {:archived {:application nil
+                                                                                     :completed nil}}}))
+
+(defmigration add-archiving-start-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:permanent-archive-in-use-since {$exists false}}))}
+  (mongo/update-by-query :organizations {:permanent-archive-in-use-since {$exists false}} {$set {:permanent-archive-in-use-since 0}}))
 
 ;;
 ;; ****** NOTE! ******

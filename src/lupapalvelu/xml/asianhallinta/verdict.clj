@@ -81,7 +81,7 @@
             timestamp (core/now)]
         ; path must contain exactly one xml
         (when-not (= (count xmls) 1)
-          (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-wrong-number-of-xmls))
+          (error-and-fail! (str "Expected to find one xml, found " (count xmls) " for user " ftp-user) :error.integration.asianhallinta-wrong-number-of-xmls))
 
                                         ; parse XML
         (let [parsed-xml (-> (first xmls) slurp xml/parse cr/strip-xml-namespaces xml/xml->edn)
@@ -93,7 +93,7 @@
           (ensure-attachments-present! unzipped-path attachments)
 
           (when-not application-id
-            (error-and-fail! "Asianhallinta verdict - Application id is nil" :error.integration.asianhallinta.no-application-id))
+            (error-and-fail! (str "ah-verdict - Application id is nil for user " ftp-user) :error.integration.asianhallinta.no-application-id))
 
                                         ; Create verdict
                                         ; -> fetch application

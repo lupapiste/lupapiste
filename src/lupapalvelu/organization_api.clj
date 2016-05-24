@@ -1,5 +1,6 @@
 (ns lupapalvelu.organization-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+            [clojure.core.memoize :as memo]
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
@@ -11,7 +12,7 @@
             [camel-snake-kebab.core :as csk]
             [me.raynes.fs :as fs]
             [slingshot.slingshot :refer [try+]]
-            [sade.core :refer [ok fail fail! now]]
+            [sade.core :refer [ok fail fail! now unauthorized]]
             [sade.env :as env]
             [sade.municipality :as muni]
             [sade.property :as p]
@@ -341,6 +342,18 @@
   (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
   (ok))
 
+(defcommand set-organization-permanent-archive-start-date
+  {:parameters [date]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial number-parameters [:date])]
+   :pre-checks [(fn [{:keys [user]} _]
+                  (when-not (o/some-organization-has-archive-enabled? [(user/authority-admins-organization-id user)])
+                    unauthorized))]}
+  [{user :user}]
+  (when (pos? date)
+    (o/update-organization (user/authority-admins-organization-id user) {$set {:permanent-archive-in-use-since date}})
+    (ok)))
+
 (defn split-emails [emails] (ss/split emails #"[\s,;]+"))
 
 (def email-list-validators [(partial action/string-parameters [:emails])
@@ -592,6 +605,7 @@
    :optional-parameters [org lang]
    :input-validators [o/valid-feed-format o/valid-org o/valid-language]
    :user-roles #{:anonymous}}
-  (o/waste-ads (ss/upper-case org)
-               (-> fmt ss/lower-case keyword)
-               (-> (or lang :fi) ss/lower-case keyword)))
+  ((memo/ttl o/waste-ads :ttl/threshold 900000)             ; 15 min
+    (ss/upper-case org)
+    (-> fmt ss/lower-case keyword)
+    (-> (or lang :fi) ss/lower-case keyword)))
