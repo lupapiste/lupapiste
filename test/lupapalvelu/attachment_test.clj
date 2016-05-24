@@ -379,3 +379,29 @@
                                 file-obj)]
         (fact "Generated attachment data is valid (no PDF/A generation)"
           (sc/check Attachment result-attachment) => nil)))))
+
+(facts resolve-ram-linked-attachments
+  (fact "backward ram link"
+    (let [attachment1 (assoc (ssg/generate Attachment) :ram-link nil)
+          attachment2 (assoc (ssg/generate Attachment) :ram-link (:id attachment1))]
+      (resolve-ram-links [attachment1 attachment2] (:id attachment2)) => [attachment1 attachment2]))
+
+  (fact "forward ram link"
+    (let [attachment1 (assoc (ssg/generate Attachment) :ram-link nil)
+          attachment2 (assoc (ssg/generate Attachment) :ram-link (:id attachment1))]
+      (resolve-ram-links [attachment1 attachment2] (:id attachment1)) => [attachment1 attachment2]))
+
+  (fact "no linking"
+    (let [attachments (vec (repeatedly 5 (fn [] (assoc (ssg/generate Attachment) :ram-link nil))))]
+      (resolve-ram-links attachments (:id (nth attachments 2))) => [(nth attachments 2)]))
+
+  (fact "complete ram link chain"
+    (let [ids         (gen/sample ssg/object-id 5)
+          attachments (map (fn [[link id]] (assoc (ssg/generate Attachment) :id id :ram-link link)) (partition 2 1 ids))]
+      (resolve-ram-links attachments (nth ids 2)) => attachments))
+
+  (fact "inclomplete ram link chain"
+    (let [ids         (gen/sample ssg/object-id 5)
+          attachments (-> (mapv (fn [[link id]] (assoc (ssg/generate Attachment) :id id :ram-link link)) (partition 2 1 ids))
+                          (assoc-in [3 :ram-link] nil))]
+      (resolve-ram-links attachments (nth ids 1)) => (take 3 attachments))))
