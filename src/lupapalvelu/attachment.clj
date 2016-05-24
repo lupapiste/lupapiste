@@ -394,19 +394,22 @@
     (tos/update-process-retention-period (:id application) now)
     (map :id attachments)))
 
+(defn- make-ram-attachment [{:keys [id op target type contents scale size] :as base-attachment} application now]
+  (->> (default-tos-metadata-for-attachment-type type application)
+       (make-attachment now target false false false (:state application) op type)
+       (#(merge {:ram-link id}
+                %
+                (when contents {:contents contents})
+                (when scale    {:scale scale})
+                (when size     {:size size})))))
+
 (defn create-ram-attachment! [{attachments :attachments :as application} attachment-id now]
   {:pre [(map? application)]}
-  (let [{:keys [op target type contents scale size] :as base-attachment} (util/find-by-id attachment-id attachments)
-        ram-attachment (->> (default-tos-metadata-for-attachment-type type application)
-                            (make-attachment now target false false false (:state application) op type)
-                            (merge {:ram-link attachment-id}))]
+  (let [ram-attachment (make-ram-attachment (util/find-by-id attachment-id attachments) application now)]
     (update-application
      (application->command application)
-      {$set {:modified now}
-       $push {:attachments (cond-> ram-attachment
-                             contents (assoc :contents contents)
-                             scale (assoc :scale scale)
-                             size (assoc :size size))}})
+     {$set {:modified now}
+      $push {:attachments ram-attachment}})
     (tos/update-process-retention-period (:id application) now)
     (:id ram-attachment)))
 

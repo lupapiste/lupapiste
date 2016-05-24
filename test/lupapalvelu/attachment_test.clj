@@ -26,7 +26,8 @@
                    make-version
                    build-version-updates
                    default-metadata-for-attachment-type
-                   create-appeal-attachment-data!)
+                   create-appeal-attachment-data!
+                   make-ram-attachment)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -272,14 +273,14 @@
 (defspec make-version-new-attachment 20
   (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
                  file-id         (ssg/generator ssc/ObjectIdStr)
-                 archivability   (ssg/generator (sc/maybe {:archivable sc/Bool 
-                                                           :archivabilityError (apply sc/enum archivability-errors) 
+                 archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
+                                                           :archivabilityError (apply sc/enum archivability-errors)
                                                            :missing-fonts [sc/Str]}))
-                 general-options (ssg/generator {:filename sc/Str 
-                                                :content-type sc/Str 
-                                                :size sc/Int 
-                                                :now ssc/Timestamp 
-                                                :user user/SummaryUser 
+                 general-options (ssg/generator {:filename sc/Str
+                                                :content-type sc/Str
+                                                :size sc/Int
+                                                :now ssc/Timestamp
+                                                :user user/SummaryUser
                                                 :stamped (sc/maybe sc/Bool)})]
                 (let [options (merge {:file-id file-id :original-file-id file-id} archivability general-options)
                       version (make-version attachment options)]
@@ -305,9 +306,9 @@
                                                            (ssg/generator Version)
                                                            (gen/vector-distinct ssg/object-id {:num-elements 2})
                                                            (ssg/generator {:filename sc/Str
-                                                                           :content-type sc/Str 
-                                                                           :size sc/Int 
-                                                                           :now ssc/Timestamp 
+                                                                           :content-type sc/Str
+                                                                           :size sc/Int
+                                                                           :now ssc/Timestamp
                                                                            :user user/SummaryUser})))]
                 (let [version (make-version attachment options)]
                   (and (= (:version version) (get-in attachment [:latestVersion :version]))
@@ -323,9 +324,9 @@
   (prop/for-all [application    (ssg/generator {:state sc/Keyword})
                  attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
-                 options        (ssg/generator {:now ssc/Timestamp 
+                 options        (ssg/generator {:now ssc/Timestamp
                                                 :target (sc/maybe Target)
-                                                :user user/SummaryUser 
+                                                :user user/SummaryUser
                                                 :stamped (sc/maybe sc/Bool)
                                                 :comment? sc/Bool
                                                 :comment-text sc/Str})]
@@ -347,10 +348,10 @@
                                                           [(-> (assoc-in att [:versions 1] ver)
                                                                (assoc :latestVersion ver))
                                                            ver]))
-                                                      (gen/tuple (ssg/generator Attachment {Version   nil 
+                                                      (gen/tuple (ssg/generator Attachment {Version   nil
                                                                                             [Version] (gen/vector-distinct (ssg/generator Version) {:min-elements 3})})
                                                                  (gen/vector-distinct ssg/object-id {:num-elements 2})))
-                 options (ssg/generator {:now ssc/Timestamp 
+                 options (ssg/generator {:now ssc/Timestamp
                                          :user user/SummaryUser})]
                 (let [updates (build-version-updates application attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
@@ -379,6 +380,30 @@
                                 file-obj)]
         (fact "Generated attachment data is valid (no PDF/A generation)"
           (sc/check Attachment result-attachment) => nil)))))
+
+(facts make-ram-attachment
+  (let [application {:tosFunction  nil
+                     :verdicts     []
+                     :organization "753-R"
+                     :state        :verdictGiven}
+        base-attachment (ssg/generate Attachment)
+        ram-attachment (make-ram-attachment base-attachment application 12345)]
+    (fact "attachment type is copied"
+      (:type ram-attachment) => (:type base-attachment))
+
+    (fact "ram-link is created"
+      (:ram-link ram-attachment) => (:id base-attachment)))
+
+  (let [application {:tosFunction  nil
+                     :verdicts     []
+                     :organization "753-R"
+                     :state        :constructionStarted}
+        base-attachment (assoc (ssg/generate Attachment) :contents "foo content" :size :A0 :scale :1:10)
+        ram-attachment (make-ram-attachment base-attachment application 12345)]
+    (fact "attachment meta is copied"
+      (:contents ram-attachment) => "foo content"
+      (:size ram-attachment) =>  :A0
+      (:scale ram-attachment) => :1:10)))
 
 (facts resolve-ram-linked-attachments
   (fact "backward ram link"
