@@ -10,8 +10,6 @@ Kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Tutustu Lupapisteen 
 
 Toivottavasti viihdyt palvelumme parissa!
 
-Jos et ole rekister&ouml;itynyt Lupapisteeseen, voit j&auml;tt&auml;&auml; t&auml;m&auml;n s&auml;hk&ouml;postin huomiotta.
-
 --
 
 # Tack f&ouml;r registreringen, {{name}}.
@@ -25,5 +23,3 @@ Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;s
 Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https://www.lupapiste.fi/ohjeet](https://www.lupapiste.fi/ohjeet) och vanliga fr&aring;gor [https://www.lupapiste.fi/usein-kysytyt-kysymykset](https://www.lupapiste.fi/usein-kysytyt-kysymykset).
 
 Vi hoppas att du trivs med v&aring;r tj&auml;nst!
-
-Om du inte registrerat dig hos Lupapiste beh&ouml;ver du inte beakta detta meddelande.
