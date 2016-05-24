@@ -583,3 +583,28 @@
     (fact "After upload comments count is + 1"
       (count (:comments application)) => 0 ; before upload
       (count comments) => 1)))
+
+(facts "Creating RAM attachment"
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
+        {attachments :attachments} (query-application pena (:id application))
+        base-attachment (first attachments)]
+
+    (fact "Cannot create ram attachment before verdict is given"
+      (command pena :create-ram-attachment :id (:id application) :attachmentId (:id base-attachment))
+      => (partial expected-failure? :error.command-illegal-state))
+
+    (fact "Give verdict"
+      (command sonja :check-for-verdict :id (:id application))
+      => ok?)
+
+    (fact "Attachment id should match attachment in the application"
+      (command pena :create-ram-attachment :id (:id application) :attachmentId "invalid_id")
+      => (partial expected-failure? :error.attachment.id))
+
+    (fact "RAM link is created"
+      (command pena :create-ram-attachment :id (:id application) :attachmentId (:id base-attachment))
+      => ok?)
+
+    (fact "RAM link cannot be created twice on same attachment"
+      (command pena :create-ram-attachment :id (:id application) :attachmentId (:id base-attachment))
+      => (partial expected-failure? :error.ram-link-already-exists))))
