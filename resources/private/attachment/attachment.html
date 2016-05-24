@@ -75,7 +75,7 @@
                 <button data-test-id="add-ram-attachment"
                         class="positive"
                         data-bind="click: newRamAttachment,
-                                   visible: true">
+                                   visible: $root.authorization.ok( 'create-ram-attachment') && editable">
                   <i class="lupicon-circle-plus"></i>
                   <span data-bind="ltext: 'attachment.new-ram'"></span>
                 </button>

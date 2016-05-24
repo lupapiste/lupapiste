@@ -217,8 +217,8 @@
    :user-authz-roles auth/default-authz-writer-roles
    :states states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
-  (if-let [attachment-ids (attachment/create-ram-attachment! application attachment-id created)]
-    (ok :applicationId id :attachmentIds attachment-ids)
+  (if-let [attachment-id (attachment/create-ram-attachment! application attachment-id created)]
+    (ok :applicationId id :attachmentId attachment-id)
     (fail :error.attachment-placeholder)))
 
 ;;

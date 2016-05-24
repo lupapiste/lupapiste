@@ -14,4 +14,5 @@
   lupapisteApp.services.fileUploadService = new LUPAPISTE.FileuploadService();
   lupapisteApp.services.verdictAppealService = new LUPAPISTE.VerdictAppealService();
   lupapisteApp.services.scrollService = new LUPAPISTE.ScrollService();
+  lupapisteApp.services.ramService = new LUPAPISTE.RamService();
 })();
