@@ -201,7 +201,7 @@
    :state                                (apply sc/enum attachment-states) ;; attachment state
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
-   (sc/optional-key :ram-link)           ssc/ObjectIdStr    ;; reference from ram attachment to base attachment
+   (sc/optional-key :ram-link)           ssc/Str            ;; reference from ram attachment to base attachment
    :required                             sc/Bool            ;;
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;

@@ -382,6 +382,7 @@
           (sc/check Attachment result-attachment) => nil)))))
 
 (facts make-ram-attachment
+
   (let [application {:tosFunction  nil
                      :verdicts     []
                      :organization "753-R"
@@ -392,7 +393,10 @@
       (:type ram-attachment) => (:type base-attachment))
 
     (fact "ram-link is created"
-      (:ram-link ram-attachment) => (:id base-attachment)))
+      (:ram-link ram-attachment) => (:id base-attachment))
+
+    (fact "ram-attachment is valid"
+      (sc/check Attachment ram-attachment) => nil))
 
   (let [application {:tosFunction  nil
                      :verdicts     []
