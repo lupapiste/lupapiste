@@ -52,7 +52,6 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
     self.editReservationTypeModel.init({
       commandName: "add",
       command: function(reservationType) {
-        console.info(reservationType)
         ajax
           .command("add-reservation-type-for-organization", {reservationType: reservationType})
           .success(function() {
