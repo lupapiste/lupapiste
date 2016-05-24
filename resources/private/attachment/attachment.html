@@ -77,7 +77,7 @@
                         data-bind="click: newRamAttachment,
                                    visible: $root.authorization.ok( 'create-ram-attachment') && editable">
                   <i class="lupicon-circle-plus"></i>
-                  <span data-bind="ltext: 'attachment.new-ram'"></span>
+                  <span data-bind="ltext: 'attachment.ram.new'"></span>
                 </button>
                 <button id="show-attachment-versions"
                         class="btn"
@@ -123,7 +123,7 @@
                 </table>
               </div>
             </div>
-
+            <ram-links params="{attachment: $root.attachment}"></ram-links>
             <div>
               <div class="attachment-label">
                 <div id="attachment-latest-version-info" data-bind="with: latestVersion">

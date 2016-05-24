@@ -18,7 +18,7 @@ LUPAPISTE.RamService = function() {
   }
 
   function openAttachment( attachmentId ) {
-    location.assign( "#!/attachment/" + appId() + "/" + attachmentId );
+    location.assign( self.attachmentUrl( attachmentId ));
   }
 
   function newRamAttachment( options ) {
@@ -30,9 +30,25 @@ LUPAPISTE.RamService = function() {
                        _.partial( openAttachment, res.attachmentId),
                        true );
         repository.load( appId(), null, null, true );
-} )
+      } )
       .call();
   }
+
+  // Public API
+  self.attachmentUrl = function( attachmentId ) {
+    return "#!/attachment/" + appId() + "/" + attachmentId;
+  };
+
+  self.links = function( attachmentId, obsArray ) {
+    ajax.query( "ram-linked-attachments",
+                params( {attachmentId: attachmentId}))
+      .error( notifyError)
+      .success( function( res ) {
+        obsArray( res["ram-links"]);
+      })
+      .call();
+  };
+
 
   hub.subscribe( self.serviceName + "::new", newRamAttachment );
 };

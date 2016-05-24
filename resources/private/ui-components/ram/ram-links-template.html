@@ -1,0 +1,31 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="ram-links-template">
+  <!-- ko if: showLinks -->
+  <h3 data-bind="ltext: 'attachment.ram.links'"></h3>
+  <table>
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'attachment.file'"></th>
+        <th data-bind="ltext: 'attachment.version'"></th>
+        <th data-bind="ltext: 'attachment.editDate'"></th>
+        <th data-bind="ltext: 'attachment.editor'"></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: links">
+      <tr>
+        <td data-bind="text: _.get( $data, 'latestVersion.filename', '-')"></td>
+        <td data-bind="version: _.get( $data, 'latestVersion.version')"></td>
+        <td data-bind="dateTimeString: modified"></td>
+        <td data-bind="fullName: _.get( $data, 'latestVersion.user', {})"></td>
+        <td data-bind="if: id != $parent.attachmentId">
+          <a data-bind="attr: {href: $parent.service.attachmentUrl( id )}"
+             class="button primary">
+            <i class="lupicon-external-link"></i>
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- /ko -->
+</script>

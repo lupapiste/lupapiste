@@ -144,7 +144,9 @@
    :states     states/all-states}
   [{{attachments :attachments} :application}]
   (->> (attachment/resolve-ram-links attachments attachmentId)
-       (map #(select-keys % [:id :latestVersion]))
+       ;; We include modified in order to have a timestamp even if the
+       ;; attachment is empty
+       (map #(select-keys % [:id :latestVersion :modified]))
        (ok :ram-links)))
 
 ;;

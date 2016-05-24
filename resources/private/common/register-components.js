@@ -122,7 +122,8 @@ jQuery(document).ready(function() {
     {name: "cell-date"},
     {name: "cell-select"},
     {name: "review-tasks"},
-    {name: "task"}
+    {name: "task"},
+    {name: "ram-links"}
 ];
 
   _.forEach(components, function(component) {
