@@ -9,6 +9,8 @@
         <span data-bind="ltext: 'back'"></span>
       </button>
       <h2 data-bind="ltext: 'auth-admin.organization-calendars'"></h2>
+      <h3 data-bind="with: calendars.calendarInView"><!--ko text: name --><!--/ko--> (<!--ko text: organization --><!--/ko-->) </h3>
+      <div>&nbsp;</div>
     </div>
     <div class="calendar-table"></div>
   </div>

@@ -367,19 +367,19 @@
                              :statement :docgen :create :mypage :header :debug
                              :company :analytics :register-company :footer :ui-components]}
 
+   :calendar-view {:depends [:common-html]
+                   :js ["calendar-view.js" "calendar-service.js" "mycalendar.js"]
+                   :html ["calendar-view.html" "mycalendar.html"]}
+
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
-                             :company :stamp :integration-error :analytics :metadata-editor :footer :ui-components]}
+                             :company :stamp :integration-error :analytics :metadata-editor :footer  :calendar-view :ui-components]}
 
    :oir-app {:depends [] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
                        :docgen :debug :analytics :header :footer :ui-components]
              :css ["oir.css"]}
-
-   :calendar-view {:depends [:common-html]
-                   :js ["calendar-view.js" "calendar-service.js"]
-                   :html ["calendar-view.html"]}
 
    :authority-admin-app {:depends []
                          :js ["authority-admin-app.js"]}

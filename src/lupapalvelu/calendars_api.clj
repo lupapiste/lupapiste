@@ -8,6 +8,14 @@
             [sade.util :as util]
             [lupapalvelu.user :as usr]))
 
+; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
+
+(defn- ->FrontendCalendar [calendar user]
+  {:id           (:id calendar)
+   :name         (format "%s %s" (:firstName user) (:lastName user))
+   :email        (:email user)
+   :organization (:organizationCode calendar)})
+
 (defn- ->FrontendReservationSlots [backend-slots]
   (map (fn [s] {:id        (:id s)
                 :status    (if (:fullyBooked s) :booked :available)
@@ -23,6 +31,8 @@
             :reservationTypeIds reservationTypeIds
             :capacity 1}))
        slots))
+
+; -- API Call helpers
 
 (defn- build-url [& path-parts]
   (apply str (env/value :ajanvaraus :host) path-parts))
@@ -89,16 +99,18 @@
        (fail! :resources.backend-error))
      (:body response))))
 
+; -- calendar API functions
+
 (defn- calendar-ref-for-user [userId]
   (str "user-" userId))
 
 (defn- get-calendar
   [calendarId userId]
   (let [calendar (api-query (str "/api/resources/" calendarId))
+        user     (usr/get-user-by-id userId)
         external-ref (:externalRef calendar)]
     (when (.endsWith external-ref userId)
-      {:id           (:id calendar)
-       :organization (:organizationCode calendar)})))
+      (->FrontendCalendar calendar user))))
 
 (defn- find-calendars-for-organizations
   [& orgIds]
@@ -174,16 +186,20 @@
       (doseq [id (map :id calendars)]
         (delete-command (str "/api/resources/" id))))))
 
+(defquery my-calendars
+  {:user-roles #{:authority}
+   :feature :ajanvaraus}
+  [{user :user}]
+  (ok :calendars (map #(->FrontendCalendar % user) (find-calendars-for-user (:id user)))))
+
 (defquery calendar
   {:parameters [calendarId userId]
    :feature :ajanvaraus
    :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
    :user-roles #{:authorityAdmin}}
   [_]
-  (let [calendar (get-calendar calendarId userId)
-        user     (usr/get-user-by-id userId)]
-    (ok :calendar (assoc calendar :name (format "%s %s" (:firstName user) (:lastName user))
-                                  :email (:email user)))))
+  (let [calendar (get-calendar calendarId userId)]
+    (ok :calendar calendar)))
 
 (defquery calendars-for-authority-admin
   {:user-roles #{:authorityAdmin}

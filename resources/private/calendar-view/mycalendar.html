@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="mycalendar">
+
+  <div class="container">
+    <button class="secondary" data-bind="click: function() { history.go(-1); }">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+    <div>
+      <h1 data-bind="ltext: 'mycalendar.title'"></h1>
+    </div>
+    <div class="calendar-table"></div>
+  </div>
+
+</section>
+</body>
+</html>

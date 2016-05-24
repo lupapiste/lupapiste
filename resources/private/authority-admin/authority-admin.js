@@ -387,6 +387,8 @@
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
   editAttachmentsModel = new EditAttachmentsModel();
+
+  lupapisteApp.services.calendarService = new LUPAPISTE.CalendarService();
   calendarsModel = new LUPAPISTE.AuthAdminCalendarsModel();
   reservationTypesModel = new LUPAPISTE.AuthAdminReservationTypesModel();
 
@@ -441,7 +443,7 @@
       reservationTypesModel.load();
       if (!calendarViewModel) {
         var component = $("#calendar-admin .calendar-table");
-        calendarViewModel = calendarView.create(component, new LUPAPISTE.CalendarService());
+        calendarViewModel = calendarView.create(component);
       }
       var path = pageutil.getPagePath();
       if (path.length > 1) {

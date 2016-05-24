@@ -1,3 +1,5 @@
+"Ajanvaraus" "fi" "Ajanvaraus"
+"Ajanvaraus" "sv" ""
 "auth-admin.calendar.create-slot" "fi" "Lisää varattavia aikoja"
 "auth-admin.calendar.create-slot" "sv" "Lägg till bokningsbara tider"
 "auth-admin.calendar.inuse" "fi" "Kalenteri käytössä"
@@ -18,3 +20,5 @@
 "auth-admin.organization.reservation-types" "sv" ""
 "auth-admin.organization.reservation-type" "fi" "Ajanvaraustyyppi"
 "auth-admin.organization.reservation-type" "sv" ""
+"mycalendar.title" "fi" "Minun kalenterini"
+"mycalendar.title" "sv" ""

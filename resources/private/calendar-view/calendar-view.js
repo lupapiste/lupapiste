@@ -1,8 +1,9 @@
 var calendarView = (function($) {
   "use strict";
 
-  function ViewCalendarModel(component, calendarService) {
-    var self = this;
+  function ViewCalendarModel(component) {
+    var self = this,
+        calendarService = lupapisteApp.services.calendarService;
 
     self.component = component;
 

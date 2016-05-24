@@ -43,6 +43,7 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
 
   self.items = ko.observableArray();
   self.initialized = false;
+  self.calendarInView = lupapisteApp.services.calendarService.calendar;
 
   function setEnabled(user, value) {
     if (self.initialized) {

@@ -5,6 +5,8 @@ LUPAPISTE.CalendarService = function() {
   self.calendar = ko.observable();
   self.calendarWeekdays = ko.observableArray();
 
+  self.myCalendars = ko.observableArray();
+
   self.calendarQuery = {
     calendarId: ko.observable(),
     week: ko.observable(),
@@ -59,6 +61,19 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
+  var _fetchMyCalendars = hub.subscribe("calendarService::fetchMyCalendars", function(event) {
+    ajax.query("my-calendars")
+      .success(function(data) {
+        self.myCalendars(data.calendars);
+        if (data.calendars && data.calendars.length > 0) {
+          self.calendar(data.calendars[0]);
+          self.calendarQuery.calendarId(data.calendars[0].id);
+          doFetchCalendarSlots({week: moment().isoWeek(), year: moment().year()});
+        };
+      })
+      .call();
+  });
+
   var _fetchSlots = hub.subscribe("calendarService::fetchCalendarSlots", function(event) {
     doFetchCalendarSlots(event);
   });
@@ -77,6 +92,7 @@ LUPAPISTE.CalendarService = function() {
 
   self.dispose = function() {
     hub.unsubscribe(_fetchCalendar);
+    hub.unsubscribe(_fetchMyCalendars);
     hub.unsubscribe(_fetchSlots);
     hub.unsubscribe(_createSlots);
   };

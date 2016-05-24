@@ -2,7 +2,7 @@
   padding: 0px $baseline;
 }
 
-#calendar-admin .calendar-table {
+.calendar-table {
   width:100%;
   min-height:$baseline * 6;
 
@@ -106,4 +106,8 @@
     }
 
   }
+}
+
+#mycalendar h1 {
+  margin-top: $baseline;
 }
