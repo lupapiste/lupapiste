@@ -30,8 +30,9 @@ Valinnaisesti:
 
 ### user.properties
 
-Luo projektin juureen (sovelluksen kehitysaikaiseen ajohakemistoon) user.properties
-tiedosto. Tiedostossa voit määritellä mm. tietokantayhteyden:
+Luo projektin juureen (sovelluksen kehitysaikaiseen ajohakemistoon)
+user.properties -tiedosto. Tiedostossa voit määritellä
+mm. tietokantayhteyden:
 
     mongodb.servers.0.host  localhost
     mongodb.servers.0.port  27017
