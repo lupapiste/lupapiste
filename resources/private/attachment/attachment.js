@@ -146,6 +146,10 @@ var attachment = (function() {
       }
     },
 
+    newRamAttachment: function() {
+      hub.send( "ramService::new", {attachmentId: model.id()} );
+    },
+
     showChangeTypeDialog: function() {
       model.previewDisabled(true);
       model.changeTypeDialogModel.init(model.attachmentType());

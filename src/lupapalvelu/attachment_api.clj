@@ -144,7 +144,9 @@
    :states     states/all-states}
   [{{attachments :attachments} :application}]
   (->> (attachment/resolve-ram-links attachments attachmentId)
-       (map #(select-keys % [:id :latestVersion]))
+       ;; We include modified in order to have a timestamp even if the
+       ;; attachment is empty
+       (map #(select-keys % [:id :latestVersion :modified]))
        (ok :ram-links)))
 
 ;;
@@ -217,8 +219,8 @@
    :user-authz-roles auth/default-authz-writer-roles
    :states states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
-  (if-let [attachment-ids (attachment/create-ram-attachment! application attachment-id created)]
-    (ok :applicationId id :attachmentIds attachment-ids)
+  (if-let [attachment-id (attachment/create-ram-attachment! application attachment-id created)]
+    (ok :applicationId id :attachmentId attachment-id)
     (fail :error.attachment-placeholder)))
 
 ;;
