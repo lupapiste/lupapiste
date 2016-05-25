@@ -66,6 +66,5 @@
                            :katselmuksenLaji {:modified 1463391893160, :value "aloituskokous"}}}]
 
 
-    (get-in (update-task-buildings buildings task-rakennus) [:data :rakennus :0 :rakennus :rakennusnro]) => "value-from-buildings"
-    (get-in (update-task-buildings buildings task-rakennus) [:data :rakennus :0 :tila :tila]) => "value-from-task"
-    ))
+    (get-in (update-task-buildings buildings task-rakennus) [:data :rakennus :0 :rakennus :rakennusnro :value]) => "value-from-buildings"
+    (get-in (update-task-buildings buildings task-rakennus) [:data :rakennus :0 :tila :tila :value]) => "value-from-task"))
