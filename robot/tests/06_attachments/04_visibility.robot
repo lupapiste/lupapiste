@@ -30,9 +30,9 @@ Mikko sets CV to be visible only to himself and authorities
 
 Mikko uploads attachment to placeholder asemapiirros
   Open attachment details  paapiirustus.asemapiirros
-  Element Should Be Disabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
+  Wait Until  Element Should Be Disabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
   Add attachment version  ${TXT_TESTFILE_PATH}
-  Element Should Be Enabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
 
