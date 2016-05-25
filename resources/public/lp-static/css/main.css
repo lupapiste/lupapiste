@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1464259400822');
+@import url('main-blessed1.css?z=1464259435192');
 
 @media (max-width: 991px) {
   /* line 80, ../../../private/common-html/sass/views/_application.scss */
@@ -3253,49 +3253,49 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 .calendar-table table td.date-today div.timeline-slot {
   background: #eeeeee;
 }
-/* line 64, ../../../private/common-html/sass/views/_calendars.scss */
-.calendar-table table td.date div.timeline-slot:nth-child(even) {
-  background: white;
-}
-/* line 69, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 63, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.timestamp {
   height: 60px;
 }
-/* line 73, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 67, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.timeline-slot {
   height: 60px;
   border-bottom: 1px solid #ccc;
 }
-/* line 77, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 71, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.timeline-slot:nth-child(even) {
+  background: white;
+}
+/* line 75, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.timeline-slot:hover {
   background: #dddddd;
 }
-/* line 83, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 80, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.reservation-slot {
   position: absolute;
   width: 100%;
   padding: 6px;
 }
-/* line 88, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 85, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.reservation-slot.booked {
   color: white;
   background: #2ca92c;
 }
-/* line 92, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 89, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.reservation-slot.booked a {
   color: white;
 }
-/* line 97, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 94, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.reservation-slot.accepted {
   color: white;
   background: #f39129;
 }
-/* line 101, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 98, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.reservation-slot.accepted a {
   color: white;
 }
 
-/* line 111, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 108, ../../../private/common-html/sass/views/_calendars.scss */
 #mycalendar h1 {
   margin-top: 24px;
 }
