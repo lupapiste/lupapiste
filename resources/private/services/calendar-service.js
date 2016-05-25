@@ -82,9 +82,7 @@ LUPAPISTE.CalendarService = function() {
     ajax
       .command("create-calendar-slots", {calendarId: event.calendarId, slots: event.slots})
       .success(function() {
-        if (event.modalClose) {
-          LUPAPISTE.ModalDialog.close();
-        }
+        hub.send("calendarView::reservationSlotCreated", {modalClose: event.modalClose});
         doFetchCalendarSlots();
       })
       .call();

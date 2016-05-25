@@ -187,7 +187,7 @@
                    "accordion-service.js"
                    "verdict-appeal-service.js"
                    "scroll-service.js"
-                   "ram-service.js"]}
+                   "calendar-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -368,7 +368,7 @@
                              :company :analytics :register-company :footer :ui-components]}
 
    :calendar-view {:depends [:common-html]
-                   :js ["calendar-view.js" "calendar-service.js" "mycalendar.js"]
+                   :js ["calendar-view.js" "mycalendar.js"]
                    :html ["calendar-view.html" "mycalendar.html"]}
 
    :authority-app {:depends [] :js ["authority.js"]}

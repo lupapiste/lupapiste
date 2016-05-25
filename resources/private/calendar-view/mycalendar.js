@@ -3,8 +3,6 @@
 
   var calendarViewModel;
 
-  lupapisteApp.services.calendarService = new LUPAPISTE.CalendarService();
-
   $(function() {
     $("#mycalendar").applyBindings({});
   });
@@ -13,7 +11,7 @@
     hub.onPageLoad("mycalendar", function() {
       if (!calendarViewModel) {
         var component = $("#mycalendar .calendar-table");
-        calendarViewModel = calendarView.create(component, new LUPAPISTE.CalendarService());
+        calendarViewModel = calendarView.create(component);
         hub.send("calendarService::fetchMyCalendars");
       }
     });

@@ -15,4 +15,5 @@
   lupapisteApp.services.verdictAppealService = new LUPAPISTE.VerdictAppealService();
   lupapisteApp.services.scrollService = new LUPAPISTE.ScrollService();
   lupapisteApp.services.ramService = new LUPAPISTE.RamService();
+  lupapisteApp.services.calendarService = new LUPAPISTE.CalendarService();
 })();

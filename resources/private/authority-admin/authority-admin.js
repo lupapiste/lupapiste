@@ -388,7 +388,6 @@
   editSelectedOperationsModel = new EditSelectedOperationsModel();
   editAttachmentsModel = new EditAttachmentsModel();
 
-  lupapisteApp.services.calendarService = new LUPAPISTE.CalendarService();
   calendarsModel = new LUPAPISTE.AuthAdminCalendarsModel();
   reservationTypesModel = new LUPAPISTE.AuthAdminReservationTypesModel();
 
