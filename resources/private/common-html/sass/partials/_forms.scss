@@ -432,6 +432,10 @@ input.form-input.inline {
  width: $cols1;
 }
 
+.form-input.short-plus {
+ width: 1.5  * $cols1;
+}
+
 .form-input.medium {
  width: $cols2;
 }
