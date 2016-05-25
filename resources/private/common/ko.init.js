@@ -185,6 +185,17 @@
     }
   };
 
+  ko.bindingHandlers.feature = {
+    update: function( element, valueAccessor) {
+      var value = ko.utils.unwrapObservable( valueAccessor() ) ;
+      if( features.enabled(value) ) {
+        $(element).addClass( "feature" );
+      } else {
+        $(element).remove();
+      }
+    }
+  };
+
   ko.bindingHandlers.lhtml = {
     update: _.partial(localized, "html")
   };
