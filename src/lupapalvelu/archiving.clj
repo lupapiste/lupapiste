@@ -128,10 +128,10 @@
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
-  (if (= op-id (:id primaryOperation))
-    [(:name primaryOperation)]
-    (->> (filter #(= op-id (:id %)) secondaryOperations)
-         (map :name))))
+  (cond->> (concat [primaryOperation] secondaryOperations)
+           op-id (filter #(= op-id (:id %)))
+           true (map :name)
+           true (distinct)))
 
 (defn- ->iso-8601-date [date]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
@@ -173,7 +173,8 @@
     (->> (if op-id
            [(get id-to-usage op-id)]
            (vals id-to-usage))
-         (remove nil?))))
+         (remove nil?)
+         (distinct))))
 
 (defn- get-building-ids [bldg-key {:keys [buildings]} op-id]
   ;; Only some building lists contain operation ids at all
@@ -200,9 +201,7 @@
                        :nationalBuildingIds   (get-building-ids :nationalId application (get-in attachment [:op :id]))
                        :propertyId            propertyId
                        :applicant             applicant
-                       :operations            (if (:op attachment)
-                                                (find-op application (get-in attachment [:op :id]))
-                                                (concat [(get-in application [:primaryOperation :name])] (map :name (:secondaryOperations application))))
+                       :operations            (find-op application (get-in attachment [:op :id]))
                        :tosFunction           (first (filter #(= (:tosFunction application) (:code %)) (tiedonohjaus/available-tos-functions (:organization application))))
                        :address               address
                        :organization          organization
@@ -216,9 +215,7 @@
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (:authority application) [:username :firstName :lastName])
                        :arkistoija            (select-keys user [:username :firstName :lastName])
-                       :kayttotarkoitukset    (if (:op attachment)
-                                                (get-usages application (get-in attachment [:op :id]))
-                                                (get-usages application nil))
+                       :kayttotarkoitukset    (get-usages application (get-in attachment [:op :id]))
                        :kieli                 "fi"
                        :versio                (if attachment (make-version-number attachment) "1.0")
                        :suunnittelijat        (:_designerIndex (amf/designers-index application))}]

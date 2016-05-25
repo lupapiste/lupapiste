@@ -131,6 +131,22 @@
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.illegal-attachment-type)))))
+
+;;
+;; RAM link
+;;
+
+(defquery ram-linked-attachments
+  {:parameters [id attachmentId]
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states     states/all-states}
+  [{{attachments :attachments} :application}]
+  (->> (attachment/resolve-ram-links attachments attachmentId)
+       (map #(select-keys % [:id :latestVersion]))
+       (ok :ram-links)))
+
 ;;
 ;; Operations
 ;;

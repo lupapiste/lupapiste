@@ -88,7 +88,7 @@
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
-                  :output-file (File. output-file)}
+                  :output-file (File. ^String output-file)}
       (= exit 5) (do (warn "PDF/A conversion failed because it can't be done losslessly")
                      (warn log-lines)
                      (io/delete-file output-file :silently)
@@ -106,7 +106,7 @@
                 {:pdfa? false}))))
 
 (defn- get-pdf-page-count [input-file]
-  (with-open [reader (PdfReader. input-file)]
+  (with-open [reader (PdfReader. ^String input-file)]
     (.getNumberOfPages reader)))
 
 (defn- store-converted-page-count [result count]
@@ -116,14 +116,7 @@
                  :else :invalid-pages)]
     (statistics/store-pdf-conversion-page-count db-key count)))
 
-(hystrix/defcommand convert-to-pdf-a
-  "Takes a PDF File and returns a File that is PDF/A"
-  {:hystrix/group-key   "Attachment"
-   :hystrix/command-key "Convert to PDF/A with PdfTools"
-   :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000))) setter)
-   ;; :hystrix/fallback-fn (fn fetch-request-fallback [pdf-file & [target-file-path]] nil)
-   }
-  [pdf-file & [target-file-path]]
+(defn- analyze-and-convert-to-pdf-a [pdf-file target-file-path]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
     (try
       (info "Trying to convert PDF to PDF/A")
@@ -149,11 +142,22 @@
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, using original")
         {:pdfa? false})))
 
+(hystrix/defcommand convert-to-pdf-a
+  "Takes a PDF File and returns a File that is PDF/A"
+  {:hystrix/group-key   "Attachment"
+   :hystrix/command-key "Convert to PDF/A with PDF Tools utility"
+   :hystrix/init-fn     (fn [_ setter]
+                          (doto setter
+                            (.andCommandPropertiesDefaults
+                              (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000)))))}
+  [pdf-file & [target-file-path]]
+  (analyze-and-convert-to-pdf-a pdf-file target-file-path))
+
 (defn pdf-a-required? [organization-id]
   (organization/some-organization-has-archive-enabled? #{organization-id}))
 
 (defn convert-file-to-pdf-in-place [src-file]
-  "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwie true.
+  "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwise true.
    Original file is overwritten."
   (let [temp-file (File/createTempFile "lupapiste.pdf.a." ".tmp")]
     (try

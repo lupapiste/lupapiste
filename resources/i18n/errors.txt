@@ -461,4 +461,5 @@
 "error.vrk:CR343" "fi" "Jos lämmitystapa on sähkölämmitys, on polttoaineen oltava sähkö"
 "error.vrk:CR343" "sv" "Om uppvärmningssättet är elvärme, måste bränslet vara el."
 "error.foreman-already-linked" "fi" "Työnjohtaja on jo nimetty eri rooliin."
+"error.foreman-already-linked" "sv" "Arbetsledaren är redan utsedd till en annan roll."
 "error.ram-link-already-exists" "fi" "Liittestä on jo tehty rakentamisen aikainen muutos"
