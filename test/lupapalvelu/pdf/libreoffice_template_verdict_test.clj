@@ -57,7 +57,7 @@
                paatos (nth (:paatokset verdict) 0)]
            (verdict-signatures verdict paatos) => '[["Tytti M\u00e4ntyoja" "04.02.2016"] ["Matti Mallikas" "23.02.2015"] ["Minna Mallikas" "23.02.2015"]])))
 
-(facts "Verdict vastuuhenkilö "
+(facts "Verdict vastuuhenkil\u00f6 "
        (def get-vastuuhenkilo #'lupapalvelu.pdf.libreoffice-template-verdict/get-vastuuhenkilo)
        (fact {:midje/description " yritys "}
              (get-vastuuhenkilo (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
