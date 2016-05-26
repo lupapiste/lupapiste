@@ -61,11 +61,11 @@
       }
 
       div.timestamp {
-        height: 60px; // 1 px per minute
+        height: 60px; // hour slots => 1 px per minute
       }
 
       div.timeline-slot {
-        height: 60px; // 1 px per minute
+        height: 60px; // hour slots => 1 px per minute
         border-bottom: 1px solid #ccc;
 
         &:nth-child(even) {
@@ -81,6 +81,10 @@
         position: absolute;
         width: 100%;
         padding: $marginS;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: $orange-dark; // This is needed because of text ellipsis
 
         &.booked {
           color: white;
