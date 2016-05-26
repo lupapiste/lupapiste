@@ -187,6 +187,7 @@
                    "accordion-service.js"
                    "verdict-appeal-service.js"
                    "scroll-service.js"
+                   "ram-service.js"
                    "calendar-service.js"]}
 
    :global-models {:depends [:services]

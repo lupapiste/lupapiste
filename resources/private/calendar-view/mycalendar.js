@@ -9,7 +9,7 @@
   function MyCalendarsModel() {
     var self = this;
     self.error = ko.observable();
-  };
+  }
 
   $(function() {
     _.forEach(components, function(component) {

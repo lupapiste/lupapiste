@@ -14,8 +14,7 @@
       usersList = null,
       editRolesDialogModel,
       calendarsModel,
-      reservationTypesModel,
-      calendarViewModel;
+      reservationTypesModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {

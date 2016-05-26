@@ -1,4 +1,4 @@
-LUPAPISTE.CalendarViewModel = function (params) {
+LUPAPISTE.CalendarViewModel = function () {
   "use strict";
   var self = this,
       calendarService = lupapisteApp.services.calendarService;
@@ -10,7 +10,7 @@ LUPAPISTE.CalendarViewModel = function (params) {
 
   // helper function for the view
   self.month = function() {
-    return moment().set({'year': self.year(), 'isoWeek': self.week(), 'isoWeekday': 1 /* Monday */}).valueOf();
+    return moment().set({"year": self.year(), "isoWeek": self.week(), "isoWeekday": 1 /* Monday */}).valueOf();
   };
 
   self.calendarId = ko.observable();
@@ -30,12 +30,12 @@ LUPAPISTE.CalendarViewModel = function (params) {
 
   self.slotPositionTop = function(slot) {
     var start = moment(slot.startTime);
-    return ((start.hour() - self.firstFullHour()) * 60 + start.minute()) + 'px';
+    return ((start.hour() - self.firstFullHour()) * 60 + start.minute()) + "px";
   };
 
   self.slotHeight = function(slot) {
     var duration = moment.duration(slot.duration);
-    return duration.asMinutes() + 'px';
+    return duration.asMinutes() + "px";
   };
 
   self.slotViewText = function(slot) {
@@ -43,13 +43,13 @@ LUPAPISTE.CalendarViewModel = function (params) {
   };
 
   self.clickHandler = function(clazz) {
-    if (clazz === 'timeline-slot') {
+    if (clazz === "timeline-slot") {
       hub.send("calendarView::timelineSlotClicked",
         { calendarId: this.calendarWeekday.calendarId,
           weekday: this.calendarWeekday,
           hour: this.slot.hour,
           minutes: this.slot.minutes });
-    } else if (clazz === 'reservation-slot') {
+    } else if (clazz === "reservation-slot") {
       hub.send("calendarView::reservationSlotClicked",
         { calendarId: this.calendarWeekday.calendarId,
           slot: this.slot });

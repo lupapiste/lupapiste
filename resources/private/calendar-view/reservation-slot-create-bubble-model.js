@@ -12,7 +12,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
   self.error = params.error;
 
   self.send = function() {
-    var slots = [{start: self.startTime().valueOf(), end: moment(self.startTime()).add(1, 'h').valueOf(), reservationTypes: self.selectedReservationTypes()}];
+    var slots = [{start: self.startTime().valueOf(), end: moment(self.startTime()).add(1, "h").valueOf(), reservationTypes: self.selectedReservationTypes()}];
     hub.send("calendarService::createCalendarSlots", {calendarId: self.calendarId(), slots: slots});
     self.bubbleVisible(false);
   };

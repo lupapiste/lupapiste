@@ -64,7 +64,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _fetchMyCalendars = hub.subscribe("calendarService::fetchMyCalendars", function(event) {
+  var _fetchMyCalendars = hub.subscribe("calendarService::fetchMyCalendars", function() {
     ajax.query("my-calendars")
       .success(function(data) {
         self.myCalendars(data.calendars);
@@ -74,7 +74,7 @@ LUPAPISTE.CalendarService = function() {
           self.calendarQuery.calendarId(data.calendars[0].id);
           self.calendarQuery.reservationTypes(self.reservationTypesByOrganization()[data.calendars[0].organization]);
           doFetchCalendarSlots({week: moment().isoWeek(), year: moment().year()});
-        };
+        }
       })
       .call();
   });
