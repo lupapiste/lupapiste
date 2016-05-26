@@ -244,7 +244,7 @@
        (ok :slots)))
 
 (defcommand create-calendar-slots
-  {:user-roles #{:authorityAdmin}
+  {:user-roles #{:authorityAdmin :authority}
    :parameters [calendarId slots]
    :input-validators [(partial action/number-parameters [:calendarId])]
    :feature    :ajanvaraus}
