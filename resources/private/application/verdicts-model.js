@@ -82,7 +82,7 @@ LUPAPISTE.VerdictsModel = function() {
   self.publishVerdict = function(bindings, verdict) {
     var applicationId = getApplicationId(bindings);
     LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmpublish"), {title: loc("yes"), fn: function() {
-      ajax.command("publish-verdict", {id: applicationId, verdictId: verdict.id})
+      ajax.command("publish-verdict", {id: applicationId, verdictId: verdict.id, lang: loc.getCurrentLanguage()})
         .success(function() {repository.load(applicationId, self.newPending);})
         .call();
       hub.send("track-click", {category:"Application", label: "", event:"publishVerdict"});

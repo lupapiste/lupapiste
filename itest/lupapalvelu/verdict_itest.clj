@@ -70,7 +70,7 @@
               a-id => application-id
               v-id => verdict-id))))
 
-      (fact "Publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id) => ok?)
+      (fact "Publish verdict" (command sonja :publish-verdict :id application-id :verdictId verdict-id :lang :fi) => ok?)
 
       (let [application (query-application sonja application-id)
             first-attachment (get-in application [:attachments 0])]
