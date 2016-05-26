@@ -1,8 +1,6 @@
 (ns lupapalvelu.calendars-api-itest
   (require [midje.sweet :refer :all]
-           [lupapalvelu.itest-util :refer :all]
-           [lupapalvelu.fixture.minimal :as minimal]
-           [lupapalvelu.user :as u]))
+           [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-fixture "ajanvaraus")
 
