@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page container">
+  <script type="text/x-jquery-tmpl" id="reservation-slot-create-bubble-template">
+    <div class="calendar-slot-bubble">
+      <bubble-dialog params="visible: bubbleVisible,
+                             buttonIcon: 'lupicon-circle-arrow-right',
+                             buttonText: 'application-guests.send',
+                             okEnabled: true,
+                             okFun: send,
+                             initFun: init,
+                             error: error,
+                             prefix: 'company-invite',
+                             waiting: waiting">
+        <p>Lisätään varattavia aikoja alkaen klo <span data-bind="text: $parent.startTime"></span></p>
+        <p>Tapahtumalajit:</p>
+        <div data-bind="foreach: $parent.reservationTypes">
+          <p>
+            <input type="checkbox" data-bind="checkedValue: $data.id, checked: $parents[1].selectedReservationTypes">
+            <span data-bind="text: $data.name"/>
+          </p>
+        </div>
+      </bubble-dialog>
+    </div>
+  </script>
+</section>
+</body>
+</html>

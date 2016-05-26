@@ -55,22 +55,29 @@
 
       &.date-today {
         background: $gray221;
-        div.timeline-slot {
-          background: $gray238;
-        }
       }
 
       div.timestamp {
         height: 60px; // hour slots => 1 px per minute
       }
 
-      div.timeline-slot {
+      &.date div.timeline-slot {
         height: 60px; // hour slots => 1 px per minute
         border-bottom: 1px solid #ccc;
 
         &:nth-child(even) {
           background: white;
         }
+
+        &:hover {
+          background: $gray221;
+        }
+      }
+
+      &.date-today div.timeline-slot {
+        height: 60px; // hour slots => 1 px per minute
+        border-bottom: 1px solid #ccc;
+        background: $gray238;
 
         &:hover {
           background: $gray221;

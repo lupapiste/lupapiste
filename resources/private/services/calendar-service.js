@@ -6,9 +6,11 @@ LUPAPISTE.CalendarService = function() {
   self.calendarWeekdays = ko.observableArray();
 
   self.myCalendars = ko.observableArray();
+  self.reservationTypesByOrganization = ko.observable();
 
   self.calendarQuery = {
     calendarId: ko.observable(),
+    reservationTypes: ko.observableArray(),
     week: ko.observable(),
     year: ko.observable()
   };
@@ -56,6 +58,7 @@ LUPAPISTE.CalendarService = function() {
       .success(function(data) {
         self.calendar(data.calendar);
         self.calendarQuery.calendarId(data.calendar.id);
+        self.calendarQuery.reservationTypes(self.reservationTypesByOrganization()[data.calendar.organization]);
         doFetchCalendarSlots({week: moment().isoWeek(), year: moment().year()});
       })
       .call();
@@ -65,9 +68,11 @@ LUPAPISTE.CalendarService = function() {
     ajax.query("my-calendars")
       .success(function(data) {
         self.myCalendars(data.calendars);
+        self.reservationTypesByOrganization(data.reservationTypes);
         if (data.calendars && data.calendars.length > 0) {
           self.calendar(data.calendars[0]);
           self.calendarQuery.calendarId(data.calendars[0].id);
+          self.calendarQuery.reservationTypes(self.reservationTypesByOrganization()[data.calendars[0].organization]);
           doFetchCalendarSlots({week: moment().isoWeek(), year: moment().year()});
         };
       })

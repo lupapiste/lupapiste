@@ -1,15 +1,9 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <section class="page" id="calendar-view-templates">
-
-    <!--
-      WARNING:
-      This is a template that will be cloned to
-      multiple places, so DO NOT USE element ID's.
-    -->
-
-    <div class="weekview-table">
+<section class="page container">
+  <script type="text/x-jquery-tmpl" id="calendar-view-template">
+    <div class="calendar-table">
       <div class="nav-actions">
         <div class="month" data-bind="calendarViewMonthText: month()"></div>
         <div class="nav-links">
@@ -38,18 +32,19 @@
           <!-- ko foreach: calendarWeekdays -->
           <td data-bind="css: {'date-today': today == true, 'date': today == false}">
             <div style="position: relative;">
-              <!-- ko foreach: $root.timelineTimes -->
-              <div class="timeline-slot" data-bind="click: $root.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'timeline-slot')">
+              <!-- ko foreach: $component.timelineTimes -->
+              <div class="timeline-slot" data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'timeline-slot')">
                 &nbsp;
               </div>
               <!-- /ko -->
               <!-- ko foreach: slots -->
-              <div class="reservation-slot" data-bind="style: { top: $root.slotPositionTop($data), height: $root.slotHeight($data) },
+              <div class="reservation-slot" data-bind="style: { top: $component.slotPositionTop($data),
+                                                                height: $component.slotHeight($data) },
                                                        css: { 'reservation-slot': 1,
                                                               'booked': status == 'booked',
                                                               'accepted': status == 'accepted' }">
-                <a data-bind="click: $root.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'reservation-slot'),
-                              text: $root.slotViewText($data)"></a>
+                <a data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'reservation-slot'),
+                              text: $component.slotViewText($data)"></a>
               </div>
               <!-- /ko -->
             </div>
@@ -59,7 +54,7 @@
         </tbody>
       </table>
     </div>
-
-  </section>
+  </script>
+</section>
 </body>
 </html>

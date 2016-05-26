@@ -12,7 +12,7 @@
       <h3 data-bind="with: calendars.calendarInView"><!--ko text: name --><!--/ko--> (<!--ko text: organization --><!--/ko-->) </h3>
       <div>&nbsp;</div>
     </div>
-    <div class="calendar-table"></div>
+    <div data-bind="component: { name: 'calendar-view' }"></div>
   </div>
 
 

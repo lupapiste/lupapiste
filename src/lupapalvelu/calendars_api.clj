@@ -178,6 +178,10 @@
       (fail! :error.unknown))
     (deactivate-resource existing-calendar)))
 
+(defn- reservation-types
+  [organization]
+  (api-query "/api/reservation-types/by-organization" {:organization organization}))
+
 ; toistaiseksi vain itestien siivoukseen. Siksi in-dev.
 (env/in-dev
   (defn delete-calendar
@@ -190,7 +194,10 @@
   {:user-roles #{:authority}
    :feature :ajanvaraus}
   [{user :user}]
-  (ok :calendars (map #(->FrontendCalendar % user) (find-calendars-for-user (:id user)))))
+  (let [calendars     (map #(->FrontendCalendar % user) (find-calendars-for-user (:id user)))
+        organizations (keys (group-by :organization calendars))]
+    (ok :calendars        calendars
+        :reservationTypes (zipmap organizations (map reservation-types organizations)))))
 
 (defquery calendar
   {:parameters [calendarId userId]
@@ -227,7 +234,7 @@
       (ok :calendarId (disable-calendar userId orgId) :disabled true))))
 
 (defquery calendar-slots
-  {:user-roles #{:authorityAdmin}
+  {:user-roles #{:authorityAdmin :authority}
    :parameters [calendarId year week]
    :input-validators [(partial action/non-blank-parameters [:calendarId :year :week])]
    :feature    :ajanvaraus}
@@ -264,7 +271,7 @@
   [{user :user}]
   (let [admin-in-organization-id (usr/authority-admins-organization-id user)]
     (info "Get reservation types for organization" admin-in-organization-id)
-    (ok :reservationTypes (api-query "/api/reservation-types/by-organization" {:organization admin-in-organization-id}))))
+    (ok :reservationTypes (reservation-types admin-in-organization-id))))
 
 (defcommand update-reservation-type
   {:user-roles #{:authorityAdmin}

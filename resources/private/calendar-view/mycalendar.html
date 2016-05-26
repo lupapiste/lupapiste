@@ -3,7 +3,7 @@
 <body>
 <section class="page" id="mycalendar">
 
-  <div class="container">
+  <div class="container" data-bind="with: mycalendars">
     <button class="secondary" data-bind="click: function() { history.go(-1); }">
       <i class="lupicon-chevron-start"></i>
       <span data-bind="ltext: 'back'"></span>
@@ -12,12 +12,11 @@
       <h1 data-bind="ltext: 'mycalendar.title'"></h1>
     </div>
 
-    <div data-bind="component: { name: 'calendar-slot-bubble',
-                                 params: { bubbleVisible: true }}">
+    <div data-bind="component: { name: 'reservation-slot-create-bubble',
+                                 params: { bubbleVisible: true,
+                                           error: error }}"></div>
 
-    </div>
-
-    <div class="calendar-table"></div>
+    <div data-bind="component: { name: 'calendar-view' }"></div>
   </div>
 
 </section>
