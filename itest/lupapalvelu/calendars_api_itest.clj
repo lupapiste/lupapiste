@@ -21,3 +21,17 @@
 
 (fact "create calendar for existing user"
   (command sipoo :set-calendar-enabled-for-authority :userId "777777777777777777888823" :enabled true) => ok?)
+
+(fact "Add reservation type for organization"
+  (command sipoo :add-reservation-type-for-organization :reservationType "Katselmus")
+  (let [result (query sipoo :reservation-types-for-organization)]
+    (map :name (:reservationTypes result)) => (just #{"Katselmus"})
+    (command sipoo :delete-reservation-type :reservationTypeId (first (map :id (:reservationTypes result))))))
+
+(fact "Delete reservation type"
+  (command sipoo :add-reservation-type-for-organization :reservationType "Katselmus")
+  (let [result (query sipoo :reservation-types-for-organization)
+        reservation-type-id (first (map :id (:reservationTypes result)))]
+    (command sipoo :delete-reservation-type :reservationTypeId reservation-type-id) => ok?
+    (let [foobar (query sipoo :reservation-types-for-organization)]
+      (count (:reservationTypes foobar)) => 0)))
