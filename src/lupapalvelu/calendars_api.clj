@@ -6,7 +6,7 @@
             [sade.http :as http]
             [sade.env :as env]
             [sade.util :as util]
-            [lupapalvelu.user :as usr])
+            [lupapalvelu.user :as usr]))
 
 (defn- ->FrontendReservationSlots [backend-slots]
   (map (fn [s] {:id        (:id s)
