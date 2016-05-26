@@ -626,8 +626,8 @@
 
   (defpage [:get "/dev/private-krysp"] []
     (let [request (request/ring-request)
-          user    (basic-authentication request)]
-      (if user
+          [u p] (http/decode-basic-auth request)]
+      (if (= u p "pena")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml")))
         basic-401))))
 
