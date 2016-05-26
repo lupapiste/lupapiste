@@ -228,8 +228,10 @@
     (let [dt (tc/from-long timestamp)]
       (timeformat/unparse (timeformat/formatter fmt) dt))))
 
-(defn- local-date-time [^Long timestamp]
-  (LocalDateTime. timestamp))
+(defn- local-date-time [timestamp-or-datetime]
+  (if (number? timestamp-or-datetime)
+    (LocalDateTime. (long timestamp-or-datetime))
+    (LocalDateTime. timestamp-or-datetime)))
 
 (defn- format-timestamp-local-tz [^Long timestamp ^String fmt]
   (when timestamp

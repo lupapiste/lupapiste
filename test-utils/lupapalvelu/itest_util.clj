@@ -21,6 +21,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.document-api]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
@@ -445,7 +446,7 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
-(defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
+(defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 12300000000, official 12400000000}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id :lang "fi")
         verdict-id (or (:verdictId new-verdict-resp))]
     (if-not (ok? new-verdict-resp)
@@ -453,7 +454,7 @@
       (do
        (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "" :lang "fi")
        (assoc
-         (f apikey :publish-verdict :id application-id :verdictId verdict-id)
+         (f apikey :publish-verdict :id application-id :verdictId verdict-id :lang "fi")
          :verdict-id verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
@@ -496,18 +497,19 @@
 ;; API for local operations
 
 (defn make-local-request [apikey]
-  {:scheme "http"
-   :user (find-user-from-minimal-by-apikey apikey)}
-  )
+  {:scheme "http", :user (find-user-from-minimal-by-apikey apikey)})
+
+(defn- execute-local [apikey web-fn action & args]
+  (let [params (if (map? (first args)) (first args) (apply hash-map args))]
+    (i18n/with-lang (:lang params)
+      (binding [*request* (make-local-request apikey)]
+        (web-fn (name action) params *request*)))))
 
 (defn local-command [apikey command-name & args]
-  (binding [*request* (make-local-request apikey)]
-    ;; (println "sending local-command" (if (map? (first args)) (first args) (apply hash-map args)) *request*)
-    (web/execute-command (name command-name) (if (map? (first args)) (first args) (apply hash-map args)) *request*)))
+  (apply execute-local apikey web/execute-command command-name args))
 
 (defn local-query [apikey query-name & args]
-  (binding [*request* (make-local-request apikey)]
-    (web/execute-query (name query-name) (if (map? (first args)) (first args) (apply hash-map args)) *request*)))
+  (apply execute-local apikey web/execute-query query-name args))
 
 (defn create-local-app
   "Runs the create-application command locally, returns reply map. Use ok? to check it."

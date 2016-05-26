@@ -307,15 +307,18 @@
   (let [{app-id :id} (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId jarvenpaa-property-id)
         {:keys [attachments]} (query-application pena app-id)
         created (now)
-        {vid :verdict-id} (give-verdict raktark-jarvenpaa app-id :verdictId "321-2016")
+        {vid :verdict-id :as resp0} (give-verdict raktark-jarvenpaa app-id :verdictId "321-2016")
+        expected-att-cnt (if (env/feature? :paatos-pdfa) 1 0)
         resp1  (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
         file-id-1 (get-in resp1 [:files 0 :id])
         resp2  (upload-file raktark-jarvenpaa "dev-resources/test-pdf.pdf")
         file-id-2 (get-in resp2 [:files 0 :id])
         pdfa-conversion? (string? (env/value :pdf2pdf :license-key))]
+    resp0 => ok?
     resp1 => ok?
     resp2 => ok?
-    (count attachments) => 0
+    (fact "Initially there are no attachments"
+      (count attachments) => 0)
 
     (fact "file not linked to application"
       (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-1) => http404?)
@@ -337,7 +340,7 @@
                                                     (= aid (:id target))))
                                              attachments)]
       (fact "new attachment has been created"
-        (count attachments) => 1
+        (count attachments) => (+ expected-att-cnt 1)
         (-> appeal-attachment :latestVersion :fileId) => file-id-1)
       (fact "attachment type is correct"
         (:type appeal-attachment) => {:type-group "muutoksenhaku"
@@ -360,7 +363,7 @@
               appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)
               {pdf-versions :versions :as pdf-attachment} (last appeal-attachments)]
           (count appeals) => 1
-          (count attachments) => 2
+          (count attachments) => (+ expected-att-cnt 2)
           (count appeal-attachments) => 2
           (if pdfa-conversion?
             (count pdf-versions) => 2
@@ -397,7 +400,7 @@
         (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
               appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
           (count appeals) => 1
-          (count attachments) => 1
+          (count attachments) => (+ expected-att-cnt 1)
           (count appeal-attachments) => 1
           (-> appeal-attachments first :latestVersion :fileId) => file-id-1
           (count (-> appeal-attachments first :versions)) => 1)
