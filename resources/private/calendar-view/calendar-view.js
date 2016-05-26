@@ -13,7 +13,7 @@ var calendarView = (function($) {
 
     // helper function for the view
     self.month = function() {
-      return moment().set({'year': self.year(), 'isoWeek': self.week()}).valueOf();
+      return moment().set({"year": self.year(), "isoWeek": self.week()}).valueOf();
     };
 
     self.calendarId = ko.observable();
@@ -33,27 +33,27 @@ var calendarView = (function($) {
 
     self.slotPositionTop = function(slot) {
       var start = moment(slot.startTime);
-      return ((start.hour() - self.firstFullHour()) * 60 + start.minute()) + 'px';
+      return ((start.hour() - self.firstFullHour()) * 60 + start.minute()) + "px";
     };
 
     self.slotHeight = function(slot) {
       var duration = moment.duration(slot.duration);
-      return duration.asMinutes() + 'px';
+      return duration.asMinutes() + "px";
     };
 
     self.slotViewText = function(slot) {
-      return (slot.status == "available" ? "Vapaa aika: " : "") +
+      return (slot.status === "available" ? "Vapaa aika: " : "") +
         _.map(slot.reservationTypes, function(d) { return d.name; }).join();
     };
 
     self.clickHandler = function(clazz) {
-      if (clazz === 'timeline-slot') {
+      if (clazz === "timeline-slot") {
         hub.send("calendarView::timelineSlotClicked",
           { calendarId: this.calendarWeekday.calendarId,
             weekday: this.calendarWeekday,
             hour: this.slot.hour,
             minutes: this.slot.minutes });
-      } else if (clazz === 'reservation-slot') {
+      } else if (clazz === "reservation-slot") {
         hub.send("calendarView::reservationSlotClicked",
           { calendarId: this.calendarWeekday.calendarId,
             slot: this.slot });

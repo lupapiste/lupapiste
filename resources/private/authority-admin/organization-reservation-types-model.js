@@ -22,7 +22,11 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
     };
 
     self.execute = function() {
-      self.commandName() === "edit" ? self.command(self.id(), self.name()) : self.command(self.name());
+      if (self.commandName() === "edit") {
+        self.command(self.id(), self.name());
+      } else {
+        self.command(self.name());
+      }
     };
 
     self.ok = ko.computed(function() {

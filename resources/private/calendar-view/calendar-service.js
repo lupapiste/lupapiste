@@ -19,7 +19,7 @@ LUPAPISTE.CalendarService = function() {
       self.calendarQuery.week(event.week);
       self.calendarQuery.year(event.year);
     } else if (event && event.increment) {
-      var newStartOfWeek = moment().year(self.calendarQuery.year()).isoWeek(self.calendarQuery.week()).add(event.increment, 'weeks');
+      var newStartOfWeek = moment().year(self.calendarQuery.year()).isoWeek(self.calendarQuery.week()).add(event.increment, "weeks");
       self.calendarQuery.year(newStartOfWeek.year());
       self.calendarQuery.week(newStartOfWeek.isoWeek());
     }
@@ -31,14 +31,14 @@ LUPAPISTE.CalendarService = function() {
                                    year: year })
       .success(function(data) {
         var now = moment();
-        var startOfWeek = moment().isoWeek(week).year(year).startOf('isoWeek').valueOf();
+        var startOfWeek = moment().isoWeek(week).year(year).startOf("isoWeek").valueOf();
         var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
           var day = moment(startOfWeek).isoWeekday(i);
-          var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, 'day'); });
+          var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, "day"); });
           return {
             calendarId: self.calendarQuery.calendarId(),
             startOfDay: day.valueOf(),
-            today: day.isSame(now, 'day'),
+            today: day.isSame(now, "day"),
             slots: _.map(slotsForDay,
               function(s) {
                 return _.extend(s, { duration: moment(s.endTime).diff(s.startTime) });

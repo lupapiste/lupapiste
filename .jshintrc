@@ -33,6 +33,7 @@
     "attachmentTypeSelect": true,
     "attachmentUtils" : true,
     "authorization": true,
+    "calendarView": true,
     "comments": true,
     "currentUser": true,
     "debug": true,
@@ -78,7 +79,7 @@
   "exported": [
     "accordion","AccordionState","ajax","attachment",
     "attachmentUtils","attachmentTypeSelect",
-    "authorization","comments","currentUser",
+    "authorization","calendarView","comments","currentUser",
     "docutils", "DocModel","docgen",
     "expand", "externalApiTools", "features",
     "ga","gis","getEvent","hub","invites","loc",

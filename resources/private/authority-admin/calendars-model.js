@@ -18,7 +18,7 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
       self.command = params.command;
       self.startTime(util.getIn(params, ["source", "startTime"], ""));
     };
-  };
+  }
 
   self.newReservationSlotModel = new NewReservationSlotModel();
   hub.subscribe("calendarView::timelineSlotClicked", function(event) {
@@ -28,16 +28,13 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
     var startTime = moment(weekday.startOfDay).hour(hour).minutes(minutes);
     self.newReservationSlotModel.init({
       source: { startTime: startTime },
-      commandName: 'create',
+      commandName: "create",
       command: function(reservationTypes) {
-        var slots = [{start: startTime.valueOf(), end: moment(startTime).add(30, 'm').valueOf(), reservationTypes: reservationTypes}];
+        var slots = [{start: startTime.valueOf(), end: moment(startTime).add(30, "m").valueOf(), reservationTypes: reservationTypes}];
         hub.send("calendarService::createCalendarSlots", {calendarId: weekday.calendarId, slots: slots, modalClose: true});
       }
     });
     self.openNewReservationSlotDialog();
-  });
-
-  hub.subscribe("calendarView::reservationSlotClicked", function(event) {
   });
 
   self.openNewReservationSlotDialog = function() {
@@ -56,14 +53,14 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
         })
         .call();
     }
-  };
+  }
 
   self.init = function(data) {
     var users = _.map(data.users,
       function(user) {
-        var calendarEnabledObservable = ko.observable(_.has(user, 'calendarId'));
-        var calendarIdForLink = ko.observable(user.calendarId || '');
-        var user = _.extend(user, { calendarEnabled: calendarEnabledObservable,
+        var calendarEnabledObservable = ko.observable(_.has(user, "calendarId"));
+        var calendarIdForLink = ko.observable(user.calendarId || "");
+        user = _.extend(user, { calendarEnabled: calendarEnabledObservable,
                                     calendarId: calendarIdForLink });
         user.calendarEnabled.subscribe(_.partial(setEnabled, user));
         return user;
