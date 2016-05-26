@@ -453,7 +453,7 @@
       (do
        (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "" :lang "fi")
        (assoc
-         (f apikey :publish-verdict :id application-id :verdictId verdict-id :lang :fi)
+         (f apikey :publish-verdict :id application-id :verdictId verdict-id :lang "fi")
          :verdict-id verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
