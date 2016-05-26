@@ -12,7 +12,10 @@
       asianhallintaModel,
       linkToVendorBackendModel,
       usersList = null,
-      editRolesDialogModel;
+      editRolesDialogModel,
+      calendarsModel,
+      reservationTypesModel,
+      calendarViewModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -384,6 +387,8 @@
   organizationUsers = new LUPAPISTE.OrganizationUserModel(organizationModel);
   editSelectedOperationsModel = new EditSelectedOperationsModel();
   editAttachmentsModel = new EditAttachmentsModel();
+  calendarsModel = new LUPAPISTE.AuthAdminCalendarsModel();
+  reservationTypesModel = new LUPAPISTE.AuthAdminReservationTypesModel();
 
   wfsModel = new LUPAPISTE.WFSModel();
   statementGiversModel = new StatementGiversModel();
@@ -431,9 +436,27 @@
     linkToVendorBackendModel.load();
   });
 
+  if (features.enabled("ajanvaraus")) {
+    hub.onPageLoad("calendar-admin", function() {
+      reservationTypesModel.load();
+      if (!calendarViewModel) {
+        var component = $("#calendar-admin .calendar-table");
+        calendarViewModel = calendarView.create(component, new LUPAPISTE.CalendarService());
+      }
+      var path = pageutil.getPagePath();
+      if (path.length > 1) {
+        hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
+      }
+    });
+
+    hub.onPageLoad("organization-calendars", function() {
+      calendarsModel.load();
+      reservationTypesModel.load();
+    });
+  }
+
   $(function() {
     organizationModel.load();
-
     $("#applicationTabs").applyBindings({});
     $("#users").applyBindings({
       organizationUsers:   organizationUsers,
@@ -463,6 +486,17 @@
     $("#areas").applyBindings({
       organization:        organizationModel
     });
+    if (features.enabled("ajanvaraus")) {
+      $("#organization-calendars").applyBindings({
+        calendars:           calendarsModel,
+        reservationTypes:    reservationTypesModel
+      });
+      $("#calendar-admin").applyBindings({
+        calendars:           calendarsModel,
+        reservationTypes:    reservationTypesModel
+      });
+    }
+
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();
   });

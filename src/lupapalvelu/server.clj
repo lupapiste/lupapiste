@@ -61,7 +61,8 @@
             [lupapalvelu.ssokeys-api]
             [lupapalvelu.guest-api]
             [lupapalvelu.archiving-api]
-            [lupapalvelu.appeal-api]))
+            [lupapalvelu.appeal-api]
+            [lupapalvelu.calendars-api]))
 
 
 

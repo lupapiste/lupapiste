@@ -12,9 +12,12 @@
                     <li><a class="link-btn" href="#!/users" data-test-id="users" data-bind="ltext: 'auth-admin.users', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('users')}"></a></li>
                     <li><a class="link-btn" href="#!/applications" data-test-id="" data-bind="ltext: 'auth-admin.application-settings', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('applications')}"></a></li>
                     <li><a class="link-btn" href="#!/operations" data-test-id="" data-bind="ltext: 'auth-admin.selected-operations', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('operations')}"></a></li>
-                    <li><a class="link-btn" href="#!/attachments" data-test-id="" data-bind="ltext: 'auth-admin.operations-attachments.attachments', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('attachmentes')}"></a></li>
+                    <li><a class="link-btn" href="#!/attachments" data-test-id="" data-bind="ltext: 'auth-admin.operations-attachments.attachments', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('attachments')}"></a></li>
                     <li><a class="link-btn" href="#!/backends" data-test-id="" data-bind="ltext: 'auth-admin.backends', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('backends')}"></a></li>
                     <li><a class="link-btn" href="#!/areas" data-test-id="" data-bind="ltext: 'auth-admin.areas', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('areas')}"></a></li>
+                    <li data-bind="if: features.enabled('ajanvaraus')">
+                      <a class="link-btn" href="#!/organization-calendars" data-test-id="" data-bind="ltext: 'auth-admin.organization-calendars', css: {'selected': lupapisteApp.models.rootVMO.isCurrentPage('organization-calendars')}"></a>
+                    </li>
                 </ul>
             </div>
         </div>

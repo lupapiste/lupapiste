@@ -1,0 +1,109 @@
+#calendar-admin>.container>div {
+  padding: 0px $baseline;
+}
+
+#calendar-admin .calendar-table {
+  width:100%;
+  min-height:$baseline * 6;
+
+  .nav-actions {
+    width: 96%;
+    .month {
+      float: left;
+      margin-left: 5%;
+      padding-left: 12px;
+      font-size: $baseline * 0.75;
+      font-weight: bold;
+    }
+    .nav-links {
+      vertical-align: top;
+    }
+    text-align: right;
+  }
+
+  table {
+    width: 96%;
+    tr {
+      border: none;
+    }
+
+    th {
+      background: white;
+      font-size: $baseline * 0.75;
+      font-weight: normal;
+
+      &.date-today {
+        background: $gray221;
+        border: 1px solid #dddddd;
+      }
+    }
+
+    td {
+      background: $gray246;
+      padding: 0;
+      margin: $marginS;
+      width: 18%;
+      border: 1px solid #dddddd;
+
+      &:first-child {
+        font-size: $baseline * 0.75;
+        font-weight: normal;
+        background: white;
+        width: 5%;
+        border: none;
+      }
+
+      &.date-today {
+        background: $gray221;
+        div.timeline-slot {
+          background: $gray238;
+        }
+      }
+
+      &.date {
+        div.timeline-slot:nth-child(even) {
+          background: white;
+        }
+      }
+
+      div.timestamp {
+        height: 60px; // 1 px per minute
+      }
+
+      div.timeline-slot {
+        height: 60px; // 1 px per minute
+        border-bottom: 1px solid #ccc;
+
+        &:hover {
+          background: $gray221;
+        }
+
+      }
+
+      div.reservation-slot {
+        position: absolute;
+        width: 100%;
+        padding: $marginS;
+
+        &.booked {
+          color: white;
+          background: $green-dark;
+
+          a {
+            color: white;
+          }
+        }
+
+        &.accepted {
+          color: white;
+          background: $orange-dark;
+
+          a {
+            color: white;
+          }
+        }
+      }
+    }
+
+  }
+}

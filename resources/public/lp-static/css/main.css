@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1464172031133');
+@import url('main-blessed1.css?z=1464259289598');
 
 @media (max-width: 991px) {
   /* line 80, ../../../private/common-html/sass/views/_application.scss */
@@ -3183,6 +3183,118 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   transition: opacity 0.2s linear;
 }
 
+/* line 1, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin > .container > div {
+  padding: 0px 24px;
+}
+
+/* line 5, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table {
+  width: 100%;
+  min-height: 144px;
+}
+/* line 9, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table .nav-actions {
+  width: 96%;
+  text-align: right;
+}
+/* line 11, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table .nav-actions .month {
+  float: left;
+  margin-left: 5%;
+  padding-left: 12px;
+  font-size: 18px;
+  font-weight: bold;
+}
+/* line 18, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table .nav-actions .nav-links {
+  vertical-align: top;
+}
+/* line 24, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table {
+  width: 96%;
+}
+/* line 26, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table tr {
+  border: none;
+}
+/* line 30, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table th {
+  background: white;
+  font-size: 18px;
+  font-weight: normal;
+}
+/* line 35, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table th.date-today {
+  background: #dddddd;
+  border: 1px solid #dddddd;
+}
+/* line 41, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td {
+  background: #f6f6f6;
+  padding: 0;
+  margin: 6px;
+  width: 18%;
+  border: 1px solid #dddddd;
+}
+/* line 48, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td:first-child {
+  font-size: 18px;
+  font-weight: normal;
+  background: white;
+  width: 5%;
+  border: none;
+}
+/* line 56, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td.date-today {
+  background: #dddddd;
+}
+/* line 58, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td.date-today div.timeline-slot {
+  background: #eeeeee;
+}
+/* line 64, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td.date div.timeline-slot:nth-child(even) {
+  background: white;
+}
+/* line 69, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.timestamp {
+  height: 60px;
+}
+/* line 73, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.timeline-slot {
+  height: 60px;
+  border-bottom: 1px solid #ccc;
+}
+/* line 77, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.timeline-slot:hover {
+  background: #dddddd;
+}
+/* line 83, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot {
+  position: absolute;
+  width: 100%;
+  padding: 6px;
+}
+/* line 88, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot.booked {
+  color: white;
+  background: #2ca92c;
+}
+/* line 92, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot.booked a {
+  color: white;
+}
+/* line 97, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot.accepted {
+  color: white;
+  background: #f39129;
+}
+/* line 101, ../../../private/common-html/sass/views/_calendars.scss */
+#calendar-admin .calendar-table table td div.reservation-slot.accepted a {
+  color: white;
+}
+
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */
 #bulletins {
   font-family: "Source Sans Pro", sans-serif;
@@ -3700,50 +3812,50 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 /*
   Lupapalvelu CSS:
 */
-/* line 159, ../../../private/common-html/sass/main.scss */
+/* line 160, ../../../private/common-html/sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 165, ../../../private/common-html/sass/main.scss */
+/* line 166, ../../../private/common-html/sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 169, ../../../private/common-html/sass/main.scss */
+/* line 170, ../../../private/common-html/sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 173, ../../../private/common-html/sass/main.scss */
+/* line 174, ../../../private/common-html/sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 177, ../../../private/common-html/sass/main.scss */
+/* line 178, ../../../private/common-html/sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 181, ../../../private/common-html/sass/main.scss */
+/* line 182, ../../../private/common-html/sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 185, ../../../private/common-html/sass/main.scss */
+/* line 186, ../../../private/common-html/sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 190, ../../../private/common-html/sass/main.scss */
+/* line 191, ../../../private/common-html/sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 194, ../../../private/common-html/sass/main.scss */
+/* line 195, ../../../private/common-html/sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -3755,27 +3867,27 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   display: table-cell;
 }
 
-/* line 205, ../../../private/common-html/sass/main.scss */
+/* line 206, ../../../private/common-html/sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 213, ../../../private/common-html/sass/main.scss */
+/* line 214, ../../../private/common-html/sass/main.scss */
 .table, .reviews-table, table.review-buildings-table, .appeals-table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 219, ../../../private/common-html/sass/main.scss */
+/* line 220, ../../../private/common-html/sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 224, ../../../private/common-html/sass/main.scss */
+/* line 225, ../../../private/common-html/sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -3789,47 +3901,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 237, ../../../private/common-html/sass/main.scss */
+/* line 238, ../../../private/common-html/sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 239, ../../../private/common-html/sass/main.scss */
+/* line 240, ../../../private/common-html/sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 245, ../../../private/common-html/sass/main.scss */
+/* line 246, ../../../private/common-html/sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 250, ../../../private/common-html/sass/main.scss */
+/* line 251, ../../../private/common-html/sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 252, ../../../private/common-html/sass/main.scss */
+/* line 253, ../../../private/common-html/sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 255, ../../../private/common-html/sass/main.scss */
+/* line 256, ../../../private/common-html/sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 256, ../../../private/common-html/sass/main.scss */
+/* line 257, ../../../private/common-html/sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 259, ../../../private/common-html/sass/main.scss */
+/* line 260, ../../../private/common-html/sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 261, ../../../private/common-html/sass/main.scss */
+/* line 262, ../../../private/common-html/sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 263, ../../../private/common-html/sass/main.scss */
+/* line 264, ../../../private/common-html/sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
