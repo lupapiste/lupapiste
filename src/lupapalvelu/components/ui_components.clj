@@ -368,8 +368,8 @@
                              :company :analytics :register-company :footer :ui-components]}
 
    :calendar-view {:depends [:common-html]
-                   :js ["calendar-view.js" "mycalendar.js"]
-                   :html ["calendar-view.html" "mycalendar.html"]}
+                   :js ["calendar-slot-bubble-model.js" "calendar-view.js" "mycalendar.js"]
+                   :html ["calendar-slot-bubble-template.html" "calendar-view.html" "mycalendar.html"]}
 
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications :application

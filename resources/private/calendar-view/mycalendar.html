@@ -11,6 +11,12 @@
     <div>
       <h1 data-bind="ltext: 'mycalendar.title'"></h1>
     </div>
+
+    <div data-bind="component: { name: 'calendar-slot-bubble',
+                                 params: { bubbleVisible: true }}">
+
+    </div>
+
     <div class="calendar-table"></div>
   </div>
 
