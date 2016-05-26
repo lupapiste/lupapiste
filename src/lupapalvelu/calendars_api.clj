@@ -6,7 +6,7 @@
             [sade.http :as http]
             [sade.env :as env]
             [sade.util :as util]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr])
 
 (defn- ->FrontendReservationSlots [backend-slots]
   (map (fn [s] {:id        (:id s)
@@ -199,8 +199,11 @@
 
 (defcommand set-calendar-enabled-for-authority
   {:user-roles #{:authorityAdmin}
+   :parameters [userId enabled]
+   :input-validators [(partial action/non-blank-parameters [:userId])
+                      (partial action/boolean-parameters [:enabled])]
    :feature    :ajanvaraus}
-  [{{:keys [userId enabled]} :data adminUser :user}]
+  [{adminUser :user}]
   (let [orgId (usr/authority-admins-organization-id adminUser)]
     (info "Set calendar enabled status" userId "in organization" orgId "as" enabled)
     (if enabled
@@ -209,16 +212,20 @@
 
 (defquery calendar-slots
   {:user-roles #{:authorityAdmin}
+   :parameters [calendarId year week]
+   :input-validators [(partial action/non-blank-parameters [:calendarId :year :week])]
    :feature    :ajanvaraus}
-  [{{:keys [calendarId year week]} :data}]
+  [_]
   (->> (api-query (str "/api/reservationslots/calendar/" calendarId) {:year year :week week})
        ->FrontendReservationSlots
        (ok :slots)))
 
 (defcommand create-calendar-slots
   {:user-roles #{:authorityAdmin}
+   :parameters [calendarId slots]
+   :input-validators [(partial action/number-parameters [:calendarId])]
    :feature    :ajanvaraus}
-  [{{:keys [calendarId slots]} :data}]
+  [_]
   (info "Creating new calendar slots in calendar #" calendarId)
   (->> slots
        ->BackendReservationSlots
@@ -227,12 +234,13 @@
 
 (defcommand add-reservation-type-for-organization
   {:user-roles #{:authorityAdmin}
+   :parameters [reservationType]
+   :input-validators [(partial action/non-blank-parameters [:reservationType])]
    :feature    :ajanvaraus}
-  [{{:keys [reservationType]} :data user :user}]
+  [{user :user}]
   (let [admin-in-organization-id (usr/authority-admins-organization-id user)]
-    (info "Adding reservation type" reservationType "for organization" admin-in-organization-id)
     (ok :reservationTypes (post-command "/api/reservation-types/" {:reservationType   reservationType
-                                                                    :organization      admin-in-organization-id}))))
+                                                                   :organization      admin-in-organization-id}))))
 
 (defquery reservation-types-for-organization
   {:user-roles #{:authorityAdmin}
@@ -244,12 +252,17 @@
 
 (defcommand update-reservation-type
   {:user-roles #{:authorityAdmin}
-   :feature    :ajanvaraus}
-  [{{:keys [reservationTypeId name]} :data user :user}]
+   :parameters [reservationTypeId name]
+   :input-validators [(partial action/number-parameters [:reservationTypeId])
+                      (partial action/non-blank-parameters [:name])]
+   :feature :ajanvaraus}
+  [_]
   (ok :reservationTypes (put-command (str "/api/reservation-types/" reservationTypeId) {:name name})))
 
 (defcommand delete-reservation-type
   {:user-roles #{:authorityAdmin}
+   :parameters [reservationTypeId]
+   :input-validators [(partial action/number-parameters [:reservationTypeId])]
    :feature    :ajanvaraus}
-  [{{:keys [reservationTypeId]} :data user :user}]
+  [_]
   (ok :reservationTypes (delete-command (str "/api/reservation-types/" reservationTypeId))))
