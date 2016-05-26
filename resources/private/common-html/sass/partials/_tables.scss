@@ -273,3 +273,14 @@ table.review-buildings-table {
     background-color: initial;
   }
 }
+
+@include note-table ( company-users ) {}
+
+table.company-users-table {
+  select {
+    width: initial;
+  }
+  tr:hover, tr:active {
+    background-color: transparent;
+  }
+}

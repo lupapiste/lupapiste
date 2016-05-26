@@ -1,5 +1,73 @@
-@import url('main-blessed1.css?z=1464259289598');
+@import url('main-blessed1.css?z=1464268068528');
 
+
+/* line 239, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search {
+  padding-right: 17px;
+  /* add space for the 'x' icon*/
+}
+
+/* line 242, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search::-ms-clear {
+  display: none;
+}
+
+/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  display: none;
+  /* now go with the styling */
+  cursor: pointer;
+  font: bold 1em sans-serif;
+  color: #38468F;
+}
+/* line 255, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear:before {
+  color: #f52;
+}
+
+/* application section styles*/
+/*Summary styles*/
+/* line 65, ../../../private/common-html/sass/views/_application.scss */
+.application_summary {
+  background-color: #eeeeee;
+  border-bottom: 2px solid #bbbbbb;
+  min-height: 332px;
+  padding: 6px 0 0 0;
+  position: relative;
+  display: block;
+  float: none;
+}
+/* line 74, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .container {
+  margin-bottom: 0;
+}
+/* line 80, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble {
+  position: relative;
+  min-height: 280px;
+  padding-left: 320px;
+  padding-right: 24%;
+  margin-right: 61px;
+}
+/* line 23, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+/* line 28, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container {
+  left: 0;
+  width: 320px;
+  margin-bottom: 12px;
+}
+/* line 35, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application_actions {
+  right: 0;
+}
 @media (max-width: 991px) {
   /* line 80, ../../../private/common-html/sass/views/_application.scss */
   .application_summary .preamble {
@@ -3875,7 +3943,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 
 /* basic styles*/
 /* line 214, ../../../private/common-html/sass/main.scss */
-.table, .reviews-table, table.review-buildings-table, .appeals-table {
+.table, .reviews-table, table.review-buildings-table, .company-users-table, .appeals-table {
   font-size: 16px;
   line-height: 24px;
 }

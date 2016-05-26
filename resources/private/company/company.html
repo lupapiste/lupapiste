@@ -125,7 +125,7 @@
                                       invitations().length + users().length,
                                       info.accountType() ? info.accountType().limit : info.model().customAccountLimit())"></span>
 
-          <table data-bind="visible: !pending()" class="table table-striped" data-test-id="company-users-table">
+          <table data-bind="visible: !pending()" class="company-users-table" data-test-id="company-users-table">
             <thead>
               <tr>
                 <th data-bind="ltext: 'company.user.firstName'"></th>
@@ -133,37 +133,68 @@
                 <th data-bind="ltext: 'company.user.email'"></th>
                 <th data-bind="ltext: 'company.user.enabled'"></th>
                 <th data-bind="ltext: 'company.user.role'"></th>
+                <th data-bind="ltext: 'company.user.submit'"></th>
                 <th data-bind="visible: isAdmin"></th>
               </tr>
             </thead>
-            <tbody data-bind="foreach: invitations">
+            <tbody>
+              <!-- ko foreach: invitations -->
               <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
                 <td data-bind="text: email" data-test-id="company-invited-user-email"></td>
                 <td data-bind="ltext: 'company.user.invited'" data-test-id="company-user-invited"></td>
                 <td data-bind="ltext: 'company.user.role.' + role" data-test-id="company-user-role"></td>
-                <td>
+                <td data-bind="ltext: submit ? 'yes' : 'no'" data-test-id="company-user-submit"></td>
+                <td class="company-users-table--action">
                   <div data-bind="visible: opsEnabled">
                     <a href="#" data-bind="click: deleteInvitation, ltext: 'company.user.op.delete.invitation'"></a>
                   </div>
                 </td>
               </tr>
-            </tbody>
-            <tbody data-bind="foreach: users">
+              <!-- /ko -->
+              <!-- ko foreach: users -->
               <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
                 <td data-bind="text: email"></td>
-                <td data-bind="ltext: 'company.user.enabled.' + enabled()" data-test-id="company-user-invited"></td>
-                <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
-                <td data-bind="visible: $parent.isAdmin">
-                  <div data-bind="visible: opsEnabled">
-                    <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#" data-test-id="company-user-toggle-admin"></a>
-                    <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" href="#" data-test-id="company-user-toggle-delete"></a>
+                <td data-bind="ltext: 'company.user.enabled.' + enabled" data-test-id="company-user-invited"></td>
+                <!-- ko if: editing -->
+                <td>
+                  <select data-bind="options: $parent.userEditor.roles,
+                                     optionsText: $parent.userEditor.roleText,
+                                     value: $parent.userEditor.role"
+                          class="dropdown"
+                          data-test-id="company-user-edit-role"></select>
+                </td>
+                <td>
+                  <select  data-test-id="company-user-edit-submit"
+                           data-bind="options: [true, false],
+                                      optionsText: $parent.userEditor.submitText,
+                                      value: $parent.userEditor.submit"
+                           class="dropdown"></select>
+                </td>
+                <td data-bind="visible: $parent.isAdmin"
+                    class="company-users-table--action">
+                  <div data-bind="if: opsEnabled">
+                    <a data-bind="ltext: 'save', click: $parent.userEditor.save" data-test-id="company-user-save"></a>
+                    <a data-bind="ltext: 'cancel', click: $parent.userEditor.clear" data-test-id="company-user-cancel"></a>
                   </div>
                 </td>
+                <!-- /ko -->
+                <!-- ko ifnot: editing -->
+                <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
+                <td data-bind="ltext: submit() ? 'yes' : 'no'" data-test-id="company-user-submit"></td>
+                <td data-bind="visible: $parent.isAdmin"
+                    class="company-users-table--action">
+                  <div data-bind="if: opsEnabled">
+                    <a data-bind="ltext: 'edit', click: edit" data-test-id="company-user-edit"></a>
+                    <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" data-test-id="company-user-toggle-delete"></a>
+                  </div>
+                </td>
+                <!-- /ko -->
               </tr>
+              <!-- /ko -->
             </tbody>
           </table>
           <div data-bind="visible: isAdmin">
@@ -177,37 +208,6 @@
                              visible: isAdmin && !lupapisteApp.models.globalAuthModel.ok('company-add-user')"></span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div id="dialog-company-user-op" class="window autosized">
-      <div class="dialog-header">
-        <p data-bind="text: title"></p>
-        <p class="dialog-close close lupicon-remove"></p>
-      </div>
-      <div class="dialog-content">
-
-        <div>
-          <span data-bind="html: message"></span>
-        </div>
-
-        <div data-bind="visible: pending">
-          <em class="button-loader" style="position: relative;"></em>
-          <span data-bind="ltext: 'company.user.op.pending'"></span>
-        </div>
-
-        <button data-bind="click: ok,
-                           enable: !pending(),
-                           ltext: 'yes'"
-                class="positive btn-dialog"
-                data-test-id="confirm-yes">
-        </button>
-        <button data-test-id="company-new-user-close-dialog"
-                data-bind="enable: !pending(),
-                           ltext: 'no'"
-                class="secondary btn-dialog close">
-        </button>
-
       </div>
     </div>
 

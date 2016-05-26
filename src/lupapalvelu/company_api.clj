@@ -60,20 +60,22 @@
   (ok :company (c/update-company! company updates caller)))
 
 (defcommand company-user-update
-  {:parameters [user-id op value]
-   :input-validators [(partial action/non-blank-parameters [:user-id :op])
-                      (partial action/boolean-parameters [:value])]
+  {:parameters [user-id role submit]
+   :input-validators [(partial action/non-blank-parameters [:user-id])
+                      (partial action/boolean-parameters [:submit])
+                      (partial action/select-parameters [:role] #{"user" "admin"})]
+   :pre-checks [c/company-user-edit-allowed]
    :user-roles #{:applicant :admin}}
-  [{caller :user}]
-  (let [target-user (u/get-user-by-id! user-id)]
-    (if-not (or (= (:role caller) "admin")
-                (and (= (get-in caller [:company :role])
-                        "admin")
-                     (= (get-in caller [:company :id])
-                        (get-in target-user [:company :id]))))
-      (unauthorized!))
-    (c/update-user! user-id (keyword op) value)
-    (ok)))
+  [_]
+  (c/update-user! user-id role submit))
+
+(defcommand company-user-delete
+  {:parameters [user-id]
+   :input-validators [(partial action/non-blank-parameters [:user-id])]
+   :user-roles #{:applicant :admin}
+   :pre-checks [c/company-user-edit-allowed]}
+  [_]
+  (c/delete-user! user-id))
 
 (defn- user-limit-not-exceeded [command _]
   (let [company (c/find-company-by-id (get-in command [:user :company :id]))

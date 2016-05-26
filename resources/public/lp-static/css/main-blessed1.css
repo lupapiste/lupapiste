@@ -7137,7 +7137,7 @@ select.dropdown {
   border: 1px solid #bbbbbb;
   border-radius: 0 0 0 0;
   padding-left: 12px;
-  padding-right: 12px;
+  padding-right: 33px;
   height: 40px;
   background-image: url("/lp-static/img/lupicon-chevron-down-orange-dark.png");
   background-position: right 17px center;
@@ -8443,6 +8443,51 @@ table.review-buildings-table div.checkbox-wrapper {
 /* line 272, ../../../private/common-html/sass/partials/_tables.scss */
 table.review-buildings-table div.checkbox-wrapper--disabled {
   background-color: initial;
+}
+
+/* line 226, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--action {
+  text-align: right;
+}
+/* line 228, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--action a {
+  padding-right: 2em;
+}
+/* line 232, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--icons {
+  text-align: center;
+  color: #f39129;
+}
+/* line 236, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note {
+  padding-left: 2em;
+  padding-right: 2em;
+  background-color: white;
+}
+/* line 241, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note:active {
+  background-color: initial;
+}
+/* line 245, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note td.company-users-table--extra {
+  white-space: pre-wrap;
+}
+/* line 248, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note td.company-users-table--no-extra {
+  color: #bbbbbb;
+}
+/* line 252, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table div.bubble-dialog {
+  border: none;
+}
+
+/* line 280, ../../../private/common-html/sass/partials/_tables.scss */
+table.company-users-table select {
+  width: initial;
+}
+/* line 283, ../../../private/common-html/sass/partials/_tables.scss */
+table.company-users-table tr:hover, table.company-users-table tr:active {
+  background-color: transparent;
 }
 
 /*Tab styles*/
@@ -11368,72 +11413,4 @@ div.search i {
   position: relative;
   display: inline-block;
   vertical-align: bottom;
-}
-
-/* line 239, ../../../private/common-html/sass/views/_applications.scss */
-.applications-search {
-  padding-right: 17px;
-  /* add space for the 'x' icon*/
-}
-
-/* line 242, ../../../private/common-html/sass/views/_applications.scss */
-.applications-search::-ms-clear {
-  display: none;
-}
-
-/* line 245, ../../../private/common-html/sass/views/_applications.scss */
-span.icon_clear {
-  position: absolute;
-  right: 12px;
-  top: 8px;
-  display: none;
-  /* now go with the styling */
-  cursor: pointer;
-  font: bold 1em sans-serif;
-  color: #38468F;
-}
-/* line 255, ../../../private/common-html/sass/views/_applications.scss */
-span.icon_clear:before {
-  color: #f52;
-}
-
-/* application section styles*/
-/*Summary styles*/
-/* line 65, ../../../private/common-html/sass/views/_application.scss */
-.application_summary {
-  background-color: #eeeeee;
-  border-bottom: 2px solid #bbbbbb;
-  min-height: 332px;
-  padding: 6px 0 0 0;
-  position: relative;
-  display: block;
-  float: none;
-}
-/* line 74, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .container {
-  margin-bottom: 0;
-}
-/* line 80, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble {
-  position: relative;
-  min-height: 280px;
-  padding-left: 320px;
-  padding-right: 24%;
-  margin-right: 61px;
-}
-/* line 23, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-}
-/* line 28, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble .application-map-container {
-  left: 0;
-  width: 320px;
-  margin-bottom: 12px;
-}
-/* line 35, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble .application_actions {
-  right: 0;
 }

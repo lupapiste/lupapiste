@@ -1462,7 +1462,7 @@ select.dropdown {
   border-radius: 0 0 0 0;
   padding: {
     left: 12px;
-    right: 12px;
+    right: 17px + 12px + 4px; // arrow position + arrow width + padding
 
   }
   height: 40px;

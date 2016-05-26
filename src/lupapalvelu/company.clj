@@ -184,15 +184,25 @@
     (mongo/update :companies {:_id id} updated)
     updated))
 
-(defn update-user!
-  "Update company user."
-  [user-id op value]
-  (condp = op
-    :admin  (mongo/update-by-id :users user-id {$set {:company.role (if value "admin" "user")}})
-    :enabled (mongo/update-by-id :users user-id {$set {:enabled (if value true false)}})
-    :delete (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}})
-    (fail! :bad-request)))
+(defn company-user-edit-allowed
+  "Pre-check enforcing that the caller has sufficient credentials to
+  edit company member."
+  [{caller :user {user-id :user-id} :data} _]
+  (when-let [target-user (usr/get-user-by-id user-id)]
+    (if-not (or (= (:role caller) "admin")
+                (and (= (get-in caller [:company :role])
+                        "admin")
+                     (= (get-in caller [:company :id])
+                        (get-in target-user [:company :id]))))
+      (unauthorized))))
 
+(defn delete-user!
+  [user-id]
+  (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}}))
+
+(defn update-user! [user-id role submit]
+  (mongo/update-by-id :users user-id {$set {:company.role role
+                                            :company.submit submit}}))
 ;;
 ;; Add/invite new company user:
 ;;
@@ -229,7 +239,7 @@
                              :username    (:email user)
                              :firstName   (:firstName user)
                              :lastName    (:lastName user)
-                             :company     {:id (:id company) :role role}
+                             :company     {:id (:id company) :role role :submit true}
                              :personId    (:personId user)
                              :password    password
                              :role        :applicant
@@ -261,7 +271,7 @@
 
 (defn link-user-to-company! [user-id company-id role]
   (if-let [user (usr/get-user-by-id user-id)]
-    (let [updates (merge {:company {:id company-id, :role role}}
+    (let [updates (merge {:company {:id company-id, :role role :submit true}}
                     (when (usr/dummy? user) {:role :applicant})
                     (when-not (:enabled user) {:enabled true}))]
       (mongo/update :users {:_id user-id} {$set updates})
