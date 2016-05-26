@@ -187,14 +187,15 @@
 (defn company-user-edit-allowed
   "Pre-check enforcing that the caller has sufficient credentials to
   edit company member."
-  [{caller :user {user-id :user-id} :data} _]
-  (when-let [target-user (usr/get-user-by-id user-id)]
-    (if-not (or (= (:role caller) "admin")
-                (and (= (get-in caller [:company :role])
-                        "admin")
-                     (= (get-in caller [:company :id])
-                        (get-in target-user [:company :id]))))
-      (unauthorized))))
+  [{caller :user {user-id :user-id} :data :as cmd} app]
+  (when user-id
+    (let [target-user (usr/get-user-by-id user-id)]
+     (if-not (or (= (:role caller) "admin")
+                 (and (= (get-in caller [:company :role])
+                         "admin")
+                      (= (get-in caller [:company :id])
+                         (get-in target-user [:company :id]))))
+       (unauthorized)))))
 
 (defn delete-user!
   [user-id]
