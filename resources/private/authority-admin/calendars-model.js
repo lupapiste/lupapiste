@@ -38,7 +38,6 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
   });
 
   hub.subscribe("calendarView::reservationSlotClicked", function(event) {
-    console.log(event);
   });
 
   self.openNewReservationSlotDialog = function() {

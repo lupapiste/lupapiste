@@ -166,7 +166,7 @@
       (fail! :error.unknown))
     (deactivate-resource existing-calendar)))
 
-; Käytetään toistaiseksi vain itestien siivoukseen. Siksi in-dev.
+; toistaiseksi vain itestien siivoukseen. Siksi in-dev.
 (env/in-dev
   (defn delete-calendar
     [userId]

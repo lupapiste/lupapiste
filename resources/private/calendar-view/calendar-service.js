@@ -22,7 +22,6 @@ LUPAPISTE.CalendarService = function() {
       var newStartOfWeek = moment().year(self.calendarQuery.year()).isoWeek(self.calendarQuery.week()).add(event.increment, 'weeks');
       self.calendarQuery.year(newStartOfWeek.year());
       self.calendarQuery.week(newStartOfWeek.isoWeek());
-      console.log(event, newStartOfWeek.toString());
     }
 
     var week = self.calendarQuery.week();
