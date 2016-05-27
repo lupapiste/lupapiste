@@ -438,7 +438,7 @@
 
   if (features.enabled("ajanvaraus")) {
     hub.onPageLoad("calendar-admin", function() {
-      reservationTypesModel.load();
+      hub.send("calendarService::fetchOrganizationReservationTypes");
       var path = pageutil.getPagePath();
       if (path.length > 1) {
         hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
@@ -446,8 +446,8 @@
     });
 
     hub.onPageLoad("organization-calendars", function() {
-      calendarsModel.load();
-      reservationTypesModel.load();
+      hub.send("calendarService::fetchOrganizationCalendars");
+      hub.send("calendarService::fetchOrganizationReservationTypes");
     });
   }
 

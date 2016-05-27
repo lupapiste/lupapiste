@@ -271,7 +271,8 @@
   [{user :user}]
   (let [admin-in-organization-id (usr/authority-admins-organization-id user)]
     (info "Get reservation types for organization" admin-in-organization-id)
-    (ok :reservationTypes (reservation-types admin-in-organization-id))))
+    (ok :organization admin-in-organization-id
+        :reservationTypes (reservation-types admin-in-organization-id))))
 
 (defcommand update-reservation-type
   {:user-roles #{:authorityAdmin}

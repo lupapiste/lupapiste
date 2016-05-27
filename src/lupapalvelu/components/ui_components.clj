@@ -369,13 +369,17 @@
                              :company :analytics :register-company :footer :ui-components]}
 
    :calendar-view {:depends [:common-html]
-                   :js ["mycalendar.js" "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
-                   :html ["reservation-slot-create-bubble-template.html" "calendar-view-template.html" "mycalendar.html" ]}
+                   :js ["calendar-view.js" "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
+                   :html ["reservation-slot-create-bubble-template.html" "calendar-view-template.html" ]}
+
+   :mycalendar   {:depends [:calendar-view]
+                  :js ["mycalendar.js"]
+                  :html ["mycalendar.html"]}
 
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
-                             :company :stamp :integration-error :analytics :metadata-editor :footer :calendar-view :ui-components]}
+                             :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components]}
 
    :oir-app {:depends [] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment

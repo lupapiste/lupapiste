@@ -14,38 +14,6 @@
     </div>
     <div data-bind="component: { name: 'calendar-view' }"></div>
   </div>
-
-
-  <!-- DIALOGS -->
-
-  <div id="dialog-new-slot" class="window autosized">
-    <div class="dialog-header">
-      <p data-bind="ltext: 'auth-admin.calendar.create-slot'"></p>
-      <p class="dialog-close close lupicon-remove"></p>
-    </div>
-    <div class="dialog-content">
-      <div data-bind="with: $root.calendars.newReservationSlotModel">
-        <p>Lis&auml;t&auml;&auml;n varattavia aikoja alkaen klo <span data-bind="text: startTime"></span></p>
-        <p>Tapahtumalajit:</p>
-        <div data-bind="foreach: $root.reservationTypes.items">
-          <p>
-            <input type="checkbox" data-bind="checkedValue: $data.id, checked: $parent.reservationTypes">
-            <span data-bind="text: $data.name"/>
-          </p>
-        </div>
-        <button data-bind="click: execute, ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
-      </div>
-    </div>
-  </div>
-
-  <div id="dialog-edit-slot" class="window autosized">
-    <div class="dialog-header">
-      <p data-bind="ltext: 'auth-admin.calendar.edit-slot'"></p>
-      <p class="dialog-close close lupicon-remove"></p>
-    </div>
-    <div class="dialog-content">
-    </div>
-  </div>
 </section>
 </body>
 </html>

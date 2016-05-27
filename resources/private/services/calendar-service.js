@@ -6,8 +6,10 @@ LUPAPISTE.CalendarService = function() {
   self.calendarWeekdays = ko.observableArray();
 
   self.myCalendars = ko.observableArray();
+  self.organizationCalendars = ko.observableArray();
   self.reservationTypesByOrganization = ko.observable();
 
+  // Data related to the current calendar view
   self.calendarQuery = {
     calendarId: ko.observable(),
     reservationTypes: ko.observableArray(),
@@ -60,6 +62,27 @@ LUPAPISTE.CalendarService = function() {
         self.calendarQuery.calendarId(data.calendar.id);
         self.calendarQuery.reservationTypes(self.reservationTypesByOrganization()[data.calendar.organization]);
         doFetchCalendarSlots({week: moment().isoWeek(), year: moment().year()});
+      })
+      .call();
+  });
+
+  var _fetchOrgCalendars = hub.subscribe("calendarService::fetchOrganizationCalendars", function() {
+    ajax.query("calendars-for-authority-admin")
+      .success(function(d) {
+        self.organizationCalendars(d.users || []);
+        hub.send("calendarService::organizationCalendarsFetched");
+      })
+      .call();
+   });
+
+  var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function() {
+    ajax.query("reservation-types-for-organization")
+      .success(function (data) {
+        var obj = {};
+        obj[data.organization] = data.reservationTypes;
+        self.calendarQuery.reservationTypes(data.reservationTypes);
+        self.reservationTypesByOrganization(obj);
+        hub.send("calendarService::organizationReservationTypesFetched");
       })
       .call();
   });

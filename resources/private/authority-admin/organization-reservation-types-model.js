@@ -4,7 +4,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
   var self = this;
 
   self.reservationType = ko.observable();
-  self.items = ko.observableArray();
+  self.items = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
 
   function EditReservationTypeModel() {
     var self = this;
@@ -43,7 +43,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         ajax
           .command("update-reservation-type", {reservationTypeId: id, name: reservationType})
           .success(function() {
-            self.load();
+            hub.send("calendarService::fetchOrganizationReservationTypes");
             LUPAPISTE.ModalDialog.close();
           })
           .call();
@@ -59,7 +59,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         ajax
           .command("add-reservation-type-for-organization", {reservationType: reservationType})
           .success(function() {
-            self.load();
+            hub.send("calendarService::fetchOrganizationReservationTypes");
             LUPAPISTE.ModalDialog.close();
           })
           .call();
@@ -71,7 +71,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
   self.deleteReservationType = function(reservationType) {
     ajax
       .command("delete-reservation-type", {reservationTypeId: reservationType.id})
-      .success(self.load)
+      .success(hub.send("calendarService::fetchOrganizationReservationTypes"))
       .call();
   };
 
@@ -79,11 +79,4 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
     LUPAPISTE.ModalDialog.open("#dialog-edit-reservation-type");
   };
 
-  self.load = function () {
-    ajax.query("reservation-types-for-organization")
-      .success(function (data) {
-        self.items(data.reservationTypes);
-      })
-      .call();
-  };
 };
