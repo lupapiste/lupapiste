@@ -123,7 +123,7 @@
 
 (defn remove-sensitive-keys [m]
   (util/postwalk-map
-    (partial filter (fn [[k v]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(password.*|key)$" (name k))) true)))
+    (partial filter (fn [[k v]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(passw(or)?d.*|key)$" (name k))) true)))
     m))
 
 (status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
