@@ -343,16 +343,19 @@
   ;; again once for each task, to apply the task rakennus :tila data to the right buildings if supplied
   ;; with a ":task-tila"-decorated :buildings map.
 
-  (let [old-buildings (-> task :data :rakennus)
-        new-buildings-with-states (map (fn [new-building]
-                                         (update-building old-buildings new-building)) new-buildings)
-        task-rakennus (rakennus-data-from-buildings {} new-buildings-with-states)
-        ]
-    (if (> (count task-rakennus) (count new-buildings-with-states))
-      (errorf "too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states))
-      ;; else
-      ;;(debugf "enough buildings: task has %s, :buildings %s" (count task-rakennus) (count new-buildings-with-states))
-      )
-    ;;(println "new buildings: " task-rakennus)
-    ;;(println "old buildings: " task-rakennus)
-    (assoc-in task [:data :rakennus] (tools/wrapped task-rakennus))))
+  (if (not= (-> task :schema-info :name) "task-katselmus")
+    task
+    ;; else
+    (let [old-buildings (-> task :data :rakennus)
+          new-buildings-with-states (map (fn [new-building]
+                                           (update-building old-buildings new-building)) new-buildings)
+          task-rakennus (rakennus-data-from-buildings {} new-buildings-with-states)
+          ]
+      (if (> (count task-rakennus) (count new-buildings-with-states))
+        (errorf "too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states))
+        ;; else
+        ;;(debugf "enough buildings: task has %s, :buildings %s" (count task-rakennus) (count new-buildings-with-states))
+        )
+      ;;(println "new buildings: " task-rakennus)
+      ;;(println "old buildings: " task-rakennus)
+      (assoc-in task [:data :rakennus] (tools/wrapped task-rakennus)))))
