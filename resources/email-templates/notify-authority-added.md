@@ -6,6 +6,9 @@ Kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Tutustu Lupapisteen 
 
 Ongelmatilanteissa otathan yhteytt&auml; tuki@lupapiste.fi.
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 # Hej!
@@ -16,3 +19,5 @@ Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https:
 
 Vid problem &auml;r du v&auml;lkommen att kontakta tuki@lupapiste.fi.
 
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

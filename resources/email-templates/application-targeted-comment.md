@@ -7,7 +7,7 @@ sinulle on osoitettu uusi viesti hakemuksen keskustelussa. P&auml;&auml;set n&au
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 Terveisin,
-Lupapiste
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
@@ -20,4 +20,4 @@ ett nytt inl&auml;gg i en diskussion har riktats till dig. Du kan se inl&auml;gg
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
 Hälsningar,
-Lupapiste
+[Lupapiste](https://www.lupapiste.fi/)

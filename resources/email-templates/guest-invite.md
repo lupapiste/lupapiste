@@ -15,11 +15,13 @@ Mik&auml;li olet rekister&ouml;itynyt eri osoitteella Lupapisteeseen, pyyd&auml;
 
 Kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Tutustu Lupapisteen ohjesivustoon [https://www.lupapiste.fi/ohjeet](https://www.lupapiste.fi/ohjeet) sek&auml; yleisesti esitettyihin kysymyksiin [https://www.lupapiste.fi/usein-kysytyt-kysymykset](https://www.lupapiste.fi/usein-kysytyt-kysymykset).
 
----
-
 Kutsujan viesti:
 
 {{message}}
+
+
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
@@ -33,15 +35,16 @@ Klicka h&auml;r f&ouml;r att se uppgifterna om ans&ouml;kan:
 
 {{link-sv}}
 
-Godkänn inbjudan för att få skrivåtkomsten. <-TÄMÄ PITÄÄ TARKISTAA! 
+Godkänn inbjudan för att få skrivåtkomsten. <-TÄMÄ PITÄÄ TARKISTAA!
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
 Om du registrerat dig i Lupapiste med en annan adress, be {{inviter-email}} som skickat inbjudan om en ny inbjudan.
 
 Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https://www.lupapiste.fi/ohjeet](https://www.lupapiste.fi/ohjeet) och vanliga fr&aring;gor [https://www.lupapiste.fi/usein-kysytyt-kysymykset](https://www.lupapiste.fi/usein-kysytyt-kysymykset).
 
----
-
 Meddelande fr&aring;n inbjudan:
 {{message}}
 
+
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

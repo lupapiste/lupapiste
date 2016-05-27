@@ -14,6 +14,9 @@ Ongelmatilanteissa ota yhteytt&auml; tuki@lupapiste.fi.
 
 Toivottavasti viihdyt palvelumme parissa!
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 # Hej {{user.firstName}},
@@ -32,3 +35,5 @@ Vid problem &auml;r du v&auml;lkommen att kontakta tuki@lupapiste.fi.
 
 Vi hoppas att du trivs med v&aring;r tj&auml;nst!
 
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

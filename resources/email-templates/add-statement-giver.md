@@ -10,6 +10,9 @@ Jatkossa uusiin lausuntopyynt&ouml;ihin p&auml;&auml;sette kirjautumaan suoraan 
 
 [Lis&auml;tietoa Lupapisteest&auml;](https://www.lupapiste.fi/viranomaisille)
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 # Hej,
@@ -24,3 +27,5 @@ Till d&auml;rp&aring; f&ouml;ljande inbjudningar kommer du direkt genom att logg
 
 [Mer info om Lupapiste](https://www.lupapiste.fi/sv/myndigheter)
 
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

@@ -8,6 +8,9 @@ Vahvistathan rekister&ouml;itymisesi ja tunnistaudu pankkitunnuksillasi:
 
 Lupapisteeseen rekister&ouml;ityminen ei maksa mit&auml;&auml;n. Palvelun k&auml;ytt&ouml;ehdot voit lukea t&auml;&auml;lt&auml;: https://www.lupapiste.fi/kayttoehdot
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 Hej {{name}},
@@ -19,3 +22,6 @@ Bekr&auml;fta registreringen och identifiera dig med dina bankkoder:
   {{link-fi}}
 
 Att registrera sig hos Lupapiste kostar ingenting. Anv&auml;ndarvillkoren kan du l&auml;sa h&auml;r: https://www.lupapiste.fi/kayttoehdot
+
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

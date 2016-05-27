@@ -8,6 +8,9 @@ Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Huom
 
 Ongelmatilanteissa ota yhteytt&auml; tuki@lupapiste.fi.
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 # Hej {{caller.firstName}},
@@ -20,3 +23,5 @@ Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;s
 
 Vid problem &auml;r du v&auml;lkommen att kontakta tuki@lupapiste.fi.
 
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

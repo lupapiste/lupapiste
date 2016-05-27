@@ -9,6 +9,9 @@ Klikkaa allaolevaa linkki&auml; liitt&auml;&auml;ksesi Yritystilisi käyttäjät
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 # Hej!
@@ -22,4 +25,5 @@ Klicka p&aring; l&auml;nken nedan f&ouml;r att delta i behandlingen av ans&ouml;
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
-
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

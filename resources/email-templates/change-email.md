@@ -6,8 +6,8 @@ käyttäjätunnuksen {{old-email}} vaihto on viimeistelyä vaille valmis. Vahvis
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Aktivointilinkki on voimassa 24 tuntia ({{expires}} asti). Ongelmatilanteissa ota yhteytt&auml; tuki@lupapiste.fi.
 
-Terveisin, 
-Lupapiste
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
 
 --
 
@@ -19,5 +19,5 @@ Du har bett om att &auml;ndra e-postadressen {{old-email}} i Lupapiste-tj&auml;n
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt. Aktiveringsl&auml;nken &auml;r i kraft 24 timmar (till {{expires}}). Vid problem kontakta tuki@lupapiste.fi.
 
-Hälsningar, 
-Lupapiste
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

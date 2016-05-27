@@ -22,6 +22,8 @@ Lupapiste-palveluun on avattu automaattisesti korkeintaan kaksi vuotta vanhojen,
 
 Ty&ouml;njohtajan pit&auml;&auml; saada kutsu rakennusluvalle hankkeeseen ryhtyv&auml;lt&auml;. Kutsu tulee ty&ouml;njohtajan s&auml;hk&ouml;postiin.
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
@@ -49,5 +51,5 @@ Tv&aring; &aring;r gamla bygglovbeslut, som "s&ouml;kts p&aring; papper", kopier
 
 Arbetsledaren m&aring;ste f&aring; en inbjudan till bygglovet av den som p&aring;b&ouml;rjar byggprojektet. Inbjudan skickas till arbetsledarens e-post.
 
-
-
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

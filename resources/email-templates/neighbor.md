@@ -8,10 +8,10 @@ Jos linkki ei toimi, kopioikaa osoite ja liitt&auml;k&auml;&auml; se selaimen os
 
 Tutustuttuanne hakemukseen voitte allekirjoittaa kuulemisen s&auml;hk&ouml;isesti verkkopankkitunnusten tai mobiilitunnisteen avulla. Mikäli hakemuksessa on jotain huomautettavaa, onnistuu huomauttaminen allekirjoittamisen yhteydessä. Varatkaa verkkopankkitunnukset tarvittaessa saatavillenne.
 
-Jos hakemus herättää lisäkysymyksiä, olettehan yhteydessä joko hankkeeseen ryhtyvän edustajaan tai rakennusvalvontaan. 
+Jos hakemus herättää lisäkysymyksiä, olettehan yhteydessä joko hankkeeseen ryhtyvän edustajaan tai rakennusvalvontaan.
 
 Terveisin,
-Lupapiste
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
@@ -25,5 +25,5 @@ Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;s
 
 Obs: l&auml;nken föråldras inom tre veckor, på {{expires}}!
 
-Hälsningar, 
-Lupapiste
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

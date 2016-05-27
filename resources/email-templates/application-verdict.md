@@ -5,7 +5,7 @@ hakemukseen {{link-fi}} on annettu p&auml;&auml;t&ouml;s. P&auml;&auml;set n&aum
 Hankkeelle voi jälleen lisätä tarpeellisia suunnitelmia ja liitteitä Suunnitelmat ja liitteet –välilehdelle. Muuten tietojen muokkaaminen ei enää onnistu.
 
 Terveisin,
-Lupapiste
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
@@ -14,4 +14,4 @@ Lupapiste
 din ans&ouml;kan {{link-sv}} har avgjorts. Du kan se beslutet under fliken &quot;Beslut&quot;. Bekanta dig noga med beslutets inneh&aring;ll och tillst&aring;ndsvillkoren.
 
 Hälsningar,
-Lupapiste
+[Lupapiste](https://www.lupapiste.fi/)
