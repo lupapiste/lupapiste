@@ -3,13 +3,15 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
   var self = this;
 
   self.startTime = ko.observable();
+  self.positionTop = ko.observable();
+  self.weekdayCss = ko.observable();
   self.calendarId = lupapisteApp.services.calendarService.calendarQuery.calendarId;
   self.reservationTypes = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
   self.selectedReservationTypes = ko.observableArray();
   self.bubbleVisible = ko.observable(false);
 
   self.waiting = params.waiting;
-  self.error = params.error;
+  self.error = ko.observable();
 
   self.send = function() {
     var slots = [{start: self.startTime().valueOf(), end: moment(self.startTime()).add(1, "h").valueOf(), reservationTypes: self.selectedReservationTypes()}];
@@ -25,7 +27,10 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
     var weekday = event.weekday;
     var hour = event.hour;
     var minutes = event.minutes;
-    self.startTime(moment(weekday.startOfDay).hour(hour).minutes(minutes));
+    var timestamp = moment(weekday.startOfDay).hour(hour).minutes(minutes);
+    self.startTime(timestamp);
+    self.positionTop((event.hour - params.tableFirstFullHour() + 1) * 60 + "px");
+    self.weekdayCss("weekday-" + timestamp.isoWeekday());
     self.selectedReservationTypes([]);
     self.bubbleVisible(true);
   });

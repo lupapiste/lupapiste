@@ -2,6 +2,33 @@
   padding: 0px $baseline;
 }
 
+.calendar-slot-bubble {
+  font-size: $baseline * 0.66;
+  p {
+    margin-bottom: 0px;
+  }
+  &.weekday-1 {
+    float: left;
+    margin-left: 6%;
+  }
+  &.weekday-2 {
+    float: left;
+    margin-left: 25%;
+  }
+  &.weekday-3 {
+    float: left;
+    margin-left: 44%;
+  }
+  &.weekday-4 {
+    float: left;
+    margin-left: 63%;
+  }
+  &.weekday-5 {
+    right: 0px;
+    margin-right: 1%;
+  }
+}
+
 .calendar-table {
   width:100%;
   min-height:$baseline * 6;

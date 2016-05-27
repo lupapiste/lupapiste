@@ -12,11 +12,8 @@
       <h1 data-bind="ltext: 'mycalendar.title'"></h1>
     </div>
 
-    <div data-bind="component: { name: 'reservation-slot-create-bubble',
-                                 params: { bubbleVisible: true,
-                                           error: error }}"></div>
-
-    <div data-bind="component: { name: 'calendar-view' }"></div>
+    <div data-bind="component: { name: 'calendar-view',
+                                 params: { error: error }}"></div>
   </div>
 
 </section>

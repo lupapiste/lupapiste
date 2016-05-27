@@ -8,7 +8,6 @@
 
   function MyCalendarsModel() {
     var self = this;
-    self.error = ko.observable();
   }
 
   $(function() {
@@ -25,10 +24,6 @@
 
   if (features.enabled("ajanvaraus")) {
     hub.onPageLoad("mycalendar", function() {
-/*      if (!calendarViewModel) {
-        var component = $("#mycalendar .calendar-table");
-        calendarViewModel = calendarView.create(component);
-      } */
       hub.send("calendarService::fetchMyCalendars");
     });
   }

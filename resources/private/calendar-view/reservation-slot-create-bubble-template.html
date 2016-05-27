@@ -3,7 +3,11 @@
 <body>
 <section class="page container">
   <script type="text/x-jquery-tmpl" id="reservation-slot-create-bubble-template">
-    <div class="calendar-slot-bubble">
+    <div class="calendar-slot-bubble"
+         data-bind="style: { position: 'absolute',
+                             top: positionTop,
+                             'z-index': 1000 },
+                    css: weekdayCss ">
       <bubble-dialog params="visible: bubbleVisible,
                              buttonIcon: 'lupicon-circle-arrow-right',
                              buttonText: 'application-guests.send',
@@ -13,7 +17,10 @@
                              error: error,
                              prefix: 'company-invite',
                              waiting: waiting">
-        <p>Lisätään varattavia aikoja alkaen klo <span data-bind="text: $parent.startTime"></span></p>
+        <p>Lisätään varattavia aikoja</p>
+        <p>Alkaen <span data-bind="dateTimeString: $parent.startTime"></span></p>
+        <p>Kesto 1h</p>
+        <p>Kpl: 1</p>
         <p>Tapahtumalajit:</p>
         <div data-bind="foreach: $parent.reservationTypes">
           <p>
