@@ -2175,7 +2175,7 @@
   {:apply-when (pos? (mongo/count :organizations {:_id #"YMP" :scope.permitType {$not {"$eq" "YM"}}}))}
   (->> (mongo/select :organizations {:_id #"YMP" :scope.permitType {$not {"$eq" "YM"}}})
        (map add-ym-in-scope)
-       (run! #(mongo/update-by-id :organizations {:_id (:id %)} {$set {:scope (:scope %)}}))))
+       (run! #(mongo/update-by-id :organizations (:id %) {$set {:scope (:scope %)}}))))
 
 ;;
 ;; ****** NOTE! ******
