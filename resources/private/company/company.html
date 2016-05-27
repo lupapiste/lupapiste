@@ -263,30 +263,17 @@
           </div>
         </div>
 
-        <div data-bind="visible: showUserInvited">
-          <h3 data-bind="ltext: 'register.company.add-user.done.header'" data-test-id="company-old-user-invited"></h3>
-          <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
-          <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
-          <div class="dialog-content__footer">
-            <button class="positive close"
-                    data-test-id="company-old-user-invited-close-dialog">
-              <i class="lupicon-check"></i>
-              <span  data-bind="ltext: 'ok'"></span>
-            </button>
-          </div>
-        </div>
-
         <form data-bind="visible: showUserDetails" id="companyUserDetails">
 
           <label data-bind="ltext: 'company.user.firstName'" class="form-label tip"></label>
           <input data-bind="textInput: firstName,
-                            disable: done"
+                            disable: done() || oldUser()"
                  class="form-input" type="text" data-test-id="company-new-user-firstname"/>
 
           <label data-bind="ltext: 'company.user.lastName'"
                  class="form-label tip"></label>
           <input data-bind="textInput: lastName,
-                            disable: done"
+                            disable: done() || oldUser()"
                  class="form-input" type="text" data-test-id="company-new-user-lastname"/>
           <div class="checkbox-wrapper checkbox-wrapper--break-small">
             <input data-bind="checked: admin,

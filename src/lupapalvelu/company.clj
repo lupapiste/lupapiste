@@ -225,22 +225,25 @@
                                             :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
     token-id))
 
-(defn add-user! [user company role]
+(defn add-user! [user company role submit]
   (let [user (update-in user [:email] usr/canonize-email)
-        token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
+        token-id (token/make-token :new-company-user nil {:user user
+                                                          :company company
+                                                          :role role
+                                                          :submit submit} :auto-consume false)]
     (notif/notify! :new-company-user {:user       user
                                       :company    company
                                       :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
                                       :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
     token-id))
 
-(defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
+(defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
   (usr/create-new-user nil {:email       (:email user)
                              :username    (:email user)
                              :firstName   (:firstName user)
                              :lastName    (:lastName user)
-                             :company     {:id (:id company) :role role :submit true}
+                             :company     {:id (:id company) :role role :submit submit}
                              :personId    (:personId user)
                              :password    password
                              :role        :applicant
@@ -249,10 +252,13 @@
     :send-email false)
   (ok))
 
-(defn invite-user! [user-email company-id]
+(defn invite-user! [user-email company-id role submit]
   (let [company   (find-company! {:id company-id})
         user      (usr/get-user-by-email user-email)
-        token-id  (token/make-token :invite-company-user nil {:user user, :company company, :role :user} :auto-consume false)]
+        token-id  (token/make-token :invite-company-user nil {:user user
+                                                              :company company
+                                                              :role role
+                                                              :submit submit} :auto-consume false)]
     (notif/notify! :invite-company-user {:user       user
                                          :company    company
                                          :ok-fi    (str (env/value :host) "/app/fi/welcome#!/invite-company-user/ok/" token-id)

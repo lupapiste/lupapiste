@@ -14,7 +14,7 @@
       email: undefined,
       firstName: undefined,
       lastName: undefined,
-      admin: undefined,
+      admin: false,
       submit: true
     };
 
@@ -36,6 +36,7 @@
     self.showUserAlreadyInvited = ko.observable();
     self.showUserInvited    = ko.observable();
     self.showUserDetails    = ko.observable();
+    self.oldUser          = ko.observable();
 
     self.canSearchUser    = self.email.isValid;
     self.pending          = ko.observable();
@@ -55,19 +56,21 @@
   NewCompanyUser.prototype.searchUser = function() {
     this.emailEnabled(false);
     ajax
-      .command("company-invite-user", {email: this.email()})
+      .query("company-search-user", {email: this.email()})
       .pending(this.pending)
       .success(function(data) {
         var result = data.result;
-        if (result === "invited") {
-          hub.send("refresh-companies");
-          this.showSearchEmail(false).showUserInvited(true);
-        } else if (result === "already-in-company") {
+        if (result === "already-in-company") {
           this.showSearchEmail(false).showUserInCompany(true);
         } else if (result === "already-invited") {
           this.showSearchEmail(false).showUserAlreadyInvited(true);
-        } else if (result === "not-found") {
+        } else {
           this.showSearchEmail(false).showUserDetails(true);
+          if( result === "found") {
+            this.oldUser( true );
+            this.firstName( data.firstName );
+            this.lastName( data.lastName );
+          }
         }
       }, this)
       .call();
@@ -75,7 +78,8 @@
 
   NewCompanyUser.prototype.sendInvite = function() {
     ajax
-      .command("company-add-user", ko.mapping.toJS(this))
+      .command(this.oldUser() ? "company-invite-user" :"company-add-user",
+               ko.mapping.toJS(this))
       .pending(this.pending)
       .success(function() {
           hub.send("refresh-companies");
@@ -220,7 +224,7 @@
     self.email     = user.email;
     self.expires   = user.expires;
     self.role      = user.role;
-    self.submit    = true;
+    self.submit    = user.submit;
     self.tokenId   = user.tokenId;
     self.opsEnabled   = ko.computed(function() { return lupapisteApp.models.currentUser.company.role() === "admin" && lupapisteApp.models.currentUser.id() !== user.id; });
     self.deleteInvitation = _.partial( deleteCompanyUser, user, function() {
