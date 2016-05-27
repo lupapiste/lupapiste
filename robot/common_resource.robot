@@ -1109,11 +1109,13 @@ Submit empty verdict
   Input verdict  -  6  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
+  Wait for jQuery
   Wait until  Application state should be  ${targetState}
 
 Do fetch verdict
   [Arguments]  ${fetchConfirmationText}
   Click enabled by test id  fetch-verdict
+  Wait for jQuery
   Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
   Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  ${fetchConfirmationText}
   Confirm  dynamic-ok-confirm-dialog
