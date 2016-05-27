@@ -12,12 +12,12 @@ Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Tark
 
 Mik&auml;li olet rekister&ouml;itynyt eri osoitteella Lupapisteeseen, pyyd&auml; kutsun l&auml;hett&auml;j&auml;lt&auml; {{inviter-email}} uusi kutsu.
 
-
----
-
-Kutsujan viesti / Meddelande fr&aring;n inbjudan:
+Kutsujan viesti:
 
 {{message}}
+
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
@@ -35,3 +35,9 @@ Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;s
 
 Om du registrerat dig i Lupapiste med en annan adress, be {{inviter-email}} som skickat inbjudan om en ny inbjudan.
 
+Meddelande fr&aring;n inbjudan:
+
+{{message}}
+
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

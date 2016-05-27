@@ -228,8 +228,10 @@
     (let [dt (tc/from-long timestamp)]
       (timeformat/unparse (timeformat/formatter fmt) dt))))
 
-(defn- local-date-time [^Long timestamp]
-  (LocalDateTime. timestamp))
+(defn- local-date-time [timestamp-or-datetime]
+  (if (number? timestamp-or-datetime)
+    (LocalDateTime. (long timestamp-or-datetime))
+    (LocalDateTime. timestamp-or-datetime)))
 
 (defn- format-timestamp-local-tz [^Long timestamp ^String fmt]
   (when timestamp
@@ -248,6 +250,9 @@
 (defn to-xml-datetime [^Long timestamp]
   (format-utc-timestamp timestamp "YYYY-MM-dd'T'HH:mm:ss"))
 
+(defn to-xml-local-datetime [^Long timestamp]
+  (format-timestamp-local-tz timestamp "YYYY-MM-dd'T'HH:mm:ss"))
+
 (defn to-xml-date-from-string [^String date-as-string]
   (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
@@ -261,6 +266,11 @@
 (defn to-millis-from-local-date-string [^String date-as-string]
   (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (tc/to-long d))))
+
+(defn to-millis-from-local-datetime-string [^String datetime-as-string]
+  (when-not (ss/blank? datetime-as-string)
+    (let [d (timeformat/parse (timeformat/formatter-local "YYYY-MM-dd'T'HH:mm" ) datetime-as-string)]
       (tc/to-long d))))
 
 (defn to-RFC1123-datetime [^Long timestamp]

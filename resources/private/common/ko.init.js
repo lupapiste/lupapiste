@@ -522,6 +522,34 @@
     }
   };
 
+  function dayName(timeValue) {
+    var names = $.datepicker.regional[loc.currentLanguage].dayNames;
+    var day = moment(timeValue).day();
+    return names[day];
+  }
+
+  function monthName(timeValue) {
+    var names = $.datepicker.regional[loc.currentLanguage].monthNames;
+    var month = moment(timeValue).month();
+    return names[month];
+  }
+
+  ko.bindingHandlers.calendarDayColumnHeader = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var dateStr = value ? moment(value).format("D ") + dayName(value) : "";
+      $(element).html(dateStr);
+    }
+  };
+
+  ko.bindingHandlers.calendarViewMonthText = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var dateStr = value ? monthName(value) + moment(value).format(" YYYY"): "";
+      $(element).html(dateStr);
+    }
+  };
+
   ko.observable.fn.increment = function () {
     this(this() + 1);
   };

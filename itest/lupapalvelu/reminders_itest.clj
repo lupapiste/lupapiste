@@ -517,7 +517,7 @@
 
   (facts "application-state-reminder"
 
-    (fact "the \"reminder-sent\" timestamp does not pre-exist -> reminder is sent"
+    (fact "the 'reminder-sent' timestamp does not pre-exist -> reminder is sent"
       (mongo/with-db db-name
         (let [now-timestamp (now)]
 
@@ -529,9 +529,9 @@
             (check-sent-reminder-email
              "pena@example.com"
              "Lupapiste: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
-             ["Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])))))
+             ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"])))))
 
-    (fact "the \"reminder-sent\" timestamp already exists but is over 1 week old -> reminder is sent"
+    (fact "the 'reminder-sent' timestamp already exists but is over 1 week old -> reminder is sent"
       (mongo/with-db db-name
         (update-application (application->command reminder-application)
                             {$set {:reminder-sent timestamp-the-beginning-of-time}})
@@ -544,9 +544,9 @@
           (check-sent-reminder-email
            "pena@example.com"
            "Lupapiste: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
-           ["Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"]))))
+           ["sinulla on Lupapiste-palvelussa aktiivinen lupahakemus"]))))
 
-    (fact "the \"reminder-sent\" timestamp already exists - no reminder is sent"
+    (fact "the 'reminder-sent' timestamp already exists - no reminder is sent"
       (mongo/with-db db-name
         (dummy-email-server/messages :reset true)  ;; clears inbox
         (batchrun/application-state-reminder)

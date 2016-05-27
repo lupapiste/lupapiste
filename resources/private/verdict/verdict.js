@@ -132,7 +132,7 @@ LUPAPISTE.verdictPageController = (function($) {
 
     self.commandAndBack = function(cmd) {
       ajax
-      .command(cmd, {id: currentApplicationId, verdictId: currentVerdictId})
+      .command(cmd, {id: currentApplicationId, verdictId: currentVerdictId, lang: loc.getCurrentLanguage()})
       .success(function() {
         self.returnToApplication();
       })
@@ -176,7 +176,7 @@ LUPAPISTE.verdictPageController = (function($) {
         attachmentsModel.refresh(application, target, type);
       })
       .call();
-      
+
     createTaskController.reset(currentApplicationId, target);
     authorities(authorityUsers);
   }

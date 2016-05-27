@@ -12,11 +12,12 @@ Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Tark
 
 {{due-date-str-fi}}
 
----
-
-Lausuntopyynn&ouml;n saate / F&ouml;ljetext f&ouml;r beg&auml;ran om utl&aring;tande:
+Lausuntopyynn&ouml;n saate:
 
 {{saateText}}
+
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
@@ -35,3 +36,9 @@ Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;s
 
 {{due-date-str-sv}}
 
+F&ouml;ljetext f&ouml;r beg&auml;ran om utl&aring;tande:
+
+{{saateText}}
+
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

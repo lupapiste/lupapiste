@@ -129,7 +129,7 @@
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
-   :moment         {:js ["moment.min.js"]}
+   :moment         {:js ["moment.min.js" "moment-timezone-with-data-2010-2020.min.js"]}
    :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
    ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
    ;:open-layers    {:js ["OpenLayers.debug.js" ]}
@@ -377,12 +377,18 @@
                        :docgen :debug :analytics :header :footer :ui-components]
              :css ["oir.css"]}
 
+   :calendar-view {:depends [:common-html]
+                   :js ["calendar-view.js" "calendar-service.js"]
+                   :html ["calendar-view.html"]}
+
    :authority-admin-app {:depends []
                          :js ["authority-admin-app.js"]}
-   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :header :debug :analytics :proj4 :ol :footer :ui-components]
+   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer :ui-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
+                              "calendars-model.js" "organization-reservation-types-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
-                         :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"]}
+                         :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
+                                "organization-calendars.html" "calendar-admin.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}
