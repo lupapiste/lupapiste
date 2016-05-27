@@ -1,12 +1,12 @@
 # Moi {{name}},
 
-sinulle on osoitettu uusi viesti hakemuksen keskustelussa. P&auml;&auml;set n&auml;kem&auml;&auml;n viestin sek&auml; vastaamaan siihen hankkeen alla olevan linkin kautta. 
+sinulle on osoitettu uusi viesti hakemuksen keskustelussa. P&auml;&auml;set n&auml;kem&auml;&auml;n viestin sek&auml; vastaamaan siihen hankkeen alla olevan linkin kautta.
 
-  {{link-sv}}
+  {{link-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-Terveisin, 
+Terveisin,
 Lupapiste
 
 ---
