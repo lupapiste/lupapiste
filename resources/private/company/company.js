@@ -9,7 +9,8 @@
   // ========================================================================================
 
   function NewCompanyUser() {
-    this.defaults  = {
+    var self = this;
+    self.defaults  = {
       email: undefined,
       firstName: undefined,
       lastName: undefined,
@@ -17,30 +18,33 @@
       submit: true
     };
 
-    this.email     = ko.observable().extend(required).extend({email: true});
-    this.firstName = ko.observable().extend(required);
-    this.lastName  = ko.observable().extend(required);
-    this.admin     = ko.observable();
-    this.submit    = ko.observable();
+    self.email     = ko.observable().extend(required).extend({email: true});
+    self.firstName = ko.observable().extend(required);
+    self.lastName  = ko.observable().extend(required);
+    self.admin     = ko.observable();
+    self.submit    = ko.observable();
 
-    this.isValid = ko.computed(function() {
-      return _.every(this.fields, function(f) { return this[f].isValid(); }, this);
-    }, this);
+    self.validated = ko.validatedObservable( {
+      email: self.email,
+      firstName: self.firstName,
+      lastName: self.lastName
+    });
 
-    this.showSearchEmail    = ko.observable();
-    this.showUserInCompany  = ko.observable();
-    this.showUserAlreadyInvited = ko.observable();
-    this.showUserInvited    = ko.observable();
-    this.showUserDetails    = ko.observable();
+    self.isValid = self.validated.isValid;
+    self.showSearchEmail    = ko.observable();
+    self.showUserInCompany  = ko.observable();
+    self.showUserAlreadyInvited = ko.observable();
+    self.showUserInvited    = ko.observable();
+    self.showUserDetails    = ko.observable();
 
-    this.canSearchUser    = this.email.isValid;
-    this.pending          = ko.observable();
+    self.canSearchUser    = self.email.isValid;
+    self.pending          = ko.observable();
 
-    this.emailEnabled     = ko.observable();
-    this.done             = ko.observable();
+    self.emailEnabled     = ko.observable();
+    self.done             = ko.observable();
 
-    this.canSubmit = ko.computed(function() { return !this.pending() && !this.done() && this.isValid(); }, this);
-    this.canClose  = ko.computed(function() { return !this.pending(); }, this);
+    self.canSubmit = ko.computed(function() { return !self.pending() && !self.done() && self.isValid(); }, self);
+    self.canClose  = ko.computed(function() { return !self.pending(); }, self);
   }
 
   NewCompanyUser.prototype.update = function(source) {
@@ -69,7 +73,7 @@
       .call();
   };
 
-  NewCompanyUser.prototype.submit = function() {
+  NewCompanyUser.prototype.sendInvite = function() {
     ajax
       .command("company-add-user", ko.mapping.toJS(this))
       .pending(this.pending)
