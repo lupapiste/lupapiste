@@ -254,9 +254,14 @@
 
           <label data-bind="ltext: 'company.user.lastName'" class="form-label tip"></label>
           <input data-bind="textInput: lastName" class="form-input" type="text" data-test-id="company-new-user-lastname"/>
-
-          <input data-bind="checked: admin" class="form-input" type="checkbox" id="register.company.add-user.admin"/>
-          <label data-bind="ltext: 'register.company.add-user.admin'" class="form-label" for="register.company.add-user.admin"></label>
+          <div class="checkbox-wrapper checkbox-wrapper--break-small">
+            <input data-bind="checked: admin" class="form-input" type="checkbox" id="register.company.add-user.admin"/>
+            <label data-bind="ltext: 'register.company.add-user.admin'" class="checkbox-label" for="register.company.add-user.admin"></label>
+          </div>
+          <div class="checkbox-wrapper">
+            <input data-bind="checked: submit" class="form-input" type="checkbox" id="register.company.add-user.can-submit"/>
+            <label data-bind="ltext: 'register.company.add-user.can-submit'" class="checkbox-label" for="register.company.add-user.can-submit"></label>
+          </div>
 
           <div data-bind="visible: pending">
             <h3>

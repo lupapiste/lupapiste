@@ -13,13 +13,15 @@
       email: undefined,
       firstName: undefined,
       lastName: undefined,
-      admin: undefined
+      admin: undefined,
+      submit: true
     };
 
     this.email     = ko.observable().extend(required).extend({email: true});
     this.firstName = ko.observable().extend(required);
     this.lastName  = ko.observable().extend(required);
-    this.admin     = ko.observable().extend(notRequired);
+    this.admin     = ko.observable();
+    this.submit    = ko.observable();
 
     this.isValid = ko.computed(function() {
       return _.every(this.fields, function(f) { return this[f].isValid(); }, this);
