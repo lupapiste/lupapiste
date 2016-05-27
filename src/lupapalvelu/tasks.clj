@@ -237,17 +237,22 @@
     initial-rakennus
     buildings))
 
-
 (defn katselmus->task [meta source {:keys [buildings]} katselmus]
   ;; (debugf "type of :muuTunnustieto is %s (value=%s)" (type (:muuTunnustieto katselmus)) (:muuTunnustieto katselmus))
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
         rakennustieto (map :KatselmuksenRakennus (:katselmuksenRakennustieto katselmus))
         get-muuTunnus (fn [katselmus]
-                        ;; get first {:sovellus "BackendName" :tunnus "BackendIdNumber"} that doesn't have :sovellus "lupapiste" and combine to a single string like "BackendName-BackendIdNumber"
+                        ;; get first {:sovellus "BackendName" :tunnus "BackendIdNumber"} that doesn't have :sovellus "lupapiste"
+                        ;; and combine to a single string like "BackendName-BackendIdNumber" (or just "BackendIdNumber" of "BackendName" is missing or empty)
                         (let [MuuTunnus (-> (util/find-first #(not= "lupapiste" (-> % :MuuTunnus :sovellus sade.strings/lower-case)) (:muuTunnustieto katselmus))
                                             :MuuTunnus)
-                              sovellus-and-tunnus (str  (:tunnus MuuTunnus) "-" (:sovellus MuuTunnus))]
-                          sovellus-and-tunnus))
+                              sovellus (:sovellus MuuTunnus)
+                              tunnus (:tunnus MuuTunnus "")
+                              ]
+                          (if (and (not-empty sovellus) (not-empty tunnus))
+                            (str tunnus "-" sovellus)
+                            ;; else
+                            tunnus)))
         first-huomautus (first (get-in katselmus [:huomautukset]))
         katselmus-data {:tila (get katselmus :osittainen)
                         :pitaja (get katselmus :pitaja)
@@ -339,20 +344,25 @@
       new-building)))
 
 (defn update-task-buildings [new-buildings task]
-  ;; Normally task's buildings (:data :rakennus) are updated by tasks/rakennus-data-from-buildings called in katselmus->task.  here we call it
-  ;; again once for each task, to apply the task rakennus :tila data to the right buildings if supplied
-  ;; with a ":task-tila"-decorated :buildings map.
 
-  (let [old-buildings (-> task :data :rakennus)
-        new-buildings-with-states (map (fn [new-building]
-                                         (update-building old-buildings new-building)) new-buildings)
-        task-rakennus (rakennus-data-from-buildings {} new-buildings-with-states)
-        ]
-    (if (> (count task-rakennus) (count new-buildings-with-states))
-      (errorf "too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states))
-      ;; else
-      ;;(debugf "enough buildings: task has %s, :buildings %s" (count task-rakennus) (count new-buildings-with-states))
-      )
-    ;;(println "new buildings: " task-rakennus)
-    ;;(println "old buildings: " task-rakennus)
-    (assoc-in task [:data :rakennus] (tools/wrapped task-rakennus))))
+  (if (not= (-> task :schema-info :name) "task-katselmus")
+    task
+    ;; else
+
+    ;; Normally task's buildings (:data :rakennus) are updated by tasks/rakennus-data-from-buildings called in katselmus->task.  here we call it
+    ;; again once for each task, to apply the task rakennus :tila data to the right buildings if supplied
+    ;; with a ":task-tila"-decorated :buildings map.
+
+    (let [old-buildings (-> task :data :rakennus)
+          new-buildings-with-states (map (fn [new-building]
+                                           (update-building old-buildings new-building)) new-buildings)
+          task-rakennus (rakennus-data-from-buildings {} new-buildings-with-states)
+          ]
+      (if (> (count task-rakennus) (count new-buildings-with-states))
+        (errorf "too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states))
+        ;; else
+        ;;(debugf "enough buildings: task has %s, :buildings %s" (count task-rakennus) (count new-buildings-with-states))
+        )
+      ;;(println "new buildings: " task-rakennus)
+      ;;(println "old buildings: " task-rakennus)
+      (assoc-in task [:data :rakennus] (tools/wrapped task-rakennus)))))

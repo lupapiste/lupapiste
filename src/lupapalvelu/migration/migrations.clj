@@ -2157,6 +2157,26 @@
   {:apply-when (pos? (mongo/count :organizations {:permanent-archive-in-use-since {$exists false}}))}
   (mongo/update-by-query :organizations {:permanent-archive-in-use-since {$exists false}} {$set {:permanent-archive-in-use-since 0}}))
 
+(defn add-ym-in-scope [org]
+  (let [ym-municipalities (->> (filter (comp #{"YM"} :permitType) (:scope org))
+                               (map :municipality)
+                               (set))]
+    (->> (map :municipality (:scope org))
+         (distinct)
+         (remove ym-municipalities)
+         (reduce #(update %1 :scope conj {:open-inforequest-email nil,
+                                          :open-inforequest false,
+                                          :new-application-enabled true,
+                                          :inforequest-enabled true,
+                                          :municipality %2,
+                                          :permitType "YM"}) org))))
+
+(defmigration add-ym-permit-type-to-all-ymp-orgs
+  {:apply-when (pos? (mongo/count :organizations {:_id #"YMP" :scope.permitType {$not {"$eq" "YM"}}}))}
+  (->> (mongo/select :organizations {:_id #"YMP" :scope.permitType {$not {"$eq" "YM"}}})
+       (map add-ym-in-scope)
+       (run! #(mongo/update-by-id :organizations (:id %) {$set {:scope (:scope %)}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections

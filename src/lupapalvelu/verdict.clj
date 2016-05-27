@@ -498,13 +498,13 @@
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {} source {:buildings buildings-summary} %)
         review-tasks (map review-to-task reviews)
-        validation-errors (doall  (map (partial tasks/task-doc-validation "task-katselmus") review-tasks))
 
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
+        validation-errors (doall  (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
 
         task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
 

@@ -24,14 +24,15 @@ Valinnaisesti:
 
 - [pdf2pdf](https://www.pdf-tools.com/pdf/Products-Shop/Evaluate.aspx?p=CNV&back=%2fpdf%2fpdf-to-pdfa-converter-signature.aspx)
   PDF/A-konversioita varten
-- [KnockoutJS context debugger](https://chrome.google.com/webstore/detail/knockoutjs-context-debugg/oddcpmchholgcjgjdnfjmildmlielhof) Chrome plugin, joka helpottaa DOM elementtien binding kontekstien hahmottamista
+- [KnockoutJS context debugger](https://chrome.google.com/webstore/detail/knockoutjs-context-debugg/oddcpmchholgcjgjdnfjmildmlielhof) Chrome plugin, joka helpottaa DOM-elementtien binding kontekstien hahmottamista
 
 ## Kehitysympäristön konfigurointi
 
 ### user.properties
 
-Luo projektin juureen (sovelluksen kehitysaikaiseen ajohakemistoon) user.properties
-tiedosto. Tiedostossa voit määritellä mm. tietokantayhteyden:
+Luo projektin juureen (sovelluksen kehitysaikaiseen ajohakemistoon)
+user.properties -tiedosto. Tiedostossa voit määritellä
+mm. tietokantayhteyden:
 
     mongodb.servers.0.host  localhost
     mongodb.servers.0.port  27017
