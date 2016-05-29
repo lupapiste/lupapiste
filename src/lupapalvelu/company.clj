@@ -352,3 +352,12 @@
        {:auth {$elemMatch {:invite.user.id company-id}}}
        {$set  {:auth.$ (-> company company->auth (assoc :inviter inviter :inviteAccepted (now)))}}))
     (ok)))
+
+(defn cannot-submit
+  "Pre-check that fails only if the user is not authed as company user
+  without submit rights"
+  [{user :user} application]
+  (when-not (and (not (domain/owner-or-write-access? application (:id user)))
+             (domain/company-access? application (-> user :company :id))
+             (not (-> user :company :submit)))
+    (fail :error.authorized)))

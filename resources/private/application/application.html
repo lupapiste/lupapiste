@@ -650,11 +650,13 @@
                             </i>
                             <br>
                             <!-- /ko -->
+                            <p data-bind="ltext: 'company.user.cannot.submit',
+                                            visible: $root.authorization.ok( 'company-user-cannot-submit')"></p>
                             <button class="positive"
                                     data-test-id="application-submit-btn"
                                     data-bind="click: submitApplication,
                                                visible: $root.authorization.ok('submit-application'),
-                                               enable: submitButtonEnabled">
+                                               enable: submitButtonEnabled() && !$root.authorization.ok( 'company-user-cannot-submit')">
                                 <i class="lupicon-download"></i>
                                 <span data-bind="ltext: 'application.submitApplication'"></span>
                             </button>

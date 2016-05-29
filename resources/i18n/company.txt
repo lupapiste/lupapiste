@@ -220,3 +220,4 @@
 "register.company.sign.terms-accepted" "sv" "Jag har läst och godkänt avtalsvillkoren"
 "register.company.user-limit.reached" "fi" "Yritystilillä on jo maksimimäärä käyttäjiä."
 "register.company.user-limit.reached" "sv" "Företagskontot har redan maximalmängden användare."
+"company.user.cannot.submit" "fi" "Sinulla ei ole oikeutta jättää hakemusta. Ota tarvittaessa yhteys yrityksesi ylläpitäjään."

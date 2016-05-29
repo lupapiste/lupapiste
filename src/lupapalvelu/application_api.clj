@@ -257,6 +257,7 @@
     (or
       (foreman/validate-application application)
       (app/validate-link-permits application)
+      (when-not (company/cannot-submit command application) (fail :company.user.cannot.submit))
       (do-submit command application created))))
 
 (defcommand refresh-ktj
