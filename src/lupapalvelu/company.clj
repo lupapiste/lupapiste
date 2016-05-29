@@ -187,15 +187,14 @@
 (defn company-user-edit-allowed
   "Pre-check enforcing that the caller has sufficient credentials to
   edit company member."
-  [{caller :user {user-id :user-id} :data :as cmd} app]
-  (when user-id
-    (let [target-user (usr/get-user-by-id user-id)]
-     (if-not (or (= (:role caller) "admin")
-                 (and (= (get-in caller [:company :role])
-                         "admin")
-                      (= (get-in caller [:company :id])
-                         (get-in target-user [:company :id]))))
-       (unauthorized)))))
+  [{caller :user :as cmd} app]
+  (when-let [target-user (some-> cmd :data :user-id usr/get-user-by-id)]
+    (when-not (or (= (:role caller) "admin")
+                  (and (= (get-in caller [:company :role])
+                          "admin")
+                       (= (get-in caller [:company :id])
+                          (get-in target-user [:company :id]))))
+      unauthorized)))
 
 (defn delete-user!
   [user-id]
@@ -276,9 +275,9 @@
 ;; Link user to company:
 ;;
 
-(defn link-user-to-company! [user-id company-id role]
+(defn link-user-to-company! [user-id company-id role submit]
   (if-let [user (usr/get-user-by-id user-id)]
-    (let [updates (merge {:company {:id company-id, :role role :submit true}}
+    (let [updates (merge {:company {:id company-id, :role role :submit submit}}
                     (when (usr/dummy? user) {:role :applicant})
                     (when-not (:enabled user) {:enabled true}))]
       (mongo/update :users {:_id user-id} {$set updates})
@@ -286,7 +285,7 @@
         (pw-reset/reset-password (assoc user :role "applicant"))))
     (fail! :error.user-not-found)))
 
-(defmethod token/handle-token :invite-company-user [{{:keys [user company role]} :data} {accept :ok}]
+(defmethod token/handle-token :invite-company-user [{{:keys [user company role submit]} :data} {accept :ok}]
   (infof "user %s (%s) %s invitation to company %s (%s)"
          (:username user)
          (:id user)
@@ -294,7 +293,7 @@
          (:name company)
          (:id company))
   (if accept
-    (link-user-to-company! (:id user) (:id company) role))
+    (link-user-to-company! (:id user) (:id company) role submit))
   (ok))
 
 (defn company->auth [company]

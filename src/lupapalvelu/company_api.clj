@@ -94,7 +94,7 @@
    :user-roles #{:applicant}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
+   :pre-checks [validate-user-is-admin-or-company-admin]}
   [{caller :user}]
   (let [user (u/find-user {:email email})
         tokens (c/find-user-invitations (-> caller :company :id))]
@@ -175,7 +175,6 @@
   (ok))
 
 (defquery company-user-cannot-submit
-
   {:description "Negative psseudo query that succeeds only if the
   current user is authed to the current application via company but
   does not have submit rights."

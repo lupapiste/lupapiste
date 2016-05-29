@@ -505,7 +505,7 @@
               :apikey "502cb9e58426c613c8b85abe"}
     :role "applicant"
     :architect true
-    :company {:id "solita", :role "admin"}}
+    :company {:id "solita" :role "admin" :submit true}}
 
    ])
 
