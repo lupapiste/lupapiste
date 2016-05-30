@@ -288,23 +288,28 @@
             <label data-bind="ltext: 'register.company.add-user.can-submit'" class="checkbox-label" for="register.company.add-user.can-submit"></label>
           </div>
 
-          <div data-bind="visible: pending">
+          <div data-bind="visible: pending"
+               class="dialog-content__footer">
             <h3>
-              <em data-bind="visible: pending" class="button-loader" style="position: relative;"></em>
               <span data-bind="ltext: 'register.company.add-user.pending'"></span>
             </h3>
           </div>
 
-          <div data-bind="visible: done">
+          <div data-bind="visible: done"  class="dialog-content__footer">
             <h3 data-bind="ltext: 'register.company.add-user.done.header'" id="testCompanyAddUserDone"></h3>
             <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
             <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
           </div>
 
           <div class="inner-margins dialog-content__footer">
-            <button data-bind="enable: canSubmit, click: sendInvite" type="submit"
-                    class="positive" data-test-id="company-user-submit">
+            <button data-bind="enable: canSubmit, 
+                               click: sendInvite,
+                               css: {waiting: pending}"
+                    type="submit"
+                    class="positive"
+                    data-test-id="company-user-submit">
               <i class="lupicon-envelope"></i>
+              <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: 'register.company.add-user.submit'"></span>
             </button>
             <button data-bind="enable: canClose" class="secondary close"

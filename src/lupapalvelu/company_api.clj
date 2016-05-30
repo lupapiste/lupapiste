@@ -96,20 +96,8 @@
                       action/email-validator]
    :pre-checks [validate-user-is-admin-or-company-admin]}
   [{caller :user}]
-  (let [user (u/find-user {:email email})
-        tokens (c/find-user-invitations (-> caller :company :id))]
-    (cond
-      (some #(= email (:email %)) tokens)
-      (ok :result :already-invited)
-
-      (nil? user)
-      (ok :result :not-found)
-
-      (get-in user [:company :id])
-      (ok :result :already-in-company)
-
-      :else
-      (ok (assoc (select-keys user [:firstName :lastName]) :result :found)))))
+  (c/search-result caller email (fn [user]
+                                  (ok (assoc (select-keys user [:firstName :lastName]) :result :found)))))
 
 (defcommand company-invite-user
   {:parameters [email admin submit]
@@ -119,22 +107,11 @@
                       action/email-validator]
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{caller :user}]
-(let [user (u/find-user {:email email})
-      tokens (c/find-user-invitations (-> caller :company :id))]
-    (cond
-      (some #(= email (:email %)) tokens)
-      (ok :result :already-invited)
-
-      (nil? user)
-      (ok :result :not-found)
-
-      (get-in user [:company :id])
-      (ok :result :already-in-company)
-
-      :else
-      (do
-        (c/invite-user! email (-> caller :company :id) (if admin :admin :user) submit)
-        (ok :result :invited)))))
+  (c/search-result caller email (fn [_]
+                                  (c/invite-user! email
+                                                  (-> caller :company :id)
+                                                  (if admin :admin :user) submit)
+                                  (ok :result :invited))))
 
 (defcommand company-add-user
   {:user-roles #{:applicant}
