@@ -2177,6 +2177,22 @@
        (map add-ym-in-scope)
        (run! #(mongo/update-by-id :organizations (:id %) {$set {:scope (:scope %)}}))))
 
+(defmigration add-missing-submit-rights-to-company-users
+  {:apply-when (pos? (mongo/count :users {:company.id {$exists true}
+                                          :company.submit {$exists false}}))}
+  (mongo/update-by-query :users
+                         {:company.id {$exists true}
+                          :company.submit {$exists false}}
+                         {$set {:company.submit true}}))
+
+(defmigration add-missing-submit-rights-to-company-tokens
+  {:apply-when (pos? (mongo/count :token {:token-type {$in [:new-company-user :invite-company-user]}
+                                          :data.submit {$exists false}}))}
+  (mongo/update-by-query :token
+                         {:token-type {$in [:new-company-user :invite-company-user]}
+                          :data.submit {$exists false}}
+                         {$set {:data.submit true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
