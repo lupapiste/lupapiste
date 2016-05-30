@@ -199,10 +199,10 @@
          (assoc foreman-app :documents))))
 
 (defn- applicant-user-auth [applicant path auth]
-  (when-let [applicant-user (-> applicant
-                                (get-in path)
-                                usr/canonize-email
-                                usr/get-user-by-email)]
+  (when-let [applicant-user (some-> applicant
+                                    (get-in path)
+                                    usr/canonize-email
+                                    usr/get-user-by-email)]
     ;; Create invite for applicant if authed
     (when (some (partial usr/same-user? applicant-user) auth)
       {:email (:email applicant-user)

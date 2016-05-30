@@ -4,6 +4,9 @@ T&auml;m&auml; on muistutusviesti. Rakennuspaikan rajanaapurina Teille ilmoiteta
 
   {{link-fi}}
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 # Hej {{name}},
@@ -12,3 +15,5 @@ Det h&auml;r meddelandet &auml;r en p&aring;minnelse. Som r&aring;granne till en
 
   {{link-sv}}
 
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

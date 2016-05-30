@@ -75,7 +75,8 @@
    :link-sv (get-application-link application tab "sv" recipient)
    :state-fi (i18n/localize :fi (name (:state application)))
    :state-sv (i18n/localize :sv (name (:state application)))
-   :modified (to-local-date (:modified application))})
+   :modified (to-local-date (:modified application))
+   :name (:firstName recipient)})
 
 
 ;;

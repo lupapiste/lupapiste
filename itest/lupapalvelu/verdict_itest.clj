@@ -79,13 +79,15 @@
           (:state application) => "verdictGiven"
           (-> application :history last :state) => "verdictGiven")
 
-        (fact "Authority is still able to add an attachment"
-
-          (let [email (last-email)]
+        (fact "Email was sent"
+          (let [email (last-email)
+                body (get-in email [:body :plain])]
             (:to email) => (contains (email-for-key pena))
             (:subject email) => "Lupapiste: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
-            email => (partial contains-application-link-with-tab? application-id "verdict" "applicant"))
+            email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")
+            body => (contains "Moi Pena,")))
 
+        (fact "Authority is still able to add an attachment"
           (upload-attachment sonja (:id application) first-attachment true)
           (upload-attachment pena (:id application) first-attachment false))))))
 
