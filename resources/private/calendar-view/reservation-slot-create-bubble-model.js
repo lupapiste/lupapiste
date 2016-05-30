@@ -10,12 +10,12 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
   self.calendarId = lupapisteApp.services.calendarService.calendarQuery.calendarId;
   self.reservationTypes = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
   self.selectedReservationTypes = ko.observableArray();
-  self.bubbleVisible = ko.observable(false);
+  self.amount = ko.observable();
+  self.maxAmount = ko.observable();
 
   self.waiting = params.waiting;
   self.error = ko.observable(false);
-  self.amount = ko.observable();
-  self.maxAmount = ko.observable();
+  self.bubbleVisible = ko.observable(false);
 
   self.okEnabled = self.disposedComputed(function() {
     var amount = _.toInteger(self.amount());
@@ -37,7 +37,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
         reservationTypes: self.selectedReservationTypes()
       }
     });
-    hub.send("calendarService::createCalendarSlots", {calendarId: self.calendarId(), slots: slots});
+    self.sendEvent("calendarService", "createCalendarSlots", {calendarId: self.calendarId(), slots: slots});
     self.bubbleVisible(false);
   };
 
@@ -50,7 +50,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
     return moment(nextSlotStartTime).diff(timestamp, "seconds");
   }
 
-  var _timelineSlotClicked = hub.subscribe("calendarView::timelineSlotClicked", function(event) {
+  self.addEventListener("calendarView", "timelineSlotClicked", function(event) {
     var weekday = event.weekday;
     var hour = event.hour;
     var minutes = event.minutes;
@@ -71,7 +71,4 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
     self.bubbleVisible(true);
   });
 
-  self.dispose = function() {
-    hub.unsubscribe(_timelineSlotClicked);
-  };
 };

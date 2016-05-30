@@ -3,7 +3,8 @@
 
   var components = [
     {name: "calendar-view"},
-    {name: "reservation-slot-create-bubble"}
+    {name: "reservation-slot-create-bubble"},
+    {name: "reservation-slot-edit-bubble"}
   ];
 
   $(function() {

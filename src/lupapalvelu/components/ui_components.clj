@@ -369,8 +369,10 @@
                              :company :analytics :register-company :footer :ui-components]}
 
    :calendar-view {:depends [:common-html]
-                   :js ["calendar-view.js" "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
-                   :html ["reservation-slot-create-bubble-template.html" "calendar-view-template.html" ]}
+                   :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
+                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
+                   :html ["reservation-slot-edit-bubble-template.html"
+                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html" ]}
 
    :mycalendar   {:depends [:calendar-view]
                   :js ["mycalendar.js"]

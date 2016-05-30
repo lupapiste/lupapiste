@@ -25,9 +25,12 @@
           <td colspan="6" style="height: 0px">
             <div style="position: relative;">
               <div data-bind="component: { name: 'reservation-slot-create-bubble',
-                                           params: { bubbleVisible: true,
-                                                     error: error,
-                                                     tableFirstFullHour: $component.firstFullHour,
+                                           params: { tableFirstFullHour: $component.firstFullHour,
+                                                     tableLastFullHour: $component.lastFullHour }}"></div>
+            </div>
+            <div style="position: relative;">
+              <div data-bind="component: { name: 'reservation-slot-edit-bubble',
+                                           params: { tableFirstFullHour: $component.firstFullHour,
                                                      tableLastFullHour: $component.lastFullHour }}"></div>
             </div>
           </td>
