@@ -794,14 +794,21 @@
     (when-not (nil? v)
       {k v})))
 
+(defn- str-get-in [m ks]
+  ;; return strings for keywords
+  (let [safe-name #(if (nil? %)
+                     %
+                     (name %))]
+    (safe-name (get-in m ks))))
+
 (defn schema-info-filter
   ([docs prop]
-   (filter #(get-in % [:schema-info prop]) docs))
+   (filter #(str-get-in % [:schema-info prop]) docs))
   ([docs prop value]
    (let [values (if (coll? value)
                   (set value)
                   #{value})]
-     (filter #(contains? values (get-in % [:schema-info prop])) docs))))
+     (filter #(contains? values (str-get-in % [:schema-info prop])) docs))))
 
 (defn ->postiosoite-type [address]
   (assoc-country (merge {:osoitenimi (entry :katu address :teksti)}
@@ -845,8 +852,8 @@
 
 (defn- process-party [lang {{role :subtype} :schema-info data :data}]
   {:Osapuoli (merge
-               {:roolikoodi (ss/capitalize role)
-                :asioimiskieli lang}
+              {:roolikoodi (ss/capitalize (name role))
+               :asioimiskieli lang}
                (osapuolitieto data))})
 
 (defn process-parties [docs lang]
