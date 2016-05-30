@@ -119,7 +119,6 @@
 (defn select-parameters
   "Parameters are valid if each of them belong to the value-set"
   [params value-set command]
-  ()
   (filter-params-of-command params command (complement value-set) "error.illegal-value:not-in-set"))
 
 (defn property-id-parameters [params command]
