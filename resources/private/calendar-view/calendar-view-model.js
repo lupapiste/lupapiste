@@ -15,8 +15,8 @@ LUPAPISTE.CalendarViewModel = function () {
 
   self.calendarId = ko.observable();
 
-  self.firstFullHour = ko.observable(8);
-  self.lastFullHour = ko.observable(16);
+  self.firstFullHour = calendarService.firstFullHour;
+  self.lastFullHour = calendarService.lastFullHour;
 
   var timelineTimesBuilder = function() {
     var times = [];

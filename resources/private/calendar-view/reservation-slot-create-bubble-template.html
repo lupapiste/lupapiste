@@ -11,7 +11,7 @@
       <bubble-dialog params="visible: bubbleVisible,
                              buttonIcon: 'lupicon-circle-arrow-right',
                              buttonText: 'application-guests.send',
-                             okEnabled: true,
+                             okEnabled: okEnabled,
                              okFun: send,
                              initFun: init,
                              error: error,
@@ -20,7 +20,7 @@
         <p>Lisätään varattavia aikoja</p>
         <p>Alkaen <span data-bind="dateTimeString: $parent.startTime"></span></p>
         <p>Kesto 1h</p>
-        <p>Kpl: 1</p>
+        <p>Kpl: <input type="text" class="form-input" data-bind="value: $parent.amount"></p>
         <p>Tapahtumalajit:</p>
         <div data-bind="foreach: $parent.reservationTypes">
           <p>

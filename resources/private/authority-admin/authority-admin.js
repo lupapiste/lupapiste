@@ -438,11 +438,16 @@
 
   if (features.enabled("ajanvaraus")) {
     hub.onPageLoad("calendar-admin", function() {
-      hub.send("calendarService::fetchOrganizationReservationTypes");
       var path = pageutil.getPagePath();
       if (path.length > 1) {
-        hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
+        // calendar-view can be initialized with fetchCalendar event after reservationtypes have been init'ed
+        var _calLoader;
+        _calLoader = hub.subscribe("calendarService::organizationReservationTypesFetched", function() {
+          hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
+          hub.unsubscribe(_calLoader);
+        });
       }
+      hub.send("calendarService::fetchOrganizationReservationTypes");
     });
 
     hub.onPageLoad("organization-calendars", function() {
