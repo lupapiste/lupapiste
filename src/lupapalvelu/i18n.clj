@@ -16,28 +16,6 @@
 (def supported-langs [:fi :sv])
 (def default-lang (first supported-langs))
 
-(defn- add-term [k t result lang]
-  (assoc-in result [(keyword lang) k] (s/trim t)))
-
-(defn- process-translation [row k default-t result lang]
-  (let [t (get row lang)]
-    (if (seq t)
-      (add-term k t result lang)
-      (add-term k default-t result lang))))
-
-(defn- process-row [langs-but-default result row]
-  (let [k (get row "key")
-        default-t (get row (name default-lang))]
-    (if (and (not (s/blank? k)) default-t)
-      (reduce
-        (partial process-translation row k default-t)
-        (add-term k default-t result default-lang)
-        langs-but-default)
-      result)))
-
-(defn- read-sheet [headers sheet]
-  (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
-
 (defn- read-translations-txt [name-or-file]
   (let [resource (if (instance? java.io.File name-or-file)
                    name-or-file
