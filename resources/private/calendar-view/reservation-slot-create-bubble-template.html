@@ -9,18 +9,18 @@
                              'z-index': 1000 },
                     css: weekdayCss ">
       <bubble-dialog params="visible: bubbleVisible,
-                             buttonIcon: 'lupicon-circle-arrow-right',
-                             buttonText: 'application-guests.send',
+                             buttonIcon: 'lupicon-save',
+                             buttonText: 'save',
                              okEnabled: okEnabled,
                              okFun: send,
                              initFun: init,
                              error: error,
                              prefix: 'company-invite',
                              waiting: waiting">
-        <p>Lisätään varattavia aikoja</p>
-        <p>Alkaen <span data-bind="dateTimeString: $parent.startTime"></span></p>
-        <p>Kesto 1h</p>
-        <p>Kpl: <input type="text" class="form-input" data-bind="value: $parent.amount"></p>
+        <h3 data-bind="ltext: 'calendar.create-slot.title'"></h3>
+        <p><span data-bind="ltext: 'calendar.create-slot.start-time'"></span>: <span data-bind="dateTimeString: $parent.startTime"></span></p>
+        <p><span data-bind="ltext: 'calendar.create-slot.duration'"></span>: 1h</p>
+        <p><span data-bind="ltext: 'calendar.create-slot.amount'"></span>: <input type="text" class="form-input" data-bind="value: $parent.amount"></p>
         <p>Tapahtumalajit:</p>
         <div data-bind="foreach: $parent.reservationTypes">
           <p>
