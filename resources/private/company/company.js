@@ -108,6 +108,10 @@
   // Delete/uninvite company user
   // ========================================================================================
 
+  function htmlSafeName( user ) {
+    return _.escape( user.firstName + " " + user.lastName );
+  }
+
   function deleteCompanyUser( user, callback ) {
     function deleteCommand() {
       ajax.command(user.tokenId ? "company-cancel-invite" : "company-user-delete",
@@ -124,7 +128,7 @@
                                         : "delete") + ".true.";
     LUPAPISTE.ModalDialog.showDynamicYesNo( loc( prefix  + "title" ),
                                             loc(prefix + "message",
-                                                user.firstName + user.lastName ),
+                                                htmlSafeName( user )) + "<br>",
                                             {title: loc( "yes"),
                                              fn: deleteCommand},
                                             {title: loc( "no")},
@@ -154,7 +158,7 @@
         var prefix = "company.user.op.admin." + (self.role() !== "admin") + ".";
         LUPAPISTE.ModalDialog.showDynamicYesNo( loc( prefix  + "title" ),
                                                 loc(prefix + "message",
-                                                    user.firstName + user.lastName ),
+                                                    htmlSafeName( user )),
                                                 {title: loc( "yes"), fn: self.ok},
                                                 {title: loc( "no")},
                                                 {html: true});

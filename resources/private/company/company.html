@@ -139,13 +139,19 @@
             </thead>
             <tbody>
               <!-- ko foreach: invitations -->
-              <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
-                <td data-bind="text: firstName"></td>
-                <td data-bind="text: lastName"></td>
-                <td data-bind="text: email" data-test-id="company-invited-user-email"></td>
-                <td data-bind="ltext: 'company.user.invited'" data-test-id="company-user-invited"></td>
-                <td data-bind="ltext: 'company.user.role.' + role" data-test-id="company-user-role"></td>
-                <td data-bind="ltext: submit ? 'yes' : 'no'" data-test-id="company-user-submit"></td>
+              <tr>
+                <td data-bind="text: firstName,
+                               attr: {'data-test-id': 'invitation-firstname-' + $index()}"></td>
+                <td data-bind="text: lastName,
+                               attr: {'data-test-id': 'invitation-lastname-' + $index()}"></td>
+                <td data-bind="text: email,
+                               attr: {'data-test-id': 'invitation-email-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.invited',
+                               attr: {'data-test-id': 'invitation-invited-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.role.' + role,
+                               attr: {'data-test-id': 'invitation-role-' + $index()}"></td>
+                <td data-bind="ltext: submit ? 'yes' : 'no',
+                               attr: {'data-test-id': 'invitation-submit-' + $index()}"></td>
                 <td class="company-users-table--action">
                   <div data-bind="visible: opsEnabled">
                     <a href="#" data-bind="click: deleteInvitation, ltext: 'company.user.op.delete.invitation'"></a>
@@ -154,42 +160,53 @@
               </tr>
               <!-- /ko -->
               <!-- ko foreach: users -->
-              <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
-                <td data-bind="text: firstName"></td>
-                <td data-bind="text: lastName"></td>
-                <td data-bind="text: email"></td>
-                <td data-bind="ltext: 'company.user.enabled.' + enabled" data-test-id="company-user-invited"></td>
+              <tr>
+                <td data-bind="text: firstName,
+                               attr: {'data-test-id': 'company-user-firstname-' + $index()}"></td>
+                <td data-bind="text: lastName,
+                               attr: {'data-test-id': 'company-user-lastname-' + $index()}"></td>
+                <td data-bind="text: email,
+                               attr: {'data-test-id': 'company-user-email-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.enabled.' + enabled,
+                               attr: {'data-test-id': 'company-user-enabled-' + $index()}"></td>
                 <!-- ko if: editing -->
                 <td>
                   <select data-bind="options: $parent.userEditor.roles,
                                      optionsText: $parent.userEditor.roleText,
-                                     value: $parent.userEditor.role"
-                          class="dropdown"
-                          data-test-id="company-user-edit-role"></select>
+                                     value: $parent.userEditor.role,
+                                     attr: {'data-test-id': 'company-user-edit-role-' + $index()}"
+                          class="dropdown"></select>
                 </td>
                 <td>
-                  <select  data-test-id="company-user-edit-submit"
-                           data-bind="options: [true, false],
+                  <select data-bind="options: [true, false],
                                       optionsText: $parent.userEditor.submitText,
-                                      value: $parent.userEditor.submit"
-                           class="dropdown"></select>
+                                      value: $parent.userEditor.submit,
+                                      attr: {'data-test-id': 'company-user-edit-submit-' + $index()}"
+                          class="dropdown"></select>
                 </td>
                 <td data-bind="visible: $parent.isAdmin"
                     class="company-users-table--action">
                   <div data-bind="if: opsEnabled">
-                    <a data-bind="ltext: 'save', click: $parent.userEditor.save" data-test-id="company-user-save"></a>
-                    <a data-bind="ltext: 'cancel', click: $parent.userEditor.clear" data-test-id="company-user-cancel"></a>
+                    <a data-bind="ltext: 'save', click: $parent.userEditor.save,
+                                  attr: {'data-test-id': 'company-user-save-' + $index()}"></a>
+                    <a data-bind="ltext: 'cancel', click: $parent.userEditor.clear,
+                                  attr: {'data-test-id': 'company-user-cancel-' + $index()}"></a>
                   </div>
                 </td>
                 <!-- /ko -->
                 <!-- ko ifnot: editing -->
-                <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
-                <td data-bind="ltext: submit() ? 'yes' : 'no'" data-test-id="company-user-submit"></td>
+                <td data-bind="ltext: 'company.user.role.' + role(),
+                               attr: {'data-test-id': 'company-user-role-' + $index()}"></td>
+                <td data-bind="ltext: submit() ? 'yes' : 'no',
+                               attr: {'data-test-id': 'company-user-submit-' + $index()}"></td>
                 <td data-bind="visible: $parent.isAdmin"
                     class="company-users-table--action">
                   <div data-bind="if: opsEnabled">
-                    <a data-bind="ltext: 'edit', click: edit" data-test-id="company-user-edit"></a>
-                    <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" data-test-id="company-user-toggle-delete"></a>
+                    <a data-bind="ltext: 'edit', click: edit,
+                                  attr: {'data-test-id': 'company-user-edit-' + $index()}"></a>
+                    <a data-bind="click: deleteUser,   
+                                  ltext: 'company.user.op.delete',
+                                  attr: {'data-test-id': 'company-user-delete-' + $index()}"></a>
                   </div>
                 </td>
                 <!-- /ko -->
@@ -278,14 +295,14 @@
           <div class="checkbox-wrapper checkbox-wrapper--break-small">
             <input data-bind="checked: admin,
                               disable: done"
-                   class="form-input" type="checkbox" id="register.company.add-user.admin"/>
-            <label data-bind="ltext: 'register.company.add-user.admin'" class="checkbox-label" for="register.company.add-user.admin"></label>
+                   class="form-input" type="checkbox" id="company-new-user-admin"/>
+            <label data-bind="ltext: 'register.company.add-user.admin'" class="checkbox-label" for="company-new-user-admin"></label>
           </div>
           <div class="checkbox-wrapper">
             <input data-bind="checked: submit,
                               disable: done"
-                   class="form-input" type="checkbox" id="register.company.add-user.can-submit"/>
-            <label data-bind="ltext: 'register.company.add-user.can-submit'" class="checkbox-label" for="register.company.add-user.can-submit"></label>
+                   class="form-input" type="checkbox" id="company-new-user-submit"/>
+            <label data-bind="ltext: 'register.company.add-user.can-submit'" class="checkbox-label" for="company-new-user-submit"></label>
           </div>
 
           <div data-bind="visible: pending"
@@ -295,7 +312,8 @@
             </h3>
           </div>
 
-          <div data-bind="visible: done"  class="dialog-content__footer">
+          <div data-bind="visible: done"  class="dialog-content__footer"
+               data-test-id="company-add-user-done">
             <h3 data-bind="ltext: 'register.company.add-user.done.header'" id="testCompanyAddUserDone"></h3>
             <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
             <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
@@ -307,7 +325,7 @@
                                css: {waiting: pending}"
                     type="submit"
                     class="positive"
-                    data-test-id="company-user-submit">
+                    data-test-id="company-user-send-invite">
               <i class="lupicon-envelope"></i>
               <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: 'register.company.add-user.submit'"></span>

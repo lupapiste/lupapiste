@@ -16,6 +16,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]

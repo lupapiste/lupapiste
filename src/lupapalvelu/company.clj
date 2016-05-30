@@ -133,6 +133,7 @@
       (assoc :lastName  (get-in token [:data :user :lastName]))
       (assoc :email     (get-in token [:data :user :email]))
       (assoc :role      (get-in token [:data :role]))
+      (assoc :submit    (get-in token [:data :submit]))
       (assoc :tokenId (:id token))
       (assoc :expires (:expires token))))
 
