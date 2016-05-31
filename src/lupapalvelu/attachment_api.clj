@@ -151,7 +151,7 @@
   (->> (attachment/resolve-ram-links attachments attachmentId)
        ;; We include modified in order to have a timestamp even if the
        ;; attachment is empty.
-       (map #(select-keys % [:id :latestVersion :modified :approved]))
+       (map #(select-keys % [:id :latestVersion :modified :approved :ram-link]))
        (ok :ram-links)))
 
 ;;

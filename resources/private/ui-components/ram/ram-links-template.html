@@ -1,33 +1,27 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="ram-links-template">
   <!-- ko if: showLinks -->
-  <h3 data-bind="ltext: 'attachment.ram.links'"></h3>
+  <h3 data-bind="ltext: 'ram.links'"></h3>
   <table data-test-id="ram-links-table">
     <thead>
       <tr>
+        <th data-bind="ltext: 'ram.type'"></th>
         <th data-bind="ltext: 'attachment.file'"></th>
-        <th data-bind="ltext: 'attachment.ram.approved'"></th>
         <th data-bind="ltext: 'attachment.editDate'"></th>
         <th data-bind="ltext: 'attachment.editor'"></th>
-        <th></th>
+        <th data-bind="ltext: 'ram.approved'"></th>
       </tr>
     </thead>
     <tbody data-bind="foreach: links">
       <tr>
-        <td data-bind="text: _.get( $data, 'latestVersion.filename', '-'),
+        <td data-bind="html: $parent.typeHtml( $data )"></td>
+        <td data-bind="attachmentVersion: latestVersion,
                        attr: {'data-test-id': 'ram-link-filename-' + $index()}"></td>
+        <td data-bind="dateTimeString: _.get( $data, 'latestVersion.created', modified )"></td>
+        <td data-bind="text: _.get( $data, 'latestVersion.user.username', ''),
+                       attr: {'data-test-id': 'ram-link-name-' + $index()}"></td>
         <td data-bind="html: $parent.approvalHtml( $data ),
                        attr: {'data-test-id': 'ram-link-approved-' + $index()}"></td>
-        <td data-bind="dateTimeString: _.get( $data, 'latestVersion.created', modified )"></td>
-        <td data-bind="fullName: _.get( $data, 'latestVersion.user', {}),
-                       attr: {'data-test-id': 'ram-link-name-' + $index()}"></td>
-        <td data-bind="if: id != $parent.attachmentId">
-          <a data-bind="attr: {href: $parent.service.attachmentUrl( id ),
-                        'data-test-id': 'ram-link-link-' + $index()}"
-             class="link-btn primary">
-            <i class="lupicon-external-link"></i>
-          </a>
-        </td>
       </tr>
     </tbody>
   </table>

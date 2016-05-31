@@ -22,7 +22,7 @@ LUPAPISTE.RamLinksModel = function( params) {
     }
   });
 
-  var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %>, <%- time %>");
+  var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %> <%- time %>");
 
   self.approvalHtml = function( data ) {
     var approved = data.approved || {};
@@ -30,5 +30,17 @@ LUPAPISTE.RamLinksModel = function( params) {
       ? approvalTemplate( {user: approved.user,
                            time: moment( approved.timestamp).format( "D.M.YYYY HH:mm")})
       : "-";
+  };
+
+  var ramLinkTemplate = _.template( "<a href='<%- url %>'><%= text %></a>");
+
+  self.typeHtml = function( data ) {
+    var text =  _.escape( loc (_.trim( data["ram-link"] )
+                               ? "ram.type.ram"
+                               : "ram.type.original"));
+    return data.id === self.attachmentId
+      ? text
+      : ramLinkTemplate( {url: self.service.attachmentUrl( data.id ),
+                          text: text});
   };
 };
