@@ -8,17 +8,6 @@
 
 (apply-remote-minimal)
 
-(defn- get-attachment-by-id [apikey application-id attachment-id]
-  (get-attachment-info (query-application apikey application-id) attachment-id))
-
-(defn- approve-attachment [application-id attachment-id]
-  (command veikko :approve-attachment :id application-id :attachmentId attachment-id) => ok?
-  (get-attachment-by-id veikko application-id attachment-id) => (in-state? "ok"))
-
-(defn- reject-attachment [application-id attachment-id]
-  (command veikko :reject-attachment :id application-id :attachmentId attachment-id) => ok?
-  (get-attachment-by-id veikko application-id attachment-id) => (in-state? "requires_user_action"))
-
 (facts "attachments"
   (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
 
@@ -104,21 +93,9 @@
             (fact "download-attachment as pena should be possible"
               (raw pena "download-attachment" :attachment-id file-id) => http200?))))
 
-      (fact "Veikko can approve attachment"
-        (approve-attachment application-id (first attachment-ids)))
-
-      (fact "Veikko can reject attachment"
-        (reject-attachment application-id (first attachment-ids)))
-
       (fact "Pena submits the application"
         (command pena :submit-application :id application-id) => ok?
         (:state (query-application veikko application-id)) => "submitted")
-
-      (fact "Veikko can still approve attachment"
-        (approve-attachment application-id (first attachment-ids)))
-
-      (fact "Veikko can still reject attachment"
-        (reject-attachment application-id (first attachment-ids)))
 
       (fact "Pena signs attachments"
         (fact "meta" attachment-ids => seq)
