@@ -104,13 +104,27 @@
 (defn- calendar-ref-for-user [userId]
   (str "user-" userId))
 
+(defn- calendar-belongs-to-user?
+  [calendar userId]
+  (.endsWith (:externalRef calendar) userId))
+
 (defn- get-calendar
   [calendarId userId]
   (let [calendar (api-query (str "/api/resources/" calendarId))
-        user     (usr/get-user-by-id userId)
-        external-ref (:externalRef calendar)]
-    (when (.endsWith external-ref userId)
+        user     (usr/get-user-by-id userId)]
+    (when (calendar-belongs-to-user? calendar userId)
       (->FrontendCalendar calendar user))))
+
+(defn- authorized-to-edit-calendar?
+  [user calendarId]
+  (try
+    (let [calendar (api-query (str "/api/resources/" calendarId))
+          orgId    (:organizationCode calendar)]
+      (or
+        (and (usr/authority-admin? user) (= (usr/authority-admins-organization-id user) orgId))
+        (and (usr/authority? user) (calendar-belongs-to-user? calendar (:id user)))))
+    (catch Exception _
+      false)))
 
 (defn- find-calendars-for-organizations
   [& orgIds]
@@ -243,12 +257,20 @@
        ->FrontendReservationSlots
        (ok :slots)))
 
+(defn- valid-frontend-slot? [m]
+  (and (map? m) (number? (:start m)) (number? (:end m))
+       (not (empty? (:reservationTypes m)))
+       (every? number? (:reservationTypes m))))
+
 (defcommand create-calendar-slots
   {:user-roles #{:authorityAdmin :authority}
    :parameters [calendarId slots]
-   :input-validators [(partial action/number-parameters [:calendarId])]
+   :input-validators [(partial action/number-parameters [:calendarId])
+                      (partial action/vector-parameter-of :slots valid-frontend-slot?)]
    :feature    :ajanvaraus}
-  [_]
+  [{user :user}]
+  (when-not (authorized-to-edit-calendar? user calendarId)
+    (unauthorized!))
   (info "Creating new calendar slots in calendar #" calendarId)
   (->> slots
        ->BackendReservationSlots
