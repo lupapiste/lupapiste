@@ -57,6 +57,10 @@
 
 (register-generator ssc/NatString nat-string)
 
+(def decimal-string  (gen/fmap (partial s/join ".") (gen/tuple gen/large-integer gen/pos-int)))
+
+(register-generator ssc/DecimalString decimal-string)
+
 (def single-hex (gen/elements (concat (map str (range 10)) (map (comp str char) (range (int \a) (inc (int \f)))))))
 
 (def single-number-int (gen/elements (range 10)))
@@ -66,16 +70,6 @@
 (register-generator ssc/BlankStr blank-string)
 
 (def not-blank-string (gen/such-that (comp not s/blank?) gen/string))
-
-(def nat-string (gen/fmap str gen/nat))
-
-(register-generator ssc/NatString nat-string)
-
-(register-generator ssc/Nat gen/nat)
-
-(def int-string (gen/fmap str gen/int))
-
-(register-generator ssc/IntString int-string)
 
 (def digit (gen/fmap str single-number-int))
 
