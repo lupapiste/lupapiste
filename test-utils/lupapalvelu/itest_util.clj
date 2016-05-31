@@ -105,7 +105,7 @@
 ;; HTTP Client cookie store
 ;;
 
-(def test-db-name (str "test_" (now)))
+(defonce test-db-name (str "test_" (now)))
 
 (defn ->cookie [name value]
   (proxy [Cookie] []
