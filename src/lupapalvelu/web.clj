@@ -45,7 +45,8 @@
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]
-            [net.cgrand.enlive-html :as enlive]))
+            [net.cgrand.enlive-html :as enlive]
+            [lupapalvelu.calendars-api :as calendars]))
 
 ;;
 ;; Helpers
@@ -709,6 +710,9 @@
 
   (defpage "/dev/clear/:collection" {:keys [collection]}
     (resp/status 200 (resp/json {:ok true :status (mongo/remove-many collection {})})))
+
+  (defpage "/dev/ajanvaraus/clear" []
+    (resp/status 200 (resp/json {:ok true :status (calendars/clear-database)})))
 
   (defpage [:get "/api/proxy-ctrl"] []
     (resp/json {:ok true :data (not @env/proxy-off)}))

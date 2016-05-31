@@ -198,6 +198,10 @@
   (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
     (assert (-> resp :body :ok) (str "Response not ok: clearing collection: \"" collection "\": response: " (pr-str resp)))))
 
+(defn clear-ajanvaraus-db []
+  (let [resp (decode-response (http-get (str (server-address) "/dev/ajanvaraus/clear") {}))]
+    (assert (-> resp :body :ok) (str "Response not ok: clearing ajanvaraus-db" (pr-str resp)))))
+
 (defn create-app-with-fn [f apikey & args]
   (let [args (apply hash-map args)
         municipality (:municipality args)

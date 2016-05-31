@@ -24,7 +24,7 @@
   (command sipoo :add-reservation-type-for-organization :reservationType "Katselmus")
   (let [result (query sipoo :reservation-types-for-organization)]
     (map :name (:reservationTypes result)) => (just #{"Katselmus"})
-    (command sipoo :delete-reservation-type :reservationTypeId (first (map :id (:reservationTypes result))))))
+    (clear-ajanvaraus-db)))
 
 (fact "Delete reservation type"
   (command sipoo :add-reservation-type-for-organization :reservationType "Katselmus")
