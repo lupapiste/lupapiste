@@ -199,7 +199,7 @@
    (sc/optional-key :readOnly)           sc/Bool            ;;
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
    :state                                (apply sc/enum attachment-states) ;; attachment state
-   (sc/optional-key :approved)           {:value (sc/enum :approved :rejected)
+   (sc/optional-key :approved)           {:value (sc/enum :approved :rejected) ; Key name and value structure are the same as in document meta data.
                                           :user {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
                                           :timestamp ssc/Timestamp
                                           :fileId ssc/ObjectIdStr }
