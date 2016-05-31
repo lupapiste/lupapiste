@@ -1,6 +1,6 @@
 # Moi {{name}},
 
-hakemkselle on lis&auml;tty uusi kommentti. P&auml;&auml;set lukemaan kommentin hakemuksen keskusteluketjusta.
+hakemukselle on lis&auml;tty uusi kommentti. P&auml;&auml;set lukemaan kommentin hakemuksen keskusteluketjusta.
 
   {{link-fi}}
 
