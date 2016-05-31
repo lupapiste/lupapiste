@@ -2,7 +2,7 @@
   (require [midje.sweet :refer :all]
            [lupapalvelu.itest-util :refer :all]))
 
-(fact-group :ajanvaraus
+(facts :ajanvaraus
   (apply-remote-fixture "ajanvaraus")
 
   (fact "non-authority-admin users should not be able to use the calendar admin API"
