@@ -153,7 +153,7 @@
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
-            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
+            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
