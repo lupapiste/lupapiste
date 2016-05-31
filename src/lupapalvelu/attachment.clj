@@ -764,26 +764,24 @@
   [{:keys [attachments] :as application} op-id]
   (filter #(= (:id (:op %)) op-id) attachments))
 
-(defn- append-gridfs-file! [zip {:keys [filename file-id]}]
-  (when file-id
-    (if-let [content (:content (mongo/download file-id))]
-      (with-open [in (content)]
-        (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" filename))))
-        (io/copy in zip)
-        (.closeEntry zip))
-      (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename file-id))))
-
 (defn- append-stream [zip file-name in]
   (when in
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)
     (.closeEntry zip)))
 
+(defn- append-gridfs-file! [zip {:keys [filename fileId]}]
+  (when fileId
+    (if-let [content (:content (mongo/download fileId))]
+      (with-open [in (content)]
+        (append-stream zip (str fileId "_" filename) in))
+      (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
+
 (defn get-all-attachments!
   "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
   [attachments & [application lang]]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
-    (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
+    (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       ; Add all attachments:
       (doseq [attachment attachments]
