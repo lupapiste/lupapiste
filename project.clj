@@ -150,8 +150,8 @@
                                       :snapshots false}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
                                            :checksum :ignore}]]
-  :aliases {"integration" ["with-profile" "dev,itest" "midje" ":filter" "-ajanvaraus"]
-            "ajanvaraus"  ["with-profile" "dev,itest" "midje" ":filter" "ajanvaraus"]
+  :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
+            "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :aot [lupapalvelu.main clj-time.core]
