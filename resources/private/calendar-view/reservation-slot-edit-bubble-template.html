@@ -22,6 +22,15 @@
         <div>
           <h3>Muokkaa varattavaa aikaa</h3>
         </div>
+        <p><span data-bind="ltext: 'calendar.slot.start-time'"></span>: <span data-bind="dateTimeString: $parent.startTime"></span></p>
+        <p><span data-bind="ltext: 'calendar.slot.duration'"></span>: 1h</p>
+        <p>Tapahtumalajit:</p>
+        <div data-bind="foreach: $parent.reservationTypes">
+          <p>
+            <input type="checkbox" data-bind="checkedValue: $data.id, checked: $parents[1].selectedReservationTypes">
+            <span data-bind="text: $data.name"/>
+          </p>
+        </div>
       </bubble-dialog>
     </div>
   </script>

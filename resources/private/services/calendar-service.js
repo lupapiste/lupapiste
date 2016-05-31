@@ -114,7 +114,17 @@ LUPAPISTE.CalendarService = function() {
     ajax
       .command("create-calendar-slots", {calendarId: event.calendarId, slots: event.slots})
       .success(function() {
-        hub.send("calendarView::reservationSlotCreated", {modalClose: event.modalClose});
+        hub.send("indicator", {style: "positive"});
+        doFetchCalendarSlots();
+      })
+      .call();
+  });
+
+  var _deleteSlot = hub.subscribe("calendarService::deleteCalendarSlot", function(event) {
+    ajax
+      .command("delete-calendar-slot", {slotId: event.id})
+      .success(function() {
+        hub.send("indicator", {style: "positive", message: "calendar.deleted"});
         doFetchCalendarSlots();
       })
       .call();

@@ -115,6 +115,10 @@
     (when (calendar-belongs-to-user? calendar userId)
       (->FrontendCalendar calendar user))))
 
+(defn- get-calendar-slot
+  [slotId]
+  (api-query (str "/api/reservationslots/" slotId)))
+
 (defn- authorized-to-edit-calendar?
   [user calendarId]
   (try
@@ -268,6 +272,22 @@
        ->BackendReservationSlots
        (post-command (str "/api/reservationslots/calendar/" calendarId))
        (ok :result)))
+
+(defcommand delete-calendar-slot
+  {:user-roles       #{:authorityAdmin :authority}
+   :parameters       [slotId]
+   :input-validators [(partial action/number-parameters [:slotId])]
+   :feature          :ajanvaraus}
+  [{user :user}]
+  (let [slot       (get-calendar-slot slotId)
+        calendarId (:resourceId slot)]
+    (println slot)
+    (when-not (authorized-to-edit-calendar? user calendarId)
+      (unauthorized!))
+    (when (> (:amountOfReservations slot) 1)
+      (fail! :error.calendar.cannot-delete-a-booked-slot))
+    (info "Deleting reservation slot #" slotId)
+    (ok :result (delete-command (str "/api/reservationslots/" slotId)))))
 
 (defcommand add-reservation-type-for-organization
   {:user-roles #{:authorityAdmin}

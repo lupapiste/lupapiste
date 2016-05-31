@@ -49,8 +49,8 @@ LUPAPISTE.CalendarViewModel = function () {
           weekday: this.calendarWeekday,
           hour: this.slot.hour,
           minutes: this.slot.minutes });
-    } else if (clazz === "reservation-slot") {
-      hub.send("calendarView::reservationSlotClicked",
+    } else if (clazz === "calendar-slot") {
+      hub.send("calendarView::calendarSlotClicked",
         { calendarId: this.calendarWeekday.calendarId,
           slot: this.slot });
     }

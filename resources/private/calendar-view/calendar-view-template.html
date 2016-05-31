@@ -52,12 +52,12 @@
               </div>
               <!-- /ko -->
               <!-- ko foreach: slots -->
-              <div class="reservation-slot" data-bind="style: { top: $component.slotPositionTop($data),
+              <div class="calendar-slot" data-bind="style: { top: $component.slotPositionTop($data),
                                                                 height: $component.slotHeight($data) },
-                                                       css: { 'reservation-slot': 1,
+                                                       css: { 'calendar-slot': 1,
                                                               'booked': status == 'booked',
                                                               'accepted': status == 'accepted' }">
-                <a data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'reservation-slot'),
+                <a data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'calendar-slot'),
                               text: $component.slotViewText($data)"></a>
               </div>
               <!-- /ko -->
