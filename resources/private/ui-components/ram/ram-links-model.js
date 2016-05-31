@@ -21,4 +21,14 @@ LUPAPISTE.RamLinksModel = function( params) {
       self.service.links( self.attachmentId, self.links );
     }
   });
+
+  var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %>, <%- time %>");
+
+  self.approvalHtml = function( data ) {
+    var approved = data.approved || {};
+    return approved.value === "approved"
+      ? approvalTemplate( {user: approved.user,
+                           time: moment( approved.timestamp).format( "D.M.YYYY HH:mm")})
+      : "-";
+  };
 };

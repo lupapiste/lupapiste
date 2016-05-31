@@ -756,8 +756,6 @@
 "attachment.pdf" "sv" "Öppna pdf-filen för förhandsgranskning."
 "attachment.pdf.preview.link" "fi" "Näytä tiedoston esikatseluversio"
 "attachment.pdf.preview.link" "sv" "Förhandsgranska filen"
-"attachment.ram.new" "fi" "Uusi RAM-liite"
-"attachment.ram.links" "fi" "RAM-liitteet"
 "attachment.reject" "fi" "Tarkennettavaa"
 "attachment.reject" "sv" "Bör preciseras"
 "attachment.removed" "fi" "Poistettu liite"

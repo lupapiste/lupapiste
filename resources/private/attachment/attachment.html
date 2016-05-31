@@ -50,15 +50,18 @@
           <div class="attachment-info-wrapper">
               <div class="attachment-info-header">
                   <h1>
-                      <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
-                      <span data-bind="if: latestVersion">
-                          <span data-bind="ltext: 'attachment.version'">versio</span>
-                          <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-                      </span>
+                    <span data-bind="visible: isRamAttachment,
+                                     ltext: 'attachment.ram.prefix'"></span>
+                    <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
+                    <span data-bind="if: latestVersion">
+                      <span data-bind="ltext: 'attachment.version'">versio</span>
+                      <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+                    </span>
                   </h1>
                   <span data-bind="component: {
                                   name: 'help-toggle',
-                                   params: { flag: showHelp, lhtml: 'attachment.view.desc' }}"></span>
+                                   params: { flag: showHelp, 
+                                   lhtml: isRamAttachment() ? 'attachment.ram.help' : 'attachment.view.desc' }}"></span>
               </div>
           </div>
 
@@ -77,7 +80,7 @@
                 <button data-test-id="add-ram-attachment"
                         class="positive"
                         data-bind="click: newRamAttachment,
-                                   visible: $root.authorization.ok( 'create-ram-attachment') && editable">
+                                   visible: $root.authorization.ok( 'create-ram-attachment')">
                   <i class="lupicon-circle-plus"></i>
                   <span data-bind="ltext: 'attachment.ram.new'"></span>
                 </button>

@@ -150,8 +150,8 @@
   [{{attachments :attachments} :application}]
   (->> (attachment/resolve-ram-links attachments attachmentId)
        ;; We include modified in order to have a timestamp even if the
-       ;; attachment is empty
-       (map #(select-keys % [:id :latestVersion :modified]))
+       ;; attachment is empty.
+       (map #(select-keys % [:id :latestVersion :modified :approved]))
        (ok :ram-links)))
 
 ;;
@@ -218,7 +218,8 @@
                     (fail :error.attachment.id)))
                 (fn [{{attachment-id :attachmentId} :data} {attachments :attachments}]
                   (when (some (comp #{attachment-id} :ram-link) attachments)
-                    (fail :error.ram-link-already-exists)))]
+                    (fail :error.ram-link-already-exists)))
+                attachment/ram-status-ok]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/default-authz-writer-roles
@@ -244,7 +245,9 @@
    :pre-checks  [a/validate-authority-in-drafts
                  attachment-not-readOnly
                  attachment-not-required
-                 attachment-editable-by-application-state]}
+                 attachment-editable-by-application-state
+                 attachment/ram-status-not-ok
+                 attachment/ram-not-root-attachment]}
   [{:keys [application user]}]
   (attachment/delete-attachment! application attachmentId)
   (ok))
@@ -258,7 +261,9 @@
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [a/validate-authority-in-drafts
                  attachment-not-readOnly
-                 attachment-editable-by-application-state]}
+                 attachment-editable-by-application-state
+                 attachment/ram-status-not-ok
+                 attachment/ram-not-root-attachment]}
   [{:keys [application user]}]
 
   (if (and (attachment/file-id-in-application? application attachmentId fileId)

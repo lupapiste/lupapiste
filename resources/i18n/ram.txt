@@ -1,0 +1,8 @@
+"attachment.ram.approved" "fi" "Hyväksynyt"
+"attachment.ram.help" "fi" ""
+"attachment.ram.new" "fi" "Uusi RAM-liite"
+"attachment.ram.links" "fi" "Liitteen rakentamisen aikaiset muutokset (RAM)"
+"attachment.ram.prefix" "fi" "[RAM]"
+"error.ram-not-approved" "fi" "Toimepide ei ole mahdollinen, koska RAM-liitettä ei olla hyväksytty."
+"error.ram-approved" "fi" "Toimenpide ei ole mahdollinen, koska RAM-liite on jo hyväksytty."
+"error.ram-cannot-delete-root" "fi" "Et voi poistaa liitettä, koska sillä on jo RAM-liite."
