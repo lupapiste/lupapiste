@@ -3,6 +3,7 @@
 
   function MyCalendarsModel() {
     var self = this;
+    self.myCalendars = lupapisteApp.services.calendarService.myCalendars; // observableArray
   }
 
   $(function() {

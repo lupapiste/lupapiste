@@ -35,7 +35,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
         start: t1.valueOf(),
         end: t2.valueOf(),
         reservationTypes: self.selectedReservationTypes()
-      }
+      };
     });
     self.sendEvent("calendarService", "createCalendarSlots", {calendarId: self.calendarId(), slots: slots});
     self.bubbleVisible(false);
