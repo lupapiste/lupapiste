@@ -193,7 +193,7 @@
         hakija-docs          (domain/get-applicant-documents (:documents application))
         hakija-docs          (map cleanup-hakija-doc hakija-docs)]
     (->> (:documents foreman-app)
-         (remove (comp #{"tyonjohtaja-v2"} :name :schema-info))
+         (remove (comp #{:tyonjohtaja-v2} keyword :name :schema-info))
          (remove (comp #{:hankkeen-kuvaus :hakija} keyword :subtype :schema-info))
          (concat hakija-docs [hankkeen-kuvaus-doc tyonjohtaja-doc])
          (remove nil?)
