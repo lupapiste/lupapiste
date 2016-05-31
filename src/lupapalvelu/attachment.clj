@@ -645,17 +645,19 @@
     (update-application
      (application->command application)
      {:attachments {$elemMatch {:id attachment-id}}}
-     (merge
+     (util/deep-merge
        (when (= file-id (-> attachment :versions last :fileId))
          ; Deleting latest versions resets approval
-         {$unset {:attachments.$.approved 1}})
+         {$unset {:attachments.$.approved 1}
+          $set {:attachments.$.state :requires_authority_action}})
        {$pull {:attachments.$.versions {:fileId file-id}
-              :attachments.$.signatures {:fileId file-id}}
-        $set  (merge {:attachments.$.latestVersion latest-version}
-                     (when (nil? latest-version)
-                       ; No latest version: reset auth and state
-                       {:attachments.$.auth []
-                        :attachments.$.state :requires_user_action}))}))
+               :attachments.$.signatures {:fileId file-id}}
+        $set  (merge
+                {:attachments.$.latestVersion latest-version}
+                (when (nil? latest-version)
+                  ; No latest version: reset auth and state
+                  {:attachments.$.auth []
+                   :attachments.$.state :requires_user_action}))}))
     (infof "3/3 deleted meta-data of file %s of attachment" file-id attachment-id)))
 
 (defn get-attachment-file-as!
