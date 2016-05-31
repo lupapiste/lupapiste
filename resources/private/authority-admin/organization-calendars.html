@@ -63,6 +63,27 @@
       data-test-id="add-reservation-type" class="modal btn btn-primary"></a>
     </section>
 
+    <section>
+      <h2 data-bind="ltext: 'auth-admin.organization.properties'"></h2>
+      <table class="admin-settings" data-bind="with: reservationProperties">
+        <thead>
+        <tr>
+          <th data-bind="ltext: 'auth-admin.parameter'"></th>
+          <th data-bind="ltext: 'auth-admin.value'"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td data-bind="ltext: 'auth-admin.organization.default-location'"></td>
+          <td class="value">
+            <input type="text" data-bind="value: defaultLocation" data-test-id="organization-default-location">
+            <span class="save-indicator" data-bind="saveIndicator: defaultLocationIndicator, label: false"></span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+
   </div>
 
   <!-- DIALOGS -->

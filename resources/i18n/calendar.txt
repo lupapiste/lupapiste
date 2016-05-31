@@ -18,3 +18,7 @@
 "auth-admin.organization.reservation-types" "sv" ""
 "auth-admin.organization.reservation-type" "fi" "Ajanvaraustyyppi"
 "auth-admin.organization.reservation-type" "sv" ""
+"auth-admin.organization.default-location" "fi" "Oletustapaamispaikka"
+"auth-admin.organization.default-location" "sv" ""
+"auth-admin.organization.properties" "fi" "Asetukset"
+"auth-admin.organization.properties" "sv" ""
