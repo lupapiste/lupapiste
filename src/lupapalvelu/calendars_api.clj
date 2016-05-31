@@ -14,7 +14,8 @@
   {:id           (:id calendar)
    :name         (format "%s %s" (:firstName user) (:lastName user))
    :email        (:email user)
-   :organization (:organizationCode calendar)})
+   :organization (:organizationCode calendar)
+   :active       (:active calendar)})
 
 (defn- ->FrontendReservationSlots [backend-slots]
   (map (fn [s] {:id        (:id s)
@@ -124,9 +125,9 @@
   (try
     (let [calendar (api-query (str "/api/resources/" calendarId))
           orgId    (:organizationCode calendar)]
-      (or
+      (and (:active calendar) (or
         (and (usr/authority-admin? user) (= (usr/authority-admins-organization-id user) orgId))
-        (and (usr/authority? user) (calendar-belongs-to-user? calendar (:id user)))))
+        (and (usr/authority? user) (calendar-belongs-to-user? calendar (:id user))))))
     (catch Exception _
       false)))
 
@@ -205,6 +206,7 @@
    :feature :ajanvaraus}
   [{user :user}]
   (let [calendars     (map #(->FrontendCalendar % user) (find-calendars-for-user (:id user)))
+        calendars     (filter :active calendars)
         organizations (keys (group-by :organization calendars))]
     (ok :calendars        calendars
         :reservationTypes (zipmap organizations (map reservation-types organizations)))))
@@ -216,6 +218,8 @@
    :user-roles #{:authorityAdmin}}
   [_]
   (let [calendar (get-calendar calendarId userId)]
+    (when-not (:active calendar)
+      (unauthorized!))
     (ok :calendar calendar)))
 
 (defquery calendars-for-authority-admin

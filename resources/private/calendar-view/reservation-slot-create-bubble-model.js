@@ -20,7 +20,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
   self.okEnabled = self.disposedComputed(function() {
     var amount = _.toInteger(self.amount());
     var isValid = amount > 0 && !_.isEmpty(self.selectedReservationTypes());
-    return isValid;
+    return !self.error() && isValid;
   });
 
   self.send = function() {

@@ -12,8 +12,13 @@
       <h1 data-bind="ltext: 'mycalendar.title'"></h1>
     </div>
 
+    <!-- ko if: calendars().length -->
     <div data-bind="component: { name: 'calendar-view',
                                  params: { error: error }}"></div>
+    <!-- /ko -->
+    <!-- ko ifnot: calendars().length -->
+    <div class="context-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
+    <!-- /ko -->
   </div>
 
 </section>
