@@ -1,5 +1,6 @@
 (ns lupapalvelu.kopiolaitos-itest
-  (:require [midje.sweet :refer :all]
+  (:require [clojure.java.io :as io]
+            [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
@@ -41,14 +42,18 @@
         _ (upload-attachment-to-all-placeholders pena app)
         app (query-application pena app-id)]
 
-    (fact* "Sonja sets two attachments to be verdict attachments"
+    (fact "Sonja sets two attachments to be verdict attachments"
       (command sonja :set-attachments-as-verdict-attachment
         :id app-id
         :selectedAttachmentIds (map :id (take 2 (:attachments app)))
         :unSelectedAttachmentIds []) => ok?
 
-      (let [app (query-application sonja app-id) => map?
-            attachments (:attachments app) => sequential?]
+      (let [app (query-application sonja app-id)
+            attachments (:attachments app)]
+
+        (fact "every attachment has a file"
+          attachments => (has every? (comp string? :fileId :latestVersion)))
+
         (fact "Two attachments have forPrinting flags set to true"
           (count (filter :forPrinting attachments)) => 2)))
 
@@ -113,29 +118,28 @@
             :attachmentsWithAmounts (filter :forPrinting attachments-with-amount)
             :orderInfo order-info) => ok?)
 
-        (facts* "sent emails were correct"
+        (facts "sent emails were correct"
           (let [sent-emails (sent-emails)]  ;; resets sent emails list
             (count sent-emails) => 2
             (map :to sent-emails) => (just #{"sipoo@example.com" "sipoo2@example.com"})
 
             (fact "check attachment contents of both sent emails"
-              (doseq [email sent-emails]
-                (let [zip-stream (-> email
-                                   (get-in [:body :attachment])
-                                   (crypt/str->bytes)
-                                   (crypt/base64-decode)
-                                   (clojure.java.io/input-stream)
-                                   (ZipInputStream.))
-                      to-zip-entries (fn [s result]
-                                       (if-let [entry (.getNextEntry s)]
-                                         (recur s (conj result (bean entry)))
-                                         result))
-                      result (to-zip-entries zip-stream [])]
+              (doseq [email sent-emails
+                      :let [attachment (get-in email [:body :attachment])
+                            bytes (-> attachment (crypt/str->bytes) (crypt/base64-decode))]]
+                (fact "has attachment" attachment => truthy)
 
-                  (fact "zip file has two files"
-                    (count result) => 2)
-                  (fact "filenames end with 'test-attachment.txt'"
-                    (every? #(.endsWith (:name %) "test-attachment.txt") result) => true))))))
+                (with-open [zip-stream (ZipInputStream. (io/input-stream bytes))]
+                  (let [to-zip-entries (fn [s result]
+                                         (if-let [entry (.getNextEntry s)]
+                                           (recur s (conj result (bean entry)))
+                                           result))
+                        result (to-zip-entries zip-stream [])]
+
+                   (fact "zip file has two files"
+                     (count result) => 2)
+                   (fact "filenames end with 'test-attachment.txt'"
+                     (every? #(.endsWith (:name %) "test-attachment.txt") result) => true)))))))
 
         (fact "unsetting organization kopiolaitos-email leads to failure in kopiolaitos order"
           (command sipoo :set-kopiolaitos-info
@@ -165,8 +169,8 @@
     (fact "one email"
       (util/separate-emails "pena.bulkki@example.com") => #{"pena.bulkki@example.com"}))
 
-  (fact "one kopiolaitos email is invalid"
-    (get-kopiolaitos-email-addresses sonja-muni) => (throws Exception #"kopiolaitos-invalid-email")
-    (provided
-      (organization/with-organization sonja-muni :kopiolaitos-email) => "pena.bulkki@example.com;mikko.nodomain")))
+ (fact "one kopiolaitos email is invalid"
+   (get-kopiolaitos-email-addresses sonja-muni) => (throws Exception #"kopiolaitos-invalid-email")
+   (provided
+     (organization/with-organization sonja-muni :kopiolaitos-email) => "pena.bulkki@example.com;mikko.nodomain")))
 
