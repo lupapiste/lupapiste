@@ -104,20 +104,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     .call();
   };
 
-  // Textual representation of the approval status.
-  // Tiedot OK (Sibbo Sonja 21.9.2015 10:55)
-  self.approvalInfo = function( approvalFun ) {
-    var approval = approvalFun();
-    var text = null;
-    if(approval && approval.user && approval.timestamp) {
-      text = loc(["document", approval.value]);
-      text += " (" + approval.user.lastName + " "
-            + approval.user.firstName
-            + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
-    }
-    return text;
-  };
-
   // Returns the latest modification time of the model or
   // zero if no modifications.
   function modelTimestamp( model ) {
@@ -146,13 +132,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return approval && approval.timestamp > ts
          ? approval
          : {value: "neutral", timestamp: ts};
-  };
-
-  // Check is either approved or rejected.
-  // Note: if the approval is not set, then both types of check return false
-  self.approvalStatus = function( approvalFun, check ) {
-    var approval = approvalFun();
-    return approval && approval.value === check;
   };
 
   self.approvalHubSubscribe = function(fun, listenBroadcasts) {

@@ -236,6 +236,9 @@ Sonja opens attachment details
   [Tags]  attachments
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
 
+Approver info is not visible
+  Wait Until  Element Should Not Be Visible  jquery=#attachment .attachment-info span.form-approval-status
+
 Sonja sees Reject-button which is enabled
   [Tags]  attachments
   Wait Until  Element should be visible  test-attachment-reject
@@ -259,6 +262,10 @@ Sonja approves attachment
   [Tags]  attachments
   Wait until  Element should be enabled  test-attachment-approve
   Click element  test-attachment-approve
+
+Approver info is visible
+  Wait Until  Element Should Be Visible  jquery=#attachment .attachment-info span.form-approval-status
+  Wait Until  Element Should Contain  jquery=#attachment .attachment-info .approved .is-details  Tiedot OK (Sibbo Sonja
 
 Approve-button should be disabled
   [Tags]  attachments

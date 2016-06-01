@@ -16,6 +16,7 @@
             [sade.http :as http]
             [sade.env :as env]
             [sade.dummy-email-server]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
@@ -104,7 +105,7 @@
 ;; HTTP Client cookie store
 ;;
 
-(def test-db-name (str "test_" (now)))
+(defonce test-db-name (str "test_" (now)))
 
 (defn ->cookie [name value]
   (proxy [Cookie] []
@@ -615,6 +616,9 @@
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.115.html") => 0)))))
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
+
+(defn get-attachment-by-id [apikey application-id attachment-id]
+  (att/get-attachment-info (query-application apikey application-id) attachment-id))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment (:attachments application)]
