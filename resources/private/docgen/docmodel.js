@@ -250,9 +250,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return button;
   }
 
-  function makeLabel(schema, type, pathStr, groupLabel, validationResult) {
+  function makeLabel(schema, type, pathStr, validationResult) {
     var label = document.createElement("label");
-    var path = groupLabel ? pathStr + "._group_label" : pathStr;
+    var path = pathStr;
+    switch(type) {
+      case "table":
+      case "group":
+      case "select":
+        path = pathStr + "._group_label";
+        break;
+    }
 
     var locKey = util.locKeyFromDocPath(self.schemaI18name + "." + path);
     if (schema.i18nkey) {
@@ -412,7 +419,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.disabled = isInputReadOnly(doc, subSchema, model);
 
     if (subSchema.label) {
-      var label = makeLabel(subSchema, "checkbox", myPath, false, validationResult);
+      var label = makeLabel(subSchema, "checkbox", myPath, validationResult);
       label.onmouseover = docutils.showHelp;
       label.onmouseout = docutils.hideHelp;
       span.appendChild(label);
@@ -437,7 +444,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     listen(subSchema, myPath, input);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "string", myPath, false, validationResult));
+      span.appendChild(makeLabel(subSchema, "string", myPath, validationResult));
     }
 
     if (subSchema.subtype === "maaraala-tunnus" ) {
@@ -560,7 +567,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "text", myPath, false, validationResult));
+      span.appendChild(makeLabel(subSchema, "text", myPath, validationResult));
     }
     span.appendChild(input);
     return span;
@@ -575,7 +582,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "date", myPath, false, validationResult));
+      span.appendChild(makeLabel(subSchema, "date", myPath, validationResult));
     }
 
     var className = "form-input text form-date";
@@ -726,7 +733,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     emitLater(select, subSchema);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath, true, validationResult));
+      span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
     }
     span.appendChild(select);
     return span;
@@ -772,7 +779,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                      path: path,
                                      remove: resolveRemoveOptions(subSchema, path)}));
     }
-    var label = makeLabel(subSchema, "group", myPath, true, validationResult);
+    var label = makeLabel(subSchema, "group", myPath, validationResult);
     div.appendChild(label);
 
     var groupHelpText = docutils.makeGroupHelpTextSpan(subSchema);
@@ -978,7 +985,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .call();
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath, false, validationResult));
+      span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
     }
     span.appendChild(select);
     return span;
@@ -1064,7 +1071,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     select.appendChild(unknownOption);
 
-    span.appendChild(makeLabel(subSchema, "select", myPath, false, validationResult));
+    span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
     span.appendChild(select);
     return span;
   }
@@ -1427,7 +1434,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                           path: myPath}));
         }
 
-        var label = makeLabel(subSchema, "table", myPath.join("."), true);
+        var label = makeLabel(subSchema, "table", myPath.join("."));
         div.appendChild(label);
 
         var groupHelpText = docutils.makeGroupHelpTextSpan(subSchema);
