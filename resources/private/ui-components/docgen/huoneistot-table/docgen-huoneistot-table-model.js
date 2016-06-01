@@ -61,16 +61,14 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
     }
   }
 
-  function save(item) {
-    if (item.model() != null) {
-      self.service.updateDoc(self.documentId, [[item.path, item.model()]], indicator);
-    }
+  function save(model, path) {
+    self.service.updateDoc(self.documentId, [[path, model()]], indicator);
   }
 
-  function cellInfo(doc, item) {
+  function cellInfo(doc, model, path) {
     var result = self.disposedPureComputed(function() {
       var validation = _.find(doc.validationResults(), function(validation) {
-        return _.isEqual(validation.path, item.path);
+        return _.isEqual(validation.path, path);
       });
       return validation && validation.result;
     });
@@ -99,7 +97,7 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
       events: {
         mouseover: function() { showMessagePanel(true); },
         mouseout: function() { showMessagePanel(false); },
-        change: function() { save(item); }
+        change: function() { _.defer(save, model, path); }
       }
     };
   }
@@ -107,9 +105,16 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
   self.rows = self.disposedPureComputed(function() {
     var doc = self.service.findDocumentById(self.documentId);
     return _.map(self.groups(), function(group) {
-      return _.extend(group, {
-        info: _.map(group.model, _.partial(cellInfo, doc))
-      });
+      return _(group.schema.body).map(function(schema) {
+        var model = group.model[schema.name].model;
+        return [schema.name, {model: model,
+                              path: group.model[schema.name].path,
+                              schema: schema,
+                              info: cellInfo(doc, model, group.model[schema.name].path)}];
+      }).fromPairs()
+        .extend({ index: group.index,
+                  schema: group.schema })
+        .value();
     });
   });
 };
