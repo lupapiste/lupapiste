@@ -208,7 +208,7 @@
 
 (defn dir [asc] (if asc 1 -1))
 
-(defn- make-sort [{{:keys [field asc]} :sort}]
+(defn make-sort [{{:keys [field asc]} :sort}]
   (let [sort-field (sort-field-mapping field)]
     (cond
       (= "type" field) (array-map :permitSubtype (dir asc) :infoRequest (dir (not asc)))

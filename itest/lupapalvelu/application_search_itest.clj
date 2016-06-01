@@ -81,7 +81,8 @@
           (count (keys application)) => 4)))
 
     (fact "applications integration endpoint returns localized data"
-      (let [application (util/find-by-id application-id (:applications (query mikko :applications) ))
+      (let [resp (datatables mikko :applications)
+            application (util/find-by-id application-id (:applications resp))
             {primary :primaryOperation secondaries :secondaryOperations} application
             {state-fi :stateNameFi state-sv :stateNameSv} application]
 
@@ -133,12 +134,12 @@
         modified (:modified application2)]
 
     (fact "No applications modified after the last one was created"
-      (let [resp (query sonja :applications :modifiedAfter modified)]
+      (let [resp (datatables sonja :applications :modifiedAfter modified)]
         resp => ok?
         (-> resp :applications count) => 0))
 
     (fact "One applications modified just before the last one was created"
-      (let [resp (query sonja :applications :modifiedAfter (dec modified))]
+      (let [resp (datatables sonja :applications :modifiedAfter (dec modified))]
         resp => ok?
         (-> resp :applications count) => 1))
 
@@ -193,8 +194,8 @@
 
       (command sonja :cancel-application-authority :id application-id :text "test" :lang "fi") => ok?
 
-      (let [{default-res :applications}   (query sonja :applications)
-            {unlimited-res :applications} (query sonja :applications :applicationType "unlimited")
+      (let [{default-res :applications}   (datatables sonja :applications)
+            {unlimited-res :applications} (datatables sonja :applications :applicationType "unlimited")
             default-ids (map :id default-res)
             all-ids (map :id unlimited-res)]
         (fact "are not returned with default search"
@@ -205,4 +206,14 @@
         (fact "are returned with unlimited search"
           (count unlimited-res) => 4
           all-ids => (contains application-id)
-          all-ids => (contains (:id foreman-app)))))))
+          all-ids => (contains (:id foreman-app)))))
+
+    (facts "limit, skip, sort"
+      (let [{results :applications} (datatables sonja :applications :applicationType "unlimited"
+                                      ; latest first, skip the absolute latest and return 2
+                                       :sort {:field :id, :asc false} :skip 1 :limit 2)]
+
+        (count results) => 2
+        (fact "Application 2 was the last to be creaded, not in results" (map :id results) =not=> (contains application-id2))
+        (fact "Foreman app was the second to last to be creaded" (-> results first :id) => (:id foreman-app))
+        (fact "Application 1 was the third to last to be creaded" (-> results second :id) => application-id)))))

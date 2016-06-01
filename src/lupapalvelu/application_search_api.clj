@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
+            [sade.util :as util]
             [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.application-search :as search]
             [lupapalvelu.application-utils :refer [location->object]]
@@ -73,8 +74,18 @@
                 :permitType
                 :state
                 :submitted]
-        apps (mongo/select :applications query (zipmap fields (repeat 1)))
-        rows (map #(-> %
+
+        skip        (or (util/->long (:skip data)) 0)
+        limit       (or (util/->long (:limit data)) Long/MAX_VALUE)
+
+        apps        (mongo/with-collection "applications"
+                      (query/find query)
+                      (query/fields fields)
+                      (query/sort (search/make-sort data))
+                      (query/skip skip)
+                      (query/limit limit))
+
+        rows (map #(-> (mongo/with-id %)
                      (domain/filter-application-content-for user)
                      (select-keys fields) ; filters empty lists from previous step
                      localize-application
