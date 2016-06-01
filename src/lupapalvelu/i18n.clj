@@ -13,7 +13,7 @@
             [lupapiste-commons.i18n.core :as commons]
             [lupapiste-commons.i18n.resources :as commons-resources]))
 
-(def supported-langs [:fi :sv])
+(def supported-langs [:fi :sv :en])
 (def default-lang (first supported-langs))
 
 (defn- read-translations-txt [name-or-file]
@@ -112,23 +112,23 @@
     lines))
 
 (defn missing-localizations-excel
-  "Writes missing localizations to excel file.
+  "Writes missing localizations of given language to excel file.
    If file is not provided, will create the file to user home dir."
-  ([]
+  ([lang]
    (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
          filename (str (System/getProperty "user.home")
                        "/lupapiste_translations_"
                        date-str
                        ".xlsx")]
-        (missing-localizations-excel (io/file filename))))
-  ([file]
+        (missing-localizations-excel (io/file filename) lang)))
+  ([file lang]
     (let [i18n-files   (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")
           loc-maps     (map commons-resources/txt->map i18n-files)
           langs        (distinct (apply concat (map :languages loc-maps)))
           translations (apply merge-with conj (map :translations loc-maps))
           loc-map      {:languages langs :translations translations}]
     (commons-resources/write-excel
-      (commons-resources/missing-translations loc-map)
+      (commons-resources/missing-translations loc-map (keyword lang))
       file))))
 
 (defn excel-to-txt
