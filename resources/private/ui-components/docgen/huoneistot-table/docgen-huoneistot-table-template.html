@@ -10,7 +10,7 @@
           <h3 class="form-label" data-bind="ltext: groupLabel"></h3>
           <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'huoneistotTable.help' } }"></span>
         </div>
-        
+
 
         <!-- ko if: groupHelp -->
         <span class="group-help-text" data-bind="ltext: groupHelp"></span>
@@ -31,17 +31,17 @@
               <td>
                 <span class="form-entry form-input">
                   <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: info[0].showMessagePanel, message: info[0].errorMessage"></message-panel>
-                    <select data-bind="options: schema.body[0].body,
+                    <message-panel params="class: 'errorPanel', show: huoneistoTyyppi.info.showMessagePanel, message: huoneistoTyyppi.info.errorMessage"></message-panel>
+                    <select data-bind="options: huoneistoTyyppi.schema.body,
                                        optionsText: $component.selectOptionsTextFn('huoneistoTyyppi'),
                                        optionsValue: 'name',
-                                       css: info[0].css(),
-                                       event: info[0].events,
-                                       value: model.huoneistoTyyppi.model,
+                                       css: huoneistoTyyppi.info.css(),
+                                       event: huoneistoTyyppi.info.events,
+                                       value: huoneistoTyyppi.model,
                                        valueAllowUnset: true,
                                        optionsCaption: loc('selectone'),
-                                       disable: $component.disabled() || !model.muutostapa.model(),
-                                       attr: {'data-test-id': path.join('.')}"
+                                       disable: $component.disabled() || !muutostapa.model(),
+                                       attr: {'data-test-id': huoneistoTyyppi.path.join('.')}"
                             class="dropdown form-input short">
                     </select>
                   </div>
@@ -52,14 +52,14 @@
               <td>
                 <span class="form-entry form-input">
                   <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: info[1].showMessagePanel, message: info[1].errorMessage"></message-panel>
+                    <message-panel params="class: 'errorPanel', show: porras.info.showMessagePanel, message: porras.info.errorMessage"></message-panel>
                       <input type="text"
-                             data-bind="textInput: model.porras.model,
-                                        disable: $component.disabled() || !model.muutostapa.model(),
-                                        css: info[1].css(),
-                                        event: info[1].events,
-                                        attr: { 'maxlength': schema.body[1]['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'data-test-id': path.join('.') + '.porras'}"
+                             data-bind="textInput: porras.model,
+                                        disable: $component.disabled() || !muutostapa.model(),
+                                        css: porras.info.css(),
+                                        event: porras.info.events,
+                                        attr: { 'maxlength': porras.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                                'data-test-id': porras.path.join('.')}"
                              class="form-input tiny"/>
                     </span>
                   </div>
@@ -70,14 +70,14 @@
               <td>
                 <span class="form-entry form-input">
                   <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: info[2].showMessagePanel, message: info[2].errorMessage"></message-panel>
+                    <message-panel params="class: 'errorPanel', show: huoneistonumero.info.showMessagePanel, message: huoneistonumero.info.errorMessage"></message-panel>
                       <input type="text"
-                             data-bind="textInput: model.huoneistonumero.model,
-                                        disable: $component.disabled() || !model.muutostapa.model(),
-                                        css: info[2].css(),
-                                        event: info[2].events,
-                                        attr: { 'maxlength': schema.body[2]['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'data-test-id': path.join('.') + '.huoneistonumero'}"
+                             data-bind="textInput: huoneistonumero.model,
+                                        disable: $component.disabled() || !muutostapa.model(),
+                                        css: huoneistonumero.info.css(),
+                                        event: huoneistonumero.info.events,
+                                        attr: { 'maxlength': huoneistonumero.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                                'data-test-id': huoneistonumero.path.join('.') }"
                              class="form-input tiny"/>
                     </span>
                   </div>
@@ -88,14 +88,14 @@
               <td>
                 <span class="form-entry form-input">
                   <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: info[3].showMessagePanel, message: info[3].errorMessage"></message-panel>
+                    <message-panel params="class: 'errorPanel', show: jakokirjain.info.showMessagePanel, message: jakokirjain.info.errorMessage"></message-panel>
                       <input type="text"
-                             data-bind="textInput: model.jakokirjain.model,
-                                        disable: $component.disabled() || !model.muutostapa.model(),
-                                        css: info[3].css(),
-                                        event: info[3].events,
-                                        attr: { 'maxlength': schema.body[3]['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'data-test-id': path.join('.') + '.jakokirjain' }"
+                             data-bind="textInput: jakokirjain.model,
+                                        disable: $component.disabled() || !muutostapa.model(),
+                                        css: jakokirjain.info.css(),
+                                        event: jakokirjain.info.events,
+                                        attr: { 'maxlength': jakokirjain.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                                'data-test-id': jakokirjain.path.join('.') }"
                              class="form-input tiny"/>
                     </span>
                   </div>
@@ -106,16 +106,16 @@
               <td>
                 <span class="form-entry form-input">
                   <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: info[4].showMessagePanel, message: info[4].errorMessage"></message-panel>
+                    <message-panel params="class: 'errorPanel', show: huoneluku.info.showMessagePanel, message: huoneluku.info.errorMessage"></message-panel>
                       <input type="text"
-                             data-bind="textInput: model.huoneluku.model,
-                                        disable: $component.disabled() || !model.muutostapa.model(),
-                                        css: info[4].css(),
-                                        event: info[4].events,
-                                        attr: { 'maxlength': schema.body[4]['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'max': schema.body[4].max,
-                                                'min': schema.body[4].min,
-                                                'data-test-id': path.join('.') + '.huoneluku' }"
+                             data-bind="textInput: huoneluku.model,
+                                        disable: $component.disabled() || !muutostapa.model(),
+                                        css: huoneluku.info.css(),
+                                        event: huoneluku.info.events,
+                                        attr: { 'maxlength': huoneluku.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                                'max': huoneluku.schema.max,
+                                                'min': huoneluku.schema.min,
+                                                'data-test-id': huoneluku.path.join('.') }"
                              class="form-input tiny"/>
                     </span>
                   </div>
@@ -126,17 +126,17 @@
               <td>
                 <span class="form-entry form-input">
                   <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: info[5].showMessagePanel, message: info[5].errorMessage"></message-panel>
-                    <select data-bind="options: schema.body[5].body,
+                    <message-panel params="class: 'errorPanel', show: keittionTyyppi.info.showMessagePanel, message: keittionTyyppi.info.errorMessage"></message-panel>
+                    <select data-bind="options: keittionTyyppi.schema.body,
                                        optionsText: $component.selectOptionsTextFn('keittionTyyppi'),
                                        optionsValue: 'name',
-                                       value: model.keittionTyyppi.model,
+                                       value: keittionTyyppi.model,
                                        valueAllowUnset: true,
                                        optionsCaption: loc('selectone'),
-                                       disable: $component.disabled() || !model.muutostapa.model(),
-                                       css: info[5].css(),
-                                       event: info[5].events,
-                                       attr: {'data-test-id': path.join('.') + '.keittio'}"
+                                       disable: $component.disabled() || !muutostapa.model(),
+                                       css: keittionTyyppi.info.css(),
+                                       event: keittionTyyppi.info.events,
+                                       attr: {'data-test-id': keittionTyyppi.path.join('.')}"
                             class="dropdown form-input short">
                     </select>
                   </div>
@@ -147,16 +147,16 @@
               <td>
                 <span class="form-entry form-input">
                   <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: info[6].showMessagePanel, message: info[6].errorMessage"></message-panel>
+                    <message-panel params="class: 'errorPanel', show: huoneistoala.info.showMessagePanel, message: huoneistoala.info.errorMessage"></message-panel>
                       <input type="text"
-                             data-bind="textInput: model.huoneistoala.model,
-                                        disable: $component.disabled() || !model.muutostapa.model(),
-                                        css: info[6].css(),
-                                        event: info[6].events,
-                                        attr: { 'maxlength': schema.body[6]['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'max': schema.body[6].max,
-                                                'min': schema.body[6].min,
-                                                'data-test-id': path.join('.') + '.huoneistoala' }"
+                             data-bind="textInput: huoneistoala.model,
+                                        disable: $component.disabled() || !muutostapa.model(),
+                                        css: huoneistoala.info.css(),
+                                        event: huoneistoala.info.events,
+                                        attr: { 'maxlength': huoneistoala.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
+                                                'max': huoneistoala.schema.max,
+                                                'min': huoneistoala.schema.min,
+                                                'data-test-id': huoneistoala.path.join('.') }"
                              class="form-input tiny"/>
                     </span>
                   </div>
@@ -167,10 +167,10 @@
               <td>
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
-                         data-bind="checked: model.WCKytkin.model,
-                                    disable: $component.disabled() || !model.muutostapa.model(),
-                                    css: info[7].css(),
-                                    event: info[7].events,
+                         data-bind="checked: WCKytkin.model,
+                                    disable: $component.disabled() || !muutostapa.model(),
+                                    css: WCKytkin.info.css(),
+                                    event: WCKytkin.info.events,
                                     attr: {'id': $component.documentId + '-huoneistot-wc-' + $index()}">
                   <label data-bind="attr: {'for': $component.documentId + '-huoneistot-wc-' + $index()}" class="inline-label checkbox-label"></label>
                 </div>
@@ -180,10 +180,10 @@
               <td>
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
-                         data-bind="checked: model.ammeTaiSuihkuKytkin.model,
-                                    disable: $component.disabled() || !model.muutostapa.model(),
-                                    css: info[8].css(),
-                                    event: info[8].events,
+                         data-bind="checked: ammeTaiSuihkuKytkin.model,
+                                    disable: $component.disabled() || !muutostapa.model(),
+                                    css: ammeTaiSuihkuKytkin.info.css(),
+                                    event: ammeTaiSuihkuKytkin.info.events,
                                     attr: {'id': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}">
                   <label data-bind="attr: {'for': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}" class="inline-label checkbox-label"></label>
                 </div>
@@ -193,10 +193,10 @@
               <td>
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
-                         data-bind="checked: model.saunaKytkin.model,
-                                    disable: $component.disabled() || !model.muutostapa.model(),
-                                    css: info[9].css(),
-                                    event: info[9].events,
+                         data-bind="checked: saunaKytkin.model,
+                                    disable: $component.disabled() || !muutostapa.model(),
+                                    css: saunaKytkin.info.css(),
+                                    event: saunaKytkin.info.events,
                                     attr: {'id': $component.documentId + '-huoneistot-sauna-' + $index()}">
                   <label data-bind="attr: {'for': $component.documentId + '-huoneistot-sauna-' + $index()}" class="inline-label checkbox-label"></label>
                 </div>
@@ -206,10 +206,10 @@
               <td>
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
-                         data-bind="checked: model.parvekeTaiTerassiKytkin.model,
-                                    disable: $component.disabled() || !model.muutostapa.model(),
-                                    css: info[10].css(),
-                                    event: info[10].events,
+                         data-bind="checked: parvekeTaiTerassiKytkin.model,
+                                    disable: $component.disabled() || !muutostapa.model(),
+                                    css: parvekeTaiTerassiKytkin.info.css(),
+                                    event: parvekeTaiTerassiKytkin.info.events,
                                     attr: {'id': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}">
                   <label data-bind="attr: {'for': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}" class="inline-label checkbox-label"></label>
                 </div>
@@ -219,10 +219,10 @@
               <td>
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
-                         data-bind="checked: model.lamminvesiKytkin.model,
-                                    disable: $component.disabled() || !model.muutostapa.model(),
-                                    css: info[11].css(),
-                                    event: info[11].events,
+                         data-bind="checked: lamminvesiKytkin.model,
+                                    disable: $component.disabled() || !muutostapa.model(),
+                                    css: lamminvesiKytkin.info.css(),
+                                    event: lamminvesiKytkin.info.events,
                                     attr: {'id': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}">
                   <label data-bind="attr: {'for': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}" class="inline-label checkbox-label"></label>
                 </div>
@@ -232,17 +232,17 @@
               <td>
                 <span class="form-entry form-input">
                   <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: info[12].showMessagePanel, message: info[12].errorMessage"></message-panel>
-                    <select data-bind="options: schema.body[12].body,
+                    <message-panel params="class: 'errorPanel', show: muutostapa.info.showMessagePanel, message: muutostapa.info.errorMessage"></message-panel>
+                    <select data-bind="options: muutostapa.schema.body,
                                        optionsText: $component.selectOptionsTextFn('muutostapa'),
                                        optionsValue: 'name',
-                                       value: model.muutostapa.model,
+                                       value: muutostapa.model,
                                        valueAllowUnset: true,
                                        optionsCaption: loc('selectone'),
                                        disable: $component.disabled(),
-                                       css: info[12].css(),
-                                       event: info[12].events,
-                                       attr: {'data-test-id': path.join('.') + '.muutostapa'}"
+                                       css: muutostapa.info.css(),
+                                       event: muutostapa.info.events,
+                                       attr: {'data-test-id': muutostapa.path.join('.') }"
                             class="dropdown form-input short">
                     </select>
                   </div>
