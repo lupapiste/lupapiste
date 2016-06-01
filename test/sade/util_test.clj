@@ -242,6 +242,14 @@
   (fact (to-long "") => nil)
   (fact (to-long 1234) => nil))
 
+(facts "->long"
+  (fact (->long nil) => nil)
+  (fact (->long "") => nil)
+  (fact (->long true) => nil)
+  (fact (->long "1234") => 1234)
+  (fact (->long "213asd2") => nil)
+  (fact (->long 1234) => 1234))
+
 (facts "relative-local-url?"
   (relative-local-url? nil) => false
   (relative-local-url? "") => true
