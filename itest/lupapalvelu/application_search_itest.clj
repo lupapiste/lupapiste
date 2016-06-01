@@ -6,7 +6,6 @@
             [sade.property :as p]
             [sade.util :as util]))
 
-(apply-remote-minimal)
 
 (defn- num-of-results? [n response]
   (and
@@ -21,6 +20,8 @@
   (datatables mikko :applications-search :searchText query-s))
 
 (facts* "Search"
+  (apply-remote-minimal)
+
   (let [property-id (str sonja-muni "-123-0000-1234")
         application (create-and-submit-application mikko
                       :propertyId sipoo-property-id
@@ -125,7 +126,18 @@
                        :address "Hakukuja 10"
                        :propertyId (p/to-property-id property-id)
                        :operation "purkaminen")
-        application-id2 (:id application2)]
+        application-id2 (:id application2)
+        modified (:modified application2)]
+
+    (fact "No applications modified after the last one was created"
+      (let [resp (query sonja :applications :modifiedAfter modified)]
+        resp => ok?
+        (-> resp :applications count) => 0))
+
+    (fact "One applications modified just before the last one was created"
+      (let [resp (query sonja :applications :modifiedAfter (dec modified))]
+        resp => ok?
+        (-> resp :applications count) => 1))
 
     (count (get-in (datatables sonja :applications-search :handlers [sonja-id]) [:data :applications])) => 2
     (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?

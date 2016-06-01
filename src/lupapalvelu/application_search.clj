@@ -114,11 +114,13 @@
              {:created {$gte from-ts}}]}
       base-query)))
 
-(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas]} user]
+(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas modifiedAfter]} user]
   {$and
    (filter seq
      [query
       (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
+      (when-let [modified-after (util/->long modifiedAfter)]
+        {:modified {$gt modified-after}})
       (if (user/applicant? user)
         (case applicationType
           "inforequest"        {:state {$in ["answered" "info"]}}
