@@ -70,6 +70,22 @@
                                    :areas []}}]}
    ])
 
+(def- default-keys-for-organizations {:app-required-fields-filling-obligatory false
+                                      :validate-verdict-given-date true
+                                      :kopiolaitos-email nil
+                                      :kopiolaitos-orderer-address nil
+                                      :kopiolaitos-orderer-email nil
+                                      :kopiolaitos-orderer-phone nil
+                                      :calendars-enabled false})
+
+(def organizations (map
+                     (partial merge default-keys-for-organizations)
+                     [
+                      {:id "753-R-TESTI"
+                       :name {:fi "Sipoon rakennusvalvonta"
+                              :sv "Sipoon rakennusvalvonta"}
+                       :calendars-enabled true}]))
+
 (deffixture "ajanvaraus" {}
   (mongo/clear!)
   (mongo/insert-batch :ssoKeys [{:_id "12342424c26b7342d92a4321" :ip "127.0.0.1" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
