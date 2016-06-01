@@ -11,20 +11,26 @@ Company admin logs in
   User should be logged in  Kaino Solita
   Open company user listing
 
-Add existing dummy user
+Check Kaino's status
+  Check company user  0  kaino@solita.fi  Kaino  Solita  Ylläpitäjä  Kyllä
+  No such test id  company-user-delete-0
+
+Invite Duff3
+  Invite existing user  dummy3@example.com  Duff3  Dummy3  
+
+Check Duff3 invitation status
+  Check invitation  0  dummy3@example.com  Duff3  Dummy3  Käyttäjä  Kyllä
+
+Duff3 cannot be invited again
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
+  Test id disabled  company-search-email
   Input text by test id  company-new-user-email  dummy3@example.com
   Click enabled by test id  company-search-email
-  Wait until  Element text should be  xpath=//h3[@data-test-id='company-old-user-invited']  Käyttäjä kutsuttu.
-  Click enabled by test id  company-old-user-invited-close-dialog
-  Wait until  Element text should be  xpath=//td[@data-test-id='company-invited-user-email']  dummy3@example.com
+  Wait until  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="ltext: 'register.company.add-user.already-invited'"]
+  Click enabled by test id  company-user-already-invited-close-dialog
 
-New user is invited as a regular user
-  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-role']  Käyttäjä
-  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-invited']  Kutsuttu
-
-Dummy user gets invite email
+Duff3 user gets invite email
   Open last email
   Wait Until  Page Should Contain  dummy3@example.com
   Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
@@ -34,7 +40,7 @@ Account is linked
   Wait Until  Page Should Contain  Tilisi on liitetty onnistuneesti yrityksen tiliin.
   Click link  Siirry Lupapiste-palveluun
 
-Dummy user gets password reset email
+Duff3 user gets password reset email
   Open last email
   Wait Until  Page Should Contain  dummy3@example.com
   Page Should Contain  /app/fi/welcome#!/setpw/
@@ -43,15 +49,22 @@ Admin logs in again
   Go to login page
   Login  kaino@solita.fi  kaino123
   User should be logged in  Kaino Solita
-
-Dummy user is active in company
   Open company user listing
-  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-invited']  Käytössä
 
-Conver dummy user to admin
-  Click link  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']//a[@data-test-id='company-user-toggle-admin']
-  Confirm  dialog-company-user-op
-  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']/td[@data-test-id='company-user-role']  Ylläpitäjä
+Duff3 is an active member in the company
+  No such test id  invitation-firstname-0
+  Check company user  0  dummy3@example.com  Duff3  Dummy3  Käyttäjä  Kyllä
+
+Convert Duff3 user to admin and rescind submit rights
+  Edit company user  0  admin  Ei
+  Click by test id  company-user-save-0
+  Confirm  dynamic-yes-no-confirm-dialog
+  Check company user  0  dummy3@example.com  Duff3  Dummy3  Ylläpitäjä  Ei
+
+Canceled edit does not change user information
+  Edit company user  0  user  Kyllä
+  Click by test id  company-user-cancel-0
+  Check company user  0  dummy3@example.com  Duff3  Dummy3  Ylläpitäjä  Ei
 
 Can not add the same user again
   Click enabled by test id  company-add-user
@@ -61,24 +74,28 @@ Can not add the same user again
   Wait until  Element should be visible  //div[@id="dialog-company-new-user"]//span[@data-bind="ltext: 'register.company.add-user.already-in'"]
   Click enabled by test id  company-add-user-already-in-close
 
-Delete dummy user
-  Click link  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']//a[@data-test-id='company-user-toggle-delete']
-  Confirm  dialog-company-user-op
-  Wait Until  Page should not contain element  //table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-dummy3@example.com']//a[@data-test-id='company-user-toggle-delete']
-
+Delete Duff3
+  Click by test id  company-user-delete-0
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Page should not contain  dummy3@example.com
+  
 Add new user
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
   Input text by test id  company-new-user-email  USER2@solita.fi
   Click enabled by test id  company-search-email
-  Wait until  Element should be visible  companyUserDetails
+  Test id disabled  company-new-user-email
+  Test id disabled  company-user-send-invite
   Input text by test id  company-new-user-firstname  Ulla
+  Test id disabled  company-user-send-invite
   Input text by test id  company-new-user-lastname  Ser
-  Select Checkbox  register.company.add-user.admin
-  Click enabled by test id  company-user-submit
+  Test id enabled  company-user-send-invite
+  Click label  company-new-user-admin
+  Click label  company-new-user-submit
+  Click enabled by test id  company-user-send-invite
   Wait until  Element text should be  testCompanyAddUserDone  Käyttäjä kutsuttu.
   Click enabled by test id  company-new-user-invited-close-dialog
-  Wait until  Element text should be  xpath=//td[@data-test-id='company-invited-user-email']  user2@solita.fi
+  Check invitation  0  user2@solita.fi  Ulla  Ser  Ylläpitäjä  Ei  
 
 New user gets email
   Open last email
@@ -106,20 +123,89 @@ New user logs in
   Applicant logs in  user2@solita.fi  pitka123  Ulla Ser
   Confirm notification dialog
 
-User sees herself as company admin
+Ulla sees herself as company admin
   Open company user listing
-  Wait Until  Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-user2@solita.fi']/td[@data-test-id='company-user-role']  Ylläpitäjä
+  Check company user  0  user2@solita.fi  Ulla  Ser  Ylläpitäjä  Ei  
+  No such test id  company-user-delete-0
+  Wait test id visible  company-add-user
+  Wait test id visible  company-user-edit-1
+  Wait test id visible  company-user-delete-1
+
+Ulla invites Pena into company
+  Invite existing user  pena@example.com  Pena  Panaani  false  false
+  Check invitation  0  pena@example.com  Pena  Panaani  Käyttäjä  Ei
+  [Teardown]  Logout
+
+Pena accepts invitation
+  Open last email
+  Wait Until  Page Should Contain  pena@example.com
+  Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
+  Click link  xpath=//a[contains(@href,'invite-company-user')]
+
+Pena logs in and sees the non-admin view of the company
+  Go to login page
+  Pena logs in
+  Open company user listing
+  # Pena is second after Ulla
+  Check company user  1  pena@example.com  Pena  Panaani  Käyttäjä  Ei  
+  No such test id  company-add-user
+  No such test id  company-user-edit-1
+  No such test id  company-user-delete-1
+  [Teardown]  Logout
+
+Mikko logs in, creates application and invites Solita
+  Mikko logs in
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  Ditiezhan${secs}
+  Set Suite Variable  ${propertyId}  753-416-5-5
+  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
+  Invite company to application  Solita Oy
+  [Teardown]  Logout
+
+Solita accepts invite
+  Open last email
+  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
+  Click Element  xpath=(//a)[2]
+  Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
+  [Teardown]  Go to login page
+
+Kaino logs in and could submit application
+  Login  kaino@solita.fi  kaino123
+  Open application  ${appname}  ${propertyId}
+  Open tab  requiredFieldSummary
+  Test id enabled  application-submit-btn
+  [Teardown]  Logout
+
+Pena logs in and could not submit application
+  Pena logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  requiredFieldSummary
+  Test id disabled  application-submit-btn
+  [Teardown]  Logout
+
+Mikko logs in and invites Pena directly
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Invite pena@example.com to application
+  [Teardown]  Logout
+
+Pena logs in, accepts invitation and could now submit application
+  Pena logs in
+  Open application  ${appname}  ${propertyId}
+  Confirm yes no dialog
+  Open tab  requiredFieldSummary
+  Test id enabled  application-submit-btn
   [Teardown]  Logout
 
 # Custom account
 
-Solita admin sets custom account for company 'Solita Oy', max users 2
+Solita admin sets custom account for company 'Solita Oy', max users 3
   SolitaAdmin logs in
   Wait until  Click element  xpath=//li/a[contains(text(), "Yritykset")]
   Wait until  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
   Wait until  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritysta
   Select from list by value  xpath=//select[@name="account-type"]  custom
-  Input text with jQuery   input[name="customAccountLimit"]  2
+  Input text with jQuery   input[name="customAccountLimit"]  3
   Focus  xpath=//button[@data-test-id="modal-dialog-submit-button"]
   Click by test id  modal-dialog-submit-button
   Wait Until  Element should not be visible  xpath=//div[@data-test-id="modal-dialog-content"]
@@ -137,3 +223,48 @@ Kaino wants to invite new users, but can't because account limit is reached
   Element should be disabled  xpath=//button[@data-test-id="company-add-user"]
   Element should be visible  xpath=//span[@class="user-limit-reached"]
 
+*** Keywords ***
+
+Invite existing user
+  [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=false  ${submit}=true
+  Click enabled by test id  company-add-user
+  Wait until  Element should be visible  dialog-company-new-user
+  Test id disabled  company-search-email
+  Input text by test id  company-new-user-email  ${email}
+  Click enabled by test id  company-search-email
+  Test id disabled  company-new-user-email
+  Textfield should contain  jquery=[data-test-id=company-new-user-firstname]  ${firstname}
+  Test id disabled  company-new-user-firstname
+  Textfield should contain  jquery=[data-test-id=company-new-user-lastname]  ${lastname}
+  Test id disabled  company-new-user-lastname
+  Run keyword if  '${admin}' == 'true'  Click label  company-new-user-admin
+  Run keyword unless  '${submit}' == 'true'  Click label  company-new-user-submit
+  Click enabled by test id  company-user-send-invite
+  Wait Test id visible  company-add-user-done
+  Click by test id  company-new-user-invited-close-dialog
+
+
+Check invitation
+  [Arguments]  ${index}  ${email}  ${firstname}  ${lastname}  ${role}  ${submit}
+  Test id should contain  invitation-firstname-${index}  ${firstname}
+  Test id should contain  invitation-lastname-${index}  ${lastname}
+  Test id should contain  invitation-email-${index}  ${email}
+  Test id should contain  invitation-invited-${index}  Kutsuttu
+  Test id should contain  invitation-role-${index}  ${role}
+  Test id should contain  invitation-submit-${index}  ${submit}
+
+Check company user
+  [Arguments]  ${index}  ${email}  ${firstname}  ${lastname}  ${role}  ${submit}
+  Test id should contain  company-user-firstname-${index}  ${firstname}
+  Test id should contain  company-user-lastname-${index}  ${lastname}
+  Test id should contain  company-user-email-${index}  ${email}
+  Test id should contain  company-user-enabled-${index}  Käytössä
+  Test id should contain  company-user-role-${index}  ${role}
+  Test id should contain  company-user-submit-${index}  ${submit}
+
+Edit company user
+  [Arguments]  ${index}  ${role}  ${submit}
+  Click by test id  company-user-edit-${index}
+  Select from test id  company-user-edit-role-${index}  ${role}
+  Select from test id  company-user-edit-submit-${index}  ${submit}
+    

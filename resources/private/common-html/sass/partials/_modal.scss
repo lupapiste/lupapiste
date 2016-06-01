@@ -149,7 +149,7 @@
   min-height: $baseline * 4;
   position: relative;
   margin: $marginM  0;
-  padding-bottom: 64px;
+  padding-bottom: 24px;
 
   .dialog-desc {
     width: 300px;
@@ -159,12 +159,12 @@
     width: 450px;
   }
 
-  [type=submit], .btn, button {
-    //padding: 4px $marginL;
-    min-width: $cols2;
-    max-width: $cols3;
+  /* [type=submit], .btn, button { */
+  /*   //padding: 4px $marginL; */
+  /*   min-width: $cols2; */
+  /*   max-width: $cols3; */
 
-  }
+  /* } */
 
   .file-upload {
     margin: $marginM 0;
@@ -203,6 +203,10 @@
       height: 160px;
     }
   }
+}
+
+.dialog-content__footer {
+  margin-top: $marginL;
 }
 
 .scrolling-content {

@@ -125,7 +125,7 @@
                                       invitations().length + users().length,
                                       info.accountType() ? info.accountType().limit : info.model().customAccountLimit())"></span>
 
-          <table data-bind="visible: !pending()" class="table table-striped" data-test-id="company-users-table">
+          <table data-bind="visible: !pending()" class="company-users-table" data-test-id="company-users-table">
             <thead>
               <tr>
                 <th data-bind="ltext: 'company.user.firstName'"></th>
@@ -133,81 +133,100 @@
                 <th data-bind="ltext: 'company.user.email'"></th>
                 <th data-bind="ltext: 'company.user.enabled'"></th>
                 <th data-bind="ltext: 'company.user.role'"></th>
+                <th data-bind="ltext: 'company.user.submit'"></th>
                 <th data-bind="visible: isAdmin"></th>
               </tr>
             </thead>
-            <tbody data-bind="foreach: invitations">
-              <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
-                <td data-bind="text: firstName"></td>
-                <td data-bind="text: lastName"></td>
-                <td data-bind="text: email" data-test-id="company-invited-user-email"></td>
-                <td data-bind="ltext: 'company.user.invited'" data-test-id="company-user-invited"></td>
-                <td data-bind="ltext: 'company.user.role.' + role" data-test-id="company-user-role"></td>
-                <td>
+            <tbody>
+              <!-- ko foreach: invitations -->
+              <tr>
+                <td data-bind="text: firstName,
+                               attr: {'data-test-id': 'invitation-firstname-' + $index()}"></td>
+                <td data-bind="text: lastName,
+                               attr: {'data-test-id': 'invitation-lastname-' + $index()}"></td>
+                <td data-bind="text: email,
+                               attr: {'data-test-id': 'invitation-email-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.invited',
+                               attr: {'data-test-id': 'invitation-invited-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.role.' + role,
+                               attr: {'data-test-id': 'invitation-role-' + $index()}"></td>
+                <td data-bind="ltext: submit ? 'yes' : 'no',
+                               attr: {'data-test-id': 'invitation-submit-' + $index()}"></td>
+                <td class="company-users-table--action">
                   <div data-bind="visible: opsEnabled">
                     <a href="#" data-bind="click: deleteInvitation, ltext: 'company.user.op.delete.invitation'"></a>
                   </div>
                 </td>
               </tr>
-            </tbody>
-            <tbody data-bind="foreach: users">
-              <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
-                <td data-bind="text: firstName"></td>
-                <td data-bind="text: lastName"></td>
-                <td data-bind="text: email"></td>
-                <td data-bind="ltext: 'company.user.enabled.' + enabled()" data-test-id="company-user-invited"></td>
-                <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
-                <td data-bind="visible: $parent.isAdmin">
-                  <div data-bind="visible: opsEnabled">
-                    <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#" data-test-id="company-user-toggle-admin"></a>
-                    <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" href="#" data-test-id="company-user-toggle-delete"></a>
+              <!-- /ko -->
+              <!-- ko foreach: users -->
+              <tr>
+                <td data-bind="text: firstName,
+                               attr: {'data-test-id': 'company-user-firstname-' + $index()}"></td>
+                <td data-bind="text: lastName,
+                               attr: {'data-test-id': 'company-user-lastname-' + $index()}"></td>
+                <td data-bind="text: email,
+                               attr: {'data-test-id': 'company-user-email-' + $index()}"></td>
+                <td data-bind="ltext: 'company.user.enabled.' + enabled,
+                               attr: {'data-test-id': 'company-user-enabled-' + $index()}"></td>
+                <!-- ko if: editing -->
+                <td>
+                  <select data-bind="options: $parent.userEditor.roles,
+                                     optionsText: $parent.userEditor.roleText,
+                                     value: $parent.userEditor.role,
+                                     attr: {'data-test-id': 'company-user-edit-role-' + $index()}"
+                          class="dropdown"></select>
+                </td>
+                <td>
+                  <select data-bind="options: [true, false],
+                                      optionsText: $parent.userEditor.submitText,
+                                      value: $parent.userEditor.submit,
+                                      attr: {'data-test-id': 'company-user-edit-submit-' + $index()}"
+                          class="dropdown"></select>
+                </td>
+                <td data-bind="visible: $parent.isAdmin"
+                    class="company-users-table--action">
+                  <div data-bind="if: opsEnabled">
+                    <a data-bind="ltext: 'save', click: $parent.userEditor.save,
+                                  attr: {'data-test-id': 'company-user-save-' + $index()}"></a>
+                    <a data-bind="ltext: 'cancel', click: $parent.userEditor.clear,
+                                  attr: {'data-test-id': 'company-user-cancel-' + $index()}"></a>
                   </div>
                 </td>
+                <!-- /ko -->
+                <!-- ko ifnot: editing -->
+                <td data-bind="ltext: 'company.user.role.' + role(),
+                               attr: {'data-test-id': 'company-user-role-' + $index()}"></td>
+                <td data-bind="ltext: submit() ? 'yes' : 'no',
+                               attr: {'data-test-id': 'company-user-submit-' + $index()}"></td>
+                <td data-bind="visible: $parent.isAdmin"
+                    class="company-users-table--action">
+                  <div data-bind="if: opsEnabled">
+                    <a data-bind="ltext: 'edit', click: edit,
+                                  attr: {'data-test-id': 'company-user-edit-' + $index()}"></a>
+                    <a data-bind="click: deleteUser,   
+                                  ltext: 'company.user.op.delete',
+                                  attr: {'data-test-id': 'company-user-delete-' + $index()}"></a>
+                  </div>
+                </td>
+                <!-- /ko -->
               </tr>
+              <!-- /ko -->
             </tbody>
           </table>
           <div data-bind="visible: isAdmin">
             <button class="btn btn-primary"
                     data-test-id="company-add-user"
                     data-bind="click: openNewUser,
-                               ltext: 'register.company.add-user.open',
-                               enable: lupapisteApp.models.globalAuthModel.ok('company-add-user')" ></button>
+                               enable: lupapisteApp.models.globalAuthModel.ok('company-add-user')">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'register.company.add-user.open'"></span>
+            </button>
             <span class="user-limit-reached"
                   data-bind="ltext: 'register.company.user-limit.reached',
                              visible: isAdmin && !lupapisteApp.models.globalAuthModel.ok('company-add-user')"></span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div id="dialog-company-user-op" class="window autosized">
-      <div class="dialog-header">
-        <p data-bind="text: title"></p>
-        <p class="dialog-close close lupicon-remove"></p>
-      </div>
-      <div class="dialog-content">
-
-        <div>
-          <span data-bind="html: message"></span>
-        </div>
-
-        <div data-bind="visible: pending">
-          <em class="button-loader" style="position: relative;"></em>
-          <span data-bind="ltext: 'company.user.op.pending'"></span>
-        </div>
-
-        <button data-bind="click: ok,
-                           enable: !pending(),
-                           ltext: 'yes'"
-                class="positive btn-dialog"
-                data-test-id="confirm-yes">
-        </button>
-        <button data-test-id="company-new-user-close-dialog"
-                data-bind="enable: !pending(),
-                           ltext: 'no'"
-                class="secondary btn-dialog close">
-        </button>
-
       </div>
     </div>
 
@@ -219,65 +238,106 @@
       <div class="dialog-content">
         <form>
           <label data-bind="ltext: 'company.user.email'" class="form-label tip"></label>
-          <input data-bind="textInput: email, enable: emailEnabled" class="form-input" type="text" data-test-id="company-new-user-email"/>
-
-          <div data-bind="visible: showSearchEmail">
-            <button data-bind="enable: canSearchUser, click: searchUser" type="submit" class="positive btn-dialog" data-test-id="company-search-email">
+          <input data-bind="textInput: email, enable: emailEnabled" class="form-input"
+                 type="text" data-test-id="company-new-user-email"/>
+          <div data-bind="visible: showSearchEmail" class="inner-margins dialog-content__footer">
+            <button data-bind="enable: canSearchUser, 
+                               click: searchUser,
+                               css: {waiting: pending}"
+                    type="submit"
+                    class="positive"
+                    data-test-id="company-search-email">
+              <i class="lupicon-search"></i>
+              <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: 'register.company.add-user.searchUser'"></span>
-              <em data-bind="visible: pending" class="button-loader" style="position: relative;"></em>
             </button>
-            <button data-bind="ltext: 'cancel'" class="secondary btn-dialog close"></button>
+            <button class="secondary close">
+              <i class="lupicon-remove"></i>
+              <span  data-bind="ltext: 'cancel'"></span>
+            </button>
           </div>
         </form>
 
         <div data-bind="visible: showUserInCompany">
           <span data-bind="ltext: 'register.company.add-user.already-in'"></span>
-          <button data-bind="ltext: 'ok'" class="secondary btn-dialog close" data-test-id="company-add-user-already-in-close"></button>
+          <div class="dialog-content__footer">
+            <button class="positive close"
+                    data-test-id="company-add-user-already-in-close">
+              <i class="lupicon-check"></i>
+              <span  data-bind="ltext: 'ok'"></span>
+            </button>
+          </div>
         </div>
 
         <div data-bind="visible: showUserAlreadyInvited">
-          <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>
-          <button data-bind="ltext: 'ok'" class="secondary btn-dialog close"></button>
-        </div>
-
-        <div data-bind="visible: showUserInvited">
-          <h3 data-bind="ltext: 'register.company.add-user.done.header'" data-test-id="company-old-user-invited"></h3>
-          <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
-          <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
-          <button data-bind="ltext: 'ok'" class="secondary btn-dialog close" data-test-id="company-old-user-invited-close-dialog"></button>
+          <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>        
+          <div class="dialog-content__footer">
+            <button class="positive close"
+                    data-test-id="company-user-already-invited-close-dialog">
+              <i class="lupicon-check"></i>
+              <span  data-bind="ltext: 'ok'"></span>
+            </button>
+          </div>
         </div>
 
         <form data-bind="visible: showUserDetails" id="companyUserDetails">
 
           <label data-bind="ltext: 'company.user.firstName'" class="form-label tip"></label>
-          <input data-bind="textInput: firstName" class="form-input" type="text" data-test-id="company-new-user-firstname"/>
+          <input data-bind="textInput: firstName,
+                            disable: done() || oldUser()"
+                 class="form-input" type="text" data-test-id="company-new-user-firstname"/>
 
-          <label data-bind="ltext: 'company.user.lastName'" class="form-label tip"></label>
-          <input data-bind="textInput: lastName" class="form-input" type="text" data-test-id="company-new-user-lastname"/>
+          <label data-bind="ltext: 'company.user.lastName'"
+                 class="form-label tip"></label>
+          <input data-bind="textInput: lastName,
+                            disable: done() || oldUser()"
+                 class="form-input" type="text" data-test-id="company-new-user-lastname"/>
+          <div class="checkbox-wrapper checkbox-wrapper--break-small">
+            <input data-bind="checked: admin,
+                              disable: done"
+                   class="form-input" type="checkbox" id="company-new-user-admin"/>
+            <label data-bind="ltext: 'register.company.add-user.admin'" class="checkbox-label" for="company-new-user-admin"></label>
+          </div>
+          <div class="checkbox-wrapper">
+            <input data-bind="checked: submit,
+                              disable: done"
+                   class="form-input" type="checkbox" id="company-new-user-submit"/>
+            <label data-bind="ltext: 'register.company.add-user.can-submit'" class="checkbox-label" for="company-new-user-submit"></label>
+          </div>
 
-          <input data-bind="checked: admin" class="form-input" type="checkbox" id="register.company.add-user.admin"/>
-          <label data-bind="ltext: 'register.company.add-user.admin'" class="form-label" for="register.company.add-user.admin"></label>
-
-          <div data-bind="visible: pending">
+          <div data-bind="visible: pending"
+               class="dialog-content__footer">
             <h3>
-              <em data-bind="visible: pending" class="button-loader" style="position: relative;"></em>
               <span data-bind="ltext: 'register.company.add-user.pending'"></span>
             </h3>
           </div>
 
-          <div data-bind="visible: done">
+          <div data-bind="visible: done"  class="dialog-content__footer"
+               data-test-id="company-add-user-done">
             <h3 data-bind="ltext: 'register.company.add-user.done.header'" id="testCompanyAddUserDone"></h3>
             <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
             <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
           </div>
 
-          <div>
-            <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="positive btn-dialog" data-test-id="company-user-submit"></button>
-            <button data-bind="enable: canClose, ltext: 'close'" class="secondary btn-dialog close" data-test-id="company-new-user-invited-close-dialog"></button>
+          <div class="inner-margins dialog-content__footer">
+            <button data-bind="enable: canSubmit, 
+                               click: sendInvite,
+                               css: {waiting: pending}"
+                    type="submit"
+                    class="positive"
+                    data-test-id="company-user-send-invite">
+              <i class="lupicon-envelope"></i>
+              <i class="wait spin lupicon-refresh"></i>
+              <span data-bind="ltext: 'register.company.add-user.submit'"></span>
+            </button>
+            <button data-bind="enable: canClose" class="secondary close"
+                    data-test-id="company-new-user-invited-close-dialog">
+              <i class="lupicon-remove"></i>
+              <span  data-bind="ltext: 'close'"></span>
+            </button>
           </div>
         </form>
       </div>
-
     </div>
   </section>
 </body>

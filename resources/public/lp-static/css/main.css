@@ -1,5 +1,33 @@
-@import url('main-blessed1.css?z=1464259289598');
+@import url('main-blessed1.css?z=1464350459327');
 
+/* line 74, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .container {
+  margin-bottom: 0;
+}
+/* line 80, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble {
+  position: relative;
+  min-height: 280px;
+  padding-left: 320px;
+  padding-right: 24%;
+  margin-right: 61px;
+}
+/* line 23, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+/* line 28, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application-map-container {
+  left: 0;
+  width: 320px;
+  margin-bottom: 12px;
+}
+/* line 35, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application_actions {
+  right: 0;
+}
 @media (max-width: 991px) {
   /* line 80, ../../../private/common-html/sass/views/_application.scss */
   .application_summary .preamble {
@@ -3875,7 +3903,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 
 /* basic styles*/
 /* line 214, ../../../private/common-html/sass/main.scss */
-.table, .reviews-table, table.review-buildings-table, .appeals-table {
+.table, .reviews-table, table.review-buildings-table, .company-users-table, .appeals-table {
   font-size: 16px;
   line-height: 24px;
 }

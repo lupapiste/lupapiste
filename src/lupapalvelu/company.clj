@@ -133,6 +133,7 @@
       (assoc :lastName  (get-in token [:data :user :lastName]))
       (assoc :email     (get-in token [:data :user :email]))
       (assoc :role      (get-in token [:data :role]))
+      (assoc :submit    (get-in token [:data :submit]))
       (assoc :tokenId (:id token))
       (assoc :expires (:expires token))))
 
@@ -148,6 +149,31 @@
 
 (defn find-company-admins [company-id]
   (usr/get-users {:company.id company-id, :company.role "admin"}))
+
+(defn search-result
+  "Convenience handler for the most common search results. The
+  following results are automatically
+  handled/responded: :already-invited, :not-found
+  and :already-in-company. For other results (user is found but not
+  related to the company), the given fun is called.
+    caller: Calling user
+    email: Email to be searched
+    fun: Function that takes (found) user as argument."
+  [caller email fun]
+  (let [user (usr/find-user {:email email})
+        tokens (find-user-invitations (-> caller :company :id))]
+    (cond
+      (some #(= email (:email %)) tokens)
+      (ok :result :already-invited)
+
+      (nil? user)
+      (ok :result :not-found)
+
+      (get-in user [:company :id])
+      (ok :result :already-in-company)
+
+      :else
+      (fun user))))
 
 (defn ensure-custom-limit
   "Checks that custom account's customAccountLimit is set and allowed. Nullifies customAcconutLimit with normal accounts."
@@ -184,15 +210,25 @@
     (mongo/update :companies {:_id id} updated)
     updated))
 
-(defn update-user!
-  "Update company user."
-  [user-id op value]
-  (condp = op
-    :admin  (mongo/update-by-id :users user-id {$set {:company.role (if value "admin" "user")}})
-    :enabled (mongo/update-by-id :users user-id {$set {:enabled (if value true false)}})
-    :delete (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}})
-    (fail! :bad-request)))
+(defn company-user-edit-allowed
+  "Pre-check enforcing that the caller has sufficient credentials to
+  edit company member."
+  [{caller :user :as cmd} app]
+  (when-let [target-user (some-> cmd :data :user-id usr/get-user-by-id)]
+    (when-not (or (= (:role caller) "admin")
+                  (and (= (get-in caller [:company :role])
+                          "admin")
+                       (= (get-in caller [:company :id])
+                          (get-in target-user [:company :id]))))
+      unauthorized)))
 
+(defn delete-user!
+  [user-id]
+  (mongo/update-by-id :users user-id {$set {:enabled false}, $unset {:company 1}}))
+
+(defn update-user! [user-id role submit]
+  (mongo/update-by-id :users user-id {$set {:company.role role
+                                            :company.submit submit}}))
 ;;
 ;; Add/invite new company user:
 ;;
@@ -214,22 +250,25 @@
                                             :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
     token-id))
 
-(defn add-user! [user company role]
+(defn add-user! [user company role submit]
   (let [user (update-in user [:email] usr/canonize-email)
-        token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
+        token-id (token/make-token :new-company-user nil {:user user
+                                                          :company company
+                                                          :role role
+                                                          :submit submit} :auto-consume false)]
     (notif/notify! :new-company-user {:user       user
                                       :company    company
                                       :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
                                       :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
     token-id))
 
-(defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
+(defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
   (usr/create-new-user nil {:email       (:email user)
                              :username    (:email user)
                              :firstName   (:firstName user)
                              :lastName    (:lastName user)
-                             :company     {:id (:id company) :role role}
+                             :company     {:id (:id company) :role role :submit submit}
                              :personId    (:personId user)
                              :password    password
                              :role        :applicant
@@ -238,10 +277,13 @@
     :send-email false)
   (ok))
 
-(defn invite-user! [user-email company-id]
+(defn invite-user! [user-email company-id role submit]
   (let [company   (find-company! {:id company-id})
         user      (usr/get-user-by-email user-email)
-        token-id  (token/make-token :invite-company-user nil {:user user, :company company, :role :user} :auto-consume false)]
+        token-id  (token/make-token :invite-company-user nil {:user user
+                                                              :company company
+                                                              :role role
+                                                              :submit submit} :auto-consume false)]
     (notif/notify! :invite-company-user {:user       user
                                          :company    company
                                          :ok-fi    (str (env/value :host) "/app/fi/welcome#!/invite-company-user/ok/" token-id)
@@ -259,9 +301,9 @@
 ;; Link user to company:
 ;;
 
-(defn link-user-to-company! [user-id company-id role]
+(defn link-user-to-company! [user-id company-id role submit]
   (if-let [user (usr/get-user-by-id user-id)]
-    (let [updates (merge {:company {:id company-id, :role role}}
+    (let [updates (merge {:company {:id company-id, :role role :submit submit}}
                     (when (usr/dummy? user) {:role :applicant})
                     (when-not (:enabled user) {:enabled true}))]
       (mongo/update :users {:_id user-id} {$set updates})
@@ -269,7 +311,7 @@
         (pw-reset/reset-password (assoc user :role "applicant"))))
     (fail! :error.user-not-found)))
 
-(defmethod token/handle-token :invite-company-user [{{:keys [user company role]} :data} {accept :ok}]
+(defmethod token/handle-token :invite-company-user [{{:keys [user company role submit]} :data} {accept :ok}]
   (infof "user %s (%s) %s invitation to company %s (%s)"
          (:username user)
          (:id user)
@@ -277,7 +319,7 @@
          (:name company)
          (:id company))
   (if accept
-    (link-user-to-company! (:id user) (:id company) role))
+    (link-user-to-company! (:id user) (:id company) role submit))
   (ok))
 
 (defn company->auth [company]
@@ -335,3 +377,12 @@
        {:auth {$elemMatch {:invite.user.id company-id}}}
        {$set  {:auth.$ (-> company company->auth (assoc :inviter inviter :inviteAccepted (now)))}}))
     (ok)))
+
+(defn cannot-submit
+  "Pre-check that fails only if the user is authed as company user
+  without submit rights"
+  [{user :user} application]
+  (when-not (and (not (domain/owner-or-write-access? application (:id user)))
+             (domain/company-access? application (-> user :company :id))
+             (not (-> user :company :submit)))
+    (fail :error.authorized)))

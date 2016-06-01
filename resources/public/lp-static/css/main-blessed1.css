@@ -7137,7 +7137,7 @@ select.dropdown {
   border: 1px solid #bbbbbb;
   border-radius: 0 0 0 0;
   padding-left: 12px;
-  padding-right: 12px;
+  padding-right: 33px;
   height: 40px;
   background-image: url("/lp-static/img/lupicon-chevron-down-orange-dark.png");
   background-position: right 17px center;
@@ -7296,6 +7296,11 @@ div.review-done div {
 }
 
 /* line 1602, ../../../private/common-html/sass/partials/_forms.scss */
+.checkbox-wrapper.checkbox-wrapper--break-small {
+  margin-bottom: 6px;
+}
+
+/* line 1606, ../../../private/common-html/sass/partials/_forms.scss */
 .foreman-info {
   padding-left: 6px;
 }
@@ -8445,6 +8450,51 @@ table.review-buildings-table div.checkbox-wrapper--disabled {
   background-color: initial;
 }
 
+/* line 226, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--action {
+  text-align: right;
+}
+/* line 228, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--action a {
+  padding-right: 2em;
+}
+/* line 232, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--icons {
+  text-align: center;
+  color: #f39129;
+}
+/* line 236, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note {
+  padding-left: 2em;
+  padding-right: 2em;
+  background-color: white;
+}
+/* line 241, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note:active {
+  background-color: initial;
+}
+/* line 245, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note td.company-users-table--extra {
+  white-space: pre-wrap;
+}
+/* line 248, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note td.company-users-table--no-extra {
+  color: #bbbbbb;
+}
+/* line 252, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table div.bubble-dialog {
+  border: none;
+}
+
+/* line 280, ../../../private/common-html/sass/partials/_tables.scss */
+table.company-users-table select {
+  width: initial;
+}
+/* line 283, ../../../private/common-html/sass/partials/_tables.scss */
+table.company-users-table tr:hover, table.company-users-table tr:active {
+  background-color: transparent;
+}
+
 /*Tab styles*/
 /* line 42, ../../../private/common-html/sass/partials/_tabs.scss */
 .tab-wrapper {
@@ -9218,7 +9268,12 @@ ul.tabs {
   min-height: 96px;
   position: relative;
   margin: 12px 0;
-  padding-bottom: 64px;
+  padding-bottom: 24px;
+  /* [type=submit], .btn, button { */
+  /*   //padding: 4px $marginL; */
+  /*   min-width: $cols2; */
+  /*   max-width: $cols3; */
+  /* } */
 }
 /* line 154, ../../../private/common-html/sass/partials/_modal.scss */
 .dialog-content .dialog-desc {
@@ -9227,11 +9282,6 @@ ul.tabs {
 /* line 158, ../../../private/common-html/sass/partials/_modal.scss */
 .dialog-content .dialog-desc-wide {
   width: 450px;
-}
-/* line 162, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content [type=submit], .dialog-content .btn, .dialog-content .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .dialog-content .paginate_disabled_previous, .dialog-content .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .dialog-content .paginate_disabled_next, .dialog-content button {
-  min-width: 10em;
-  max-width: 16.25em;
 }
 /* line 169, ../../../private/common-html/sass/partials/_modal.scss */
 .dialog-content .file-upload {
@@ -9273,18 +9323,23 @@ ul.tabs {
 }
 
 /* line 208, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content__footer {
+  margin-top: 24px;
+}
+
+/* line 212, ../../../private/common-html/sass/partials/_modal.scss */
 .scrolling-content {
   overflow-y: scroll;
   max-height: 288px;
 }
 
-/* line 213, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 217, ../../../private/common-html/sass/partials/_modal.scss */
 .dialog-content-low {
   min-height: 72px;
   padding-bottom: 0;
 }
 
-/* line 219, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 223, ../../../private/common-html/sass/partials/_modal.scss */
 .with-map {
   /* .map-container { */
   /*   //padding: 0; */
@@ -9313,37 +9368,37 @@ ul.tabs {
 /*   vertical-align: top; */
 /*   padding-left: $marginM; */
 /* } */
-/* line 253, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 257, ../../../private/common-html/sass/partials/_modal.scss */
 .neighbors-message {
   margin: 12px;
 }
 
-/* line 258, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 262, ../../../private/common-html/sass/partials/_modal.scss */
 #dialog-add-link-permit .combobox {
   margin-bottom: 8px;
 }
 
-/* line 264, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 268, ../../../private/common-html/sass/partials/_modal.scss */
 #upload-dialog .dialog-content {
   padding-bottom: 0;
 }
 
-/* line 270, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 274, ../../../private/common-html/sass/partials/_modal.scss */
 #dialog-cancel-application div.application-cancel-text-content p {
   margin-bottom: 0;
 }
 
-/* line 276, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 280, ../../../private/common-html/sass/partials/_modal.scss */
 .authority-select-dialog select {
   width: 100%;
 }
 
-/* line 282, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 286, ../../../private/common-html/sass/partials/_modal.scss */
 .company-invite-dialog select {
   width: 100%;
 }
 
-/* line 288, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 292, ../../../private/common-html/sass/partials/_modal.scss */
 .with-map-top {
   margin-top: 6px;
   margin-bottom: 0;
@@ -11408,32 +11463,4 @@ span.icon_clear:before {
   position: relative;
   display: block;
   float: none;
-}
-/* line 74, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .container {
-  margin-bottom: 0;
-}
-/* line 80, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble {
-  position: relative;
-  min-height: 280px;
-  padding-left: 320px;
-  padding-right: 24%;
-  margin-right: 61px;
-}
-/* line 23, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble .application-map-container, .application_summary .preamble .application_actions {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-}
-/* line 28, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble .application-map-container {
-  left: 0;
-  width: 320px;
-  margin-bottom: 12px;
-}
-/* line 35, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble .application_actions {
-  right: 0;
 }

@@ -475,7 +475,7 @@
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
     :username  "dummy2"
-    :firstName "Duff"
+    :firstName "Duff2"
     :lastName "Dummy2"
     :email  "dummy2@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
@@ -484,7 +484,7 @@
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
     :username  "dummy3"
-    :firstName "Duff"
+    :firstName "Duff3"
     :lastName "Dummy3"
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
@@ -505,7 +505,7 @@
               :apikey "502cb9e58426c613c8b85abe"}
     :role "applicant"
     :architect true
-    :company {:id "solita", :role "admin"}}
+    :company {:id "solita" :role "admin" :submit true}}
 
    ])
 

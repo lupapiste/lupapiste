@@ -116,6 +116,11 @@
 (defn string-parameters [params command]
   (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
 
+(defn select-parameters
+  "Parameters are valid if each of them belong to the value-set"
+  [params value-set command]
+  (filter-params-of-command params command (complement value-set) "error.illegal-value:not-in-set"))
+
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
     (trace "invalid property id parameters:" (s/join ", " invalid))
