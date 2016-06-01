@@ -27,8 +27,9 @@
             </span>
           </td>
           <td>
-            <input type="checkbox" class="form-input" id="calendar-enabled"
+            <input type="checkbox" class="form-input"
                    data-bind="checked: calendarEnabled,
+                              attr: { 'data-test-id': 'calendar-checkbox-' + $index() },
                               enable: lupapisteApp.models.globalAuthModel.ok('set-calendar-enabled-for-authority')" />
           </td>
         </tr>
@@ -65,7 +66,7 @@
 
     <section>
       <h2 data-bind="ltext: 'auth-admin.organization.properties'"></h2>
-      <table class="admin-settings" data-bind="with: reservationProperties">
+      <table class="admin-settings" data-bind="with: reservationProperties" data-test-id="reservation-properties-table">
         <thead>
         <tr>
           <th data-bind="ltext: 'auth-admin.parameter'"></th>
@@ -96,8 +97,8 @@
     <div class="dialog-content">
       <div>
         <p data-bind="ltext: 'auth-admin.organization.reservation-type.name'"></p>
-        <input type="text" data-bind="textInput: name" class="form-input text long" autofocus="autofocus" maxlength="256"/>
-        <button data-bind="click: execute, enable: ok(), ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
+        <input type="text" data-bind="textInput: name" class="form-input text long" autofocus="autofocus" maxlength="256" data-test-id="reservation-type-name"/>
+        <button data-bind="click: execute, enable: ok(), ltext: 'save'" class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>
       </div>
     </div>
   </div>
