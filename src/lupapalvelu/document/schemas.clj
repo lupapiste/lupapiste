@@ -830,7 +830,7 @@
                      :body [{:name "liiketaloudellinen"}
                             {:name "muu"}
                             {:name "ei tiedossa"}]}
-                    {:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l
+                    {:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l :i18nkey "kayttotarkoitus"
                      :body usages/rakennuksen-kayttotarkoitus}]})
 
 (def mitat {:name "mitat"
