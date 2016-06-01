@@ -424,7 +424,7 @@
 (defn ram-not-root-attachment
   "Pre-checker that fails if the attachment is the root for RAM
   attachments and the user is applicant (authority can delete the
-  root)-"
+  root)."
   [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
   (when (and (-> attachment-id (util/find-by-id attachments) :ram-link ss/blank?)
              (find-by-ram-link attachment-id attachments)

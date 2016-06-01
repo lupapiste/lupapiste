@@ -22,7 +22,7 @@ LUPAPISTE.RamLinksModel = function( params) {
     }
   });
 
-  var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %> <%- time %>");
+  var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %><br><%- time %>");
 
   self.approvalHtml = function( data ) {
     var approved = data.approved || {};

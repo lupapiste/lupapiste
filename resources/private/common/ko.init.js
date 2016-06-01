@@ -218,6 +218,16 @@
     }
   };
 
+  // First name Last name
+  ko.bindingHandlers.firstLastName = {
+    update: function( element, valueAccessor ) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        $(element).text( v.firstName + "\u00a0" + v.lastName );
+      }
+    }
+  };
+
   // v is unwrapped size value
   function sizeString( v ) {
     var result = "";

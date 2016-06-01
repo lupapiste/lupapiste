@@ -15,10 +15,10 @@
     <tbody data-bind="foreach: links">
       <tr>
         <td data-bind="html: $parent.typeHtml( $data )"></td>
-        <td data-bind="attachmentVersion: latestVersion,
-                       attr: {'data-test-id': 'ram-link-filename-' + $index()}"></td>
+        <td data-bind="attachmentVersion: $data.latestVersion,
+                       attr: {'data-test-id': 'ram-link-file-' + $index()}"></td>
         <td data-bind="dateTimeString: _.get( $data, 'latestVersion.created', modified )"></td>
-        <td data-bind="text: _.get( $data, 'latestVersion.user.username', ''),
+        <td data-bind="firstLastName: _.get( $data, 'latestVersion.user', ''),
                        attr: {'data-test-id': 'ram-link-name-' + $index()}"></td>
         <td data-bind="html: $parent.approvalHtml( $data ),
                        attr: {'data-test-id': 'ram-link-approved-' + $index()}"></td>
