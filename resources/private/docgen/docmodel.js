@@ -1770,7 +1770,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     section.append( sticky );
     var elements = document.createElement("div");
     elements.className = "accordion-fields";
-    appendElements(elements, self.schema, self.model);
+    appendElements(elements, self.schema, self.model, []);
     // Disable fields and hide if the form is not editable
     if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
       $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
