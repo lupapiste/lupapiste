@@ -7400,10 +7400,10 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Approving and rejecting attachments
   self.approveAttachment = function(attachmentId) {
-    updateAttachment(attachmentId, {state: "ok"});
+    self.updateAttachment(attachmentId, {state: "ok"});
   };
   self.rejectAttachment = function(attachmentId) {
-    updateAttachment(attachmentId, {state: "requires_user_action"});
+    self.updateAttachment(attachmentId, {state: "requires_user_action"});
   };
 
   //helpers for checking relevant attachment states
@@ -7495,7 +7495,6 @@ LUPAPISTE.AttachmentsService = function() {
 
   function showAll() {
     var filterValues = _.mapValues(filters, function(f) { return f(); });
-    console.log(filterValues);
     return _(filterValues).omit("notNeeded").values()
            .every(function(f) { return !f; });
   }
@@ -7511,7 +7510,6 @@ LUPAPISTE.AttachmentsService = function() {
         !_.some(subFilters, function(f) {
           return filters[f]();
         })) {
-      console.log("here");
       return attachments;
     }
     return _.filter(attachments, function(attachment) {
