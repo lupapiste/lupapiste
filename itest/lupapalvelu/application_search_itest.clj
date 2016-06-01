@@ -118,6 +118,9 @@
                       :x 404369.304 :y 6693806.957
                       :operation "muu-uusi-rakentaminen") => truthy
         application-id (:id application)
+
+        foreman-app (command sonja :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa" :foremanEmail "")
+
         id-matches? (fn [response]
                       (and
                         (one-result? response)
@@ -184,4 +187,22 @@
           (upload-area sipoo)
           (let [res (datatables sonja :applications-search :areas [(:id keskusta)])]
             (count (get-in res [:data :applications])) => 1
-            (get-in res [:data :applications 0 :id]) => application-id))))))
+            (get-in res [:data :applications 0 :id]) => application-id))))
+
+    (fact "canceled application and foreman application"
+
+      (command sonja :cancel-application-authority :id application-id :text "test" :lang "fi") => ok?
+
+      (let [{default-res :applications}   (query sonja :applications)
+            {unlimited-res :applications} (query sonja :applications :applicationType "unlimited")
+            default-ids (map :id default-res)
+            all-ids (map :id unlimited-res)]
+        (fact "are not returned with default search"
+          (count default-res) => 2
+          default-ids =not=> (contains application-id)
+          default-ids =not=> (contains (:id foreman-app)))
+
+        (fact "are returned with unlimited search"
+          (count unlimited-res) => 4
+          all-ids => (contains application-id)
+          all-ids => (contains (:id foreman-app)))))))

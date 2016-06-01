@@ -123,6 +123,7 @@
         {:modified {$gt modified-after}})
       (if (user/applicant? user)
         (case applicationType
+          "unlimited"          {}
           "inforequest"        {:state {$in ["answered" "info"]}}
           "application"        applicant-application-states
           "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
@@ -132,6 +133,7 @@
           "foremanNotice"      (assoc applicant-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           {:state {$ne "canceled"}})
         (case applicationType
+          "unlimited"          {}
           "inforequest"        {:state {$in ["open" "answered" "info"]}}
           "application"        authority-application-states
           "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
@@ -153,7 +155,7 @@
         {:organization {$in organizations}})
       (if-not (empty? operations)
         {:primaryOperation.name {$in operations}}
-        (when (user/authority? user)
+        (when (and (user/authority? user) (not= applicationType "unlimited"))
           ; Hide foreman applications in default search, see LPK-923
           {:primaryOperation.name {$ne "tyonjohtajan-nimeaminen-v2"}}))
       (when-not (empty? areas)
