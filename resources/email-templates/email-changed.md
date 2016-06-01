@@ -1,4 +1,4 @@
-Moi {{name}},
+# Moi {{name}},
 
 k&auml;ytt&auml;j&auml;tunnus {{old-email}} on vaihdettu onnistuneesti Lupapiste-palvelussa. Uusi k&auml;ytt&auml;j&auml;tunnus on {{new-email}}.
 
@@ -9,7 +9,7 @@ Terveisin,
 
 ---
 
-Hej {{name}},
+# Hej {{name}},
 
 anv&auml;ndarnamnet {{old-email}} &auml;ndrats i Lupapiste-tj&auml;nsten. Den nya anv&auml;ndarnamnet &auml;r {{new-email}}.
 
