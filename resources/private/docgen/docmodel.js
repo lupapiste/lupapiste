@@ -423,7 +423,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildString(subSchema, model, path, partOfChoice) {
+  function buildString(subSchema, model, path) {
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath, validationResult);
@@ -437,11 +437,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     listen(subSchema, myPath, input);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema,
-                                 partOfChoice ? "string-choice" : "string",
-                                 myPath,
-                                 false,
-                                 validationResult));
+      span.appendChild(makeLabel(subSchema, "string", myPath, false, validationResult));
     }
 
     if (subSchema.subtype === "maaraala-tunnus" ) {
@@ -614,13 +610,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildTime(subSchema, model, path, partOfChoice) {
+  function buildTime(subSchema, model, path) {
     // Set implisit options into a clone
     var timeSchema = _.clone(subSchema);
     timeSchema.subtype = "time";
     timeSchema.size = "m";
     timeSchema["max-len"] = 10; // hh:mm:ss.f
-    return buildString(timeSchema, model, path, partOfChoice);
+    return buildString(timeSchema, model, path);
   }
 
   function buildSelect(subSchema, model, path) {
@@ -755,7 +751,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return opts;
   }
 
-  function buildGroup(subSchema, model, path, partOfChoice) {
+  function buildGroup(subSchema, model, path) {
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
@@ -763,7 +759,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var div = document.createElement("div");
     var validationResult = getValidationResult(model, subSchema.name);
 
-    appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
+    appendElements(partsDiv, subSchema, myModel, path, save);
 
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
@@ -1104,7 +1100,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return createComponent("foreman-history", params, "form-table");
   }
 
-  function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
+  function buildForemanOtherApplications(subSchema, model, path) {
     if (!_.includes(updatedDocumentsInDocumentDataService, doc.id)) {
       lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
       updatedDocumentsInDocumentDataService.push(doc.id);
@@ -1122,7 +1118,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       path: path,
       i18npath: i18npath,
       schemaI18name: self.schemaI18name,
-      partOfChoice: partOfChoice,
       validationErrors: doc.validationErrors
     };
 
@@ -1286,12 +1281,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function buildTableRow(subSchema, model, path, partOfChoice) {
+  function buildTableRow(subSchema, model, path) {
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
     var row = document.createElement("tr");
-    appendElements(row, subSchema, myModel, path, save, partOfChoice);
+    appendElements(row, subSchema, myModel, path, save);
 
     row.id = pathStrToGroupID(myPath);
     var rm = resolveRemoveOptions( subSchema, path );
@@ -1350,7 +1345,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .call();
   }
 
-  function build(subSchema, model, path, partOfChoice) {
+  function build(subSchema, model, path) {
     // Do not create hidden whitelisted elements
     var whitelistedRoles = util.getIn(subSchema, ["whitelist", "roles"]);
     var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.includes(whitelistedRoles, lupapisteApp.models.currentUser.role());
@@ -1370,7 +1365,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
-      var elem = builder(subSchema, myModel, myPath.concat([id]), partOfChoice);
+      var elem = builder(subSchema, myModel, myPath.concat([id]));
       if (elem) {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
@@ -1528,7 +1523,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return elements;
     }
 
-    return builder(subSchema, model, myPath, partOfChoice);
+    return builder(subSchema, model, myPath);
   }
 
   function getSelectOneOfDefinition(schema) {
@@ -1543,7 +1538,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return [];
   }
 
-  function appendElements(body, schema, model, path, partOfChoice) {
+  function appendElements(body, schema, model, path) {
 
     function toggleSelectedGroup(value) {
       $(body)
@@ -1556,7 +1551,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var selectOneOf = getSelectOneOfDefinition(schema);
 
     _.each(schema.body, function (subSchema) {
-      var children = build(subSchema, model, path, save, partOfChoice);
+      var children = build(subSchema, model, path, save);
       if (!_.isArray(children)) {
         children = [children];
       }
@@ -1775,7 +1770,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     section.append( sticky );
     var elements = document.createElement("div");
     elements.className = "accordion-fields";
-    appendElements(elements, self.schema, self.model, []);
+    appendElements(elements, self.schema, self.model);
     // Disable fields and hide if the form is not editable
     if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
       $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
