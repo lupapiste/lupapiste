@@ -196,8 +196,9 @@
   ((get-actions) (keyword command)))
 
 (defn check-lockdown [command]
-  (when (and (control/lockdown?) (= :command (:type (meta-data command))))
-    (fail :error.service-lockdown)))
+  (let [{:keys [type allowed-in-lockdown]} (meta-data command)]
+    (when (and (control/lockdown?) (= :command type) (not allowed-in-lockdown))
+      (fail :error.service-lockdown))))
 
 (defn missing-command [command]
   (when-not (meta-data command)
@@ -424,6 +425,8 @@
    (sc/optional-key :on-complete) (sc/either util/Fn [util/Fn])
    (sc/optional-key :on-success)  (sc/either util/Fn [util/Fn])
    (sc/optional-key :on-fail)     (sc/either util/Fn [util/Fn])
+   ; Allow command execution even if the system is in readonly mode.
+   (sc/optional-key :allowed-in-lockdown)    sc/Bool
    ; Feature flag name. Action is run only if the feature flag is true.
    ; If you have feature.some-feature properties file, use :feature :some-feature in action meta data
    (sc/optional-key :feature)     sc/Keyword})
