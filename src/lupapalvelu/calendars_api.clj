@@ -301,9 +301,9 @@
    :input-validators [(partial action/non-blank-parameters [:reservationType])]
    :feature    :ajanvaraus}
   [{user :user}]
-  (let [admin-in-organization-id (usr/authority-admins-organization-id user)]
-    (ok :reservationTypes (post-command "/api/reservation-types/" {:reservationType   reservationType
-                                                                   :organization      admin-in-organization-id}))))
+  (info "Inserting a reservation type ")
+  (ok :result (post-command "/api/reservation-types/" {:reservationType   reservationType
+                                                       :organization      (usr/authority-admins-organization-id user)})))
 
 (defquery reservation-types-for-organization
   {:user-roles #{:authorityAdmin}

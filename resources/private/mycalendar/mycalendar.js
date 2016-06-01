@@ -13,12 +13,17 @@
       if (calendarService.myCalendars().length > 0) {
         // conversion to string for compatibility with radio-field...
         self.selectedCalendar("" + calendarService.myCalendars()[0].id);
+        self.noCalendarsFound(false);
+      } else {
+        self.selectedCalendar(undefined);
+        self.noCalendarsFound(true);
       }
     });
 
     self.selectedCalendar.subscribe(function(val) {
       if (typeof val !== "undefined") {
-        hub.send("calendarService::fetchCalendar", {id: self.selectedCalendar(), user: currentUserModel.id()});
+        hub.send("calendarService::fetchCalendar",
+          {id: self.selectedCalendar(), user: currentUserModel.id()});
       }
     });
 
