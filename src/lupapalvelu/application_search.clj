@@ -212,7 +212,7 @@
   (let [sort-field (sort-field-mapping field)]
     (cond
       (= "type" field) (array-map :permitSubtype (dir asc) :infoRequest (dir (not asc)))
-      (nil? sort-field) {}
+      (ss/blank? sort-field) {}
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
