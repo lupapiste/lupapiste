@@ -10,7 +10,6 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
 
   var self = this;
 
-  var APPROVED = "approved";
   var REJECTED = "rejected";
   var NEUTRAL  = "neutral";
 
@@ -76,17 +75,16 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
     docModel.approvalHubSend( self.approval(), [], data.path );
   });
 
+  ko.utils.extend(self, new LUPAPISTE.ApprovalModel(self));
+
   self.showStatus = ko.pureComputed(_.partial(docModel.isApprovalCurrent, docModel.model, self.approval));
-  self.isApproved = ko.pureComputed(_.partial(docModel.approvalStatus, self.approval, APPROVED));
-  self.isRejected = ko.pureComputed(_.partial(docModel.approvalStatus, self.approval, REJECTED));
-  self.details    = ko.pureComputed(_.partial(docModel.approvalInfo, self.approval));
 
   self.changeStatus = function(flag) {
     docModel.updateApproval([], flag, self.masterApproval);
   };
 
   // reset approval when document is updated
-  self.modificationHubSub = hub.subscribe(
+  self.modificationHubSub = self.addHubListener(
       {eventType: "update-doc-success", documentId: docModel.docId},
       function() {
         if (self.masterApproval() !== null) {
@@ -95,8 +93,9 @@ LUPAPISTE.DocumentApprovalModel = function(docModel) {
         }
       });
 
+  var parentDispose = _.isFunction(self.dispose) ? self.dispose : _.noop;
   self.dispose = function() {
-    hub.unsubscribe(self.modificationHubSub);
+    parentDispose();
     _.each(self, function(property) {
       if (_.isFunction(_.get(property, "dispose"))) {
         property.dispose();

@@ -117,12 +117,12 @@
                  [lupapiste/openpdf "1.0.4"]
                  ; Wrapper for clj-pdf for PDF/A document generation
                  [lupapiste/pdfa-generator "1.0.1"]]
-  :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
+  :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.5"]
                                   [pdfboxing "0.1.9"]]
-                   :plugins [[lein-midje "3.1.1"]
+                   :plugins [[lein-midje "3.2"]
                              [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
                              [lupapiste/lein-nitpicker "0.5.1"]]
@@ -150,9 +150,10 @@
                                       :snapshots false}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
                                            :checksum :ignore}]]
-  :aliases {"integration" ["with-profile" "dev,itest" "midje"]
+  :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
+            "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
-            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
+            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," ["midje" ":filter" "-ajanvaraus"]]}
   :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}

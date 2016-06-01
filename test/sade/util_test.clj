@@ -304,3 +304,63 @@
       (fact "nil filter"
         (let [files (set (list-jar clojure-jar nil))]
           (files "META-INF/MANIFEST.MF") => "META-INF/MANIFEST.MF")))))
+
+(facts "=as-kw"
+
+  (facts "single param"
+    (fact "str"  (=as-kw "str") => true)
+    (fact ":str" (=as-kw ::str) => true))
+
+  (fact "str str"   (=as-kw "str" "str") => true)
+  (fact ":str :str" (=as-kw ::str ::str) => true)
+
+  (facts "type conversions"
+    (fact "str :str"  (=as-kw "str" :str) => true)
+    (fact ":str str"  (=as-kw :str "str") => true)
+
+    (fact ":str str :str" (=as-kw :str "str" :str) => true)
+    (fact "str :str str"  (=as-kw "str" :str "str") => true)
+
+    (fact ":str str :str :str" (=as-kw :str "str" :str :str) => true)
+    (fact "str :str str :str"  (=as-kw "str" :str "str" :str) => true)
+    (fact ":str :str str str"  (=as-kw :str :str "str" "str") => true))
+
+  (facts "nils"
+    (fact "nil"  (=as-kw nil) => true)
+    (fact "str nil"   (=as-kw "str" nil) => false)
+    (fact "nil :str" (=as-kw nil :str) => false))
+
+  (facts "different values"
+    (fact "foo :bar"  (=as-kw "foo" :bar) => false)
+    (fact "foo :bar foo"  (=as-kw "foo" :bar "foo") => false)
+    (fact "foo foo :bar"  (=as-kw "foo" "foo" :bar) => false)))
+
+(facts "not=as-kw"
+
+  (facts "single param"
+    (fact "str"  (not=as-kw "str") => false)
+    (fact ":str" (not=as-kw :str) => false))
+
+  (fact "str str"   (not=as-kw "str" "str2") => true)
+  (fact ":str :str" (not=as-kw :str :str2) => true)
+
+  (facts "type conversions"
+    (fact "str :str"  (not=as-kw "str" :str2) => true)
+    (fact ":str str"  (not=as-kw :str "str") => false)
+
+    (fact ":str str :str" (not=as-kw :str "str2" :str3) => true)
+    (fact "str :str str"  (not=as-kw "str" :str "str") => false)
+
+    (fact ":str str :str :str" (not=as-kw :str "str" :str :str) => false)
+    (fact "str :str str :str"  (not=as-kw "str" :str2 "str" :str) => true)
+    (fact ":str :str str str"  (not=as-kw :str :str "str3" "str") => true))
+
+  (facts "nils"
+    (fact "nil"  (not=as-kw nil) => false)
+    (fact "str nil"   (not=as-kw "str" nil) => true)
+    (fact "nil :str" (not=as-kw nil :str) => true))
+
+  (facts "different values"
+    (fact "foo :bar"  (not=as-kw "foo" :bar) => true)
+    (fact "foo :bar foo"  (not=as-kw "foo" :bar "foo") => true)
+    (fact "foo foo :bar"  (not=as-kw "foo" "foo" :bar) => true)))

@@ -1,0 +1,13 @@
+<!-- Template is to be used with ApprovalModel or standalone -->
+<script type="text/x-jquery-tmpl" id="approval-template" class="ko-template">
+        <span class="form-approval-status is-status"
+              data-bind="css: {rejected: isRejected,
+                               approved: isApproved},
+                               visible: showStatus">
+          <span class="like-btn">
+            <i class="lupicon-circle-attention rejected"></i>
+            <i class="lupicon-circle-check approved"></i>
+            <span class="is-details" data-bind="text: details"></span>
+          </span>
+        </span>
+</script>
