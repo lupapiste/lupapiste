@@ -36,6 +36,8 @@
 "calendar.slot.start-time" "sv" ""
 "calendar.slot.duration" "fi" "Kesto"
 "calendar.slot.duration" "sv" ""
+"mycalendar.in-organization" "fi" "Organisaatiossa"
+"mycalendar.in-organization" "sv" "Organisaatiossa"
 "mycalendar.no-active-calendar" "fi" "Sinulle ei ole luotu kalenteria Lupapisteeseen. Ota yhteys pääkäyttäjääsi."
 "mycalendar.no-active-calendar" "sv" ""
 "mycalendar.title" "fi" "Minun kalenterini"

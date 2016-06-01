@@ -35,14 +35,15 @@
 
 .calendar-table {
   width:100%;
-  min-height:$baseline * 6;
+  min-height: $baseline * 6;
+  padding-top: $baseline;
 
   .nav-actions {
     width: 96%;
     .month {
       float: left;
       margin-left: 5%;
-      padding-left: 12px;
+      padding-left: $marginM;
       font-size: $baseline * 0.75;
       font-weight: bold;
     }

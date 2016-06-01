@@ -215,9 +215,11 @@
   {:parameters [calendarId userId]
    :feature :ajanvaraus
    :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
-   :user-roles #{:authorityAdmin}}
-  [_]
+   :user-roles #{:authorityAdmin :authority}}
+  [{user :user}]
   (let [calendar (get-calendar calendarId userId)]
+    (when-not (authorized-to-edit-calendar? user calendarId)
+      (unauthorized!))
     (when-not (:active calendar)
       (unauthorized!))
     (ok :calendar calendar)))

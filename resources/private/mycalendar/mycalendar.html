@@ -12,13 +12,27 @@
       <h1 data-bind="ltext: 'mycalendar.title'"></h1>
     </div>
 
-    <!-- ko if: calendars().length -->
-    <div data-bind="component: { name: 'calendar-view',
-                                 params: { error: error }}"></div>
+    <!-- ko if: calendars().length > 0 -->
+      <div class="form-grid form-grid--no-border">
+        <span data-bind="ltext: 'mycalendar.in-organization'"></span>: &nbsp; &nbsp;
+        <!-- ko foreach: calendars -->
+        <span data-bind="component: {name: 'radio-field',
+                                     params: {value: id,
+                                              selectedValue: $parent.selectedCalendar,
+                                              name: 'selectedCalendar',
+                                              label: organization}}"></span>
+        <!-- /ko -->
+      </div>
     <!-- /ko -->
-    <!-- ko ifnot: calendars().length -->
-    <div class="context-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
+
+    <!-- ko if: selectedCalendar -->
+      <div data-bind="component: { name: 'calendar-view' }"></div>
     <!-- /ko -->
+
+    <!-- ko if: noCalendarsFound -->
+      <div class="context-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
+    <!-- /ko -->
+
   </div>
 
 </section>
