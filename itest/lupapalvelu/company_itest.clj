@@ -2,76 +2,97 @@
   (:require [midje.sweet  :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [cheshire.core :as json]
+            [clojure.string :refer [index-of]]))
 
 (apply-remote-minimal)
 
-(defn accept-invitation []
-  (let [email (last-email)
-            [uri token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))
-            params {:follow-redirects false
-                    :throw-exceptions false
-                    :content-type     :json
-                    :body "{\"ok\": true}"}
-            resp (http-post (str (server-address) "/api/token/" token) params)
-            ]
-        (:status resp) => 200
-        (:to email)))
+(defn http-token-call
+  ([token body]
+   (let [url (str (server-address) "/api/token/" token)]
+     (http-post url {:follow-redirects false
+                  :throw-exceptions false
+                  :content-type     :json
+                  :body (json/encode body)})))
+  ([token]
+   (fact "Call api/token"
+         (http-token-call token {:ok true}) => (contains {:status 200}))))
+
+(defn token-from-email [email]
+  (let [data (last-email)]
+    (fact {:midje/description (str "Read email for " email)}
+          (index-of (:to data) email) => pos?)
+    (last (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)"
+                   (:plain (:body data))))))
+
+(defn accept-invitation [email]
+  (http-token-call (token-from-email email)))
+
+(defn register-user [email password]
+  (http-token-call (token-from-email email) {:password password}))
 
 (defn check-invitation-details [email & kv]
-  (let [{invitations :invitations} (query kaino :company :company "solita" :users true)
-        [details] (filter #(= email (:email %)) invitations)]
-    details => (contains (apply array-map kv))))
+  (fact {:midje/description (str "Check invitation for " email)}
+        (let [{invitations :invitations} (query kaino :company :company "solita" :users true)
+              [details] (filter #(= email (:email %)) invitations)]
+          details) => (contains (apply array-map kv))))
 
 (defn check-user-details [email & kv]
-  (let [{users :users} (query kaino :company :company "solita" :users true)
-        [details] (filter #(= email (:email %)) users)]
-    details => (contains (apply array-map kv))))
+  (fact {:midje/description (str "Check user " email)}
+        (let [{users :users} (query kaino :company :company "solita" :users true)
+              details (-> (filter #(= email (:email %)) users)
+                          first
+                          (select-keys [:firstName :lastName :company]))
+              details (if (-> details :company :id)
+                        (update details :company #(dissoc % :id))
+                        details)]
+          details) => (contains (apply array-map kv))))
 
 (facts* "User is invited to company"
         (let [company (query kaino :company :company "solita" :users true)]
-    (count (:invitations company)) => 0
-    (count (:users company)) => 1
-
-    (fact "Can not invite with non-ascii email"
-      (command kaino :company-invite-user :email "tepp\u00f6@example.com" :admin false :submit false) => fail?)
-
-    (fact "Invite is sent"
-          (command kaino :company-invite-user :email "teppo@example.com" :admin false :submit false) => ok?)
-
-    (fact "Sent invitation is seen in company query"
-      (let [company (query kaino :company :company "solita" :users true)]
-        (count (:invitations company)) => 1
-        (count (:users company)) => 1))
-
-    (fact "Invitation details are correct"
-          (check-invitation-details (email-for-key teppo) :role "user" :submit false :firstName "Teppo" :lastName "Nieminen"))
-
-    (fact "Invitation is accepted"
-          (accept-invitation) => "Teppo Nieminen <teppo@example.com>"))
-
-  (fact "User is seen in company query"
-    (let [company (query kaino :company :company "solita" :users true)]
-      (count (:invitations company)) => 0
-      (count (:users company)) => 2))
-
-  (fact "User details are correct"
-        (check-user-details (email-for-key teppo) :role "user" :submit false :firstName "Teppo" :lastName "Nieminen"))
-
-  (fact "Invitation is sent and cancelled"
-    (fact "Invite is sent"
-      (command kaino :company-invite-user :email "rakennustarkastaja@jarvenpaa.fi" :admin false :submit true) => ok?
-      (let [company (query kaino :company :company "solita" :users true)]
-        (count (:invitations company)) => 1
-        (count (:users company)) => 2))
-
-    (fact "Invitation is cancelled"
-      (let [email (last-email)
-            [uri token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))]
-        (command kaino :company-cancel-invite :tokenId token) => ok?
-        (let [company (query kaino :company :company "solita" :users true)]
           (count (:invitations company)) => 0
-          (count (:users company)) => 2)))))
+          (count (:users company)) => 1)
+
+        (fact "Can not invite with non-ascii email"
+              (command kaino :company-invite-user :email "tepp\u00f6@example.com" :admin false :submit false) => fail?)
+
+        (fact "Invite is sent"
+              (command kaino :company-invite-user :email "teppo@example.com" :admin false :submit false) => ok?)
+
+        (fact "Sent invitation is seen in company query"
+              (let [company (query kaino :company :company "solita" :users true)]
+                (count (:invitations company)) => 1
+                (count (:users company)) => 1))
+
+        (fact "Invitation details are correct"
+              (check-invitation-details (email-for-key teppo) :role "user" :submit false :firstName "Teppo" :lastName "Nieminen"))
+
+        (fact "Invitation is accepted"
+              (accept-invitation (email-for-key teppo)))
+
+        (fact "User is seen in company query"
+              (let [company (query kaino :company :company "solita" :users true)]
+                (count (:invitations company)) => 0
+                (count (:users company)) => 2)))
+
+(fact "User details are correct"
+      (check-user-details (email-for-key teppo) :company {:role "user" :submit false} :firstName "Teppo" :lastName "Nieminen"))
+
+(fact "Invitation is sent and cancelled"
+      (fact "Invite is sent"
+            (command kaino :company-invite-user :email "rakennustarkastaja@jarvenpaa.fi" :admin false :submit true) => ok?
+            (let [company (query kaino :company :company "solita" :users true)]
+              (count (:invitations company)) => 1
+              (count (:users company)) => 2))
+
+      (fact "Invitation is cancelled"
+            (let [email (last-email)
+                  [uri token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))]
+              (command kaino :company-cancel-invite :tokenId token) => ok?
+              (let [company (query kaino :company :company "solita" :users true)]
+                (count (:invitations company)) => 0
+                (count (:users company)) => 2))))
 
 
 (facts* "Company is added to application"
@@ -145,10 +166,10 @@
              (query kaino :company-search-user :email foobar) => (result :already-invited))
        (fact "Invitation details"
              (check-invitation-details foobar :firstName "Foo" :lastName "Bar" :role "admin" :submit true))
-       (fact "Foobar accepts invitation"
-             (accept-invitation) => "Foo Bar <foo@bar.baz>")
+       (facts "Foobar accepts invitation and registers"
+              (register-user foobar "password1234"))
        (fact "User details"
-             (check-user-details foobar :firstName "Foo" :lastName "Bar" :role "admin" :submit true)))
+             (check-user-details foobar :firstName "Foo" :lastName "Bar" :company {:role "admin" :submit true})))
 
 
 (facts* "Company details"

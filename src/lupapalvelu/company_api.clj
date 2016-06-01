@@ -152,7 +152,7 @@
   (ok))
 
 (defquery company-user-cannot-submit
-  {:description "Negative psseudo query that succeeds only if the
+  {:description "Negative pseudo query that succeeds only if the
   current user is authed to the current application via company but
   does not have submit rights."
    :parameters [:id]
