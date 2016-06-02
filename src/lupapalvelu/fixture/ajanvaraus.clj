@@ -4,6 +4,8 @@
             [sade.core :refer :all]
             [lupapalvelu.calendars-api]))
 
+(def sonja "5056e6d3aa24a1c901e6b9d1")
+
 (def users
   [;; Solita admin:  admin / admin
    {:id "777777777777777777000099"
@@ -47,7 +49,7 @@
     :zip "33456"
     :city "Sipoo"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
-              :apikey "5056e6d3aa24a1c901e6b9d1"}
+              :apikey sonja}
     :applicationFilters [{:id "foobar"
                           :title "Foobar"
                           :sort {:asc false

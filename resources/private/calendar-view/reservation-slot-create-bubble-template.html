@@ -1,36 +1,29 @@
-<!DOCTYPE html>
-<html>
-<body>
-<section class="page container">
-  <script type="text/x-jquery-tmpl" id="reservation-slot-create-bubble-template">
-    <div class="calendar-slot-bubble"
-         data-bind="style: { position: 'absolute',
-                             top: positionTop,
-                             'z-index': 1000 },
-                    css: weekdayCss ">
-      <bubble-dialog params="visible: bubbleVisible,
-                             buttonIcon: 'lupicon-save',
-                             buttonText: 'save',
-                             okEnabled: okEnabled,
-                             okFun: send,
-                             initFun: init,
-                             error: error,
-                             prefix: 'company-invite',
-                             waiting: waiting">
-        <h3 data-bind="ltext: 'calendar.create-slot.title'"></h3>
-        <p><span data-bind="ltext: 'calendar.create-slot.first-start-time'"></span>: <span data-bind="dateTimeString: $parent.startTime"></span></p>
-        <p><span data-bind="ltext: 'calendar.slot.duration'"></span>: 1h</p>
-        <p><span data-bind="ltext: 'calendar.create-slot.amount'"></span>: <input type="text" class="form-input" data-bind="value: $parent.amount"></p>
-        <p>Tapahtumalajit:</p>
-        <div data-bind="foreach: $parent.reservationTypes">
-          <p>
-            <input type="checkbox" data-bind="checkedValue: $data.id, checked: $parents[1].selectedReservationTypes">
-            <span data-bind="text: $data.name"/>
-          </p>
-        </div>
-      </bubble-dialog>
-    </div>
-  </script>
-</section>
-</body>
-</html>
+<script class="ko-template" type="text/x-jquery-tmpl" id="reservation-slot-create-bubble-template">
+  <div class="calendar-slot-bubble"
+       data-bind="style: { position: 'absolute',
+                           top: positionTop,
+                           'z-index': 1000 },
+                  css: weekdayCss ">
+    <bubble-dialog params="visible: bubbleVisible,
+                           buttonIcon: 'lupicon-save',
+                           buttonText: 'save',
+                           okEnabled: okEnabled,
+                           okFun: send,
+                           initFun: init,
+                           error: error,
+                           prefix: 'company-invite',
+                           waiting: waiting">
+      <h3 data-bind="ltext: 'calendar.create-slot.title'"></h3>
+      <p><span data-bind="ltext: 'calendar.create-slot.first-start-time'"></span>: <span data-bind="dateTimeString: $parent.startTime"></span></p>
+      <p><span data-bind="ltext: 'calendar.slot.duration'"></span>: 1h</p>
+      <p><span data-bind="ltext: 'calendar.create-slot.amount'"></span>: <input type="text" class="form-input" data-bind="value: $parent.amount"></p>
+      <p>Tapahtumalajit:</p>
+      <div data-bind="foreach: $parent.reservationTypes">
+        <p>
+          <input type="checkbox" data-bind="checkedValue: $data.id, checked: $parents[1].selectedReservationTypes">
+          <span data-bind="text: $data.name"/>
+        </p>
+      </div>
+    </bubble-dialog>
+  </div>
+</script>

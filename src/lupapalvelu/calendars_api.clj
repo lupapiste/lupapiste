@@ -51,7 +51,7 @@
   ([action]
    (api-query action {}))
   ([action params]
-   (let [response (api-call http/get action {:query-params params})]
+   (let [response (api-call http/get (str "/api/" (name action)) {:query-params params})]
      (when-not (= 200 (:status response))
        (error response)
        (fail! :resources.backend-error))
@@ -71,30 +71,30 @@
                                 :content-type :json}))
 
 (defn- post-command
-  ([url]
-   (post-command url []))
-  ([url request-body]
-   (let [response (api-post-command url request-body)]
+  ([command]
+   (post-command command []))
+  ([command request-body]
+   (let [response (api-post-command (str "/api/" (name command)) request-body)]
      (when-not (= 200 (:status response))
        (error response)
        (fail! :resources.backend-error))
      (:body response))))
 
 (defn- put-command
-  ([url]
-   (put-command url []))
-  ([url request-body]
-   (let [response (api-put-command url request-body)]
+  ([command]
+   (put-command command []))
+  ([command request-body]
+   (let [response (api-put-command (str "/api/" (name command)) request-body)]
      (when-not (= 200 (:status response))
        (error response)
        (fail! :resources.backend-error))
      (:body response))))
 
 (defn- delete-command
-  ([url]
-   (delete-command url []))
-  ([url request-body]
-   (let [response (api-delete-command url request-body)]
+  ([command]
+   (delete-command command []))
+  ([command request-body]
+   (let [response (api-delete-command (str "/api/" (name command)) request-body)]
      (when-not (= 200 (:status response))
        (error response)
        (fail! :resources.backend-error))
@@ -111,19 +111,19 @@
 
 (defn- get-calendar
   [calendarId userId]
-  (let [calendar (api-query (str "/api/resources/" calendarId))
+  (let [calendar (api-query (str "resources/" calendarId))
         user     (usr/get-user-by-id userId)]
     (when (calendar-belongs-to-user? calendar userId)
       (->FrontendCalendar calendar user))))
 
 (defn- get-calendar-slot
   [slotId]
-  (api-query (str "/api/reservationslots/" slotId)))
+  (api-query (str "reservationslots/" slotId)))
 
 (defn- authorized-to-edit-calendar?
   [user calendarId]
   (try
-    (let [calendar (api-query (str "/api/resources/" calendarId))
+    (let [calendar (api-query (str "resources/" calendarId))
           orgId    (:organizationCode calendar)]
       (and (:active calendar) (or
         (and (usr/authority-admin? user) (= (usr/authority-admins-organization-id user) orgId))
@@ -133,11 +133,11 @@
 
 (defn- find-calendars-for-organizations
   [& orgIds]
-  (group-by :externalRef (api-query "/api/resources/by-organization" {:organizationCodes orgIds})))
+  (group-by :externalRef (api-query "resources/by-organization" {:organizationCodes orgIds})))
 
 (defn- find-calendars-for-user
   [userId]
-  (api-query (str "/api/resources/by-external-ref/" (calendar-ref-for-user userId))))
+  (api-query (str "resources/by-external-ref/" (calendar-ref-for-user userId))))
 
 (defn- find-calendar-for-user-and-organization
   [userId orgId]
@@ -158,20 +158,20 @@
 (defn- create-calendar
   [userId target-user organization]
   (info "Creating a new calendar" userId organization)
-  (post-command "/api/resources" {:name             (str (:firstName target-user) " " (:lastName target-user))
+  (post-command "resources" {:name             (str (:firstName target-user) " " (:lastName target-user))
                                   :organizationCode organization
                                   :externalRef      (calendar-ref-for-user userId)}))
 
 (defn- activate-resource
   [{:keys [id]}]
   (info "Activating calendar" id)
-  (post-command (str "/api/resources/" id "/activate"))
+  (post-command (str "resources/" id "/activate"))
   id)
 
 (defn- deactivate-resource
   [{:keys [id]}]
   (info "Deactivating calendar" id)
-  (post-command (str "/api/resources/" id "/deactivate"))
+  (post-command (str "resources/" id "/deactivate"))
   id)
 
 (defn- enable-calendar
@@ -199,7 +199,7 @@
 
 (defn- reservation-types
   [organization]
-  (api-query "/api/reservation-types/by-organization" {:organization organization}))
+  (api-query "reservation-types/by-organization" {:organization organization}))
 
 (defquery my-calendars
   {:user-roles #{:authority}
@@ -255,7 +255,7 @@
    :input-validators [(partial action/non-blank-parameters [:calendarId :year :week])]
    :feature    :ajanvaraus}
   [_]
-  (->> (api-query (str "/api/reservationslots/calendar/" calendarId) {:year year :week week})
+  (->> (api-query (str "reservationslots/calendar/" calendarId) {:year year :week week})
        ->FrontendReservationSlots
        (ok :slots)))
 
@@ -276,7 +276,7 @@
   (info "Creating new calendar slots in calendar #" calendarId)
   (->> slots
        ->BackendReservationSlots
-       (post-command (str "/api/reservationslots/calendar/" calendarId))
+       (post-command (str "reservationslots/calendar/" calendarId))
        (ok :result)))
 
 (defcommand delete-calendar-slot
@@ -293,7 +293,7 @@
     (when (> (:amountOfReservations slot) 1)
       (fail! :error.calendar.cannot-delete-a-booked-slot))
     (info "Deleting reservation slot #" slotId)
-    (ok :result (delete-command (str "/api/reservationslots/" slotId)))))
+    (ok :result (delete-command (str "reservationslots/" slotId)))))
 
 (defcommand add-reservation-type-for-organization
   {:user-roles #{:authorityAdmin}
@@ -302,7 +302,7 @@
    :feature    :ajanvaraus}
   [{user :user}]
   (info "Inserting a reservation type ")
-  (ok :result (post-command "/api/reservation-types/" {:reservationType   reservationType
+  (ok :result (post-command "reservation-types/" {:reservationType   reservationType
                                                        :organization      (usr/authority-admins-organization-id user)})))
 
 (defquery reservation-types-for-organization
@@ -321,7 +321,7 @@
                       (partial action/non-blank-parameters [:name])]
    :feature :ajanvaraus}
   [_]
-  (ok :reservationTypes (put-command (str "/api/reservation-types/" reservationTypeId) {:name name})))
+  (ok :reservationTypes (put-command (str "reservation-types/" reservationTypeId) {:name name})))
 
 (defcommand delete-reservation-type
   {:user-roles #{:authorityAdmin}
@@ -329,10 +329,10 @@
    :input-validators [(partial action/number-parameters [:reservationTypeId])]
    :feature    :ajanvaraus}
   [_]
-  (ok :reservationTypes (delete-command (str "/api/reservation-types/" reservationTypeId))))
+  (ok :reservationTypes (delete-command (str "reservation-types/" reservationTypeId))))
 
 ; For integration tests in dev
 (env/in-dev
   (defn clear-database
     []
-    (ok :res (post-command "/api/testdata/clear"))))
+    (ok :res (post-command "testdata/clear"))))

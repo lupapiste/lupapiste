@@ -441,11 +441,9 @@
       var path = pageutil.getPagePath();
       if (path.length > 1) {
         // calendar-view can be initialized with fetchCalendar event after reservationtypes have been init'ed
-        var _calLoader;
-        _calLoader = hub.subscribe("calendarService::organizationReservationTypesFetched", function() {
+        hub.subscribe("calendarService::organizationReservationTypesFetched", function() {
           hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
-          hub.unsubscribe(_calLoader);
-        });
+        }, true);
       }
       hub.send("calendarService::fetchOrganizationReservationTypes");
     });
