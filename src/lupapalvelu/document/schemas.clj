@@ -862,7 +862,7 @@
                              {:name "ter\u00e4s"}
                              {:name "puu"}
                              ei-tiedossa]}
-                     {:name "muuRakennusaine" :type :string}
+                     {:name "muuRakennusaine" :type :string :i18nkey "kantavaRakennusaine.muuRakennusaine"}
                      {:name "julkisivu" :type :select :sortBy :displayname :other-key "muuMateriaali"
                       :body [{:name "betoni"}
                              {:name "tiili"}
