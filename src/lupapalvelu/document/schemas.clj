@@ -882,7 +882,7 @@
                               {:name "uuni"}
                               {:name "ei l\u00e4mmityst\u00e4"}
                               ei-tiedossa]}
-                      {:name "lammonlahde" :type :select :sortBy :displayname :other-key "muu-lammonlahde"
+                      {:name "lammonlahde" :type :select :sortBy :displayname :other-key "muu-lammonlahde" :i18nkey "lammonlahde"
                        :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                               {:name "kevyt poltto\u00f6ljy"}
                               {:name "raskas poltto\u00f6ljy"}
@@ -893,7 +893,7 @@
                               {:name "maal\u00e4mp\u00f6"}
                               {:name "puu"}
                               ei-tiedossa]}
-                      {:name "muu-lammonlahde" :type :string}]})
+                      {:name "muu-lammonlahde" :type :string :i18nkey "lammonlahde.muu-lammonlahde"}]})
 
 (def verkostoliittymat {:name "verkostoliittymat" :type :group :layout :vertical :i18nkey "verkostoliittymat"
                         :body [{:name "viemariKytkin" :type :checkbox :i18nkey "viemariKytkin"}
