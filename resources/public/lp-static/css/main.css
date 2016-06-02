@@ -1,5 +1,18 @@
-@import url('main-blessed1.css?z=1464350459327');
+@import url('main-blessed1.css?z=1464858662016');
 
+
+/* application section styles*/
+/*Summary styles*/
+/* line 65, ../../../private/common-html/sass/views/_application.scss */
+.application_summary {
+  background-color: #eeeeee;
+  border-bottom: 2px solid #bbbbbb;
+  min-height: 332px;
+  padding: 6px 0 0 0;
+  position: relative;
+  display: block;
+  float: none;
+}
 /* line 74, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .container {
   margin-bottom: 0;
