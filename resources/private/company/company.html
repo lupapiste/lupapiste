@@ -128,8 +128,8 @@
           <table data-bind="visible: !pending()" class="company-users-table" data-test-id="company-users-table">
             <thead>
               <tr>
-                <th data-bind="ltext: 'company.user.firstName'"></th>
                 <th data-bind="ltext: 'company.user.lastName'"></th>
+                <th data-bind="ltext: 'company.user.firstName'"></th>
                 <th data-bind="ltext: 'company.user.email'"></th>
                 <th data-bind="ltext: 'company.user.enabled'"></th>
                 <th data-bind="ltext: 'company.user.role'"></th>
@@ -139,11 +139,11 @@
             </thead>
             <tbody>
               <!-- ko foreach: invitations -->
-              <tr>
-                <td data-bind="text: firstName,
-                               attr: {'data-test-id': 'invitation-firstname-' + $index()}"></td>
+              <tr>                
                 <td data-bind="text: lastName,
                                attr: {'data-test-id': 'invitation-lastname-' + $index()}"></td>
+                <td data-bind="text: firstName,
+                               attr: {'data-test-id': 'invitation-firstname-' + $index()}"></td>
                 <td data-bind="text: email,
                                attr: {'data-test-id': 'invitation-email-' + $index()}"></td>
                 <td data-bind="ltext: 'company.user.invited',
@@ -160,11 +160,11 @@
               </tr>
               <!-- /ko -->
               <!-- ko foreach: users -->
-              <tr>
-                <td data-bind="text: firstName,
-                               attr: {'data-test-id': 'company-user-firstname-' + $index()}"></td>
+              <tr>                
                 <td data-bind="text: lastName,
                                attr: {'data-test-id': 'company-user-lastname-' + $index()}"></td>
+                <td data-bind="text: firstName,
+                               attr: {'data-test-id': 'company-user-firstname-' + $index()}"></td>
                 <td data-bind="text: email,
                                attr: {'data-test-id': 'company-user-email-' + $index()}"></td>
                 <td data-bind="ltext: 'company.user.enabled.' + enabled,

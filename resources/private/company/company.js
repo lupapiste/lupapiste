@@ -24,13 +24,11 @@
     self.admin     = ko.observable();
     self.submit    = ko.observable();
 
-    self.validated = ko.validatedObservable( {
-      email: self.email,
-      firstName: self.firstName,
-      lastName: self.lastName
-    });
+    // Checking the required name fields without triggering validation.
+    var namesValid = ko.pureComputed(function() {
+      return _.every( [self.firstName(), self.lastName()], _.trim );
+    } );
 
-    self.isValid = self.validated.isValid;
     self.showSearchEmail    = ko.observable();
     self.showUserInCompany  = ko.observable();
     self.showUserAlreadyInvited = ko.observable();
@@ -44,7 +42,7 @@
     self.emailEnabled     = ko.observable();
     self.done             = ko.observable();
 
-    self.canSubmit = ko.computed(function() { return !self.pending() && !self.done() && self.isValid(); }, self);
+    self.canSubmit = ko.computed(function() { return !self.pending() && !self.done() && namesValid();}, self);
     self.canClose  = ko.computed(function() { return !self.pending(); }, self);
   }
 
@@ -55,6 +53,7 @@
 
   NewCompanyUser.prototype.searchUser = function() {
     this.emailEnabled(false);
+    this.oldUser( false );
     ajax
       .query("company-search-user", {email: this.email()})
       .pending(this.pending)

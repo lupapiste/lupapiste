@@ -122,7 +122,7 @@
   (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :reference :document] (array-map :name 1)))
 
 (defn find-company-users [company-id]
-  (usr/get-users {:company.id company-id}))
+  (usr/get-users {:company.id company-id} {:lastName 1}))
 
 (defn company-users-count [company-id]
   (mongo/count :users {:company.id company-id}))
@@ -138,12 +138,13 @@
       (assoc :expires (:expires token))))
 
 (defn find-user-invitations [company-id]
-  (let [tokens (mongo/select :token {$and [{:token-type {$in ["invite-company-user" "new-company-user"]}}
-                                           {:data.company.id company-id}
-                                           {:expires {$gt (now)}}
-                                           {:used nil}]}
+  (let [tokens (mongo/select :token
+                             {$and [{:token-type {$in ["invite-company-user" "new-company-user"]}}
+                                    {:data.company.id company-id}
+                                    {:expires {$gt (now)}}
+                                    {:used nil}]}
                              {:data 1 :tokenId 1}
-                             {:data.user.firstName 1})
+                             {:data.user.lastName 1})
         data (map map-token-to-user-invitation tokens)]
     data))
 
