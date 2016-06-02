@@ -1364,6 +1364,8 @@
 "osapuoli.suoramarkkinointilupa" "sv" "Uppgifterna får överlämnas för direktmarknadsföring och åsikts- och marknadsundersökningar."
 "osapuoli.suunnittelija.kuntaRoolikoodi._group_label" "fi" "Suunnittelurooli"
 "osapuoli.suunnittelija.kuntaRoolikoodi._group_label" "sv" "Planeringsroll"
+"osapuoli.suunnittelija.kuntaRoolikoodi.pääsuunnittelija" "fi" "Pääsuunnittelija"
+"osapuoli.suunnittelija.kuntaRoolikoodi.pääsuunnittelija" "sv" "Huvudprojekterare"
 "osapuoli.suunnittelija.kuntaRoolikoodi.ARK-rakennussuunnittelija" "fi" "ARK-rakennussuunnittelija"
 "osapuoli.suunnittelija.kuntaRoolikoodi.ARK-rakennussuunnittelija" "sv" "Byggnadsplanerare"
 "osapuoli.suunnittelija.kuntaRoolikoodi.ei tiedossa" "fi" "Ei tiedossa"
