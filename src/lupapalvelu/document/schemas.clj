@@ -917,7 +917,7 @@
 
 (def luokitus {:name "luokitus"
                :type :group
-               :body [{:name "energialuokka" :type :select :sortBy :displayname
+               :body [{:name "energialuokka" :type :select :sortBy :displayname :i18nkey "energialuokka"
                        :body [{:name "A"}
                               {:name "B"}
                               {:name "C"}
