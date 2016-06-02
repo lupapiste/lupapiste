@@ -856,7 +856,7 @@
                       :body [{:name "elementti"}
                              {:name "paikalla"}
                              ei-tiedossa]}
-                     {:name "kantavaRakennusaine" :type :select :sortBy :displayname :required true :other-key "muuRakennusaine"
+                     {:name "kantavaRakennusaine" :type :select :sortBy :displayname :required true :other-key "muuRakennusaine" :i18nkey "kantavaRakennusaine"
                       :body [{:name "betoni"}
                              {:name "tiili"}
                              {:name "ter\u00e4s"}
