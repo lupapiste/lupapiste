@@ -12,14 +12,14 @@ Company admin logs in
   Open company user listing
 
 Check Kaino's status
-  Check company user  0  kaino@solita.fi  Kaino  Solita  Ylläpitäjä  Kyllä
+  Check company user  0  kaino@solita.fi  Solita  Kaino  Ylläpitäjä  Kyllä
   No such test id  company-user-delete-0
 
 Invite Duff3
   Invite existing user  dummy3@example.com  Duff3  Dummy3  
 
 Check Duff3 invitation status
-  Check invitation  0  dummy3@example.com  Duff3  Dummy3  Käyttäjä  Kyllä
+  Check invitation  0  dummy3@example.com  Dummy3  Duff3  Käyttäjä  Kyllä
 
 Duff3 cannot be invited again
   Click enabled by test id  company-add-user
@@ -53,18 +53,18 @@ Admin logs in again
 
 Duff3 is an active member in the company
   No such test id  invitation-firstname-0
-  Check company user  0  dummy3@example.com  Duff3  Dummy3  Käyttäjä  Kyllä
+  Check company user  0  dummy3@example.com  Dummy3  Duff3  Käyttäjä  Kyllä
 
 Convert Duff3 user to admin and rescind submit rights
   Edit company user  0  admin  Ei
   Click by test id  company-user-save-0
   Confirm  dynamic-yes-no-confirm-dialog
-  Check company user  0  dummy3@example.com  Duff3  Dummy3  Ylläpitäjä  Ei
+  Check company user  0  dummy3@example.com  Dummy3  Duff3  Ylläpitäjä  Ei
 
 Canceled edit does not change user information
   Edit company user  0  user  Kyllä
   Click by test id  company-user-cancel-0
-  Check company user  0  dummy3@example.com  Duff3  Dummy3  Ylläpitäjä  Ei
+  Check company user  0  dummy3@example.com  Dummy3  Duff3  Ylläpitäjä  Ei
 
 Can not add the same user again
   Click enabled by test id  company-add-user
@@ -95,7 +95,7 @@ Add new user
   Click enabled by test id  company-user-send-invite
   Wait until  Element text should be  testCompanyAddUserDone  Käyttäjä kutsuttu.
   Click enabled by test id  company-new-user-invited-close-dialog
-  Check invitation  0  user2@solita.fi  Ulla  Ser  Ylläpitäjä  Ei  
+  Check invitation  0  user2@solita.fi  Ser  Ulla  Ylläpitäjä  Ei  
 
 New user gets email
   Open last email
@@ -125,7 +125,8 @@ New user logs in
 
 Ulla sees herself as company admin
   Open company user listing
-  Check company user  0  user2@solita.fi  Ulla  Ser  Ylläpitäjä  Ei  
+  # Ser, Solita
+  Check company user  0  user2@solita.fi  Ser  Ulla  Ylläpitäjä  Ei  
   No such test id  company-user-delete-0
   Wait test id visible  company-add-user
   Wait test id visible  company-user-edit-1
@@ -133,7 +134,7 @@ Ulla sees herself as company admin
 
 Ulla invites Pena into company
   Invite existing user  pena@example.com  Pena  Panaani  false  false
-  Check invitation  0  pena@example.com  Pena  Panaani  Käyttäjä  Ei
+  Check invitation  0  pena@example.com  Panaani  Pena  Käyttäjä  Ei
   [Teardown]  Logout
 
 Pena accepts invitation
@@ -146,8 +147,8 @@ Pena logs in and sees the non-admin view of the company
   Go to login page
   Pena logs in
   Open company user listing
-  # Pena is second after Ulla
-  Check company user  1  pena@example.com  Pena  Panaani  Käyttäjä  Ei  
+  # Panaani, Ser, Solita
+  Check company user  0  pena@example.com  Panaani  Pena  Käyttäjä  Ei  
   No such test id  company-add-user
   No such test id  company-user-edit-1
   No such test id  company-user-delete-1
@@ -245,18 +246,18 @@ Invite existing user
 
 
 Check invitation
-  [Arguments]  ${index}  ${email}  ${firstname}  ${lastname}  ${role}  ${submit}
-  Test id should contain  invitation-firstname-${index}  ${firstname}
+  [Arguments]  ${index}  ${email}  ${lastname}  ${firstname}  ${role}  ${submit}
   Test id should contain  invitation-lastname-${index}  ${lastname}
+  Test id should contain  invitation-firstname-${index}  ${firstname}
   Test id should contain  invitation-email-${index}  ${email}
   Test id should contain  invitation-invited-${index}  Kutsuttu
   Test id should contain  invitation-role-${index}  ${role}
   Test id should contain  invitation-submit-${index}  ${submit}
 
 Check company user
-  [Arguments]  ${index}  ${email}  ${firstname}  ${lastname}  ${role}  ${submit}
-  Test id should contain  company-user-firstname-${index}  ${firstname}
+  [Arguments]  ${index}  ${email}  ${lastname}  ${firstname}  ${role}  ${submit}
   Test id should contain  company-user-lastname-${index}  ${lastname}
+  Test id should contain  company-user-firstname-${index}  ${firstname}
   Test id should contain  company-user-email-${index}  ${email}
   Test id should contain  company-user-enabled-${index}  Käytössä
   Test id should contain  company-user-role-${index}  ${role}

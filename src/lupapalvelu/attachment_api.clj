@@ -151,7 +151,7 @@
   (->> (attachment/resolve-ram-links attachments attachmentId)
        ;; We include modified in order to have a timestamp even if the
        ;; attachment is empty.
-       (map #(select-keys % [:id :latestVersion :modified :approved :ram-link]))
+       (map #(select-keys % [:id :latestVersion :modified :approved :ramLink]))
        (ok :ram-links)))
 
 ;;
@@ -217,7 +217,7 @@
                   (when-not (util/find-by-id attachment-id attachments)
                     (fail :error.attachment.id)))
                 (fn [{{attachment-id :attachmentId} :data} {attachments :attachments}]
-                  (when (some (comp #{attachment-id} :ram-link) attachments)
+                  (when (some (comp #{attachment-id} :ramLink) attachments)
                     (fail :error.ram-link-already-exists)))
                 attachment/ram-status-ok]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]

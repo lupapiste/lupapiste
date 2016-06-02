@@ -472,7 +472,7 @@ var attachment = (function() {
 
     model.showAttachmentVersionHistory(false);
     model.showTosMetadata(false);
-    model.isRamAttachment( Boolean( attachment["ram-link"]));
+    model.isRamAttachment( Boolean( attachment.ramLink));
 
     pageutil.hideAjaxWait();
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {

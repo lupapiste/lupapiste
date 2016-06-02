@@ -205,7 +205,7 @@
                                           :fileId ssc/ObjectIdStr }
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
-   (sc/optional-key :ram-link)           sc/Str            ;; reference from ram attachment to base attachment
+   (sc/optional-key :ramLink)           sc/Str            ;; reference from ram attachment to base attachment
    :required                             sc/Bool            ;;
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;
@@ -405,28 +405,28 @@
 (defn ram-status-ok
   "Pre-checker that fails only if the attachment is unapproved RAM attachment."
   [{{attachment-id :attachmentId} :data} {attachments :attachments}]
-  (let [{:keys [ram-link state]} (util/find-by-id attachment-id attachments)]
-    (when (and (-> ram-link ss/blank? not)
-               (not= (keyword state) :ok))
+  (let [{:keys [ramLink state]} (util/find-by-id attachment-id attachments)]
+    (when (and (-> ramLink ss/not-blank?)
+               (util/not=as-kw state :ok))
       (fail :error.ram-not-approved))))
 
 (defn ram-status-not-ok
   "Pre-checker that fails only if the attachment is approved RAM attachment."
   [{{attachment-id :attachmentId} :data} {attachments :attachments}]
-  (let [{:keys [ram-link state]} (util/find-by-id attachment-id attachments)]
-    (when (and (-> ram-link ss/blank? not)
-               (= (keyword state) :ok))
+  (let [{:keys [ramLink state]} (util/find-by-id attachment-id attachments)]
+    (when (and (-> ramLink ss/not-blank?)
+               (util/=as-kw state :ok))
       (fail :error.ram-approved))))
 
 (defn- find-by-ram-link [link attachments]
-  (util/find-first (comp #{link} :ram-link) attachments))
+  (util/find-first (comp #{link} :ramLink) attachments))
 
 (defn ram-not-root-attachment
   "Pre-checker that fails if the attachment is the root for RAM
   attachments and the user is applicant (authority can delete the
   root)."
   [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
-  (when (and (-> attachment-id (util/find-by-id attachments) :ram-link ss/blank?)
+  (when (and (-> attachment-id (util/find-by-id attachments) :ramLink ss/blank?)
              (find-by-ram-link attachment-id attachments)
              (usr/applicant? user))
     (fail :error.ram-cannot-delete-root)))
@@ -435,7 +435,7 @@
 (defn- make-ram-attachment [{:keys [id op target type contents scale size] :as base-attachment} application now]
   (->> (default-tos-metadata-for-attachment-type type application)
        (make-attachment now target false false false (:state application) op type)
-       (#(merge {:ram-link id}
+       (#(merge {:ramLink id}
                 %
                 (when contents {:contents contents})
                 (when scale    {:scale scale})
@@ -455,7 +455,7 @@
   (-> []
       (#(loop [res % id attachment-id] ; Backward linking
            (if-let [attachment (and id (not (util/find-by-id id res)) (util/find-by-id id attachments))]
-             (recur (cons attachment res) (:ram-link attachment))
+             (recur (cons attachment res) (:ramLink attachment))
              (vec res))))
       (#(loop [res % id attachment-id] ; Forward linking
            (if-let [attachment (and id (not (find-by-ram-link id res)) (find-by-ram-link id attachments))]

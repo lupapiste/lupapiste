@@ -393,7 +393,7 @@
       (:type ram-attachment) => (:type base-attachment))
 
     (fact "ram-link is created"
-      (:ram-link ram-attachment) => (:id base-attachment))
+      (:ramLink ram-attachment) => (:id base-attachment))
 
     (fact "ram-attachment is valid"
       (sc/check Attachment ram-attachment) => nil))
@@ -411,39 +411,39 @@
 
 (facts resolve-ram-linked-attachments
   (fact "backward ram link"
-    (let [attachment1 (assoc (ssg/generate Attachment) :ram-link nil)
-          attachment2 (assoc (ssg/generate Attachment) :ram-link (:id attachment1))]
+    (let [attachment1 (assoc (ssg/generate Attachment) :ramLink nil)
+          attachment2 (assoc (ssg/generate Attachment) :ramLink (:id attachment1))]
       (resolve-ram-links [attachment1 attachment2] (:id attachment2)) => [attachment1 attachment2]))
 
   (fact "forward ram link"
-    (let [attachment1 (assoc (ssg/generate Attachment) :ram-link nil)
-          attachment2 (assoc (ssg/generate Attachment) :ram-link (:id attachment1))]
+    (let [attachment1 (assoc (ssg/generate Attachment) :ramLink nil)
+          attachment2 (assoc (ssg/generate Attachment) :ramLink (:id attachment1))]
       (resolve-ram-links [attachment1 attachment2] (:id attachment1)) => [attachment1 attachment2]))
 
   (fact "no linking"
     (let [ids         (gen/sample ssg/object-id 5)
-          attachments (mapv (fn [id] {:id id :ram-link nil}) ids)]
+          attachments (mapv (fn [id] {:id id :ramLink nil}) ids)]
       (resolve-ram-links attachments (:id (nth attachments 2))) => [(nth attachments 2)]))
 
   (fact "complete ram link chain"
     (let [ids         (gen/sample ssg/object-id 5)
-          attachments (map (fn [[link id]] {:id id :ram-link link}) (partition 2 1 ids))]
+          attachments (map (fn [[link id]] {:id id :ramLink link}) (partition 2 1 ids))]
       (resolve-ram-links attachments (nth ids 2)) => attachments))
 
   (fact "inclomplete ram link chain"
     (let [ids         (gen/sample ssg/object-id 5)
-          attachments (-> (mapv (fn [[link id]] {:id id :ram-link link}) (partition 2 1 ids))
-                          (assoc-in [3 :ram-link] nil))]
+          attachments (-> (mapv (fn [[link id]] {:id id :ramLink link}) (partition 2 1 ids))
+                          (assoc-in [3 :ramLink] nil))]
       (resolve-ram-links attachments (nth ids 1)) => (take 3 attachments)))
 
   (fact "self-linked - should not get in endless loop"
     (let [id          (ssg/generate ssc/ObjectIdStr)
-          attachment  {:id id :ram-link id}]
+          attachment  {:id id :ramLink id}]
       (resolve-ram-links [attachment] id) => [attachment]))
 
   (fact "link ring - should not get in endless loop"
     (let [ids         (gen/sample ssg/object-id 5)
-          attachments (map (fn [[link id]] {:id id :ram-link link}) (partition 2 1 ids ids)) ; padded with first id
+          attachments (map (fn [[link id]] {:id id :ramLink link}) (partition 2 1 ids ids)) ; padded with first id
           result      (resolve-ram-links attachments (nth ids 2))]
       (count result) => (count attachments)
       (set result)   => (just attachments))))
@@ -451,9 +451,9 @@
 (facts "RAM pre-checkers"
        (defn ram-fail [code] {:ok false :text (name code)})
 
-       (let [att1 (dissoc (ssg/generate Attachment) :ram-link)
-             att2 (assoc (ssg/generate Attachment) :ram-link (:id att1))
-             att3 (assoc (ssg/generate Attachment) :ram-link (:id att2))]
+       (let [att1 (dissoc (ssg/generate Attachment) :ramLink)
+             att2 (assoc (ssg/generate Attachment) :ramLink (:id att1))
+             att3 (assoc (ssg/generate Attachment) :ramLink (:id att2))]
          (fact "ram-status-ok"
                (ram-status-ok {:data {:attachmentId (:id att1)}}
                               {:attachments [att1 att2]}) => nil?

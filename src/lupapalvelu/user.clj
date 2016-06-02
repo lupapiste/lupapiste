@@ -236,8 +236,11 @@
 (defn find-user [query]
   (mongo/select-one :users (user-query query)))
 
-(defn find-users [query]
-  (mongo/select :users (user-query query)))
+(defn find-users
+  ([query]
+   (mongo/select :users (user-query query)))
+  ([query order-by]
+   (mongo/select-ordered :users (user-query query) order-by)))
 
 (defn find-authorized-users-in-org [org-id & org-authz]
   (mongo/select :users
@@ -333,8 +336,11 @@
 (defn get-user [q]
   (non-private (find-user q)))
 
-(defn get-users [q]
-  (map non-private (find-users q)))
+(defn get-users
+  ([q]
+   (map non-private (find-users q)))
+  ([q order-by]
+   (map non-private (find-users q order-by))))
 
 (defn get-user-by-id [id]
   {:pre [id]}
