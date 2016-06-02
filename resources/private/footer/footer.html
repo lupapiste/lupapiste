@@ -29,7 +29,11 @@
         <h3 data-bind="ltext: 'footer.contact'"></h3>
         <ul>
           <li><a data-bind="attr: { href: loc( 'footer.support.request.href' ) },
-                            text: loc( 'footer.support.request.text' )"></a><br /><span data-bind="ltext: 'footer.support.request.text2'"></span></li>
+                            text: loc( 'footer.support.request.text' )"></a>
+        <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() && !lupapisteApp.models.currentUser.isCompanyUser() -->
+                            <br /><span data-bind="ltext: 'footer.support.request.text2'"></span>
+        <!-- /ko -->
+          </li>
         <!-- ko if: lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.isCompanyUser()) -->
           <li><a href="mailto:tuki@lupapiste.fi">tuki@lupapiste.fi</a></li>
           <li><span><span data-bind="ltext: 'footer.tel'"></span> 044 750 4471</span></li>
