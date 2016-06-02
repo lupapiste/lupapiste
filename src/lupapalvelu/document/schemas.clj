@@ -1022,7 +1022,7 @@
                              :repeating true
                              :approvable true
                              :body (body building-parties
-                                     [{:name "omistajalaji" :type :select :sortBy :displayname :other-key "muu-omistajalaji" :required true :size :l :ii18nkey "omistajalaji._group_label"
+                                     [{:name "omistajalaji" :type :select :sortBy :displayname :other-key "muu-omistajalaji" :required true :size :l :i18nkey "omistajalaji._group_label"
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4" :i18nkey "omistajalaji.yksityinen-maatalousyrittaja"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta" :i18nkey "omistajalaji.muu-yksityinen"}
                                               {:name "asunto-oy tai asunto-osuuskunta" :i18nkey "omistajalaji.asunto-oy-tms"}
@@ -1044,7 +1044,7 @@
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
 
 (def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
-                     {:name "muutostyolaji" :type :select :sortBy :displayname :required true
+                     {:name "muutostyolaji" :type :select :sortBy :displayname :required true :i18nkey "muutostyolaji"
                       :body
                       [{:name perustusten-korjaus}
                        {:name kayttotarkotuksen-muutos}
