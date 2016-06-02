@@ -929,7 +929,7 @@
                       {:name "energiatehokkuusluvunYksikko" :type :select, :sortBy :displayname, :default "kWh/m2"
                        :body [{:name "kWh/m2"}
                               {:name "kWh/brm2/vuosi"}]}
-                      {:name "paloluokka" :type :select :sortBy :displayname
+                      {:name "paloluokka" :type :select :sortBy :displayname :i18nkey "paloluokka"
                        :body [{:name "palonkest\u00e4v\u00e4"}
                                {:name "paloapid\u00e4tt\u00e4v\u00e4"}
                                {:name "paloahidastava"}
