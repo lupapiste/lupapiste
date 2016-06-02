@@ -875,7 +875,7 @@
 
 (def lammitys {:name "lammitys"
                :type :group
-               :body [{:name "lammitystapa" :type :select :sortBy :displayname
+               :body [{:name "lammitystapa" :type :select :sortBy :displayname :i18nkey "lammitystapa"
                        :body [{:name "vesikeskus"}
                               {:name "ilmakeskus"}
                               {:name "suora s\u00e4hk\u00f6"}
