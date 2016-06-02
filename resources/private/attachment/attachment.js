@@ -78,10 +78,7 @@ var attachment = (function() {
     showTosMetadata:              ko.observable(false),
     dirty:                        false,
     attachmentVisibilities:       ko.observableArray(LUPAPISTE.config.attachmentVisibilities),
-
-    // toggleHelp: function() {
-    //   model.showHelp(!model.showHelp());
-    // },
+    isRamAttachment:              ko.observable(),
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -475,6 +472,7 @@ var attachment = (function() {
 
     model.showAttachmentVersionHistory(false);
     model.showTosMetadata(false);
+    model.isRamAttachment( Boolean( attachment["ram-link"]));
 
     pageutil.hideAjaxWait();
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {

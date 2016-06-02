@@ -447,3 +447,53 @@
           result      (resolve-ram-links attachments (nth ids 2))]
       (count result) => (count attachments)
       (set result)   => (just attachments))))
+
+(facts "RAM pre-checkers"
+       (defn ram-fail [code] {:ok false :text (name code)})
+
+       (let [att1 (dissoc (ssg/generate Attachment) :ram-link)
+             att2 (assoc (ssg/generate Attachment) :ram-link (:id att1))
+             att3 (assoc (ssg/generate Attachment) :ram-link (:id att2))]
+         (fact "ram-status-ok"
+               (ram-status-ok {:data {:attachmentId (:id att1)}}
+                              {:attachments [att1 att2]}) => nil?
+               (ram-status-ok {:data {:attachmentId (:id att2)}}
+                              {:attachments [att1 (dissoc att2 :state)]}) => (contains (ram-fail :error.ram-not-approved))
+               (ram-status-ok {:data {:attachmentId (:id att2)}}
+                              {:attachments [att1 (assoc att2 :state :ok)]}) => nil?)
+
+         (fact "ram-status-not-ok"
+               (ram-status-not-ok {:data {:attachmentId (:id att1)}}
+                                  {:attachments [att1 att2]}) => nil?
+               (ram-status-not-ok {:data {:attachmentId (:id att1)}}
+                                  {:attachments [(assoc att1 :state :ok) att2]}) => nil?
+               (ram-status-not-ok {:data {:attachmentId (:id att2)}}
+                                  {:attachments [att1 (dissoc att2 :state)]}) => nil?
+               (ram-status-not-ok {:data {:attachmentId (:id att2)}}
+                                  {:attachments [att1 (assoc att2 :state :ok)]}) => (contains (ram-fail :error.ram-approved)))
+
+         (fact "ram-not-root-attachment"
+               (ram-not-root-attachment {:user {:role :authority}
+                                         :data {:attachmentId (:id att1)}}
+                                        {:attachments [att1]}) => nil?
+               (ram-not-root-attachment  {:user {:role :applicant}
+                                          :data {:attachmentId (:id att1)}}
+                                         {:attachments [att1]}) => nil?
+               (ram-not-root-attachment  {:user {:role :applicant}
+                                          :data {:attachmentId (:id att2)}}
+                                         {:attachments [att1]}) => nil?
+               (ram-not-root-attachment {:user {:role :authority}
+                                         :data {:attachmentId (:id att2)}}
+                                        {:attachments [att1]}) => nil?
+               (ram-not-root-attachment  {:user {:role :authority}
+                                          :data {:attachmentId (:id att1)}}
+                                         {:attachments [att1 att2]}) => nil?
+               (ram-not-root-attachment  {:user {:role :applicant}
+                                          :data {:attachmentId (:id att1)}}
+                                         {:attachments [att1 att2]})=> (ram-fail :error.ram-cannot-delete-root)
+               (ram-not-root-attachment  {:user {:role :applicant}
+                                          :data {:attachmentId (:id att2)}}
+                                         {:attachments [att1 att2]})= nil?
+               (ram-not-root-attachment  {:user {:role :applicant}
+                                          :data {:attachmentId (:id att2)}}
+                                         {:attachments [att1 att2 att3]}))))

@@ -149,7 +149,7 @@
   min-height: $baseline * 4;
   position: relative;
   margin: $marginM  0;
-  padding-bottom: 24px;
+  padding-bottom: 64px;
 
   .dialog-desc {
     width: 300px;
@@ -207,6 +207,10 @@
 
 .dialog-content__footer {
   margin-top: $marginL;
+}
+
+.dialog-content.dialog-content--no-padding {
+  padding-bottom: 0;
 }
 
 .scrolling-content {

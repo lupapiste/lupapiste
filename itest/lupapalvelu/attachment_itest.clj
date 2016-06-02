@@ -561,27 +561,72 @@
       (count (:comments application)) => 0 ; before upload
       (count comments) => 1)))
 
-(facts "Creating RAM attachment"
-  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
-        {attachments :attachments} (query-application pena (:id application))
-        base-attachment (first attachments)]
+
+(facts "RAM attachments"
+       (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
+             application-id (:id application)
+             {attachments :attachments} (query-application pena application-id)
+             base-attachment (first attachments)]
 
     (fact "Cannot create ram attachment before verdict is given"
-      (command pena :create-ram-attachment :id (:id application) :attachmentId (:id base-attachment))
+      (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
       => (partial expected-failure? :error.command-illegal-state))
 
     (fact "Give verdict"
-      (command sonja :check-for-verdict :id (:id application))
-      => ok?)
+          (command sonja :check-for-verdict :id application-id)
+          => ok?)
 
     (fact "Attachment id should match attachment in the application"
-      (command pena :create-ram-attachment :id (:id application) :attachmentId "invalid_id")
+      (command pena :create-ram-attachment :id application-id :attachmentId "invalid_id")
       => (partial expected-failure? :error.attachment.id))
 
     (fact "RAM link is created"
-      (command pena :create-ram-attachment :id (:id application) :attachmentId (:id base-attachment))
+      (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
       => ok?)
 
     (fact "RAM link cannot be created twice on same attachment"
-      (command pena :create-ram-attachment :id (:id application) :attachmentId (:id base-attachment))
-      => (partial expected-failure? :error.ram-link-already-exists))))
+          (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
+          => (partial expected-failure? :error.ram-link-already-exists))
+
+    (defn latest-attachment []
+      (-> (query-application pena application-id) :attachments last))
+
+    (fact "Pena uploads new post-verdict attachment and corresponding RAM attachment"
+          (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+          (let [base (latest-attachment)]
+            (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?
+            (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+            (fact "Applicant cannot delete base attachment"
+                  (command pena :delete-attachment :id application-id :attachmentId (:id base))
+                  => (partial expected-failure? :error.ram-cannot-delete-root))
+            (fact "Applicant cannot delete base attachment version"
+                  (command pena :delete-attachment-version :id application-id :attachmentId (:id base)
+                           :fileId (-> base :latestVersion :fileId) :originalFileId (-> base :latestVersion :originalFileId))
+                  => (partial expected-failure? :error.ram-cannot-delete-root))))
+    (let [ram-id (:id (latest-attachment))]
+      (fact "Sonja approves RAM attachment"
+            (command sonja :approve-attachment :id application-id :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
+      (let [{{:keys [fileId originalFileId]} :latestVersion :as ram} (latest-attachment)]
+        (fact "RAM is approved" (:state ram) => "ok")
+        (fact "Sonja cannot delete approved RAM"
+              (command sonja :delete-attachment :id application-id :attachmentId ram-id) => (partial expected-failure? :error.ram-approved))
+        (fact "Sonja cannot delete approved RAM version"
+              (command sonja :delete-attachment-version :id application-id :attachmentId ram-id
+                       :fileId fileId :originalFileId originalFileId) => (partial expected-failure? :error.ram-approved))
+        (fact "Pena cannot delete approved RAM"
+              (command pena :delete-attachment :id application-id :attachmentId ram-id) => (partial expected-failure? :error.ram-approved))
+        (fact "Pena cannot delete approved RAM version"
+              (command pena :delete-attachment-version :id application-id :attachmentId ram-id
+                       :fileId fileId :originalFileId originalFileId) => (partial expected-failure? :error.ram-approved))
+        (fact "Sonja rejects RAM attachment"
+              (command sonja :reject-attachment :id application-id :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
+        (fact "Pena can delete rejected RAM version"
+              (command pena :delete-attachment-version :id application-id :attachmentId ram-id
+                       :fileId fileId :originalFileId originalFileId) => ok?)
+        (fact "Pena can delete rejected RAM"
+              (command pena :delete-attachment :id application-id :attachmentId ram-id) => ok?)
+        (let [base (latest-attachment)]
+          (fact "Pena again creates RAM attachment"
+                (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
+          (fact "Sonja can delete base attachment"
+                (command sonja :delete-attachment :id application-id :attachmentId (:id base)) => ok?))))))

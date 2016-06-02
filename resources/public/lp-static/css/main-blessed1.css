@@ -9268,7 +9268,7 @@ ul.tabs {
   min-height: 96px;
   position: relative;
   margin: 12px 0;
-  padding-bottom: 24px;
+  padding-bottom: 64px;
   /* [type=submit], .btn, button { */
   /*   //padding: 4px $marginL; */
   /*   min-width: $cols2; */
@@ -9328,18 +9328,23 @@ ul.tabs {
 }
 
 /* line 212, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content.dialog-content--no-padding {
+  padding-bottom: 0;
+}
+
+/* line 216, ../../../private/common-html/sass/partials/_modal.scss */
 .scrolling-content {
   overflow-y: scroll;
   max-height: 288px;
 }
 
-/* line 217, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 221, ../../../private/common-html/sass/partials/_modal.scss */
 .dialog-content-low {
   min-height: 72px;
   padding-bottom: 0;
 }
 
-/* line 223, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 227, ../../../private/common-html/sass/partials/_modal.scss */
 .with-map {
   /* .map-container { */
   /*   //padding: 0; */
@@ -9368,37 +9373,37 @@ ul.tabs {
 /*   vertical-align: top; */
 /*   padding-left: $marginM; */
 /* } */
-/* line 257, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 261, ../../../private/common-html/sass/partials/_modal.scss */
 .neighbors-message {
   margin: 12px;
 }
 
-/* line 262, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 266, ../../../private/common-html/sass/partials/_modal.scss */
 #dialog-add-link-permit .combobox {
   margin-bottom: 8px;
 }
 
-/* line 268, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 272, ../../../private/common-html/sass/partials/_modal.scss */
 #upload-dialog .dialog-content {
   padding-bottom: 0;
 }
 
-/* line 274, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 278, ../../../private/common-html/sass/partials/_modal.scss */
 #dialog-cancel-application div.application-cancel-text-content p {
   margin-bottom: 0;
 }
 
-/* line 280, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 284, ../../../private/common-html/sass/partials/_modal.scss */
 .authority-select-dialog select {
   width: 100%;
 }
 
-/* line 286, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 290, ../../../private/common-html/sass/partials/_modal.scss */
 .company-invite-dialog select {
   width: 100%;
 }
 
-/* line 292, ../../../private/common-html/sass/partials/_modal.scss */
+/* line 296, ../../../private/common-html/sass/partials/_modal.scss */
 .with-map-top {
   margin-top: 6px;
   margin-bottom: 0;
@@ -11450,17 +11455,4 @@ span.icon_clear {
 /* line 255, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear:before {
   color: #f52;
-}
-
-/* application section styles*/
-/*Summary styles*/
-/* line 65, ../../../private/common-html/sass/views/_application.scss */
-.application_summary {
-  background-color: #eeeeee;
-  border-bottom: 2px solid #bbbbbb;
-  min-height: 332px;
-  padding: 6px 0 0 0;
-  position: relative;
-  display: block;
-  float: none;
 }

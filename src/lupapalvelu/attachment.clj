@@ -398,6 +398,40 @@
     (tos/update-process-retention-period (:id application) now)
     (map :id attachments)))
 
+;; -------------------------------------------------------------------
+;; RAM
+;; -------------------------------------------------------------------
+
+(defn ram-status-ok
+  "Pre-checker that fails only if the attachment is unapproved RAM attachment."
+  [{{attachment-id :attachmentId} :data} {attachments :attachments}]
+  (let [{:keys [ram-link state]} (util/find-by-id attachment-id attachments)]
+    (when (and (-> ram-link ss/blank? not)
+               (not= (keyword state) :ok))
+      (fail :error.ram-not-approved))))
+
+(defn ram-status-not-ok
+  "Pre-checker that fails only if the attachment is approved RAM attachment."
+  [{{attachment-id :attachmentId} :data} {attachments :attachments}]
+  (let [{:keys [ram-link state]} (util/find-by-id attachment-id attachments)]
+    (when (and (-> ram-link ss/blank? not)
+               (= (keyword state) :ok))
+      (fail :error.ram-approved))))
+
+(defn- find-by-ram-link [link attachments]
+  (util/find-first (comp #{link} :ram-link) attachments))
+
+(defn ram-not-root-attachment
+  "Pre-checker that fails if the attachment is the root for RAM
+  attachments and the user is applicant (authority can delete the
+  root)."
+  [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
+  (when (and (-> attachment-id (util/find-by-id attachments) :ram-link ss/blank?)
+             (find-by-ram-link attachment-id attachments)
+             (usr/applicant? user))
+    (fail :error.ram-cannot-delete-root)))
+
+
 (defn- make-ram-attachment [{:keys [id op target type contents scale size] :as base-attachment} application now]
   (->> (default-tos-metadata-for-attachment-type type application)
        (make-attachment now target false false false (:state application) op type)
@@ -417,9 +451,6 @@
     (tos/update-process-retention-period (:id application) now)
     (:id ram-attachment)))
 
-(defn- find-by-ram-link [link attachments]
-  (util/find-first (comp #{link} :ram-link) attachments))
-
 (defn resolve-ram-links [attachments attachment-id]
   (-> []
       (#(loop [res % id attachment-id] ; Backward linking
@@ -430,6 +461,8 @@
            (if-let [attachment (and id (not (find-by-ram-link id res)) (find-by-ram-link id attachments))]
              (recur (conj res attachment) (:id attachment))
              (vec res))))))
+
+;; -------------------------------------------------------------------
 
 (defn- delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)
