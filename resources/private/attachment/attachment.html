@@ -51,7 +51,8 @@
               <div class="attachment-info-header">
                   <h1>
                     <span data-bind="visible: isRamAttachment,
-                                     ltext: 'ram.prefix'"></span>
+                                     ltext: 'ram.prefix'"
+                          data-test-id="ram-prefix"></span>
                     <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
                     <span data-bind="if: latestVersion">
                       <span data-bind="ltext: 'attachment.version'">versio</span>
