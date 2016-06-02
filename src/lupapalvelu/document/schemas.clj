@@ -863,7 +863,7 @@
                              {:name "puu"}
                              ei-tiedossa]}
                      {:name "muuRakennusaine" :type :string :i18nkey "kantavaRakennusaine.muuRakennusaine"}
-                     {:name "julkisivu" :type :select :sortBy :displayname :other-key "muuMateriaali"
+                     {:name "julkisivu" :type :select :sortBy :displayname :other-key "muuMateriaali" :i18nkey "julkisivu"
                       :body [{:name "betoni"}
                              {:name "tiili"}
                              {:name "metallilevy"}
@@ -871,7 +871,7 @@
                              {:name "puu"}
                              {:name "lasi"}
                              ei-tiedossa]}
-                     {:name "muuMateriaali" :type :string}]})
+                     {:name "muuMateriaali" :type :string :i18nkey "julkisivu.muuMateriaali"}]})
 
 (def lammitys {:name "lammitys"
                :type :group
