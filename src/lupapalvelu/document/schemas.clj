@@ -1022,22 +1022,22 @@
                              :repeating true
                              :approvable true
                              :body (body building-parties
-                                     [{:name "omistajalaji" :type :select :sortBy :displayname :other-key "muu-omistajalaji" :required true :size :l
-                                       :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
-                                              {:name "muu yksityinen henkil\u00f6 tai perikunta"}
-                                              {:name "asunto-oy tai asunto-osuuskunta"}
-                                              {:name "kiinteist\u00f6 oy"}
-                                              {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}
-                                              {:name "valtio- tai kuntaenemmist\u00f6inen yritys"}
-                                              {:name "kunnan liikelaitos"}
-                                              {:name "valtion liikelaitos"}
-                                              {:name "pankki tai vakuutuslaitos"}
-                                              {:name "kunta tai kuntainliitto"}
-                                              {:name "valtio"}
-                                              {:name "sosiaaliturvarahasto"}
-                                              {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
+                                     [{:name "omistajalaji" :type :select :sortBy :displayname :other-key "muu-omistajalaji" :required true :size :l :ii18nkey "omistajalaji._group_label"
+                                       :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4" :i18nkey "omistajalaji.yksityinen-maatalousyrittaja"}
+                                              {:name "muu yksityinen henkil\u00f6 tai perikunta" :i18nkey "omistajalaji.muu-yksityinen"}
+                                              {:name "asunto-oy tai asunto-osuuskunta" :i18nkey "omistajalaji.asunto-oy-tms"}
+                                              {:name "kiinteist\u00f6 oy" :i18nkey "omistajalaji.kiinteisto-oy"}
+                                              {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)" :i18nkey "omistajalaji.yksityinen-yritys"}
+                                              {:name "valtio- tai kuntaenemmist\u00f6inen yritys" :i18nkey "omistajalaji.valtio-tai-kunta-yritys"}
+                                              {:name "kunnan liikelaitos" :i18nkey "omistajalaji.kunnan-liikelaitos"}
+                                              {:name "valtion liikelaitos" :i18nkey "omistajalaji.valtion-liikelaitos"}
+                                              {:name "pankki tai vakuutuslaitos" :i18nkey "omistajalaji.pankki-tai-vakuutuslaitos"}
+                                              {:name "kunta tai kuntainliitto" :i18nkey "omistajalaji.kunta-tai-kuntaliitto"}
+                                              {:name "valtio" :i18nkey "omistajalaji.valtio"}
+                                              {:name "sosiaaliturvarahasto" :i18nkey "omistajalaji.sosiaaliturvarahasto"}
+                                              {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys" :i18nkey "omistajalaji.yhteiso-saatio-puolue-yhdistys"}
                                               ei-tiedossa]}
-                                      {:name "muu-omistajalaji" :type :string}])}])
+                                      {:name "muu-omistajalaji" :type :string :i18nkey "muu-omistajalaji"}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")
