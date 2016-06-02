@@ -2172,10 +2172,26 @@
                                           :permitType "YM"}) org))))
 
 (defmigration add-ym-permit-type-to-all-ymp-orgs
-  {:apply-when (pos? (mongo/count :organizations {:_id #"YMP" :scope.permitType {$not {"$eq" "YM"}}}))}
+  {:apply-when (pos? (mongo/count :organizations {:_id #"YMP" :scope.0 {$exists true} :scope.permitType {$not {"$eq" "YM"}}}))}
   (->> (mongo/select :organizations {:_id #"YMP" :scope.permitType {$not {"$eq" "YM"}}})
        (map add-ym-in-scope)
        (run! #(mongo/update-by-id :organizations (:id %) {$set {:scope (:scope %)}}))))
+
+(defmigration add-missing-submit-rights-to-company-users
+  {:apply-when (pos? (mongo/count :users {:company.id {$exists true}
+                                          :company.submit {$exists false}}))}
+  (mongo/update-by-query :users
+                         {:company.id {$exists true}
+                          :company.submit {$exists false}}
+                         {$set {:company.submit true}}))
+
+(defmigration add-missing-submit-rights-to-company-tokens
+  {:apply-when (pos? (mongo/count :token {:token-type {$in [:new-company-user :invite-company-user]}
+                                          :data.submit {$exists false}}))}
+  (mongo/update-by-query :token
+                         {:token-type {$in [:new-company-user :invite-company-user]}
+                          :data.submit {$exists false}}
+                         {$set {:data.submit true}}))
 
 ;;
 ;; ****** NOTE! ******

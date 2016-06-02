@@ -5,16 +5,7 @@
     <script type="text/x-jquery-tmpl" id="group-approval-template">
       <div class="group-buttons"
            data-bind="if: hasContents">
-        <span class="form-approval-status is-status"
-              data-bind="css: {rejected: isRejected,
-                               approved: isApproved},
-                               visible: showStatus">
-          <div class="like-btn">
-            <i class="lupicon-circle-attention rejected"></i>
-            <i class="lupicon-circle-check approved"></i>
-            <span class="is-details" data-bind="text: details"></span>
-          </div>
-        </span>
+        <span data-bind="template: 'approval-template'"></span>
         <button class="secondary is-right"
                 data-bind="visible: remove.fun,
                            data-test-class: remove.testClass,

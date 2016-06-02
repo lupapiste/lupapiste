@@ -159,12 +159,12 @@
     width: 450px;
   }
 
-  [type=submit], .btn, button {
-    //padding: 4px $marginL;
-    min-width: $cols2;
-    max-width: $cols3;
+  /* [type=submit], .btn, button { */
+  /*   //padding: 4px $marginL; */
+  /*   min-width: $cols2; */
+  /*   max-width: $cols3; */
 
-  }
+  /* } */
 
   .file-upload {
     margin: $marginM 0;
@@ -203,6 +203,14 @@
       height: 160px;
     }
   }
+}
+
+.dialog-content__footer {
+  margin-top: $marginL;
+}
+
+.dialog-content.dialog-content--no-padding {
+  padding-bottom: 0;
 }
 
 .scrolling-content {

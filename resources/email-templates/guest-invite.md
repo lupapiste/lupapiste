@@ -1,6 +1,6 @@
 # Moi!
 
-S&auml;hk&ouml;postiosoite {{recipient-email}} halutaan lis&auml;t&auml; osapuoleksi lupahakemukselle Lupapisteeseen. Lupapisteess&auml; voidaan hoitaa rakentamiseen liittyv&auml;&auml; lupa-asiointia yhdess&auml; muiden hankkeen osapuolten kesken. Vuorokauden ymp&auml;ri.
+S&auml;hk&ouml;postiosoite {{recipient-email}} halutaan lis&auml;t&auml; lukuoikeudella osapuoleksi lupahakemukselle Lupapisteeseen. Lupapisteess&auml; voidaan hoitaa rakentamiseen liittyv&auml;&auml; lupa-asiointia yhdess&auml; muiden hankkeen osapuolten kesken. Vuorokauden ymp&auml;ri.
 
 Jos et ole viel&auml; Lupapisteen k&auml;ytt&auml;j&auml;, hakemuksen n&auml;keminen edellytt&auml;&auml; rekister&ouml;itymist&auml; palveluun mobiilivarmenteen tai henkil&ouml;kohtaisten verkkopankkitunnuksien avulla. Muistathan rekister&ouml;ity&auml; palveluun samalla s&auml;hk&ouml;postiosoitteella, johon kutsu on l&auml;hetetty eli {{recipient-email}}.
 
@@ -8,7 +8,6 @@ N&auml;hd&auml;ksesi hakemuksen tiedot klikkaa t&auml;st&auml;:
 
 {{link-fi}}
 
-Hyv&auml;ksy kutsu niin saat kirjoitusoikeuden hakemukseen.
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 Mik&auml;li olet rekister&ouml;itynyt eri osoitteella Lupapisteeseen, pyyd&auml; kutsun l&auml;hett&auml;j&auml;lt&auml; {{inviter-email}} uusi kutsu.
@@ -35,7 +34,7 @@ Klicka h&auml;r f&ouml;r att se uppgifterna om ans&ouml;kan:
 
 {{link-sv}}
 
-Godkänn inbjudan för att få skrivåtkomsten. <-TÄMÄ PITÄÄ TARKISTAA!
+
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
 Om du registrerat dig i Lupapiste med en annan adress, be {{inviter-email}} som skickat inbjudan om en ny inbjudan.

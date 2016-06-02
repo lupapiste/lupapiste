@@ -166,14 +166,6 @@
       (fail! :error.unknown))
     (deactivate-resource existing-calendar)))
 
-; toistaiseksi vain itestien siivoukseen. Siksi in-dev.
-(env/in-dev
-  (defn delete-calendar
-    [userId]
-    (let [calendars (find-calendars-for-user userId)]
-      (doseq [id (map :id calendars)]
-        (delete-command (str "/api/resources/" id))))))
-
 (defquery calendar
   {:parameters [calendarId userId]
    :feature :ajanvaraus
@@ -266,3 +258,9 @@
    :feature    :ajanvaraus}
   [_]
   (ok :reservationTypes (delete-command (str "/api/reservation-types/" reservationTypeId))))
+
+; For integration tests in dev
+(env/in-dev
+  (defn clear-database
+    []
+    (ok :res (post-command "/api/testdata/clear"))))

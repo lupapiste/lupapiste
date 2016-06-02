@@ -114,13 +114,16 @@
              {:created {$gte from-ts}}]}
       base-query)))
 
-(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas]} user]
+(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas modifiedAfter]} user]
   {$and
    (filter seq
      [query
       (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
+      (when-let [modified-after (util/->long modifiedAfter)]
+        {:modified {$gt modified-after}})
       (if (user/applicant? user)
         (case applicationType
+          "unlimited"          {}
           "inforequest"        {:state {$in ["answered" "info"]}}
           "application"        applicant-application-states
           "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
@@ -130,6 +133,7 @@
           "foremanNotice"      (assoc applicant-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           {:state {$ne "canceled"}})
         (case applicationType
+          "unlimited"          {}
           "inforequest"        {:state {$in ["open" "answered" "info"]}}
           "application"        authority-application-states
           "construction"       {:state {$in ["verdictGiven" "constructionStarted"]}}
@@ -151,7 +155,7 @@
         {:organization {$in organizations}})
       (if-not (empty? operations)
         {:primaryOperation.name {$in operations}}
-        (when (user/authority? user)
+        (when (and (user/authority? user) (not= applicationType "unlimited"))
           ; Hide foreman applications in default search, see LPK-923
           {:primaryOperation.name {$ne "tyonjohtajan-nimeaminen-v2"}}))
       (when-not (empty? areas)
@@ -204,7 +208,7 @@
 
 (defn dir [asc] (if asc 1 -1))
 
-(defn- make-sort [{{:keys [field asc]} :sort}]
+(defn make-sort [{{:keys [field asc]} :sort}]
   (let [sort-field (sort-field-mapping field)]
     (cond
       (= "type" field) (array-map :permitSubtype (dir asc) :infoRequest (dir (not asc)))
@@ -217,8 +221,8 @@
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
         query-total (mongo/count :applications query)
-        skip        (or (:skip params) 0)
-        limit       (or (:limit params) 10)
+        skip        (or (util/->long (:skip params)) 0)
+        limit       (or (util/->long (:limit params)) 10)
         apps        (mongo/with-collection "applications"
                       (query/find query)
                       (query/fields db-fields)

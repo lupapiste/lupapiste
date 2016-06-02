@@ -13,7 +13,7 @@
             [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]))
 
-(def db-name (str "test_autom-check-verdicts-itest_" (now)))
+(defonce db-name (str "test_autom-check-verdicts-itest_" (now)))
 
 (mongo/connect!)
 (mongo/with-db db-name

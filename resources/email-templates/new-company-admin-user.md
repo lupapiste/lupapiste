@@ -4,7 +4,7 @@ Yrityksellesi **{{company.name}}** on luotu Yritystili [Lupapiste](https://www.l
 
 Voit aktivoida tilisi oheisella linkill&auml;:
 
-  [{{link-fi}}]({{link-fi}})
+{{link-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
@@ -25,7 +25,7 @@ Ditt f&ouml;retag **{{company.name}}** har f&aring;tt ett eget F&ouml;retagskont
 
 Ditt konto aktiveras genom l&auml;nken nedan:
 
-  [{{link-sv}}]({{link-sv}})
+{{link-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 

@@ -9,7 +9,10 @@ LUPAPISTE.RamLinksModel = function( params) {
   self.links = ko.observableArray();
 
   self.showLinks = self.disposedPureComputed( function() {
-    return _.size( self.links()) > 1
+    // There is always at least one link (the current attachment).
+    // A lone link is shown in the table only if it as a RAM attachment.
+    var count = _.size( self.links());
+    return (count > 1 || (count === 1 &&  _.trim(_.first(self.links()).ramLink)))
       && lupapisteApp.models.applicationAuthModel.ok( "ram-linked-attachments");
   });
 
@@ -21,4 +24,24 @@ LUPAPISTE.RamLinksModel = function( params) {
       self.service.links( self.attachmentId, self.links );
     }
   });
+
+  var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %><br><%- time %>");
+
+  self.approvalHtml = function( data ) {
+    var approved = data.approved || {};
+    return approved.value === "approved"
+      ? approvalTemplate( {user: approved.user,
+                           time: moment( approved.timestamp).format( "D.M.YYYY HH:mm")})
+      : "-";
+  };
+
+  var ramLinkTemplate = _.template( "<a href='<%- url %>'><%- text %></a>");
+
+  self.typeHtml = function( data ) {
+    var text = loc (_.trim( data.ramLink ) ? "ram.type.ram" : "ram.type.original");
+    return data.id === self.attachmentId
+      ? text
+      : ramLinkTemplate( {url: self.service.attachmentUrl( data.id ),
+                          text: text});
+  };
 };

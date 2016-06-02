@@ -1269,7 +1269,6 @@ No such test id
   [Arguments]  ${id}
   Wait until  Element should not be visible  jquery=[data-test-id=${id}]
 
-
 Test id should contain
   [Arguments]  ${id}  ${text}
   Wait until  Element should contain  jquery=[data-test-id=${id}]  ${text}
@@ -1283,6 +1282,11 @@ Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
 
+Click label
+  [Arguments]  ${for}
+  Click element  jquery=label[for=${for}]
+  
+
 Checkbox wrapper selected
   [Arguments]  ${id}
   Javascript?  $("input#${id}:checked").length
@@ -1290,6 +1294,10 @@ Checkbox wrapper selected
 Checkbox wrapper not selected
   [Arguments]  ${id}
   Javascript?  $("input#${id}:checked").length === 0
+
+Select from test id
+  [Arguments]  ${id}  ${value}
+  Select from list  jquery=select[data-test-id=${id}]  ${value}
 
 # Frontend error log
 
