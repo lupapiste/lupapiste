@@ -221,8 +221,8 @@
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
         query-total (mongo/count :applications query)
-        skip        (or (:skip params) 0)
-        limit       (or (:limit params) 10)
+        skip        (or (util/->long (:skip params)) 0)
+        limit       (or (util/->long (:limit params)) 10)
         apps        (mongo/with-collection "applications"
                       (query/find query)
                       (query/fields db-fields)
