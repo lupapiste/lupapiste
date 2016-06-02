@@ -313,8 +313,12 @@
   (when (numeric? s)
     (Long/parseLong s)))
 
-(defn ->long [v]
-  (if (string? v) (to-long v) v))
+(defn ->long
+  "Parses strings and numbers to longs. Returns nil for other types and invalid strings."
+  [x]
+  (cond
+    (string? x) (to-long x)
+    (number? x) (long x)))
 
 (defn sequable?
   "Returns true if x can be converted to sequence."
