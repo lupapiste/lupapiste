@@ -76,7 +76,7 @@
                 :submitted]
 
         skip        (or (util/->long (:skip data)) 0)
-        limit       (or (util/->long (:limit data)) Long/MAX_VALUE)
+        limit       (or (util/->long (:limit data)) Integer/MAX_VALUE)
 
         apps        (mongo/with-collection "applications"
                       (query/find query)
