@@ -290,7 +290,7 @@
   (update-in yhteyshenkilo-without-kytkimet [:body] concat [kytkimet-with-vain-sahkoinen-asiointi]))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string :required true :size :l}
-                     {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
+                     {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true :i18nkey "y-tunnus"}])
 
 (def yritys (body
               yritys-valitsin
