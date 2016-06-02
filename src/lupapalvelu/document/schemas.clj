@@ -852,7 +852,7 @@
 
 (def rakenne {:name "rakenne"
               :type :group
-              :body [{:name "rakentamistapa" :type :select :sortBy :displayname :required true
+              :body [{:name "rakentamistapa" :type :select :sortBy :displayname :required true :i18nkey "rakentamistapa"
                       :body [{:name "elementti"}
                              {:name "paikalla"}
                              ei-tiedossa]}
