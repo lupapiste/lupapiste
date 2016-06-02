@@ -178,8 +178,10 @@ i.btn-small {
     padding: 0;
     display: block;
     text-align: center;
-    max-width: $lupicon-size;
+    max-width: 16px;
     margin: {
+      left: auto;
+      right: auto;
       top: $btn-spacer;
     }
   }
@@ -543,5 +545,3 @@ button {
 .left-buttons > button {
   margin-right: $btn-spacer;
 }
-
-

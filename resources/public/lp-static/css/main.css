@@ -1,5 +1,96 @@
-@import url('main-blessed1.css?z=1464858662016');
+@import url('main-blessed1.css?z=1464862213113');
 
+/* line 151, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation div {
+  padding-right: 24px;
+  display: table-cell;
+}
+/* line 154, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation div .btn, .invitations .invitation div .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .invitations .invitation div .paginate_disabled_previous, .invitations .invitation div .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .invitations .invitation div .paginate_disabled_next {
+  margin: 0 6px 0 6px;
+}
+/* line 158, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation p {
+  max-width: 35em;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* line 164, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation h3 {
+  max-width: 35em;
+  margin-top: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* line 170, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation .invitation-actions {
+  white-space: nowrap;
+}
+
+/* line 176, ../../../private/common-html/sass/views/_applications.scss */
+.filter-controls div {
+  display: inline-block;
+  margin-bottom: 24px;
+}
+/* line 180, ../../../private/common-html/sass/views/_applications.scss */
+.filter-controls label {
+  display: block;
+}
+/* line 183, ../../../private/common-html/sass/views/_applications.scss */
+.filter-controls select {
+  display: block;
+}
+
+/* line 189, ../../../private/common-html/sass/views/_applications.scss */
+#applications-list .indicator-count, .applications-table .indicator-count {
+  padding-left: 0;
+  padding-right: 0;
+  font-weight: bold;
+  color: #f39129;
+  text-align: center;
+  width: 22px;
+  padding: 3px;
+}
+/* line 198, ../../../private/common-html/sass/views/_applications.scss */
+#applications-list div, .applications-table div {
+  padding-top: 3px;
+  height: 30px;
+}
+
+/* line 234, ../../../private/common-html/sass/views/_applications.scss */
+.clearable {
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+/* line 239, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search {
+  padding-right: 17px;
+  /* add space for the 'x' icon*/
+}
+
+/* line 242, ../../../private/common-html/sass/views/_applications.scss */
+.applications-search::-ms-clear {
+  display: none;
+}
+
+/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  display: none;
+  /* now go with the styling */
+  cursor: pointer;
+  font: bold 1em sans-serif;
+  color: #38468F;
+}
+/* line 255, ../../../private/common-html/sass/views/_applications.scss */
+span.icon_clear:before {
+  color: #f52;
+}
 
 /* application section styles*/
 /*Summary styles*/
@@ -2819,13 +2910,13 @@ ul.appeals-files li span.appeals-files__size {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 446, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 448, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .check-string, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 451, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 453, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
@@ -3103,7 +3194,8 @@ div.olControlZoom {
 
 /* line 151, ../../../private/common-html/sass/views/_openlayers2.scss */
 div.olControlZoom a, .olControlLupapisteEditingToolbar div {
-  font-family: 'lupapiste';
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
   speak: none;
   font-style: normal;
   font-size: 22px;
@@ -3677,23 +3769,23 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   color: #f39129;
   background-color: none;
 }
-/* line 217, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:link, .bulletin-comment .bulletin-comment__name:visited {
   color: #f39129;
   background-color: none;
 }
-/* line 221, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:hover {
   color: #f7ac2e;
   background-color: none;
   text-decoration: none;
 }
-/* line 226, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:active, .bulletin-comment .bulletin-comment__name.active {
   color: #fbc732;
   background-color: none;
 }
-/* line 230, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:disabled, .bulletin-comment .bulletin-comment__name.disabled, .bulletin-comment .bulletin-comment__name.waiting {
   cursor: default !important;
   color: white !important;
