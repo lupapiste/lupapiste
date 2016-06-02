@@ -138,7 +138,7 @@
         resp => ok?
         (-> resp :applications count) => 0))
 
-    (fact "One applications modified just before the last one was created"
+    (fact "One applications modified since just before the last one was created"
       (let [resp (datatables sonja :applications :modifiedAfter (dec modified))]
         resp => ok?
         (-> resp :applications count) => 1))
@@ -198,7 +198,7 @@
             {unlimited-res :applications} (datatables sonja :applications :applicationType "unlimited")
             default-ids (map :id default-res)
             all-ids (map :id unlimited-res)]
-        (fact "are not returned with default search"
+        (fact "are NOT returned with default search"
           (count default-res) => 2
           default-ids =not=> (contains application-id)
           default-ids =not=> (contains (:id foreman-app)))
@@ -209,11 +209,12 @@
           all-ids => (contains (:id foreman-app)))))
 
     (facts "limit, skip, sort"
-      (let [{results :applications} (datatables sonja :applications :applicationType "unlimited"
+      (let [limit 2
+            {results :applications} (datatables sonja :applications :applicationType "unlimited"
                                       ; latest first, skip the absolute latest and return 2
-                                       :sort {:field :id, :asc false} :skip 1 :limit 2)]
+                                       :sort {:field :id, :asc false} :skip 1 :limit limit)]
 
-        (count results) => 2
+        (count results) => limit
         (fact "Application 2 was the last to be creaded, not in results" (map :id results) =not=> (contains application-id2))
         (fact "Foreman app was the second to last to be creaded" (-> results first :id) => (:id foreman-app))
         (fact "Application 1 was the third to last to be creaded" (-> results second :id) => application-id)))))
