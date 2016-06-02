@@ -148,10 +148,13 @@
           loc-maps     (map commons-resources/txt->map i18n-files)
           langs        (distinct (apply concat (map :languages loc-maps)))
           translations (apply merge-with conj (map :translations loc-maps))
-          loc-map      {:languages langs :translations translations}]
-    (commons-resources/write-excel
-      (commons-resources/missing-translations loc-map)
-      file))))
+          loc-map      {:languages langs :translations translations}
+          missing      (commons-resources/missing-translations loc-map)
+          cleaned      (update missing :translations (util/fn->>
+                                                       (remove (comp ss/blank? :fi second))
+                                                       ;(map (fn [[k & rest]] (cons (ss/replace k #"!$" "") rest)))
+                                                       (sort-by first)))]
+    (commons-resources/write-excel cleaned file))))
 
 (defn excel-to-txt
   "Reads translation excel and generates corresponding txt files (one
