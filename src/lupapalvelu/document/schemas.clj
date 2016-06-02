@@ -234,22 +234,23 @@
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
+                    :i18nkey "yhteystiedot._group_label"
                     :blacklist [:neighbor turvakielto]
-                    :body [{:name "puhelin" :type :string :subtype :tel :required true}
-                           {:name "email" :type :string :subtype :email :required true}]}])
+                    :body [{:name "puhelin" :type :string :subtype :tel :required true :i18nkey "puhelin"}
+                           {:name "email" :type :string :subtype :email :required true :i18nkey "email"}]}])
 
 (def henkilotiedot-minimal {:name "henkilotiedot"
                             :type :group
-                            :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
-                                   {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                   {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
+                            :body [{:name "etunimi" :type :string :subtype :vrk-name :required true :i18nkey "etunimi"}
+                                   {:name "sukunimi" :type :string :subtype :vrk-name :required true :i18nkey "sukunimi"}
+                                   {:name turvakielto :type :checkbox :blacklist [turvakielto] :i18nkey "henkilo.turvakieltoKytkin"}]})
 
 (def henkilotiedot {:name "henkilotiedot"
-                            :type :group
-                            :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
-                                   {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                   {:name "hetu" :type :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto] :emit [:hetuChanged] :transform :upper-case}
-                                   {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
+                    :type :group
+                    :body [{:name "etunimi" :type :string :subtype :vrk-name :required true :i18nkey "etunimi"}
+                           {:name "sukunimi" :type :string :subtype :vrk-name :required true :i18nkey "sukunimi"}
+                           {:name "hetu" :type :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto] :emit [:hetuChanged] :transform :upper-case :i18nkey "hetu"}
+                           {:name turvakielto :type :checkbox :blacklist [turvakielto] :i18nkey "henkilo.turvakieltoKytkin"}]})
 
 (def henkilo (body
                henkilo-valitsin
