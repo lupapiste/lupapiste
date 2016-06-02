@@ -891,25 +891,25 @@
                               {:name "ei tiedossa"}]}
                       {:name "muu-lammonlahde" :type :string}]})
 
-(def verkostoliittymat {:name "verkostoliittymat" :type :group :layout :vertical
-                        :body [{:name "viemariKytkin" :type :checkbox}
-                               {:name "vesijohtoKytkin" :type :checkbox}
-                               {:name "sahkoKytkin" :type :checkbox}
-                               {:name "maakaasuKytkin" :type :checkbox}
-                               {:name "kaapeliKytkin" :type :checkbox}]})
+(def verkostoliittymat {:name "verkostoliittymat" :type :group :layout :vertical :i18nkey "verkostoliittymat"
+                        :body [{:name "viemariKytkin" :type :checkbox :i18nkey "viemariKytkin"}
+                               {:name "vesijohtoKytkin" :type :checkbox :i18nkey "vesijohtoKytkin"}
+                               {:name "sahkoKytkin" :type :checkbox :i18nkey "sahkoKytkin"}
+                               {:name "maakaasuKytkin" :type :checkbox :i18nkey "maakaasuKytkin"}
+                               {:name "kaapeliKytkin" :type :checkbox :i18nkey "kaapeliKytkin"}]})
 
-(def varusteet {:name "varusteet" :type :group :layout :vertical
-                :body [{:name "sahkoKytkin" :type :checkbox}
-                       {:name "kaasuKytkin" :type :checkbox}
-                       {:name "viemariKytkin" :type :checkbox}
-                       {:name "vesijohtoKytkin" :type :checkbox}
-                       {:name "hissiKytkin" :type :checkbox}
-                       {:name "koneellinenilmastointiKytkin" :type :checkbox}
-                       {:name "lamminvesiKytkin" :type :checkbox}
-                       {:name "aurinkopaneeliKytkin" :type :checkbox}
-                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size :s :unit :kpl}
-                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size :s :unit :hengelle}
-                       {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox}]})
+(def varusteet {:name "varusteet" :type :group :layout :vertical :i18nkey "varusteet"
+                :body [{:name "sahkoKytkin" :type :checkbox :i18nkey "sahkoKytkin"}
+                       {:name "kaasuKytkin" :type :checkbox :i18nkey "kaasuKytkin"}
+                       {:name "viemariKytkin" :type :checkbox :i18nkey "viemariKytkin"}
+                       {:name "vesijohtoKytkin" :type :checkbox :i18nkey "vesijohtoKytkin"}
+                       {:name "hissiKytkin" :type :checkbox :i18nkey "hissiKytkin"}
+                       {:name "koneellinenilmastointiKytkin" :type :checkbox :i18nkey "koneellinenilmastointiKytkin"}
+                       {:name "lamminvesiKytkin" :type :checkbox :i18nkey "lamminvesiKytkin"}
+                       {:name "aurinkopaneeliKytkin" :type :checkbox :i18nkey "aurinkopaneeliKytkin"}
+                       {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size :s :unit :kpl :i18nkey "saunoja"}
+                       {:name "vaestonsuoja" :type :string :subtype :number :min 0 :max 99999 :size :s :unit :hengelle :i18nkey "vaestonsuoja"}
+                       {:name "liitettyJatevesijarjestelmaanKytkin" :type :checkbox :i18nkey "liitettyJatevesijarjestelmaanKytkin"}]})
 
 (def luokitus {:name "luokitus"
                :type :group
