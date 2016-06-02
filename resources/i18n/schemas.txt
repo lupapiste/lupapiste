@@ -1855,7 +1855,7 @@
 "omistajalaji.muu-yksityinen" "fi" "Yksityinen henkilö tai perikunta"
 "omistajalaji.muu-yksityinen" "sv" "Privatperson eller arvingar"
 "omistajalaji.asunto-oy-tms" "fi" "Asunto-osakeyhtiö tai asunto-osuuskunta"
-"omistajalaji.asunto-oy-tms" "sv" Bostadsaktiebolag eller bostadsandelslag""
+"omistajalaji.asunto-oy-tms" "sv" "Bostadsaktiebolag eller bostadsandelslag"
 "omistajalaji.valtio-tai-kunta-yritys" "fi" "Valtio- tai kuntaenemmistöinen yritys"
 "omistajalaji.valtio-tai-kunta-yritys" "sv" "Företag med stats- och kommunmajoritet"
 "omistajalaji.kunnan-liikelaitos" "fi" "Kunnan liikelaitos"
