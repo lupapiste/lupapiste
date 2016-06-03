@@ -3,6 +3,7 @@
 Documentation   Users are added to company
 Resource        ../../common_resource.robot
 Suite Teardown  Logout
+Default Tags    company
 
 *** Test Cases ***
 
@@ -152,6 +153,16 @@ Pena logs in and sees the non-admin view of the company
   No such test id  company-add-user
   No such test id  company-user-edit-1
   No such test id  company-user-delete-1
+  [Teardown]  Logout
+
+Kaino logs in and removes Ulla's admin rights
+  # This is needed to make sure that only Kaino receives the
+  # invitation mail from the next case.
+  Login  kaino@solita.fi  kaino123
+  User should be logged in  Kaino Solita
+  Open company user listing
+  # Panaani, Ser, Solita
+  Edit company user  1  user  Kyllä
   [Teardown]  Logout
 
 Mikko logs in, creates application and invites Solita
