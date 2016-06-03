@@ -123,7 +123,8 @@ jQuery(document).ready(function() {
     {name: "cell-select"},
     {name: "review-tasks"},
     {name: "task"},
-    {name: "ram-links"}
+    {name: "ram-links"},
+    {name: "attachments-listing"}
 ];
 
   _.forEach(components, function(component) {

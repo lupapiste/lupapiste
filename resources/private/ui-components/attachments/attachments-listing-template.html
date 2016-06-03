@@ -1,0 +1,10 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-listing-template">
+  <div>
+    <p data-bind="text: JSON.stringify(attachmentsHierarchy())"></p>
+    <h2>Hakemuksen aikaiset liitteet</h2>
+    <accordion id="pre-verdict-accordion"
+               params="accordionContentTemplate: 'attachments-listing-main-accordion-template',
+                        accordionContentTemplateData: null"/>
+  </div>
+</script>
