@@ -48,7 +48,7 @@
        (fact {:midje/description (str "verdict-reviews krysp")}
              (verdict-vaaditutKatselmukset application1 "a1" 0 :fi) => '[[" muu katselmus " "* KVV-tarkastus"] [" muu katselmus " " * S\u00e4hk\u00f6tarkastus "] [" muu katselmus " " * Rakennetarkastus "] [" loppukatselmus " ""] [" muu katselmus " " Aloitusilmoitus "]])
        (fact {:midje/description (str "verdict-reviews non-krysp")}
-             (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[["Muu katselmus (YA paikan tarkastaminen)"] ["Muu katselmus (rakennuksen paikan tarkastaminen)"]]))
+             (verdict-vaaditutKatselmukset application2 "a1" 0 :fi) => '[["YA paikan tarkastaminen"] ["rakennuksen paikan tarkastaminen"]]))
 
 (facts "Verdict signatures "
        (def verdict-signatures #'lupapalvelu.pdf.libreoffice-template-verdict/verdict-signatures)
@@ -158,7 +158,7 @@
            (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
-             (.delete tmp-file)
+             #_(.delete tmp-file)
              (fact {:midje/description (str " verdict title  date(" (name lang) ")")} (get-user-field user-fields "LPTITLE_CONTRACT_DATE") => (build-user-field (localize lang "verdict.contract.date") "LPTITLE_CONTRACT_DATE"))
              ;;TODO test signatures
              ))))

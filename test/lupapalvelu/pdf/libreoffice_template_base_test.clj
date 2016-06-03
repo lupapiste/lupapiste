@@ -143,7 +143,10 @@
                                                       :poytakirjat [{:urlHash         "4196f10a7fef9bec325dc567f1b87fbcd10163ce"
                                                                      :status          "1"
                                                                      :paatoksentekija "Tytti M\u00e4ntyoja"
-                                                                     :paatos          "Lorem ipsum dolor sit amet"
+                                                                     :paatos          "Lorem ipsum dolor sit amet
+                                                                     rivi 2
+                                                                     rivi 3
+                                                                     rivi 4"
                                                                      :pykala          31
                                                                      :paatospvm       1454284800000
                                                                      :paatoskoodi     "my\u00f6nnetty"}]}]}]
