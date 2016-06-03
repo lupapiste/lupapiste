@@ -134,19 +134,17 @@
                                                        (sort-by first)))]
     (commons-resources/write-excel cleaned file))))
 
-(defn excel-to-txt
-  "Reads translation excel and generates corresponding txt files (one
-  for each sheet) into the same folder. For example,
-  lupapiste_translations_20160204.xlsx -> translations.txt
-  where translations is the name of the sheet in the excel."
-  [xlsx-path]
-  (let [file (io/file xlsx-path)
-        dir (.getParent file)]
-    (with-open [in (io/input-stream file)]
-      (let [wb      (xls/load-workbook in)
-            sheets  (seq wb)]
-        (doseq [sheet sheets
-               :let [sheet-name (.getSheetName sheet)]]
-         (commons-resources/write-txt
-          (commons-resources/sheet->map sheet)
-          (io/file dir (str sheet-name ".txt"))))))))
+(defn merge-translations-from-excels
+  "Merges translation excel files from paths to one translation txt file. Uses commons/merge-translations."
+  [& paths]
+  (let [dir (.getParent (io/file (first paths)))]
+    (commons-resources/write-txt
+      (apply
+        commons/merge-translations
+        (for [path paths
+              :let [file (io/file path)]]
+          (with-open [in (io/input-stream file)]
+            (let [wb (xls/load-workbook in)
+                  sheets (seq wb)]
+              (apply commons/merge-translations (map commons-resources/sheet->map sheets))))))
+      (io/file dir (str "merged_translations_" (now) ".txt")))))
