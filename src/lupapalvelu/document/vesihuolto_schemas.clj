@@ -23,7 +23,7 @@
                                                         {:name "Saunarakennus"}
                                                         {:name "Lomarakennus"}
                                                         {:name "Asuinrakennus"}
-                                                        {:name "ei tiedossa"}]}
+                                                        ei-tiedossa]}
                                                 {:name "rakennusvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size :s}
                                                 {:name "vapautus" :type :checkbox}
                                                 {:name "kohteenVarustelutaso" :type :group
@@ -67,11 +67,11 @@
             :body [{:name "kannetaan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "pumpataan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "johdetaan paineellisena vesijohtoa pitkin rakennukseen"}
-                   {:name "ei tiedossa"}]}
+                   ei-tiedossa]}
            {:name "riittavyys" :type :select :sortBy :displayname
             :body [{:name "vesi ajoittain v\u00e4hiss\u00e4"}
                    {:name "vesi riitt\u00e4\u00e4 talouden tarpeisiin"}
-                   {:name "ei tiedossa"}
+                   ei-tiedossa
                    ]}]}
    {:info {:name "jatevedet"
            :approvable false

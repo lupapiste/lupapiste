@@ -77,7 +77,11 @@
   (let [log (apply str (parse-log-file output-file))
         required-part (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d'." log))
         level (if (= required-part "1") "b" "u")
-        cl (str "pdfa-" (or required-part "2") level)]
+        cl (str "pdfa-" (or required-part "2") level)
+        not-prints (re-find #"The value of the key . is 'Not Print' but must be 'Print'" log)
+        missing-appearances (re-find #"The appearance dictionary doesn't contain an entry" log)]
+    (when (or not-prints missing-appearances)
+      (warn "PDF has elements with 'not print' or undefined appearance, PDF/A will probably look weird. Log:" log))
     (debug "Determined required compliance to be:" cl)
     cl))
 
