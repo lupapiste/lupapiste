@@ -68,7 +68,7 @@
                                          :year       current-year))]
                   (count slots) => 1
 
-                  (fact "The available slot is deleteable"
+                  (fact "The available slot is deletable"
                     (command authority :delete-calendar-slot :slotId (-> slots first :id)) => ok?
                     (count (:slots (query authority :calendar-slots
                                                     :calendarId authority-calendar-id

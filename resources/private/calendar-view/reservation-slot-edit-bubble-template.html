@@ -13,10 +13,10 @@
                            removeEnabled: removeEnabled,
                            removeFun: remove,
                            error: error,
-                           prefix: 'company-invite',
+                           prefix: 'reservation-slot-edit',
                            waiting: waiting">
       <div>
-        <h3>Muokkaa varattavaa aikaa</h3>
+        <h3 data-bind="ltext: 'calendar.edit-slot.title'"></h3>
       </div>
       <p><span data-bind="ltext: 'calendar.slot.start-time'"></span>: <span data-bind="dateTimeString: $parent.startTime"></span></p>
       <p><span data-bind="ltext: 'calendar.slot.duration'"></span>: 1h</p>

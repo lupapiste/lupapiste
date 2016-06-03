@@ -43,7 +43,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         ajax
           .command("update-reservation-type", {reservationTypeId: id, name: reservationType})
           .success(function() {
-            hub.send("calendarService::fetchOrganizationReservationTypes");
+            _.partial( hub.send, "calendarService::fetchOrganizationReservationTypes" );
             LUPAPISTE.ModalDialog.close();
           })
           .call();
