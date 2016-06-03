@@ -11,7 +11,12 @@
           </button>
           <div class="accordion_content" data-accordion-state="closed">
               <div class="accordion-fields">
-                  <div data-bind="template: {name: accordionContentTemplate, data: accordionContentTemplateData}"></div>
+                  <!-- ko if: contentIsTemplate -->
+                  <div data-bind="template: contents"></div>
+                  <!-- /ko -->
+                  <!-- ko if: contentIsComponent -->
+                  <div data-bind="component: contents"></div>
+                  <!-- /ko -->
               </div>
           </div>
       </section>

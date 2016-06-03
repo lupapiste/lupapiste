@@ -1,5 +1,9 @@
-@import url('main-blessed1.css?z=1464172031133');
+@import url('main-blessed1.css?z=1464851948046');
 
+/* line 35, ../../../private/common-html/sass/views/_application.scss */
+.application_summary .preamble .application_actions {
+  right: 0;
+}
 @media (max-width: 991px) {
   /* line 80, ../../../private/common-html/sass/views/_application.scss */
   .application_summary .preamble {

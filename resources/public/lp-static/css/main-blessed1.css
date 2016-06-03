@@ -10130,6 +10130,11 @@ ul.no-bullets {
   border-right: none;
 }
 
+/* line 138, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion button.accordion-toggle {
+  background: #999999;
+}
+
 /* line 1, ../../../private/common-html/sass/partials/_datepicker.scss */
 #ui-datepicker-div {
   background: #f6f6f6;
@@ -11432,8 +11437,4 @@ span.icon_clear:before {
   left: 0;
   width: 320px;
   margin-bottom: 12px;
-}
-/* line 35, ../../../private/common-html/sass/views/_application.scss */
-.application_summary .preamble .application_actions {
-  right: 0;
 }
