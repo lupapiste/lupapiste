@@ -1,0 +1,11 @@
+.rollup--closed > .rollup__open {
+  display: none;
+}
+
+.rollup--open > .rollup__closed {
+  display: none;
+} 
+
+button.rollup-button {
+  width: 100%;
+}

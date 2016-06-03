@@ -7,4 +7,24 @@
                params="accordionContentTemplate: 'attachments-listing-main-accordion-template',
                         accordionContentTemplateData: null"/>
   </div>
+  
+  <rollup params="{open: rollupToggle}">
+    <rollup-button params="open: $parent.rollupToggle, 
+                           text: 'Outer rollup'"></rollup-button>
+    <div class="rollup__open">
+      Body is now visible!
+      <rollup params="open: $parent.innerToggle">
+        <rollup-button params="open: $parents[1].innerToggle, 
+                               text: 'Inner rollup'"></rollup-button>
+        <div class="rollup__open">Inner body is now visible!</div>
+      </rollup>
+      <rollup params="open: $parent.linkToggle">
+        No rollup button, just a <a data-bind="toggleClick: $parents[1].linkToggle">link</a>
+        <p class="rollup__open">
+          Paragraph is visible. You can <a data-bind="toggleClick: $parents[1].linkToggle">hide</a> it.
+        </p>
+        
+      </rollup>
+    </div>
+  </rollup>
 </script>
