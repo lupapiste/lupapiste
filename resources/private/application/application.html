@@ -355,6 +355,12 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
+                            <li data-bind="css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
+                                <a data-bind="click: changeTab" href="#" data-target="attachmentsPOC" data-test-id="application-open-attachmentsPOC-tab" class="link-btn">
+                                    <span>Suunnitelmat ja liitteet POC</span>
+                                    <span data-bind="if: attachmentsRequiringAction">
+                                        <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
+
                             <li data-bind="if: _.includes(['draft', 'open', 'submitted', 'complementNeeded'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
@@ -616,6 +622,54 @@
                             </a>
                         </div>
                     </div>
+                    <!-- /ko -->
+
+                    <!-- AttachmentsPOC tab -->
+                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
+                    <div id="application-attachmentsPOC-tab" class="tab-content" data-bind="with: $root.attachmentsTab">
+                        <h1>Suunnitelmat ja liitteet POC</h1>
+                        <span data-bind="component: {
+                                         name: 'help-toggle',
+                                         params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
+                                         }"></span>
+                        <div class="clear"></div>
+                        <div class="stacked">
+                            <div class="like-btn">
+                                <i class="lupicon-circle-check"></i>
+                                <span data-bind="ltext: 'ok.title'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-star"></i>
+                                <span data-bind="ltext: 'new.title'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-attention"></i>
+                                <span data-bind="ltext: 'missing.title'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-pen"></i>
+                                <span data-bind="ltext: 'attachment.signed'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-arrow-up"></i>
+                                <span data-bind="ltext: 'application.attachmentSentDate'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-stamp"></i>
+                                <span data-bind="ltext: 'attachment.stamped'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-circle-section-sign"></i>
+                                <span data-bind="ltext: 'attachment.verdict-attachment'"></span>
+                            </div>
+                            <div class="like-btn">
+                                <i class="lupicon-lock"></i>
+                                <span data-bind="ltext: 'attachment.not-public-attachment'"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <attachments-listing/>
                     <!-- /ko -->
 
 
