@@ -7389,7 +7389,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
   self.removeAttachment = function(attachmentId) {
     self.attachments.remove(function(attachment) {
-      return attachment.id === attachmentId;
+      return attachment().id === attachmentId;
     });
   };
 
