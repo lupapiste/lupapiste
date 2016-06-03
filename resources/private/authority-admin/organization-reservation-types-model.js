@@ -43,7 +43,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         ajax
           .command("update-reservation-type", {reservationTypeId: id, name: reservationType})
           .success(function() {
-            _.partial( hub.send, "calendarService::fetchOrganizationReservationTypes" );
+            hub.send("calendarService::fetchOrganizationReservationTypes");
             LUPAPISTE.ModalDialog.close();
           })
           .call();
@@ -71,7 +71,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
   self.deleteReservationType = function(reservationType) {
     ajax
       .command("delete-reservation-type", {reservationTypeId: reservationType.id})
-      .success(hub.send("calendarService::fetchOrganizationReservationTypes"))
+      .success(_.partial(hub.send("calendarService::fetchOrganizationReservationTypes")))
       .call();
   };
 
