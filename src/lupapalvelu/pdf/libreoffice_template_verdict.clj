@@ -65,7 +65,7 @@
   (if-let [krysp-other-requirements (:vaaditutKatselmukset (get-lupamaaraykset application verdict-id paatos-idx))]
     (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))])
          krysp-other-requirements)
-    (map (fn [child] [(str (i18n/localize (name lang) (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value]))) " (" (:taskname child) ")")])
+    (map (fn [child] [(str (:taskname child))])
          (concat (filter-tasks application verdict-id "task-katselmus-ya") (filter-tasks application verdict-id "task-katselmus")))))
 
 ;(sc/optional-key :maaraykset)                     [Maarays]
@@ -130,7 +130,7 @@
                                  "LPVALUE_VERDICT_STATE" (verdict-status paatos lang)
 
                                  "LPTITLE_TEKSTI" (i18n/localize lang "verdict.text")
-                                 "LPVALUE_TEKSTI" (verdict-paatos-key paatos :paatos)
+                                 "LPTABLE_TEKSTI" (map (fn [line] ["" line]) (clojure.string/split (verdict-paatos-key paatos :paatos) #"\n"))
 
                                  "LPTITLE_YHTEYSHENKILO" (i18n/localize lang "verdict.yhteyshenkilo")
                                  "LPVALUE_YHTEYSHENKILO" (get-yhteyshenkilo application)

@@ -157,8 +157,13 @@ LUPAPISTE.OrganizationModel = function () {
     var operationsTosFunctions = organization["operations-tos-functions"] || {};
 
     var setTosFunctionForOperation = function(operationId, functionCode) {
+      var cmd = functionCode !== null ? "set-tos-function-for-operation" : "remove-tos-function-from-operation";
+      var data = {operation: operationId};
+      if (functionCode !== null) {
+        data.functionCode = functionCode;
+      }
       ajax
-        .command("set-tos-function-for-operation", {operation: operationId, functionCode: functionCode})
+        .command(cmd, data)
         .success(self.load)
         .call();
     };
@@ -216,7 +221,7 @@ LUPAPISTE.OrganizationModel = function () {
       ajax
         .query("available-tos-functions", {organizationId: organization.id})
         .success(function(data) {
-          self.tosFunctions(data.functions);
+          self.tosFunctions([{code: null, name: ""}].concat(data.functions));
           if (data.functions.length > 0 && organization["permanent-archive-enabled"]) {
             self.tosFunctionVisible(true);
           }
