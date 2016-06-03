@@ -406,7 +406,7 @@
   "Pre-checker that fails only if the attachment is unapproved RAM attachment."
   [{{attachment-id :attachmentId} :data} {attachments :attachments}]
   (let [{:keys [ramLink state]} (util/find-by-id attachment-id attachments)]
-    (when (and (-> ramLink ss/not-blank?)
+    (when (and (ss/not-blank? ramLink)
                (util/not=as-kw state :ok))
       (fail :error.ram-not-approved))))
 
@@ -414,7 +414,7 @@
   "Pre-checker that fails only if the attachment is approved RAM attachment."
   [{{attachment-id :attachmentId} :data} {attachments :attachments}]
   (let [{:keys [ramLink state]} (util/find-by-id attachment-id attachments)]
-    (when (and (-> ramLink ss/not-blank?)
+    (when (and (ss/not-blank? ramLink)
                (util/=as-kw state :ok))
       (fail :error.ram-approved))))
 
