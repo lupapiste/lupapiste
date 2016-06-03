@@ -12,13 +12,13 @@
                     :body [{:name "kaytettykerrosala" :type :group
                             :validator :poikkeus-olemassa-olevat-rakennukset
                             :body [{:name "pintaAla" :type :string :size :s :unit :m2 :subtype :number}
-                                   {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname :size :l
+                                   {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname :size :l :i18nkey "kayttotarkoitus"
                                     :body usages/rakennuksen-kayttotarkoitus}]}
                            {:name "toimenpiteet"
                             :type :group
                             :repeating false
                             :approvable true
-                            :body [{:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l
+                            :body [{:name "kayttotarkoitus" :type :select :sortBy :displayname :size :l :i18nkey "kayttotarkoitus"
                                     :required true
                                     :body usages/rakennuksen-kayttotarkoitus}
                                    {:name "Toimenpide" :type :select :sortBy :displayname :size :l :required true

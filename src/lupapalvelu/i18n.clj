@@ -13,30 +13,8 @@
             [lupapiste-commons.i18n.core :as commons]
             [lupapiste-commons.i18n.resources :as commons-resources]))
 
-(def supported-langs [:fi :sv])
+(def supported-langs [:fi :sv :en])
 (def default-lang (first supported-langs))
-
-(defn- add-term [k t result lang]
-  (assoc-in result [(keyword lang) k] (s/trim t)))
-
-(defn- process-translation [row k default-t result lang]
-  (let [t (get row lang)]
-    (if (seq t)
-      (add-term k t result lang)
-      (add-term k default-t result lang))))
-
-(defn- process-row [langs-but-default result row]
-  (let [k (get row "key")
-        default-t (get row (name default-lang))]
-    (if (and (not (s/blank? k)) default-t)
-      (reduce
-        (partial process-translation row k default-t)
-        (add-term k default-t result default-lang)
-        langs-but-default)
-      result)))
-
-(defn- read-sheet [headers sheet]
-  (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
 
 (defn- read-translations-txt [name-or-file]
   (let [resource (if (instance? java.io.File name-or-file)
@@ -134,41 +112,39 @@
     lines))
 
 (defn missing-localizations-excel
-  "Writes missing localizations to excel file.
+  "Writes missing localizations of given language to excel file.
    If file is not provided, will create the file to user home dir."
-  ([]
+  ([lang]
    (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
          filename (str (System/getProperty "user.home")
                        "/lupapiste_translations_"
                        date-str
                        ".xlsx")]
-        (missing-localizations-excel (io/file filename))))
-  ([file]
+        (missing-localizations-excel (io/file filename) lang)))
+  ([file lang]
     (let [i18n-files   (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")
           loc-maps     (map commons-resources/txt->map i18n-files)
           langs        (distinct (apply concat (map :languages loc-maps)))
           translations (apply merge-with conj (map :translations loc-maps))
           loc-map      {:languages langs :translations translations}
-          missing      (commons-resources/missing-translations loc-map)
+          missing      (commons-resources/missing-translations loc-map (keyword lang))
           cleaned      (update missing :translations (util/fn->>
                                                        (remove (comp ss/blank? :fi second))
                                                        ;(map (fn [[k & rest]] (cons (ss/replace k #"!$" "") rest)))
                                                        (sort-by first)))]
     (commons-resources/write-excel cleaned file))))
 
-(defn excel-to-txt
-  "Reads translation excel and generates corresponding txt files (one
-  for each sheet) into the same folder. For example,
-  lupapiste_translations_20160204.xlsx -> translations.txt
-  where translations is the name of the sheet in the excel."
-  [xlsx-path]
-  (let [file (io/file xlsx-path)
-        dir (.getParent file)]
-    (with-open [in (io/input-stream file)]
-      (let [wb      (xls/load-workbook in)
-            sheets  (seq wb)]
-        (doseq [sheet sheets
-               :let [sheet-name (.getSheetName sheet)]]
-         (commons-resources/write-txt
-          (commons-resources/sheet->map sheet)
-          (io/file dir (str sheet-name ".txt"))))))))
+(defn merge-translations-from-excels
+  "Merges translation excel files from paths to one translation txt file. Uses commons/merge-translations."
+  [& paths]
+  (let [dir (.getParent (io/file (first paths)))]
+    (commons-resources/write-txt
+      (apply
+        commons/merge-translations
+        (for [path paths
+              :let [file (io/file path)]]
+          (with-open [in (io/input-stream file)]
+            (let [wb (xls/load-workbook in)
+                  sheets (seq wb)]
+              (apply commons/merge-translations (map commons-resources/sheet->map sheets))))))
+      (io/file dir (str "merged_translations_" (now) ".txt")))))
