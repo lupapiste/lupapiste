@@ -186,11 +186,19 @@
                 </td>
                 <td data-bind="visible: $parent.isAdmin"
                     class="company-users-table--action">
-                  <div data-bind="if: opsEnabled">
-                    <a data-bind="ltext: 'save', click: $parent.userEditor.save,
-                                  attr: {'data-test-id': 'company-user-save-' + $index()}"></a>
-                    <a data-bind="ltext: 'cancel', click: $parent.userEditor.clear,
-                                  attr: {'data-test-id': 'company-user-cancel-' + $index()}"></a>
+                  <div data-bind="if: opsEnabled" class="inner-margins">
+                    <button data-bind="click: $parent.userEditor.save,
+                                       attr: {'data-test-id': 'company-user-save-' + $index()}"
+                            class="positive">
+                      <i class="lupicon-save"></i>
+                      <span data-bind="ltext: 'save'"></span>
+                    </button>
+                    <button data-bind="click: $parent.userEditor.clear,
+                                       attr: {'data-test-id': 'company-user-cancel-' + $index()}"
+                            class="secondary">
+                      <i class="lupicon-remove"></i>
+                      <span data-bind="ltext: 'cancel'"></span>
+                    </button>
                   </div>
                 </td>
                 <!-- /ko -->
