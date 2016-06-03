@@ -326,3 +326,5 @@
 "verdict.contract.date" "sv" ""
 "verdict.export.operations" "fi" "Asia"
 "verdict.export.operations" "sv" ""
+"verdict.contract.text" "fi" "Sopimusteksti"
+"verdict.contract.text" "sv" ""
