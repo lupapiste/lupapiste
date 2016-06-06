@@ -1990,6 +1990,8 @@
 "invalid-tiff" "sv" "TIFF-filen är felaktig eller innehåller okända metafilområden"
 "invite.already-has-auth" "fi" "Kyseinen henkilö on jo kutsuttu."
 "invite.already-has-auth" "sv" "Ifrågavarande person har redan bjudits in."
+"company.already-invited" "fi" "Yritys on jo kutsuttu."
+"company.already-invited" "sv" "Företag har redan bjudits in."
 "invite.default-text" "fi" "Hei! Sinut on kutsuttu osallistumaan lupahakemuksen tekemiseen Lupapisteessä."
 "invite.default-text" "sv" "Hej! Du har valts ut att delta i uppgörandet av en tillståndsansökan i Lupapiste."
 "invite.desc" "fi" "Voit valtuuttaa henkilön kutsumalla hänet sähköpostilla. Sähköinen valtuutus vastaa perinteistä valtakirjaa. Valtuutuksen hyväksyminen antaa henkilölle oikeudet muokata hakemusta ja asioida puolestasi."

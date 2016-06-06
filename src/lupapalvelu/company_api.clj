@@ -128,7 +128,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :company-id])]
    :states (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [application/validate-authority-in-drafts
+                c/company-not-already-invited]}
   [{caller :user application :application}]
   (c/company-invite caller application company-id)
   (ok))
