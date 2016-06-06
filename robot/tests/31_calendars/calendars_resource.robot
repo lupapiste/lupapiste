@@ -23,7 +23,7 @@ Set default reservation location
 
 Add reservation type
   [Arguments]  ${name}
-  Wait and click  xpath=//a[@data-test-id='add-reservation-type']
+  Click by test id  add-reservation-type
   Wait until  Element should be visible  dialog-edit-reservation-type
   Input text by test id  reservation-type-name  ${name}
   Confirm   dialog-edit-reservation-type

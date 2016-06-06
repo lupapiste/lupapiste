@@ -400,7 +400,7 @@
   {:parameters [location]
    :description "When reservation is made, use this location as default value"
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial action/non-blank-parameters [:location])]}
+   :input-validators [(partial action/string-parameters [:location])]}
   [{user :user}]
   (let [organization-id (user/authority-admins-organization-id user)]
     (o/update-organization organization-id {$set {:reservations.default-location location}})
