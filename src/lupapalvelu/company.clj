@@ -297,6 +297,18 @@
     :auto-consume false
     :ttl ttl/company-invite-ttl))
 
+(defn company-not-already-invited
+  "Pre-checker for company-invite command. Fails if the company is
+  already authorized to the application."
+  [{{:keys [company-id]} :data} {:keys [auth]}]
+  ;; We identify companies by their y (Y-tunnus), since the id
+  ;; is not available in the auth for not yet accepted invites.
+  ;; See company-invite function below.
+  (when-let [y (some-> company-id find-company-by-id :y)]
+    (when (some #(= y (:y %)) auth)
+      (fail :company.already-invited))))
+
+
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
@@ -333,5 +345,5 @@
       (update-application
        (application->command application)
        {:auth {$elemMatch {:invite.user.id company-id}}}
-       {$set  {:auth.$ (-> company company->auth (assoc :inviter inviter :inviteAccepted (now)))}}))
+       {$set  {:auth.$ (-> company company->auth (util/assoc-when :inviter inviter :inviteAccepted (now)))}}))
     (ok)))
