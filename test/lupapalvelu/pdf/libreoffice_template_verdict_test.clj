@@ -97,7 +97,7 @@
 
                                                     {:schema-info {:subtype "hakija"}
                                                      :data        {:_selected {:value "yritys"}
-                                                                   :yritys    {:yhteyshenkilo {:henkilotiedot {:sukunimi {:value "Lohikäärme"}
+                                                                   :yritys    {:yhteyshenkilo {:henkilotiedot {:sukunimi {:value "Lohikaarme"}
                                                                                                                :etunimi  {:value "Puff"}}}
                                                                                :yritysnimi    {:value "Vantaan kaupunki / Rakennus Oy"}}
                                                                    :henkilo   {:henkilotiedot {:etunimi  {:value "aa"}
