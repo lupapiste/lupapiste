@@ -102,7 +102,10 @@
     (count auth) => 1
 
     (fact "Applicant invites company"
-      (command mikko :company-invite :id application-id :company-id "solita") => ok?)
+          (command mikko :company-invite :id application-id :company-id "solita") => ok?)
+
+    (fact "Company cannot be invited twice"
+          (command mikko :company-invite :id application-id :company-id "solita") => (partial expected-failure? "company.already-invited"))
 
     (fact "Company is only invited to the application"
       (let [auth (:auth (query-application mikko application-id))
