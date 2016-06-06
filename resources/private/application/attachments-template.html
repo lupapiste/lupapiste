@@ -65,6 +65,7 @@
               data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <span data-bind="if: type">
                   <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
+                  <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'"></span>
                 </span>
                 <span data-bind="if: !type">
                   <i data-bind="ltext: 'attachment.noName'"></i>
