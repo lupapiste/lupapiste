@@ -2,6 +2,8 @@
 "task-katselmus.katselmuksenLaji._group_label" "sv" "Typ av syneförrättning"
 "task-katselmus.katselmuksenLaji" "fi" "Katselmuksen laji"
 "task-katselmus.katselmuksenLaji" "sv" "Typ av syneförrättning"
+"task-katselmus.katselmuksenLaji.ei tiedossa" "fi" "Ei tiedossa"
+"task-katselmus.katselmuksenLaji.ei tiedossa" "sv" "Ingen vetskap"
 "task-katselmus.katselmuksenLaji.aloituskokous" "fi" "Aloituskokous"
 "task-katselmus.katselmuksenLaji.aloituskokous" "sv" "Inledande möte"
 "task-katselmus.katselmuksenLaji.loppukatselmus" "fi" "Loppukatselmus"
