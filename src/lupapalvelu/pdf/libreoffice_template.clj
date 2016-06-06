@@ -105,6 +105,9 @@
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
         (s/trim (str (:value last-name) \space (:value first-name)))))))
 
+(defn get-applicant-docs [application]
+  (domain/get-applicant-documents (:documents application)))
+
 (defn formatted-applicant-index [application formatter]
   (let [applicants (doall (remove s/blank? (map formatter (domain/get-applicant-documents (:documents application)))))
         applicant (:applicant application)]
@@ -133,11 +136,11 @@
     (str (get-in data [:yritys :yritysnimi :value]) " / " (get-in henkilo [:etunimi :value]) " " (get-in henkilo [:sukunimi :value]))))
 
 (defn name-from-doc [document]
-  [(when-let [body (:data document)]
+  (when-let [body (:data document)]
     (if (= (get-in body [:_selected :value]) "yritys")
       (get-yhteyshenkilo body)
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-        (s/trim (str (:value first-name) " " (:value last-name))))))])
+        (s/trim (str (:value first-name) " " (:value last-name)))))))
 
 (defn create-libre-doc [template file fields]
   (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]
