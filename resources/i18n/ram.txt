@@ -9,7 +9,7 @@
 "ram.prefix" "fi" "[RAM]"
 "ram.prefix" "sv" "[RAM]"
 "ram.type.ram" "fi" "RAM-liite"
-"ram.type.ram" "sv" "RAM-bilaga""error.ram-not-approved" "fi" "Toimepide ei ole mahdollinen, koska RAM-liitettä ei olla hyväksytty."
+"ram.type.ram" "sv" "RAM-bilaga"
 "ram.type" "fi" "Tyyppi"
 "ram.type" "sv" "Typ"
 "ram.type.original" "fi" "Alkuperäinen"
