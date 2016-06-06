@@ -557,7 +557,7 @@
 "applications.welcome" "fi" "<div style='padding: 50px'>Tervetuloa! Voit aloittaa selvittämällä hankkeesi luvan tarpeen painamalla <i>Uusi hanke</i> painiketta. Selvitettyäsi luvan tarpeen voit ottaa yhteyttä viranomaisiin . </div>"
 "applications.welcome" "sv" "<div style='padding: 50px'>Välkommen! Du kan börja genom att utreda projektets tillståndsbehov genom att klicka på knappen <i>Nytt projekt</i> . Efter att du utrett tillståndsbehovet kan du kontakta myndigheterna. </div>"
 "applications.filter.readyForArchival" "fi" "Arkistoitavat"
-"applications.filter.readyForArchival" "sv" ""
+"applications.filter.readyForArchival" "sv" "Som ska arkiveras"
 "application.createContinuationPeriodPermit" "fi" "Hae jatkoaikaa"
 "application.createContinuationPeriodPermit" "sv" "Ansök om tillägstid"
 "application.createContinuationPeriodPermit.confirmation.message" "fi" "Olet hakemassa jatkoaikaa luvallesi. Luvan oleelliset tiedot kopioidaan jatkoaikahakemukselle."
