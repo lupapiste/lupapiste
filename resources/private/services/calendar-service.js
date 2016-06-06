@@ -5,8 +5,17 @@ LUPAPISTE.CalendarService = function() {
   self.calendar = ko.observable();
   self.calendarWeekdays = ko.observableArray();
 
+  self.myCalendars = ko.observableArray([]);
+  self.organizationCalendars = ko.observableArray();
+  self.reservationTypesByOrganization = ko.observable();
+
+  self.firstFullHour = ko.observable(8);
+  self.lastFullHour = ko.observable(16);
+
+  // Data related to the current calendar view
   self.calendarQuery = {
     calendarId: ko.observable(),
+    reservationTypes: ko.observableArray(),
     week: ko.observable(),
     year: ko.observable()
   };
@@ -33,11 +42,12 @@ LUPAPISTE.CalendarService = function() {
         var now = moment();
         var startOfWeek = moment().isoWeek(week).year(year).startOf("isoWeek").valueOf();
         var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
-          var day = moment(startOfWeek).isoWeekday(i);
+          var day = moment(startOfWeek).isoWeekday(i).hour(self.firstFullHour()).minutes(0).seconds(0);
           var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, "day"); });
           return {
             calendarId: self.calendarQuery.calendarId(),
             startOfDay: day.valueOf(),
+            endOfDay: moment(day).hour(self.lastFullHour()).valueOf(),
             today: day.isSame(now, "day"),
             slots: _.map(slotsForDay,
               function(s) {
@@ -54,7 +64,39 @@ LUPAPISTE.CalendarService = function() {
       .success(function(data) {
         self.calendar(data.calendar);
         self.calendarQuery.calendarId(data.calendar.id);
+        self.calendarQuery.reservationTypes(self.reservationTypesByOrganization()[data.calendar.organization]);
         doFetchCalendarSlots({week: moment().isoWeek(), year: moment().year()});
+      })
+      .call();
+  });
+
+  var _fetchOrgCalendars = hub.subscribe("calendarService::fetchOrganizationCalendars", function() {
+    ajax.query("calendars-for-authority-admin")
+      .success(function(d) {
+        self.organizationCalendars(d.users || []);
+        hub.send("calendarService::organizationCalendarsFetched");
+      })
+      .call();
+   });
+
+  var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function() {
+    ajax.query("reservation-types-for-organization")
+      .success(function (data) {
+        var obj = {};
+        obj[data.organization] = data.reservationTypes;
+        self.calendarQuery.reservationTypes(data.reservationTypes);
+        self.reservationTypesByOrganization(obj);
+        hub.send("calendarService::organizationReservationTypesFetched");
+      })
+      .call();
+  });
+
+  var _fetchMyCalendars = hub.subscribe("calendarService::fetchMyCalendars", function() {
+    ajax.query("my-calendars")
+      .success(function(data) {
+        self.myCalendars(data.calendars);
+        self.reservationTypesByOrganization(data.reservationTypes);
+        hub.send("calendarService::myCalendarsFetched");
       })
       .call();
   });
@@ -67,17 +109,40 @@ LUPAPISTE.CalendarService = function() {
     ajax
       .command("create-calendar-slots", {calendarId: event.calendarId, slots: event.slots})
       .success(function() {
-        if (event.modalClose) {
-          LUPAPISTE.ModalDialog.close();
-        }
+        hub.send("indicator", {style: "positive"});
+        doFetchCalendarSlots();
+      })
+      .call();
+  });
+
+/*  var _updateSlot = hub.subscribe("calendarService::updateCalendarSlot", function(event) {
+    ajax
+      .command("update-calendar-slots", {calendarId: event.calendarId, slots: event.slots})
+      .success(function() {
+        hub.send("indicator", {style: "positive"});
+        doFetchCalendarSlots();
+      })
+      .call();
+  }); */
+
+  var _deleteSlot = hub.subscribe("calendarService::deleteCalendarSlot", function(event) {
+    ajax
+      .command("delete-calendar-slot", {slotId: event.id})
+      .success(function() {
+        hub.send("indicator", {style: "positive", message: "calendar.deleted"});
         doFetchCalendarSlots();
       })
       .call();
   });
 
   self.dispose = function() {
+    hub.unsubscribe(_fetchOrgCalendars);
+    hub.unsubscribe(_fetchReservationTypes);
     hub.unsubscribe(_fetchCalendar);
+    hub.unsubscribe(_fetchMyCalendars);
     hub.unsubscribe(_fetchSlots);
     hub.unsubscribe(_createSlots);
+    //hub.unsubscribe(_updateSlot);
+    hub.unsubscribe(_deleteSlot);
   };
 };

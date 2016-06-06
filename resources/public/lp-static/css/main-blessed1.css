@@ -5380,7 +5380,7 @@ input.form-input.inline, input.inline.form-input--inline {
   overflow: visible;
 }
 /* line 505, ../../../private/common-html/sass/partials/_forms.scss */
-.docgen-content .form-group .form-entry .form-label-string-choice, .docgen-content .form-group .form-entry .form-label-select, .docgen-content .form-group .form-entry .form-label-date {
+.docgen-content .form-group .form-entry .form-label-select, .docgen-content .form-group .form-entry .form-label-date {
   vertical-align: text-bottom;
 }
 /* line 509, ../../../private/common-html/sass/partials/_forms.scss */
@@ -7070,9 +7070,9 @@ input[type=checkbox]:disabled + .checkbox-label:before {
 }
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8913,61 +8913,61 @@ ul.tabs {
   border-top: 24px solid #e9e9e9;
 }
 
-/* line 113, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 112, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-for-me {
   border: solid 2px #f39129;
 }
 
-/* line 118, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 117, ../../../private/common-html/sass/partials/_conversation.scss */
 .conversation div {
   vertical-align: top;
 }
 
-/* line 123, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 122, ../../../private/common-html/sass/partials/_conversation.scss */
 .conversation .attachment-comment {
   vertical-align: top;
   background-color: #e9e9e9;
 }
 
-/* line 128, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 127, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-controls {
   display: inline-block;
   margin-left: 24px;
 }
-/* line 132, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 131, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-controls .comment-request {
   display: inline-block;
   margin-left: 24px;
 }
-/* line 135, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 134, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-controls .comment-request label {
   display: block;
 }
-/* line 138, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 137, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-controls .comment-request select {
   display: block;
 }
-/* line 143, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 142, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-controls .mark-answered {
   margin-left: 24px;
   display: inline-block;
 }
-/* line 146, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 145, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-controls .mark-answered label, .comment-controls .mark-answered input {
   display: inline;
 }
 
-/* line 153, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 152, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-toggle {
   margin-bottom: 8px;
 }
 
-/* line 157, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 156, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-message {
   white-space: pre-line;
 }
 
-/* line 247, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 246, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble {
   position: relative;
   color: #333333;
@@ -8981,7 +8981,7 @@ ul.tabs {
   margin-bottom: 15px;
   border: 1px solid #bbbbbb;
 }
-/* line 178, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 177, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble:after, .comment-bubble:before {
   top: 100%;
   left: 5%;
@@ -8992,25 +8992,25 @@ ul.tabs {
   position: absolute;
   pointer-events: none;
 }
-/* line 189, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble:after, .comment-bubble:before {
   left: 5%;
 }
-/* line 192, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble:after {
   border-color: rgba(246, 246, 246, 0);
   border-top-color: #f6f6f6;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 198, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble:before {
   border-color: rgba(187, 187, 187, 0);
   border-top-color: #bbbbbb;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 204, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 203, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header {
   border-bottom: 2px solid #bbbbbb;
   margin-bottom: 5px;
@@ -9019,37 +9019,37 @@ ul.tabs {
   overflow-y: hidden;
   vertical-align: top;
 }
-/* line 211, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 210, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender {
   font-weight: bold;
 }
-/* line 213, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role {
   text-transform: lowercase;
 }
-/* line 215, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 214, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role:before {
   content: "(";
 }
-/* line 218, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender .role:after {
   content: ")";
 }
-/* line 223, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 222, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .sender .to:before {
   margin-left: 12px;
   margin-right: 12px;
   content: "→";
 }
-/* line 230, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 229, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .header .timestamp {
   float: right;
 }
-/* line 235, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 234, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .content .target {
   margin-right: 6px;
 }
-/* line 239, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 238, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble a {
   color: #f39129;
   text-decoration: none;
@@ -9068,12 +9068,12 @@ ul.tabs {
   color: #fbc732;
   text-decoration: underline;
 }
-/* line 242, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 241, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .deleted {
   text-decoration: line-through;
 }
 
-/* line 252, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 251, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority {
   position: relative;
   color: #333333;
@@ -9087,7 +9087,7 @@ ul.tabs {
   margin-bottom: 15px;
   border: 1px solid #bbbbbb;
 }
-/* line 178, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 177, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
   top: 100%;
   left: 95%;
@@ -9098,25 +9098,25 @@ ul.tabs {
   position: absolute;
   pointer-events: none;
 }
-/* line 189, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
   left: 95%;
 }
-/* line 192, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after {
   border-color: rgba(246, 246, 246, 0);
   border-top-color: #f6f6f6;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 198, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:before {
   border-color: rgba(187, 187, 187, 0);
   border-top-color: #bbbbbb;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 204, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 203, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header {
   border-bottom: 2px solid #bbbbbb;
   margin-bottom: 5px;
@@ -9125,37 +9125,37 @@ ul.tabs {
   overflow-y: hidden;
   vertical-align: top;
 }
-/* line 211, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 210, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender {
   font-weight: bold;
 }
-/* line 213, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role {
   text-transform: lowercase;
 }
-/* line 215, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 214, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role:before {
   content: "(";
 }
-/* line 218, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .role:after {
   content: ")";
 }
-/* line 223, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 222, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .sender .to:before {
   margin-left: 12px;
   margin-right: 12px;
   content: "→";
 }
-/* line 230, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 229, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header .timestamp {
   float: right;
 }
-/* line 235, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 234, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .content .target {
   margin-right: 6px;
 }
-/* line 239, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 238, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority a {
   color: #f39129;
   text-decoration: none;
@@ -9174,34 +9174,34 @@ ul.tabs {
   color: #fbc732;
   text-decoration: underline;
 }
-/* line 242, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 241, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .deleted {
   text-decoration: line-through;
 }
-/* line 254, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 253, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority .header {
   border-bottom-color: #05d3b9;
 }
 
-/* line 259, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 258, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble > .content > span,
 .comment-bubble-authority > .content > span {
   white-space: pre-wrap;
 }
 
-/* line 264, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 263, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.attachment > .content > span.target,
 .comment-bubble-authority.attachment > .content > span.target {
   white-space: normal;
 }
 
-/* line 272, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 271, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.attachment .header,
 .comment-bubble-authority.attachment .header {
   border-bottom-color: #f7ac2e;
 }
 
-/* line 279, ../../../private/common-html/sass/partials/_conversation.scss */
+/* line 278, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.for-me .header,
 .comment-bubble-authority.for-me .header {
   border-bottom-color: #46b02d;
@@ -11477,4 +11477,9 @@ div.search i {
 /* line 148, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation span {
   margin-right: 12px;
+}
+/* line 151, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation div {
+  padding-right: 24px;
+  display: table-cell;
 }

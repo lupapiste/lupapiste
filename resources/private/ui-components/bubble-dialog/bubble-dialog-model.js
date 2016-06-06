@@ -6,7 +6,11 @@
 // [buttonIcon]: Icon for OK button (default no icon)
 // [buttonText]: Ltext for OK button (default 'ok')
 // [okEnabled]: Is OK button enabled (default true). Typically observable, when given.
-// [waiting]: Observable that is true when bubble is waiting/pending.
+// [waiting]: Observable that is true when bubble is waiting/pending for the OK operation.
+// [removeVisible]: If true, a "remove" button is shown between OK and Cancel buttons.
+// [removeEnabled]: Is Remove button enabled (default false). Typically observable, when given.
+// [removeFun]: Callback function for the remove button (default _.noop).
+// [waitingRemove]: Waiting observable for the Remove operation.
 // [error]: Error message observable. The message is shown above
 //          the dialog buttons.
 // [prefix]: Prefix for button and error test ids.
@@ -23,16 +27,22 @@ LUPAPISTE.BubbleDialogModel = function( params ) {
   var BUBBLE = "bubble-dialog";
 
   self.bubbleVisible = params.visible;
+  self.removeVisible = params.removeVisible || false;
   self.buttonIcon = params.buttonIcon || "";
   self.buttonText = params.buttonText || "ok";
   self.okEnabled = _.isUndefined( params.okEnabled )
                  ? true
                  : params.okEnabled;
+  self.removeEnabled = _.isUndefined( params.removeEnabled )
+                     ? false
+                     : params.removeEnabled;
 
   self.ok = params.okFun;
+  self.remove = params.removeFun || _.noop;
   var initFun = params.initFun || _.noop;
   self.cancel = _.partial( self.bubbleVisible, false );
   self.waiting = params.waiting;
+  self.waitingRemove = params.waitingRemove || false;
   self.error = params.error;
   self.prefix = params.prefix ? params.prefix + "-" : "";
 

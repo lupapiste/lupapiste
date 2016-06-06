@@ -187,7 +187,8 @@
                    "accordion-service.js"
                    "verdict-appeal-service.js"
                    "scroll-service.js"
-                   "ram-service.js"]}
+                   "ram-service.js"
+                   "calendar-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -367,19 +368,25 @@
                              :statement :docgen :create :mypage :header :debug
                              :company :analytics :register-company :footer :ui-components]}
 
+   :calendar-view {:depends [:common-html]
+                   :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
+                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
+                   :html ["reservation-slot-edit-bubble-template.html"
+                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html" ]}
+
+   :mycalendar   {:depends [:calendar-view]
+                  :js ["mycalendar.js"]
+                  :html ["mycalendar.html"]}
+
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
-                             :company :stamp :integration-error :analytics :metadata-editor :footer :ui-components]}
+                             :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components]}
 
    :oir-app {:depends [] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
                        :docgen :debug :analytics :header :footer :ui-components]
              :css ["oir.css"]}
-
-   :calendar-view {:depends [:common-html]
-                   :js ["calendar-view.js" "calendar-service.js"]
-                   :html ["calendar-view.html"]}
 
    :authority-admin-app {:depends []
                          :js ["authority-admin-app.js"]}
