@@ -8,6 +8,8 @@
 "ram.new" "sv" "Ny RAM-bilaga"
 "ram.prefix" "fi" "[RAM]"
 "ram.prefix" "sv" "[RAM]"
+"ram.postfix" "fi" "(RAM)""
+"ram.postfix" "sv" "(RAM)"
 "ram.type.ram" "fi" "RAM-liite"
 "ram.type.ram" "sv" "RAM-bilaga"
 "ram.type" "fi" "Tyyppi"

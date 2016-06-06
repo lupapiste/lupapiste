@@ -18,7 +18,7 @@
                        attr: {'data-test-id': 'ram-link-type-' + $index()}"></td>
         <td data-bind="attachmentVersion: $data.latestVersion,
                        attr: {'data-test-id': 'ram-link-file-' + $index()}"></td>
-        <td data-bind="dateTimeString: _.get( $data, 'latestVersion.created', modified )"></td>
+        <td data-bind="dateTimeString: _.get( $data, 'latestVersion.created' )"></td>
         <td data-bind="firstLastName: _.get( $data, 'latestVersion.user', ''),
                        attr: {'data-test-id': 'ram-link-editor-' + $index()}"></td>
         <td data-bind="html: $parent.approvalHtml( $data ),
