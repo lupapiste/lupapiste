@@ -9,8 +9,10 @@
   </div>
   
   <rollup params="{open: rollupToggle}">
-    <rollup-button params="open: $parent.rollupToggle, 
-                           text: 'Outer rollup'"></rollup-button>
+    <rollup-button params="open: $parent.rollupToggle,
+                           css: {authority: 1}">
+      <span data-bind="text: 'Hello world!'"></span>
+    </rollup-button>
     <div class="rollup__open">
       Body is now visible!
       <rollup params="open: $parent.innerToggle">
