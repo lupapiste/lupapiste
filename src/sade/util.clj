@@ -183,6 +183,19 @@
        (catch Exception _
          default)))))
 
+(defn to-long
+  "Parses string to long. If string is not numeric returns nil."
+  [^String s]
+  (when (numeric? s)
+    (Long/parseLong s)))
+
+(defn ->long
+  "Parses strings and numbers to longs. Returns nil for other types and invalid strings."
+  [x]
+  (cond
+    (string? x) (to-long x)
+    (number? x) (long x)))
+
 (defn abs [n]
   {:pre [(number? n)]}
   (Math/abs n))
@@ -235,7 +248,7 @@
 
 (defn- format-timestamp-local-tz [^Long timestamp ^String fmt]
   (when timestamp
-    (let [dt (local-date-time timestamp)]
+    (let [dt (local-date-time (->long timestamp))]
       (timeformat/unparse-local (timeformat/formatter fmt) dt))))
 
 (defn to-local-date [^Long timestamp]
@@ -306,19 +319,6 @@
   "Returns a timestamp in future. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
   [time-key amount]
   (get-timestamp-ago-or-from-now from-now time-key amount))
-
-(defn to-long
-  "Parses string to long. If string is not numeric returns nil."
-  [^String s]
-  (when (numeric? s)
-    (Long/parseLong s)))
-
-(defn ->long
-  "Parses strings and numbers to longs. Returns nil for other types and invalid strings."
-  [x]
-  (cond
-    (string? x) (to-long x)
-    (number? x) (long x)))
 
 (defn sequable?
   "Returns true if x can be converted to sequence."
