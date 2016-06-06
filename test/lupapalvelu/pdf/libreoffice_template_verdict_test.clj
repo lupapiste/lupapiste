@@ -111,7 +111,7 @@
            (verdict/write-verdict-libre-doc data "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
-             #_(.delete tmp-file)
+             (.delete tmp-file)
              (fact {:midje/description (str " verdict title id (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
              (fact {:midje/description (str " verdict id (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_ID") => (build-user-field "LP-000-0000-0000" "LPAVALUE_ID"))
              (fact {:midje/description (str " verdict title kuntalupa (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
@@ -139,7 +139,7 @@
            (verdict/write-verdict-libre-doc data "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
-             #_(.delete tmp-file)
+             (.delete tmp-file)
              (fact {:midje/description (str " verdict title id (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
              (fact {:midje/description (str " verdict id (" (name lang) ")")} (get-user-field user-fields "LPAVALUE_ID") => (build-user-field "LP-000-0000-0000" "LPAVALUE_ID"))
              (fact {:midje/description (str " verdict title kuntalupa (" (name lang) ")")} (get-user-field user-fields "LPATITLE_ID") => (build-user-field (localize lang "verdict-attachment-prints-order.order-dialog.lupapisteId") "LPATITLE_ID"))
@@ -160,7 +160,7 @@
            (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
-             #_(.delete tmp-file)
+             (.delete tmp-file)
              (fact {:midje/description (str " verdict title  date(" (name lang) ")")} (get-user-field user-fields "LPTITLE_CONTRACT_DATE") => (build-user-field (localize lang "verdict.contract.date") "LPTITLE_CONTRACT_DATE"))
              ;;TODO test signatures
              ))))

@@ -92,7 +92,6 @@
 
 (defn write-verdict-libre-doc [application id paatos-idx lang file]
   (let [applicants (map (fn [val] [val]) (map template/name-from-doc (template/get-applicant-docs application)))
-        _ (timbre/debug "aplicants: " (with-out-str (clojure.pprint/pprint applicants)))
         verdict (first (filter #(= id (:id %)) (:verdicts application)))
         paatos (nth (:paatokset verdict) paatos-idx)
         start-time (template/get-in-document-data application :tyoaika [:tyoaika-alkaa-pvm :value])
