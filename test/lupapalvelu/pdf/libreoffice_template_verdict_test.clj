@@ -66,7 +66,7 @@
                                                                                                            :sukunimi {:value ""}}}
                                                                                :yritys    {:yritysnimi    {:value "Yritys Oy Ab"}
                                                                                            :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
-                                                                                                                           :sukunimi {:value "Mallikas"}}}}}}])) => "Yritys Oy Ab")
+                                                                                                                           :sukunimi {:value "Mallikas"}}}}}}])) => "Yritys Oy Ab / Mikko Mallikas")
        (fact {:midje/description " henkilo "}
              (get-vastuuhenkilo (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
                                                                  :data        {:henkilo {:henkilotiedot {:etunimi  {:value "Veikko"}
@@ -74,14 +74,6 @@
                                                                                :yritys  {:yritysnimi    {:value "Yritys Oy Ab"}
                                                                                          :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
                                                                                                                          :sukunimi {:value "Mallikas"}}}}}}])) => "Veikko Vastaava"))
-(facts "Verdict yhteyshenkilo "
-       (def get-yhteyshenkilo #'lupapalvelu.pdf.libreoffice-template-verdict/get-yhteyshenkilo)
-       (fact (get-yhteyshenkilo (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
-                                                                 :data        {:henkilo {:henkilotiedot {:etunimi  {:value ""}
-                                                                                                         :sukunimi {:value ""}}}
-                                                                               :yritys  {:yritysnimi    {:value "Yritys Oy Ab"}
-                                                                                         :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
-                                                                                                                         :sukunimi {:value "Mallikas"}}}}}}])) => "Mikko Mallikas"))
 
 (background
   (get-organization "753-R") => {:name {:fi "org-name-fi"}})
@@ -101,7 +93,21 @@
                                                                                                                :sukunimi {:value "Mallikas"}}}}}}
                                                     {:schema-info {:name :tyoaika}
                                                      :data        {:tyoaika-alkaa-pvm   {:value "01.12.2016"}
-                                                                   :tyoaika-paattyy-pvm {:value "02.12.2016"}}}])]
+                                                                   :tyoaika-paattyy-pvm {:value "02.12.2016"}}}
+
+                                                    {:schema-info {:subtype "hakija"}
+                                                     :data        {:_selected {:value "yritys"}
+                                                                   :yritys    {:yhteyshenkilo {:henkilotiedot {:sukunimi {:value "Lohikaarme"}
+                                                                                                               :etunimi  {:value "Puff"}}}
+                                                                               :yritysnimi    {:value "Vantaan kaupunki / Rakennus Oy"}}
+                                                                   :henkilo   {:henkilotiedot {:etunimi  {:value "aa"}
+                                                                                               :sukunimi {:value "bb"}}}
+                                                                   }}
+                                                    {:schema-info {:subtype "hakija"}
+                                                     :data        {:_selected {:value "henkilo"}
+                                                                   :henkilo   {:henkilotiedot {:etunimi  {:value "Heikki"}
+                                                                                               :sukunimi {:value "Hakija"}}}}}
+                                                    ])]
            (verdict/write-verdict-libre-doc data "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
@@ -115,9 +121,7 @@
              ;;TODO: test rest of common "LPA" application fields
 
              (fact {:midje/description (str " verdict title vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_VASTUU") => (build-user-field (localize lang "verdict.vastuuhenkilo") "LPTITLE_VASTUU"))
-             (fact {:midje/description (str " verdict vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_VASTUU") => (build-user-field "Yritys Oy Ab" "LPVALUE_VASTUU"))
-             (fact {:midje/description (str " verdict title yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_YHTEYSHENKILO") => (build-user-field (localize lang "verdict.yhteyshenkilo") "LPTITLE_YHTEYSHENKILO"))
-             (fact {:midje/description (str " verdict yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_YHTEYSHENKILO") => (build-user-field "Mikko Mallikas" "LPVALUE_YHTEYSHENKILO"))
+             (fact {:midje/description (str " verdict vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_VASTUU") => (build-user-field "Yritys Oy Ab / Mikko Mallikas" "LPVALUE_VASTUU"))
              (fact {:midje/description (str " verdict title alkaa (" (name lang) ")")} (get-user-field user-fields "LPTITLE_LUPA_AIKA") => (build-user-field (i18n/localize lang "tyoaika._group_label") "LPTITLE_LUPA_AIKA"))
              (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA") => (build-user-field "01.12.2016 - 02.12.2016" "LPVALUE_LUPA_AIKA"))
              ))))
@@ -145,9 +149,7 @@
              ;;TODO: test rest of common "LPA" application fields
 
              (fact {:midje/description (str " verdict title vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_VASTUU") => (build-user-field (localize lang "verdict.vastuuhenkilo") "LPTITLE_VASTUU"))
-             (fact {:midje/description (str " verdict vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_VASTUU") => (build-user-field "Yritys Oy Ab" "LPVALUE_VASTUU"))
-             (fact {:midje/description (str " verdict title yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPTITLE_YHTEYSHENKILO") => (build-user-field (localize lang "verdict.yhteyshenkilo") "LPTITLE_YHTEYSHENKILO"))
-             (fact {:midje/description (str " verdict yhteyshenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_YHTEYSHENKILO") => (build-user-field "Mikko Mallikas" "LPVALUE_YHTEYSHENKILO"))
+             (fact {:midje/description (str " verdict vastuuhenkilo (" (name lang) ")")} (get-user-field user-fields "LPVALUE_VASTUU") => (build-user-field "Yritys Oy Ab / Mikko Mallikas" "LPVALUE_VASTUU"))
              (fact {:midje/description (str " verdict title alkaa (" (name lang) ")")} (get-user-field user-fields "LPTITLE_LUPA_AIKA") => (build-user-field "" "LPTITLE_LUPA_AIKA"))
              (fact {:midje/description (str " verdict alkaa (" (name lang) ")")} (get-user-field user-fields "LPVALUE_LUPA_AIKA") => (build-user-field "" "LPVALUE_LUPA_AIKA"))
              ))))
@@ -158,7 +160,7 @@
            (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]
-             #_(.delete tmp-file)
+             (.delete tmp-file)
              (fact {:midje/description (str " verdict title  date(" (name lang) ")")} (get-user-field user-fields "LPTITLE_CONTRACT_DATE") => (build-user-field (localize lang "verdict.contract.date") "LPTITLE_CONTRACT_DATE"))
              ;;TODO test signatures
              ))))
