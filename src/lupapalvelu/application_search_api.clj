@@ -48,14 +48,19 @@
     (ok :operationsByPermitType ops-by-permit-type)))
 
 (defn- localize-operation [op]
-  (assoc op
-    :displayNameFi (i18n/localize "fi" "operations" (:name op))
-    :displayNameSv (i18n/localize "sv" "operations" (:name op))))
+  (let [keys [:id :created :name :description]
+        loc-path (if (:name op) ["operations" (:name op)] ["not-known"])]
+    (merge
+      (zipmap keys (repeat nil))
+      (select-keys op keys)
+      {:displayNameFi (apply i18n/localize "fi" loc-path)
+       :displayNameSv (apply i18n/localize "sv" loc-path)})))
 
 (defn- localize-application [application]
   (-> application
-    (update-in [:secondaryOperations] #(map localize-operation %))
-    (update-in [:primaryOperation] localize-operation)
+    (update :secondaryOperations (util/fn->> (remove (comp nil? :name))))
+    (update :secondaryOperations #(map localize-operation %))
+    (update :primaryOperation localize-operation)
     (assoc
       :stateNameFi (i18n/localize "fi" (:state application))
       :stateNameSv (i18n/localize "sv" (:state application)))))
