@@ -117,7 +117,7 @@
 
                               <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("tos-operations-enabled") -->
                               <div>
-                                <p data-bind="ltext: 'tos.function'"></p>
+                                <p data-bind="ltext: 'application.tosFunction'"></p>
                                 <span class="application_summary_text">
                                 <select class="dropdown dropdown--full-width"
                                         data-bind="options: $root.tosFunctions,
@@ -178,7 +178,7 @@
                                       <span data-bind="text: $data.id"></span>
                                       -
                                       <span data-bind="ltext: 'operations.' + $data.operation()"></span>
-                                      <span data-bind="visible: $data.permitSubtype() === 'muutoslupa',
+                                      <span data-bind="visible: $data.permitSubtype && $data.permitSubtype() === 'muutoslupa',
                                                        ltext: 'permitSubtype.muutoslupa'"
                                             class="modification-permit"></span>
                                     </a>

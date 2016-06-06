@@ -356,11 +356,11 @@
    (str "    <text:user-field-decl office:value-type=\"string\" office:string-value=\"" (xml-escape value) "\" text:name=\"" name "\"/>"))
 
 (fact "get-document-data"
-      (get-document-data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
-                                                          :data        {:henkilo {:henkilotiedot {:etunimi  {:value "etu"}
+      (get-in-document-data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
+                                                          :data           {:henkilo {:henkilotiedot {:etunimi  {:value "etu"}
                                                                                                   :sukunimi {:value "suku"}}}
                                                                         :yritys  {:yritysnimi {:value         "Yritys Oy Ab"
                                                                                                :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
                                                                                                                                :sukunimi {:value "Mallikas"}}}}}}}])
-                         :tyomaastaVastaava [:henkilo]) => {:henkilotiedot {:etunimi  {:value "etu"}
+                            :tyomaastaVastaava [:henkilo]) => {:henkilotiedot {:etunimi  {:value "etu"}
                                                                             :sukunimi {:value "suku"}}})

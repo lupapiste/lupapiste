@@ -374,6 +374,8 @@
 "application.taskState" "sv" "Status"
 "application.toAsianhallinta" "fi" "Siirrä asianhallintaan"
 "application.toAsianhallinta" "sv" "Flytta till ärendehantering"
+"application.tosFunction" "fi" "Menettely:"
+"application.tosFunction" "sv" "Procedur:"
 "application.tosMetadataWasReset" "fi" "Menettelyn vaihto palautti kaikkien asiakirjojen arkistointimetatiedot oletusarvoihin, vaikka niitä olisi aiemmin muokattu Lupapisteessä."
 "application.tosMetadataWasReset" "sv" "Bytet av förfarandet återställde dokumentens arkiveringsmetauppgifter till utgångsvärden, fastän de tidigare skulle ha blivit redigerade i Lupapiste."
 "application.tosMetadataWasResetTitle" "fi" "Metatiedot päivitettiin"
