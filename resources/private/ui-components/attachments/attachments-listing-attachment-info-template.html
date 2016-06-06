@@ -1,6 +1,17 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-listing-attachment-info-template">
   <div>
-    <p>Some info</p>
+    <ul data-bind="foreach: attachments">
+      <li>
+        <p data-bind="text: $data.id"/>
+        <!-- ko if: !($parent.isApproved($data)) -->
+        <button data-bind="click: $parent.approveAttachment($data.id)">Hyväksy</button>
+        <!-- /ko -->
+        <!-- ko if: !($parent.isRejected($data)) -->
+        <button data-bind="click: $parent.rejectAttachment($data.id)">Hylkää</button>
+        <!-- /ko -->
+        <button data-bind="click: $parent.removeAttachment($data.id)">Poista</button>
+      </li>
+    </ul>
   </div>
 </script>

@@ -7130,9 +7130,9 @@ input[type=checkbox]:disabled + .checkbox-label:before {
 }
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100.0%;
-  min-width: 100.0%;
-  max-width: 100.0%;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
@@ -10320,6 +10320,11 @@ ul.no-bullets {
 /* line 138, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion .accordion button.accordion-toggle {
   background: #999999;
+}
+
+/* line 145, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion.all-ok button.accordion-toggle {
+  background: #04c714;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_datepicker.scss */

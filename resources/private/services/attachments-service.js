@@ -7394,7 +7394,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.updateAttachment = function(attachmentId, updates) {
-    var oldAttachment = self.getAttachment(attachmentId);
+    var oldAttachment = self.getAttachment(attachmentId)();
     self.getAttachment(attachmentId)(_.merge(oldAttachment, updates));
   };
 
@@ -7417,10 +7417,15 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment.notNeeded;
   };
 
+  function getAttachmentValue(attachmentId) {
+    return self.getAttachment(attachmentId)();
+  }
+
   // returns a function for use in computed
   self.allApproved = function(attachmentIds) {
     return function() {
-      return _.every(attachmentIds, self.isApproved);
+      return _.every(_.map(attachmentIds, getAttachmentValue),
+                     self.isApproved);
     };
   };
 
@@ -7467,7 +7472,7 @@ LUPAPISTE.AttachmentsService = function() {
     if (mainGroup === "erityissuunnitelmat") {
       return attachment.type["type-id"];
     } else {
-      return mainGroup;
+      return "no-sub-group";
     }
   }
 
@@ -7549,12 +7554,13 @@ LUPAPISTE.AttachmentsService = function() {
         return _(attachmentsOfVerdictGroup)
           .groupBy(getMainGroup)
           .mapValues(function(attachmentsOfMainGroup) {
-            return _(attachmentsOfMainGroup)
+            var subGroups = _(attachmentsOfMainGroup)
               .groupBy(getSubGroup)
               .mapValues(function(attachments) {
                 return _.map(attachments, "id");
               })
               .value();
+            return subGroups["no-sub-group"] || subGroups;
           })
           .value();
       })

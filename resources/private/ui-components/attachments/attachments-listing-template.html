@@ -48,14 +48,28 @@
   <div>
     <p data-bind="text: JSON.stringify(attachmentsHierarchy())"></p>
     <h2>Hakemuksen aikaiset liitteet</h2>
-    <accordion id="pre-verdict-accordion"
-               params="accordionContentTemplate: 'attachments-listing-main-accordion-template',
-                       accordionContentTemplateData: null"/>
   </div>
-  
+  <div>
+    <h2 data-bind="ltext: 'application.attachments.pre-verdict'"/>
+    <div
+       data-bind="template: {name: 'attachments-listing-accordion-template',
+                             data: groups.preVerdict.yleiset}"></div>
+    <!-- ko if: groups.preVerdict.erityissuunnitelmat.data().hasAttachments -->
+    <rollup params="{open: getAccordionToggle('preVerdict', 'erityissuunnitelmat')}">
+      <rollup-button params="{open: open,
+                              text: 'erityissuunnitelmat'}"></rollup-button>
+      <div class="rollup__open">
+        <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                                   data: $parent.groups.preVerdict.erityissuunnitelmat['kvv_suunnitelma']}"></div>
+        <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                                   data: $parent.groups.preVerdict.erityissuunnitelmat.rakennesuunnitelma}"></div>
+      </div>
+    </rollup>
+    <!-- /ko -->
+  </div>  
   <rollup params="{open: rollupToggle}">
     <rollup-status-button params="open: $parent.rollupToggle,
-                                  style: 'tertiary',
+diff                                  style: 'tertiary',
                                   status: $parent.rollupStatus,
                                   text: 'Button with approval status'">
       <span data-bind="text: 'Hello world!'"></span>
