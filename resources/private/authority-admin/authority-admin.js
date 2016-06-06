@@ -14,7 +14,9 @@
       usersList = null,
       editRolesDialogModel,
       calendarsModel,
-      reservationTypesModel;
+      reservationTypesModel,
+      calendarViewModel,
+      reservationPropertiesModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -389,6 +391,7 @@
 
   calendarsModel = new LUPAPISTE.AuthAdminCalendarsModel();
   reservationTypesModel = new LUPAPISTE.AuthAdminReservationTypesModel();
+  reservationPropertiesModel = new LUPAPISTE.AuthAdminOrganizationReservationPropertiesModel();
 
   wfsModel = new LUPAPISTE.WFSModel();
   statementGiversModel = new StatementGiversModel();
@@ -451,6 +454,7 @@
     hub.onPageLoad("organization-calendars", function() {
       hub.send("calendarService::fetchOrganizationCalendars");
       hub.send("calendarService::fetchOrganizationReservationTypes");
+      reservationPropertiesModel.load();
     });
   }
 
@@ -488,7 +492,8 @@
     if (features.enabled("ajanvaraus")) {
       $("#organization-calendars").applyBindings({
         calendars:           calendarsModel,
-        reservationTypes:    reservationTypesModel
+        reservationTypes:    reservationTypesModel,
+        reservationProperties: reservationPropertiesModel
       });
       $("#calendar-admin").applyBindings({
         calendars:           calendarsModel,
