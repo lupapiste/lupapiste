@@ -17,6 +17,12 @@
             <span data-bind="saveIndicator: indicator"></span>
           </div>
 
+          <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
+            <label data-bind="ltext: 'organization.calendars.enabled'" for="calendarsEnabled"></label>
+            <input type="checkbox" data-bind="checked: calendarsEnabled" class="form-input" id="calendarsEnabled">
+            <span data-bind="saveIndicator: indicator"></span>
+          </div>
+
           <h2>Hakemustyypit</h2>
           <div data-bind="with: organization"><div data-bind="foreach: $data.scope">
             <h3><span data-bind="text: loc(['municipality', $data.municipality()])"></span>: <span data-bind="ltext: $data.permitType"></span></h3>

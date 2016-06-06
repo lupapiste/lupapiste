@@ -333,6 +333,15 @@
   (o/update-organization (user/authority-admins-organization-id user) {$set {:validate-verdict-given-date enabled}})
   (ok))
 
+(defcommand set-organization-calendars-enabled
+  {:parameters [enabled organizationId]
+   :user-roles #{:admin}
+   :input-validators  [(partial non-blank-parameters [:organizationId])
+                       (partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (o/update-organization organizationId {$set {:calendars-enabled enabled}})
+  (ok))
+
 (defcommand set-organization-permanent-archive-enabled
   {:parameters [enabled organizationId]
    :user-roles #{:admin}

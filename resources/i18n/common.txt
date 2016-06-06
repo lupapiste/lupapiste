@@ -1742,6 +1742,8 @@
 "organization.archive.enabled" "sv" "Elektroniskt arkiv i användning"
 "organization.attachments" "fi" "Tarvitset todennäköisesti seuraavat liitteet:"
 "organization.attachments" "sv" "Du behöver troligtvis följande bilagor:"
+"organization.calendars.enabled" "fi" "Ajanvaraus käytössä"
+"organization.calendars.enabled" "sv" "Tidsbeställning i användning"
 "organization.id" "fi" "Tunnus"
 "organization.id" "sv" "Kännetecken"
 "organization.inforequest.enabled" "fi" "Neuvontapyynnöt päällä"
