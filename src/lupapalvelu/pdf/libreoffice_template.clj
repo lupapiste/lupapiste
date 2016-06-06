@@ -105,10 +105,13 @@
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
         (s/trim (str (:value last-name) \space (:value first-name)))))))
 
-(defn applicant-index [application]
-  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
+(defn formatted-applicant-index [application formatter]
+  (let [applicants (doall (remove s/blank? (map formatter (domain/get-applicant-documents (:documents application)))))
         applicant (:applicant application)]
     [(if (seq applicants) applicants [applicant])]))
+
+(defn applicant-index [application]
+  (formatted-applicant-index application applicant-name-from-doc))
 
 (defn child-attachments [application child-type id]
   (let [type (case child-type
@@ -119,8 +122,22 @@
 (defn get-organization-name [application lang]
   (org/get-organization-name (:organization application) lang))
 
-(defn get-document-data [application type data]
-  (-> (domain/get-document-by-name application type) :data (get-in data)))
+(defn get-document [application type]
+  (domain/get-document-by-name application type))
+
+(defn get-in-document-data [application type data]
+  (-> (get-document application type) :data (get-in data)))
+
+(defn- get-yhteyshenkilo [data]
+  (let [henkilo (get-in data [:yritys :yhteyshenkilo :henkilotiedot])]
+    (str (get-in data [:yritys :yritysnimi :value]) " / " (get-in henkilo [:etunimi :value]) " " (get-in henkilo [:sukunimi :value]))))
+
+(defn name-from-doc [document]
+  [(when-let [body (:data document)]
+    (if (= (get-in body [:_selected :value]) "yritys")
+      (get-yhteyshenkilo body)
+      (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+        (s/trim (str (:value first-name) " " (:value last-name))))))])
 
 (defn create-libre-doc [template file fields]
   (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]

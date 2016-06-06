@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.text">
- <office:meta><meta:initial-creator>Microsoft Office User</meta:initial-creator><meta:editing-cycles>21</meta:editing-cycles><meta:creation-date>2016-04-29T12:24:00</meta:creation-date><dc:date>2016-06-03T11:55:03.779903511</dc:date><meta:editing-duration>P2DT13H57M9S</meta:editing-duration><meta:generator>LibreOffice/5.0.4.2$Linux_X86_64 LibreOffice_project/00m0$Build-2</meta:generator><meta:document-statistic meta:table-count="4" meta:image-count="1" meta:object-count="0" meta:page-count="1" meta:paragraph-count="16" meta:word-count="1" meta:character-count="45" meta:non-whitespace-character-count="14"/><meta:user-defined meta:name="AppVersion">15.0000</meta:user-defined><meta:user-defined meta:name="DocSecurity" meta:value-type="float">0</meta:user-defined><meta:user-defined meta:name="HyperlinksChanged" meta:value-type="boolean">false</meta:user-defined><meta:user-defined meta:name="LinksUpToDate" meta:value-type="boolean">false</meta:user-defined><meta:user-defined meta:name="ScaleCrop" meta:value-type="boolean">false</meta:user-defined><meta:user-defined meta:name="ShareDoc" meta:value-type="boolean">false</meta:user-defined><meta:template xlink:type="simple" xlink:actuate="onRequest" xlink:title="Normal.dotm" xlink:href=""/></office:meta>
+ <office:meta><meta:initial-creator>Microsoft Office User</meta:initial-creator><meta:editing-cycles>22</meta:editing-cycles><meta:creation-date>2016-04-29T12:24:00</meta:creation-date><dc:date>2016-06-06T10:46:41.671168826</dc:date><meta:editing-duration>P2DT13H58M19S</meta:editing-duration><meta:generator>LibreOffice/5.0.4.2$Linux_X86_64 LibreOffice_project/00m0$Build-2</meta:generator><meta:document-statistic meta:table-count="5" meta:image-count="1" meta:object-count="0" meta:page-count="1" meta:paragraph-count="17" meta:word-count="1" meta:character-count="45" meta:non-whitespace-character-count="14"/><meta:user-defined meta:name="AppVersion">15.0000</meta:user-defined><meta:user-defined meta:name="DocSecurity" meta:value-type="float">0</meta:user-defined><meta:user-defined meta:name="HyperlinksChanged" meta:value-type="boolean">false</meta:user-defined><meta:user-defined meta:name="LinksUpToDate" meta:value-type="boolean">false</meta:user-defined><meta:user-defined meta:name="ScaleCrop" meta:value-type="boolean">false</meta:user-defined><meta:user-defined meta:name="ShareDoc" meta:value-type="boolean">false</meta:user-defined><meta:template xlink:type="simple" xlink:actuate="onRequest" xlink:title="Normal.dotm" xlink:href=""/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
    <config:config-item config:name="ViewAreaTop" config:type="long">0</config:config-item>
    <config:config-item config:name="ViewAreaLeft" config:type="long">0</config:config-item>
-   <config:config-item config:name="ViewAreaWidth" config:type="long">18046</config:config-item>
-   <config:config-item config:name="ViewAreaHeight" config:type="long">26771</config:config-item>
+   <config:config-item config:name="ViewAreaWidth" config:type="long">49967</config:config-item>
+   <config:config-item config:name="ViewAreaHeight" config:type="long">26966</config:config-item>
    <config:config-item config:name="ShowRedlineChanges" config:type="boolean">true</config:config-item>
    <config:config-item config:name="InBrowseMode" config:type="boolean">false</config:config-item>
    <config:config-item-map-indexed config:name="Views">
     <config:config-item-map-entry>
      <config:config-item config:name="ViewId" config:type="string">view2</config:config-item>
-     <config:config-item config:name="ViewLeft" config:type="long">7500</config:config-item>
-     <config:config-item config:name="ViewTop" config:type="long">13559</config:config-item>
+     <config:config-item config:name="ViewLeft" config:type="long">10834</config:config-item>
+     <config:config-item config:name="ViewTop" config:type="long">8629</config:config-item>
      <config:config-item config:name="VisibleLeft" config:type="long">0</config:config-item>
      <config:config-item config:name="VisibleTop" config:type="long">0</config:config-item>
-     <config:config-item config:name="VisibleRight" config:type="long">18045</config:config-item>
-     <config:config-item config:name="VisibleBottom" config:type="long">26769</config:config-item>
+     <config:config-item config:name="VisibleRight" config:type="long">49966</config:config-item>
+     <config:config-item config:name="VisibleBottom" config:type="long">26965</config:config-item>
      <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutColumns" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutBookMode" config:type="boolean">false</config:config-item>
@@ -68,7 +68,7 @@
    <config:config-item config:name="InvertBorderSpacing" config:type="boolean">true</config:config-item>
    <config:config-item config:name="SaveGlobalDocumentLinks" config:type="boolean">false</config:config-item>
    <config:config-item config:name="TabsRelativeToIndent" config:type="boolean">false</config:config-item>
-   <config:config-item config:name="Rsid" config:type="int">2586062</config:config-item>
+   <config:config-item config:name="Rsid" config:type="int">2659934</config:config-item>
    <config:config-item config:name="PrintProspectRTL" config:type="boolean">false</config:config-item>
    <config:config-item config:name="PrintEmptyPages" config:type="boolean">false</config:config-item>
    <config:config-item config:name="ApplyUserData" config:type="boolean">true</config:config-item>
@@ -321,7 +321,7 @@
  </office:styles>
  <office:automatic-styles>
   <style:style style:name="LPTABLE_5f_TEKSTI" style:display-name="LPTABLE_TEKSTI" style:family="table">
-   <style:table-properties style:width="17cm" table:align="margins" style:shadow="none" style:writing-mode="lr-tb"/>
+   <style:table-properties style:width="17cm" table:align="margins" style:writing-mode="lr-tb"/>
   </style:style>
   <style:style style:name="LPTABLE_5f_TEKSTI.A" style:display-name="LPTABLE_TEKSTI.A" style:family="table-column">
    <style:table-column-properties style:column-width="5.001cm" style:rel-column-width="19276*"/>
@@ -349,6 +349,12 @@
   </style:style>
   <style:style style:name="ATTACHMENTTABLE.A" style:family="table-column">
    <style:table-column-properties style:column-width="11.873cm"/>
+  </style:style>
+  <style:style style:name="LPTABLE_5f_APPLICANT" style:display-name="LPTABLE_APPLICANT" style:family="table">
+   <style:table-properties style:width="11.913cm" fo:margin-left="5.101cm" table:align="left" style:writing-mode="lr-tb"/>
+  </style:style>
+  <style:style style:name="LPTABLE_5f_APPLICANT.A" style:display-name="LPTABLE_APPLICANT.A" style:family="table-column">
+   <style:table-column-properties style:column-width="11.913cm"/>
   </style:style>
   <style:style style:name="P1" style:family="paragraph" style:parent-style-name="Standard">
    <style:text-properties fo:language="fi" fo:country="FI"/>
@@ -436,7 +442,15 @@
   <style:style style:name="P19" style:family="paragraph" style:parent-style-name="Table_20_Heading">
    <style:text-properties officeooo:rsid="00246318" officeooo:paragraph-rsid="00246318"/>
   </style:style>
-  <style:style style:name="P20" style:family="paragraph" style:parent-style-name="Heading_20_1" style:master-page-name="Standard">
+  <style:style style:name="P20" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties>
+    <style:tab-stops>
+     <style:tab-stop style:position="5.006cm"/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+   <style:text-properties officeooo:paragraph-rsid="0028965e"/>
+  </style:style>
+  <style:style style:name="P21" style:family="paragraph" style:parent-style-name="Heading_20_1" style:master-page-name="Standard">
    <style:paragraph-properties style:page-number="auto"/>
    <style:text-properties fo:language="fi" fo:country="FI"/>
   </style:style>
@@ -909,7 +923,7 @@
     <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPTITLE_KUNTALUPA"/>
     <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPVALUE_KUNTALUPA"/>
    </text:user-field-decls>
-   <text:h text:style-name="P20" text:outline-level="1"><text:user-field-get text:name="LPTITLE"/></text:h>
+   <text:h text:style-name="P21" text:outline-level="1"><text:user-field-get text:name="LPTITLE"/></text:h>
    <text:p text:style-name="P2"/>
    <text:p text:style-name="P7"><text:span text:style-name="T2"><text:user-field-get text:name="LPATITLE_ID"/></text:span><text:span text:style-name="T1"><text:tab/></text:span><text:span text:style-name="T1"><text:user-field-get text:name="LPAVALUE_ID"/></text:span></text:p>
    <text:p text:style-name="P7"><text:span text:style-name="T2"><text:user-field-get text:name="LPTITLE_KUNTALUPA"/></text:span><text:span text:style-name="T2"><text:tab/></text:span><text:span text:style-name="T7"><text:user-field-get text:name="LPVALUE_KUNTALUPA"/></text:span></text:p>
@@ -917,8 +931,24 @@
    <text:p text:style-name="P1"/>
    <text:p text:style-name="P6"><text:span text:style-name="T2"><text:user-field-get text:name="LPTITLE_SIJAINTI"/></text:span><text:span text:style-name="T1"><text:tab/></text:span><text:span text:style-name="T1"><text:user-field-get text:name="LPAVALUE_ADDRESS"/></text:span></text:p>
    <text:p text:style-name="P1"/>
-   <text:p text:style-name="P6"><text:span text:style-name="T2"><text:user-field-get text:name="LPATITLE_APPLICANT"/></text:span><text:span text:style-name="T1"><text:tab/></text:span><text:span text:style-name="T1"><text:user-field-get text:name="LPAVALUE_APPLICANT"/></text:span><text:span text:style-name="T1"><text:line-break/></text:span><text:bookmark-start text:name="__DdeLink__2184_156810916"/><text:bookmark-start text:name="__DdeLink__2186_156810916"/><text:span text:style-name="T4"><text:user-field-get text:name="LPTITLE_YHTEYSHENKILO"/></text:span><text:bookmark-end text:name="__DdeLink__2184_156810916"/><text:bookmark-end text:name="__DdeLink__2186_156810916"/><text:span text:style-name="T4"><text:tab/></text:span><text:span text:style-name="T6"><text:user-field-get text:name="LPVALUE_YHTEYSHENKILO"/></text:span></text:p>
-   <text:p text:style-name="P6"><text:bookmark-start text:name="__DdeLink__1978_156810916"/><text:bookmark-start text:name="__DdeLink__2101_156810916"/><text:span text:style-name="T4"><text:user-field-get text:name="LPTITLE_VASTUU"/></text:span><text:bookmark-end text:name="__DdeLink__1978_156810916"/><text:bookmark-end text:name="__DdeLink__2101_156810916"/><text:span text:style-name="T5"><text:tab/></text:span><text:span text:style-name="T5"><text:user-field-get text:name="LPVALUE_VASTUU"/></text:span></text:p>
+   <text:p text:style-name="P20"><text:span text:style-name="T2"><text:user-field-get text:name="LPATITLE_APPLICANT"/></text:span><text:span text:style-name="T1"><text:tab/></text:span></text:p>
+   <table:table table:name="LPTABLE_APPLICANT" table:style-name="LPTABLE_5f_APPLICANT">
+    <table:table-column table:style-name="LPTABLE_5f_APPLICANT.A"/>
+    <table:table-header-rows>
+     <table:table-row>
+      <table:table-cell office:value-type="string">
+       <text:p text:style-name="Table_20_Heading"/>
+      </table:table-cell>
+     </table:table-row>
+    </table:table-header-rows>
+    <table:table-row>
+     <table:table-cell office:value-type="string">
+      <text:p text:style-name="Table_20_Contents"/>
+     </table:table-cell>
+    </table:table-row>
+   </table:table>
+   <text:p text:style-name="P20"><text:span text:style-name="T1"><text:line-break/></text:span><text:bookmark-start text:name="__DdeLink__2186_156810916"/><text:bookmark-start text:name="__DdeLink__2184_156810916"/><text:span text:style-name="T4"><text:user-field-get text:name="LPTITLE_YHTEYSHENKILO"/></text:span><text:bookmark-end text:name="__DdeLink__2186_156810916"/><text:bookmark-end text:name="__DdeLink__2184_156810916"/><text:span text:style-name="T4"><text:tab/></text:span><text:span text:style-name="T6"><text:user-field-get text:name="LPVALUE_YHTEYSHENKILO"/></text:span></text:p>
+   <text:p text:style-name="P6"><text:bookmark-start text:name="__DdeLink__2101_156810916"/><text:bookmark-start text:name="__DdeLink__1978_156810916"/><text:span text:style-name="T4"><text:user-field-get text:name="LPTITLE_VASTUU"/></text:span><text:bookmark-end text:name="__DdeLink__2101_156810916"/><text:bookmark-end text:name="__DdeLink__1978_156810916"/><text:span text:style-name="T5"><text:tab/></text:span><text:span text:style-name="T5"><text:user-field-get text:name="LPVALUE_VASTUU"/></text:span></text:p>
    <text:p text:style-name="P1"/>
    <text:p text:style-name="P6"><text:span text:style-name="T2"><text:user-field-get text:name="LPATITLE_OPERATIONS"/></text:span><text:span text:style-name="T1"><text:tab/></text:span><text:span text:style-name="T1"><text:user-field-get text:name="LPAVALUE_OPERATIONS"/></text:span></text:p>
    <text:p text:style-name="P1"/>

@@ -86,33 +86,30 @@
         (map (fn [sig] [(str (get-in sig [:user :firstName]) " " (get-in sig [:user :lastName])) (or (util/to-local-date (:created sig)) "-")]) (:signatures verdict))))
 
 (defn- get-vastuuhenkilo [application]
-  (if (= (template/get-document-data application :tyomaastaVastaava [:_selected :value]) "yritys")
-    (template/get-document-data application :tyomaastaVastaava [:yritys :yritysnimi :value])
-    (let [henkilo (template/get-document-data application :tyomaastaVastaava [:henkilo :henkilotiedot])
-          henkilo-nimi (str (get-in henkilo [:etunimi :value]) " " (get-in henkilo [:sukunimi :value]))]
-      henkilo-nimi)))
-
-(defn- get-yhteyshenkilo [application]
-  (let [henkilo (template/get-document-data application :tyomaastaVastaava [:yritys :yhteyshenkilo :henkilotiedot])]
-    (str (get-in henkilo [:etunimi :value]) " " (get-in henkilo [:sukunimi :value]))))
+    (let [data (template/get-document application :tyomaastaVastaava)
+          _ (timbre/debug data)
+          henkilo-nimi (template/name-from-doc data)]
+      (first henkilo-nimi)))
 
 (defn write-verdict-libre-doc [application id paatos-idx lang file]
-  (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
+  (let [applicants (template/formatted-applicant-index application template/name-from-doc)
+        _ (timbre/debug "aplicants: " applicants)
+        verdict (first (filter #(= id (:id %)) (:verdicts application)))
         paatos (nth (:paatokset verdict) paatos-idx)
-        start-time (template/get-document-data application :tyoaika [:tyoaika-alkaa-pvm :value])
-        end-time (template/get-document-data application :tyoaika [:tyoaika-paattyy-pvm :value])]
+        start-time (template/get-in-document-data application :tyoaika [:tyoaika-alkaa-pvm :value])
+        end-time (template/get-in-document-data application :tyoaika [:tyoaika-paattyy-pvm :value])]
     (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
     (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-ya-contract-template.fodt" "private/lupapiste-ya-verdict-template.fodt"))
                                file
                                (assoc (template/common-field-map application lang)
 
-                                 "LPAVALUE_APPLICANT" (:applicant application)
+                                 "LPTABLE_APPLICANT" applicants
 
                                  "LPATITLE_OPERATIONS" (i18n/localize lang "verdict.export.operations")
 
-                                 "LPTITLE_CONTRACT_DATE" (i18n/localize lang "verdict.contract.date")
+                                 "LPTITLE" (i18n/localize lang (if (:sopimus verdict) "userInfo.company.contract" "application.verdict.title"))
 
-                                 "LPTITLE" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
+                                 "LPTITLE_CONTRACT_DATE" (i18n/localize lang "verdict.contract.date")
 
                                  "LPTITLE_KUNTA" (i18n/localize lang "verdict.id")
                                  "LPTITLE_KUNTALUPA" (i18n/localize lang "linkPermit.dialog.kuntalupatunnus")
@@ -129,17 +126,13 @@
                                  "LPTITLE_VERDICT_STATE" (i18n/localize lang "verdict.status")
                                  "LPVALUE_VERDICT_STATE" (verdict-status paatos lang)
 
-                                 "LPTITLE_TEKSTI" (i18n/localize lang "verdict.text")
+                                 "LPTITLE_TEKSTI" (i18n/localize lang (if (:sopimus verdict) "verdict.contract.text" "verdict.text"))
                                  "LPTABLE_TEKSTI" (map (fn [line] ["" line]) (clojure.string/split (verdict-paatos-key paatos :paatos) #"\n"))
-
-                                 "LPTITLE_YHTEYSHENKILO" (i18n/localize lang "verdict.yhteyshenkilo")
-                                 "LPVALUE_YHTEYSHENKILO" (get-yhteyshenkilo application)
 
                                  "LPTITLE_VASTUU" (i18n/localize lang "verdict.vastuuhenkilo")
                                  "LPVALUE_VASTUU" (get-vastuuhenkilo application)
 
                                  "LPTITLE_LUPA_AIKA" (if (s/blank? start-time) "" (i18n/localize lang "tyoaika._group_label"))
-
                                  "LPVALUE_LUPA_AIKA" (if (s/blank? start-time) ""  (str start-time " - " end-time))
 
 
@@ -166,6 +159,8 @@
 
                                  "LPTITLE_OSAPUOLET" (i18n/localize lang "verdict.osapuolet.ja.yhteyshenkilot")
                                  "LPTABLE-OSAPUOLET" (into [[(str (get-organization-name application lang) " / " (verdict-paatos-key paatos :paatoksentekija))]] (applicant-index application))
+
+
 
                                  "LPTITLE_SISALTO" (i18n/localize lang "verdict.contract.content")
 
