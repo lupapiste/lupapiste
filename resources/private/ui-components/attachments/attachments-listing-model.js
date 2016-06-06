@@ -9,4 +9,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.rollupToggle = ko.observable();
   self.innerToggle = ko.observable();
   self.linkToggle = ko.observable();
+
+  self.rollupStatus = ko.observable( "ok");
 };

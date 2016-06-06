@@ -8,4 +8,20 @@
 
 button.rollup-button {
   width: 100%;
+  display: table-cell;
+}
+
+.rollup-status {
+  width: 100%;
+  display: table-cell;
+}
+
+.rollup-status__text {
+  display: table-cell;
+  width: 100%;
+}
+
+.rollup-status__icon {
+  display: table-cell;
+  min-width: $lupicon-size;
 }

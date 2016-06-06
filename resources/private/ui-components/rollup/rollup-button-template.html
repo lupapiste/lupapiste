@@ -9,8 +9,8 @@
         <span data-bind="text: text"></span>
         <!-- /ko -->
         <!-- ko ifnot: text -->
-        <span data-bind="template: {nodes: $componentTemplateNodes}">
-        </span>
+        <!-- ko template: {nodes: $componentTemplateNodes} -->
+        <!-- /ko -->
         <!-- /ko -->
       </button>
 </script>

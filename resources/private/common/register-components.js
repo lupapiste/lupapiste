@@ -126,7 +126,8 @@ jQuery(document).ready(function() {
     {name: "ram-links"},
     {name: "attachments-listing"},
     {name: "rollup"},
-    {name: "rollup-button"}
+    {name: "rollup-button"},
+    {name: "rollup-status-button"}
 ];
 
   _.forEach(components, function(component) {

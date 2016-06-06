@@ -9,15 +9,18 @@
   </div>
   
   <rollup params="{open: rollupToggle}">
-    <rollup-button params="open: $parent.rollupToggle,
-                           css: {authority: 1}">
+    <rollup-status-button params="open: $parent.rollupToggle,
+                                  style: 'tertiary',
+                                  status: $parent.rollupStatus,
+                                  text: 'Button with approval status'">
       <span data-bind="text: 'Hello world!'"></span>
-    </rollup-button>
-    <div class="rollup__open">
+    </rollup-status-button>
+    <div class="rollup__open" style="padding-left: 5em">
       Body is now visible!
       <rollup params="open: $parent.innerToggle">
         <rollup-button params="open: $parents[1].innerToggle, 
-                               text: 'Inner rollup'"></rollup-button>
+                               text: 'Inner rollup',
+                               css: {authority: 1}"></rollup-button>
         <div class="rollup__open">Inner body is now visible!</div>
       </rollup>
       <rollup params="open: $parent.linkToggle">
