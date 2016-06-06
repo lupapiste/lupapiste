@@ -15,7 +15,6 @@
       editRolesDialogModel,
       calendarsModel,
       reservationTypesModel,
-      calendarViewModel,
       reservationPropertiesModel;
 
   function toAttachmentData(groupId, attachmentId) {
