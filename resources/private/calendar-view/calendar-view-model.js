@@ -21,12 +21,25 @@ LUPAPISTE.CalendarViewModel = function () {
   var timelineTimesBuilder = function() {
     var times = [];
     ko.utils.arrayForEach(ko.utils.range(self.firstFullHour(), self.lastFullHour()), function(hour) {
-      times.push({ hour: hour, minutes:  0, viewText: hour + ":00" });
+      times.push({ viewText: _.padStart(hour + ":00", 5, "0") });
     });
     return times;
   };
 
   self.timelineTimes = ko.observableArray(timelineTimesBuilder());
+
+  self.timelineSlots = function(weekday) {
+    var times = [];
+    var weekdayStr = moment(weekday.startOfDay).format("dddd");
+    ko.utils.arrayForEach(ko.utils.range(self.firstFullHour(), self.lastFullHour()), function(hour) {
+      times.push({ weekday: weekday,
+                   calendarId: weekday.calendarId,
+                   hour: hour,
+                   minutes:  0,
+                   dataTestId: "timeline-slot-" + weekdayStr + "-" + _.padStart(hour, 2, "0") + "00" });
+    });
+    return times;
+  };
 
   self.slotPositionTop = function(slot) {
     var start = moment(slot.startTime);
@@ -34,8 +47,7 @@ LUPAPISTE.CalendarViewModel = function () {
   };
 
   self.slotHeight = function(slot) {
-    var duration = moment.duration(slot.duration);
-    return duration.asMinutes() + "px";
+    return moment.duration(slot.duration).asMinutes() + "px";
   };
 
   self.slotViewText = function(slot) {
@@ -45,10 +57,10 @@ LUPAPISTE.CalendarViewModel = function () {
   self.clickHandler = function(clazz) {
     if (clazz === "timeline-slot") {
       hub.send("calendarView::timelineSlotClicked",
-        { calendarId: this.calendarWeekday.calendarId,
-          weekday: this.calendarWeekday,
-          hour: this.slot.hour,
-          minutes: this.slot.minutes });
+        { calendarId: this.calendarId,
+          weekday: this.weekday,
+          hour: this.hour,
+          minutes: this.minutes });
     } else if (clazz === "calendar-slot") {
       hub.send("calendarView::calendarSlotClicked",
         { calendarId: this.calendarWeekday.calendarId,
