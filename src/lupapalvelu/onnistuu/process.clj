@@ -194,7 +194,7 @@
              (:id company)
              token-id)
       (when (:currentUser signer)
-        (c/link-user-to-company! (:currentUser signer) (:id company) :admin)
+        (c/link-user-to-company! (:currentUser signer) (:id company) :admin true)
         (infof "added current user to created-company: company [%s], user [%s]"
                (:id company)
                (:currentUser signer)))
