@@ -724,3 +724,13 @@
                     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
   [_])
+
+(defquery calendars-enabled
+          {:user-roles #{:authority}
+           :pre-checks [(fn [command {:keys [organization]}]
+                          (let [org-set (if organization
+                                          #{organization}
+                                          (usr/organization-ids-by-roles (:user command) #{:authority}))]
+                            (when (or (empty? org-set) (not (organization/some-organization-has-calendars-enabled? org-set)))
+                              unauthorized)))]}
+  [_])
