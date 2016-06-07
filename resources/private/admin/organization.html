@@ -17,7 +17,7 @@
             <span data-bind="saveIndicator: indicator"></span>
           </div>
 
-          <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
+          <div class="calendars-setting" data-bind="if: util.getIn($data, ['organization', 'id']) && features.enabled('ajanvaraus')">
             <label data-bind="ltext: 'organization.calendars.enabled'" for="calendarsEnabled"></label>
             <input type="checkbox" data-bind="checked: calendarsEnabled" class="form-input" id="calendarsEnabled">
             <span data-bind="saveIndicator: indicator"></span>

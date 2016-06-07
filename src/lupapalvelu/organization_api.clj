@@ -337,7 +337,8 @@
   {:parameters [enabled organizationId]
    :user-roles #{:admin}
    :input-validators  [(partial non-blank-parameters [:organizationId])
-                       (partial boolean-parameters [:enabled])]}
+                       (partial boolean-parameters [:enabled])]
+   :feature :ajanvaraus}
   [{user :user}]
   (o/update-organization organizationId {$set {:calendars-enabled enabled}})
   (ok))
