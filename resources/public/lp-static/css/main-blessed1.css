@@ -9777,14 +9777,18 @@ ul.tabs {
   border: none;
   padding: 0 0 0 0;
 }
+/* line 29, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle.tight button.function:active span, .help-toggle.tight button.function:hover span {
+  text-decoration: underline;
+}
 
-/* line 31, ../../../private/common-html/sass/partials/_help.scss */
+/* line 36, ../../../private/common-html/sass/partials/_help.scss */
 .stacked.help-toggle,
 .stacked.help-toggle div {
   overflow-y: visible;
 }
 
-/* line 39, ../../../private/common-html/sass/partials/_help.scss */
+/* line 44, ../../../private/common-html/sass/partials/_help.scss */
 .help-text {
   display: none;
   position: relative;
@@ -9794,29 +9798,29 @@ ul.tabs {
   margin-bottom: 24px;
   border: 1px solid #f7ac2e;
 }
-/* line 48, ../../../private/common-html/sass/partials/_help.scss */
+/* line 53, ../../../private/common-html/sass/partials/_help.scss */
 .help-text p:last-child {
   margin-bottom: 0;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_help.scss */
+/* line 59, ../../../private/common-html/sass/partials/_help.scss */
 .tab-info {
   width: 80%;
 }
 
-/* line 61, ../../../private/common-html/sass/partials/_help.scss */
+/* line 66, ../../../private/common-html/sass/partials/_help.scss */
 .help-reset {
   clear: both;
   max-height: 6px;
 }
 
-/* line 66, ../../../private/common-html/sass/partials/_help.scss */
+/* line 71, ../../../private/common-html/sass/partials/_help.scss */
 .panel-info {
   width: 100%;
   text-align: justify;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_help.scss */
+/* line 76, ../../../private/common-html/sass/partials/_help.scss */
 .expanded-content {
   max-height: 0;
   overflow: hidden;
@@ -9824,17 +9828,17 @@ ul.tabs {
   -webkit-transition: max-height 400ms;
   /* Safari */
 }
-/* line 76, ../../../private/common-html/sass/partials/_help.scss */
+/* line 81, ../../../private/common-html/sass/partials/_help.scss */
 .expanded-content.expand {
   max-height: 1000px;
 }
 
-/* line 81, ../../../private/common-html/sass/partials/_help.scss */
+/* line 86, ../../../private/common-html/sass/partials/_help.scss */
 .page-info {
   margin: 12px 0;
 }
 
-/* line 86, ../../../private/common-html/sass/partials/_help.scss */
+/* line 91, ../../../private/common-html/sass/partials/_help.scss */
 .help-adjacent-title {
   margin-top: 0 !important;
   line-height: normal;
@@ -10909,17 +10913,4 @@ ul.no-bullets {
   display: inline-block;
   vertical-align: bottom;
   line-height: normal;
-}
-/* line 182, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.tos-function-correction select, .tos-function-correction input {
-  width: 350px;
-  min-height: 40px;
-  box-sizing: border-box;
-  display: inline-block;
-  margin: 0;
-}
-
-/* line 191, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.mark-as-archived {
-  margin-top: 3em;
 }

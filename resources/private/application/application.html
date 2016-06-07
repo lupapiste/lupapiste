@@ -355,7 +355,8 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-                            <li data-bind="css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
+                            <li data-bind="feature: 'attachments-poc',
+                                           css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
                                 <a data-bind="click: changeTab" href="#" data-target="attachmentsPOC" data-test-id="application-open-attachmentsPOC-tab" class="link-btn">
                                     <span>Suunnitelmat ja liitteet POC</span>
                                     <span data-bind="if: attachmentsRequiringAction">
@@ -626,7 +627,8 @@
 
                     <!-- AttachmentsPOC tab -->
                     <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
-                    <div id="application-attachmentsPOC-tab" class="tab-content">                     
+                    <div id="application-attachmentsPOC-tab" class="tab-content"
+                         data-bind="feature: 'attachments-poc'">                     
                       <attachments-listing/>
                     </div>
                     <!-- /ko -->

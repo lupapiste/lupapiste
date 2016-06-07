@@ -25,6 +25,11 @@
   button.function {
     border: none;
     padding: 0 0 0 0;
+    &:active, &:hover {
+                span {
+                  text-decoration: underline;
+                }
+              }
   }
 }
 

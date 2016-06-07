@@ -1,5 +1,18 @@
-@import url('main-blessed1.css?z=1465311696125');
+@import url('main-blessed1.css?z=1465313444218');
 
+/* line 182, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.tos-function-correction select, .tos-function-correction input {
+  width: 350px;
+  min-height: 40px;
+  box-sizing: border-box;
+  display: inline-block;
+  margin: 0;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.mark-as-archived {
+  margin-top: 3em;
+}
 /* line 193, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .mark-as-archived p {
   margin-bottom: 0.5em;
