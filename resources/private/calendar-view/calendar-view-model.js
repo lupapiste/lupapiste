@@ -5,13 +5,7 @@ LUPAPISTE.CalendarViewModel = function () {
 
   self.calendar = calendarService.calendar;
   self.calendarWeekdays = calendarService.calendarWeekdays;
-  self.week = calendarService.calendarQuery.week;
-  self.year = calendarService.calendarQuery.year;
-
-  // helper function for the view
-  self.month = function() {
-    return moment().set({"year": self.year(), "isoWeek": self.week(), "isoWeekday": 1 /* Monday */}).valueOf();
-  };
+  self.startOfWeek = calendarService.calendarQuery.startOfWeek;
 
   self.calendarId = ko.observable();
 

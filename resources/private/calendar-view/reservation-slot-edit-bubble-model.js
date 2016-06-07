@@ -22,9 +22,13 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function( params ) {
 
   self.removeEnabled = true;
 
-  self.remove = function() {
+  self.doRemove = function() {
     self.sendEvent("calendarService", "deleteCalendarSlot", {id: self.slotId()});
     self.bubbleVisible(false);
+  };
+
+  self.remove = function() {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("calendar.slot.confirmdelete"), {title: loc("yes"), fn: self.doRemove});
   };
 
   self.send = function() {
