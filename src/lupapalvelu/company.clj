@@ -392,10 +392,8 @@
     (ok)))
 
 (defn cannot-submit
-  "Pre-check that fails only if the user is authed as company user
-  without submit rights"
-  [{user :user} application]
-  (when-not (and (not (domain/owner-or-write-access? application (:id user)))
-             (domain/company-access? application (-> user :company :id))
-             (not (-> user :company :submit)))
+  "Pre-check that succeeds only if a company user does not have submit
+  rights"
+  [{{company :company} :user} application]
+  (when-not (and company  (not (:submit company)))
     (fail :error.authorized)))
