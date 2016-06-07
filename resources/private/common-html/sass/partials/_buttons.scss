@@ -325,6 +325,14 @@ a.link-btn {
   cursor: pointer;
 }
 
+.link-btn--link {
+  &:hover, &:active {
+             span {
+               text-decoration: underline;
+             }             
+  }
+}
+
 a.link-btn-julkipano {
   @extend .like-btn;
   @include styled-input( none, none, none,
@@ -546,4 +554,17 @@ button {
 
 .left-buttons > button {
   margin-right: $btn-spacer;
+}
+
+// Mixin for a button row that wraps
+@mixin button-row ($margin-right: $btn-spacer, $margin-bottom: $btn-spacer ){
+  .btn-base, .btn, button, div, a {
+    margin: {
+    right: $margin-right;
+    bottom: $margin-bottom;
+  }
+  }
+  :last-child {
+    margin-right: 0;
+  }
 }

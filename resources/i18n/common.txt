@@ -746,6 +746,7 @@
 "attachment.legend.error" "sv" "Bilaga som är bristfällig eller som kräver ändringar"
 "attachment.legend.ok" "fi" "Viranomainen on alustavasti hyväksynyt, että liite on asianmukainen kyseessä olevaan hakemukseen. Varsinainen hyväksyntä annetaan myöhemmin luvan virallisessa käsittelyssä."
 "attachment.legend.ok" "sv" "Bilaga som myndigheten preliminärt godkänt. Egentligt godkännande ges senare i den formella behandlingen av tillståndet."
+"attachment.legend.help" "fi" "Liitteiden tilaikonien selitteet"
 "attachment.missing-fonts" "fi" "Seuraavat kirjasintyypit täytyy sisällyttää asiakirjaan arkistointia varten"
 "attachment.missing-fonts" "sv" "För arkivering måste följande fonter ingå i dokumentet"
 "attachment.noName" "fi" "Nimetön"

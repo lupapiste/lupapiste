@@ -20,10 +20,20 @@
   }
 }
 
+.help-toggle.tight {
+  margin-left: 0;
+  button.function {
+    border: none;
+    padding: 0 0 0 0;
+  }
+}
+
 .stacked.help-toggle,
 .stacked.help-toggle div {
   overflow-y: visible;
 }
+
+
 
 
 .help-text {

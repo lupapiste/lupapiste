@@ -1,5 +1,24 @@
-@import url('main-blessed1.css?z=1465227009893');
+@import url('main-blessed1.css?z=1465311696125');
 
+/* line 193, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.mark-as-archived p {
+  margin-bottom: 0.5em;
+}
+
+/* line 1, ../../../private/common-html/sass/partials/_applications_search.scss */
+.applications-search-top {
+  background-color: #eeeeee;
+  border-bottom: 2px solid #dddddd;
+}
+/* line 4, ../../../private/common-html/sass/partials/_applications_search.scss */
+.applications-search-top .container {
+  margin-bottom: 0;
+}
+/* line 7, ../../../private/common-html/sass/partials/_applications_search.scss */
+.applications-search-top .button-group {
+  float: right;
+  margin-bottom: 20px;
+}
 /* line 9, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-top .button-group button {
   margin-left: 20px;
@@ -2372,6 +2391,21 @@ td.comment-text {
   margin-bottom: 10px;
 }
 
+/* line 315, ../../../private/common-html/sass/views/_attachment.scss */
+.attachment-operations {
+  margin-top: 1em;
+  margin-bottom: 2em;
+}
+/* line 561, ../../../private/common-html/sass/partials/_buttons.scss */
+.attachment-operations .btn-base, .attachment-operations [type=submit], .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations .like-btn, .attachment-operations a.link-btn, .attachment-operations a.link-btn-julkipano, .attachment-operations .check-string, .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations div, .attachment-operations a {
+  margin-right: 12px;
+  margin-bottom: 12px;
+}
+/* line 567, ../../../private/common-html/sass/partials/_buttons.scss */
+.attachment-operations :last-child {
+  margin-right: 0;
+}
+
 /* line 3, ../../../private/common-html/sass/views/_statement.scss */
 #statement .statement-top {
   background-color: #eee;
@@ -3495,13 +3529,13 @@ ul.appeals-files li span.appeals-files__size {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 450, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 458, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .check-string, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 455, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 463, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
