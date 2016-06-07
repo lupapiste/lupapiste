@@ -272,7 +272,7 @@
   ko.bindingHandlers.download = {
     update: function( element, valueAccessor) {
       var file = ko.utils.unwrapObservable(valueAccessor());
-      $(element).attr( "href", "/api/raw/download-attachment?attachment-id=" + file.id);
+      $(element).attr( "href", "/api/raw/download-attachment?attachment-id=" + file.fileId);
       $(element).text( file.filename);
     }
   };

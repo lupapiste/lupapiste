@@ -12,7 +12,7 @@
         sanitized-filename (mime/sanitize-filename (:filename file))
         content-type       (mime/mime-type sanitized-filename)]
     (mongo/upload file-id sanitized-filename content-type (:tempfile file) metadata)
-    {:id file-id
+    {:fileId file-id
      :filename sanitized-filename
      :size (:size file)
      :contentType content-type

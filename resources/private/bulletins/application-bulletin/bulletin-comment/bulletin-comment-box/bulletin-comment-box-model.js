@@ -60,7 +60,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
   });
 
   self.removeAttachment = function(attachment) {
-    hub.send("fileuploadService::removeFile", {attachmentId: attachment.id});
+    hub.send("fileuploadService::removeFile", {attachmentId: attachment.fileId});
   };
 
   self.sendComment = function() {
@@ -91,7 +91,7 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
 
   self.addEventListener("fileuploadService", "fileRemoved", function(event) {
     self.attachments.remove(function(attachment) {
-      return attachment.id === event.attachmentId;
+      return attachment.fileId === event.attachmentId;
     });
   });
 
