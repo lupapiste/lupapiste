@@ -50,3 +50,5 @@
 "calendar.error.cannot-update-a-booked-slot" "sv" ""
 "calendar.error.cannot-delete-a-booked-slot" "fi" "Varattua aikaa ei voi poistaa"
 "calendar.error.cannot-delete-a-booked-slot" "sv" ""
+"calendar.week" "fi" "viikko"
+"calendar.week" "sv" "vecka"
