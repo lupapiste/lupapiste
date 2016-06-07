@@ -154,8 +154,7 @@
 
 (defquery company-user-cannot-submit
   {:description "Negative pseudo query that succeeds only if the
-  current user is authed to the current application via company but
-  does not have submit rights."
+  current user is a company member but does not have submit rights."
    :parameters [:id]
    :user-roles #{:applicant}
    :pre-checks [c/cannot-submit]}

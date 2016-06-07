@@ -94,13 +94,20 @@
                 (count (:invitations company)) => 0
                 (count (:users company)) => 2))))
 
+(facts "Teppo cannot submit even his own applications"
+       (let [application-id (create-app-id teppo :propertyId sipoo-property-id :address "Xi Dawang Lu 8")]
+         (fact "Cannot submit pseudo-query is ok"
+               (query teppo :company-user-cannot-submit :id application-id) => ok?)
+         (fact "Submit application fails"
+               (command teppo :submit-application :id application-id) => fail?)))
 
 (facts* "Company is added to application"
 
-  (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
+        (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
         auth (:auth (query-application mikko application-id))]
     (count auth) => 1
-
+    (fact "Cannot submit pseudo-query fails for Mikko"
+          (query mikko :company-user-cannot-submit :id application-id) => (partial expected-failure? "error.authorized"))
     (fact "Applicant invites company"
           (command mikko :company-invite :id application-id :company-id "solita") => ok?)
 
