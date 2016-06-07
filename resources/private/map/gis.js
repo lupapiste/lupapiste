@@ -23,6 +23,12 @@ var gis = (function() {
   // Map initialization
 
   function Map(element, options) {
+
+    if (!document.getElementById(element)) {
+      error("Will not create map: #" + element + " not in DOM");
+      return;
+    }
+
     var self = this;
     var allLayers;
     var mapConfig = LUPAPISTE.config.maps;
@@ -57,7 +63,7 @@ var gis = (function() {
     if (mapServer.indexOf(",") > -1) {
       mapServer = mapServer.split(",");
     }
-    var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
+    var base = new OpenLayers.Layer("base", {displayInLayerSwitcher: false, isBaseLayer: true});
 
     var taustakartta = new OpenLayers.Layer.WMTS({ // this is available in open NLS map
       name: "Taustakartta",
@@ -118,7 +124,14 @@ var gis = (function() {
     if (options && options.drawingControls) {
       allLayers.push(self.manualDrawingLayer);
     }
-    self.map.addLayers(allLayers);
+
+    try {
+      self.map.addLayers(allLayers);
+    } catch (e) {
+      // Try to catch LPK-1662 & LPK-816
+      error("Unable to add layers to " + element, _.map(allLayers, "name"));
+      throw e;
+    }
 
     //
     // Hack: Did not manage to adjust the configs of the layers and the map (resolutions and maxExtent)
