@@ -279,6 +279,22 @@
        (post-command (str "reservationslots/calendar/" calendarId))
        (ok :result)))
 
+(defcommand update-calendar-slot
+  {:user-roles       #{:authorityAdmin :authority}
+   :parameters       [slotId reservationTypeIds]
+   :input-validators [(partial action/number-parameters [:slotId])
+                      (partial action/vector-parameters [:reservationTypeIds])]
+   :feature          :ajanvaraus}
+  [{user :user}]
+  (let [slot       (get-calendar-slot slotId)
+        calendarId (:resourceId slot)]
+    (when-not (authorized-to-edit-calendar? user calendarId)
+      (unauthorized!))
+    (when (:fullyBooked slot)
+      (fail! :calendar.error.cannot-update-a-booked-slot))
+    (info "Updating calendar slot #" slotId)
+    (ok :result (put-command (str "reservationslots/" slotId) {:capacity 1 :reservationTypeIds reservationTypeIds}))))
+
 (defcommand delete-calendar-slot
   {:user-roles       #{:authorityAdmin :authority}
    :parameters       [slotId]
@@ -287,11 +303,10 @@
   [{user :user}]
   (let [slot       (get-calendar-slot slotId)
         calendarId (:resourceId slot)]
-    (println slot)
     (when-not (authorized-to-edit-calendar? user calendarId)
       (unauthorized!))
-    (when (> (:amountOfReservations slot) 1)
-      (fail! :error.calendar.cannot-delete-a-booked-slot))
+    (when (:fullyBooked slot)
+      (fail! :calendar.error.cannot-delete-a-booked-slot))
     (info "Deleting reservation slot #" slotId)
     (ok :result (delete-command (str "reservationslots/" slotId)))))
 

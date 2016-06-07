@@ -46,3 +46,7 @@
 "mycalendar.no-active-calendar" "sv" ""
 "mycalendar.title" "fi" "Minun kalenterini"
 "mycalendar.title" "sv" ""
+"calendar.error.cannot-update-a-booked-slot" "fi" "Varattua aikaa ei voi muokata"
+"calendar.error.cannot-update-a-booked-slot" "sv" ""
+"calendar.error.cannot-delete-a-booked-slot" "fi" "Varattua aikaa ei voi poistaa"
+"calendar.error.cannot-delete-a-booked-slot" "sv" ""
