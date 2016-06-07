@@ -112,7 +112,7 @@
 
 (defn- referenced-file-can-be-attached
   [{{files :files} :data}]
-  (let [files-found (map #(mongo/any? :fs.files {:_id (:id %) "metadata.sessionId" (vetuma/session-id)}) files)]
+  (let [files-found (map #(mongo/any? :fs.files {:_id (:fileId %) "metadata.sessionId" (vetuma/session-id)}) files)]
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
