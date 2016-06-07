@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="mycalendar">
+
+  <div class="container" data-bind="with: mycalendars">
+    <button class="secondary" data-bind="click: function() { history.go(-1); }">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+    <div>
+      <h1 data-bind="ltext: 'mycalendar.title'"></h1>
+    </div>
+
+    <!-- ko if: calendars().length > 0 -->
+      <div class="form-grid form-grid--no-border">
+        <span data-bind="ltext: 'mycalendar.in-organization'"></span>: &nbsp; &nbsp;
+        <!-- ko foreach: calendars -->
+        <span data-bind="component: {name: 'radio-field',
+                                     params: {value: id,
+                                              selectedValue: $parent.selectedCalendar,
+                                              name: 'selectedCalendar',
+                                              label: organization}}"></span>
+        <!-- /ko -->
+      </div>
+    <!-- /ko -->
+
+    <div data-bind="component: { name: 'calendar-view' },
+                    visible: selectedCalendar() !== undefined"></div>
+
+    <!-- ko if: noCalendarsFound -->
+      <div class="context-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
+    <!-- /ko -->
+
+  </div>
+
+</section>
+</body>
+</html>

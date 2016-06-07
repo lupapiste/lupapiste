@@ -6,7 +6,7 @@ Lupapiste on s&auml;hk&ouml;inen asiointipalvelu, jossa voit hakea rakentamiseen
 
 Ty&ouml;njohtajien nime&auml;minen tehd&auml;&auml;n t&auml;st&auml; hetkest&auml; eteenp&auml;in s&auml;hk&ouml;isesti Lupapisteess&auml;. Ty&ouml;njohtajan nime&auml;miset tehd&auml;&auml;n saatuun rakennuslupaan. Saamasi rakennuslupa {{kuntalupatunnus}} on nyt avattu Lupapisteeseen. P&auml;&auml;set siihen seuraavasta linkist&auml;:
 
-  {{link-fi}}
+{{link-fi}}
 
 Ellet ole aikaisemmin k&auml;ytt&auml;nyt Lupapistett&auml; {{recipient-email}} s&auml;hk&ouml;postiosoitteesta, on sinun ensin rekister&ouml;idytt&auml;v&auml; Lupapisteen k&auml;ytt&auml;j&auml;ksi. Rekister&ouml;ityminen tehd&auml;&auml;n henkil&ouml;kohtaisten pankkitunnusten tai mobiilivarmenteen avulla.
 
@@ -22,6 +22,8 @@ Lupapiste-palveluun on avattu automaattisesti korkeintaan kaksi vuotta vanhojen,
 
 Ty&ouml;njohtajan pit&auml;&auml; saada kutsu rakennusluvalle hankkeeseen ryhtyv&auml;lt&auml;. Kutsu tulee ty&ouml;njohtajan s&auml;hk&ouml;postiin.
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
@@ -33,7 +35,7 @@ Lupapiste &auml;r en elektronisk servicetj&auml;nst, d&auml;r du kan ans&ouml;ka
 
 Anm&auml;lan av arbetsledare sker fr&aring;n denna stund fram&aring;t elektroniskt i Lupapiste –tj&auml;nsten. Anm&auml;lan av arbetsledare g&ouml;rs till beviljade bygglov. {{kuntalupatunnus}} f&ouml;r byggnadslovet du ans&ouml;kt om har nu skapats i Lupapiste-tj&auml;nsten. Klicka h&auml;r f&ouml;r att komma dit:
 
-  {{link-sv}}
+{{link-sv}}
 
 Ifall du inte tidigare anv&auml;nt Lupapiste-tj&auml;nsten med denna {{recipient-email}} e-postadress, m&aring;ste du f&ouml;rst registrera dig som anv&auml;ndare till Lupapiste-tj&auml;nsten. Registreringen g&ouml;rs med personliga bankkoder eller mobilcertifikat.
 
@@ -49,5 +51,5 @@ Tv&aring; &aring;r gamla bygglovbeslut, som "s&ouml;kts p&aring; papper", kopier
 
 Arbetsledaren m&aring;ste f&aring; en inbjudan till bygglovet av den som p&aring;b&ouml;rjar byggprojektet. Inbjudan skickas till arbetsledarens e-post.
 
-
-
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

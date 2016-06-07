@@ -466,6 +466,8 @@
 (defcommand login
   {:parameters [username password]
    :input-validators [(partial action/non-blank-parameters [:username :password])]
+   ; Failed login count is written to DB but we'll allow this in readonly mode
+   :allowed-in-lockdown true
    :user-roles #{:anonymous}}
   [command]
   (if (usr/throttle-login? username)

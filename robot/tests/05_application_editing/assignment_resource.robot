@@ -32,4 +32,4 @@ Application assignee select is
 Application assignee span is
   [Arguments]  ${authority}
   Wait Until  Element should be visible  jquery=[data-test-id=assignee-span]:visible
-  Element Text Should Be  jquery=[data-test-id=assignee-span]:visible  ${authority}
+  Wait Until  Element Text Should Be  jquery=[data-test-id=assignee-span]:visible  ${authority}

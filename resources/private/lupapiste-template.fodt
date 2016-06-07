@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rpt="http://openoffice.org/2005/report" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:css3t="http://www.w3.org/TR/css3-text/" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.text">
- <office:meta><meta:creation-date>2016-02-23T10:08:58.354107187</meta:creation-date><dc:date>2016-03-30T13:56:12.734394796</dc:date><meta:editing-duration>PT1H4M59S</meta:editing-duration><meta:editing-cycles>11</meta:editing-cycles><meta:generator>LibreOffice/5.0.4.2$Linux_X86_64 LibreOffice_project/00m0$Build-2</meta:generator><meta:document-statistic meta:table-count="2" meta:image-count="1" meta:object-count="0" meta:page-count="2" meta:paragraph-count="51" meta:word-count="262" meta:character-count="1899" meta:non-whitespace-character-count="1663"/></office:meta>
+ <office:meta><meta:creation-date>2016-02-23T10:08:58.354107187</meta:creation-date><dc:date>2016-04-29T13:53:29.271698523</dc:date><meta:editing-duration>PT1H57M6S</meta:editing-duration><meta:editing-cycles>21</meta:editing-cycles><meta:generator>LibreOffice/5.0.4.2$Linux_X86_64 LibreOffice_project/00m0$Build-2</meta:generator><meta:document-statistic meta:table-count="2" meta:image-count="1" meta:object-count="0" meta:page-count="3" meta:paragraph-count="61" meta:word-count="407" meta:character-count="2388" meta:non-whitespace-character-count="1961"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
-   <config:config-item config:name="ViewAreaTop" config:type="long">0</config:config-item>
+   <config:config-item config:name="ViewAreaTop" config:type="long">1270</config:config-item>
    <config:config-item config:name="ViewAreaLeft" config:type="long">0</config:config-item>
-   <config:config-item config:name="ViewAreaWidth" config:type="long">56120</config:config-item>
+   <config:config-item config:name="ViewAreaWidth" config:type="long">55670</config:config-item>
    <config:config-item config:name="ViewAreaHeight" config:type="long">31328</config:config-item>
    <config:config-item config:name="ShowRedlineChanges" config:type="boolean">true</config:config-item>
    <config:config-item config:name="InBrowseMode" config:type="boolean">false</config:config-item>
    <config:config-item-map-indexed config:name="Views">
     <config:config-item-map-entry>
      <config:config-item config:name="ViewId" config:type="string">view2</config:config-item>
-     <config:config-item config:name="ViewLeft" config:type="long">30510</config:config-item>
-     <config:config-item config:name="ViewTop" config:type="long">16746</config:config-item>
+     <config:config-item config:name="ViewLeft" config:type="long">8782</config:config-item>
+     <config:config-item config:name="ViewTop" config:type="long">17993</config:config-item>
      <config:config-item config:name="VisibleLeft" config:type="long">0</config:config-item>
-     <config:config-item config:name="VisibleTop" config:type="long">0</config:config-item>
-     <config:config-item config:name="VisibleRight" config:type="long">56118</config:config-item>
-     <config:config-item config:name="VisibleBottom" config:type="long">31327</config:config-item>
+     <config:config-item config:name="VisibleTop" config:type="long">1270</config:config-item>
+     <config:config-item config:name="VisibleRight" config:type="long">55668</config:config-item>
+     <config:config-item config:name="VisibleBottom" config:type="long">32597</config:config-item>
      <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutColumns" config:type="short">0</config:config-item>
      <config:config-item config:name="ViewLayoutBookMode" config:type="boolean">false</config:config-item>
@@ -68,7 +68,7 @@
    <config:config-item config:name="InvertBorderSpacing" config:type="boolean">false</config:config-item>
    <config:config-item config:name="SaveGlobalDocumentLinks" config:type="boolean">false</config:config-item>
    <config:config-item config:name="TabsRelativeToIndent" config:type="boolean">true</config:config-item>
-   <config:config-item config:name="Rsid" config:type="int">1232548</config:config-item>
+   <config:config-item config:name="Rsid" config:type="int">1693485</config:config-item>
    <config:config-item config:name="PrintProspectRTL" config:type="boolean">false</config:config-item>
    <config:config-item config:name="PrintEmptyPages" config:type="boolean">false</config:config-item>
    <config:config-item config:name="ApplyUserData" config:type="boolean">true</config:config-item>
@@ -156,9 +156,9 @@
    <style:paragraph-properties fo:margin-top="0.423cm" fo:margin-bottom="0.212cm" loext:contextual-spacing="false" fo:keep-with-next="always"/>
    <style:text-properties style:font-name="Liberation Sans" fo:font-family="&apos;Liberation Sans&apos;" style:font-family-generic="swiss" style:font-pitch="variable" fo:font-size="14pt" style:font-name-asian="Droid Sans Fallback" style:font-family-asian="&apos;Droid Sans Fallback&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="14pt" style:font-name-complex="FreeSans" style:font-family-complex="FreeSans" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="14pt"/>
   </style:style>
-  <style:style style:name="Text_20_body" style:display-name="Text body" style:family="paragraph" style:parent-style-name="Standard" style:class="text">
-   <style:paragraph-properties fo:margin-left="0.199cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0.247cm" loext:contextual-spacing="false" fo:line-height="120%" fo:text-indent="0cm" style:auto-text-indent="false"/>
-   <style:text-properties fo:font-size="12pt" style:font-size-asian="10.5pt"/>
+  <style:style style:name="Text_20_body" style:display-name="Text body" style:family="paragraph" style:parent-style-name="Standard" style:class="text" style:master-page-name="">
+   <style:paragraph-properties fo:margin-left="0.199cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0.247cm" loext:contextual-spacing="false" fo:line-height="120%" fo:text-indent="0cm" style:auto-text-indent="false" style:page-number="auto"/>
+   <style:text-properties fo:font-size="12pt" fo:background-color="transparent" style:font-size-asian="10.5pt"/>
   </style:style>
   <style:style style:name="List" style:family="paragraph" style:parent-style-name="Text_20_body" style:class="list">
    <style:text-properties style:font-size-asian="12pt" style:font-name-complex="FreeSans1" style:font-family-complex="FreeSans" style:font-family-generic-complex="swiss"/>
@@ -313,13 +313,10 @@
    <style:table-column-properties style:column-width="2.794cm"/>
   </style:style>
   <style:style style:name="HISTORYTABLE.C" style:family="table-column">
-   <style:table-column-properties style:column-width="6.399cm"/>
+   <style:table-column-properties style:column-width="7.398cm"/>
   </style:style>
   <style:style style:name="HISTORYTABLE.D" style:family="table-column">
-   <style:table-column-properties style:column-width="1.997cm"/>
-  </style:style>
-  <style:style style:name="HISTORYTABLE.E" style:family="table-column">
-   <style:table-column-properties style:column-width="2.914cm"/>
+   <style:table-column-properties style:column-width="3.912cm"/>
   </style:style>
   <style:style style:name="HISTORYTABLE.1" style:family="table-row">
    <style:table-row-properties fo:background-color="#ffffff">
@@ -354,89 +351,171 @@
   <style:style style:name="P7" style:family="paragraph" style:parent-style-name="Text_20_body">
    <style:text-properties fo:font-size="10pt" fo:language="fi" fo:country="FI" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
-  <style:style style:name="P8" style:family="paragraph" style:parent-style-name="Heading_20_1">
+  <style:style style:name="P8" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="00111e41"/>
+  </style:style>
+  <style:style style:name="P9" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="0012cea4"/>
+  </style:style>
+  <style:style style:name="P10" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:paragraph-rsid="00111e41"/>
+  </style:style>
+  <style:style style:name="P11" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4"/>
+  </style:style>
+  <style:style style:name="P12" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:paragraph-rsid="0012cea4"/>
+  </style:style>
+  <style:style style:name="P13" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties fo:font-style="normal" officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="P14" style:family="paragraph" style:parent-style-name="Heading_20_1">
    <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005e678" officeooo:paragraph-rsid="0005e678"/>
   </style:style>
-  <style:style style:name="P9" style:family="paragraph" style:parent-style-name="Heading_20_2">
+  <style:style style:name="P15" style:family="paragraph" style:parent-style-name="Heading_20_2">
    <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005e678" officeooo:paragraph-rsid="0005e678"/>
   </style:style>
-  <style:style style:name="P10" style:family="paragraph" style:parent-style-name="Heading_20_3">
+  <style:style style:name="P16" style:family="paragraph" style:parent-style-name="Heading_20_3">
    <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005d424" officeooo:paragraph-rsid="0005d424"/>
   </style:style>
-  <style:style style:name="P11" style:family="paragraph" style:parent-style-name="Horizontal_20_Line">
+  <style:style style:name="P17" style:family="paragraph" style:parent-style-name="Horizontal_20_Line">
    <style:text-properties fo:language="fi" fo:country="FI" fo:text-shadow="1pt 1pt" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
   </style:style>
-  <style:style style:name="P12" style:family="paragraph" style:parent-style-name="Table_20_Heading">
+  <style:style style:name="P18" style:family="paragraph" style:parent-style-name="Table_20_Heading">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" loext:contextual-spacing="false" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0cm" style:auto-text-indent="false"/>
    <style:text-properties style:font-name="Nimbus Sans L1" fo:font-size="11pt" fo:language="fi" fo:country="FI" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P13" style:family="paragraph" style:parent-style-name="Table_20_Heading">
+  <style:style style:name="P19" style:family="paragraph" style:parent-style-name="Table_20_Heading">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" loext:contextual-spacing="false" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0cm" style:auto-text-indent="false"/>
    <style:text-properties style:font-name="Nimbus Sans L1" fo:font-size="10pt" fo:language="fi" fo:country="FI" officeooo:rsid="000b9525" officeooo:paragraph-rsid="000b9525" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
   </style:style>
-  <style:style style:name="P14" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+  <style:style style:name="P20" style:family="paragraph" style:parent-style-name="Table_20_Contents">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" loext:contextual-spacing="false" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0cm" style:auto-text-indent="false"/>
    <style:text-properties style:font-name="Nimbus Sans L1" fo:font-size="11pt" fo:language="fi" fo:country="FI" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P15" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+  <style:style style:name="P21" style:family="paragraph" style:parent-style-name="Table_20_Contents">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" loext:contextual-spacing="false" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0cm" style:auto-text-indent="false"/>
    <style:text-properties style:font-name="Nimbus Sans L1" fo:font-size="11pt" fo:language="fi" fo:country="FI" style:font-size-asian="11pt" style:font-size-complex="11pt" loext:padding="0cm" loext:border="none"/>
   </style:style>
-  <style:style style:name="P16" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+  <style:style style:name="P22" style:family="paragraph" style:parent-style-name="Table_20_Contents">
    <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
    <style:text-properties style:font-name="Nimbus Sans L1" fo:font-size="11pt" fo:language="fi" fo:country="FI" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P17" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+  <style:style style:name="P23" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
+   <style:text-properties officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4"/>
+  </style:style>
+  <style:style style:name="P24" style:family="paragraph" style:parent-style-name="Table_20_Contents">
    <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm" loext:contextual-spacing="false" fo:text-align="start" style:justify-single-word="false"/>
    <style:text-properties style:font-name="Nimbus Sans L1" fo:font-size="11pt" fo:language="fi" fo:country="FI" style:font-size-asian="11pt" style:font-size-complex="11pt"/>
   </style:style>
-  <style:style style:name="P18" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
-   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4"/>
-  </style:style>
-  <style:style style:name="P19" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
-   <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="0012cea4"/>
-  </style:style>
-  <style:style style:name="P20" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
-   <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0.499cm" loext:contextual-spacing="false"/>
-   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt"/>
-  </style:style>
-  <style:style style:name="P21" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+  <style:style style:name="P25" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
    <style:text-properties fo:color="#000000"/>
   </style:style>
-  <style:style style:name="P22" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+  <style:style style:name="P26" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4"/>
+  </style:style>
+  <style:style style:name="P27" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-style="normal" officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="P28" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" officeooo:paragraph-rsid="0012cea4"/>
+  </style:style>
+  <style:style style:name="P29" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
    <style:text-properties fo:color="#000000" officeooo:paragraph-rsid="0012cea4"/>
   </style:style>
-  <style:style style:name="P23" style:family="paragraph" style:parent-style-name="Heading_20_2">
-   <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005e678" officeooo:paragraph-rsid="0005e678"/>
-  </style:style>
-  <style:style style:name="P24" style:family="paragraph" style:parent-style-name="Heading_20_1">
-   <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005e678" officeooo:paragraph-rsid="0005e678"/>
-  </style:style>
-  <style:style style:name="P25" style:family="paragraph" style:parent-style-name="Heading_20_3">
-   <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005d424" officeooo:paragraph-rsid="0005d424"/>
-  </style:style>
-  <style:style style:name="P26" style:family="paragraph" style:parent-style-name="Text_20_body">
-   <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="00111e41"/>
-  </style:style>
-  <style:style style:name="P27" style:family="paragraph" style:parent-style-name="Text_20_body">
+  <style:style style:name="P30" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
    <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="0012cea4"/>
   </style:style>
-  <style:style style:name="P28" style:family="paragraph" style:parent-style-name="Text_20_body">
-   <style:text-properties officeooo:paragraph-rsid="00111e41"/>
-  </style:style>
-  <style:style style:name="P29" style:family="paragraph" style:parent-style-name="Text_20_body">
-   <style:text-properties officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4"/>
-  </style:style>
-  <style:style style:name="P30" style:family="paragraph" style:parent-style-name="Text_20_body">
-   <style:text-properties officeooo:paragraph-rsid="0012cea4"/>
-  </style:style>
-  <style:style style:name="P31" style:family="paragraph" style:parent-style-name="Text_20_body">
-   <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
-   <style:text-properties officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4"/>
+  <style:style style:name="P31" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0.499cm" loext:contextual-spacing="false"/>
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt"/>
   </style:style>
   <style:style style:name="P32" style:family="paragraph" style:parent-style-name="Text_20_body">
    <style:paragraph-properties fo:break-before="page"/>
    <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="00111e41"/>
+  </style:style>
+  <style:style style:name="P33" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <style:text-properties fo:font-weight="normal" style:font-weight-asian="normal" style:font-weight-complex="normal"/>
+  </style:style>
+  <style:style style:name="P34" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-style="normal" officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="P35" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+   <style:text-properties officeooo:paragraph-rsid="0017ee8e"/>
+  </style:style>
+  <style:style style:name="P36" style:family="paragraph" style:parent-style-name="Heading_20_1">
+   <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="00167982" officeooo:paragraph-rsid="00167982"/>
+  </style:style>
+  <style:style style:name="P37" style:family="paragraph" style:parent-style-name="Heading_20_3">
+   <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005d424" officeooo:paragraph-rsid="0005d424"/>
+  </style:style>
+  <style:style style:name="P38" style:family="paragraph" style:parent-style-name="Heading_20_3">
+   <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005d424" officeooo:paragraph-rsid="0019d72d"/>
+  </style:style>
+  <style:style style:name="P39" style:family="paragraph" style:parent-style-name="Heading_20_3">
+   <style:text-properties officeooo:paragraph-rsid="0005d424"/>
+  </style:style>
+  <style:style style:name="P40" style:family="paragraph" style:parent-style-name="Table_20_Heading">
+   <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" loext:contextual-spacing="false" fo:text-align="start" style:justify-single-word="false" fo:text-indent="0cm" style:auto-text-indent="false"/>
+   <style:text-properties style:font-name="Nimbus Sans L1" fo:font-size="10pt" fo:language="fi" fo:country="FI" officeooo:rsid="00181c15" officeooo:paragraph-rsid="00181c15" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+  </style:style>
+  <style:style style:name="P41" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:paragraph-rsid="0016cfab"/>
+  </style:style>
+  <style:style style:name="P42" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="0016cfab"/>
+  </style:style>
+  <style:style style:name="P43" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="00111e41"/>
+  </style:style>
+  <style:style style:name="P44" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="00111e41" officeooo:paragraph-rsid="0017d2c4"/>
+  </style:style>
+  <style:style style:name="P45" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="0017d2c4" officeooo:paragraph-rsid="0017d2c4"/>
+  </style:style>
+  <style:style style:name="P46" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="0017d2c4" officeooo:paragraph-rsid="0017ee8e"/>
+  </style:style>
+  <style:style style:name="P47" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:paragraph-rsid="0017d2c4"/>
+  </style:style>
+  <style:style style:name="P48" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties fo:font-style="normal" officeooo:rsid="0017d2c4" officeooo:paragraph-rsid="0017d2c4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="P49" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties fo:font-style="normal" officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="P50" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties fo:font-style="normal" officeooo:rsid="0012cea4" officeooo:paragraph-rsid="0017ee8e" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="P51" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties fo:font-style="normal" officeooo:rsid="0017ee8e" officeooo:paragraph-rsid="0017ee8e" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="P52" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties fo:font-weight="bold" officeooo:rsid="0017d2c4" officeooo:paragraph-rsid="0017d2c4" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="P53" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:rsid="0017ee8e" officeooo:paragraph-rsid="0017ee8e"/>
+  </style:style>
+  <style:style style:name="P54" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:paragraph-rsid="0019d72d"/>
+  </style:style>
+  <style:style style:name="P55" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:text-properties officeooo:paragraph-rsid="0005d424"/>
+  </style:style>
+  <style:style style:name="P56" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:paragraph-properties fo:margin-left="0cm" fo:margin-right="0cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
+  </style:style>
+  <style:style style:name="P57" style:family="paragraph" style:parent-style-name="Heading_20_2">
+   <style:text-properties fo:language="fi" fo:country="FI" officeooo:paragraph-rsid="00167982"/>
+  </style:style>
+  <style:style style:name="P58" style:family="paragraph" style:parent-style-name="Heading_20_2">
+   <style:text-properties officeooo:rsid="0017d2c4" officeooo:paragraph-rsid="0017d2c4"/>
+  </style:style>
+  <style:style style:name="P59" style:family="paragraph" style:parent-style-name="Heading_20_2">
+   <style:text-properties officeooo:rsid="0017ee8e" officeooo:paragraph-rsid="0017ee8e"/>
   </style:style>
   <style:style style:name="T1" style:family="text">
    <style:text-properties officeooo:rsid="0005e678"/>
@@ -460,46 +539,109 @@
    <style:text-properties fo:font-weight="bold" officeooo:rsid="00111e41" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T8" style:family="text">
-   <style:text-properties fo:font-style="italic" style:font-style-asian="italic" style:font-style-complex="italic"/>
+   <style:text-properties fo:font-weight="bold" officeooo:rsid="0016cfab" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T9" style:family="text">
-   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt"/>
+   <style:text-properties fo:font-style="italic" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T10" style:family="text">
-   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+   <style:text-properties fo:font-style="italic" officeooo:rsid="0016cfab" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T11" style:family="text">
-   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-style="normal" officeooo:rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+   <style:text-properties fo:font-style="italic" officeooo:rsid="0017ee8e" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T12" style:family="text">
-   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-style="normal" fo:font-weight="bold" officeooo:rsid="0012cea4" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-style-complex="normal" style:font-weight-complex="bold"/>
+   <style:text-properties fo:font-style="italic" officeooo:rsid="00111e41" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T13" style:family="text">
-   <style:text-properties fo:color="#000000" style:font-name="Nimbus Sans L1" fo:font-size="12pt" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties fo:font-style="italic" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" style:font-style-asian="italic" style:font-style-complex="italic"/>
   </style:style>
   <style:style style:name="T14" style:family="text">
-   <style:text-properties fo:color="#000000" style:font-name="Liberation Sans" fo:font-size="12pt" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt"/>
   </style:style>
   <style:style style:name="T15" style:family="text">
-   <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T16" style:family="text">
-   <style:text-properties fo:font-style="normal" style:font-style-asian="normal" style:font-style-complex="normal"/>
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-style="normal" officeooo:rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
   </style:style>
   <style:style style:name="T17" style:family="text">
-   <style:text-properties fo:font-style="normal" officeooo:rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-style="normal" officeooo:rsid="0017ee8e" style:font-style-asian="normal" style:font-style-complex="normal"/>
   </style:style>
   <style:style style:name="T18" style:family="text">
-   <style:text-properties fo:font-style="normal" fo:font-weight="bold" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-style-complex="normal" style:font-weight-complex="bold"/>
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-style="normal" fo:font-weight="bold" officeooo:rsid="0012cea4" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-style-complex="normal" style:font-weight-complex="bold"/>
   </style:style>
   <style:style style:name="T19" style:family="text">
-   <style:text-properties officeooo:rsid="0012cea4"/>
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:background-color="#e4e4ff" loext:char-shading-value="0"/>
   </style:style>
   <style:style style:name="T20" style:family="text">
-   <style:text-properties style:font-name="DejaVu Sans Mono" fo:font-size="9pt"/>
+   <style:text-properties fo:color="#000000" style:font-name="DejaVu Sans Mono" fo:font-size="9pt" officeooo:rsid="0017d2c4" fo:background-color="#e4e4ff" loext:char-shading-value="0"/>
   </style:style>
   <style:style style:name="T21" style:family="text">
+   <style:text-properties fo:color="#000000" style:font-name="Nimbus Sans L1" fo:font-size="12pt" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+  </style:style>
+  <style:style style:name="T22" style:family="text">
+   <style:text-properties fo:color="#000000" style:font-name="Liberation Sans" fo:font-size="12pt" style:font-size-asian="12pt" style:font-size-complex="12pt"/>
+  </style:style>
+  <style:style style:name="T23" style:family="text">
+   <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/>
+  </style:style>
+  <style:style style:name="T24" style:family="text">
+   <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T25" style:family="text">
+   <style:text-properties fo:font-style="normal" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="T26" style:family="text">
+   <style:text-properties fo:font-style="normal" officeooo:rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="T27" style:family="text">
+   <style:text-properties fo:font-style="normal" officeooo:rsid="0017ee8e" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="T28" style:family="text">
+   <style:text-properties fo:font-style="normal" officeooo:rsid="00111e41" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="T29" style:family="text">
+   <style:text-properties fo:font-style="normal" fo:font-weight="bold" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-style-complex="normal" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T30" style:family="text">
+   <style:text-properties fo:font-style="normal" fo:font-weight="bold" officeooo:rsid="00111e41" style:font-style-asian="normal" style:font-weight-asian="bold" style:font-style-complex="normal" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T31" style:family="text">
+   <style:text-properties fo:font-style="normal" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" officeooo:rsid="0012cea4" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="T32" style:family="text">
+   <style:text-properties fo:font-style="normal" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" officeooo:rsid="00111e41" style:font-style-asian="normal" style:font-style-complex="normal"/>
+  </style:style>
+  <style:style style:name="T33" style:family="text">
+   <style:text-properties officeooo:rsid="0012cea4"/>
+  </style:style>
+  <style:style style:name="T34" style:family="text">
+   <style:text-properties style:font-name="DejaVu Sans Mono" fo:font-size="9pt"/>
+  </style:style>
+  <style:style style:name="T35" style:family="text">
    <style:text-properties style:font-name="DejaVu Sans Mono" fo:font-size="9pt" fo:font-weight="bold" officeooo:rsid="0012cea4" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T36" style:family="text">
+   <style:text-properties officeooo:rsid="00132b4b"/>
+  </style:style>
+  <style:style style:name="T37" style:family="text">
+   <style:text-properties officeooo:rsid="00167982"/>
+  </style:style>
+  <style:style style:name="T38" style:family="text">
+   <style:text-properties fo:language="fi" fo:country="FI" officeooo:rsid="0005d424"/>
+  </style:style>
+  <style:style style:name="T39" style:family="text">
+   <style:text-properties officeooo:rsid="0016cfab"/>
+  </style:style>
+  <style:style style:name="T40" style:family="text">
+   <style:text-properties officeooo:rsid="0017d2c4"/>
+  </style:style>
+  <style:style style:name="T41" style:family="text">
+   <style:text-properties officeooo:rsid="0017ee8e"/>
+  </style:style>
+  <style:style style:name="T42" style:family="text">
+   <style:text-properties officeooo:rsid="00181c15"/>
   </style:style>
   <style:style style:name="fr1" style:family="graphic" style:parent-style-name="Graphics">
    <style:graphic-properties style:vertical-pos="from-top" style:vertical-rel="paragraph" style:horizontal-pos="from-left" style:horizontal-rel="paragraph" style:mirror="none" fo:clip="rect(0cm, 0cm, 0cm, 0cm)" draw:luminance="0%" draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%" draw:color-inversion="false" draw:image-opacity="100%" draw:color-mode="standard"/>
@@ -517,19 +659,42 @@
  <office:master-styles>
   <style:master-page style:name="Standard" style:page-layout-name="pm1">
    <style:footer>
-    <text:p text:style-name="P1"><text:span text:style-name="T1">FOOTER_DATE</text:span> <text:span text:style-name="T1">FOOTER_PAGE</text:span><text:page-number text:select-page="current">2</text:page-number> / <text:page-count>2</text:page-count></text:p>
+    <text:p text:style-name="P1"><text:span text:style-name="T1">FOOTER_DATE</text:span> <text:span text:style-name="T1">FOOTER_PAGE</text:span><text:page-number text:select-page="current">4</text:page-number> / <text:page-count>3</text:page-count></text:p>
    </style:footer>
   </style:master-page>
  </office:master-styles>
  <office:body>
   <office:text text:use-soft-page-breaks="true">
+   <office:forms form:automatic-focus="false" form:apply-design-mode="false"/>
    <text:sequence-decls>
     <text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>
     <text:sequence-decl text:display-outline-level="0" text:name="Table"/>
     <text:sequence-decl text:display-outline-level="0" text:name="Text"/>
     <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>
    </text:sequence-decls>
-   <text:h text:style-name="P8" text:outline-level="1"><draw:frame draw:style-name="fr1" draw:name="Image1" text:anchor-type="paragraph" svg:x="0.025cm" svg:y="-0.951cm" svg:width="4.006cm" svg:height="0.855cm" draw:z-index="0"><draw:image>
+   <text:user-field-decls>
+    <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPAVALUE_ADDRESS"/>
+    <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPTITLE_SOMETITLE"/>
+    <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPAVALUE_ID"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_ID"/>
+    <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPATITLE_ADDRESS"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_STATE"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_STATE"/>
+    <text:user-field-decl office:value-type="string" office:string-value="" text:name="LPTITLE_SomeColumnTitle"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_PROPERTYID"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPAVALUE_PROPERTYID"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_SUBMITTED"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPAVALUE_SUBMITTED"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_MUNICIPALITY"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPAVALUE_MUNICIPALITY"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_AUTHORITY"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPAVALUE_AUTHORITY"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_APPLICANT"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPAVALUE_APPLICANT"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPATITLE_OPERATIONS"/>
+    <text:user-field-decl office:value-type="string" office:string-value="  " text:name="LPAVALUE_OPERATIONS"/>
+   </text:user-field-decls>
+   <text:h text:style-name="P36" text:outline-level="1"><draw:frame draw:style-name="fr1" draw:name="Image1" text:anchor-type="paragraph" svg:x="0.025cm" svg:y="-0.951cm" svg:width="4.006cm" svg:height="0.855cm" draw:z-index="0"><draw:image>
       <office:binary-data>iVBORw0KGgoAAAANSUhEUgAAAKQAAAAjCAIAAACVYjZ2AAAgAElEQVR4AQFnQ5i8Af///wAA
        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/57f7oxf7szf/x2v7y3gD9+AAAAAADCAIO
        IgEPJgIUMwIYOwEHEwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -854,115 +1019,121 @@
        zgAAAABJRU5ErkJggg==
       </office:binary-data>
      </draw:image>
-    </draw:frame>FIELD001</text:h>
-   <text:h text:style-name="P9" text:outline-level="2">FIELD002</text:h>
-   <text:p text:style-name="P11"/>
+    </draw:frame><text:user-field-get text:name="LPTITLE_SOMETITLE"/></text:h>
+   <text:h text:style-name="P57" text:outline-level="2"><text:span text:style-name="T37"><text:user-field-get text:name="LPAVALUE_ADDRESS"/></text:span></text:h>
    <table:table table:name="Table1" table:style-name="Table1">
     <table:table-column table:style-name="Table1.A"/>
     <table:table-column table:style-name="Table1.B"/>
     <table:table-row>
      <table:table-cell table:style-name="Table1.A1" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD003A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD003B</text:p>
+      <text:h text:style-name="P39" text:outline-level="3"><text:user-field-get text:name="LPATITLE_MUNICIPALITY">  </text:user-field-get></text:h>
+      <text:p text:style-name="P55"><text:user-field-get text:name="LPAVALUE_MUNICIPALITY">  </text:user-field-get></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B1" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD004A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD004B</text:p>
+      <text:h text:style-name="P16" text:outline-level="3"><text:user-field-get text:name="LPATITLE_STATE">  </text:user-field-get></text:h>
+      <text:p text:style-name="Text_20_body"><text:user-field-get text:name="LPATITLE_STATE">  </text:user-field-get></text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table1.A2" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD005A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD005B</text:p>
+      <text:h text:style-name="P16" text:outline-level="3"><text:user-field-get text:name="LPATITLE_PROPERTYID">  </text:user-field-get></text:h>
+      <text:p text:style-name="Text_20_body"><text:user-field-get text:name="LPAVALUE_PROPERTYID">  </text:user-field-get></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B2" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD006A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD006B</text:p>
+      <text:h text:style-name="P16" text:outline-level="3"><text:user-field-get text:name="LPATITLE_SUBMITTED">  </text:user-field-get></text:h>
+      <text:p text:style-name="Text_20_body"><text:user-field-get text:name="LPAVALUE_SUBMITTED">  </text:user-field-get></text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table1.A2" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD007A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD007B</text:p>
+      <text:h text:style-name="P38" text:outline-level="3"><text:user-field-get text:name="LPATITLE_ID">  </text:user-field-get></text:h>
+      <text:p text:style-name="P54"><text:user-field-get text:name="LPAVALUE_ID"/></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B2" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD008A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD008B</text:p>
+      <text:h text:style-name="P16" text:outline-level="3"><text:user-field-get text:name="LPATITLE_AUTHORITY">  </text:user-field-get></text:h>
+      <text:p text:style-name="Text_20_body"><text:user-field-get text:name="LPAVALUE_AUTHORITY">  </text:user-field-get></text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table1.A2" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD009A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD009B</text:p>
+      <text:h text:style-name="P16" text:outline-level="3"><text:user-field-get text:name="LPATITLE_ADDRESS"/></text:h>
+      <text:p text:style-name="P41"><text:user-field-get text:name="LPAVALUE_ADDRESS"/></text:p>
      </table:table-cell>
      <table:table-cell table:style-name="Table1.B2" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD010A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD010B</text:p>
+      <text:h text:style-name="P16" text:outline-level="3"><text:user-field-get text:name="LPATITLE_APPLICANT">  </text:user-field-get></text:h>
+      <text:p text:style-name="Text_20_body"><text:user-field-get text:name="LPAVALUE_APPLICANT">  </text:user-field-get></text:p>
      </table:table-cell>
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table1.B2" table:number-columns-spanned="2" office:value-type="string">
-      <text:h text:style-name="P10" text:outline-level="3">FIELD011A</text:h>
-      <text:p text:style-name="Text_20_body">FIELD011B</text:p>
+      <text:h text:style-name="P16" text:outline-level="3"><text:user-field-get text:name="LPATITLE_OPERATIONS">  </text:user-field-get></text:h>
+      <text:p text:style-name="P56"><text:user-field-get text:name="LPAVALUE_OPERATIONS">  </text:user-field-get></text:p>
      </table:table-cell>
      <table:covered-table-cell/>
     </table:table-row>
    </table:table>
    <text:p text:style-name="P7"/>
-   <text:h text:style-name="Heading_20_2" text:outline-level="2">Instructions <text:span text:style-name="T5">[delete these lines]</text:span></text:h>
-   <text:p text:style-name="P26">1. Make a copy of this, or create a new Libre document from scratch.</text:p>
-   <text:p text:style-name="P26"><text:s text:c="4"/>- <text:span text:style-name="T19">There is ready ready made code for injectting common-fields above and footer text localization. </text:span></text:p>
-   <text:p text:style-name="P26">2. Edit and format it any way you want.</text:p>
-   <text:p text:style-name="P26">3. Enter <text:span text:style-name="T15">unique</text:span> placeholder texts you whish to replace programatically.</text:p>
-   <text:p text:style-name="P28"><text:span text:style-name="T7">Important!</text:span><text:span text:style-name="T5"> the placeholder text must fill the whole element! <text:line-break/>So that the result XML is like this : <text:line-break/></text:span><text:span text:style-name="T9">&lt;text:p text:style-name=&quot;P20&quot;&gt;</text:span><text:span text:style-name="T10">FIELD004B</text:span><text:span text:style-name="T9">&lt;/text:p&gt;</text:span></text:p>
-   <text:p text:style-name="Text_20_body">The code will match ”<text:span text:style-name="T9">&gt;FIELD004B&lt;”</text:span><text:span text:style-name="T14"> </text:span><text:span text:style-name="T13">for field </text:span><text:span text:style-name="T9">”FIELD004B” </text:span></text:p>
-   <text:p text:style-name="P26">4. When you are ready save it to classpath (for example to this resources/private – folder) in ”Flat XML ODF Text Document (.fodt)” - format.</text:p>
-   <text:p text:style-name="P26"/>
-   <text:p text:style-name="P32">There is special case for injection rows into tables. Insert a table into document normally. Then go to <text:span text:style-name="T8">Table properties </text:span><text:span text:style-name="T16">and enter unique </text:span><text:span text:style-name="T8">Name</text:span><text:span text:style-name="T16"> for it </text:span><text:span text:style-name="T17">(right click on table)</text:span><text:span text:style-name="T16">. <text:line-break/></text:span><text:span text:style-name="T18">Important!</text:span><text:span text:style-name="T16"> <text:line-break/>* </text:span><text:span text:style-name="T8">Name </text:span><text:span text:style-name="T16">must also be unique among the placeholder texts. </text:span></text:p>
-   <text:p text:style-name="P27"><text:span text:style-name="T16">* </text:span><text:span text:style-name="T17">Table must have header row(s) format row as ”Table Heading”.</text:span></text:p>
-   <text:p text:style-name="P27"><text:span text:style-name="T17">* Header rows have same placeholder mechanics as the rest of the document.</text:span></text:p>
-   <text:p text:style-name="P27"><text:span text:style-name="T17">* All non-heading rows in table will be deleted.</text:span></text:p>
-   <text:p text:style-name="P29"><text:span text:style-name="T16">Code will check if any of the table names in document match data map field names. </text:span></text:p>
-   <text:p text:style-name="P18"><text:span text:style-name="T16">&lt;table:table table:name=&quot;MINUTES-TABLE&quot; ...&gt;</text:span></text:p>
-   <text:p text:style-name="P29"><text:span text:style-name="T16"/></text:p>
-   <text:p text:style-name="P29"><text:span text:style-name="T16">and does placeholder text replacement on header rows: </text:span></text:p>
-   <text:p text:style-name="P19"><text:span text:style-name="T11">&lt;</text:span><text:span text:style-name="T12">table:table-header-rows</text:span><text:span text:style-name="T11">&gt;</text:span></text:p>
-   <text:p text:style-name="P21"><text:s/><text:span text:style-name="T20">&lt;table:table-row table:style-name=&quot;MINUTES-TABLE.1&quot;&gt;</text:span></text:p>
-   <text:p text:style-name="P21"><text:s text:c="2"/><text:span text:style-name="T20">&lt;table:table-cell table:style-name=&quot;MINUTES-TABLE.A1&quot; office:value-type=&quot;string&quot;&gt;</text:span></text:p>
-   <text:p text:style-name="P21"><text:s text:c="3"/><text:span text:style-name="T20">&lt;text:p text:style-name=&quot;P33&quot;&gt;</text:span><text:span text:style-name="T21">COLTITLE1</text:span><text:span text:style-name="T20">&lt;/text:p&gt;</text:span></text:p>
-   <text:p text:style-name="P21"><text:s text:c="2"/><text:span text:style-name="T20">&lt;/table:table-cell&gt;</text:span></text:p>
-   <text:p text:style-name="P22"><text:span text:style-name="T20">…</text:span></text:p>
-   <text:p text:style-name="P22"><text:s/><text:span text:style-name="T20">&lt;/table:table-row&gt;</text:span></text:p>
-   <text:p text:style-name="P20">&lt;<text:span text:style-name="T6">/table:table-header-rows</text:span>&gt;</text:p>
-   <text:p text:style-name="P30"><text:span text:style-name="T17">Code will inject given rows replacing all existing rows after header rows. </text:span></text:p>
-   <text:p text:style-name="P31">Example placeholder table: </text:p>
+   <text:h text:style-name="Heading_20_1" text:outline-level="1">Instructions </text:h>
+   <text:h text:style-name="Heading_20_3" text:outline-level="3">New template </text:h>
+   <text:p text:style-name="P8">1. Make a copy of this, or create a new Libre document from scratch.</text:p>
+   <text:p text:style-name="P42"><text:s text:c="4"/>- <text:span text:style-name="T39">The above common and footer </text:span><text:span text:style-name="T8">keys</text:span><text:span text:style-name="T39"> will be autotically injected into documents via Common-fields-map - function. </text:span></text:p>
+   <text:p text:style-name="P8">2. Edit and format <text:span text:style-name="T39">the template </text:span>any way you want <text:span text:style-name="T40">with static text and Libre automatic fields</text:span>.</text:p>
+   <text:p text:style-name="P42">3. <text:span text:style-name="T39">For text you want to inject programatically you need to insert a </text:span><text:span text:style-name="T10">User Field</text:span><text:span text:style-name="T39"> into the document. </text:span></text:p>
+   <text:p text:style-name="P8">4. When you are ready save <text:span text:style-name="T40">template to </text:span>resources/private – folder in ”Flat XML ODF Text <text:soft-page-break/>Document (.fodt)” - format.</text:p>
+   <text:p text:style-name="P47"><text:span text:style-name="T40">5. Write a code for injecting the text. System takes in template file and map where keys are matched to User Field names. See:</text:span></text:p>
+   <text:p text:style-name="P47"><text:span text:style-name="T19">lupapalvelu.pdf.libreoffice-template-statement.</text:span><text:span text:style-name="T20">clj</text:span></text:p>
+   <text:h text:style-name="P58" text:outline-level="2">Adding new field to document </text:h>
+   <text:p text:style-name="P45">Select <text:s/><text:span text:style-name="T9">Insert → Fields → More Fields</text:span> or press <text:span text:style-name="T6">CTRL + F12 </text:span>shortcut open the Fields toolbox. </text:p>
+   <text:p text:style-name="P45">Then select <text:span text:style-name="T9">User Field</text:span></text:p>
+   <text:p text:style-name="P48">Enter uniue <text:span text:style-name="T9">Name</text:span> and make sure <text:span text:style-name="T13">Format</text:span><text:span text:style-name="T23"> is ”Text” </text:span><text:s/>only other alternative is ”Float”. <text:s/></text:p>
+   <text:p text:style-name="P44"><text:span text:style-name="T39">Naming convention is to prefix field names with ”LPTITLE_” for titles and ”LPVALUE_” for values, like ”LPVALUE_StatementGiver”. You can place the smae filed multiple times if you want to. </text:span></text:p>
+   <text:p text:style-name="P52">Tips: </text:p>
+   <text:p text:style-name="P45">* Ctrl + F12 is shortcut to open Fields toolbox.</text:p>
+   <text:p text:style-name="P45">* Ctrl + F8 is shortcut for <text:span text:style-name="T9">View → Fie</text:span><text:span text:style-name="T11">l</text:span><text:span text:style-name="T9">d </text:span><text:span text:style-name="T11">s</text:span><text:span text:style-name="T9">hading</text:span></text:p>
+   <text:p text:style-name="P46"><text:span text:style-name="T9">* </text:span><text:span text:style-name="T25">Ctrl + F</text:span><text:span text:style-name="T27">9 </text:span><text:span text:style-name="T25">is shortcut for</text:span><text:span text:style-name="T9"> View → Fie</text:span><text:span text:style-name="T11">l</text:span><text:span text:style-name="T9">d </text:span><text:span text:style-name="T11">names</text:span></text:p>
+   <text:p text:style-name="P46">* Leave the Fields toolbox open while you are editing the document [it&apos;s not modal].</text:p>
+   <text:p text:style-name="P53">You can format and structure the docuemnt and the User Fields any way you want to, except it is recommended that the User Field format is Text.</text:p>
+   <text:h text:style-name="P59" text:outline-level="2">Dynamic tables </text:h>
+   <text:p text:style-name="P53">You can also <text:span text:style-name="T5">inject row </text:span>data <text:span text:style-name="T5">into tables. </text:span></text:p>
+   <text:p text:style-name="P53"><text:span text:style-name="T5">Insert a table into document normally. Then go to </text:span><text:span text:style-name="T12">Table properties </text:span><text:span text:style-name="T28">and enter unique </text:span><text:span text:style-name="T12">Name</text:span><text:span text:style-name="T28"> for it </text:span><text:span text:style-name="T26">(right click on table)</text:span><text:span text:style-name="T28">. <text:line-break/></text:span><text:span text:style-name="T30">Important!</text:span><text:span text:style-name="T28"> <text:line-break/>* </text:span><text:span text:style-name="T12">Name </text:span><text:span text:style-name="T32">must</text:span><text:span text:style-name="T28"> also be unique </text:span><text:span text:style-name="T25">also </text:span><text:span text:style-name="T28">among </text:span><text:span text:style-name="T25">User Fields</text:span><text:span text:style-name="T28">. </text:span></text:p>
+   <text:p text:style-name="P9"><text:span text:style-name="T25">* </text:span><text:span text:style-name="T26">Table </text:span><text:span text:style-name="T31">must</text:span><text:span text:style-name="T26"> have header row(s) </text:span><text:span text:style-name="T27">(in the fodt-file)</text:span></text:p>
+   <text:p text:style-name="P13">* Header row <text:span text:style-name="T42">text</text:span> have same placeholder mechanics as the rest of the document.</text:p>
+   <text:p text:style-name="P13">* All non-heading rows in table will be <text:span text:style-name="T41">overwritten</text:span></text:p>
+   <text:p text:style-name="P13">* <text:span text:style-name="T41">All rows must have same amount of columns</text:span></text:p>
+   <text:p text:style-name="P13">* <text:span text:style-name="T42">If table name is not found in data map it&apos;s rows will not be changed. </text:span></text:p>
+   <text:p text:style-name="P13"><text:soft-page-break/></text:p>
+   <text:p text:style-name="P51">The code will look for </text:p>
+   <text:p text:style-name="P27">&lt;table:table table:name=&quot;MINUTES-TABLE&quot; ...&gt;</text:p>
+   <text:p text:style-name="P27"/>
+   <text:p text:style-name="P13"><text:span text:style-name="T41">in the FODF file and the looks for </text:span></text:p>
+   <text:p text:style-name="P33"><text:span text:style-name="T14">&lt;/table:table-header-rows&gt;</text:span></text:p>
+   <text:p text:style-name="P50"><text:span text:style-name="T41">After which it will replace everything the unformatted </text:span><text:span text:style-name="T11">Default</text:span><text:span text:style-name="T41"> – fomat text rows until </text:span></text:p>
+   <text:p text:style-name="P35"><text:s/><text:span text:style-name="T16">&lt;/table:table</text:span><text:span text:style-name="T17">&gt;</text:span></text:p>
+   <text:p text:style-name="P35"><text:span text:style-name="T17"/></text:p>
+   <text:p text:style-name="P23">Example <text:span text:style-name="T42">of </text:span>table: </text:p>
    <table:table table:name="HISTORYTABLE" table:style-name="HISTORYTABLE">
     <table:table-column table:style-name="HISTORYTABLE.A"/>
     <table:table-column table:style-name="HISTORYTABLE.B"/>
     <table:table-column table:style-name="HISTORYTABLE.C"/>
     <table:table-column table:style-name="HISTORYTABLE.D"/>
-    <table:table-column table:style-name="HISTORYTABLE.E"/>
     <table:table-header-rows>
      <table:table-row table:style-name="HISTORYTABLE.1">
       <table:table-cell table:style-name="HISTORYTABLE.A1" office:value-type="string">
-       <text:p text:style-name="P13">COLTITLE1</text:p>
+       <text:p text:style-name="P40">Static column name 1</text:p>
       </table:table-cell>
       <table:table-cell table:style-name="HISTORYTABLE.A1" office:value-type="string">
-       <text:p text:style-name="P13">COLTITLE2</text:p>
+       <text:p text:style-name="P19"><text:user-field-get text:name="LPTITLE_SomeColumnTitle"/></text:p>
       </table:table-cell>
       <table:table-cell table:style-name="HISTORYTABLE.A1" office:value-type="string">
-       <text:p text:style-name="P13">COLTITLE3</text:p>
+       <text:p text:style-name="P40">Static column name 2</text:p>
       </table:table-cell>
       <table:table-cell table:style-name="HISTORYTABLE.A1" office:value-type="string">
-       <text:p text:style-name="P13">COLTITLE4</text:p>
-      </table:table-cell>
-      <table:table-cell table:style-name="HISTORYTABLE.A1" office:value-type="string">
-       <text:p text:style-name="P13">COLTITLE5</text:p>
+       <text:p text:style-name="P40">Static column name 3</text:p>
       </table:table-cell>
      </table:table-row>
     </table:table-header-rows>
    </table:table>
-   <text:p text:style-name="P5"/>
+   <text:p text:style-name="P5"><text:s/></text:p>
   </office:text>
  </office:body>
 </office:document>

@@ -11,9 +11,8 @@
 LUPAPISTE.GroupApprovalModel = function( params ) {
   "use strict";
   var self = this;
-  var APPROVED = "approved";
+
   var APPROVE  = "approve";
-  var REJECTED = "rejected";
   var REJECT   = "reject";
   // Neutral status is only used in the front-end.
   var NEUTRAL  = "neutral";
@@ -45,16 +44,14 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   }, true);
 
   // UI
+  ko.utils.extend(self, new LUPAPISTE.ApprovalModel(self));
+
+  // Inherit isApproved && isRejected, override showStatus and details
   self.showStatus = ko.pureComputed( _.partial( self.docModel.isApprovalCurrent,
                                                 self.model,
                                                 self.approval ));
 
-  self.isApproved = ko.pureComputed(_.partial (self.docModel.approvalStatus,
-                                               self.approval,
-                                               APPROVED));
-  self.isRejected = ko.pureComputed(_.partial (self.docModel.approvalStatus,
-                                               self.approval,
-                                               REJECTED));
+  self.details = self.disposedPureComputed(_.partial(self.approvalInfo, myApproval));
 
   self.testId = _.partial( self.docModel.approvalTestId, params.path );
 
@@ -79,8 +76,6 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
   self.reject  = _.partial( changeStatus, false );
   self.approve = _.partial( changeStatus, true );
 
-  self.details = ko.pureComputed( _.partial( self.docModel.approvalInfo,
-                                             myApproval ));
 
   // Send the initial approval status to the master.
   self.docModel.approvalHubSend( self.docModel.safeApproval( self.model, myApproval),

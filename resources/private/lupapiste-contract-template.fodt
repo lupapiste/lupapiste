@@ -1191,11 +1191,11 @@
        zgAAAABJRU5ErkJggg==
       </office:binary-data>
      </draw:image>
-    </draw:frame>FIELD001<text:tab/><text:tab/><text:span text:style-name="T3">LPVALUE_VERDICT_GIVEN</text:span></text:h>
-   <text:p text:style-name="Text_20_body"><text:span text:style-name="T43">FIELD007A</text:span> <text:s/><text:span text:style-name="T40">FIELD007B</text:span></text:p>
+    </draw:frame>LPTITLE<text:tab/><text:tab/><text:span text:style-name="T3">LPVALUE_VERDICT_GIVEN</text:span></text:h>
+   <text:p text:style-name="Text_20_body"><text:span text:style-name="T43">LPATITLE_ID</text:span> <text:s/><text:span text:style-name="T40">LPAVALUE_ID</text:span></text:p>
    <text:p text:style-name="P28"><text:span text:style-name="T41">LPTITLE_KUNTA</text:span> <text:span text:style-name="T40">FIELD012</text:span></text:p>
-   <text:p text:style-name="Text_20_body"><text:span text:style-name="T43">FIELD011A</text:span> <text:span text:style-name="T27">FIELD011B</text:span></text:p>
-   <text:p text:style-name="P22"><text:span text:style-name="T28">LPTITLE_SIJAINTI</text:span><text:span text:style-name="T26"> </text:span><text:span text:style-name="T27">FIELD002</text:span></text:p>
+   <text:p text:style-name="Text_20_body"><text:span text:style-name="T43">LPATITLE_OPERATIONS</text:span> <text:span text:style-name="T27">LPAVALUE_OPERATIONS</text:span></text:p>
+   <text:p text:style-name="P22"><text:span text:style-name="T28">LPTITLE_SIJAINTI</text:span><text:span text:style-name="T26"> </text:span><text:span text:style-name="T27">LPAVALUE_ADDRESS</text:span></text:p>
    <text:p text:style-name="P87"/>
    <table:table table:name="LPTABLE-OSAPUOLET" table:style-name="LPTABLE-OSAPUOLET">
     <table:table-column table:style-name="LPTABLE-OSAPUOLET.A"/>

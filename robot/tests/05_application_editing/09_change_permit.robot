@@ -56,5 +56,5 @@ Sonja creates a change permit
 
   Wait Until  Element should not be visible  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']
   Wait Until  Element should be visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
-  Element Text Should Be  xpath=//*[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid} - Asuinkerrostalon tai rivitalon rakentaminen
+  Element Text Should Be  xpath=//*[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid} - Asuinkerrostalon tai rivitalon rakentaminen Muutoslupa
 

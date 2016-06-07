@@ -4,7 +4,7 @@
 
 Voit hyv&auml;ksy&auml; liitt&auml;misen oheisella linkill&auml;:
 
-  [{{ok-fi}}]({{ok-fi}})
+{{ok-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
@@ -14,6 +14,9 @@ Ongelmatilanteissa ota yhteytt&auml; tuki@lupapiste.fi.
 
 Toivottavasti viihdyt palvelumme parissa!
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 # Hej {{user.firstName}},
@@ -22,7 +25,7 @@ Huvudanv&auml;ndaren f&ouml;r **{{company.name}}** -F&ouml;retagskontot har lagt
 
 Ditt konto aktiveras genom l&auml;nken nedan:
 
-  [{{ok-sv}}]({{ok-sv}})
+{{ok-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
@@ -32,3 +35,5 @@ Vid problem &auml;r du v&auml;lkommen att kontakta tuki@lupapiste.fi.
 
 Vi hoppas att du trivs med v&aring;r tj&auml;nst!
 
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

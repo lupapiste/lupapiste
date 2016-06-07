@@ -29,12 +29,16 @@
         <h3 data-bind="ltext: 'footer.contact'"></h3>
         <ul>
           <li><a data-bind="attr: { href: loc( 'footer.support.request.href' ) },
-                            text: loc( 'footer.support.request.text' )"></a></li>
+                            text: loc( 'footer.support.request.text' )"></a>
+        <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() && !lupapisteApp.models.currentUser.isCompanyUser() -->
+                            <br /><span data-bind="ltext: 'footer.support.request.text2'"></span>
+        <!-- /ko -->
+          </li>
         <!-- ko if: lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.isCompanyUser()) -->
           <li><a href="mailto:tuki@lupapiste.fi">tuki@lupapiste.fi</a></li>
           <li><span><span data-bind="ltext: 'footer.tel'"></span> 044 750 4471</span></li>
         <!-- /ko -->
-        <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() -->
+        <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() && !lupapisteApp.models.currentUser.isCompanyUser() -->
           <li><span><span data-bind="ltext: 'footer.tel'"></span> 0600 303500</span><br />(ma-pe 8-16, 0,77&euro;/min+pvm)</li>
         <!-- /ko -->
         </ul>

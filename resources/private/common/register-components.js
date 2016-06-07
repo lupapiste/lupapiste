@@ -4,6 +4,7 @@ jQuery(document).ready(function() {
   var components = [
     {name: "modal-dialog"},
     {name: "message-panel"},
+    {name: "approval", synchronous: true},
     {name: "fill-info", synchronous: true},
     {name: "foreman-history", synchronous: true},
     {name: "foreman-other-applications", synchronous: true},
@@ -122,7 +123,8 @@ jQuery(document).ready(function() {
     {name: "cell-date"},
     {name: "cell-select"},
     {name: "review-tasks"},
-    {name: "task"}
+    {name: "task"},
+    {name: "ram-links"}
 ];
 
   _.forEach(components, function(component) {

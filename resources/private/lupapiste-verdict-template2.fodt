@@ -1117,12 +1117,12 @@
        zgAAAABJRU5ErkJggg==
       </office:binary-data>
      </draw:image>
-    </draw:frame>FIELD001</text:h>
-   <text:p text:style-name="Text_20_body"><text:span text:style-name="T40">FIELD007A</text:span> <text:s/><text:span text:style-name="T38">FIELD007B</text:span></text:p>
+    </draw:frame>LPTITLE</text:h>
+   <text:p text:style-name="Text_20_body"><text:span text:style-name="T40">LPATITLE_ID</text:span> <text:s/><text:span text:style-name="T38">LPAVALUE_ID</text:span></text:p>
    <text:p text:style-name="P21"><text:span text:style-name="T39">LPTITLE_KUNTA</text:span> <text:span text:style-name="T38">FIELD012</text:span></text:p>
-   <text:p text:style-name="Text_20_body"><text:span text:style-name="T40">FIELD011A</text:span> <text:span text:style-name="T26">FIELD011B</text:span></text:p>
-   <text:p text:style-name="P17"><text:span text:style-name="T27">LPTITLE_SIJAINTI</text:span><text:span text:style-name="T25"> </text:span><text:span text:style-name="T26">FIELD002</text:span></text:p>
-   <text:p text:style-name="Text_20_body"><text:span text:style-name="T40">FIELD010A</text:span> <text:span text:style-name="T29">FIELD010B</text:span></text:p>
+   <text:p text:style-name="Text_20_body"><text:span text:style-name="T40">LPATITLE_OPERATIONS</text:span> <text:span text:style-name="T26">LPAVALUE_OPERATIONS</text:span></text:p>
+   <text:p text:style-name="P17"><text:span text:style-name="T27">LPTITLE_SIJAINTI</text:span><text:span text:style-name="T25"> </text:span><text:span text:style-name="T26">LPAVALUE_ADDRESS</text:span></text:p>
+   <text:p text:style-name="Text_20_body"><text:span text:style-name="T40">LPATITLE_APPLICANT</text:span> <text:span text:style-name="T29">LPAVALUE_APPLICANT</text:span></text:p>
    <text:p text:style-name="P17"><text:span text:style-name="T30">LPTITLE_VERDICT_GIVEN</text:span> <text:span text:style-name="T21">LPVALUE_VERDICT_GIVEN</text:span></text:p>
    <text:p text:style-name="P17"><text:span text:style-name="T30">LPTITLE_VERDICT_LEGAL</text:span> <text:span text:style-name="T21">LPVALUE_VERDICT_LEGAL</text:span></text:p>
    <text:p text:style-name="P17"><text:span text:style-name="T30">LPTITLE_VERDICT_STATE</text:span> <text:span text:style-name="T31">LPVALUE_VERDICT_STATE</text:span></text:p>

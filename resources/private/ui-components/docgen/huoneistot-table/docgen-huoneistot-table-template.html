@@ -1,286 +1,281 @@
 <!DOCTYPE html>
 <html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="docgen-huoneistot-table-template">
+  <body>
+    <section class="page container">
+      <script type="text/x-jquery-tmpl" id="docgen-huoneistot-table-template">
 
-      <div class="form-table huoneistot-table" data-bind="attr: {id: 'huoneistot'}">
+        <div class="form-table huoneistot-table" data-bind="attr: {id: 'huoneistot'}">
 
-        <div>
-          <h3 class="form-label" data-bind="ltext: groupLabel"></h3>
-          <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'huoneistotTable.help' } }"></span>
-        </div>
+          <div>
+            <h3 class="form-label" data-bind="ltext: groupLabel"></h3>
+            <span data-bind="component: { name: 'help-toggle', params: {lhtml: 'huoneistotTable.help' } }"></span>
+          </div>
 
 
-        <!-- ko if: groupHelp -->
-        <span class="group-help-text" data-bind="ltext: groupHelp"></span>
-        <!-- /ko -->
+          <!-- ko if: groupHelp -->
+          <span class="group-help-text" data-bind="ltext: groupHelp"></span>
+          <!-- /ko -->
 
-        <table data-bind="attr: {'class': _.last(path) + '-table'}">
-          <thead>
-            <tr data-bind="foreach: columnHeaders">
-              <th>
-                <span data-bind="ltext: name"></span>
-                <span data-bind="visible: required">*</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody data-bind="foreach: rows">
-            <tr data-bind="attr: { 'id': 'huoneistot-row-' + index , 'data-test-id': $component.schemaName + '-row-' + index}">
-              <!--Huoneiston tyyppi-->
-              <td>
-                <span class="form-entry form-input">
-                  <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: huoneistoTyyppi.info.showMessagePanel, message: huoneistoTyyppi.info.errorMessage"></message-panel>
-                    <select data-bind="options: huoneistoTyyppi.schema.body,
-                                       optionsText: $component.selectOptionsTextFn('huoneistoTyyppi'),
-                                       optionsValue: 'name',
-                                       css: huoneistoTyyppi.info.css(),
-                                       event: huoneistoTyyppi.info.events,
-                                       value: huoneistoTyyppi.model,
-                                       valueAllowUnset: true,
-                                       optionsCaption: loc('selectone'),
-                                       disable: $component.disabled() || !muutostapa.model(),
-                                       attr: {'data-test-id': huoneistoTyyppi.path.join('.')}"
-                            class="dropdown form-input short">
-                    </select>
-                  </div>
-                </span>
-              </td>
+          <table data-bind="attr: {'class': _.last(path) + '-table'}">
+            <thead>
+              <tr data-bind="foreach: columnHeaders">
+                <th>
+                  <span data-bind="ltext: name"></span>
+                  <span data-bind="visible: required">*</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: rows">
+              <tr data-bind="attr: { 'id': 'huoneistot-row-' + index , 'data-test-id': $component.schemaName + '-row-' + index}">
+                <!--Huoneiston tyyppi-->
+                <td>
+                  <span class="form-entry form-input">
+                    <div class="inline">
+                      <message-panel params="class: 'errorPanel', show: huoneistoTyyppi.info.showMessagePanel, message: huoneistoTyyppi.info.errorMessage"></message-panel>
+                      <select data-bind="options: huoneistoTyyppi.schema.body,
+                                         optionsText: $component.selectOptionsTextFn('huoneistoTyyppi'),
+                                         optionsValue: 'name',
+                                         css: huoneistoTyyppi.info.css(),
+                                         event: huoneistoTyyppi.info.events,
+                                         value: huoneistoTyyppi.model,
+                                         valueAllowUnset: true,
+                                         optionsCaption: loc('selectone'),
+                                         disable: $component.disabled() || !muutostapa.model(),
+                                         attr: {'data-test-id': huoneistoTyyppi.path.join('.')}"
+                              class="dropdown form-input short">
+                      </select>
+                    </div>
+                  </span>
+                </td>
 
-              <!--Porras-->
-              <td>
-                <span class="form-entry form-input">
-                  <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: porras.info.showMessagePanel, message: porras.info.errorMessage"></message-panel>
+                <!--Porras-->
+                <td>
+                  <span class="form-entry form-input">
+                    <div class="inline">
+                      <message-panel params="class: 'errorPanel', show: porras.info.showMessagePanel, message: porras.info.errorMessage"></message-panel>
                       <input type="text"
                              data-bind="textInput: porras.model,
                                         disable: $component.disabled() || !muutostapa.model(),
                                         css: porras.info.css(),
                                         event: porras.info.events,
                                         attr: { 'maxlength': porras.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'data-test-id': porras.path.join('.')}"
+                                        'data-test-id': porras.path.join('.')}"
                              class="form-input tiny"/>
-                    </span>
-                  </div>
-                </span>
-              </td>
+                    </div>
+                  </span>
+                </td>
 
-              <!--Huoneiston numero-->
-              <td>
-                <span class="form-entry form-input">
-                  <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: huoneistonumero.info.showMessagePanel, message: huoneistonumero.info.errorMessage"></message-panel>
+                <!--Huoneiston numero-->
+                <td>
+                  <span class="form-entry form-input">
+                    <div class="inline">
+                      <message-panel params="class: 'errorPanel', show: huoneistonumero.info.showMessagePanel, message: huoneistonumero.info.errorMessage"></message-panel>
                       <input type="text"
                              data-bind="textInput: huoneistonumero.model,
                                         disable: $component.disabled() || !muutostapa.model(),
                                         css: huoneistonumero.info.css(),
                                         event: huoneistonumero.info.events,
                                         attr: { 'maxlength': huoneistonumero.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'data-test-id': huoneistonumero.path.join('.') }"
+                                        'data-test-id': huoneistonumero.path.join('.') }"
                              class="form-input tiny"/>
-                    </span>
-                  </div>
-                </span>
-              </td>
+                    </div>
+                  </span>
+                </td>
 
-              <!--Jakokirjain-->
-              <td>
-                <span class="form-entry form-input">
-                  <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: jakokirjain.info.showMessagePanel, message: jakokirjain.info.errorMessage"></message-panel>
+                <!-- Jakokirjain -->
+                <td>
+                  <span class="form-entry form-input">
+                    <div class="inline">
+                      <message-panel params="class: 'errorPanel', show: jakokirjain.info.showMessagePanel, message: jakokirjain.info.errorMessage"></message-panel>
                       <input type="text"
                              data-bind="textInput: jakokirjain.model,
                                         disable: $component.disabled() || !muutostapa.model(),
                                         css: jakokirjain.info.css(),
                                         event: jakokirjain.info.events,
                                         attr: { 'maxlength': jakokirjain.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'data-test-id': jakokirjain.path.join('.') }"
+                                        'data-test-id': jakokirjain.path.join('.') }"
                              class="form-input tiny"/>
-                    </span>
-                  </div>
-                </span>
-              </td>
+                    </div>
+                  </span>
+                </td>
 
-              <!--Huoneluku-->
-              <td>
-                <span class="form-entry form-input">
-                  <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: huoneluku.info.showMessagePanel, message: huoneluku.info.errorMessage"></message-panel>
+                <!--Huoneluku-->
+                <td>
+                  <span class="form-entry form-input">
+                    <div class="inline">
+                      <message-panel params="class: 'errorPanel', show: huoneluku.info.showMessagePanel, message: huoneluku.info.errorMessage"></message-panel>
                       <input type="text"
                              data-bind="textInput: huoneluku.model,
                                         disable: $component.disabled() || !muutostapa.model(),
                                         css: huoneluku.info.css(),
                                         event: huoneluku.info.events,
                                         attr: { 'maxlength': huoneluku.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'max': huoneluku.schema.max,
-                                                'min': huoneluku.schema.min,
-                                                'data-test-id': huoneluku.path.join('.') }"
+                                        'max': huoneluku.schema.max,
+                                        'min': huoneluku.schema.min,
+                                        'data-test-id': huoneluku.path.join('.') }"
                              class="form-input tiny"/>
-                    </span>
-                  </div>
-                </span>
-              </td>
+                    </div>
+                  </span>
+                </td>
 
-              <!--Keittion tyyppi-->
-              <td>
-                <span class="form-entry form-input">
-                  <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: keittionTyyppi.info.showMessagePanel, message: keittionTyyppi.info.errorMessage"></message-panel>
-                    <select data-bind="options: keittionTyyppi.schema.body,
-                                       optionsText: $component.selectOptionsTextFn('keittionTyyppi'),
-                                       optionsValue: 'name',
-                                       value: keittionTyyppi.model,
-                                       valueAllowUnset: true,
-                                       optionsCaption: loc('selectone'),
-                                       disable: $component.disabled() || !muutostapa.model(),
-                                       css: keittionTyyppi.info.css(),
-                                       event: keittionTyyppi.info.events,
-                                       attr: {'data-test-id': keittionTyyppi.path.join('.')}"
-                            class="dropdown form-input short">
-                    </select>
-                  </div>
-                </span>
-              </td>
+                <!--Keittion tyyppi-->
+                <td>
+                  <span class="form-entry form-input">
+                    <div class="inline">
+                      <message-panel params="class: 'errorPanel', show: keittionTyyppi.info.showMessagePanel, message: keittionTyyppi.info.errorMessage"></message-panel>
+                      <select data-bind="options: keittionTyyppi.schema.body,
+                                         optionsText: $component.selectOptionsTextFn('keittionTyyppi'),
+                                         optionsValue: 'name',
+                                         value: keittionTyyppi.model,
+                                         valueAllowUnset: true,
+                                         optionsCaption: loc('selectone'),
+                                         disable: $component.disabled() || !muutostapa.model(),
+                                         css: keittionTyyppi.info.css(),
+                                         event: keittionTyyppi.info.events,
+                                         attr: {'data-test-id': keittionTyyppi.path.join('.')}"
+                              class="dropdown form-input short">
+                      </select>
+                    </div>
+                  </span>
+                </td>
 
-              <!--Huoneistoala m2-->
-              <td>
-                <span class="form-entry form-input">
-                  <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: huoneistoala.info.showMessagePanel, message: huoneistoala.info.errorMessage"></message-panel>
+                <!--Huoneistoala m2-->
+                <td>
+                  <span class="form-entry form-input">
+                    <div class="inline">
+                      <message-panel params="class: 'errorPanel', show: huoneistoala.info.showMessagePanel, message: huoneistoala.info.errorMessage"></message-panel>
                       <input type="text"
                              data-bind="textInput: huoneistoala.model,
                                         disable: $component.disabled() || !muutostapa.model(),
                                         css: huoneistoala.info.css(),
                                         event: huoneistoala.info.events,
                                         attr: { 'maxlength': huoneistoala.schema['max-len'] || LUPAPISTE.config.inputMaxLength,
-                                                'max': huoneistoala.schema.max,
-                                                'min': huoneistoala.schema.min,
-                                                'data-test-id': huoneistoala.path.join('.') }"
+                                        'max': huoneistoala.schema.max,
+                                        'min': huoneistoala.schema.min,
+                                        'data-test-id': huoneistoala.path.join('.') }"
                              class="form-input tiny"/>
-                    </span>
+                    </div>
+                  </span>
+                </td>
+
+                <!--WC-->
+                <td>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="checked: WCKytkin.model,
+                                      disable: $component.disabled() || !muutostapa.model(),
+                                      css: WCKytkin.info.css(),
+                                      event: WCKytkin.info.events,
+                                      attr: {'id': $component.documentId + '-huoneistot-wc-' + $index()}">
+                    <label data-bind="attr: {'for': $component.documentId + '-huoneistot-wc-' + $index()}" class="inline-label checkbox-label"></label>
                   </div>
-                </span>
-              </td>
+                </td>
 
-              <!--WC-->
-              <td>
-                <div class="checkbox-wrapper">
-                  <input type="checkbox"
-                         data-bind="checked: WCKytkin.model,
-                                    disable: $component.disabled() || !muutostapa.model(),
-                                    css: WCKytkin.info.css(),
-                                    event: WCKytkin.info.events,
-                                    attr: {'id': $component.documentId + '-huoneistot-wc-' + $index()}">
-                  <label data-bind="attr: {'for': $component.documentId + '-huoneistot-wc-' + $index()}" class="inline-label checkbox-label"></label>
-                </div>
-              </td>
-
-              <!--Amme/Suihku-->
-              <td>
-                <div class="checkbox-wrapper">
-                  <input type="checkbox"
-                         data-bind="checked: ammeTaiSuihkuKytkin.model,
-                                    disable: $component.disabled() || !muutostapa.model(),
-                                    css: ammeTaiSuihkuKytkin.info.css(),
-                                    event: ammeTaiSuihkuKytkin.info.events,
-                                    attr: {'id': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}">
-                  <label data-bind="attr: {'for': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}" class="inline-label checkbox-label"></label>
-                </div>
-              </td>
-
-              <!--Sauna-->
-              <td>
-                <div class="checkbox-wrapper">
-                  <input type="checkbox"
-                         data-bind="checked: saunaKytkin.model,
-                                    disable: $component.disabled() || !muutostapa.model(),
-                                    css: saunaKytkin.info.css(),
-                                    event: saunaKytkin.info.events,
-                                    attr: {'id': $component.documentId + '-huoneistot-sauna-' + $index()}">
-                  <label data-bind="attr: {'for': $component.documentId + '-huoneistot-sauna-' + $index()}" class="inline-label checkbox-label"></label>
-                </div>
-              </td>
-
-              <!--Parveke/terassi-->
-              <td>
-                <div class="checkbox-wrapper">
-                  <input type="checkbox"
-                         data-bind="checked: parvekeTaiTerassiKytkin.model,
-                                    disable: $component.disabled() || !muutostapa.model(),
-                                    css: parvekeTaiTerassiKytkin.info.css(),
-                                    event: parvekeTaiTerassiKytkin.info.events,
-                                    attr: {'id': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}">
-                  <label data-bind="attr: {'for': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}" class="inline-label checkbox-label"></label>
-                </div>
-              </td>
-
-              <!--Lammin vesi-->
-              <td>
-                <div class="checkbox-wrapper">
-                  <input type="checkbox"
-                         data-bind="checked: lamminvesiKytkin.model,
-                                    disable: $component.disabled() || !muutostapa.model(),
-                                    css: lamminvesiKytkin.info.css(),
-                                    event: lamminvesiKytkin.info.events,
-                                    attr: {'id': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}">
-                  <label data-bind="attr: {'for': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}" class="inline-label checkbox-label"></label>
-                </div>
-              </td>
-
-              <!--Huoneiston muutos-->
-              <td>
-                <span class="form-entry form-input">
-                  <div class="inline">
-                    <message-panel params="class: 'errorPanel', show: muutostapa.info.showMessagePanel, message: muutostapa.info.errorMessage"></message-panel>
-                    <select data-bind="options: muutostapa.schema.body,
-                                       optionsText: $component.selectOptionsTextFn('muutostapa'),
-                                       optionsValue: 'name',
-                                       value: muutostapa.model,
-                                       valueAllowUnset: true,
-                                       optionsCaption: loc('selectone'),
-                                       disable: $component.disabled(),
-                                       css: muutostapa.info.css(),
-                                       event: muutostapa.info.events,
-                                       attr: {'data-test-id': muutostapa.path.join('.') }"
-                            class="dropdown form-input short">
-                    </select>
+                <!--Amme/Suihku-->
+                <td>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="checked: ammeTaiSuihkuKytkin.model,
+                                      disable: $component.disabled() || !muutostapa.model(),
+                                      css: ammeTaiSuihkuKytkin.info.css(),
+                                      event: ammeTaiSuihkuKytkin.info.events,
+                                      attr: {'id': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}">
+                    <label data-bind="attr: {'for': $component.documentId + '-huoneistot-amme-tai-suihku-' + $index()}" class="inline-label checkbox-label"></label>
                   </div>
-                </span>
-              </td>
+                </td>
 
-              <!--Poista-->
-              <td class="action-column">
-                <i class="lupicon-remove primary" data-bind="click: $component.removeGroup,
-                                                             visible: $component.groupsRemovable($data.schema),
-                                                             attr: {'data-test-class': 'delete-schemas.' + $data.schema.name}"></i>
-              </td>
+                <!--Sauna-->
+                <td>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="checked: saunaKytkin.model,
+                                      disable: $component.disabled() || !muutostapa.model(),
+                                      css: saunaKytkin.info.css(),
+                                      event: saunaKytkin.info.events,
+                                      attr: {'id': $component.documentId + '-huoneistot-sauna-' + $index()}">
+                    <label data-bind="attr: {'for': $component.documentId + '-huoneistot-sauna-' + $index()}" class="inline-label checkbox-label"></label>
+                  </div>
+                </td>
 
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <!--Parveke/terassi-->
+                <td>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="checked: parvekeTaiTerassiKytkin.model,
+                                      disable: $component.disabled() || !muutostapa.model(),
+                                      css: parvekeTaiTerassiKytkin.info.css(),
+                                      event: parvekeTaiTerassiKytkin.info.events,
+                                      attr: {'id': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}">
+                    <label data-bind="attr: {'for': $component.documentId + '-huoneistot-parveke-tai-terassi-' + $index()}" class="inline-label checkbox-label"></label>
+                  </div>
+                </td>
 
-      <div class="button-group" data-bind="visible: updatable()">
-        <span data-bind="component: { name: 'docgen-button',
-                                     params: { id: $component.documentId + '-huoneistot-append-button',
-                                               className: 'positive',
-                                               icon: 'lupicon-circle-plus',
-                                               label: appendLabel,
-                                               clickFn: addGroup,
-                                               testId: schemaName + '-append-button' }}">
-        </span>
-        <span data-bind="component: { name: 'docgen-button',
-                                     params: { id: $component.documentId + '-huoneistot-copy-button',
-                                               className: 'secondary',
-                                               icon: 'lupicon-circle-plus',
-                                               label: copyLabel,
-                                               clickFn: duplicateLastGroup,
-                                               testId: schemaName + '-copy-button' }}">
-        </span>
-      </div>
+                <!--Lammin vesi-->
+                <td>
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="checked: lamminvesiKytkin.model,
+                                      disable: $component.disabled() || !muutostapa.model(),
+                                      css: lamminvesiKytkin.info.css(),
+                                      event: lamminvesiKytkin.info.events,
+                                      attr: {'id': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}">
+                    <label data-bind="attr: {'for': $component.documentId + '-huoneistot-lammin-vesi-' + $index()}" class="inline-label checkbox-label"></label>
+                  </div>
+                </td>
 
-    </script>
-  </section>
-</body>
+                <!--Huoneiston muutos-->
+                <td>
+                  <span class="form-entry form-input">
+                    <div class="inline">
+                      <message-panel params="class: 'errorPanel', show: muutostapa.info.showMessagePanel, message: muutostapa.info.errorMessage"></message-panel>
+                      <select data-bind="options: muutostapa.schema.body,
+                                         optionsText: $component.selectOptionsTextFn('muutostapa'),
+                                         optionsValue: 'name',
+                                         value: muutostapa.model,
+                                         valueAllowUnset: true,
+                                         optionsCaption: loc('selectone'),
+                                         disable: $component.disabled(),
+                                         css: muutostapa.info.css(),
+                                         event: muutostapa.info.events,
+                                         attr: {'data-test-id': muutostapa.path.join('.') }"
+                              class="dropdown form-input short">
+                      </select>
+                    </div>
+                  </span>
+                </td>
+
+                <!--Poista-->
+                <td class="action-column">
+                  <i class="lupicon-remove primary" data-bind="click: $component.removeGroup,
+                                                               visible: $component.groupsRemovable($data.schema),
+                                                               attr: {'data-test-class': 'delete-schemas.' + $data.schema.name}"></i>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="button-group" data-bind="visible: updatable()">
+          <span data-bind="component: { name: 'docgen-button',
+                           params: { id: $component.documentId + '-huoneistot-append-button',
+                           className: 'positive',
+                           icon: 'lupicon-circle-plus',
+                           label: appendLabel,
+                           clickFn: addGroup,
+                           testId: schemaName + '-append-button' }}">
+          </span>
+          <span data-bind="component: { name: 'docgen-button',
+                           params: { id: $component.documentId + '-huoneistot-copy-button',
+                           className: 'secondary',
+                           icon: 'lupicon-circle-plus',
+                           label: copyLabel,
+                           clickFn: duplicateLastGroup,
+                           testId: schemaName + '-copy-button' }}">
+          </span>
+        </div>
+
+      </script>
+    </section>
+  </body>
 </html>

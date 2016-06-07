@@ -104,20 +104,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     .call();
   };
 
-  // Textual representation of the approval status.
-  // Tiedot OK (Sibbo Sonja 21.9.2015 10:55)
-  self.approvalInfo = function( approvalFun ) {
-    var approval = approvalFun();
-    var text = null;
-    if(approval && approval.user && approval.timestamp) {
-      text = loc(["document", approval.value]);
-      text += " (" + approval.user.lastName + " "
-            + approval.user.firstName
-            + " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
-    }
-    return text;
-  };
-
   // Returns the latest modification time of the model or
   // zero if no modifications.
   function modelTimestamp( model ) {
@@ -146,13 +132,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return approval && approval.timestamp > ts
          ? approval
          : {value: "neutral", timestamp: ts};
-  };
-
-  // Check is either approved or rejected.
-  // Note: if the approval is not set, then both types of check return false
-  self.approvalStatus = function( approvalFun, check ) {
-    var approval = approvalFun();
-    return approval && approval.value === check;
   };
 
   self.approvalHubSubscribe = function(fun, listenBroadcasts) {
@@ -250,9 +229,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return button;
   }
 
-  function makeLabel(schema, type, pathStr, groupLabel, validationResult) {
+  function makeLabel(schema, type, pathStr, validationResult) {
     var label = document.createElement("label");
-    var path = groupLabel ? pathStr + "._group_label" : pathStr;
+    var path = pathStr;
+    switch(type) {
+      case "table":
+      case "group":
+      case "select":
+        path = pathStr + "._group_label";
+        break;
+    }
 
     var locKey = util.locKeyFromDocPath(self.schemaI18name + "." + path);
     if (schema.i18nkey) {
@@ -412,7 +398,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.disabled = isInputReadOnly(doc, subSchema, model);
 
     if (subSchema.label) {
-      var label = makeLabel(subSchema, "checkbox", myPath, false, validationResult);
+      var label = makeLabel(subSchema, "checkbox", myPath, validationResult);
       label.onmouseover = docutils.showHelp;
       label.onmouseout = docutils.hideHelp;
       span.appendChild(label);
@@ -423,7 +409,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildString(subSchema, model, path, partOfChoice) {
+  function buildString(subSchema, model, path) {
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath, validationResult);
@@ -437,11 +423,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     listen(subSchema, myPath, input);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema,
-                                 partOfChoice ? "string-choice" : "string",
-                                 myPath,
-                                 false,
-                                 validationResult));
+      span.appendChild(makeLabel(subSchema, "string", myPath, validationResult));
     }
 
     if (subSchema.subtype === "maaraala-tunnus" ) {
@@ -564,7 +546,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "text", myPath, false, validationResult));
+      span.appendChild(makeLabel(subSchema, "text", myPath, validationResult));
     }
     span.appendChild(input);
     return span;
@@ -579,7 +561,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var span = makeEntrySpan(subSchema, myPath, validationResult);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "date", myPath, false, validationResult));
+      span.appendChild(makeLabel(subSchema, "date", myPath, validationResult));
     }
 
     var className = "form-input text form-date";
@@ -614,13 +596,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildTime(subSchema, model, path, partOfChoice) {
+  function buildTime(subSchema, model, path) {
     // Set implisit options into a clone
     var timeSchema = _.clone(subSchema);
     timeSchema.subtype = "time";
     timeSchema.size = "m";
     timeSchema["max-len"] = 10; // hh:mm:ss.f
-    return buildString(timeSchema, model, path, partOfChoice);
+    return buildString(timeSchema, model, path);
   }
 
   function buildSelect(subSchema, model, path) {
@@ -730,7 +712,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     emitLater(select, subSchema);
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath, true, validationResult));
+      span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
     }
     span.appendChild(select);
     return span;
@@ -755,7 +737,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return opts;
   }
 
-  function buildGroup(subSchema, model, path, partOfChoice) {
+  function buildGroup(subSchema, model, path) {
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
@@ -763,7 +745,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var div = document.createElement("div");
     var validationResult = getValidationResult(model, subSchema.name);
 
-    appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
+    appendElements(partsDiv, subSchema, myModel, path, save);
 
     div.id = pathStrToGroupID(myPath);
     div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
@@ -776,7 +758,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                      path: path,
                                      remove: resolveRemoveOptions(subSchema, path)}));
     }
-    var label = makeLabel(subSchema, "group", myPath, true, validationResult);
+    var label = makeLabel(subSchema, "group", myPath, validationResult);
     div.appendChild(label);
 
     var groupHelpText = docutils.makeGroupHelpTextSpan(subSchema);
@@ -982,7 +964,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .call();
 
     if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath, false, validationResult));
+      span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
     }
     span.appendChild(select);
     return span;
@@ -1068,7 +1050,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     select.appendChild(unknownOption);
 
-    span.appendChild(makeLabel(subSchema, "select", myPath, false, validationResult));
+    span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
     span.appendChild(select);
     return span;
   }
@@ -1104,7 +1086,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return createComponent("foreman-history", params, "form-table");
   }
 
-  function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
+  function buildForemanOtherApplications(subSchema, model, path) {
     if (!_.includes(updatedDocumentsInDocumentDataService, doc.id)) {
       lupapisteApp.services.documentDataService.addDocument(doc, {isDisabled: self.isDisabled});
       updatedDocumentsInDocumentDataService.push(doc.id);
@@ -1122,7 +1104,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       path: path,
       i18npath: i18npath,
       schemaI18name: self.schemaI18name,
-      partOfChoice: partOfChoice,
       validationErrors: doc.validationErrors
     };
 
@@ -1286,12 +1267,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function buildTableRow(subSchema, model, path, partOfChoice) {
+  function buildTableRow(subSchema, model, path) {
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
     var row = document.createElement("tr");
-    appendElements(row, subSchema, myModel, path, save, partOfChoice);
+    appendElements(row, subSchema, myModel, path, save);
 
     row.id = pathStrToGroupID(myPath);
     var rm = resolveRemoveOptions( subSchema, path );
@@ -1350,7 +1331,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .call();
   }
 
-  function build(subSchema, model, path, partOfChoice) {
+  function build(subSchema, model, path) {
     // Do not create hidden whitelisted elements
     var whitelistedRoles = util.getIn(subSchema, ["whitelist", "roles"]);
     var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.includes(whitelistedRoles, lupapisteApp.models.currentUser.role());
@@ -1370,7 +1351,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
-      var elem = builder(subSchema, myModel, myPath.concat([id]), partOfChoice);
+      var elem = builder(subSchema, myModel, myPath.concat([id]));
       if (elem) {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
@@ -1432,7 +1413,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                                           path: myPath}));
         }
 
-        var label = makeLabel(subSchema, "table", myPath.join("."), true);
+        var label = makeLabel(subSchema, "table", myPath.join("."));
         div.appendChild(label);
 
         var groupHelpText = docutils.makeGroupHelpTextSpan(subSchema);
@@ -1528,7 +1509,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return elements;
     }
 
-    return builder(subSchema, model, myPath, partOfChoice);
+    return builder(subSchema, model, myPath);
   }
 
   function getSelectOneOfDefinition(schema) {
@@ -1543,7 +1524,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return [];
   }
 
-  function appendElements(body, schema, model, path, partOfChoice) {
+  function appendElements(body, schema, model, path) {
 
     function toggleSelectedGroup(value) {
       $(body)
@@ -1556,7 +1537,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var selectOneOf = getSelectOneOfDefinition(schema);
 
     _.each(schema.body, function (subSchema) {
-      var children = build(subSchema, model, path, save, partOfChoice);
+      var children = build(subSchema, model, path, save);
       if (!_.isArray(children)) {
         children = [children];
       }

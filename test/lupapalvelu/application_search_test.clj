@@ -6,7 +6,7 @@
              [lupapalvelu.application-search :refer :all]
              [lupapalvelu.geojson :as geo]))
 
-(testable-privates lupapalvelu.application-search make-sort operation-names make-area-query)
+(testable-privates lupapalvelu.application-search operation-names make-area-query)
 
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos" "kiinteistonmuodostus"]

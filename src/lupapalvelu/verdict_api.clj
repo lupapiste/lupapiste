@@ -135,8 +135,8 @@
     (fail :error.no-verdict-municipality-id)))
 
 (defcommand publish-verdict
-  {:parameters [id verdictId]
-   :input-validators [(partial action/non-blank-parameters [:id :verdictId])]
+  {:parameters [id verdictId lang]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictId :lang])]
    :states     give-verdict-states
    :pre-checks [application-has-verdict-given-state]
    :notified   true
@@ -177,7 +177,7 @@
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"
    :parameters [id verdictId password lang]
-   :input-validators [(partial action/non-blank-parameters [:id :verdictId :password])]
+   :input-validators [(partial action/non-blank-parameters [:id :verdictId :password :lang])]
    :states     states/post-verdict-states
    :pre-checks [domain/validate-owner-or-write-access]
    :user-roles #{:applicant :authority}}

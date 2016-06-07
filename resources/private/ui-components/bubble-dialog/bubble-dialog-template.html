@@ -19,6 +19,15 @@
               <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: buttonText"></span>
             </button>
+            <button class="negative"
+                    data-bind="visible: removeVisible,
+                               click: remove,
+                               enable: removeEnabled,
+                               css: {waiting: waitingRemove}">
+              <i class="lupicon-remove"></i>
+              <i class="wait spin lupicon-refresh"></i>
+              <span data-bind="ltext: 'remove'"></span>
+            </button>
             <button class="secondary"
                     data-bind="click: cancel,
                                attr: {'data-test-id': prefix + 'bubble-dialog-cancel'}">

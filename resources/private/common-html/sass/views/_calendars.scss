@@ -1,0 +1,153 @@
+#calendar-admin>.container>div {
+  padding: 0px $baseline;
+}
+
+.calendar-slot-bubble {
+  font-size: $baseline * 0.66;
+  p {
+    margin-bottom: 0px;
+  }
+  &.weekday-1 {
+    float: left;
+    margin-left: 6%;
+  }
+  &.weekday-2 {
+    float: left;
+    margin-left: 25%;
+  }
+  &.weekday-3 {
+    float: left;
+    margin-left: 44%;
+  }
+  &.weekday-4 {
+    float: left;
+    margin-left: 63%;
+  }
+  &.weekday-5 {
+    right: 0px;
+    margin-right: 1%;
+  }
+
+  input[type=text] {
+    width: $baseline * 2;
+  }
+}
+
+.calendar-table {
+  width:100%;
+  min-height: $baseline * 6;
+  padding-top: $baseline;
+
+  .nav-actions {
+    width: 96%;
+    .month {
+      float: left;
+      margin-left: 5%;
+      padding-left: $marginM;
+      font-size: $baseline * 0.75;
+      font-weight: bold;
+    }
+    .nav-links {
+      vertical-align: top;
+    }
+    text-align: right;
+  }
+
+  table {
+    width: 96%;
+    tr {
+      border: none;
+    }
+
+    th {
+      background: white;
+      font-size: $baseline * 0.75;
+      font-weight: normal;
+
+      &.date-today {
+        background: $gray221;
+        border: 1px solid #dddddd;
+      }
+    }
+
+    td {
+      background: $gray246;
+      padding: 0;
+      margin: $marginS;
+      width: 18%;
+      border: 1px solid #dddddd;
+
+      &:first-child {
+        font-size: $baseline * 0.75;
+        font-weight: normal;
+        background: white;
+        width: 5%;
+        border: none;
+      }
+
+      &.date-today {
+        background: $gray221;
+      }
+
+      div.timestamp {
+        height: 60px; // hour slots => 1 px per minute
+      }
+
+      &.date div.timeline-slot {
+        height: 60px; // hour slots => 1 px per minute
+        border-bottom: 1px solid #ccc;
+
+        &:nth-child(even) {
+          background: white;
+        }
+
+        &:hover {
+          background: $gray221;
+        }
+      }
+
+      &.date-today div.timeline-slot {
+        height: 60px; // hour slots => 1 px per minute
+        border-bottom: 1px solid #ccc;
+        background: $gray238;
+
+        &:hover {
+          background: $gray221;
+        }
+      }
+
+      div.calendar-slot {
+        position: absolute;
+        width: 100%;
+        padding: $marginS;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: $orange-dark; // This is needed because of text ellipsis
+
+        &.booked {
+          color: white;
+          background: $green-dark;
+
+          a {
+            color: white;
+          }
+        }
+
+        &.accepted {
+          color: white;
+          background: $orange-dark;
+
+          a {
+            color: white;
+          }
+        }
+      }
+    }
+
+  }
+}
+
+#mycalendar h1 {
+  margin-top: $baseline;
+}

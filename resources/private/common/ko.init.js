@@ -185,6 +185,17 @@
     }
   };
 
+  ko.bindingHandlers.feature = {
+    update: function( element, valueAccessor) {
+      var value = ko.utils.unwrapObservable( valueAccessor() ) ;
+      if( features.enabled(value) ) {
+        $(element).addClass( "feature" );
+      } else {
+        $(element).remove();
+      }
+    }
+  };
+
   ko.bindingHandlers.lhtml = {
     update: _.partial(localized, "html")
   };
@@ -207,15 +218,20 @@
     }
   };
 
-  ko.bindingHandlers.size = {
-    update: function(element, valueAccessor) {
-      var v = ko.utils.unwrapObservable(valueAccessor());
-
-      if (!v || v.length === 0) {
-        $(element).text("");
-        return;
+  // First name Last name
+  ko.bindingHandlers.firstLastName = {
+    update: function( element, valueAccessor ) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        $(element).text( v.firstName + "\u00a0" + v.lastName );
       }
+    }
+  };
 
+  // v is unwrapped size value
+  function sizeString( v ) {
+    var result = "";
+    if( _.trim( v ) ) {
       var value = parseFloat(v);
       var unit = "B";
 
@@ -240,8 +256,14 @@
       if (unit !== "B") {
         value = value.toFixed(1);
       }
+      result = value + "\u00a0" + unit;
+    }
+    return result;
+  }
 
-      $(element).text(value + "\u00a0" + unit);
+  ko.bindingHandlers.size = {
+    update: function(element, valueAccessor) {
+      $(element).text( sizeString(ko.utils.unwrapObservable(valueAccessor())));
     }
   };
 
@@ -252,6 +274,25 @@
       var file = ko.utils.unwrapObservable(valueAccessor());
       $(element).attr( "href", "/api/raw/download-attachment?attachment-id=" + file.id);
       $(element).text( file.filename);
+    }
+  };
+
+  var attachmentVersionTemplate =
+        _.template( "<a href='/api/raw/download-attachment?attachment-id"
+                    + "=<%- fileId %>'><%- filename %></a><br>"
+                    + "<i><%- contentText %> <%- sizeText %></i>");
+
+  // Fills the target element with:
+  // <a href="attachment file download url">filename</a><br>
+  // <i>localized content type size string</i>
+  ko.bindingHandlers.attachmentVersion = {
+    update: function( element, valueAccessor) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        var data = ko.mapping.toJS( v );
+        $(element).html( attachmentVersionTemplate( _.merge( data, {contentText: loc( data.contentType),
+                                                                    sizeText: sizeString( data.size )})));
+      }
     }
   };
 
@@ -508,6 +549,34 @@
           $this.attr("title", ko.utils.unwrapObservable(valueAccessor()));
         }
       });
+    }
+  };
+
+  function dayName(timeValue) {
+    var names = $.datepicker.regional[loc.currentLanguage].dayNames;
+    var day = moment(timeValue).day();
+    return names[day];
+  }
+
+  function monthName(timeValue) {
+    var names = $.datepicker.regional[loc.currentLanguage].monthNames;
+    var month = moment(timeValue).month();
+    return names[month];
+  }
+
+  ko.bindingHandlers.calendarDayColumnHeader = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var dateStr = value ? moment(value).format("D ") + dayName(value) : "";
+      $(element).html(dateStr);
+    }
+  };
+
+  ko.bindingHandlers.calendarViewMonthText = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var dateStr = value ? monthName(value) + moment(value).format(" YYYY"): "";
+      $(element).html(dateStr);
     }
   };
 

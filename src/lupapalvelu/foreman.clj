@@ -275,7 +275,7 @@
                                                :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})))
 
 (defn- user-invite-notifications! [foreman-app auths]
-  (->> (map #(set/rename-keys % {:username :email}) auths)
+  (->> (map (fn [{{:keys [email user]} :invite}] (assoc user :email email)) auths)
        (hash-map :application foreman-app :recipients)
        (notif/notify! :invite)))
 

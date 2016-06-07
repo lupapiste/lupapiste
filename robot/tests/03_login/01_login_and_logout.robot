@@ -86,6 +86,8 @@ Mikko logs in with username that has capital letters and wants to be forgotten
 
 Trying to open my page without logging in opens a help page
   [Tags]  ie8
+  Go to login page
+  Delete Cookie  ring-session
   Go to  ${SERVER}/app/fi/applicant#!/mypage
   Wait Until  Element Should Be Visible  hashbang
 
