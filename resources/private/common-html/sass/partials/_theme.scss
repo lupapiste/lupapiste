@@ -111,12 +111,14 @@ $grid-margin-large: 40px;
 $grid-font-size: 16px;
 
 $checkbox-color:          $gray187;
-$checkbox-selected-color: $orange-light;
+$checkbox-selected-color: $orange-dark;
 $checkbox-border-color:   $gray221;
+$checkbox-hover-color:    $orange-light;
 
 $radio-color:          $checkbox-color;
 $radio-selected-color: $checkbox-selected-color;
 $radio-border-color:   $checkbox-border-color;
+$radio-hover-color:    $checkbox-hover-color;
 
 $input-color:       $gray51;
 $input-focus-color: $gray51;

@@ -1,5 +1,18 @@
-@import url('main-blessed1.css?z=1465384925037');
+@import url('main-blessed1.css?z=1465398071786');
 
+/* line 62, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row .attachment-row-top {
+  *zoom: 1;
+  cursor: pointer;
+  padding: 6px 0 5px 0;
+  position: relative;
+  margin-left: 34px;
+}
+/* line 19, ../../../private/common-html/sass/main.scss */
+.archival-summary-table .attachment-row .attachment-row-top:before, .archival-summary-table .attachment-row .attachment-row-top:after {
+  content: " ";
+  display: table;
+}
 /* line 24, ../../../private/common-html/sass/main.scss */
 .archival-summary-table .attachment-row .attachment-row-top:after {
   clear: both;
