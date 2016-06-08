@@ -11,6 +11,7 @@
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.attachment-metadata :as attachment-meta]
+            [lupapalvelu.calendar :as cal]
             [lupapalvelu.company :as company]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.document.model :as model]
@@ -77,7 +78,8 @@
                  :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
                  :supportedLangs        i18n/languages
-                 :urgencyStates         ["normal" "urgent" "pending"]}]
+                 :urgencyStates         ["normal" "urgent" "pending"]
+                 :calendars             (cal/ui-params)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []

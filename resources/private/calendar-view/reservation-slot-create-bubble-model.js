@@ -63,7 +63,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
     }
 
     self.startTime(timestamp);
-    self.positionTop((event.hour - params.tableFirstFullHour() + 1) * 60 + "px");
+    self.positionTop((event.hour - params.tableFirstFullHour + 1) * 60 + "px");
     self.weekdayCss("weekday-" + timestamp.isoWeekday());
     self.selectedReservationTypes([]);
     self.amount(1);

@@ -1,6 +1,7 @@
 LUPAPISTE.CalendarService = function() {
   "use strict";
-  var self = this;
+  var self = this,
+      params = LUPAPISTE.config.calendars;
 
   self.calendar = ko.observable();
   self.calendarWeekdays = ko.observableArray();
@@ -9,8 +10,7 @@ LUPAPISTE.CalendarService = function() {
   self.organizationCalendars = ko.observableArray();
   self.reservationTypesByOrganization = ko.observable();
 
-  self.firstFullHour = ko.observable(8);
-  self.lastFullHour = ko.observable(16);
+  self.params = ko.observable(params);
 
   // Data related to the current calendar view
   self.calendarQuery = {
@@ -39,12 +39,12 @@ LUPAPISTE.CalendarService = function() {
       .success(function(data) {
         var now = moment();
         var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
-          var day = moment(startOfWeekMoment).isoWeekday(i).hour(self.firstFullHour()).minutes(0).seconds(0);
+          var day = startOfWeekMoment.set({ "isoWeekday": i, "hour": params.firstFullHour, "minutes": 0, "seconds": 0 });
           var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, "day"); });
           return {
             calendarId: self.calendarQuery.calendarId(),
             startOfDay: day.valueOf(),
-            endOfDay: moment(day).hour(self.lastFullHour()).valueOf(),
+            endOfDay: moment(day).hour(params.lastFullHour).valueOf(),
             today: day.isSame(now, "day"),
             slots: _.map(slotsForDay,
               function(s) {

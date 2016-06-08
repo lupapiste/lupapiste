@@ -41,7 +41,7 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function( params ) {
     self.slotId(event.slot.id);
     self.startTime(timestamp);
     self.selectedReservationTypes(_.map(event.slot.reservationTypes, function(d) { return d.id; }));
-    self.positionTop((timestamp.hour() - params.tableFirstFullHour() + 1) * 60 + "px");
+    self.positionTop((timestamp.hour() - params.tableFirstFullHour + 1) * 60 + "px");
     self.weekdayCss("weekday-" + timestamp.isoWeekday());
     self.bubbleVisible(true);
   });
