@@ -1,14 +1,19 @@
 LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
   "use strict";
-  var self = this;
+  var self = this,
+      calendarService = lupapisteApp.services.calendarService,
+      params = calendarService.params();
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.startTime = ko.observable();
+  self.durationHours = params.timeSlotLengthMinutes / 60;
+  self.durationMinutes = params.timeSlotLengthMinutes % 60;
+
   self.positionTop = ko.observable();
   self.weekdayCss = ko.observable();
-  self.calendarId = lupapisteApp.services.calendarService.calendarQuery.calendarId;
-  self.reservationTypes = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
+  self.calendarId = calendarService.calendarQuery.calendarId; // observable
+  self.reservationTypes = calendarService.calendarQuery.reservationTypes; // observable
   self.selectedReservationTypes = ko.observableArray();
   self.amount = ko.observable();
   self.maxAmount = ko.observable();
@@ -28,9 +33,10 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
       self.error("calendar.error.cannot-create-overlapping-slots");
       return;
     }
+    var len = params.timeSlotLengthMinutes;
     var slots = _.map(_.range(self.amount()), function(d) {
-      var t1 = moment(self.startTime()).add(d, "h");
-      var t2 = moment(self.startTime()).add(d+1, "h");
+      var t1 = moment(self.startTime()).add(d*len, "minutes");
+      var t2 = moment(self.startTime()).add((d+1)*len, "minutes");
       return {
         start: t1.valueOf(),
         end: t2.valueOf(),

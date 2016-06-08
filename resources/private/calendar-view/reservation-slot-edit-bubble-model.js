@@ -1,11 +1,15 @@
 LUPAPISTE.ReservationSlotEditBubbleModel = function( params ) {
   "use strict";
-  var self = this;
+  var self = this,
+      calendarService = lupapisteApp.services.calendarService;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.slotId = ko.observable();
   self.startTime = ko.observable();
+  self.durationHours = ko.observable();
+  self.durationMinutes = ko.observable();
+
   self.positionTop = ko.observable();
   self.weekdayCss = ko.observable();
 
@@ -38,8 +42,13 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function( params ) {
 
   self.addEventListener("calendarView", "calendarSlotClicked", function(event) {
     var timestamp = moment(event.slot.startTime);
+    var durationHours = moment.duration(event.slot.duration).hours();
+    var durationMinutes = moment.duration(event.slot.duration).minutes();
+    console.log(event.slot);
     self.slotId(event.slot.id);
     self.startTime(timestamp);
+    self.durationHours(durationHours);
+    self.durationMinutes(durationMinutes);
     self.selectedReservationTypes(_.map(event.slot.reservationTypes, function(d) { return d.id; }));
     self.positionTop((timestamp.hour() - params.tableFirstFullHour + 1) * 60 + "px");
     self.weekdayCss("weekday-" + timestamp.isoWeekday());
