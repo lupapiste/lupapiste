@@ -50,7 +50,7 @@ LUPAPISTE.FileUploadModel = function( params ) {
   self.removeFile = function( data ) {
     self.files( _.filter( self.files(),
                           function( file ) {
-                            return file.id !== data.id;
+                            return file.fileId !== data.fileId;
                           }));
   };
 };

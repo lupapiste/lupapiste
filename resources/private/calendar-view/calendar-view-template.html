@@ -5,11 +5,11 @@
   <script type="text/x-jquery-tmpl" id="calendar-view-template">
     <div class="calendar-table" data-test-id="calendar-view-calendar-table">
       <div class="nav-actions">
-        <div class="month" data-bind="calendarViewMonthText: month()"></div>
+        <div class="month" data-bind="calendarViewMonthText: startOfWeek"></div>
         <div class="nav-links">
-          <a data-bind="click: gotoPreviousWeek"><< Edellinen</a> |
-          <a data-bind="click: gotoToday">T&auml;n&auml;&auml;n</a> |
-          <a data-bind="click: gotoFollowingWeek">Seuraava >></a>
+          <a data-bind="click: gotoPreviousWeek"><span data-bind="ltext: 'calendar.week.previous'"></span></a> |
+          <a data-bind="click: gotoToday"><span data-bind="ltext: 'calendar.week.today'"></span></a> |
+          <a data-bind="click: gotoFollowingWeek"><span data-bind="ltext: 'calendar.week.next'"></span></a>
         </div>
       </div>
       <table>

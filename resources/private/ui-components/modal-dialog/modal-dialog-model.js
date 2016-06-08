@@ -68,9 +68,24 @@ LUPAPISTE.ModalDialogModel = function () {
   };
 
   self.closeDialog = function() {
+    var id = self.id();
+
+    // Click handlers were left in jQuery.cache
+    $("#modal-dialog-content-component").find("a").off();
+    $("#modal-dialog-content-component").find("button").off();
+    $("#modal-dialog-content-container").find(".mask,.close,.component").off();
+
     self.showDialog(false);
+
+    // Clear references to disposed data
+    self.component(null);
+    self.componentParams(null);
+    self.title(null);
+    self.size(null);
+    self.id(null);
+
     $("html").removeClass("no-scroll");
-    hub.send("dialog-close", {id : self.id()});
+    hub.send("dialog-close", {id : id});
   };
 
   self.componentClicked = function() {
@@ -84,7 +99,7 @@ LUPAPISTE.ModalDialogModel = function () {
     $("html").addClass("no-scroll");
     self.component(data.component);
     self.componentParams(data.componentParams || {});
-    self.title = data.ltitle ? loc(data.ltitle) : data.title;
+    self.title(data.ltitle ? loc(data.ltitle) : data.title);
     self.size(data.size ? data.size : "large");
     self.id(data.id || data.component);
     self.closeOnClick(data.closeOnClick || false);

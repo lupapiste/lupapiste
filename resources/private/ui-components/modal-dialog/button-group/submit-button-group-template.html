@@ -8,9 +8,8 @@
                 data-bind="visible: isSubmitVisible, enable: isSubmitEnabled,
                            css: submitCssClasses, click: submit, text: submitTitle">
         </button>
-        <a href="#" class="btn secondary cancel" data-test-id="modal-dialog-cancel-button" data-bind="click: close">
-          <span data-bind="ltext: 'cancel'"></span>
-        </a>
+        <a href="#" class="btn secondary cancel" data-test-id="modal-dialog-cancel-button"
+           data-bind="click: _.partial(hub.send, 'close-dialog'), ltext: 'cancel'"></a>
       </div>
     </script>
   </section>

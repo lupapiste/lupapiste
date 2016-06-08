@@ -16,33 +16,30 @@ LUPAPISTE.CalendarService = function() {
   self.calendarQuery = {
     calendarId: ko.observable(),
     reservationTypes: ko.observableArray(),
-    week: ko.observable(),
-    year: ko.observable()
+    startOfWeek: ko.observable()
   };
 
   var doFetchCalendarSlots = function(event) {
     if (event && event.id) {
       self.calendarQuery.calendarId(event.id);
     }
+    var newStartOfWeek;
     if (event && event.week && event.year) {
-      self.calendarQuery.week(event.week);
-      self.calendarQuery.year(event.year);
+      newStartOfWeek = moment().set({"isoWeek": event.week, "year": event.year}).startOf("isoWeek").valueOf();
+      self.calendarQuery.startOfWeek(newStartOfWeek);
     } else if (event && event.increment) {
-      var newStartOfWeek = moment().year(self.calendarQuery.year()).isoWeek(self.calendarQuery.week()).add(event.increment, "weeks");
-      self.calendarQuery.year(newStartOfWeek.year());
-      self.calendarQuery.week(newStartOfWeek.isoWeek());
+      newStartOfWeek = moment(self.calendarQuery.startOfWeek()).add(event.increment, "weeks");
+      self.calendarQuery.startOfWeek(newStartOfWeek.valueOf());
     }
 
-    var week = self.calendarQuery.week();
-    var year = self.calendarQuery.year();
+    var startOfWeekMoment = moment(self.calendarQuery.startOfWeek());
     ajax.query("calendar-slots", { calendarId: self.calendarQuery.calendarId(),
-                                   week: week,
-                                   year: year })
+                                   week: startOfWeekMoment.isoWeek(),
+                                   year: startOfWeekMoment.year() })
       .success(function(data) {
         var now = moment();
-        var startOfWeek = moment().isoWeek(week).year(year).startOf("isoWeek").valueOf();
         var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
-          var day = moment(startOfWeek).isoWeekday(i).hour(self.firstFullHour()).minutes(0).seconds(0);
+          var day = moment(startOfWeekMoment).isoWeekday(i).hour(self.firstFullHour()).minutes(0).seconds(0);
           var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, "day"); });
           return {
             calendarId: self.calendarQuery.calendarId(),

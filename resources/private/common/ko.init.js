@@ -272,7 +272,7 @@
   ko.bindingHandlers.download = {
     update: function( element, valueAccessor) {
       var file = ko.utils.unwrapObservable(valueAccessor());
-      $(element).attr( "href", "/api/raw/download-attachment?attachment-id=" + file.id);
+      $(element).attr( "href", "/api/raw/download-attachment?attachment-id=" + file.fileId);
       $(element).text( file.filename);
     }
   };
@@ -564,6 +564,10 @@
     return names[month];
   }
 
+  function weekText(timeValue) {
+    return "(" + loc("calendar.week") + moment(timeValue).format(" WW") + ")";
+  }
+
   ko.bindingHandlers.calendarDayColumnHeader = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
@@ -575,7 +579,7 @@
   ko.bindingHandlers.calendarViewMonthText = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      var dateStr = value ? monthName(value) + moment(value).format(" YYYY"): "";
+      var dateStr = value ? monthName(value) + moment(value).format(" YYYY ") + weekText(value) : "";
       $(element).html(dateStr);
     }
   };

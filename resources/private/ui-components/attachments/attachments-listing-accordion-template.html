@@ -1,0 +1,17 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-listing-accordion-template">
+  <!-- ko if: $data.data && $data.data().hasAttachments -->
+    <rollup params="open: $data.open">
+      <rollup-status-button
+         params="open: $parent.open,
+                 style: 'secondary',
+                 status: $parent.data().status,
+                 text: $parent.text"></rollup-status-button>
+      <div class="rollup__open">
+        <div data-bind="template:
+                        {name: 'attachments-listing-attachment-info-template',
+                         data: $parent.data().attachmentInfos}"></div>
+      </div>
+    </rollup>
+  <!-- /ko -->
+</script>
