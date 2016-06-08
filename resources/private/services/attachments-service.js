@@ -7360,6 +7360,10 @@ LUPAPISTE.AttachmentsService = function() {
     return filters[filterId];
   };
 
+  self.getFilters = ko.pureComputed(function() {
+    return _.toPairs(filters);
+  });
+
   self.setFilter = function(filterId, isFilterEnabled) {
     filters[filterId](isFilterEnabled);
     return filters[filterId]();
