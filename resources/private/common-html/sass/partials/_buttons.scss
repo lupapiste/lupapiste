@@ -242,6 +242,10 @@ i.btn-small {
   @include styled-input( $bg: $gray-link, $hover-bg: $gray-hover, $active-bg: $gray-active );
 }
 
+@include button-div-a-i-span (tertiary) {
+  @include styled-input( $bg: $light-gray-link, $hover-bg: $light-gray-hover, $active-bg: $light-gray-active );
+}
+
 @include button-div-a-i-span (positive) {
   @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
 }
@@ -321,6 +325,14 @@ a.link-btn {
                          $text: $orange-link, $hover-text: $orange-hover,
                          $active-text: $orange-active, $disabled-bg: none);
   cursor: pointer;
+}
+
+.link-btn--link {
+  &:hover, &:active {
+             span {
+               text-decoration: underline;
+             }             
+  }
 }
 
 a.link-btn-julkipano {
@@ -544,4 +556,17 @@ button {
 
 .left-buttons > button {
   margin-right: $btn-spacer;
+}
+
+// Mixin for a button row that wraps
+@mixin button-row ($margin-right: $btn-spacer, $margin-bottom: $btn-spacer ){
+  .btn-base, .btn, button, div, a {
+    margin: {
+    right: $margin-right;
+    bottom: $margin-bottom;
+  }
+  }
+  :last-child {
+    margin-right: 0;
+  }
 }

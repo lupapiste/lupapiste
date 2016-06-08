@@ -2874,6 +2874,174 @@ label.btn.secondary:disabled, .dataTables_paginate label.paginate_disabled_previ
 }
 
 /* line 205, ../../../private/common-html/sass/partials/_buttons.scss */
+button.tertiary {
+  color: white;
+  background-color: #777777;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+button.tertiary:link, button.tertiary:visited {
+  color: white;
+  background-color: #777777;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+button.tertiary:hover {
+  color: white;
+  background-color: #999999;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+button.tertiary:active, button.tertiary.active {
+  color: white;
+  background-color: #bbbbbb;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+button.tertiary:disabled, button.tertiary.disabled, button.tertiary.waiting {
+  cursor: default !important;
+  color: white !important;
+  background-color: #dddddd !important;
+}
+
+/* line 206, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.tertiary, .dataTables_paginate div.tertiary.paginate_disabled_previous, .dataTables_paginate div.tertiary.paginate_disabled_next {
+  color: white;
+  background-color: #777777;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.tertiary:link, .dataTables_paginate div.tertiary.paginate_disabled_previous:link, .dataTables_paginate div.tertiary.paginate_disabled_next:link, div.btn.tertiary:visited, .dataTables_paginate div.tertiary.paginate_disabled_previous:visited, .dataTables_paginate div.tertiary.paginate_disabled_next:visited {
+  color: white;
+  background-color: #777777;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.tertiary:hover, .dataTables_paginate div.tertiary.paginate_disabled_previous:hover, .dataTables_paginate div.tertiary.paginate_disabled_next:hover {
+  color: white;
+  background-color: #999999;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.tertiary:active, .dataTables_paginate div.tertiary.paginate_disabled_previous:active, .dataTables_paginate div.tertiary.paginate_disabled_next:active, div.btn.tertiary.active, .dataTables_paginate div.tertiary.active.paginate_disabled_previous, .dataTables_paginate div.tertiary.active.paginate_disabled_next {
+  color: white;
+  background-color: #bbbbbb;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.tertiary:disabled, .dataTables_paginate div.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate div.tertiary.paginate_disabled_next:disabled, div.btn.tertiary.disabled, .dataTables_paginate div.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate div.tertiary.disabled.paginate_disabled_next, div.btn.tertiary.waiting, .dataTables_paginate div.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate div.tertiary.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: white !important;
+  background-color: #dddddd !important;
+}
+
+/* line 207, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.tertiary, .dataTables_paginate a.tertiary.paginate_disabled_previous, .dataTables_paginate a.tertiary.paginate_disabled_next {
+  color: white;
+  background-color: #777777;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.tertiary:link, .dataTables_paginate a.tertiary.paginate_disabled_previous:link, .dataTables_paginate a.tertiary.paginate_disabled_next:link, a.btn.tertiary:visited, .dataTables_paginate a.tertiary.paginate_disabled_previous:visited, .dataTables_paginate a.tertiary.paginate_disabled_next:visited {
+  color: white;
+  background-color: #777777;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.tertiary:hover, .dataTables_paginate a.tertiary.paginate_disabled_previous:hover, .dataTables_paginate a.tertiary.paginate_disabled_next:hover {
+  color: white;
+  background-color: #999999;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.tertiary:active, .dataTables_paginate a.tertiary.paginate_disabled_previous:active, .dataTables_paginate a.tertiary.paginate_disabled_next:active, a.btn.tertiary.active, .dataTables_paginate a.tertiary.active.paginate_disabled_previous, .dataTables_paginate a.tertiary.active.paginate_disabled_next {
+  color: white;
+  background-color: #bbbbbb;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.tertiary:disabled, .dataTables_paginate a.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate a.tertiary.paginate_disabled_next:disabled, a.btn.tertiary.disabled, .dataTables_paginate a.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate a.tertiary.disabled.paginate_disabled_next, a.btn.tertiary.waiting, .dataTables_paginate a.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate a.tertiary.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: white !important;
+  background-color: #dddddd !important;
+}
+
+/* line 208, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.tertiary, .dataTables_paginate i.tertiary.paginate_disabled_previous, .dataTables_paginate i.tertiary.paginate_disabled_next {
+  color: white;
+  background-color: #777777;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.tertiary:link, .dataTables_paginate i.tertiary.paginate_disabled_previous:link, .dataTables_paginate i.tertiary.paginate_disabled_next:link, i.btn.tertiary:visited, .dataTables_paginate i.tertiary.paginate_disabled_previous:visited, .dataTables_paginate i.tertiary.paginate_disabled_next:visited {
+  color: white;
+  background-color: #777777;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.tertiary:hover, .dataTables_paginate i.tertiary.paginate_disabled_previous:hover, .dataTables_paginate i.tertiary.paginate_disabled_next:hover {
+  color: white;
+  background-color: #999999;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.tertiary:active, .dataTables_paginate i.tertiary.paginate_disabled_previous:active, .dataTables_paginate i.tertiary.paginate_disabled_next:active, i.btn.tertiary.active, .dataTables_paginate i.tertiary.active.paginate_disabled_previous, .dataTables_paginate i.tertiary.active.paginate_disabled_next {
+  color: white;
+  background-color: #bbbbbb;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.tertiary:disabled, .dataTables_paginate i.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate i.tertiary.paginate_disabled_next:disabled, i.btn.tertiary.disabled, .dataTables_paginate i.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate i.tertiary.disabled.paginate_disabled_next, i.btn.tertiary.waiting, .dataTables_paginate i.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate i.tertiary.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: white !important;
+  background-color: #dddddd !important;
+}
+
+/* line 209, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.tertiary, .dataTables_paginate span.tertiary.paginate_disabled_previous, .dataTables_paginate span.tertiary.paginate_disabled_next {
+  color: white;
+  background-color: #777777;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.tertiary:link, .dataTables_paginate span.tertiary.paginate_disabled_previous:link, .dataTables_paginate span.tertiary.paginate_disabled_next:link, span.btn.tertiary:visited, .dataTables_paginate span.tertiary.paginate_disabled_previous:visited, .dataTables_paginate span.tertiary.paginate_disabled_next:visited {
+  color: white;
+  background-color: #777777;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.tertiary:hover, .dataTables_paginate span.tertiary.paginate_disabled_previous:hover, .dataTables_paginate span.tertiary.paginate_disabled_next:hover {
+  color: white;
+  background-color: #999999;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.tertiary:active, .dataTables_paginate span.tertiary.paginate_disabled_previous:active, .dataTables_paginate span.tertiary.paginate_disabled_next:active, span.btn.tertiary.active, .dataTables_paginate span.tertiary.active.paginate_disabled_previous, .dataTables_paginate span.tertiary.active.paginate_disabled_next {
+  color: white;
+  background-color: #bbbbbb;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.tertiary:disabled, .dataTables_paginate span.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate span.tertiary.paginate_disabled_next:disabled, span.btn.tertiary.disabled, .dataTables_paginate span.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate span.tertiary.disabled.paginate_disabled_next, span.btn.tertiary.waiting, .dataTables_paginate span.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate span.tertiary.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: white !important;
+  background-color: #dddddd !important;
+}
+
+/* line 210, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.tertiary, .dataTables_paginate label.tertiary.paginate_disabled_previous, .dataTables_paginate label.tertiary.paginate_disabled_next {
+  color: white;
+  background-color: #777777;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.tertiary:link, .dataTables_paginate label.tertiary.paginate_disabled_previous:link, .dataTables_paginate label.tertiary.paginate_disabled_next:link, label.btn.tertiary:visited, .dataTables_paginate label.tertiary.paginate_disabled_previous:visited, .dataTables_paginate label.tertiary.paginate_disabled_next:visited {
+  color: white;
+  background-color: #777777;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.tertiary:hover, .dataTables_paginate label.tertiary.paginate_disabled_previous:hover, .dataTables_paginate label.tertiary.paginate_disabled_next:hover {
+  color: white;
+  background-color: #999999;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.tertiary:active, .dataTables_paginate label.tertiary.paginate_disabled_previous:active, .dataTables_paginate label.tertiary.paginate_disabled_next:active, label.btn.tertiary.active, .dataTables_paginate label.tertiary.active.paginate_disabled_previous, .dataTables_paginate label.tertiary.active.paginate_disabled_next {
+  color: white;
+  background-color: #bbbbbb;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.tertiary:disabled, .dataTables_paginate label.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate label.tertiary.paginate_disabled_next:disabled, label.btn.tertiary.disabled, .dataTables_paginate label.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate label.tertiary.disabled.paginate_disabled_next, label.btn.tertiary.waiting, .dataTables_paginate label.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate label.tertiary.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: white !important;
+  background-color: #dddddd !important;
+}
+
+/* line 205, ../../../private/common-html/sass/partials/_buttons.scss */
 button.positive {
   color: white;
   background-color: #2ca92c;
@@ -3911,11 +4079,11 @@ button.function:disabled, button.function.disabled, button.function.waiting {
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function:link, button.function:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function:hover, button.function:active {
   border-color: #bbbbbb;
 }
@@ -3950,11 +4118,11 @@ div.btn.function:disabled, .dataTables_paginate div.function.paginate_disabled_p
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function:link, .dataTables_paginate div.function.paginate_disabled_previous:link, .dataTables_paginate div.function.paginate_disabled_next:link, div.btn.function:visited, .dataTables_paginate div.function.paginate_disabled_previous:visited, .dataTables_paginate div.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function:hover, .dataTables_paginate div.function.paginate_disabled_previous:hover, .dataTables_paginate div.function.paginate_disabled_next:hover, div.btn.function:active, .dataTables_paginate div.function.paginate_disabled_previous:active, .dataTables_paginate div.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -3989,11 +4157,11 @@ a.btn.function:disabled, .dataTables_paginate a.function.paginate_disabled_previ
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function:link, .dataTables_paginate a.function.paginate_disabled_previous:link, .dataTables_paginate a.function.paginate_disabled_next:link, a.btn.function:visited, .dataTables_paginate a.function.paginate_disabled_previous:visited, .dataTables_paginate a.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function:hover, .dataTables_paginate a.function.paginate_disabled_previous:hover, .dataTables_paginate a.function.paginate_disabled_next:hover, a.btn.function:active, .dataTables_paginate a.function.paginate_disabled_previous:active, .dataTables_paginate a.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4028,11 +4196,11 @@ i.btn.function:disabled, .dataTables_paginate i.function.paginate_disabled_previ
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function:link, .dataTables_paginate i.function.paginate_disabled_previous:link, .dataTables_paginate i.function.paginate_disabled_next:link, i.btn.function:visited, .dataTables_paginate i.function.paginate_disabled_previous:visited, .dataTables_paginate i.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function:hover, .dataTables_paginate i.function.paginate_disabled_previous:hover, .dataTables_paginate i.function.paginate_disabled_next:hover, i.btn.function:active, .dataTables_paginate i.function.paginate_disabled_previous:active, .dataTables_paginate i.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4067,11 +4235,11 @@ span.btn.function:disabled, .dataTables_paginate span.function.paginate_disabled
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function:link, .dataTables_paginate span.function.paginate_disabled_previous:link, .dataTables_paginate span.function.paginate_disabled_next:link, span.btn.function:visited, .dataTables_paginate span.function.paginate_disabled_previous:visited, .dataTables_paginate span.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function:hover, .dataTables_paginate span.function.paginate_disabled_previous:hover, .dataTables_paginate span.function.paginate_disabled_next:hover, span.btn.function:active, .dataTables_paginate span.function.paginate_disabled_previous:active, .dataTables_paginate span.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4106,27 +4274,27 @@ label.btn.function:disabled, .dataTables_paginate label.function.paginate_disabl
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function:link, .dataTables_paginate label.function.paginate_disabled_previous:link, .dataTables_paginate label.function.paginate_disabled_next:link, label.btn.function:visited, .dataTables_paginate label.function.paginate_disabled_previous:visited, .dataTables_paginate label.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function:hover, .dataTables_paginate label.function.paginate_disabled_previous:hover, .dataTables_paginate label.function.paginate_disabled_next:hover, label.btn.function:active, .dataTables_paginate label.function.paginate_disabled_previous:active, .dataTables_paginate label.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
-/* line 293, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 297, ../../../private/common-html/sass/partials/_buttons.scss */
 .function.disabled {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 295, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 299, ../../../private/common-html/sass/partials/_buttons.scss */
 .function.disabled:hover, .function.disabled:active, .function.disabled:disabled {
   border-color: #dddddd !important;
 }
 
-/* line 301, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 305, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function:disabled {
   border-color: #dddddd !important;
 }
@@ -4161,11 +4329,11 @@ button.function.authority:disabled, button.function.authority.disabled, button.f
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function.authority:link, button.function.authority:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function.authority:hover, button.function.authority:active {
   border-color: #bbbbbb;
 }
@@ -4200,11 +4368,11 @@ div.btn.function.authority:disabled, .dataTables_paginate div.function.authority
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function.authority:link, .dataTables_paginate div.function.authority.paginate_disabled_previous:link, .dataTables_paginate div.function.authority.paginate_disabled_next:link, div.btn.function.authority:visited, .dataTables_paginate div.function.authority.paginate_disabled_previous:visited, .dataTables_paginate div.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function.authority:hover, .dataTables_paginate div.function.authority.paginate_disabled_previous:hover, .dataTables_paginate div.function.authority.paginate_disabled_next:hover, div.btn.function.authority:active, .dataTables_paginate div.function.authority.paginate_disabled_previous:active, .dataTables_paginate div.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4239,11 +4407,11 @@ a.btn.function.authority:disabled, .dataTables_paginate a.function.authority.pag
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function.authority:link, .dataTables_paginate a.function.authority.paginate_disabled_previous:link, .dataTables_paginate a.function.authority.paginate_disabled_next:link, a.btn.function.authority:visited, .dataTables_paginate a.function.authority.paginate_disabled_previous:visited, .dataTables_paginate a.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function.authority:hover, .dataTables_paginate a.function.authority.paginate_disabled_previous:hover, .dataTables_paginate a.function.authority.paginate_disabled_next:hover, a.btn.function.authority:active, .dataTables_paginate a.function.authority.paginate_disabled_previous:active, .dataTables_paginate a.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4278,11 +4446,11 @@ i.btn.function.authority:disabled, .dataTables_paginate i.function.authority.pag
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function.authority:link, .dataTables_paginate i.function.authority.paginate_disabled_previous:link, .dataTables_paginate i.function.authority.paginate_disabled_next:link, i.btn.function.authority:visited, .dataTables_paginate i.function.authority.paginate_disabled_previous:visited, .dataTables_paginate i.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function.authority:hover, .dataTables_paginate i.function.authority.paginate_disabled_previous:hover, .dataTables_paginate i.function.authority.paginate_disabled_next:hover, i.btn.function.authority:active, .dataTables_paginate i.function.authority.paginate_disabled_previous:active, .dataTables_paginate i.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4317,11 +4485,11 @@ span.btn.function.authority:disabled, .dataTables_paginate span.function.authori
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function.authority:link, .dataTables_paginate span.function.authority.paginate_disabled_previous:link, .dataTables_paginate span.function.authority.paginate_disabled_next:link, span.btn.function.authority:visited, .dataTables_paginate span.function.authority.paginate_disabled_previous:visited, .dataTables_paginate span.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function.authority:hover, .dataTables_paginate span.function.authority.paginate_disabled_previous:hover, .dataTables_paginate span.function.authority.paginate_disabled_next:hover, span.btn.function.authority:active, .dataTables_paginate span.function.authority.paginate_disabled_previous:active, .dataTables_paginate span.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4356,11 +4524,11 @@ label.btn.function.authority:disabled, .dataTables_paginate label.function.autho
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function.authority:link, .dataTables_paginate label.function.authority.paginate_disabled_previous:link, .dataTables_paginate label.function.authority.paginate_disabled_next:link, label.btn.function.authority:visited, .dataTables_paginate label.function.authority.paginate_disabled_previous:visited, .dataTables_paginate label.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function.authority:hover, .dataTables_paginate label.function.authority.paginate_disabled_previous:hover, .dataTables_paginate label.function.authority.paginate_disabled_next:hover, label.btn.function.authority:active, .dataTables_paginate label.function.authority.paginate_disabled_previous:active, .dataTables_paginate label.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4395,11 +4563,11 @@ button.function.julkipano:disabled, button.function.julkipano.disabled, button.f
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function.julkipano:link, button.function.julkipano:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function.julkipano:hover, button.function.julkipano:active {
   border-color: #bbbbbb;
 }
@@ -4434,11 +4602,11 @@ div.btn.function.julkipano:disabled, .dataTables_paginate div.function.julkipano
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function.julkipano:link, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate div.function.julkipano.paginate_disabled_next:link, div.btn.function.julkipano:visited, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate div.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function.julkipano:hover, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate div.function.julkipano.paginate_disabled_next:hover, div.btn.function.julkipano:active, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate div.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4473,11 +4641,11 @@ a.btn.function.julkipano:disabled, .dataTables_paginate a.function.julkipano.pag
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function.julkipano:link, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate a.function.julkipano.paginate_disabled_next:link, a.btn.function.julkipano:visited, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate a.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function.julkipano:hover, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate a.function.julkipano.paginate_disabled_next:hover, a.btn.function.julkipano:active, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate a.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4512,11 +4680,11 @@ i.btn.function.julkipano:disabled, .dataTables_paginate i.function.julkipano.pag
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function.julkipano:link, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate i.function.julkipano.paginate_disabled_next:link, i.btn.function.julkipano:visited, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate i.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function.julkipano:hover, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate i.function.julkipano.paginate_disabled_next:hover, i.btn.function.julkipano:active, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate i.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4551,11 +4719,11 @@ span.btn.function.julkipano:disabled, .dataTables_paginate span.function.julkipa
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function.julkipano:link, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate span.function.julkipano.paginate_disabled_next:link, span.btn.function.julkipano:visited, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate span.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function.julkipano:hover, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate span.function.julkipano.paginate_disabled_next:hover, span.btn.function.julkipano:active, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate span.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
@@ -4590,16 +4758,16 @@ label.btn.function.julkipano:disabled, .dataTables_paginate label.function.julki
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 281, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function.julkipano:link, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate label.function.julkipano.paginate_disabled_next:link, label.btn.function.julkipano:visited, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate label.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 284, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function.julkipano:hover, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate label.function.julkipano.paginate_disabled_next:hover, label.btn.function.julkipano:active, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate label.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
-/* line 318, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 322, ../../../private/common-html/sass/partials/_buttons.scss */
 a.link-btn {
   color: #f39129;
   background-color: none;
@@ -4628,7 +4796,12 @@ a.link-btn:disabled, a.link-btn.disabled, a.link-btn.waiting {
   background-color: none !important;
 }
 
-/* line 326, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 332, ../../../private/common-html/sass/partials/_buttons.scss */
+.link-btn--link:hover span, .link-btn--link:active span {
+  text-decoration: underline;
+}
+
+/* line 338, ../../../private/common-html/sass/partials/_buttons.scss */
 a.link-btn-julkipano {
   color: #0fa8f7;
   background-color: none;
@@ -4673,7 +4846,7 @@ a.link-btn-julkipano:disabled, a.link-btn-julkipano.disabled, a.link-btn-julkipa
     transform: rotate(360deg);
   }
 }
-/* line 378, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 390, ../../../private/common-html/sass/partials/_buttons.scss */
 .spin {
   -webkit-animation: spin 4s linear infinite;
   -moz-animation: spin 4s linear infinite;
@@ -4681,141 +4854,141 @@ a.link-btn-julkipano:disabled, a.link-btn-julkipano.disabled, a.link-btn-julkipa
   vertical-align: middle;
 }
 
-/* line 383, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 395, ../../../private/common-html/sass/partials/_buttons.scss */
 i.wait {
   display: none;
   padding: 0 !important;
 }
 
-/* line 389, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 401, ../../../private/common-html/sass/partials/_buttons.scss */
 .waiting i {
   display: none;
 }
-/* line 392, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 404, ../../../private/common-html/sass/partials/_buttons.scss */
 .waiting i.wait {
   display: table-cell;
 }
 
-/* line 397, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 409, ../../../private/common-html/sass/partials/_buttons.scss */
 .waiting .wait + span {
   padding-left: 10px;
 }
 
-/* line 401, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 413, ../../../private/common-html/sass/partials/_buttons.scss */
 span + .waiting.wait {
   padding-right: 10px;
 }
 
-/* line 408, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 420, ../../../private/common-html/sass/partials/_buttons.scss */
 i.toggle {
   display: none;
   padding: 0 !important;
 }
 
-/* line 417, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 429, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled > i, .toggled > button > i {
   display: none;
 }
 
-/* line 421, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 433, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled i.toggle {
   display: table-cell;
 }
 
-/* line 425, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 437, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled .toggle + span {
   padding-left: 10px;
 }
 
-/* line 438, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 450, ../../../private/common-html/sass/partials/_buttons.scss */
 .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 458, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 470, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked {
   display: table;
 }
-/* line 448, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 460, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked .btn-base, .stacked [type=submit], .stacked .btn, .stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked .paginate_disabled_previous, .stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked .paginate_disabled_next, .stacked button, .stacked .like-btn, .stacked a.link-btn, .stacked a.link-btn-julkipano, .stacked .check-string, .stacked .btn, .stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked .paginate_disabled_previous, .stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked .paginate_disabled_next, .stacked button {
   width: 100%;
   display: block;
   margin: 0;
 }
-/* line 453, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 465, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked div {
   overflow-y: hidden;
 }
 
-/* line 462, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 474, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline {
   display: table;
   display: inline-table;
   vertical-align: top;
 }
-/* line 448, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 460, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline .btn-base, .stacked--inline [type=submit], .stacked--inline .btn, .stacked--inline .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked--inline .paginate_disabled_previous, .stacked--inline .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked--inline .paginate_disabled_next, .stacked--inline button, .stacked--inline .like-btn, .stacked--inline a.link-btn, .stacked--inline a.link-btn-julkipano, .stacked--inline .check-string, .stacked--inline .btn, .stacked--inline .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked--inline .paginate_disabled_previous, .stacked--inline .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked--inline .paginate_disabled_next, .stacked--inline button {
   width: 100%;
   display: block;
   margin: 0;
 }
-/* line 453, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 465, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline div {
   overflow-y: hidden;
 }
 
-/* line 470, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 482, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins .btn-base, .inner-margins [type=submit], .inner-margins .btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins .like-btn, .inner-margins a.link-btn, .inner-margins a.link-btn-julkipano, .inner-margins .check-string, .inner-margins .btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins div, .inner-margins a {
   margin-left: 12px;
 }
-/* line 473, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 485, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins :first-child {
   margin-left: 0;
 }
 
-/* line 479, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 491, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked .btn-base, .inner-margins.stacked [type=submit], .inner-margins.stacked .btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked .like-btn, .inner-margins.stacked a.link-btn, .inner-margins.stacked a.link-btn-julkipano, .inner-margins.stacked .check-string, .inner-margins.stacked .btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked div, .inner-margins.stacked a {
   margin-left: 0;
   margin-top: 12px;
 }
-/* line 483, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 495, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked :first-child {
   margin-top: 0;
 }
 
-/* line 489, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 501, ../../../private/common-html/sass/partials/_buttons.scss */
 .margins-s {
   margin: 6px 6px 6px 6px;
 }
 
-/* line 495, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 507, ../../../private/common-html/sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 499, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 511, ../../../private/common-html/sass/partials/_buttons.scss */
 #partiesDocgen button {
   margin-bottom: 6px;
 }
 
-/* line 503, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 515, ../../../private/common-html/sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
 }
 
-/* line 509, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 521, ../../../private/common-html/sass/partials/_buttons.scss */
 button:focus {
   outline: 0;
 }
 
-/* line 514, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button {
   position: relative;
 }
-/* line 516, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 528, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
@@ -4825,30 +4998,30 @@ button:focus {
   overflow: hidden;
   z-index: 1;
 }
-/* line 524, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 536, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 527, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 539, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
 }
-/* line 530, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 542, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
-/* line 538, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 550, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 540, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 552, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
 
-/* line 545, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 557, ../../../private/common-html/sass/partials/_buttons.scss */
 .left-buttons > button {
   margin-right: 12px;
 }
@@ -7070,9 +7243,9 @@ input[type=checkbox]:disabled + .checkbox-label:before {
 }
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100.0%;
-  min-width: 100.0%;
-  max-width: 100.0%;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
@@ -9769,12 +9942,26 @@ ul.tabs {
 }
 
 /* line 23, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle.tight {
+  margin-left: 0;
+}
+/* line 25, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle.tight button.function {
+  border: none;
+  padding: 0 0 0 0;
+}
+/* line 29, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle.tight button.function:active span, .help-toggle.tight button.function:hover span {
+  text-decoration: underline;
+}
+
+/* line 36, ../../../private/common-html/sass/partials/_help.scss */
 .stacked.help-toggle,
 .stacked.help-toggle div {
   overflow-y: visible;
 }
 
-/* line 29, ../../../private/common-html/sass/partials/_help.scss */
+/* line 44, ../../../private/common-html/sass/partials/_help.scss */
 .help-text {
   display: none;
   position: relative;
@@ -9784,29 +9971,29 @@ ul.tabs {
   margin-bottom: 24px;
   border: 1px solid #f7ac2e;
 }
-/* line 38, ../../../private/common-html/sass/partials/_help.scss */
+/* line 53, ../../../private/common-html/sass/partials/_help.scss */
 .help-text p:last-child {
   margin-bottom: 0;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_help.scss */
+/* line 59, ../../../private/common-html/sass/partials/_help.scss */
 .tab-info {
   width: 80%;
 }
 
-/* line 51, ../../../private/common-html/sass/partials/_help.scss */
+/* line 66, ../../../private/common-html/sass/partials/_help.scss */
 .help-reset {
   clear: both;
   max-height: 6px;
 }
 
-/* line 56, ../../../private/common-html/sass/partials/_help.scss */
+/* line 71, ../../../private/common-html/sass/partials/_help.scss */
 .panel-info {
   width: 100%;
   text-align: justify;
 }
 
-/* line 61, ../../../private/common-html/sass/partials/_help.scss */
+/* line 76, ../../../private/common-html/sass/partials/_help.scss */
 .expanded-content {
   max-height: 0;
   overflow: hidden;
@@ -9814,17 +10001,17 @@ ul.tabs {
   -webkit-transition: max-height 400ms;
   /* Safari */
 }
-/* line 66, ../../../private/common-html/sass/partials/_help.scss */
+/* line 81, ../../../private/common-html/sass/partials/_help.scss */
 .expanded-content.expand {
   max-height: 1000px;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_help.scss */
+/* line 86, ../../../private/common-html/sass/partials/_help.scss */
 .page-info {
   margin: 12px 0;
 }
 
-/* line 76, ../../../private/common-html/sass/partials/_help.scss */
+/* line 91, ../../../private/common-html/sass/partials/_help.scss */
 .help-adjacent-title {
   margin-top: 0 !important;
   line-height: normal;
@@ -10303,6 +10490,16 @@ ul.no-bullets {
   border-right: none;
 }
 
+/* line 138, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion button.accordion-toggle {
+  background: #999999;
+}
+
+/* line 145, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion.all-ok button.accordion-toggle {
+  background: #04c714;
+}
+
 /* line 1, ../../../private/common-html/sass/partials/_datepicker.scss */
 #ui-datepicker-div {
   background: #f6f6f6;
@@ -10760,726 +10957,4 @@ ul.no-bullets {
 .archival-summary-table .attachment-row .additional-controls:before, .archival-summary-table .attachment-row .additional-controls:after {
   content: " ";
   display: table;
-}
-/* line 24, ../../../private/common-html/sass/main.scss */
-.archival-summary-table .attachment-row .additional-controls:after {
-  clear: both;
-}
-/* line 74, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .left {
-  padding: 6px 16px 15px 16px;
-  width: 50%;
-}
-/* line 78, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .additional-data-container {
-  background-color: #f5f5f4;
-  border: 1px solid #4f4f4f;
-}
-/* line 79, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .additional-data-container:first-child {
-  margin-bottom: 15px;
-}
-/* line 84, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .additional-data-container .header {
-  margin: 0 0 15px 0;
-  font-size: 16px;
-  color: white;
-  background-color: #4f4f4f;
-  padding: 10px 15px;
-}
-/* line 91, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .additional-data-container .contents {
-  padding: 0 15px 15px 15px;
-}
-/* line 94, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .additional-data-container .preview-image {
-  text-align: center;
-}
-/* line 96, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .additional-data-container .preview-image img {
-  border: 1px solid #4f4f4f;
-  max-width: 100%;
-}
-/* line 101, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .additional-data-container .attachment-type-select {
-  margin: 0;
-  width: 100%;
-}
-/* line 106, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .metadata-editor-container {
-  margin: 0;
-  border: 1px solid #4f4f4f;
-}
-/* line 109, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .metadata-editor-container .editor-header {
-  min-height: 0;
-  padding: 10px 15px;
-  font-size: 16px;
-}
-/* line 113, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls .metadata-editor-container .editor-header i {
-  font-size: 18px;
-}
-/* line 120, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .archival-status {
-  float: left;
-  width: 28px;
-  padding: 6px 0 0 6px;
-  text-align: center;
-}
-/* line 125, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .archival-status input {
-  margin: 0;
-}
-/* line 129, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .archival-status-header {
-  float: left;
-  width: 28px;
-  padding-left: 6px;
-  text-align: center;
-}
-/* line 135, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-type {
-  margin-right: 545px;
-  padding: 0 6px;
-}
-/* line 139, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .small-columns {
-  width: 545px;
-  float: right;
-}
-/* line 142, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .small-columns div {
-  display: inline-block;
-  padding: 0 6px;
-}
-/* line 147, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .retention-period {
-  width: 160px;
-}
-/* line 150, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .personal-data {
-  width: 170px;
-}
-/* line 153, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .will-publish {
-  width: 111px;
-  text-align: right;
-}
-/* line 157, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .stamped {
-  width: 92px;
-  text-align: center;
-}
-/* line 161, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-group-header {
-  margin: 25px 0 15px;
-  height: auto;
-}
-/* line 166, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .metadata-editor-container .editor-header {
-  border-collapse: separate;
-}
-
-/* line 172, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.tos-function-correction {
-  margin-top: 3em;
-}
-/* line 174, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.tos-function-correction p {
-  margin-bottom: 0.5em;
-}
-/* line 177, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.tos-function-correction .form-part {
-  display: inline-block;
-  vertical-align: bottom;
-  line-height: normal;
-}
-/* line 182, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.tos-function-correction select, .tos-function-correction input {
-  width: 350px;
-  min-height: 40px;
-  box-sizing: border-box;
-  display: inline-block;
-  margin: 0;
-}
-
-/* line 191, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.mark-as-archived {
-  margin-top: 3em;
-}
-/* line 193, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.mark-as-archived p {
-  margin-bottom: 0.5em;
-}
-
-/* line 1, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-top {
-  background-color: #eeeeee;
-  border-bottom: 2px solid #dddddd;
-}
-/* line 4, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-top .container {
-  margin-bottom: 0;
-}
-/* line 7, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-top .button-group {
-  float: right;
-  margin-bottom: 20px;
-}
-/* line 9, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-top .button-group button {
-  margin-left: 20px;
-}
-/* line 14, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-top h1 {
-  display: inline-block;
-}
-
-/* line 19, ../../../private/common-html/sass/partials/_applications_search.scss */
-#invitations {
-  background-color: #eeeeee;
-  margin-bottom: -24px;
-}
-/* line 22, ../../../private/common-html/sass/partials/_applications_search.scss */
-#invitations .container {
-  margin-bottom: 0;
-}
-
-/* line 27, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-component {
-  clear: both;
-}
-
-/* line 32, ../../../private/common-html/sass/partials/_applications_search.scss */
-.search-tabs ul {
-  display: inline-block;
-  list-style: none;
-  padding: 0;
-  margin-right: 6px;
-  line-height: 40px;
-  vertical-align: middle;
-}
-/* line 40, ../../../private/common-html/sass/partials/_applications_search.scss */
-.search-tabs li {
-  background-color: #f6f6f6;
-  color: #333;
-  cursor: pointer;
-  margin-right: 6px;
-  display: inline-block;
-  padding: 0 24px;
-}
-/* line 47, ../../../private/common-html/sass/partials/_applications_search.scss */
-.search-tabs li.selected {
-  background-color: #dddddd;
-}
-/* line 52, ../../../private/common-html/sass/partials/_applications_search.scss */
-.search-tabs input {
-  display: inline-block;
-  margin: 0;
-}
-/* line 56, ../../../private/common-html/sass/partials/_applications_search.scss */
-.search-tabs button {
-  margin: 0 6px;
-  width: initial;
-  padding: 0 24px;
-}
-/* line 60, ../../../private/common-html/sass/partials/_applications_search.scss */
-.search-tabs button .icon {
-  position: relative;
-  top: 2px;
-  margin-right: 12px;
-}
-
-/* line 68, ../../../private/common-html/sass/partials/_applications_search.scss */
-.paging {
-  color: #333333;
-}
-/* line 70, ../../../private/common-html/sass/partials/_applications_search.scss */
-.paging label {
-  color: #333333;
-  margin-bottom: 6px;
-  display: inline-block;
-}
-/* line 75, ../../../private/common-html/sass/partials/_applications_search.scss */
-.paging button {
-  margin-right: 20px;
-}
-
-/* line 80, ../../../private/common-html/sass/partials/_applications_search.scss */
-div.search {
-  position: relative;
-}
-/* line 82, ../../../private/common-html/sass/partials/_applications_search.scss */
-div.search input {
-  padding-right: 40px !important;
-}
-/* line 87, ../../../private/common-html/sass/partials/_applications_search.scss */
-div.search.active i {
-  color: #fbc732;
-}
-/* line 91, ../../../private/common-html/sass/partials/_applications_search.scss */
-div.search i {
-  color: #f39129;
-  position: absolute;
-  top: 8px;
-  right: 8px;
-}
-
-/* line 101, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-filters-list .applications-search-filters-list__filters {
-  display: table;
-}
-/* line 105, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-filters-list .applications-search-filters-list__filter-row {
-  display: table-row;
-}
-/* line 109, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-filters-list .applications-search-filters-list__filter-item {
-  background-color: #fff;
-  display: table-cell;
-  vertical-align: top;
-  height: 40px;
-}
-/* line 114, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-filters-list .applications-search-filters-list__filter-item:first-child {
-  width: 100%;
-}
-/* line 117, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-filters-list .applications-search-filters-list__filter-item button {
-  width: 100%;
-}
-/* line 121, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-filters-list .applications-search-filters-list__filter-item--default-filter {
-  min-width: 250px;
-  max-width: 250px;
-  width: 250px;
-  overflow: hidden;
-}
-/* line 127, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-filters-list .applications-search-filters-list__filter-item--remove {
-  min-width: 105px;
-  max-width: 105px;
-  width: 105px;
-}
-
-/* line 134, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-results__indicator {
-  color: #f39129;
-  padding: 3px 0 0 0 !important;
-  word-wrap: break-word;
-}
-/* line 138, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-results__indicator div {
-  text-align: center;
-  height: auto !important;
-  padding: 0 6px !important;
-  white-space: nowrap;
-}
-/* line 143, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-results__indicator div i {
-  display: table-cell;
-}
-/* line 146, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-results__indicator div span {
-  padding-left: 2px;
-  display: table-cell;
-  vertical-align: middle;
-  color: #595959;
-}
-/* line 154, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-results__indicator .application-search-results__urgency.urgent {
-  color: #df3215;
-}
-/* line 157, ../../../private/common-html/sass/partials/_applications_search.scss */
-.applications-search-results__indicator .application-search-results__urgency.pending {
-  color: #f39129;
-}
-
-/* line 164, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-search-result__table th, .application-foreman-search-result__table th {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  white-space: nowrap;
-  padding-right: 16px;
-}
-/* line 168, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-search-result__table th span, .application-search-result__table th i, .application-foreman-search-result__table th span, .application-foreman-search-result__table th i {
-  vertical-align: middle;
-}
-/* line 171, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-search-result__table th i, .application-foreman-search-result__table th i {
-  position: absolute;
-}
-
-/* line 191, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-search-result__table th.fifth {
-  width: 10%;
-}
-/* line 194, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-search-result__table th.sixth {
-  width: 5%;
-}
-/* line 197, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-search-result__table th.seventh {
-  width: 5%;
-}
-/* line 200, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-search-result__table th.eight {
-  width: 10%;
-}
-/* line 203, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-search-result__table th.ninth {
-  width: 10%;
-}
-
-/* line 213, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-foreman-search-result__table th.second {
-  width: 15%;
-}
-/* line 216, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-foreman-search-result__table th.third {
-  width: 5%;
-}
-/* line 219, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-foreman-search-result__table th.fourth {
-  width: 20%;
-}
-/* line 222, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-foreman-search-result__table th.fifth {
-  width: 15%;
-}
-/* line 225, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-foreman-search-result__table th.sixth {
-  width: 15%;
-}
-/* line 228, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-foreman-search-result__table th.seventh {
-  width: 5%;
-}
-/* line 231, ../../../private/common-html/sass/partials/_applications_search.scss */
-.application-foreman-search-result__table th.eight {
-  width: 15%;
-}
-
-/* line 2, ../../../private/common-html/sass/partials/_indicator.scss */
-#indicator .indicator-bar {
-  display: none;
-  position: fixed;
-  height: 50px;
-  width: 100%;
-  z-index: 2001;
-  color: #fff;
-  font-size: 18px;
-  box-sizing: border-box;
-}
-/* line 13, ../../../private/common-html/sass/partials/_indicator.scss */
-#indicator .indicator-box {
-  max-width: 1280px;
-  min-width: 640px;
-  margin: 0 auto;
-  padding-left: 6px;
-  padding-top: 12px;
-}
-/* line 21, ../../../private/common-html/sass/partials/_indicator.scss */
-#indicator .indicator-bar.positive {
-  background-color: #2ca92c;
-}
-/* line 25, ../../../private/common-html/sass/partials/_indicator.scss */
-#indicator .indicator-bar.negative {
-  background-color: #df3215;
-}
-/* line 29, ../../../private/common-html/sass/partials/_indicator.scss */
-#indicator .indicator-info {
-  float: left;
-  margin-right: 24px;
-}
-/* line 34, ../../../private/common-html/sass/partials/_indicator.scss */
-#indicator .indicator-message {
-  float: left;
-}
-/* line 38, ../../../private/common-html/sass/partials/_indicator.scss */
-#indicator .indicator-close {
-  float: right;
-}
-
-/* line 44, ../../../private/common-html/sass/partials/_indicator.scss */
-.admin #indicator .indicator-bar, .authority-admin #indicator .indicator-bar {
-  z-index: 2003;
-  margin-top: -38px;
-  height: 52px;
-}
-
-/* line 2, ../../../private/common-html/sass/partials/_indicator-icon.scss */
-#indicator-icon .indicator-icon {
-  display: none;
-  position: fixed;
-  bottom: 70px;
-  right: 70px;
-  height: 48px;
-  min-width: 48px;
-  border-radius: 24px;
-  z-index: 2002;
-  color: #fff;
-  font-size: 18px;
-  box-sizing: border-box;
-}
-/* line 16, ../../../private/common-html/sass/partials/_indicator-icon.scss */
-#indicator-icon .indicator-box {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 12px;
-}
-/* line 22, ../../../private/common-html/sass/partials/_indicator-icon.scss */
-#indicator-icon .indicator-icon.positive {
-  background-color: #2ca92c;
-}
-/* line 26, ../../../private/common-html/sass/partials/_indicator-icon.scss */
-#indicator-icon .indicator-icon.negative {
-  background-color: #df3215;
-}
-/* line 31, ../../../private/common-html/sass/partials/_indicator-icon.scss */
-#indicator-icon .indicator-info {
-  float: left;
-  margin-right: 24px;
-}
-/* line 36, ../../../private/common-html/sass/partials/_indicator-icon.scss */
-#indicator-icon .indicator-message {
-  float: left;
-}
-
-/* line 6, ../../../private/common-html/sass/partials/__guests.scss */
-.auth-table tr {
-  background-color: initial;
-}
-/* line 8, ../../../private/common-html/sass/partials/__guests.scss */
-.auth-table tr:active {
-  background-color: initial;
-}
-
-/* line 14, ../../../private/common-html/sass/partials/__guests.scss */
-.application-guests {
-  margin-bottom: 20px;
-}
-
-/* line 19, ../../../private/common-html/sass/partials/__guests.scss */
-.spin-container {
-  display: inline-block;
-  margin-top: 4px;
-  width: initial;
-  vertical-align: top;
-}
-/* line 24, ../../../private/common-html/sass/partials/__guests.scss */
-.spin-container i.spin {
-  display: table-cell;
-}
-
-/* line 2, ../../../private/common-html/sass/partials/_case-file.scss */
-.case-file-table .event-title {
-  font-weight: bold;
-}
-
-/* VIEWS
-------------------------------------------------------------------------------*/
-@media (max-width: 47.5em) {
-  /* line 1, ../../../private/common-html/sass/views/_welcome.scss */
-  body.welcome {
-    width: 41.25em;
-  }
-}
-@media (max-width: 41.25em) {
-  /* line 1, ../../../private/common-html/sass/views/_welcome.scss */
-  body.welcome {
-    width: 35em;
-  }
-}
-@media (max-width: 35em) {
-  /* line 1, ../../../private/common-html/sass/views/_welcome.scss */
-  body.welcome {
-    width: 100%;
-  }
-}
-
-/* line 13, ../../../private/common-html/sass/views/_welcome.scss */
-.welcome-register-section {
-  margin-top: 24px;
-}
-
-/* line 1, ../../../private/common-html/sass/views/_applications.scss */
-.application-row {
-  cursor: pointer;
-}
-
-/* line 5, ../../../private/common-html/sass/views/_applications.scss */
-.inforequest-row {
-  cursor: pointer;
-}
-
-/* line 19, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state {
-  margin-top: 24px;
-  margin-right: 72px;
-  width: 100%;
-}
-/* line 23, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .app-type-box, .applications-empty-state .app-type-button {
-  display: inline-block;
-  box-sizing: border-box;
-  width: 32%;
-  margin-left: auto;
-  margin-right: auto;
-  vertical-align: top;
-  position: relative;
-  padding-bottom: 48px;
-}
-/* line 35, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .app-type-button {
-  margin-top: 0;
-  padding-bottom: 0;
-}
-/* line 40, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-wrapper {
-  width: 100%;
-}
-/* line 43, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-inforequest-box {
-  padding-left: 0;
-  padding-right: 24px;
-  min-height: 250px;
-}
-/* line 46, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-application-box {
-  padding-left: 24px;
-  padding-right: 24px;
-  min-height: 250px;
-  border-left: 1px dotted #888a8c;
-  border-right: 1px dotted #888a8c;
-}
-/* line 51, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-prev-permit-box {
-  padding-left: 24px;
-  padding-right: 0;
-  min-height: 250px;
-}
-
-/* line 57, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state.wide .app-type-box, .applications-empty-state.wide .app-type-button {
-  width: 45%;
-}
-/* line 60, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state.wide .missing-application-box {
-  border-right: none;
-}
-/* line 63, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state.wide .missing-prev-permit-box {
-  display: none;
-}
-
-/* line 68, ../../../private/common-html/sass/views/_applications.scss */
-.missing-inforequest-box.app-type-button,
-.missing-application-box.app-type-button,
-.missing-prev-permit-box.app-type-button {
-  min-height: 0;
-}
-
-/* line 76, ../../../private/common-html/sass/views/_applications.scss */
-#applications-list_paginate, .dataTables_paginate {
-  display: inline-block;
-  width: 16.25em;
-  float: left;
-  /* a { */
-  /*   border: 1px solid darken($lp-light-grey, 10%); */
-  /*   padding: $marginS; */
-  /*   cursor: pointer; */
-  /* } */
-  /* .paginate_disabled_previous, .paginate_disabled_next { */
-  /*   background: $lp-light-grey; */
-  /*   color: lighten($color-text, 30%); */
-  /* } */
-  /* .paginate_enabled_previous, .paginate_enabled_next { */
-  /*   background: #ffffff; /\* Old browsers *\/ */
-  /*   @include background( linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%)); */
-  /* } */
-}
-/* line 93, ../../../private/common-html/sass/views/_applications.scss */
-#applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
-  margin-right: 12px;
-}
-
-/* line 98, ../../../private/common-html/sass/views/_applications.scss */
-#applications-list_length {
-  width: 16.25em;
-  position: absolute;
-  left: 16.25em;
-  bottom: -27px;
-}
-/* line 103, ../../../private/common-html/sass/views/_applications.scss */
-#applications-list_length select {
-  width: 5.625em;
-  margin-right: 6px;
-}
-
-/* line 109, ../../../private/common-html/sass/views/_applications.scss */
-.sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
-  cursor: pointer;
-  position: relative;
-}
-
-/* line 113, ../../../private/common-html/sass/views/_applications.scss */
-.sorting_asc:after, .sorting.asc:after {
-  content: "";
-  display: block;
-  position: absolute;
-  background-image: url("/lp-static/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0px -3393px;
-  height: 22px;
-  width: 10px;
-  top: 7px;
-  right: 2px;
-}
-
-/* line 124, ../../../private/common-html/sass/views/_applications.scss */
-.sorting_desc:after, .sorting.desc:after {
-  content: "";
-  display: block;
-  position: absolute;
-  background-image: url("/lp-static/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-  background-position: 0px -3293px;
-  height: 22px;
-  width: 10px;
-  top: 7px;
-  right: 2px;
-}
-
-/* line 136, ../../../private/common-html/sass/views/_applications.scss */
-.dataTables_info {
-  width: 16.25em;
-  display: inline-block;
-  position: absolute;
-  left: 0;
-  bottom: 12px;
-}
-
-/* line 144, ../../../private/common-html/sass/views/_applications.scss */
-.invitations {
-  margin-bottom: 24px;
-}
-/* line 146, ../../../private/common-html/sass/views/_applications.scss */
-.invitations .invitation {
-  display: table-row;
-}
-/* line 148, ../../../private/common-html/sass/views/_applications.scss */
-.invitations .invitation span {
-  margin-right: 12px;
-}
-/* line 151, ../../../private/common-html/sass/views/_applications.scss */
-.invitations .invitation div {
-  padding-right: 24px;
-  display: table-cell;
 }

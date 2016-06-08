@@ -355,6 +355,13 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
+                            <li data-bind="feature: 'attachments-poc',
+                                           css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
+                                <a data-bind="click: changeTab" href="#" data-target="attachmentsPOC" data-test-id="application-open-attachmentsPOC-tab" class="link-btn">
+                                    <span>Suunnitelmat ja liitteet POC</span>
+                                    <span data-bind="if: attachmentsRequiringAction">
+                                        <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
+
                             <li data-bind="if: _.includes(['draft', 'open', 'submitted', 'complementNeeded'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
@@ -570,7 +577,7 @@
                             <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
                         </div>
 
-                        <!-- ko if: showPostAtachmentsActions -->
+                        <!-- ko if: showPostAttachmentsActions -->
                         <div data-bind="template: {name: 'attachment-actions-template',
                                         data: {appModel: $data.appModel,
                                         attachmentsOperation: $data.attachmentsOperation,
@@ -615,6 +622,14 @@
                                 <span data-bind="ltext: 'application.previous-tab'"></span>
                             </a>
                         </div>
+                    </div>
+                    <!-- /ko -->
+
+                    <!-- AttachmentsPOC tab -->
+                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
+                    <div id="application-attachmentsPOC-tab" class="tab-content"
+                         data-bind="feature: 'attachments-poc'">                     
+                      <attachments-listing/>
                     </div>
                     <!-- /ko -->
 

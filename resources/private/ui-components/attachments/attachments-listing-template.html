@@ -1,0 +1,93 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-listing-template">
+  
+  <h1>Suunnitelmat ja liitteet POC</h1>
+  <span data-bind="component: {
+                   name: 'help-toggle',
+                   params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
+                   }"></span>
+  <div class="clear"></div>
+
+  <div class="inner-margins">
+    <button class="positive caps">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'application.attachmentsAdd'"></span>
+    </button>
+    <button class="positive caps">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
+    </button>
+  </div>
+
+  <div class="attachment-operations">
+    <button class="function">
+      <i class="lupicon-circle-stamp"></i>
+      <span data-bind="ltext: 'application.stampAttachments'"></span>
+    </button>
+    <button class="function">
+      <i class="lupicon-circle-pen"></i>
+      <span data-bind="ltext: 'signAttachment.select'"></span>
+    </button>
+    <button class="function">
+      <i class="lupicon-circle-arrow-up"></i>
+      <span data-bind="ltext: 'task.send'"></span>
+    </button>
+    <button class="function">
+      <i class="lupicon-circle-section-sign"></i>
+      <span data-bind="ltext: 'application.markVerdictAttachments'"></span>
+    </button>
+    <button class="function">
+      <i class="lupicon-envelope"></i>
+      <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
+    </button>
+  </div>
+
+  <help-toggle params="html: legendHtml,
+                       lbutton: 'attachment.legend.help'"></help-toggle>
+  
+  <div>
+    <h2 data-bind="ltext: 'application.attachments.pre-verdict'"/>
+    <div
+       data-bind="template: {name: 'attachments-listing-accordion-template',
+                             data: groups.preVerdict.yleiset}"></div>
+    <!-- ko if: groups.preVerdict.erityissuunnitelmat.data().hasAttachments -->
+    <rollup params="{open: getAccordionToggle('preVerdict', 'erityissuunnitelmat')}">
+      <rollup-status-button params="{open: open,
+                                     style: 'secondary',
+                                     status: $parent.groups.preVerdict.erityissuunnitelmat.data().status,
+                                     text: 'erityissuunnitelmat'}">
+      </rollup-status-button>
+      <div class="rollup__open">
+        <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                                   data: $parent.groups.preVerdict.erityissuunnitelmat['kvv_suunnitelma']}"></div>
+        <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                                   data: $parent.groups.preVerdict.erityissuunnitelmat.rakennesuunnitelma}"></div>
+      </div>
+    </rollup>
+    <!-- /ko -->
+  </div>  
+  <rollup params="{open: rollupToggle}">
+    <rollup-status-button params="open: $parent.rollupToggle,
+diff                                  style: 'tertiary',
+                                  status: $parent.rollupStatus,
+                                  text: 'Button with approval status'">
+      <span data-bind="text: 'Hello world!'"></span>
+    </rollup-status-button>
+    <div class="rollup__open" style="padding-left: 5em">
+      Body is now visible!
+      <rollup params="open: $parent.innerToggle">
+        <rollup-button params="open: $parents[1].innerToggle, 
+                               text: 'Inner rollup',
+                               css: {authority: 1}"></rollup-button>
+        <div class="rollup__open">Inner body is now visible!</div>
+      </rollup>
+      <rollup params="open: $parent.linkToggle">
+        No rollup button, just a <a data-bind="toggleClick: $parents[1].linkToggle">link</a>
+        <p class="rollup__open">
+          Paragraph is visible. You can <a data-bind="toggleClick: $parents[1].linkToggle">hide</a> it.
+        </p>
+        
+      </rollup>
+    </div>
+  </rollup>
+</script>

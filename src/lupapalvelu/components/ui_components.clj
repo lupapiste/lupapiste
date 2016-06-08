@@ -188,7 +188,8 @@
                    "verdict-appeal-service.js"
                    "scroll-service.js"
                    "ram-service.js"
-                   "calendar-service.js"]}
+                   "calendar-service.js"
+                   "attachments-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

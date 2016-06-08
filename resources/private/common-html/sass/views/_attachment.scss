@@ -311,3 +311,11 @@ td.comment-text {
   bottom: 10px;
 }
 }
+
+.attachment-operations {
+  @include button-row;
+  margin: {
+    top: 1em;
+    bottom: 2em;
+  }
+}
