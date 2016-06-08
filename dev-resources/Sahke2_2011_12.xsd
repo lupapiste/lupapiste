@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:narc="http://www.arkisto.fi/skeemat/Sahke2/2011/12/20" targetNamespace="http://www.arkisto.fi/skeemat/Sahke2/2011/12/20" elementFormDefault="qualified">
+
+	<!-- ================================================= -->
+	<!-- SÄHKE2 siirtokokonaisuuden metatiedot                                        -->
+	<!-- ================================================= -->
+	<!-- release notes																				-->
+	<!-- 20.12.2011 																	    			-->
+	<!-- * muutettu ElectronicNotificationType:ssä NotificationPeriod, Delivered, DeliveryDate, ArrivalDate vapaaehtoiseksi 	-->
+	<!-- * lisätty RecordType:een Agent-elementti vapaaehtoisena				-->
+	<!-- * muutettu record tasolla vapaaehtoisuus document-elementille      -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Metadata                                                                                      -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Metadata" type="narc:MetadataType">
+		<xs:annotation>
+			<xs:documentation/>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="MetadataType">
+		<xs:sequence>
+			<xs:element ref="narc:TransferInformation"/>
+			<xs:element ref="narc:ContactInformation"/>
+			<xs:element ref="narc:CaseFile" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Säilytettävän kohteen metatiedot                                                    -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Subject" type="narc:SubjectType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.1 Aihe (Subject)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="SubjectType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="scheme" type="xs:string" use="optional">
+					<xs:annotation>
+						<xs:documentation>SÄHKE2 Metatietomalli: 2.1 Aihe (Subject), merkintäjärjestelmä-tarkenne (Subject.Scheme)</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="Created" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.2.1 Avattu/laadittu (Date.Created)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Issued" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.2.2 Julkistettu (Date.Issued)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Sent" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.2.3 Lähetetty (Date.Sent)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Modified" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.2.4 Muokattu (Date.Modified)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Available" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.2.5 Saatavilla (Date.Available)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Acquired" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.2.6 Vastaanotettu (Date.Acquired)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="NativeId" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.3 Identifiointitunnus (Identifier.NativeId)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="OtherId" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.3.1 Muu tunnus (Identifier.Other)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Language" type="narc:LanguageType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.4 Kieli (Language)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:simpleType name="LanguageType">
+		<xs:restriction base="xs:string">
+			<xs:length value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Description" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.5 Kuvaus (Description)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Abstract" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.5.1 Tiivistelmä (Abstract)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Restriction" type="narc:RestrictionType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6 Käyttörajoitus</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="RestrictionType">
+		<xs:sequence>
+			<xs:element ref="narc:PublicityClass"/>
+			<xs:element ref="narc:SecurityPeriod" minOccurs="0"/>
+			<xs:element ref="narc:SecurityPeriodEnd" minOccurs="0"/>
+			<xs:element ref="narc:SecurityReason" minOccurs="0"/>
+			<xs:element ref="narc:ProtectionLevel" minOccurs="0"/>
+			<xs:element ref="narc:SecurityClass" minOccurs="0"/>
+			<xs:element ref="narc:PersonalData"/>
+			<xs:element ref="narc:Person" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Owner" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:AccessRight" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="PublicityClass" type="narc:PublicityClassType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.1 Julkisuusluokka (Restriction.PublicityClass)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:simpleType name="PublicityClassType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Julkinen"/>
+			<xs:enumeration value="Osittain salassapidettävä"/>
+			<xs:enumeration value="Salassa pidettävä"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="SecurityPeriod" type="xs:integer">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.2 Salassapitoaika (Restriction.SecurityPeriod)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="SecurityPeriodEnd" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.3 Salassapidon päättymisajankohta (Restriction.SecurityPeriodEnd)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="SecurityReason" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.4 Salassapitoperuste (Restriction.SecurityReason)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="ProtectionLevel" type="narc:ProtectionLevelType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.5 Suojaustaso (Restriction.ProtectionLevel)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:simpleType name="ProtectionLevelType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="I"/>
+			<xs:enumeration value="II"/>
+			<xs:enumeration value="III"/>
+			<xs:enumeration value="IV"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="SecurityClass" type="narc:SecurityClassType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.6 Turvallisuusluokka (Restriction.SecurityClass)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:simpleType name="SecurityClassType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Turvallisuusluokka I"/>
+			<xs:enumeration value="Turvallisuusluokka II"/>
+			<xs:enumeration value="Turvallisuusluokka III"/>
+			<xs:enumeration value="Turvallisuusluokka IV"/>
+			<xs:enumeration value="Ei turvallisuusluokiteltu"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="PersonalData" type="narc:PersonalDataType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.7 Henkilötietoja (Restriction.PersonalData)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:simpleType name="PersonalDataType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ei sisällä henkilötietoja"/>
+			<xs:enumeration value="sisältää henkilötietoja"/>
+			<xs:enumeration value="sisältää arkaluontoisia henkilötietoja"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Person" type="narc:PersonType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.8 Henkilö</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="PersonType">
+		<xs:sequence>
+			<xs:element ref="narc:Name" minOccurs="0"/>
+			<xs:element ref="narc:Ssn" minOccurs="0"/>
+			<xs:element ref="narc:ElectronicId" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Name" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.8.1 Nimi (Restriction.Person.PersonalName)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Ssn" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.8.2 Henkilötunnus (Restriction.Person.Ssn)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="ElectronicId" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.8.3 Sähköinen asiointitunnus (Restriction.Person.ElectronicId)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Owner" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.9 Omistaja (Restriction.Owner)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AccessRight" type="narc:AccessRightType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.10 Käyttäjäryhmä</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="AccessRightType">
+		<xs:sequence>
+			<xs:element ref="narc:Name">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 2.6.10.1 Henkilö (Restriction.AccessRight.Name)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Role"/>
+			<xs:element ref="narc:AccessRightDescription" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Role" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.10.2 Rooli (Restriction.AccessRight.Role)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AccessRightDescription" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.6.10.3 Kuvaus (Restriction.AccessRight.Description)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:simpleType name="AccessRightDescriptionType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="1"/>
+			<xs:enumeration value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="Title" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.7 Nimeke (Title)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Custom">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.8 Organisaatiokohtaiset metatiedot (Custom)</xs:documentation>
+			<xs:documentation>Custom metatieto on Moreq2:n mukainen: "Any additional metadata that isn't included elsewhere in this entity.  This section will allow the MoReq2 schema to be extended without making the resulting XML invalid against the MoReq2 Schema."</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:any processContents="skip" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="StorageLocation" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.9 Sijaintipaikka (StorageLocation)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="CaseFileRelation">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.10 Suhde</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="narc:Replaces" minOccurs="0"/>
+				<xs:element ref="narc:IsReplacedBy" minOccurs="0"/>
+				<xs:element ref="narc:References" minOccurs="0"/>
+				<xs:element ref="narc:IsReferencedBy" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Replaces" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.10.1 Korvaa/Korvattu (Relation.Replaces/Relation.IsReplacedBy)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="IsReplacedBy" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.10.1 Korvaa/Korvattu (Relation.Replaces/Relation.IsReplacedBy)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="References" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.10.1 2.10.2 Viittaa/On viitattu (Relation.References/Relation.IsReferencedBy)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="IsReferencedBy" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.10.1 2.10.2 Viittaa/On viitattu (Relation.References/Relation.IsReferencedBy)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="RetentionPeriod" type="xs:integer">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.11.1 Säilytysajan pituus (RetentionPeriod)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="RetentionReason" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.11.2 Säilytysajan peruste (RetentionReason)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="RetentionPeriodEnd" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.11.3 Säilytysajan päättymisajankohta (RetentionPeriodEnd)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Status" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.12 Tila (Status)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Function" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.13 Tehtävä (Function)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Agent" type="narc:AgentType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.14 Toimija</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="AgentType">
+		<xs:sequence>
+			<xs:element ref="narc:Role">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 2.14.1 Rooli (Agent.Role)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Name" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 2.14.2 Henkilö (Agent.PersonalName)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:CorporateName" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="CorporateName" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.14.3 Yhteisö (Agent.CorporateName)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Type" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 2.15 Tyyppi (Type)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Asiakirjallisen tiedon käsittelyn metatiedot (CaseFile)                       -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="CaseFile">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element ref="narc:Subject" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Created" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Issued" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Sent" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Modified" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Available" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Acquired" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:NativeId"/>
+			<xs:element ref="narc:OtherId" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Language" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Description" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Abstract" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Restriction"/>
+			<xs:element ref="narc:Title"/>
+			<xs:element ref="narc:CaseFileRelation" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:RetentionPeriod"/>
+			<xs:element ref="narc:RetentionReason"/>
+			<xs:element ref="narc:RetentionPeriodEnd" minOccurs="0"/>
+			<xs:element ref="narc:Status"/>
+			<xs:element ref="narc:ClassificationScheme"/>
+			<xs:element ref="narc:Function"/>
+			<xs:element ref="narc:Agent" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Type" minOccurs="0"/>
+			<xs:element ref="narc:Finished" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:ElectronicNotification" minOccurs="0"/>
+			<xs:element ref="narc:Action" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Custom" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	</xs:element>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Asiakirjallisen tiedon käsittelyn metatiedot - elementtimääritykset     -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Finished" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 3.1.1 Päättymispvm (Date.Finished)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="ElectronicNotification" type="narc:ElectronicNotificationType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 3.2 Sähköinen tiedoksianto</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="ElectronicNotificationType">
+		<xs:sequence>
+			<xs:element ref="narc:AcceptionDate"/>
+			<xs:element ref="narc:AcceptionDescription"/>
+			<xs:element ref="narc:NotificationPeriod" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Delivered" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:DeliveryDate" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:ArrivalDate" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="AcceptionDate" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 3.2.1 Suostumusajankohta (ElectronicNotification.AcceptionDate)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AcceptionDescription" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 3.2.2 Suostumuskuvaus (ElectronicNotification.AcceptionDescription)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="NotificationPeriod" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 3.2.3 Tiedoksiantoperiodi (ElectronicNotification.NotificationPeriod)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Delivered" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 3.2.4 Tiedoksiannon hakeminen (ElectronicNotification.Delivered)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DeliveryDate" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 3.2.5 Muun tiedoksiannon lähettämispvm (ElectronicNotification.DeliveryDate)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="ArrivalDate" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 3.2.6 Muun tiedoksiannon saapumispvm (ElectronicNotification.ArrivalDate)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Asiakirjan metatiedot (Record)                                                        -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Record" type="narc:RecordType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4 Asiakirjan metatiedot</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="RecordType">
+		<xs:sequence>
+			<xs:element ref="narc:Subject" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Created" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Issued" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Sent" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Modified" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Available" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Acquired" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:NativeId"/>
+			<xs:element ref="narc:OtherId" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Language" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Description" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Abstract" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Restriction"/>
+			<xs:element ref="narc:Title"/>
+			<xs:element ref="narc:StorageLocation" minOccurs="0"/>
+			<xs:element ref="narc:RecordRelation" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:RetentionPeriod"/>
+			<xs:element ref="narc:RetentionReason"/>
+			<xs:element ref="narc:RetentionPeriodEnd" minOccurs="0"/>
+			<xs:element ref="narc:Status"/>
+			<xs:element ref="narc:Function"/>
+			<xs:element ref="narc:Type"/>
+			<xs:element ref="narc:Accepted" minOccurs="0"/>
+			<xs:element ref="narc:Gathered" minOccurs="0"/>
+			<xs:element ref="narc:Valid" minOccurs="0"/>
+			<xs:element ref="narc:Authenticity"/>
+			<xs:element ref="narc:SignatureDescription" minOccurs="0"/>
+			<xs:element ref="narc:Coverage" minOccurs="0"/>
+			<xs:element ref="narc:Audience" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Source" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Rights" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:ProtectionClass" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:AlternativeTitle" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Version" minOccurs="0"/>
+			<xs:element ref="narc:Document" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Custom" minOccurs="0"/>
+			<xs:element ref="narc:Agent" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Asiakirjan metatiedot - elementtimääritykset                                   -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Accepted" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.1.1 Hyväksytty (Date.Accepted)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Gathered" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.1.2 Koottu (Date.Gathered)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Valid" type="narc:TimePeriodType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.1.3 Voimassaoloaika (Date.Valid)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Authenticity" type="narc:AuthenticityType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.2 Asiakirjan alkuperäisyys ja eheys todettu</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="AuthenticityType">
+		<xs:sequence>
+			<xs:element ref="narc:Checker"/>
+			<xs:element ref="narc:Date"/>
+			<xs:element ref="narc:Description">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 4.2.3 Kuvaus (Authenticity.Description)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Checker" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.2.1 Tarkastaja (Authenticity.Checker)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Date" type="xs:date">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.2.2 Aikamääre (Authenticity.Date)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="SignatureDescription" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.3 Asiakirjan sähköinen allekirjoitus (SignatureDescription)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Coverage" type="narc:CoverageType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.4 Kattavuus (Coverage)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="CoverageType">
+		<xs:sequence>
+			<xs:element ref="narc:Jurisdiction" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Spatial" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Temporal" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Jurisdiction" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.4.1 Hallinnonala (Coverage.Jurisdiction)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Spatial" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.4.2 Alueellinen (Coverage.Spatial)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Temporal" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.4.3 Ajallinen (Coverage.Temporal)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Audience" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.5 Kohdeyleisö (Coverage.Audience)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Source" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.6 Lähde (Coverage.Source)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Rights" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.7 Oikeudet (Coverage.Rights)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="RecordRelation">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8 Suhde</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="narc:Replaces" minOccurs="0"/>
+				<xs:element ref="narc:IsReplacedBy" minOccurs="0"/>
+				<xs:element ref="narc:References" minOccurs="0"/>
+				<xs:element ref="narc:IsReferencedBy" minOccurs="0"/>
+				<xs:element ref="narc:Requires" minOccurs="0"/>
+				<xs:element ref="narc:IsRequiredBy" minOccurs="0"/>
+				<xs:element ref="narc:HasPart" minOccurs="0"/>
+				<xs:element ref="narc:IsPartOf" minOccurs="0"/>
+				<xs:element ref="narc:HasFormat" minOccurs="0"/>
+				<xs:element ref="narc:IsFormatOf" minOccurs="0"/>
+				<xs:element ref="narc:HasVersion" minOccurs="0"/>
+				<xs:element ref="narc:IsVersionOf" minOccurs="0"/>
+				<xs:element ref="narc:HasRedaction" minOccurs="0"/>
+				<xs:element ref="narc:IsRedactionOf" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Requires" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.1 Pakollinen/Liittyy pakollisena (Relation.Requires/Relation.IsRequiredBy)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="IsRequiredBy" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.1 Pakollinen/Liittyy pakollisena (Relation.Requires/Relation.IsRequiredBy)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="HasPart" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.2 Sisältää/Kuuluu (Relation.HasPart/Relation.IsPartOf)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="IsPartOf" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.2 Sisältää/Kuuluu (Relation.HasPart/Relation.IsPartOf)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="HasFormat" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.3 Myöhempi formaatti/Aikaisempi formaatti (Relation.HasFormat/Relation.IsFormatOf)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="IsFormatOf" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.3 Myöhempi formaatti/Aikaisempi formaatti (Relation.HasFormat/Relation.IsFormatOf)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="HasVersion" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.4 Vanhempi versio/Uudempi versio (Relation.HasVersion/Relation.IsVersionOf)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="IsVersionOf" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.4 Vanhempi versio/Uudempi versio (Relation.HasVersion/Relation.IsVersionOf)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="HasRedaction" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.5 Julkinen (”mustattu”) versio/Salassa pidettävää tietoa sisältävä versio  (Relation.HasRedaction/Relation.IsRedactionOf)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="IsRedactionOf" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.8.5 Julkinen (”mustattu”) versio/Salassa pidettävää tietoa sisältävä versio  (Relation.HasRedaction/Relation.IsRedactionOf)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="ProtectionClass" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.9 Suojeluluokka (ProtectionClass)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="AlternativeTitle" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.10 Vaihtoehtoinen nimeke (AlternativeTitle)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Version" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 4.11 Versio (Version)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="TimePeriodType">
+		<xs:sequence>
+			<xs:element name="start" type="xs:date"/>
+			<xs:element name="end" type="xs:date" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Toimenpiteen metatiedot (Action)                                                   -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Action" type="narc:ActionType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 5 Toimenpiteen metatiedot</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="ActionType">
+		<xs:sequence>
+			<xs:element ref="narc:Accepted" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.1.1 Hyväksytty (Date.Accepted)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Issued" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.1.2 Julkistettu (Date.Issued)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Created">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.1.3 Laadittu (Date.Created)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Sent" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.1.4 Lähetetty (Date.Sent)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Modified" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.1.5 Muokattu (Date.Modified)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Valid" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.1.6 Voimassaoloaika (Date.Valid)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Description" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.2 Kuvaus</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Abstract" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="narc:Title">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.3 Nimeke</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Custom" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.4 Organisaatiokohtaiset metatiedot</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Agent" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.5 Toimija</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Type">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 5.6 Tyyppi (Type)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Record" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Toimenpiteen metatiedot - elementtimääritykset                              -->
+	<!-- Kaikki toimenpide-rakenteesta viitatut elementit on määritelty           -->
+	<!-- muaalla skeemassa                                                                      -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Siirron tekniset metatiedot                                                             -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- TransferInformation                                                                        -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="TransferInformation" type="narc:TransferInformationType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.1 Siirtokokonaisuuden identifiointitiedot</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="TransferInformationType">
+		<xs:sequence>
+			<xs:element ref="narc:NativeId">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.1.1 Identifiointitunnus (Identifier.NativeId)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Title">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.1.3 Nimeke (Title)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:TransferContractId"/>
+			<xs:element ref="narc:MetadataSchema"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- TransferInformation-rakenteen elementtimääritykset                         -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- NativeId ja Title on kuvattu kohteen metatiedoissa-->
+	<xs:element name="TransferContractId" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.1.4 Siirtosopimuksen tunnus (TransferContractId)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="MetadataSchema" type="xs:anyURI">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.1.5 Aineiston metatietojen skeema (MetadataSchema)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- ContactInformation                                                                        -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="ContactInformation" type="narc:ContactInformationType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.2 Kontaktitiedot</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="ContactInformationType">
+		<xs:sequence>
+			<xs:element ref="narc:Organisation"/>
+			<xs:element ref="narc:ContactPerson"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Organisation                                                                                 -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Organisation" type="narc:OrganisationType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.2.1 Organisaatio</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="OrganisationType">
+		<xs:sequence>
+			<xs:element ref="narc:Name">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.2.1.1 Nimi (Organisation.Name)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- ContactPerson                                                                              -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="ContactPerson" type="narc:ContactPersonType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli 6.2.2 Kontaktihenkilö</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="ContactPersonType">
+		<xs:sequence>
+			<xs:element ref="narc:Name">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.2.2.1 Nimi (ContactPerson.Name)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Address"/>
+			<xs:element ref="narc:PhoneNumber"/>
+			<xs:element ref="narc:Email"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- ContactPerson-rakenteen elementtimääritykset                               -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- name on kuvattu kohteen metatiedoissa-->
+	<xs:element name="Address" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli 6.2.2.2 Osoite (ContactPerson.Address)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="PhoneNumber" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli 6.2.2.3 puhelinnumero (ContactPerson.PhoneNumber)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Email" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli 6.2.2.4 Sähköpostiosoite (ContactPerson.Email)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- ClassificationScheme-rakenteen elementtimääritykset                               -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="ClassificationScheme" type="narc:ClassificationSchemeType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.3 Tehtäväluokitus</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="ClassificationSchemeType">
+		<xs:sequence>
+			<xs:element ref="narc:MainFunction"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="MainFunction" type="narc:MainFunctionType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.3.1 Päätehtävä (ClassificationScheme.MainFunction)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="MainFunctionType">
+		<xs:sequence>
+			<xs:element ref="narc:Title">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.3.5 Nimeke (ClassificationScheme.Title)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:FunctionCode"/>
+			<xs:element ref="narc:FunctionClassification"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="FunctionClassification" type="narc:FunctionClassificationType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.3.2 Tehtävä (ClassificationScheme.FunctionClassification)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="FunctionClassificationType">
+		<xs:sequence>
+			<xs:element ref="narc:Title">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.3.5 Nimeke (ClassificationScheme.Title)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:FunctionCode"/>
+			<xs:element ref="narc:SubFunction"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="SubFunction" type="narc:SubFunctionType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.3.3 Alatehtävä (ClassificationScheme.SubFunction)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="SubFunctionType">
+		<xs:sequence>
+			<xs:element ref="narc:Title">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.3.5 Nimeke (ClassificationScheme.Title)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:FunctionCode"/>
+			<xs:element ref="narc:SubFunction" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="FunctionCode" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.3.4 Tunnus (ClassificationScheme.FunctionCode)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Document                                                                                    -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="Document" type="narc:DocumentType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.4.2 Tiedosto</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="DocumentType">
+		<xs:sequence>
+			<xs:element ref="narc:NativeId">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.4.1 Identifiointitunnus (Identifier.NativeId)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:UseType"/>
+			<xs:element ref="narc:File"/>
+			<xs:element ref="narc:Format"/>
+			<xs:element ref="narc:MediumID" minOccurs="0"/>
+			<xs:element ref="narc:HashAlgorithm"/>
+			<xs:element ref="narc:HashValue"/>
+			<xs:element ref="narc:Encryption" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<!-- Document-rakenteen elementtimääritykset                                      -->
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<xs:element name="UseType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.1.2 Käyttötarkoitus</xs:documentation>
+		</xs:annotation>
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="Arkisto"/>
+				<xs:enumeration value="Natiivi"/>
+				<xs:enumeration value="Julkaisu"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="File" type="narc:FileType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.4.2 Tiedosto</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="FileType">
+		<xs:sequence>
+			<xs:element ref="narc:Name">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.4.2.1 Nimi (File.Name)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Path"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Path" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.4.2.2 Hakemistopolku (File.Path)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Format" type="narc:FormatType">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.4.3 Formaatti</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="FormatType">
+		<xs:sequence>
+			<xs:element ref="narc:Name">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.4.3.1 Nimi (Format.Name)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="narc:Version">
+				<xs:annotation>
+					<xs:documentation>SÄHKE2 Metatietomalli: 6.4.3.2 Versio (Format.Version)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="MediumID" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.4.4 Median identifiointitunnus (MediumID)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="HashAlgorithm" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.4.5 Eheystunnisteen algoritmi (HashAlgorithm)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="HashValue" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.4.6 Eheystunnisteen arvo (HashValue)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Encryption" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>SÄHKE2 Metatietomalli: 6.4.7 Salaustapa (Encryption)</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+</xs:schema>

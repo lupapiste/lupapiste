@@ -10,7 +10,10 @@
             [clj-time.core :as t]
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n])
+  (:import (lupapalvelu.tiedonohjaus CaseFile)
+           (javax.xml.bind JAXBContext)
+           (java.io StringWriter)))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -272,7 +275,7 @@
 
 (defn update-process-retention-period
   "Update retention period of the process report to match the longest retention time of any document
-   as per SAHKE2 operative system sertification requirement 6.3"
+   as per SAHKE2 operative system certification requirement 6.3"
   [app-id modified-ts]
   (let [{:keys [metadata attachments processMetadata] :as application} (domain/get-application-no-access-checking app-id)
         new-process-md (calculate-process-metadata processMetadata metadata attachments)]
@@ -281,3 +284,12 @@
         (action/application->command application)
         {$set {:modified modified-ts
                :processMetadata new-process-md}}))))
+
+(defn xml-case-file []
+  (let [item (doto (CaseFile.)
+               (.setTitle "Uskomaton tiedosto"))
+        context (JAXBContext/newInstance (into-array [(.getClass item)]))
+        marshaller (.createMarshaller context)]
+    (with-open [sw (StringWriter.)]
+      (.marshal marshaller item sw)
+      (.toString sw))))
