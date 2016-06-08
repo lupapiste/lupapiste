@@ -5,10 +5,10 @@
       <li>
         <p data-bind="text: $data.id"/>
         <!-- ko if: !($parent.isApproved($data)) -->
-        <button data-bind="click: $parent.approveAttachment($data.id)">Hyväksy</button>
+        <button data-bind="click: $parent.approveAttachment($data.id)">Hyv\u00E4ksy</button>
         <!-- /ko -->
         <!-- ko if: !($parent.isRejected($data)) -->
-        <button data-bind="click: $parent.rejectAttachment($data.id)">Hylkää</button>
+        <button data-bind="click: $parent.rejectAttachment($data.id)">Hylk\u00E4\u00E4</button>
         <!-- /ko -->
         <button data-bind="click: $parent.removeAttachment($data.id)">Poista</button>
       </li>
