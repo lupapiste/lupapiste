@@ -7384,7 +7384,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
-      return attachment().id === attachmentId;
+      return attachment.peek().id === attachmentId;
     });
   };
   self.removeAttachment = function(attachmentId) {
@@ -7394,8 +7394,10 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.updateAttachment = function(attachmentId, updates) {
-    var oldAttachment = self.getAttachment(attachmentId)();
-    self.getAttachment(attachmentId)(_.merge(oldAttachment, updates));
+    var oldAttachment = self.getAttachment(attachmentId);
+    if (oldAttachment) {
+      self.getAttachment(attachmentId)(_.merge(oldAttachment(), updates));
+    }
   };
 
   // Approving and rejecting attachments
@@ -7408,17 +7410,22 @@ LUPAPISTE.AttachmentsService = function() {
 
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return attachment.state === "ok";
+    return attachment && attachment.state === "ok";
   };
   self.isRejected = function(attachment) {
-    return attachment.state === "requires_user_action";
+    return attachment && attachment.state === "requires_user_action";
   };
   self.isNotNeeded = function(attachment) {
-    return attachment.notNeeded;
+    return attachment && attachment.notNeeded;
   };
 
   function getAttachmentValue(attachmentId) {
-    return self.getAttachment(attachmentId)();
+    var attachment = self.getAttachment(attachmentId);
+    if (attachment) {
+      return attachment();
+    } else {
+      return null;
+    }
   }
 
   // returns a function for use in computed
