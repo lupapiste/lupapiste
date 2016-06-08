@@ -111,8 +111,7 @@
     (or (not-empty (filter (fn-> (get-in [:metadata :for-operations]) (apply [(keyword operation)])) types))
         types)))
 
-(defn get-attachment-types-for-operation [operation]
-  (memoize (attachment-types-by-operation operation)))
+(def get-attachment-types-for-operation (memoize attachment-types-by-operation))
 
 (defn get-attachment-types-for-application
   [{:keys [permitType primaryOperation secondaryOperations] :as application}]
