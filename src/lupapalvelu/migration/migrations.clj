@@ -622,6 +622,23 @@
                 application (mongo/select collection query {k 1})]
             (mongo/update-n collection {:_id (:id application)} {$set {k (map f (k application))}}))))
 
+(defn update-bulletin-versions [k f query]
+  "Maps f over each element of list with key k in application
+   bulletins, obtained by the given query. Returns the number
+   of bulletins updated."
+  {:pre [(keyword? k) (fn? f) (map? query)]}
+  (let [version-key (keyword (str "versions." (name k)))]
+    (reduce + 0
+      (for [bulletin (mongo/select :application-bulletins query {:versions 1})]
+        (mongo/update-n :application-bulletins
+          {:_id (:id bulletin)}
+          {$set
+            {:versions
+              (map
+                (fn [versio]
+                  (assoc versio k (map f (get versio k))))
+                (:versions bulletin))}})))))
+
 (defn- populate-buildingids-to-doc [doc]
   (let [rakennusnro (get-in doc [:data :rakennusnro])
         manuaalinen-rakennusnro (get-in doc [:data :manuaalinen_rakennusnro])]
@@ -2192,6 +2209,16 @@
                          {:token-type {$in [:new-company-user :invite-company-user]}
                           :data.submit {$exists false}}
                          {$set {:data.submit true}}))
+
+
+;; update also bulletins as per change-meluilmoitus-kesto-as-repeating
+(defmigration change-meluilmoitus-bulletins-kesto-as-repeating
+  {:apply-when (pos? (mongo/count :application-bulletins {:versions.documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                                         :schema-info.name "ymp-ilm-kesto"}}}))}
+  (update-bulletin-versions :documents
+                            change-kesto-doc-as-repeating
+                            {:versions.documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                     :schema-info.name "ymp-ilm-kesto"}}}))
 
 ;;
 ;; ****** NOTE! ******
