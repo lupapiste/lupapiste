@@ -48,6 +48,7 @@ var attachment = (function() {
     applicationState:             ko.observable(),
     authorized:                   ko.observable(false),
     state:                        ko.observable(),
+    approval:                     ko.observable(),
     filename:                     ko.observable(),
     latestVersion:                ko.observable({}),
     versions:                     ko.observable([]),
@@ -77,10 +78,7 @@ var attachment = (function() {
     showTosMetadata:              ko.observable(false),
     dirty:                        false,
     attachmentVisibilities:       ko.observableArray(LUPAPISTE.config.attachmentVisibilities),
-
-    // toggleHelp: function() {
-    //   model.showHelp(!model.showHelp());
-    // },
+    isRamAttachment:              ko.observable(),
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -144,6 +142,10 @@ var attachment = (function() {
         pageutil.openPage("attachment", applicationId + "/" + nextId);
         hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
       }
+    },
+
+    newRamAttachment: function() {
+      hub.send( "ramService::new", {attachmentId: model.id()} );
     },
 
     showChangeTypeDialog: function() {
@@ -212,7 +214,8 @@ var attachment = (function() {
 
     rejectAttachment: function() {
       var id = model.application.id();
-      ajax.command("reject-attachment", { id: id, attachmentId: model.id()})
+      var fileId = util.getIn(model, ["latestVersion", "fileId"]);
+      ajax.command("reject-attachment", {id: id, fileId: fileId})
         .success(function() {
           model.state("requires_user_action");
           repository.load(applicationId, undefined, undefined, true);
@@ -224,7 +227,8 @@ var attachment = (function() {
 
     approveAttachment: function() {
       var id = model.application.id();
-      ajax.command("approve-attachment", { id: id, attachmentId: model.id()})
+      var fileId = util.getIn(model, ["latestVersion", "fileId"]);
+      ajax.command("approve-attachment", {id: id, fileId: fileId})
         .success(function() {
           model.state("ok");
           repository.load(applicationId, undefined, undefined, true);
@@ -449,6 +453,7 @@ var attachment = (function() {
     model.versions(attachment.versions);
     model.signatures(attachment.signatures || []);
     model.state(attachment.state);
+    model.approval(attachment.approved);
     model.filename(attachment.filename);
     model.type(attachment.type);
     model.selectableOperations(application.allOperations);
@@ -467,6 +472,7 @@ var attachment = (function() {
 
     model.showAttachmentVersionHistory(false);
     model.showTosMetadata(false);
+    model.isRamAttachment( Boolean( attachment.ramLink));
 
     pageutil.hideAjaxWait();
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {

@@ -183,6 +183,19 @@
        (catch Exception _
          default)))))
 
+(defn to-long
+  "Parses string to long. If string is not numeric returns nil."
+  [^String s]
+  (when (numeric? s)
+    (Long/parseLong s)))
+
+(defn ->long
+  "Parses strings and numbers to longs. Returns nil for other types and invalid strings."
+  [x]
+  (cond
+    (string? x) (to-long x)
+    (number? x) (long x)))
+
 (defn abs [n]
   {:pre [(number? n)]}
   (Math/abs n))
@@ -228,12 +241,14 @@
     (let [dt (tc/from-long timestamp)]
       (timeformat/unparse (timeformat/formatter fmt) dt))))
 
-(defn- local-date-time [^Long timestamp]
-  (LocalDateTime. timestamp))
+(defn- local-date-time [timestamp-or-datetime]
+  (if (number? timestamp-or-datetime)
+    (LocalDateTime. (long timestamp-or-datetime))
+    (LocalDateTime. timestamp-or-datetime)))
 
 (defn- format-timestamp-local-tz [^Long timestamp ^String fmt]
   (when timestamp
-    (let [dt (local-date-time timestamp)]
+    (let [dt (local-date-time (->long timestamp))]
       (timeformat/unparse-local (timeformat/formatter fmt) dt))))
 
 (defn to-local-date [^Long timestamp]
@@ -248,6 +263,9 @@
 (defn to-xml-datetime [^Long timestamp]
   (format-utc-timestamp timestamp "YYYY-MM-dd'T'HH:mm:ss"))
 
+(defn to-xml-local-datetime [^Long timestamp]
+  (format-timestamp-local-tz timestamp "YYYY-MM-dd'T'HH:mm:ss"))
+
 (defn to-xml-date-from-string [^String date-as-string]
   (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
@@ -261,6 +279,11 @@
 (defn to-millis-from-local-date-string [^String date-as-string]
   (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+      (tc/to-long d))))
+
+(defn to-millis-from-local-datetime-string [^String datetime-as-string]
+  (when-not (ss/blank? datetime-as-string)
+    (let [d (timeformat/parse (timeformat/formatter-local "YYYY-MM-dd'T'HH:mm" ) datetime-as-string)]
       (tc/to-long d))))
 
 (defn to-RFC1123-datetime [^Long timestamp]
@@ -296,15 +319,6 @@
   "Returns a timestamp in future. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
   [time-key amount]
   (get-timestamp-ago-or-from-now from-now time-key amount))
-
-(defn to-long
-  "Parses string to long. If string is not numeric returns nil."
-  [^String s]
-  (when (numeric? s)
-    (Long/parseLong s)))
-
-(defn ->long [v]
-  (if (string? v) (to-long v) v))
 
 (defn sequable?
   "Returns true if x can be converted to sequence."
@@ -475,3 +489,15 @@
   [ts timestamps]
   {:pre [(integer? ts) (and (sequential? timestamps) (every? integer? timestamps))]}
   (every? (partial > ts) timestamps))
+
+(defn =as-kw
+  "Converts arguments to keywords and compares if they are the same"
+  ([x] true)
+  ([x y] (= (keyword x) (keyword y)))
+  ([x y & more] (apply = (keyword x) (keyword y) (map keyword more))))
+
+(defn not=as-kw
+  "Converts arguments to keywords and compares if they are the same"
+  ([x] false)
+  ([x y] (not= (keyword x) (keyword y)))
+  ([x y & more] (apply not= (keyword x) (keyword y) (map keyword more))))

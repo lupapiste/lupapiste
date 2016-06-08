@@ -149,7 +149,9 @@ $app-gray-darkest: $gray187;
     .link-permit-item {
       @include link;
     }
-
+    .modification-permit:before {
+      content: " - ";
+    }
     p, .application_summary_text, ul {
       vertical-align: top;
       display: inline-block;

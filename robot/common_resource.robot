@@ -1109,11 +1109,13 @@ Submit empty verdict
   Input verdict  -  6  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
+  Wait for jQuery
   Wait until  Application state should be  ${targetState}
 
 Do fetch verdict
   [Arguments]  ${fetchConfirmationText}
   Click enabled by test id  fetch-verdict
+  Wait for jQuery
   Wait Until  Element Should Be Visible  dynamic-ok-confirm-dialog
   Element Text Should Be  xpath=//div[@id='dynamic-ok-confirm-dialog']//div[@class='dialog-user-content']/p  ${fetchConfirmationText}
   Confirm  dynamic-ok-confirm-dialog
@@ -1267,7 +1269,6 @@ No such test id
   [Arguments]  ${id}
   Wait until  Element should not be visible  jquery=[data-test-id=${id}]
 
-
 Test id should contain
   [Arguments]  ${id}  ${text}
   Wait until  Element should contain  jquery=[data-test-id=${id}]  ${text}
@@ -1281,6 +1282,11 @@ Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
 
+Click label
+  [Arguments]  ${for}
+  Click element  jquery=label[for=${for}]
+  
+
 Checkbox wrapper selected
   [Arguments]  ${id}
   Javascript?  $("input#${id}:checked").length
@@ -1288,6 +1294,10 @@ Checkbox wrapper selected
 Checkbox wrapper not selected
   [Arguments]  ${id}
   Javascript?  $("input#${id}:checked").length === 0
+
+Select from test id
+  [Arguments]  ${id}  ${value}
+  Select from list  jquery=select[data-test-id=${id}]  ${value}
 
 # Frontend error log
 

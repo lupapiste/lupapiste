@@ -3,10 +3,13 @@
 <body>
   <section class="page container" id="mypage">
     <div id="own-info-form"  class="accordion-container">
-      <button class="secondary" data-bind="click: function() { history.go(-1); }">
-        <i class="lupicon-chevron-start"></i>
-        <span data-bind="ltext: 'back'"></span>
-      </button>
+      <div id="inner-margins">
+        <button class="secondary" data-bind="click: function() { history.go(-1); }">
+          <i class="lupicon-chevron-start"></i>
+          <span data-bind="ltext: 'back'"></span>
+        </button>
+      </div>
+      <div class="hr"></div>
       <h1 data-bind="ltext: 'mypage.title'"></h1>
       <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
 

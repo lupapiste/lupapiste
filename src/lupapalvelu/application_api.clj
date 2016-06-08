@@ -16,6 +16,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.attachment-type :as att-type]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
@@ -257,6 +258,7 @@
     (or
       (foreman/validate-application application)
       (app/validate-link-permits application)
+      (when-not (company/cannot-submit command application) (fail :company.user.cannot.submit))
       (do-submit command application created))))
 
 (defcommand refresh-ktj

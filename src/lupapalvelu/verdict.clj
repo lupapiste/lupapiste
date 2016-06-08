@@ -1,5 +1,5 @@
 (ns lupapalvelu.verdict
-  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error]]
+  (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
             [net.cgrand.enlive-html :as enlive]
@@ -438,6 +438,16 @@
        (map (partial tasks/task-attachments application))
        flatten))
 
+(defn- empty-review-task? [t]
+  ;; (debugf "empty-review-task? - tila is %s" (-> t :data :katselmus :tila))
+  (let [katselmus-data (-> t :data :katselmus)
+        top-keys [:tila :pitoPvm :pitaja]
+        h-keys [:kuvaus :maaraAika :toteaja :toteamisHetki]
+        ]
+    (and (not-empty katselmus-data)
+         (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
+         (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
+
 (defn- merge-review-tasks
   "Add review tasks with new IDs to existing tasks map"
   [from-update existing]
@@ -449,7 +459,22 @@
         ids-existing (tasks->backend-ids (filter review-task? existing))
         ids-from-update (tasks->backend-ids from-update)
         has-new-id? #(let [i (bg-id %)] (and (contains? ids-from-update i)
-                                             (not (contains? ids-existing i))))]
+                                             (not (contains? ids-existing i))))
+        from-update-with-new-id (filter has-new-id? from-update)
+        same-name-and-type? (fn [wrapped-a wrapped-b]
+                              (let [a (tools/unwrapped wrapped-a)
+                                    b (tools/unwrapped wrapped-b)
+                                    na (:taskname a)
+                                    nb (:taskname b)
+                                    laji #(-> % :data :katselmuksenLaji)
+                                    la (laji a)
+                                    lb (laji b)]
+                                (and na (= na nb) la (= la lb))))
+        matches-update-by-name-and-type? #(some (partial same-name-and-type? %)
+                                                from-update-with-new-id)
+        empty-matching-update? #(and (empty-review-task? %)
+                                     (matches-update-by-name-and-type? %))
+        existing-without-empties-matching-updates (remove empty-matching-update? existing)]
     ;; (debug "ids-existing" ids-existing)
     ;; (debug "ids-from-update" ids-from-update)
 
@@ -457,8 +482,9 @@
     ;; (debug "from-update first has-new-id?" (has-new-id? (first from-update)))
 
     ;; (debug "from-update types" (doall (map :type from-update)))
-    (debugf "merge-review-tasks: existing %s + from-update %s/%s" (count existing) (count from-update) (count (filter has-new-id? from-update)))
-    (concat existing (filter has-new-id? from-update))))
+    (debugf "merge-review-tasks: existing %s/%s + from-update %s/%s" (count existing) (count existing-without-empties-matching-updates) (count from-update) (count from-update-with-new-id))
+    [existing-without-empties-matching-updates from-update-with-new-id]))
+
 
 (defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
@@ -472,16 +498,42 @@
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {} source {:buildings buildings-summary} %)
         review-tasks (map review-to-task reviews)
-        updated-tasks (merge-review-tasks review-tasks (:tasks application))
-        task-updates {$set {:tasks updated-tasks}}]
+
+        updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
+        updated-tasks (apply concat updated-existing-and-added-tasks)
+        update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
+        added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
+        updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
+        validation-errors (doall  (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
+
+        task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
+
+
+    (doseq [task (filter #(and (= "task-katselmus" (-> % :schema-info :name))
+                               (-> % :data :rakennus)) updated-tasks)]
+      (if-not (= (count buildings-summary)
+                 (-> task :data :rakennus count))
+              (errorf "buildings count %s != task rakennus count %s for id %s"
+                      (count buildings-summary)
+                      (-> task :data :rakennus count) (:id application))))
+
     (assert (every? not-empty updated-tasks))
     (assert (every? map? updated-tasks))
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
     (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
-    ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used?
+    ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks))
-    (update-application command (util/deep-merge task-updates building-updates))
-    (ok :review-tasks review-tasks)))
+    (if (some seq validation-errors)
+      (do
+        (errorf "verdict->tasks: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
+        (fail :error.invalid-task-type))
+      ;; else
+      (do
+        (doseq [added-task added-tasks-with-updated-buildings]
+          (tasks/generate-task-pdfa application added-task (:user command) (:lang command "fi")))
+        (update-application command (util/deep-merge task-updates building-updates))
+        (ok)))))
+
 
 (defn do-check-for-reviews [{:keys [application] :as command}]
   {:pre [(every? command [:application :user :created])]}

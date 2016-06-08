@@ -69,11 +69,13 @@ Huoneistot info for Uusirakennus is correct
   List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  - Valitse -
   # TODO check this: Huoneisto row items disabled except muutostapa
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  1
+  Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.huoneistoTyyppi"]  1
   Sleep  0.5s
   Reload Page
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
+  List selection should be  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.huoneistoTyyppi']  Asuinhuoneisto
   Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class='huoneistot-table']//tbody//tr  2
 
 Mikko removes apartment
@@ -202,4 +204,3 @@ Huoneisto row items disabled except muutostapa
   Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.parvekeTaiTerassiKytkin']
   Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.lamminvesiKytkin']
   Element Should Be Enabled   //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
-

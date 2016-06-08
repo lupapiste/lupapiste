@@ -13,7 +13,7 @@
             [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]))
 
-(def db-name (str "test_autom-check-verdicts-itest_" (now)))
+(defonce db-name (str "test_autom-check-verdicts-itest_" (now)))
 
 (mongo/connect!)
 (mongo/with-db db-name
@@ -84,7 +84,7 @@
               (:to email) => (contains (email-for-key sonja))
               (:subject email) => "Lupapiste: Paatoskuja 18 - p\u00e4\u00e4t\u00f6s"
               email => (partial contains-application-link-with-tab? application-id-sent "verdict" "authority")
-              (get-in email [:body :plain]) => (contains "Hakemukseesi on annettu p\u00e4\u00e4t\u00f6s")))))
+              (get-in email [:body :plain]) => (contains "on annettu p\u00e4\u00e4t\u00f6s.")))))
 
       (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
             application-sent (query-application local-query sonja application-id-sent) => truthy

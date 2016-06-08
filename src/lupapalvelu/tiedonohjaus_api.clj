@@ -39,6 +39,15 @@
   [{user :user}]
   (store-function-code operation functionCode user))
 
+(defcommand remove-tos-function-from-operation
+  {:parameters [operation]
+   :user-roles #{:authorityAdmin}
+   :input-validators [(partial non-blank-parameters [:operation])]}
+  [{user :user}]
+  (let [orgId (user/authority-admins-organization-id user)]
+    (o/update-organization orgId {$unset {(str "operations-tos-functions." operation) ""}})
+    (ok)))
+
 (defn- update-tos-metadata [function-code {:keys [application created user] :as command} & [correction-reason]]
   (if-let [tos-function-map (t/tos-function-with-name function-code (:organization application))]
     (let [orgId (:organization application)

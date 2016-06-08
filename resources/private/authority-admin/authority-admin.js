@@ -12,7 +12,10 @@
       asianhallintaModel,
       linkToVendorBackendModel,
       usersList = null,
-      editRolesDialogModel;
+      editRolesDialogModel,
+      calendarsModel,
+      reservationTypesModel,
+      reservationPropertiesModel;
 
   function toAttachmentData(groupId, attachmentId) {
     return {
@@ -385,6 +388,10 @@
   editSelectedOperationsModel = new EditSelectedOperationsModel();
   editAttachmentsModel = new EditAttachmentsModel();
 
+  calendarsModel = new LUPAPISTE.AuthAdminCalendarsModel();
+  reservationTypesModel = new LUPAPISTE.AuthAdminReservationTypesModel();
+  reservationPropertiesModel = new LUPAPISTE.AuthAdminOrganizationReservationPropertiesModel();
+
   wfsModel = new LUPAPISTE.WFSModel();
   statementGiversModel = new StatementGiversModel();
   createStatementGiverModel = new CreateStatementGiverModel();
@@ -431,9 +438,27 @@
     linkToVendorBackendModel.load();
   });
 
+  if (features.enabled("ajanvaraus")) {
+    hub.onPageLoad("calendar-admin", function() {
+      var path = pageutil.getPagePath();
+      if (path.length > 1) {
+        // calendar-view can be initialized with fetchCalendar event after reservationtypes have been init'ed
+        hub.subscribe("calendarService::organizationReservationTypesFetched", function() {
+          hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
+        }, true);
+      }
+      hub.send("calendarService::fetchOrganizationReservationTypes");
+    });
+
+    hub.onPageLoad("organization-calendars", function() {
+      hub.send("calendarService::fetchOrganizationCalendars");
+      hub.send("calendarService::fetchOrganizationReservationTypes");
+      reservationPropertiesModel.load();
+    });
+  }
+
   $(function() {
     organizationModel.load();
-
     $("#applicationTabs").applyBindings({});
     $("#users").applyBindings({
       organizationUsers:   organizationUsers,
@@ -442,7 +467,8 @@
       editRoles:           editRolesDialogModel
       });
     $("#applications").applyBindings({
-      organization:        organizationModel
+      organization:        organizationModel,
+      authorization:       lupapisteApp.models.globalAuthModel
     });
     $("#operations").applyBindings({
       organization:        organizationModel,
@@ -462,6 +488,18 @@
     $("#areas").applyBindings({
       organization:        organizationModel
     });
+    if (features.enabled("ajanvaraus")) {
+      $("#organization-calendars").applyBindings({
+        calendars:           calendarsModel,
+        reservationTypes:    reservationTypesModel,
+        reservationProperties: reservationPropertiesModel
+      });
+      $("#calendar-admin").applyBindings({
+        calendars:           calendarsModel,
+        reservationTypes:    reservationTypesModel
+      });
+    }
+
     // Init the dynamically created dialogs
     LUPAPISTE.ModalDialog.init();
   });

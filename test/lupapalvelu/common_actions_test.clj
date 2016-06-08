@@ -49,7 +49,8 @@
                           :get-building-info-from-wfs
                           :authority-notice
                           :application-guests
-                          :statement-attachment-allowed}
+                          :statement-attachment-allowed
+                          :ram-linked-attachments}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)

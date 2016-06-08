@@ -475,7 +475,7 @@
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
     :username  "dummy2"
-    :firstName "Duff"
+    :firstName "Duff2"
     :lastName "Dummy2"
     :email  "dummy2@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
@@ -484,7 +484,7 @@
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
     :username  "dummy3"
-    :firstName "Duff"
+    :firstName "Duff3"
     :lastName "Dummy3"
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
@@ -505,7 +505,7 @@
               :apikey "502cb9e58426c613c8b85abe"}
     :role "applicant"
     :architect true
-    :company {:id "solita", :role "admin"}}
+    :company {:id "solita" :role "admin" :submit true}}
 
    ])
 
@@ -563,7 +563,8 @@
                                 :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
                        :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled true}
+                       :permanent-archive-enabled true
+                       :permanent-archive-in-use-since 1451613600000}
 
                       ;; Sipoo R
                       {:id "753-R"
@@ -614,6 +615,7 @@
                        :kopiolaitos-orderer-phone "0501231234"
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "YM" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false
+                       :permanent-archive-in-use-since 1451613600000
                        :tags [{:id "111111111111111111111111" :label "yl\u00E4maa"} {:id "222222222222222222222222" :label "ullakko"}]
                        :areas {:type "FeatureCollection"
                                :features [{:id "sipoo_keskusta",

@@ -4,7 +4,7 @@ Sinut on kutsuttu viranomaiseksi Lupapiste-palveluun. Oheisen linkin kautta p&au
 
 Jatka klikkaamalla linkki&auml;:
 
-  {{link-fi}}
+{{link-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
@@ -14,7 +14,10 @@ Ongelmatilanteissa ota yhteytt&auml; tuki@lupapiste.fi.
 
 Toivottavasti viihdyt palvelumme parissa!
 
---
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
+---
 
 # Hej,
 
@@ -22,7 +25,7 @@ du har bjudits in som myndighet i tj&auml;nsten Lupapiste. Genom l&auml;nken ned
 
 Forts&auml;tt genom att klicka p&aring; l&auml;nken:
 
-  {{link-sv}}
+{{link-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
@@ -32,3 +35,5 @@ Vid problem &auml;r du v&auml;lkommen att kontakta tuki@lupapiste.fi.
 
 Vi hoppas att du trivs med v&aring;r tj&auml;nst!
 
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

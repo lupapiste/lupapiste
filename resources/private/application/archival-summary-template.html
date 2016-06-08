@@ -69,6 +69,15 @@
         </div>
       </div>
     <!-- /ko -->
+
+    <!-- ko if: showMarkArchivedSection -->
+    <div class="mark-as-archived">
+      <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
+      <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
+      <button class="btn-primary" data-bind="click: markApplicationArchived, ltext: 'archivalSummary.markArchived.button'">Merkitse hakemusvaihe arkistoiduksi</button>
+    </div>
+    <!-- /ko -->
+
   </script>
   <script type="text/x-jquery-tmpl" id="archival-summary-attachment-table">
     <div class="table archival-summary-table" data-bind="foreach: groups">

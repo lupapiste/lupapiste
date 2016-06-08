@@ -33,7 +33,7 @@
                   <span data-bind="ltext: 'document.approve'"></span>
               </button>
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()"
-                      class="negative caps">Tarkennettavaa</button>
+                      class="negative caps"></button>
               <button class="secondary" data-test-id="change-attachment-type"
                       data-bind="click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized">
                   <span data-bind="ltext: 'attachment.changeType'"></span>
@@ -45,18 +45,24 @@
               </button>
           </div>
 
+          <div data-bind="component: {name:'approval', params: $data}"></div>
+
           <div class="attachment-info-wrapper">
               <div class="attachment-info-header">
                   <h1>
-                      <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
-                      <span data-bind="if: latestVersion">
-                          <span data-bind="ltext: 'attachment.version'">versio</span>
-                          <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-                      </span>
+                    <span data-bind="visible: isRamAttachment,
+                                     ltext: 'ram.prefix'"
+                          data-test-id="ram-prefix"></span>
+                    <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
+                    <span data-bind="if: latestVersion">
+                      <span data-bind="ltext: 'attachment.version'">versio</span>
+                      <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+                    </span>
                   </h1>
                   <span data-bind="component: {
                                   name: 'help-toggle',
-                                   params: { flag: showHelp, lhtml: 'attachment.view.desc' }}"></span>
+                                   params: { flag: showHelp, 
+                                   lhtml: isRamAttachment() ? 'ram.help' : 'attachment.view.desc' }}"></span>
               </div>
           </div>
 
@@ -71,6 +77,13 @@
                     <i class="lupicon-circle-plus"></i>
                     <span data-bind="ltext: 'attachment.addVersion', visible: latestVersion"></span>
                     <span data-bind="ltext: 'attachment.addFile', visible: !latestVersion()"></span>
+                </button>
+                <button data-test-id="add-ram-attachment"
+                        class="positive"
+                        data-bind="click: newRamAttachment,
+                                   visible: $root.authorization.ok( 'create-ram-attachment')">
+                  <i class="lupicon-circle-plus"></i>
+                  <span data-bind="ltext: 'ram.new'"></span>
                 </button>
                 <button id="show-attachment-versions"
                         class="btn"
@@ -116,7 +129,7 @@
                 </table>
               </div>
             </div>
-
+            <ram-links params="{attachment: $root.attachment}"></ram-links>
             <div>
               <div class="attachment-label">
                 <div id="attachment-latest-version-info" data-bind="with: latestVersion">

@@ -107,6 +107,14 @@
     (fact (-> three-apartments :huoneistot keys) => (just #{:2 :1 :0}))
     (fact (-> two-apartments :huoneistot keys) => (just #{:2 :1 :validationResult}))))
 
+(fact "'lyhyt rakennustunnus' cannot exceed maximum length"
+  (let [application-id             (create-app-id pena)
+        application                (query-application pena application-id)
+        uusi-rakennus-doc-id       (:id (domain/get-document-by-name application "uusiRakennus"))]
+    (fact (command pena :update-doc :id application-id :doc uusi-rakennus-doc-id
+                   :collection "documents" :updates [["tunnus" "123456"]]) => ok?
+          (command pena :update-doc :id application-id :doc uusi-rakennus-doc-id
+                   :collection "documents" :updates [["tunnus" "1234567"]]) => fail?)))
 
 (facts "facts about party-document-names query"
   (let [application-id        (create-app-id pena)

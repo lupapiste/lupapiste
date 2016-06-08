@@ -3,7 +3,9 @@
     [clojure.string :as s]
     [taoensso.timbre :refer [trace debug debugf]]
     [midje.sweet :refer :all]
-    [midje.util :refer [testable-privates]]))
+    [midje.util :refer [testable-privates]]
+    [lupapalvelu.domain :as domain]
+    [lupapalvelu.pdf.libreoffice-template :refer :all]))
 
 (def date-01012016 1451606400000)
 (def date-02012016 1451692800000)
@@ -141,7 +143,10 @@
                                                       :poytakirjat [{:urlHash         "4196f10a7fef9bec325dc567f1b87fbcd10163ce"
                                                                      :status          "1"
                                                                      :paatoksentekija "Tytti M\u00e4ntyoja"
-                                                                     :paatos          "Lorem ipsum dolor sit amet"
+                                                                     :paatos          "Lorem ipsum dolor sit amet
+                                                                     rivi 2
+                                                                     rivi 3
+                                                                     rivi 4"
                                                                      :pykala          31
                                                                      :paatospvm       1454284800000
                                                                      :paatoskoodi     "my\u00f6nnetty"}]}]}]
@@ -184,6 +189,22 @@
                                                  :id   "a1"
                                                  }
                                    :id          "2222"}
+                                  {:data        {:katselmuksenLaji {:value "muu katselmus"}}
+                                   :state       "requires_user_action"
+                                   :taskname    "YA paikan tarkastaminen"
+                                   :schema-info {:name       "task-katselmus-ya"
+                                                 :i18nprefix "task-katselmus.katselmuksenLaji"
+                                                 :version    1}
+                                   :closed      nil
+                                   :created     date-02012016
+                                   :duedate     nil
+                                   :assignee    {:lastName  "Suku"
+                                                 :firstName "Etu"
+                                                 :id        1111}
+                                   :source      {:type "verdict"
+                                                 :id   "a1"
+                                                 }
+                                   :id          "2223"}
                                   {:data        {}
                                    :state       "requires_user_action"
                                    :taskname    "Joku ty\u00f6hohtaja"
@@ -214,7 +235,7 @@
                                                  :id   "a1"
                                                  }
                                    :id          "2224"}
-                                  {:data        {}
+                                  {:data        {:maarays {:value "Jotain pitais tehda"}}
                                    :state       "requires_user_action"
                                    :taskname    "Joku lupam\u00e4\u00e4r\u00e4ys"
                                    :schema-info {:name    "task-lupamaarays"
@@ -325,3 +346,21 @@
                                            :lastName  "Testaaja"}}]})
 (defn start-pos [res]
   (first (first (filter #(s/includes? (second %) "</draw:frame>") (map-indexed vector res)))))
+
+
+(def user-field-line "    <text:user-field-decl office:value-type=\"string\" office:string-value=\"\" text:name=\"LPATITLE_ID\"/>\n")
+
+(fact "Test userfield replacement" (replace-user-field user-field-line {"LPATITLE_ID" "xxx"}) => "    <text:user-field-decl office:value-type=\"string\" office:string-value=\"xxx\" text:name=\"LPATITLE_ID\"/>")
+
+(defn build-user-field [value name]
+   (str "    <text:user-field-decl office:value-type=\"string\" office:string-value=\"" (xml-escape value) "\" text:name=\"" name "\"/>"))
+
+(fact "get-document-data"
+      (get-in-document-data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
+                                                          :data           {:henkilo {:henkilotiedot {:etunimi  {:value "etu"}
+                                                                                                  :sukunimi {:value "suku"}}}
+                                                                        :yritys  {:yritysnimi {:value         "Yritys Oy Ab"
+                                                                                               :yhteyshenkilo {:henkilotiedot {:etunimi  {:value "Mikko"}
+                                                                                                                               :sukunimi {:value "Mallikas"}}}}}}}])
+                            :tyomaastaVastaava [:henkilo]) => {:henkilotiedot {:etunimi  {:value "etu"}
+                                                                            :sukunimi {:value "suku"}}})

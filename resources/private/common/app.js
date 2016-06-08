@@ -241,12 +241,19 @@ var LUPAPISTE = LUPAPISTE || {};
         lupapisteApp.models.globalAuthModel.ok("tos-operations-enabled");
     };
 
+    var isAuthorizedToCalendars = function() {
+      return lupapisteApp.models.globalAuthModel.ok("my-calendars");
+    };
+
     self.showArchiveMenuOptions = ko.observable(false);
+    self.showCalendarMenuOptions = ko.observable(false);
     if (util.getIn(window, ["lupapisteApp", "models", "globalAuthModel"])) {
       self.showArchiveMenuOptions(isAuthorizedToTosAndSearch());
+      self.showCalendarMenuOptions(isAuthorizedToCalendars());
     }
     hub.subscribe("global-auth-model-loaded", function() {
       self.showArchiveMenuOptions(isAuthorizedToTosAndSearch());
+      self.showCalendarMenuOptions(isAuthorizedToCalendars());
     });
 
     /**
@@ -291,6 +298,7 @@ var LUPAPISTE = LUPAPISTE || {};
         openStartPage: openStartPage,
         showUserMenu: self.showUserMenu,
         showArchiveMenuOptions: self.showArchiveMenuOptions,
+        showCalendarMenuOptions: self.showCalendarMenuOptions,
         // TODO: sync with side-panel.js sidePanelPages
         sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
       };

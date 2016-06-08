@@ -45,7 +45,8 @@
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]
-            [net.cgrand.enlive-html :as enlive]))
+            [net.cgrand.enlive-html :as enlive]
+            [lupapalvelu.calendars-api :as calendars]))
 
 ;;
 ;; Helpers
@@ -123,7 +124,7 @@
 
 (defn remove-sensitive-keys [m]
   (util/postwalk-map
-    (partial filter (fn [[k v]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(password.*|key)$" (name k))) true)))
+    (partial filter (fn [[k v]] (if (or (string? k) (keyword? k)) (not (re-matches #"(?i).*(passw(or)?d.*|key)$" (name k))) true)))
     m))
 
 (status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
@@ -626,8 +627,8 @@
 
   (defpage [:get "/dev/private-krysp"] []
     (let [request (request/ring-request)
-          user    (basic-authentication request)]
-      (if user
+          [u p] (http/decode-basic-auth request)]
+      (if (= u p "pena")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/dev/capabilities.xml")))
         basic-401))))
 
@@ -709,6 +710,9 @@
 
   (defpage "/dev/clear/:collection" {:keys [collection]}
     (resp/status 200 (resp/json {:ok true :status (mongo/remove-many collection {})})))
+
+  (defpage "/dev/ajanvaraus/clear" []
+    (resp/status 200 (resp/json {:ok true :status (calendars/clear-database)})))
 
   (defpage [:get "/api/proxy-ctrl"] []
     (resp/json {:ok true :data (not @env/proxy-off)}))

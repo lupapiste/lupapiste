@@ -12,6 +12,9 @@
                           <h2 data-bind="if: primaryOperation">
                                 <span data-test-id="test-application-primary-operation"
                                       data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
+                                <span data-bind="visible: permitSubtype() === 'muutoslupa',
+                                                 ltext: 'permitSubtype.muutoslupa'"
+                                      class="modification-permit"></span>
                             </h2>
 
                             <!-- State: -->
@@ -114,7 +117,7 @@
 
                               <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("tos-operations-enabled") -->
                               <div>
-                                <p data-bind="ltext: 'tos.function'"></p>
+                                <p data-bind="ltext: 'application.tosFunction'"></p>
                                 <span class="application_summary_text">
                                 <select class="dropdown dropdown--full-width"
                                         data-bind="options: $root.tosFunctions,
@@ -175,6 +178,9 @@
                                       <span data-bind="text: $data.id"></span>
                                       -
                                       <span data-bind="ltext: 'operations.' + $data.operation()"></span>
+                                      <span data-bind="visible: $data.permitSubtype && $data.permitSubtype() === 'muutoslupa',
+                                                       ltext: 'permitSubtype.muutoslupa'"
+                                            class="modification-permit"></span>
                                     </a>
                                   </span>
                                 </span>
@@ -644,11 +650,13 @@
                             </i>
                             <br>
                             <!-- /ko -->
+                            <p data-bind="ltext: 'company.user.cannot.submit',
+                                            visible: $root.authorization.ok( 'company-user-cannot-submit')"></p>
                             <button class="positive"
                                     data-test-id="application-submit-btn"
                                     data-bind="click: submitApplication,
                                                visible: $root.authorization.ok('submit-application'),
-                                               enable: submitButtonEnabled">
+                                               enable: submitButtonEnabled() && !$root.authorization.ok( 'company-user-cannot-submit')">
                                 <i class="lupicon-download"></i>
                                 <span data-bind="ltext: 'application.submitApplication'"></span>
                             </button>

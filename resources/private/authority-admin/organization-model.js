@@ -44,6 +44,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
   self.permanentArchiveEnabled = ko.observable(true);
+  self.permanentArchiveInUseSince = ko.observable();
   self.features = ko.observable();
   self.allowedRoles = ko.observable([]);
 
@@ -136,6 +137,16 @@ LUPAPISTE.OrganizationModel = function () {
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
+    self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));
+    ko.computed(function() {
+      var startDate = self.permanentArchiveInUseSince();
+      if (self.initialized && startDate) {
+        ajax.command("set-organization-permanent-archive-start-date", {date: startDate.getTime()})
+          .success(util.showSavedIndicator)
+          .error(util.showSavedIndicator)
+          .call();
+      }
+    });
 
     // Operation attachments
     //
@@ -146,8 +157,13 @@ LUPAPISTE.OrganizationModel = function () {
     var operationsTosFunctions = organization["operations-tos-functions"] || {};
 
     var setTosFunctionForOperation = function(operationId, functionCode) {
+      var cmd = functionCode !== null ? "set-tos-function-for-operation" : "remove-tos-function-from-operation";
+      var data = {operation: operationId};
+      if (functionCode !== null) {
+        data.functionCode = functionCode;
+      }
       ajax
-        .command("set-tos-function-for-operation", {operation: operationId, functionCode: functionCode})
+        .command(cmd, data)
         .success(self.load)
         .call();
     };
@@ -205,7 +221,7 @@ LUPAPISTE.OrganizationModel = function () {
       ajax
         .query("available-tos-functions", {organizationId: organization.id})
         .success(function(data) {
-          self.tosFunctions(data.functions);
+          self.tosFunctions([{code: null, name: ""}].concat(data.functions));
           if (data.functions.length > 0 && organization["permanent-archive-enabled"]) {
             self.tosFunctionVisible(true);
           }

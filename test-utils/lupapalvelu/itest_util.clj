@@ -16,11 +16,13 @@
             [sade.http :as http]
             [sade.env :as env]
             [sade.dummy-email-server]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.document-api]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
@@ -103,7 +105,7 @@
 ;; HTTP Client cookie store
 ;;
 
-(def test-db-name (str "test_" (now)))
+(defonce test-db-name (str "test_" (now)))
 
 (defn ->cookie [name value]
   (proxy [Cookie] []
@@ -196,6 +198,10 @@
 (defn clear-collection [collection]
   (let [resp (decode-response (http-get (str (server-address) "/dev/clear/" collection) {}))]
     (assert (-> resp :body :ok) (str "Response not ok: clearing collection: \"" collection "\": response: " (pr-str resp)))))
+
+(defn clear-ajanvaraus-db []
+  (let [resp (decode-response (http-get (str (server-address) "/dev/ajanvaraus/clear") {}))]
+    (assert (-> resp :body :ok) (str "Response not ok: clearing ajanvaraus-db" (pr-str resp)))))
 
 (defn create-app-with-fn [f apikey & args]
   (let [args (apply hash-map args)
@@ -421,6 +427,13 @@
     (test-application-create-successful resp app-id)
     (query-application apikey app-id)))
 
+(defn create-and-open-application
+  "Creates a new application, opens it, and returns the application map"
+  [apikey & args]
+  (let [id (apply create-app-id apikey args)]
+    (comment-application apikey id true)
+    (query-application apikey id)))
+
 (defn create-and-submit-application
   "Returns the application map"
   [apikey & args]
@@ -438,7 +451,7 @@
     (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
-(defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
+(defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 12300000000, official 12400000000}}]
   (let [new-verdict-resp (f apikey :new-verdict-draft :id application-id :lang "fi")
         verdict-id (or (:verdictId new-verdict-resp))]
     (if-not (ok? new-verdict-resp)
@@ -446,7 +459,7 @@
       (do
        (f apikey :save-verdict-draft :id application-id :verdictId verdict-id :backendId verdictId :status status :name name :given given :official official :text "" :agreement false :section "" :lang "fi")
        (assoc
-         (f apikey :publish-verdict :id application-id :verdictId verdict-id)
+         (f apikey :publish-verdict :id application-id :verdictId verdict-id :lang "fi")
          :verdict-id verdict-id)))))
 
 (defn give-verdict [apikey application-id & args]
@@ -489,18 +502,19 @@
 ;; API for local operations
 
 (defn make-local-request [apikey]
-  {:scheme "http"
-   :user (find-user-from-minimal-by-apikey apikey)}
-  )
+  {:scheme "http", :user (find-user-from-minimal-by-apikey apikey)})
+
+(defn- execute-local [apikey web-fn action & args]
+  (let [params (if (map? (first args)) (first args) (apply hash-map args))]
+    (i18n/with-lang (:lang params)
+      (binding [*request* (make-local-request apikey)]
+        (web-fn (name action) params *request*)))))
 
 (defn local-command [apikey command-name & args]
-  (binding [*request* (make-local-request apikey)]
-    ;; (println "sending local-command" (if (map? (first args)) (first args) (apply hash-map args)) *request*)
-    (web/execute-command (name command-name) (if (map? (first args)) (first args) (apply hash-map args)) *request*)))
+  (apply execute-local apikey web/execute-command command-name args))
 
 (defn local-query [apikey query-name & args]
-  (binding [*request* (make-local-request apikey)]
-    (web/execute-query (name query-name) (if (map? (first args)) (first args) (apply hash-map args)) *request*)))
+  (apply execute-local apikey web/execute-query query-name args))
 
 (defn create-local-app
   "Runs the create-application command locally, returns reply map. Use ok? to check it."
@@ -602,6 +616,9 @@
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.115.html") => 0)))))
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
+
+(defn get-attachment-by-id [apikey application-id attachment-id]
+  (att/get-attachment-info (query-application apikey application-id) attachment-id))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment (:attachments application)]

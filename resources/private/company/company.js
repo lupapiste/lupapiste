@@ -9,36 +9,41 @@
   // ========================================================================================
 
   function NewCompanyUser() {
-    this.defaults  = {
+    var self = this;
+    self.defaults  = {
       email: undefined,
       firstName: undefined,
       lastName: undefined,
-      admin: undefined
+      admin: false,
+      submit: true
     };
 
-    this.email     = ko.observable().extend(required).extend({email: true});
-    this.firstName = ko.observable().extend(required);
-    this.lastName  = ko.observable().extend(required);
-    this.admin     = ko.observable().extend(notRequired);
+    self.email     = ko.observable().extend(required).extend({email: true});
+    self.firstName = ko.observable().extend(required);
+    self.lastName  = ko.observable().extend(required);
+    self.admin     = ko.observable();
+    self.submit    = ko.observable();
 
-    this.isValid = ko.computed(function() {
-      return _.every(this.fields, function(f) { return this[f].isValid(); }, this);
-    }, this);
+    // Checking the required name fields without triggering validation.
+    var namesValid = ko.pureComputed(function() {
+      return _.every( [self.firstName(), self.lastName()], _.trim );
+    } );
 
-    this.showSearchEmail    = ko.observable();
-    this.showUserInCompany  = ko.observable();
-    this.showUserAlreadyInvited = ko.observable();
-    this.showUserInvited    = ko.observable();
-    this.showUserDetails    = ko.observable();
+    self.showSearchEmail    = ko.observable();
+    self.showUserInCompany  = ko.observable();
+    self.showUserAlreadyInvited = ko.observable();
+    self.showUserInvited    = ko.observable();
+    self.showUserDetails    = ko.observable();
+    self.oldUser          = ko.observable();
 
-    this.canSearchUser    = this.email.isValid;
-    this.pending          = ko.observable();
+    self.canSearchUser    = self.email.isValid;
+    self.pending          = ko.observable();
 
-    this.emailEnabled     = ko.observable();
-    this.done             = ko.observable();
+    self.emailEnabled     = ko.observable();
+    self.done             = ko.observable();
 
-    this.canSubmit = ko.computed(function() { return !this.pending() && !this.done() && this.isValid(); }, this);
-    this.canClose  = ko.computed(function() { return !this.pending(); }, this);
+    self.canSubmit = ko.computed(function() { return !self.pending() && !self.done() && namesValid();}, self);
+    self.canClose  = ko.computed(function() { return !self.pending(); }, self);
   }
 
   NewCompanyUser.prototype.update = function(source) {
@@ -48,28 +53,32 @@
 
   NewCompanyUser.prototype.searchUser = function() {
     this.emailEnabled(false);
+    this.oldUser( false );
     ajax
-      .command("company-invite-user", {email: this.email()})
+      .query("company-search-user", {email: this.email()})
       .pending(this.pending)
       .success(function(data) {
         var result = data.result;
-        if (result === "invited") {
-          hub.send("refresh-companies");
-          this.showSearchEmail(false).showUserInvited(true);
-        } else if (result === "already-in-company") {
+        if (result === "already-in-company") {
           this.showSearchEmail(false).showUserInCompany(true);
         } else if (result === "already-invited") {
           this.showSearchEmail(false).showUserAlreadyInvited(true);
-        } else if (result === "not-found") {
+        } else {
           this.showSearchEmail(false).showUserDetails(true);
+          if( result === "found") {
+            this.oldUser( true );
+            this.firstName( data.firstName );
+            this.lastName( data.lastName );
+          }
         }
       }, this)
       .call();
   };
 
-  NewCompanyUser.prototype.submit = function() {
+  NewCompanyUser.prototype.sendInvite = function() {
     ajax
-      .command("company-add-user", ko.mapping.toJS(this))
+      .command(this.oldUser() ? "company-invite-user" :"company-add-user",
+               ko.mapping.toJS(this))
       .pending(this.pending)
       .success(function() {
           hub.send("refresh-companies");
@@ -95,63 +104,96 @@
   var newCompanyUser = new NewCompanyUser();
 
   // ========================================================================================
-  // CompanyUserOp:
+  // Delete/uninvite company user
   // ========================================================================================
 
-  function CompanyUserOp() {
+  function htmlSafeName( user ) {
+    return _.escape( user.firstName + " " + user.lastName );
+  }
+
+  function deleteCompanyUser( user, callback ) {
+    function deleteCommand() {
+      ajax.command(user.tokenId ? "company-cancel-invite" : "company-user-delete",
+                   user.tokenId ? {tokenId: user.tokenId} : {"user-id": user.id})
+        .success( function() {
+          callback();
+          lupapisteApp.models.globalAuthModel.refresh();
+        })
+        .call();
+    }
+
+    var prefix =  "company.user.op." + (user.tokenId
+                                        ? "delete-invite"
+                                        : "delete") + ".true.";
+    LUPAPISTE.ModalDialog.showDynamicYesNo( loc( prefix  + "title" ),
+                                            loc(prefix + "message",
+                                                htmlSafeName( user )) + "<br>",
+                                            {title: loc( "yes"),
+                                             fn: deleteCommand},
+                                            {title: loc( "no")},
+                                            {html: true});
+  }
+
+  // ========================================================================================
+  // Editor for role and submit status
+  // ========================================================================================
+
+  function UserEditor() {
     var self = this;
+    var user = null;
+    self.userId = ko.observable();
+    self.role = ko.observable();
+    self.submit = ko.observable();
 
-    self.title    = ko.observable();
-    self.message  = ko.observable();
-    self.pending  = ko.observable();
+    self.edit = function( target ) {
+      user = target;
+      self.userId( user.id );
+      self.role( user.role() );
+      self.submit( user.submit());
 
-    self.userId   = null;
-    self.tokenId  = null;
-    self.op       = null;
-    self.value    = null;
-    self.cb       = null;
-
-    self.withConfirmation = function(user, value, op, cb) {
-      return function() {
-        self.value    = value ? value : ko.observable(true);
-        self.userId   = user.id;
-        self.tokenId  = user.tokenId;
-        self.op       = op;
-        self.cb       = cb;
-        var prefix    = "company.user.op." + op + "." + self.value() + ".",
-            userName  = user.firstName + " " + user.lastName;
-        self
-          .title(loc(prefix + "title"))
-          .message(loc(prefix + "message", userName))
-          .pending(false);
-        LUPAPISTE.ModalDialog.open("#dialog-company-user-op");
-      };
     };
-
-    self.ok = function() {
-      self.pending(true);
-      var command = "company-user-update";
-      var params = {"user-id": self.userId, op: self.op, value: !self.value()};
-      if (self.tokenId) {
-        command = "company-cancel-invite";
-        params = {"tokenId": self.tokenId};
+    self.save = function() {
+      if( self.role() !== user.role() ) {
+        var prefix = "company.user.op.admin." + (self.role() !== "admin") + ".";
+        LUPAPISTE.ModalDialog.showDynamicYesNo( loc( prefix  + "title" ),
+                                                loc(prefix + "message",
+                                                    htmlSafeName( user )),
+                                                {title: loc( "yes"), fn: self.ok},
+                                                {title: loc( "no")},
+                                                {html: true});
+      } else {
+        self.ok();
       }
-      ajax
-        .command(command, params)
-        .success(function() {
-          if (self.cb) {
-            self.cb();
-            lupapisteApp.models.globalAuthModel.refresh();
-          } else {
-            self.value(!self.value());
-          }
-          LUPAPISTE.ModalDialog.close();
+  };
+    self.ok = function() {
+      ajax.command( "company-user-update",
+                    {"user-id": self.userId(),
+                     role: self.role(),
+                     submit: self.submit()})
+        .success( function() {
+          user.role( self.role());
+          user.submit( self.submit());
+          self.clear();
         })
         .call();
     };
+    self.clear = function() {
+      user = null;
+      self.userId( null );
+    };
+    self.editing = function( user ) {
+      return self.userId() === user.id;
+    };
+    self.roles = ["user", "admin"];
+    self.roleText = function( role ) {
+      return loc( "company.user.role." + role );
+    };
+    self.submitText = function( submit ) {
+      return loc( submit ? "yes" : "no");
+    };
   }
 
-  var companyUserOp = new CompanyUserOp();
+  var userEditor = new UserEditor();
 
   // ========================================================================================
   // CompanyUser:
@@ -163,18 +205,19 @@
     self.firstName    = user.firstName;
     self.lastName     = user.lastName;
     self.email        = user.email;
-    self.enabled      = ko.observable(user.enabled);
+    self.enabled      = user.enabled;
     self.role         = ko.observable(user.company.role);
-    self.admin        = ko.computed({
-      read:  function() { return self.role() === "admin"; },
-      write: function(v) { return self.role(v ? "admin" : "user"); }
+    self.submit       = ko.observable(user.company.submit);
+
+    self.opsEnabled   = ko.computed(function() {
+      return lupapisteApp.models.currentUser.company.role() === "admin"
+        && lupapisteApp.models.currentUser.id() !== user.id;
     });
-    self.opsEnabled   = ko.computed(function() { return lupapisteApp.models.currentUser.company.role() === "admin" && lupapisteApp.models.currentUser.id() !== user.id; });
-    self.toggleAdmin  = companyUserOp.withConfirmation(user, self.admin, "admin");
-    self.toggleEnable = companyUserOp.withConfirmation(user, self.enabled, "enabled");
-    self.deleteUser   = companyUserOp.withConfirmation(user, self.deleted, "delete", function() {
+    self.deleteUser   = _.partial( deleteCompanyUser, user, function() {
       users.remove(function(u) { return u.id === self.id; });
-    });
+    } );
+    self.editing = ko.computed( _.partial( userEditor.editing, self ));
+    self.edit = _.partial( userEditor.edit, self );
   }
 
   function InvitedUser(user, invitations) {
@@ -184,11 +227,12 @@
     self.email     = user.email;
     self.expires   = user.expires;
     self.role      = user.role;
+    self.submit    = user.submit;
     self.tokenId   = user.tokenId;
     self.opsEnabled   = ko.computed(function() { return lupapisteApp.models.currentUser.company.role() === "admin" && lupapisteApp.models.currentUser.id() !== user.id; });
-    self.deleteInvitation = companyUserOp.withConfirmation(user, self.deleted, "delete-invite", function() {
+    self.deleteInvitation = _.partial( deleteCompanyUser, user, function() {
       invitations.remove(function(i) { return i.tokenId === user.tokenId; });
-    });
+    } );
   }
 
   // ========================================================================================
@@ -322,6 +366,7 @@
     self.id          = ko.observable();
     self.isAdmin     = ko.observable();
     self.users       = ko.observableArray([]);
+    self.userEditor  = userEditor;
     self.invitations = ko.observableArray([]);
     self.info        = new CompanyInfo(self);
     self.tabs        = new TabsModel(self.id);
@@ -387,7 +432,7 @@
 
   $(function() {
     $("#company-content").applyBindings(company);
-    $("#dialog-company-user-op").applyBindings(companyUserOp);
+//    $("#dialog-company-user-op").applyBindings(companyUserOp);
     $("#dialog-company-new-user").applyBindings(newCompanyUser);
   });
 

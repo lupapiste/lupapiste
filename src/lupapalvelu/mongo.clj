@@ -201,11 +201,11 @@
                                         (query/fields (if (map? projection) (keys projection) projection))
                                         (query/snapshot))))
   ([collection query projection order-by]
-    {:pre [collection (map? query) (seq projection) (instance? clojure.lang.PersistentArrayMap order-by)]}
-    (map with-id (with-collection (name collection)
-                                        (query/find (remove-null-chars query))
-                                        (query/fields (if (map? projection) (keys projection) projection))
-                                        (query/sort order-by)))))
+   {:pre [collection (map? query) (seq projection) (instance? clojure.lang.PersistentArrayMap order-by)]}
+   (map with-id (with-collection (name collection)
+                  (query/find (remove-null-chars query))
+                  (query/fields (if (map? projection) (keys projection) projection))
+                  (query/sort order-by)))))
 
 (defn select-one
   "Returns one entry by matching the monger query, nil if query did not match."
@@ -215,6 +215,13 @@
   ([collection query projection]
     {:pre [(map? query)]}
     (with-id (mc/find-one-as-map (get-db)  collection (remove-null-chars query) projection))))
+
+(defn select-ordered [collection query order-by]
+  "Convenience select for ordered results without projection requirement."
+  {:pre [collection (map? query) (instance? clojure.lang.PersistentArrayMap order-by)]}
+  (map with-id (with-collection (name collection)
+                 (query/find (remove-null-chars query))
+                 (query/sort order-by))))
 
 (defn any?
   "check if any"
@@ -381,6 +388,8 @@
   (ensure-index :applications {:buildings.nationalId 1})
   (ensure-index :applications {:organization 1 :state 1})
   (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32})
+  (ensure-index :applications {:archived.application 1})
+  (ensure-index :applications {:archived.completed 1})
   (ensure-index :activation {:email 1})
   (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (ensure-index :vetuma {:user.stamp 1})

@@ -340,7 +340,7 @@
         non-empty (complement clojure.string/blank?)]
     (fact "xml has 10 reviews" (count reviews) => 10)
     (fact "huomautukset" (get-in aloitus-review-task [:data :katselmus :huomautukset :kuvaus :value]) => non-empty)
-    (fact "pitaja" (get-in aloitus-review-task [:data :katselmuksenLaji :value]) => "aloituskokous")
+    (fact "katselmuksenLaji" (get-in aloitus-review-task [:data :katselmuksenLaji :value]) => "aloituskokous")
     (fact "tunnustieto" (get-in aloitus-review-task [:data :muuTunnus]) => truthy)))
 
 ;; YA verdict

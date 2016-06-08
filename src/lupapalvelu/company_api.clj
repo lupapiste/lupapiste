@@ -60,20 +60,22 @@
   (ok :company (c/update-company! company updates caller)))
 
 (defcommand company-user-update
-  {:parameters [user-id op value]
-   :input-validators [(partial action/non-blank-parameters [:user-id :op])
-                      (partial action/boolean-parameters [:value])]
+  {:parameters [user-id role submit]
+   :input-validators [(partial action/non-blank-parameters [:user-id])
+                      (partial action/boolean-parameters [:submit])
+                      (partial action/select-parameters [:role] #{"user" "admin"})]
+   :pre-checks [c/company-user-edit-allowed]
    :user-roles #{:applicant :admin}}
-  [{caller :user}]
-  (let [target-user (u/get-user-by-id! user-id)]
-    (if-not (or (= (:role caller) "admin")
-                (and (= (get-in caller [:company :role])
-                        "admin")
-                     (= (get-in caller [:company :id])
-                        (get-in target-user [:company :id]))))
-      (unauthorized!))
-    (c/update-user! user-id (keyword op) value)
-    (ok)))
+  [_]
+  (c/update-user! user-id role submit))
+
+(defcommand company-user-delete
+  {:parameters [user-id]
+   :input-validators [(partial action/non-blank-parameters [:user-id])]
+   :user-roles #{:applicant :admin}
+   :pre-checks [c/company-user-edit-allowed]}
+  [_]
+  (c/delete-user! user-id))
 
 (defn- user-limit-not-exceeded [command _]
   (let [company (c/find-company-by-id (get-in command [:user :company :id]))
@@ -87,40 +89,42 @@
         (fail :error.company-user-limit-exceeded)))))
 
 
-(defcommand company-invite-user
+(defquery company-search-user
   {:parameters [email]
    :user-roles #{:applicant}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
+   :pre-checks [validate-user-is-admin-or-company-admin]}
+  [{caller :user}]
+  (c/search-result caller email (fn [user]
+                                  (ok (assoc (select-keys user [:firstName :lastName]) :result :found)))))
+
+(defcommand company-invite-user
+  {:parameters [email admin submit]
+   :user-roles #{:applicant}
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      (partial action/boolean-parameters [:admin :submit])
+                      action/email-validator]
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{caller :user}]
-  (let [user (u/find-user {:email email})
-        tokens (c/find-user-invitations (-> caller :company :id))]
-    (cond
-      (some #(= email (:email %)) tokens)
-      (ok :result :already-invited)
-
-      (nil? user)
-      (ok :result :not-found)
-
-      (get-in user [:company :id])
-      (ok :result :already-in-company)
-
-      :else
-      (do
-        (c/invite-user! email (-> caller :company :id))
-        (ok :result :invited)))))
+  (c/search-result caller email (fn [_]
+                                  (c/invite-user! email
+                                                  (-> caller :company :id)
+                                                  (if admin :admin :user) submit)
+                                  (ok :result :invited))))
 
 (defcommand company-add-user
   {:user-roles #{:applicant}
-   :parameters [firstName lastName email]
+   :parameters [firstName lastName email admin submit]
    :input-validators [(partial action/non-blank-parameters [:email])
+                      (partial action/boolean-parameters [:admin :submit])
                       action/email-validator]
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
-  [{user :user, {:keys [admin]} :data}]
+  [{user :user}]
   (c/add-user! {:firstName firstName :lastName lastName :email email}
                (c/find-company-by-id (-> user :company :id))
-               (if admin :admin :user))
+               (if admin :admin :user)
+               submit)
   (ok))
 
 (defcommand company-invite
@@ -128,7 +132,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :company-id])]
    :states (states/all-application-states-but states/terminal-states)
    :user-roles #{:applicant :authority}
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [application/validate-authority-in-drafts
+                c/company-not-already-invited]}
   [{caller :user application :application}]
   (c/company-invite caller application company-id)
   (ok))
@@ -146,3 +151,12 @@
       (fail! :forbidden)))
   (mongo/update-by-id :token tokenId {$set {:used created}})
   (ok))
+
+(defquery company-user-cannot-submit
+  {:description "Negative pseudo query that succeeds only if the
+  current user is authed to the current application via company but
+  does not have submit rights."
+   :parameters [:id]
+   :user-roles #{:applicant}
+   :pre-checks [c/cannot-submit]}
+  [_])

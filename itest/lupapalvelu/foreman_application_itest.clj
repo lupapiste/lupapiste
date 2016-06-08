@@ -12,11 +12,6 @@
 
 (apply-remote-minimal)
 
-(defn create-and-open-app [apikey & args]
-  (let [{application-id :id :as resp} (apply create-app apikey args)]
-    (comment-application apikey application-id true)
-    resp))
-
 (defn create-foreman-app [apikey authority application-id]
   (let [{foreman-application-id :id} (command authority :create-foreman-application :id application-id
                                               :taskId "" :foremanRole "ei tiedossa" :foremanEmail "")]
@@ -51,7 +46,7 @@
 (facts* "Foreman application"
         (let [apikey                       mikko
               email                        (email-for-key apikey)
-              {application-id :id}         (create-and-open-app apikey :operation "kerrostalo-rivitalo") => truthy
+              {application-id :id}         (create-and-open-application apikey :operation "kerrostalo-rivitalo") => truthy
               application                  (query-application apikey application-id)
               _                            (generate-documents application apikey)
               {foreman-application-id :id
@@ -176,9 +171,9 @@
                        (comment-application apikey foreman-application-id) => fail?))
 
           (facts "updating other foreman projects to current foreman application"
-                 (let [{application1-id :id}         (create-and-open-app apikey :operation "kerrostalo-rivitalo") => truthy
+                 (let [{application1-id :id}         (create-and-open-application apikey :operation "kerrostalo-rivitalo") => truthy
                        {foreman-application1-id :id} (create-foreman-app apikey sonja application1-id) => truthy
-                       {application2-id :id}         (create-and-open-app apikey :operation "kerrostalo-rivitalo") => truthy
+                       {application2-id :id}         (create-and-open-application apikey :operation "kerrostalo-rivitalo") => truthy
                        {foreman-application2-id :id} (create-foreman-app apikey sonja application2-id)
                        foreman-application1          (query-application apikey foreman-application1-id)
                        foreman-application2          (query-application apikey foreman-application2-id)

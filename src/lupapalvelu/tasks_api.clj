@@ -125,7 +125,7 @@
    :pre-checks [(task-state-assertion (tasks/all-states-but :sent :ok))
                 validate-task-is-not-review]}
   [{:keys [application user lang] :as command}]
-  (generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
+  (tasks/generate-task-pdfa application (util/find-by-id taskId (:tasks application)) user lang)
   (set-state command taskId :ok))
 
 (defcommand reject-task
@@ -205,7 +205,7 @@
   (let [task (util/find-by-id taskId (:tasks application))
         tila (get-in task [:data :katselmus :tila :value])
 
-        task-pdf-version (generate-task-pdfa application task user lang)
+        task-pdf-version (tasks/generate-task-pdfa application task user lang)
         application (domain/get-application-no-access-checking id)
         all-attachments (:attachments application)
         command (assoc command :application application)

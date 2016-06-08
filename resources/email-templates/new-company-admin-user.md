@@ -4,7 +4,7 @@ Yrityksellesi **{{company.name}}** on luotu Yritystili [Lupapiste](https://www.l
 
 Voit aktivoida tilisi oheisella linkill&auml;:
 
-  [{{link-fi}}]({{link-fi}})
+{{link-fi}}
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
@@ -14,6 +14,9 @@ Ongelmatilanteissa ota yhteytt&auml; tuki@lupapiste.fi.
 
 Toivottavasti viihdyt palvelumme parissa!
 
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
+
 ---
 
 # Hej {{user.firstName}},
@@ -22,7 +25,7 @@ Ditt f&ouml;retag **{{company.name}}** har f&aring;tt ett eget F&ouml;retagskont
 
 Ditt konto aktiveras genom l&auml;nken nedan:
 
-  [{{link-sv}}]({{link-sv}})
+{{link-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
@@ -31,3 +34,6 @@ Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https:
 Vid problem &auml;r du v&auml;lkommen att kontakta tuki@lupapiste.fi.
 
 Vi hoppas att du trivs med v&aring;r tj&auml;nst!
+
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

@@ -432,6 +432,10 @@ input.form-input.inline {
  width: $cols1;
 }
 
+.form-input.short-plus {
+ width: 1.5  * $cols1;
+}
+
 .form-input.medium {
  width: $cols2;
 }
@@ -498,7 +502,7 @@ input.form-input.inline {
     .form-entry {
       .form-input.text, .form-input.combobox,  .form-input.email {
       }
-      .form-label-string-choice, .form-label-select, .form-label-date {
+      .form-label-select, .form-label-date {
         vertical-align: text-bottom;
       }
     }
@@ -1458,7 +1462,7 @@ select.dropdown {
   border-radius: 0 0 0 0;
   padding: {
     left: 12px;
-    right: 12px;
+    right: 17px + 12px + 4px; // arrow position + arrow width + padding
 
   }
   height: 40px;
@@ -1593,6 +1597,10 @@ div.review-done {
 
 .checkbox-wrapper.checkbox-wrapper--break {
   margin-bottom: $marginL;
+}
+
+.checkbox-wrapper.checkbox-wrapper--break-small {
+  margin-bottom: $marginS;
 }
 
 .foreman-info {

@@ -15,8 +15,8 @@
             [midje.util :refer [testable-privates]]))
 
 (facts "Date format"
-  (fact (util/to-xml-date (date-time 2012 1 14)) => "2012-01-14")
-  (fact (util/to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
+  (fact (util/to-xml-date (.getMillis (date-time 2012 1 14))) => "2012-01-14")
+  (fact (util/to-xml-date (.getMillis (date-time 2012 2 29))) => "2012-02-29"))
 
 (fact "get-rakennustunnus"
   (let [application {:primaryOperation {:id "1" :description "desc"}}

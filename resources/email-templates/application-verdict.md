@@ -1,18 +1,17 @@
-# Hei,
+# Moi {{name}},
 
-Hakemukseesi on annettu p&auml;&auml;t&ouml;s. P&auml;&auml;set n&auml;kem&auml;&auml;n p&auml;&auml;t&ouml;ksen &#8220;P&auml;&auml;t&ouml;kset&#8221;-v&auml;lilehdelt&auml;. Tutustuthan huolellisesti p&auml;&auml;t&ouml;ksen sis&auml;lt&ouml;&ouml;n sek&auml; lupam&auml;&auml;r&auml;yksiin.
+hakemukseen {{link-fi}} on annettu p&auml;&auml;t&ouml;s. P&auml;&auml;set n&auml;kem&auml;&auml;n p&auml;&auml;t&ouml;ksen "P&auml;&auml;t&ouml;kset"-v&auml;lilehdelt&auml;. Tutustuthan huolellisesti p&auml;&auml;t&ouml;ksen sis&auml;lt&ouml;&ouml;n sek&auml; lupam&auml;&auml;r&auml;yksiin.
 
-  {{link-fi}}
+Hankkeelle voi jälleen lisätä tarpeellisia suunnitelmia ja liitteitä Suunnitelmat ja liitteet –välilehdelle. Muuten tietojen muokkaaminen ei enää onnistu.
 
-Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+Terveisin,
+[Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
-# Hej,
+# Hej {{name}},
 
-din ans&ouml;kan har avgjorts. Du kan se beslutet under fliken &quot;Beslut&quot;. Bekanta dig noga med beslutets inneh&aring;ll och tillst&aring;ndsvillkoren.
+din ans&ouml;kan {{link-sv}} har avgjorts. Du kan se beslutet under fliken &quot;Beslut&quot;. Bekanta dig noga med beslutets inneh&aring;ll och tillst&aring;ndsvillkoren.
 
-  {{link-sv}}
-
-Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
-
+Hälsningar,
+[Lupapiste](https://www.lupapiste.fi/)

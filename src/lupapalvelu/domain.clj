@@ -370,7 +370,9 @@
    :metadata                 {}
    :processMetadata          {}
    :appeals                  []
-   :appealVerdicts           []})
+   :appealVerdicts           []
+   :archived                 {:application nil
+                              :completed   nil}})
 
 (def operation-skeleton
   {:name ""

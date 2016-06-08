@@ -1,9 +1,10 @@
 (ns lupapalvelu.pdf.libreoffice-template-verdict
-  (:require [taoensso.timbre :as log]
+  (:require [taoensso.timbre :as timbre]
             [sade.util :as util]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.pdf.libreoffice-template :refer [xml-escape get-organization-name applicant-index] :as template]
+            [lupapalvelu.pdf.libreoffice-template :refer [get-organization-name applicant-index] :as template]
             [clojure.string :as s]
+            [lupapalvelu.domain :as domain]
             [clojure.java.io :as io]))
 
 (defn- get-lupamaaraykset [application verdict-id paatos-idx]
@@ -57,15 +58,15 @@
   (into []
         (if-let [krysp-other-requirements (:muutMaaraykset (get-lupamaaraykset application verdict-id paatos-idx))]
           (map (fn [row] [(str row)]) krysp-other-requirements)
-          (map (fn [row] [(str (:taskname row))]) (filter-tasks application verdict-id "task-lupamaarays")))))
+          (map (fn [row] [(str (get-in row [:data :maarays :value]) " (" (:taskname row) ")")]) (filter-tasks application verdict-id "task-lupamaarays")))))
 
 ;;(sc/optional-key :vaaditutKatselmukset)           [Katselmus]
 (defn- verdict-vaaditutKatselmukset [application verdict-id paatos-idx lang]
   (if-let [krysp-other-requirements (:vaaditutKatselmukset (get-lupamaaraykset application verdict-id paatos-idx))]
     (map (fn [val] [(str (:katselmuksenLaji val)) (str (:tarkastuksenTaiKatselmuksenNimi val))])
          krysp-other-requirements)
-    (map (fn [child] [(i18n/localize (name lang) (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value])))])
-         (filter-tasks application verdict-id "task-katselmus"))))
+    (map (fn [child] [(str (:taskname child))])
+         (concat (filter-tasks application verdict-id "task-katselmus-ya") (filter-tasks application verdict-id "task-katselmus")))))
 
 ;(sc/optional-key :maaraykset)                     [Maarays]
 (defn- verdict-maaraykset [application verdict-id paatos-idx]
@@ -80,21 +81,37 @@
 (defn- verdict-paatos-key [paatos key]
   (s/join "\n" (map (fn [val] (str (key val))) (:poytakirjat paatos))))
 
-(defn verdict-signatures [verdict paatos]
+(defn- verdict-signatures [verdict paatos]
   (into [[(verdict-paatos-key paatos :paatoksentekija) (or (util/to-local-date (get-in paatos [:paivamaarat :anto])) "-")]]
-        (map (fn [sig] [(xml-escape (str (get-in sig [:user :firstName]) " " (get-in sig [:user :lastName]))) (or (util/to-local-date (:created sig)) "-")]) (:signatures verdict))))
+        (map (fn [sig] [(str (get-in sig [:user :firstName]) " " (get-in sig [:user :lastName])) (or (util/to-local-date (:created sig)) "-")]) (:signatures verdict))))
+
+(defn- get-vastuuhenkilo [application]
+    (let [data (template/get-document application :tyomaastaVastaava)
+          henkilo-nimi (template/name-from-doc data)]
+      henkilo-nimi))
 
 (defn write-verdict-libre-doc [application id paatos-idx lang file]
-  (let [verdict (first (filter #(= id (:id %)) (:verdicts application)))
-        paatos (nth (:paatokset verdict) paatos-idx)]
+  (let [applicants (map (fn [val] [val]) (map template/name-from-doc (template/get-applicant-docs application)))
+        verdict (first (filter #(= id (:id %)) (:verdicts application)))
+        paatos (nth (:paatokset verdict) paatos-idx)
+        start-time (template/get-in-document-data application :tyoaika [:tyoaika-alkaa-pvm :value])
+        end-time (template/get-in-document-data application :tyoaika [:tyoaika-paattyy-pvm :value])]
     (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
-    (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-contract-template.fodt" "private/lupapiste-verdict-template2.fodt"))
+    (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-ya-contract-template.fodt" "private/lupapiste-ya-verdict-template.fodt"))
                                file
                                (assoc (template/common-field-map application lang)
-                                 "FIELD001" (if (:sopimus verdict) (i18n/localize lang "userInfo.company.contract") (i18n/localize lang "application.verdict.title"))
+
+                                 "LPTABLE_APPLICANT" applicants
+
+                                 "LPATITLE_OPERATIONS" (i18n/localize lang "verdict.export.operations")
+
+                                 "LPTITLE" (i18n/localize lang (if (:sopimus verdict) "userInfo.company.contract" "application.verdict.title"))
+
+                                 "LPTITLE_CONTRACT_DATE" (i18n/localize lang "verdict.contract.date")
 
                                  "LPTITLE_KUNTA" (i18n/localize lang "verdict.id")
-                                 "FIELD012" (str (:kuntalupatunnus verdict))
+                                 "LPTITLE_KUNTALUPA" (i18n/localize lang "linkPermit.dialog.kuntalupatunnus")
+                                 "LPVALUE_KUNTALUPA" (:kuntalupatunnus verdict)
 
                                  "LPTITLE_SIJAINTI" (i18n/localize lang "applications.location")
 
@@ -107,8 +124,15 @@
                                  "LPTITLE_VERDICT_STATE" (i18n/localize lang "verdict.status")
                                  "LPVALUE_VERDICT_STATE" (verdict-status paatos lang)
 
-                                 "LPTITLE_TEKSTI" (i18n/localize lang "verdict.text")
-                                 "LPVALUE_TEKSTI" (verdict-paatos-key paatos :paatos)
+                                 "LPTITLE_TEKSTI" (i18n/localize lang (if (:sopimus verdict) "verdict.contract.text" "verdict.text"))
+                                 "LPTABLE_TEKSTI" (map (fn [line] ["" line]) (clojure.string/split (verdict-paatos-key paatos :paatos) #"\n"))
+
+                                 "LPTITLE_VASTUU" (i18n/localize lang "verdict.vastuuhenkilo")
+                                 "LPVALUE_VASTUU" (get-vastuuhenkilo application)
+
+                                 "LPTITLE_LUPA_AIKA" (if (s/blank? start-time) "" (i18n/localize lang "tyoaika._group_label"))
+                                 "LPVALUE_LUPA_AIKA" (if (s/blank? start-time) ""  (str start-time " - " end-time))
+
 
                                  ;;                                 "LUPAMAARAYKSETHEADER" (i18n/localize lang "verdict.lupamaaraukset")
                                  ;;                                 "LUPAMAARAYKSETTABLE" (verdict-lupamaaraykset application id paatos-idx lang)
@@ -133,6 +157,8 @@
 
                                  "LPTITLE_OSAPUOLET" (i18n/localize lang "verdict.osapuolet.ja.yhteyshenkilot")
                                  "LPTABLE-OSAPUOLET" (into [[(str (get-organization-name application lang) " / " (verdict-paatos-key paatos :paatoksentekija))]] (applicant-index application))
+
+
 
                                  "LPTITLE_SISALTO" (i18n/localize lang "verdict.contract.content")
 

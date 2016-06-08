@@ -7,6 +7,9 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
 - [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 - [Leiningen](https://github.com/technomancy/leiningen) 2.5+
 - [MongoDB](https://www.mongodb.org/downloads) (testattu 2.6 - 3.2 versioilla)
+    - Mac: `brew install mongodb` (`brew tap homebrew/services` + `brew services start mongodb`)
+    - Tarkista, että mongon kantakansiolla ja lokikansiolla on asetettu permissionit
+    - Macillä saattaa tulla avoimien tiedostojen raja vastaan: [How to persist ulimit settings in osx](http://unix.stackexchange.com/questions/108174/how-to-persist-ulimit-settings-in-osx-mavericks)
 - CSS ja [Sass](http://sass-lang.com):
     - [Ruby](https://www.ruby-lang.org)
     - [Compass](http://compass-style.org/): `gem install compass`
@@ -18,20 +21,21 @@ Tarvitset kehitysympäristöön seuraavat työkalut:
   - IE:llä ajettavia testejä varten ajuri osoitteesta  http://selenium-release.storage.googleapis.com/index.html
   - Chromella ajettavia testejä varten ajuri osoitteesta http://chromedriver.storage.googleapis.com/index.html
 - [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
-  PDF-tiedostojen kääntämistä ja korjaamista varten. [Apuja OS X -ongelmin](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
+  PDF-tiedostojen kääntämistä ja korjaamista varten. [Apuja OS X -ongelmiin](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
 
 Valinnaisesti:
 
 - [pdf2pdf](https://www.pdf-tools.com/pdf/Products-Shop/Evaluate.aspx?p=CNV&back=%2fpdf%2fpdf-to-pdfa-converter-signature.aspx)
   PDF/A-konversioita varten
-- [KnockoutJS context debugger](https://chrome.google.com/webstore/detail/knockoutjs-context-debugg/oddcpmchholgcjgjdnfjmildmlielhof) Chrome plugin, joka helpottaa DOM elementtien binding kontekstien hahmottamista
+- [KnockoutJS context debugger](https://chrome.google.com/webstore/detail/knockoutjs-context-debugg/oddcpmchholgcjgjdnfjmildmlielhof) Chrome plugin, joka helpottaa DOM-elementtien binding kontekstien hahmottamista
 
 ## Kehitysympäristön konfigurointi
 
 ### user.properties
 
-Luo projektin juureen (sovelluksen kehitysaikaiseen ajohakemistoon) user.properties
-tiedosto. Tiedostossa voit määritellä mm. tietokantayhteyden:
+Luo projektin juureen (sovelluksen kehitysaikaiseen ajohakemistoon)
+user.properties -tiedosto. Tiedostossa voit määritellä
+mm. tietokantayhteyden:
 
     mongodb.servers.0.host  localhost
     mongodb.servers.0.port  27017

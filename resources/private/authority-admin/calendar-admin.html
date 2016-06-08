@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="calendar-admin">
+  <div class="container">
+    <div>
+      <button class="secondary" data-bind="click: function() { history.go(-1); }">
+        <i class="lupicon-chevron-start"></i>
+        <span data-bind="ltext: 'back'"></span>
+      </button>
+      <h2 data-bind="ltext: 'auth-admin.organization-calendars'"></h2>
+      <h3 data-bind="with: calendars.calendarInView"><!--ko text: name --><!--/ko--> (<!--ko text: organization --><!--/ko-->) </h3>
+      <div>&nbsp;</div>
+    </div>
+    <div data-bind="component: { name: 'calendar-view' }"></div>
+  </div>
+</section>
+</body>
+</html>

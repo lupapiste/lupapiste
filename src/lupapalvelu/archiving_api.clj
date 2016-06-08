@@ -9,7 +9,8 @@
             [cheshire.core :as json]))
 
 (defn check-user-is-archivist [{:keys [user]} {:keys [organization]}]
-  (let [org-set (set/intersection #{organization} (user/organization-ids-by-roles user #{:archivist}))]
+  (let [archive-orgs (user/organization-ids-by-roles user #{:archivist})
+        org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
       unauthorized)))
 
@@ -43,6 +44,17 @@
                           (id-set app-doc-id) (assoc app-doc-id (get-in application [:metadata :tila]))
                           (id-set case-file-doc-id) (assoc case-file-doc-id (get-in application [:processMetadata :tila])))]
     (ok :state state-map)))
+
+(defcommand mark-pre-verdict-phase-archived
+  {:parameters       [:id]
+   :input-validators [(partial non-blank-parameters [:id])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states
+   :feature          :arkistointi
+   :pre-checks       [check-user-is-archivist]}
+  [{:keys [application created]}]
+  (archiving/mark-application-archived application created :application)
+  (ok))
 
 (defquery archiving-operations-enabled
   {:user-roles #{:authority}

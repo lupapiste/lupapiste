@@ -17,7 +17,9 @@
             [clj-time.format :as f]
             [lupapalvelu.application-meta-fields :as amf]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.states :as states])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -72,6 +74,34 @@
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
+(defn- mark-application-archived-if-done [{:keys [id] :as application} now]
+  (let [pre-verdict-query {:_id id
+                           $or  [{:attachments {$elemMatch {:metadata.tila                     {$nin [:arkistoitu]}
+                                                            :applicationState                  {$nin [states/post-verdict-states]}
+                                                            :versions                          {$gt  []}
+                                                            :metadata.sailytysaika.arkistointi {$ne  :ei}}}}
+                                 {:metadata.tila                     {$ne :arkistoitu}
+                                  :metadata.sailytysaika.arkistointi {$ne :ei}}]}
+        post-verdict-query {:_id id
+                            $or  [{:attachments {$elemMatch {:metadata.tila                     {$nin [:arkistoitu]}
+                                                             :versions                          {$gt  []}
+                                                             :metadata.sailytysaika.arkistointi {$ne  :ei}}}}
+                                  {:metadata.tila                     {$ne :arkistoitu}
+                                   :metadata.sailytysaika.arkistointi {$ne :ei}}
+                                  {:processMetadata.tila                     {$ne :arkistoitu}
+                                   :processMetadata.sailytysaika.arkistointi {$ne :ei}}
+                                  {:state {$ne :closed}}]}]
+
+    (when (zero? (mongo/count :applications pre-verdict-query))
+      (action/update-application
+        (action/application->command application)
+        {$set {:archived.application now}}))
+
+    (when (zero? (mongo/count :applications post-verdict-query))
+      (action/update-application
+        (action/application->command application)
+        {$set {:archived.completed now}}))))
+
 (defn- upload-and-set-state [id is-or-file content-type metadata {app-id :id :as application} now state-update-fn]
   (info "Trying to archive attachment id" id "from application" app-id)
   (if-not (#{:arkistoidaan :arkistoitu} (:tila metadata))
@@ -83,23 +113,25 @@
               (if (= 200 status)
                 (do
                   (state-update-fn :arkistoitu application now id)
-                  (info "Archived attachment id" id "from application" app-id))
+                  (info "Archived attachment id" id "from application" app-id)
+                  (mark-application-archived-if-done application now))
                 (do
                   (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
                   (if (and (= status 409) (string/includes? body "already exists"))
                     (do
                       (info "Response indicates that" id "is already in archive. Updating state.")
-                      (state-update-fn :arkistoitu application now id))
+                      (state-update-fn :arkistoitu application now id)
+                      (mark-application-archived-if-done application now))
                     (state-update-fn :valmis application now id)))))
             (when (instance? File is-or-file)
               (io/delete-file is-or-file :silently)))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
-  (if (= op-id (:id primaryOperation))
-    [(:name primaryOperation)]
-    (->> (filter #(= op-id (:id %)) secondaryOperations)
-         (map :name))))
+  (cond->> (concat [primaryOperation] secondaryOperations)
+           op-id (filter #(= op-id (:id %)))
+           true (map :name)
+           true (distinct)))
 
 (defn- ->iso-8601-date [date]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
@@ -141,7 +173,8 @@
     (->> (if op-id
            [(get id-to-usage op-id)]
            (vals id-to-usage))
-         (remove nil?))))
+         (remove nil?)
+         (distinct))))
 
 (defn- get-building-ids [bldg-key {:keys [buildings]} op-id]
   ;; Only some building lists contain operation ids at all
@@ -168,9 +201,7 @@
                        :nationalBuildingIds   (get-building-ids :nationalId application (get-in attachment [:op :id]))
                        :propertyId            propertyId
                        :applicant             applicant
-                       :operations            (if (:op attachment)
-                                                (find-op application (get-in attachment [:op :id]))
-                                                (concat [(get-in application [:primaryOperation :name])] (map :name (:secondaryOperations application))))
+                       :operations            (find-op application (get-in attachment [:op :id]))
                        :tosFunction           (first (filter #(= (:tosFunction application) (:code %)) (tiedonohjaus/available-tos-functions (:organization application))))
                        :address               address
                        :organization          organization
@@ -184,9 +215,7 @@
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
                        :kasittelija           (select-keys (:authority application) [:username :firstName :lastName])
                        :arkistoija            (select-keys user [:username :firstName :lastName])
-                       :kayttotarkoitukset    (if (:op attachment)
-                                                (get-usages application (get-in attachment [:op :id]))
-                                                (get-usages application nil))
+                       :kayttotarkoitukset    (get-usages application (get-in attachment [:op :id]))
                        :kieli                 "fi"
                        :versio                (if attachment (make-version-number attachment) "1.0")
                        :suunnittelijat        (:_designerIndex (amf/designers-index application))}]
@@ -217,3 +246,8 @@
               metadata (generate-archive-metadata application user attachment)]
           (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))
     {:error :error.invalid-metadata-for-archive}))
+
+(defn mark-application-archived [application now archived-ts-key]
+  (action/update-application
+    (action/application->command application)
+    {$set {(str "archived." (name archived-ts-key)) now}}))

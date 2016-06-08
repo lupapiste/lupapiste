@@ -2148,6 +2148,51 @@
                              {:documents {$elemMatch {:data.kesto.arki {$exists true}
                                                       :schema-info.name "ymp-ilm-kesto"}}}))
 
+(defmigration add-archived-timestamps
+  {:apply-when (pos? (mongo/count :applications {:archived {$exists false}}))}
+  (mongo/update-by-query :applications {:archived {$exists false}} {$set {:archived {:application nil
+                                                                                     :completed nil}}}))
+
+(defmigration add-archiving-start-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:permanent-archive-in-use-since {$exists false}}))}
+  (mongo/update-by-query :organizations {:permanent-archive-in-use-since {$exists false}} {$set {:permanent-archive-in-use-since 0}}))
+
+(defn add-ym-in-scope [org]
+  (let [ym-municipalities (->> (filter (comp #{"YM"} :permitType) (:scope org))
+                               (map :municipality)
+                               (set))]
+    (->> (map :municipality (:scope org))
+         (distinct)
+         (remove ym-municipalities)
+         (reduce #(update %1 :scope conj {:open-inforequest-email nil,
+                                          :open-inforequest false,
+                                          :new-application-enabled true,
+                                          :inforequest-enabled true,
+                                          :municipality %2,
+                                          :permitType "YM"}) org))))
+
+(defmigration add-ym-permit-type-to-all-ymp-orgs
+  {:apply-when (pos? (mongo/count :organizations {:_id #"YMP" :scope.0 {$exists true} :scope.permitType {$not {"$eq" "YM"}}}))}
+  (->> (mongo/select :organizations {:_id #"YMP" :scope.permitType {$not {"$eq" "YM"}}})
+       (map add-ym-in-scope)
+       (run! #(mongo/update-by-id :organizations (:id %) {$set {:scope (:scope %)}}))))
+
+(defmigration add-missing-submit-rights-to-company-users
+  {:apply-when (pos? (mongo/count :users {:company.id {$exists true}
+                                          :company.submit {$exists false}}))}
+  (mongo/update-by-query :users
+                         {:company.id {$exists true}
+                          :company.submit {$exists false}}
+                         {$set {:company.submit true}}))
+
+(defmigration add-missing-submit-rights-to-company-tokens
+  {:apply-when (pos? (mongo/count :token {:token-type {$in [:new-company-user :invite-company-user]}
+                                          :data.submit {$exists false}}))}
+  (mongo/update-by-query :token
+                         {:token-type {$in [:new-company-user :invite-company-user]}
+                          :data.submit {$exists false}}
+                         {$set {:data.submit true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections

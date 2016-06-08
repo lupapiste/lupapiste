@@ -131,7 +131,7 @@
             new-verdict-resp (command velho :new-verdict-draft :id link-app-id) => ok?
             verdict-id (:verdictId new-verdict-resp) => truthy
             _ (command velho :save-verdict-draft :id link-app-id :verdictId verdict-id :backendId "KLTunnus1" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "") => ok?
-            _ (command velho :publish-verdict :id link-app-id :verdictId verdict-id) => ok?
+            _ (command velho :publish-verdict :id link-app-id :verdictId verdict-id :lang :fi) => ok?
             manual-link "Another kuntalupatunnus"
 
             application (create-and-submit-application ; Actual app for asianhallinta

@@ -387,6 +387,17 @@
         })
         .call();
     };
+
+    self.showMarkArchivedSection = ko.observable(!params.application._js.archived.application);
+    self.markApplicationArchived = function() {
+      ajax
+        .command("mark-pre-verdict-phase-archived", {id: ko.unwrap(params.application.id)})
+        .success(function() {
+          repository.load(ko.unwrap(params.application.id));
+          self.showMarkArchivedSection(false);
+        })
+        .call();
+    };
   };
 
   ko.components.register("archival-summary", {
