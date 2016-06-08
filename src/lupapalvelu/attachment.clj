@@ -128,6 +128,9 @@
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
 
+(defschema AttachmentId
+  (ssc/min-length-string 24))
+
 (defschema AttachmentAuthUser
   "User summary for authorized users in attachment.
    Only name and role is used for users without Lupapiste account."
@@ -191,7 +194,7 @@
    :type-group                           (apply sc/enum all-attachment-type-groups)})
 
 (defschema Attachment
-  {:id                                   sc/Str
+  {:id                                   AttachmentId
    :type                                 Type               ;; Attachment type
    :modified                             ssc/Timestamp      ;; last modified
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
@@ -205,7 +208,7 @@
                                           :fileId ssc/ObjectIdStr }
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
-   (sc/optional-key :ramLink)           sc/Str            ;; reference from ram attachment to base attachment
+   (sc/optional-key :ramLink)            AttachmentId       ;; reference from ram attachment to base attachment
    :required                             sc/Bool            ;;
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;
