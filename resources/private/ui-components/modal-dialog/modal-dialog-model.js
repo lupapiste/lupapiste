@@ -84,7 +84,7 @@ LUPAPISTE.ModalDialogModel = function () {
     $("html").addClass("no-scroll");
     self.component(data.component);
     self.componentParams(data.componentParams || {});
-    self.title = data.ltitle ? loc(data.ltitle) : data.title;
+    self.title(data.ltitle ? loc(data.ltitle) : data.title);
     self.size(data.size ? data.size : "large");
     self.id(data.id || data.component);
     self.closeOnClick(data.closeOnClick || false);
