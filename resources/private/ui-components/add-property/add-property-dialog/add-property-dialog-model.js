@@ -29,10 +29,10 @@ LUPAPISTE.AddPropertyDialogModel = function() {
     self.map().center(x, y, 14);
   }
 
-  var _map = null;
+  self._map = null;
   self.map = function() {
-    if (!_map) {
-      _map = gis
+    if (!self._map) {
+      self._map = gis
         .makeMap("add-location-map", {zoomWheelEnabled: false})
         .addClickHandler(function(x, y) {
           self.x = x;
@@ -43,20 +43,31 @@ LUPAPISTE.AddPropertyDialogModel = function() {
           return false;
         });
     }
-    return _map;
+    return self._map;
   };
 
   self.submit = function() {
     var updates = [["kiinteisto.kiinteistoTunnus", self.propertyId()]];
+    var id = app.id(); // app is disposed after dialog is closed
     ajax
-      .command("create-doc", { id: app.id(),
+      .command("create-doc", { id: id,
                                schemaName: "secondary-kiinteistot",
                                updates: updates,
                                fetchRakennuspaikka: true })
-      .success(function() { repository.load(app.id()); })
+      .success(function() { repository.load(id); })
       .call();
     hub.send("close-dialog");
   };
 
   moveMarkerAndCenterMap(self.x, self.y);
+
+  self.dispose = function() {
+    self.selectedNotAppProperty.dispose();
+    self.selectedNotAppProperty = null;
+    if (self._map) {
+      self._map.destroy();
+      self._map = null;
+    }
+    app = null;
+  };
 };
