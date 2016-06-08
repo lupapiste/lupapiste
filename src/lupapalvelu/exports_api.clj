@@ -19,8 +19,27 @@
   (let [doc (domain/get-document-by-operation application operation)
         [_ kayttotarkoitus] (first (tools/deep-find doc [:kayttotarkoitus :value]))]
     (if (ss/blank? kayttotarkoitus)
-      {:priceClass "C" :kayttotarkoitus nil}
-      {:priceClass (get @kayttotarkoitus-hinnasto kayttotarkoitus) :kayttotarkoitus kayttotarkoitus})))
+      {:price-class "C" :kayttotarkoitus nil}
+      {:price-class (get @kayttotarkoitus-hinnasto kayttotarkoitus) :kayttotarkoitus kayttotarkoitus})))
+
+(def permit-type-price-codes
+  {"R" 901
+   "P" 901
+   "YA" 902
+   "KT" 904
+   "MM" 904
+   "MAL" 903
+   "YI"  903
+   "YL" 903
+   "YM" 903
+   "VVVL" 903})
+
+(def usage-price-codes
+  {"A" 905
+   "B" 906
+   "C" 907
+   "D" 908
+   "E" 909})
 
 (def price-classes-for-operation
   ; See lupapiste-chef/cookbooks/lupapiste-dw/files/default/etl/setupdata/price_class_csv.csv
@@ -139,14 +158,19 @@
 
 (defn- resolve-price-class [application op]
   (let [price-class (get price-classes-for-operation (keyword (:name op)))]
-    (if (fn? price-class)
-      (let [price (price-class application op)] ; get kayttotarkoitus
-        (-> op
-            (assoc :priceClass (get price :priceClass))
-            (assoc :use (get price :kayttotarkoitus))))
-      (-> op ; normal price class
-        (assoc :priceClass price-class)
-        (assoc :use nil)))))
+    (if (= uuden-rakentaminen price-class)
+      (let [{:keys [price-class kayttotarkoitus]} (price-class application op)]
+        (assoc op
+          :priceClass price-class
+          :priceCode 900
+          :use kayttotarkoitus
+          :usagePriceCode (get usage-price-codes price-class)))
+      ; normal price class
+      (assoc op
+        :priceClass price-class
+        :priceCode (get permit-type-price-codes (:permitType application))
+        :use nil
+        :usagePriceCode nil))))
 
 (defn- operation-mapper [application op]
   (util/assoc-when (resolve-price-class application op)
