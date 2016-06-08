@@ -480,6 +480,10 @@ var gis = (function() {
         }
       });
 
+      self.destroy = function() {
+        self.clear().map.destroy();
+      }
+
       var click = new ClickControl();
       self.map.addControl(click);
       click.activate();
