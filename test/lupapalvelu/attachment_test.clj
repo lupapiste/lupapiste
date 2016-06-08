@@ -93,41 +93,41 @@
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
-  (make-attachments 999 :draft [{:type :a} {:type :b}] false true true) => (just
-                                                                             [{:id "123"
-                                                                               :locked false
-                                                                               :modified 999
-                                                                               :op nil
-                                                                               :state :requires_user_action
-                                                                               :target nil
-                                                                               :type :a
-                                                                               :applicationState :draft
-                                                                               :contents nil
-                                                                               :signatures []
-                                                                               :versions []
-                                                                               :auth []
-                                                                               :notNeeded false
-                                                                               :required true
-                                                                               :requestedByAuthority true
-                                                                               :forPrinting false
-                                                                               :readOnly false}
-                                                                              {:id "123"
-                                                                               :locked false
-                                                                               :modified 999
-                                                                               :op nil
-                                                                               :state :requires_user_action
-                                                                               :target nil
-                                                                               :type :b
-                                                                               :applicationState :draft
-                                                                               :contents nil
-                                                                               :signatures []
-                                                                               :versions []
-                                                                               :auth []
-                                                                               :notNeeded false
-                                                                               :required true
-                                                                               :requestedByAuthority true
-                                                                               :forPrinting false
-                                                                               :readOnly false}])
+  (make-attachments 999 :draft [{:type {:type-group :g :type-id :a}} {:type {:type-group :g :type-id :b}}] false true true)
+  => (just [{:id                   "123"
+             :locked               false
+             :modified             999
+             :op                   nil
+             :state                :requires_user_action
+             :target               nil
+             :type                 {:type-group :g :type-id :a}
+             :applicationState     :draft
+             :contents             nil
+             :signatures           []
+             :versions             []
+             :auth                 []
+             :notNeeded            false
+             :required             true
+             :requestedByAuthority true
+             :forPrinting          false
+             :readOnly             false}
+            {:id                   "123"
+             :locked               false
+             :modified             999
+             :op                   nil
+             :state                :requires_user_action
+             :target               nil
+             :type                 {:type-group :g :type-id :b}
+             :applicationState     :draft
+             :contents             nil
+             :signatures           []
+             :versions             []
+             :auth                 []
+             :notNeeded            false
+             :required             true
+             :requestedByAuthority true
+             :forPrinting          false
+             :readOnly             false}])
   (provided
     (mongo/create-id) => "123"))
 
@@ -147,13 +147,9 @@
                                                                               "attachments.2.sent" 123}))
 
 (fact "All attachments are localized"
-  (let [attachment-group-type-paths (->>
-                                      (vals att-type/attachment-types-by-permit-type)
-                                      set
-                                      (apply concat)
-                                      (partition 2)
-                                      (map (fn [[g ts]] (map (fn [t] [g t]) ts)))
-                                      (apply concat))]
+  (let [attachment-group-type-paths (->> (vals att-type/attachment-types-by-permit-type)
+                                         (apply concat)
+                                         (map (juxt :type-group :type-id)))]
     (fact "Meta: collected all types"
       (set (map second attachment-group-type-paths)) => att-type/all-attachment-type-ids)
 
@@ -171,46 +167,47 @@
 
 
 (fact "make attachments with metadata"
-  (let [types-with-metadata [{:type :a :metadata {"foo" "bar"}} {:type :b :metadata {"bar" "baz"}}]]
-    (make-attachments 999 :draft types-with-metadata false true true) => (just
-                                                                           [{:id "123"
-                                                                             :locked false
-                                                                             :modified 999
-                                                                             :op nil
-                                                                             :state :requires_user_action
-                                                                             :target nil
-                                                                             :type :a
-                                                                             :applicationState :draft
-                                                                             :contents nil
-                                                                             :signatures []
-                                                                             :versions []
-                                                                             :auth []
-                                                                             :notNeeded false
-                                                                             :required true
-                                                                             :requestedByAuthority true
-                                                                             :forPrinting false
-                                                                             :metadata {"foo" "bar"}
-                                                                             :readOnly false}
-                                                                            {:id "123"
-                                                                             :locked false
-                                                                             :modified 999
-                                                                             :op nil
-                                                                             :state :requires_user_action
-                                                                             :target nil
-                                                                             :type :b
-                                                                             :applicationState :draft
-                                                                             :contents nil
-                                                                             :signatures []
-                                                                             :versions []
-                                                                             :auth []
-                                                                             :notNeeded false
-                                                                             :required true
-                                                                             :requestedByAuthority true
-                                                                             :forPrinting false
-                                                                             :metadata {"bar" "baz"}
-                                                                             :readOnly false}])
+  (let [types-with-metadata [{:type {:type-group :g :type-id :a} :metadata {"foo" "bar"}}
+                             {:type {:type-group :g :type-id :b} :metadata {"bar" "baz"}}]]
+    (make-attachments 999 :draft types-with-metadata false true true)
+    => (just [{:id                   "123"
+               :locked               false
+               :modified             999
+               :op                   nil
+               :state                :requires_user_action
+               :target               nil
+               :type                 {:type-group :g :type-id :a}
+               :applicationState     :draft
+               :contents             nil
+               :signatures           []
+               :versions             []
+               :auth                 []
+               :notNeeded            false
+               :required             true
+               :requestedByAuthority true
+               :forPrinting          false
+               :metadata             {"foo" "bar"}
+               :readOnly             false}
+              {:id                   "123"
+               :locked               false
+               :modified             999
+               :op                   nil
+               :state                :requires_user_action
+               :target               nil
+               :type                 {:type-group :g :type-id :b}
+               :applicationState     :draft
+               :contents             nil
+               :signatures           []
+               :versions             []
+               :auth                 []
+               :notNeeded            false
+               :required             true
+               :requestedByAuthority true
+               :forPrinting          false
+               :metadata             {"bar" "baz"}
+               :readOnly             false}])
     (provided
-      (mongo/create-id) => "123")))
+     (mongo/create-id) => "123")))
 
 (facts "facts about attachment metada"
   (fact "visibility"
