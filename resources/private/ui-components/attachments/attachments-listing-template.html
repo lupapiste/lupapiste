@@ -46,18 +46,17 @@
                        lbutton: 'attachment.legend.help'"></help-toggle>
   
   <div>
-    <p data-bind="text: JSON.stringify(attachmentsHierarchy())"></p>
-    <h2>Hakemuksen aikaiset liitteet</h2>
-  </div>
-  <div>
     <h2 data-bind="ltext: 'application.attachments.pre-verdict'"/>
     <div
        data-bind="template: {name: 'attachments-listing-accordion-template',
                              data: groups.preVerdict.yleiset}"></div>
     <!-- ko if: groups.preVerdict.erityissuunnitelmat.data().hasAttachments -->
     <rollup params="{open: getAccordionToggle('preVerdict', 'erityissuunnitelmat')}">
-      <rollup-button params="{open: open,
-                              text: 'erityissuunnitelmat'}"></rollup-button>
+      <rollup-status-button params="{open: open,
+                                     style: 'secondary',
+                                     status: $parent.groups.preVerdict.erityissuunnitelmat.data().status,
+                                     text: 'erityissuunnitelmat'}">
+      </rollup-status-button>
       <div class="rollup__open">
         <div data-bind="template: {name: 'attachments-listing-accordion-template',
                                    data: $parent.groups.preVerdict.erityissuunnitelmat['kvv_suunnitelma']}"></div>

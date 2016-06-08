@@ -80,7 +80,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       type: "sub",
       ltitle: subGroup.name, // TODO
       attachmentInfos: self.modelForAttachmentInfo(subGroup.attachmentIds),
-      allApproved: ko.pureComputed(self.service.allApproved(subGroup.attachmentIds)),
+      status: ko.pureComputed(self.service.attachmentsStatus(subGroup.attachmentIds)),
       hasAttachments: ko.pureComputed(function() {
         return subGroup.attachmentIds &&
           subGroup.attachmentIds.length > 0;
@@ -88,10 +88,22 @@ LUPAPISTE.AttachmentsListingModel = function() {
     };
   }
 
-  function allSubGroupsApproved(subGroups) {
+  function subGroupsStatus(subGroups) {
+
     return ko.pureComputed(function() {
-      return _.every(_.values(subGroups),
-                     function(sg) { return sg.allApproved(); });
+      if (_.every(_.values(subGroups),
+                  function(sg) {
+                    return sg.status() === self.service.APPROVED;
+                 }))
+      {
+        return self.service.APPROVED;
+      } else {
+        return _.some(_.values(subGroups),
+                      function(sg) {
+                        return sg.status() === self.service.REJECTED;
+                     })
+        ? self.service.REJECTED : null;
+      }
     });
   }
 
@@ -107,7 +119,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
     return _.merge({
       type: "main",
       ltitle: mainGroup.name, // TODO
-      allApproved: allSubGroupsApproved(subGroups),
+      status: subGroupsStatus(subGroups),
       hasAttachments: someSubGroupsHaveAttachments(subGroups)
     }, subGroups);
   };

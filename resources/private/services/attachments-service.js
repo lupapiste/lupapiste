@@ -5,6 +5,9 @@
 LUPAPISTE.AttachmentsService = function() {
   "use strict";
   var self = this;
+  self.APPROVED = "ok";
+  self.REJECTED = "requires_user_action";
+
   var filters = {
         preVerdict: ko.observable(false),
         postVerdict: ko.observable(false),
@@ -7402,18 +7405,18 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Approving and rejecting attachments
   self.approveAttachment = function(attachmentId) {
-    self.updateAttachment(attachmentId, {state: "ok"});
+    self.updateAttachment(attachmentId, {state: self.APPROVED});
   };
   self.rejectAttachment = function(attachmentId) {
-    self.updateAttachment(attachmentId, {state: "requires_user_action"});
+    self.updateAttachment(attachmentId, {state: self.REJECTED});
   };
 
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return attachment && attachment.state === "ok";
+    return attachment && attachment.state === self.APPROVED;
   };
   self.isRejected = function(attachment) {
-    return attachment && attachment.state === "requires_user_action";
+    return attachment && attachment.state === self.REJECTED;
   };
   self.isNotNeeded = function(attachment) {
     return attachment && attachment.notNeeded;
@@ -7429,10 +7432,15 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   // returns a function for use in computed
-  self.allApproved = function(attachmentIds) {
+  self.attachmentsStatus = function(attachmentIds) {
     return function() {
-      return _.every(_.map(attachmentIds, getAttachmentValue),
-                     self.isApproved);
+      if (_.every(_.map(attachmentIds, getAttachmentValue),
+                  self.isApproved)) {
+        return self.APPROVED;
+      } else {
+        return _.some(_.map(attachmentIds, getAttachmentValue),
+                      self.isRejected) ? self.REJECTED : null;
+      }
     };
   };
 
