@@ -6071,17 +6071,13 @@ div.alleYli-radioGroup {
   margin-top: 24px;
 }
 
-/* line 1084, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1090, ../../../private/common-html/sass/partials/_forms.scss */
 .checkbox-wrapper {
   border: 1px solid #dddddd;
-  padding-left: 7px;
-  padding-right: 0;
-  padding-bottom: 7px;
-  padding-top: 7px;
 }
-/* line 1074, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1080, ../../../private/common-html/sass/partials/_forms.scss */
 .checkbox-wrapper input[type=checkbox], .checkbox-wrapper input[type=radio] {
-  display: inherit;
+  display: block;
   opacity: 0;
   width: 0;
   height: 0;
@@ -6098,9 +6094,13 @@ div.alleYli-radioGroup {
 label.checkbox-label {
   width: 100%;
   display: inline-block;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
 }
 
-/* line 1051, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1057, ../../../private/common-html/sass/partials/_forms.scss */
 .checkbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6122,7 +6122,7 @@ label.checkbox-label {
   cursor: pointer;
 }
 
-/* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1067, ../../../private/common-html/sass/partials/_forms.scss */
 input[type=checkbox]:checked + .checkbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6140,7 +6140,7 @@ input[type=checkbox]:checked + .checkbox-label:before {
   color: #fbc732;
 }
 
-/* line 1067, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1073, ../../../private/common-html/sass/partials/_forms.scss */
 input[type=checkbox]:disabled + .checkbox-label:before {
   cursor: initial;
   color: #bbbbbb;
@@ -6176,9 +6176,9 @@ input[type=checkbox]:disabled + .checkbox-label:before {
 .form-grid .radio-wrapper label {
   cursor: pointer;
 }
-/* line 1074, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1080, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .radio-wrapper input[type=checkbox], .form-grid .radio-wrapper input[type=radio] {
-  display: inherit;
+  display: block;
   opacity: 0;
   width: 0;
   height: 0;
@@ -7243,9 +7243,9 @@ input[type=checkbox]:disabled + .checkbox-label:before {
 }
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1401, ../../../private/common-html/sass/partials/_forms.scss */
@@ -7589,6 +7589,35 @@ div.review-done div {
 /* line 1606, ../../../private/common-html/sass/partials/_forms.scss */
 .foreman-info {
   padding-left: 6px;
+}
+
+/* line 1612, ../../../private/common-html/sass/partials/_forms.scss */
+.checkbox-wrapper.checkbox-wrapper--inline {
+  display: inline-block;
+}
+
+/* line 1616, ../../../private/common-html/sass/partials/_forms.scss */
+.filter-group {
+  border: 1px solid #bbbbbb;
+  padding-top: 7px;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 14px;
+  margin-bottom: 1em;
+}
+/* line 1626, ../../../private/common-html/sass/partials/_forms.scss */
+.filter-group .filter-group__state i {
+  cursor: pointer;
+  color: #f39129;
+}
+/* line 1630, ../../../private/common-html/sass/partials/_forms.scss */
+.filter-group .filter-group__state span {
+  text-transform: uppercase;
+}
+/* line 1634, ../../../private/common-html/sass/partials/_forms.scss */
+.filter-group .filter-group__toggles {
+  margin-left: 2px;
+  margin-top: 6px;
 }
 
 /* line 4, ../../../private/common-html/sass/partials/_tables.scss */
@@ -10938,23 +10967,6 @@ ul.no-bullets {
 }
 /* line 19, ../../../private/common-html/sass/main.scss */
 .archival-summary-table .attachment-row .attachment-row-top:before, .archival-summary-table .attachment-row .attachment-row-top:after {
-  content: " ";
-  display: table;
-}
-/* line 24, ../../../private/common-html/sass/main.scss */
-.archival-summary-table .attachment-row .attachment-row-top:after {
-  clear: both;
-}
-/* line 66, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .attachment-row-top div {
-  vertical-align: top;
-}
-/* line 72, ../../../private/common-html/sass/partials/_archival-summary.scss */
-.archival-summary-table .attachment-row .additional-controls {
-  *zoom: 1;
-}
-/* line 19, ../../../private/common-html/sass/main.scss */
-.archival-summary-table .attachment-row .additional-controls:before, .archival-summary-table .attachment-row .additional-controls:after {
   content: " ";
   display: table;
 }

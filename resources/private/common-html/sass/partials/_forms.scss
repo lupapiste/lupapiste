@@ -1043,10 +1043,16 @@ $max-columns: 12;
   }
 }
 
-@mixin label-checkbox ($label-cls, $size: $lupicon-size ) {
+@mixin label-checkbox ($label-cls, $size: $lupicon-size) {
   label.#{$label-cls} {
   width: 100%;
   display: inline-block;
+  padding: {
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    top: 7px;
+  }
 }
   .#{$label-cls}:before {
     @include lupicon-font( $size );
@@ -1072,7 +1078,7 @@ $max-columns: 12;
 
 @mixin hide-radio-check-input {
   input[type=checkbox], input[type=radio] {
-    display: inherit;
+    display: block;
     opacity: 0;
     width: 0;
     height: 0;
@@ -1083,13 +1089,7 @@ $max-columns: 12;
 
 .checkbox-wrapper {
   border: 1px solid $checkbox-border-color;
-  padding: {
-    left: 7px;
-    right: 0;
-    bottom: 7px;
-    top: 7px;
-  }
-   @include hide-radio-check-input
+  @include hide-radio-check-input
 }
 
 .checkbox-wrapper--disabled {
@@ -1606,3 +1606,34 @@ div.review-done {
 .foreman-info {
   padding-left: $marginS;
 }
+
+// Attachment filters related
+
+.checkbox-wrapper.checkbox-wrapper--inline {
+  display: inline-block;
+}
+
+.filter-group {
+  border: 1px solid $gray187;
+  padding: {
+    top: 7px;
+    left: 7px;
+    right: 7px;
+    bottom: 14px;
+  }
+  margin-bottom: 1em;
+  .filter-group__state {
+    i {
+      cursor: pointer;
+      color: $primary;
+    }
+    span {
+      text-transform: uppercase;
+    }
+  }
+  .filter-group__toggles {
+    margin-left: 2px;
+    margin-top: $marginS;
+  }
+}
+ 

@@ -1,0 +1,21 @@
+<script type="text/x-jquery-tmpl" class="ko-template"
+        id="filters-template">
+  <div class="filter-group">
+    <div class="like-btn filter-group__state"
+         data-bind="click: clickGroupState">
+      <i data-bind="css: {'lupicon-checkbox-partial': groupState() === 'some',
+                    'lupicon-checkbox-on': groupState() === 'all',
+                    'lupicon-checkbox-off': groupState() === 'none'}"></i>
+      <span data-bind="ltext: 'filter.show-all'"></span>
+    </div>
+    <div class="filter-group__toggles"
+         data-bind="foreach: filters"><div class="checkbox-wrapper checkbox-wrapper--inline">
+        <input type="checkbox"
+               data-bind="attr: {id: $parent.id( $index() )},
+                          checked: filter">
+        <label class="checkbox-label"
+               data-bind="attr: {'for': $parent.id( $index() )},
+                          ltext: ltext"></label>
+    </div></div>
+  </div>
+</script
