@@ -73,6 +73,7 @@ LUPAPISTE.ModalDialogModel = function () {
     // Click handlers were left in jQuery.cache
     $("#modal-dialog-content-component").find("a").off();
     $("#modal-dialog-content-component").find("button").off();
+    $("#modal-dialog-content-container").find(".mask,.close,.component").off();
 
     self.showDialog(false);
 
