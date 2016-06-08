@@ -1043,6 +1043,85 @@ $max-columns: 12;
   }
 }
 
+@mixin hide-radio-check-input () {
+  input[type=checkbox], input[type=radio] {
+    display: inherit;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    font-size: 0;
+  }
+}
+
+
+// Defines the following classes:
+// .cls-label
+// .cls-wrapper
+// .cls-wrapper--disabled
+@mixin toggle-helper ($cls, $on, $off,
+                      $size: $lupicon-size,
+                      $color: $input-color,
+                      $icon: $checkbox-color,
+                      $hover: $checkbox-hover-color,
+                      $selected: $checkbox-selected-color,
+                      $disabled: $input-select-disabled-icon,
+                      $border: $checkbox-border-color,
+                      $disabled-bg: $input-disabled-background-color,
+                      $display: inherit) {
+  label.#{$cls}-label {
+  width: 100%;
+  display: inline-block;
+  color: $color;
+  padding: {
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    top: 7px;
+  }
+}
+  .#{$cls}-label:before {
+    @include lupicon-font( $size );
+    content: $off;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    color: $icon;
+    cursor: pointer;
+  }
+
+  .#{$cls}-label:hover.#{$cls}-label:before,
+  input:checked + .#{$cls}-label:hover.#{$cls}-label:before {
+    color: $hover;
+  }
+
+  input:checked + .#{$cls}-label:before {
+    @include lupicon-font($size);
+    content: $on;
+    color: $selected;
+  }
+
+  input:disabled + .#{$cls}-label:before,
+  input:disabled + .#{$cls}-label:hover.#{$cls}-label:before{
+    cursor: initial;
+    color: $disabled;
+  }
+
+  .#{$cls}-wrapper {
+    //display: $display;
+    border: 1px solid $border;
+    @include hide-radio-check-input ();
+}
+
+  .#{$cls}-wrapper--disabled {
+    background-color: $disabled-bg;
+}
+
+}
+
+@include toggle-helper ( arrow, "\e614", "\e611" ) {}
+
+
 @mixin label-checkbox ($label-cls, $size: $lupicon-size) {
   label.#{$label-cls} {
   width: 100%;
@@ -1081,26 +1160,6 @@ $max-columns: 12;
   }
 }
 
-@mixin hide-radio-check-input {
-  input[type=checkbox], input[type=radio] {
-    display: inherit;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    font-size: 0;
-  }
-}
-
-.checkbox-wrapper {
-  border: 1px solid $checkbox-border-color;
-  @include hide-radio-check-input
-}
-
-.checkbox-wrapper--disabled {
-  background-color: $input-disabled-background-color;
-}
-
 @include label-checkbox (checkbox-label) {}
 
 @mixin input-fields() {
@@ -1134,20 +1193,22 @@ $max-columns: 12;
   @include hide-radio-check-input
 }
 
-  .radio-label:before {
-    @include lupicon-font;
-    content: "\e634";
-    display: inline-block;
-    margin-right: 10px;
-    vertical-align: top;
-    color: $checkbox-color;
+.radio-label:before {
+  @include lupicon-font;
+  content: "\e634";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: $checkbox-color;
   }
 
-  input[type=radio]:checked + .radio-label:before {
-    @include lupicon-font;
-    content: "\e635";
-    color: $checkbox-selected-color;
-  }
+input[type=radio]:checked + .radio-label:before {
+  @include lupicon-font;
+  content: "\e635";
+  color: $checkbox-selected-color;
+}
+
+@include toggle-helper (new-radio, "\e635", "\e634", $display: inline) {}
 
 .form-grid {
   // overflow-y: hidden;
@@ -1615,7 +1676,7 @@ div.review-done {
 
 // Attachment filters related
 
-.checkbox-wrapper.checkbox-wrapper--inline {
+.wrapper--inline {
   display: inline-block;
 }
 
