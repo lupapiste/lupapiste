@@ -118,6 +118,8 @@
 "osapuoli.tyonjohtaja.kuntaRoolikoodi.vastaava työnjohtaja" "sv" "Ansvarig arbetsledare"
 "osapuoli.tyonjohtaja.kuntaRoolikoodi.ei tiedossa" "fi" "Ei tiedossa"
 "osapuoli.tyonjohtaja.kuntaRoolikoodi.ei tiedossa" "sv" "Okänd"
+"osapuoli.patevyysvaatimusluokka.ei tiedossa" "fi" "Ei tiedossa"
+"osapuoli.patevyysvaatimusluokka.ei tiedossa" "sv" "Okänd"
 "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label" "fi" "Vastattavat työtehtävät"
 "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label" "sv" "Ansvariga arbetsuppgifter"
 "osapuoli.tyonjohtaja.vastattavatTyotehtavat.alaslaskukatotLattiavalujaJaSisatyot" "fi" "Alaslaskukatot, lattiavaluja ja sisätyöt"
