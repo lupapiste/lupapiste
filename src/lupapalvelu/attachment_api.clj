@@ -113,7 +113,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{application :application}]
-  (ok :attachmentTypes (att-type/get-attachment-types-for-application application)))
+  (ok :attachmentTypes (->> (att-type/get-attachment-types-for-application application)
+                            (att-type/->grouped-array))))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]

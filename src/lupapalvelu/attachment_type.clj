@@ -5,7 +5,7 @@
             [lupapalvelu.operations :as op]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.util :refer [fn->] :as util]
+            [sade.util :refer [fn->>] :as util]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
             [schema.core :refer [defschema] :as sc]))
@@ -121,6 +121,10 @@
        (map :name)
        (mapcat get-attachment-types-for-operation)
        (distinct)))
+
+(defn ->grouped-array [attachment-types]
+  (->> (group-by :type-group attachment-types)
+       (map (juxt key (fn->> val (map :type-id))))))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]

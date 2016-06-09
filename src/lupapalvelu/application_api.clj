@@ -53,7 +53,8 @@
    :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [application user]}]
   (if application
-    (let [app (assoc application :allowedAttachmentTypes (att-type/get-attachment-types-for-application application))]
+    (let [app (assoc application :allowedAttachmentTypes (->> (att-type/get-attachment-types-for-application application)
+                                                              (att-type/->grouped-array)))]
       (ok :application (app/post-process-app app user)
           :authorities (if (usr/authority? user)
                          (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users app "authority"))
