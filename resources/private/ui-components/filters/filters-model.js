@@ -1,4 +1,4 @@
-LUPAPISTE.FiltersModel = function( params ) {
+LUPAPISTE.FiltersModel = function() {
   "use strict";
   var self = this;
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
