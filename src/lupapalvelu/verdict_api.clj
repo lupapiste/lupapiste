@@ -111,8 +111,8 @@
 
 (defn- create-verdict-pdfa! [user application verdict-id lang]
   (let [application (domain/get-application-no-access-checking (:id application))]
-      (when (> 1 (count (:paatokset (first (filter #(= verdict-id (:id %)) (:verdicts application)))))) (error "Too many paatokset in verdict( " verdict-id ") in application: " (:id application)))
-      (child-to-attachment/create-attachment-from-children user application :verdicts verdict-id lang)))
+    (when (> 1 (count (:paatokset (first (filter #(= verdict-id (:id %)) (:verdicts application)))))) (error "Too many paatokset in verdict( " verdict-id ") in application: " (:id application)))
+    (child-to-attachment/create-attachment-from-children user application :verdicts verdict-id lang)))
 
 (defn- publish-verdict [{timestamp :created application :application lang :lang user :user :as command} {:keys [id kuntalupatunnus sopimus]}]
   (if-not (ss/blank? kuntalupatunnus)
@@ -128,7 +128,7 @@
                               (:mongo-query doc-updates)
                               (:mongo-updates doc-updates)))
         (t/mark-app-and-attachments-final! (:id application) timestamp)
-        (when-not sopimus (create-verdict-pdfa! user application id lang))
+        (create-verdict-pdfa! user application id lang)
         (ok)))
     (fail :error.no-verdict-municipality-id)))
 
