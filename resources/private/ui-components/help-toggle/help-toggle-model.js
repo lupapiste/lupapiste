@@ -7,14 +7,15 @@
 //          needs to be toggled outside of component.
 //  [lbutton] (l10n key) if given, toggle is rendered similarly to link-btn
 //  lhtml:  (l10n key) identifier for lhtml binding. Can also be an array
-//          of (paragraph) identifiers.
-//  html:   Full-rendered help contents.
+//          of (paragraph) identifiers. Observables also supported.
+//  html:   Full-rendered help contents. String or observable
 //
 // Note: lhtml and html parameters are mutually exclusive.
 
 LUPAPISTE.HelpToggleModel = function( params ) {
   "use strict";
   var self = this;
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   self.flag = params.flag || ko.observable( params.show );
   self.toggleHelp = function() {
@@ -26,12 +27,15 @@ LUPAPISTE.HelpToggleModel = function( params ) {
     return _( [lhtml])
       .flatten()
       .map( function( s ) {
-        return paragraph( {p: loc( s )});
+        return paragraph( {p: loc( ko.utils.unwrapObservable(s) )});
       })
       .value()
       .join("");
   }
-
-  self.html = params.lhtml ? localizedHtml( params.lhtml ) : params.html;
-  self.lbutton = params.lbutton;
+  self.html = self.disposedComputed( function() {
+    return params.lhtml
+      ? localizedHtml( ko.utils.unwrapObservable( params.lhtml ) )
+      : ko.utils.unwrapObservable( params.html );
+  });
+ self.lbutton = params.lbutton;
 };

@@ -128,7 +128,8 @@ jQuery(document).ready(function() {
     {name: "attachments-listing"},
     {name: "rollup"},
     {name: "rollup-button"},
-    {name: "rollup-status-button"}
+    {name: "rollup-status-button"},
+    {name: "filters"}
 ];
 
   _.forEach(components, function(component) {
