@@ -16,7 +16,8 @@
 // Defines the following classes:
 // .cls-label
 // .cls-wrapper
-// .cls-wrapper--disabled
+// and the definition 
+// .cls-wrapper.wrapper--disabled
 @mixin toggle-helper ($cls, $on, $off,
                       $size: $lupicon-size,
                       $color: $input-color,
@@ -27,7 +28,7 @@
                       $border: $checkbox-border-color,
                       $disabled-bg: $input-disabled-background-color,
                       $wrapper-display: inherit,
-                      $input-display: inherit,
+                      $input-display: block,
                       $label-display: inline-block) {
   label.#{$cls}-label {
   width: 100%;
@@ -74,7 +75,7 @@
     @include hide-radio-check-input ($input-display);
 }
 
-  .#{$cls}-wrapper--disabled {
+  .#{$cls}-wrapper.wrapper--disabled {
     background-color: $disabled-bg;
 }
 }
