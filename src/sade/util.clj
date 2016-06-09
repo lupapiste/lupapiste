@@ -343,7 +343,7 @@
 (defn assoc-when
   "Assocs entries with not-empty-or-nil values into m."
   [m & kvs]
-  (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
+  (into (or m {}) (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
 (defn relative-local-url? [^String url]
   (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
