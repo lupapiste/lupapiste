@@ -34,11 +34,11 @@ import javax.xml.bind.annotation.XmlType;
 public enum PersonalDataType {
 
     @XmlEnumValue("ei sis\u00e4ll\u00e4 henkil\u00f6tietoja")
-    EI_SISÄLLÄ_HENKILÖTIETOJA("ei sis\u00e4ll\u00e4 henkil\u00f6tietoja"),
+    EI_SISALLA_HENKILOTIETOJA("ei sis\u00e4ll\u00e4 henkil\u00f6tietoja"),
     @XmlEnumValue("sis\u00e4lt\u00e4\u00e4 henkil\u00f6tietoja")
-    SISÄLTÄÄ_HENKILÖTIETOJA("sis\u00e4lt\u00e4\u00e4 henkil\u00f6tietoja"),
+    SISALTAA_HENKILOTIETOJA("sis\u00e4lt\u00e4\u00e4 henkil\u00f6tietoja"),
     @XmlEnumValue("sis\u00e4lt\u00e4\u00e4 arkaluontoisia henkil\u00f6tietoja")
-    SISÄLTÄÄ_ARKALUONTOISIA_HENKILÖTIETOJA("sis\u00e4lt\u00e4\u00e4 arkaluontoisia henkil\u00f6tietoja");
+    SISALTAA_ARKALUONTOISIA_HENKILOTIETOJA("sis\u00e4lt\u00e4\u00e4 arkaluontoisia henkil\u00f6tietoja");
     private final String value;
 
     PersonalDataType(String v) {

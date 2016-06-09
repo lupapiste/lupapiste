@@ -36,9 +36,9 @@ public enum PublicityClassType {
     @XmlEnumValue("Julkinen")
     JULKINEN("Julkinen"),
     @XmlEnumValue("Osittain salassapidett\u00e4v\u00e4")
-    OSITTAIN_SALASSAPIDETTÄVÄ("Osittain salassapidett\u00e4v\u00e4"),
+    OSITTAIN_SALASSAPIDETTAVA("Osittain salassapidett\u00e4v\u00e4"),
     @XmlEnumValue("Salassa pidett\u00e4v\u00e4")
-    SALASSA_PIDETTÄVÄ("Salassa pidett\u00e4v\u00e4");
+    SALASSA_PIDETTAVA("Salassa pidett\u00e4v\u00e4");
     private final String value;
 
     PublicityClassType(String v) {

@@ -11,9 +11,11 @@
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n])
-  (:import (lupapalvelu.tiedonohjaus CaseFile)
+  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType ProtectionLevelType SecurityClassType AccessRightType)
            (javax.xml.bind JAXBContext)
-           (java.io StringWriter)))
+           (java.io StringWriter)
+           [javax.xml.datatype DatatypeFactory]
+           [java.util GregorianCalendar Date]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
@@ -285,11 +287,82 @@
         {$set {:modified modified-ts
                :processMetadata new-process-md}}))))
 
-(defn xml-case-file []
-  (let [item (doto (CaseFile.)
-               (.setTitle "Uskomaton tiedosto"))
-        context (JAXBContext/newInstance (into-array [(.getClass item)]))
+(defn xml-date [ts-or-date]
+  (when ts-or-date
+    (let [factory (DatatypeFactory/newInstance)
+          date (if (number? ts-or-date) (Date. (long ts-or-date)) ts-or-date)
+          calendar (doto (GregorianCalendar.)
+                     (.setTime date))]
+      (.newXMLGregorianCalendar factory calendar))))
+
+(defn publicity-class-type [{:keys [julkisuusluokka]}]
+  (case (keyword julkisuusluokka)
+    :julkinen PublicityClassType/JULKINEN
+    :salainen PublicityClassType/SALASSA_PIDETTAVA
+    :osittain-salassapidettava PublicityClassType/OSITTAIN_SALASSAPIDETTAVA))
+
+(defn personal-data-type [{:keys [henkilotiedot]}]
+  (case (keyword henkilotiedot)
+    :ei-sisalla PersonalDataType/EI_SISALLA_HENKILOTIETOJA
+    :sisaltaa PersonalDataType/SISALTAA_HENKILOTIETOJA
+    :sisaltaa-arkaluonteisia PersonalDataType/SISALTAA_ARKALUONTOISIA_HENKILOTIETOJA))
+
+(defn protection-level-type [{:keys [suojaustaso]}]
+  (case (keyword suojaustaso)
+    :ei-luokiteltu nil
+    :suojaustaso4 ProtectionLevelType/IV
+    :suojaustaso3 ProtectionLevelType/III
+    :suojaustaso2 ProtectionLevelType/II
+    :suojaustaso1 ProtectionLevelType/I))
+
+(defn security-class-type [{:keys [turvallisuusluokka]}]
+  (case (keyword turvallisuusluokka)
+    :ei-turvallisuusluokkaluokiteltu SecurityClassType/EI_TURVALLISUUSLUOKITELTU
+    :turvallisuusluokka4 SecurityClassType/TURVALLISUUSLUOKKA_IV
+    :turvallisuusluokka3 SecurityClassType/TURVALLISUUSLUOKKA_III
+    :turvallisuusluokka2 SecurityClassType/TURVALLISUUSLUOKKA_II
+    :turvallisuusluokka1 SecurityClassType/TURVALLISUUSLUOKKA_I))
+
+(defn build-restriction-type [{:keys [processMetadata]}]
+  (let [r-type (doto (RestrictionType.)
+                 (.setPublicityClass (publicity-class-type processMetadata))
+                 (.setPersonalData (personal-data-type processMetadata)))]
+    (when-not (= :julkinen (keyword (:julkisuusluokka processMetadata)))
+      (doto r-type
+        (.setSecurityPeriod (BigInteger/valueOf (:salassapitoaika processMetadata)))
+        (.setSecurityPeriodEnd (xml-date (:security-period-end processMetadata)))
+        (.setSecurityReason (:salassapitoperuste processMetadata))
+        (.setProtectionLevel (protection-level-type processMetadata))
+        (.setSecurityClass (security-class-type processMetadata)))
+      (.add (.getAccessRight r-type) (doto (AccessRightType.)
+                                       (.setName (i18n/localize :fi (:kayttajaryhma processMetadata)))
+                                       (.setRole (i18n/localize :fi (:kayttajaryhmakuvaus processMetadata))))))
+    r-type))
+
+(defn retention-period [{{{:keys [pituus arkistointi]} :sailytysaika} :processMetadata}]
+  (-> (cond
+        (= :ei (keyword arkistointi)) 0
+        (#{:ikuisesti :toistaiseksi} (keyword arkistointi)) 999999
+        :else pituus)
+      (BigInteger/valueOf)))
+
+(defn xml-case-file [{:keys [id processMetadata] :as application} lang]
+  (let [case-file (generate-case-file-data application lang)
+        case-file-object (CaseFile.)
+        context (JAXBContext/newInstance (into-array [(.getClass case-file-object)]))
         marshaller (.createMarshaller context)]
+    (println case-file)
+    (.add (.getCreated case-file-object) (xml-date (:start (first case-file))))
+    (.add (.getLanguage case-file-object) (name lang))
+    (doto case-file-object
+      (.setNativeId id)
+      (.setRestriction (build-restriction-type application))
+      (.setTitle (str "K\u00e4sittelyprosessi: " id))
+      (.setRetentionPeriod (BigInteger/valueOf (retention-period application)))
+      (.setRetentionReason (get-in processMetadata [:sailytysaika :perustelu]))
+      (.setRetentionPeriodEnd (xml-date (get-in processMetadata [:sailytysaika :retention-period-end])))
+      (.setStatus (get processMetadata :tila "valmis"))
+      (.setFunction (:tosFunction application)))
     (with-open [sw (StringWriter.)]
-      (.marshal marshaller item sw)
+      (.marshal marshaller case-file-object sw)
       (.toString sw))))
