@@ -1,6 +1,7 @@
 (ns lupapalvelu.kopiolaitos-api
   (:require [sade.core :refer [ok fail]]
             [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.states :as states]
             [lupapalvelu.kopiolaitos :as kopiolaitos]))
@@ -14,12 +15,11 @@
    :input-validators [(partial action/non-blank-parameters [:lang])
                       (partial action/map-parameters-with-required-keys [:orderInfo]
                         [:address :ordererPhone :kuntalupatunnus :ordererEmail :ordererAddress :ordererOrganization :applicantName :propertyId :lupapisteId])
-                      (partial action/vector-parameters-with-map-items-with-required-keys [:attachmentsWithAmounts] [:forPrinting :amount :versions])
+                      (partial action/vector-parameters-with-map-items-with-required-keys [:attachmentsWithAmounts] [:id :amount])
                       (fn [{{attachments :attachmentsWithAmounts} :data}]
                         (when (some #(or
-                                       (not (= true (:forPrinting %)))
                                        (nil? (util/->int (:amount %) nil))
-                                       (empty? (:versions %)))
+                                       (ss/blank? (:id %)))
                                 attachments)
                           (fail :error.kopiolaitos-print-order-invalid-parameters-content)))]}
   [command]

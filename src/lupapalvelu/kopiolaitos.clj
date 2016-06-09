@@ -1,5 +1,5 @@
 (ns lupapalvelu.kopiolaitos
-  (:require [taoensso.timbre :as timbre :refer [warnf info error]]
+  (:require [taoensso.timbre :as timbre :refer [warnf info error errorf]]
             [monger.operators :refer :all]
             [clojure.java.io :as io :refer [delete-file]]
             [clojure.string :as s]
@@ -79,7 +79,7 @@
       (error "Kopiolaitos email sending error to" address "from" (:ordererOrganization orderInfo)))
     {:email-address address :sending-succeeded sending-succeeded?}))
 
-(defn- send-kopiolaitos-email [lang email-addresses attachments orderInfo]
+(defn- send-kopiolaitos-email! [lang email-addresses attachments orderInfo]
   (let [zip (attachment/get-all-attachments! attachments)
         email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (localize lang :kopiolaitos-email-subject) \space (:ordererOrganization orderInfo))
@@ -100,7 +100,7 @@
                                   (try
                                     (io/delete-file zip)
                                     (catch Exception e
-                                      (warnf e "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))))]
+                                      (errorf "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))))]
 
     (when (-> results-failed-emails count pos?)
       (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails (s/join "," results-failed-emails)))))
@@ -121,17 +121,26 @@
 
 (defn do-order-verdict-attachment-prints [{{:keys [lang attachmentsWithAmounts orderInfo]} :data application :application created :created user :user :as command}]
   (if-let [email-addresses (get-kopiolaitos-email-addresses (:organization application))]
-    (do
-      (send-kopiolaitos-email lang email-addresses attachmentsWithAmounts orderInfo)
-      (let [order {:type "verdict-attachment-print-order"
-                   :user (select-keys user [:id :role :firstName :lastName])
-                   :timestamp created
-                   :orderInfo orderInfo}
-            normalize-attachment-for-db (fn [attachment]
-                                          (select-keys attachment [:id :fileId :amount :filename :contents :type]))
-            order-with-normalized-attachments (assoc order :attachments (map normalize-attachment-for-db attachmentsWithAmounts))]
-        (action/update-application command
-          {$push {:transfers order-with-normalized-attachments}
-           $set {:modified created}})
-        (ok)))
+    (let [attachments (->> attachmentsWithAmounts
+                        (filter (comp pos? util/->long :amount))
+                        (map (fn [{:keys [id amount]}]
+                               (when-let [attachment (util/find-by-id id (:attachments application))]
+                                 (merge
+                                   (assoc attachment :amount amount)
+                                   (select-keys (-> attachment :versions last) [:fileId :filename])))))
+                        (filter :forPrinting)
+                        (filter (comp pos? count :versions)))]
+
+      (warnf "Attachments: %d" (count attachments))
+
+      (if (pos? (count attachments))
+        (let [order {:type "verdict-attachment-print-order"
+                     :user (select-keys user [:id :role :firstName :lastName])
+                     :timestamp created
+                     :orderInfo orderInfo
+                     :attachments (map #(select-keys % [:id :fileId :amount :filename :contents :type]) attachments)}]
+          (send-kopiolaitos-email! lang email-addresses attachments orderInfo)
+          (action/update-application command {$push {:transfers order}, $set {:modified created}})
+          (ok))
+        (fail :error.kopiolaitos-print-order-invalid-parameters-content)))
     (fail :no-kopiolaitos-email-defined)))
