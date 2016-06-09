@@ -74,9 +74,9 @@
                 :for-operations     (not-empty (for-operations attachment-type)))
         (sc/validate AttachmentType)))
   ([type-group type-id]
-   (attachment-type {:type-group type-group :type-id type-id}))
+   (attachment-type {:type-group (keyword type-group) :type-id (keyword type-id)}))
   ([permit-type type-group type-id]
-   (attachment-type {:type-id type-id :type-group type-group :metadata {:permitType permit-type}})))
+   (attachment-type {:type-id (keyword type-id) :type-group (keyword type-group) :metadata {:permitType (keyword permit-type)}})))
 
 (defn- ->attachment-type-array [[permit-type attachment-types]]
   (->> (partition 2 attachment-types)
@@ -107,8 +107,9 @@
                      :type-id    :oikaisuvaatimus}))
 
 (defn- attachment-types-by-operation [operation]
-  (let [types (-> operation op/permit-type-of-operation keyword attachment-types-by-permit-type)]
-    (or (not-empty (filter (fn-> (get-in [:metadata :for-operations]) (apply [(keyword operation)])) types))
+  (let [operation (keyword operation)
+        types     (-> operation op/permit-type-of-operation keyword attachment-types-by-permit-type)]
+    (or (not-empty (filter #(some-> (get-in % [:metadata :for-operations]) operation) types))
         types)))
 
 (def get-attachment-types-for-operation (memoize attachment-types-by-operation))
