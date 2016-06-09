@@ -1,11 +1,13 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="calendar-view-template">
   <div class="calendar-table" data-test-id="calendar-view-calendar-table">
     <div class="nav-actions">
-      <div class="month" data-bind="calendarViewMonthText: startOfWeek"></div>
+      <div class="month" data-bind="calendarViewMonthText: startOfWeek,
+                                    attr: { 'data-test-id': 'calendar-month-and-week-label',
+                                            'data-test-start-of-week': startOfWeek.valueOf() }"></div>
       <div class="nav-links">
         <a data-bind="click: gotoPreviousWeek"><span data-bind="ltext: 'calendar.week.previous'"></span></a> |
         <a data-bind="click: gotoToday"><span data-bind="ltext: 'calendar.week.today'"></span></a> |
-        <a data-bind="click: gotoFollowingWeek"><span data-bind="ltext: 'calendar.week.next'"></span></a>
+        <a data-bind="click: gotoFollowingWeek" data-test-id="calendar-view-following-week"><span data-bind="ltext: 'calendar.week.next'"></span></a>
       </div>
     </div>
     <table>
