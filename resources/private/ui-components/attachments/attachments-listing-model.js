@@ -37,22 +37,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
         f(attachmentId);
       };
     };
-  };
-  function approveAttachment(attachmentId) {
-    return function() {
-      self.service.approveAttachment(attachmentId);
-    };
-  };
-  function rejectAttachment(attachmentId) {
-    return function() {
-      self.service.rejectAttachment(attachmentId);
-    };
-  };
-  function removeAttachment(attachmentId) {
-    return function() {
-      self.service.removeAttachment(attachmentId);
-    };
-  };
+  }
 
   function idToAttachment(attachmentId) {
     var attachment = self.service.getAttachment(attachmentId);
@@ -115,14 +100,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
   }
 
   function modelForMainAccordion(mainGroup) {
-    var subGroups = _.mapValues(mainGroup.subGroups, groupToModel)
+    var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
     return _.merge({
       type: "main",
       ltitle: mainGroup.name, // TODO
       status: subGroupsStatus(subGroups),
       hasAttachments: someSubGroupsHaveAttachments(subGroups)
     }, subGroups);
-  };
+  }
 
   function hierarchyToGroups(hierarchy) {
     return _(hierarchy).mapValues(function(group, name) {
@@ -140,7 +125,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
         };
       }
     }).value();
-  };
+  }
 
   function groupToModel(group) {
     if (group.type === "main") {
@@ -174,17 +159,17 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.groups = {
     preVerdict: {
       open: ko.observable(),
-      data: getDataForGroup('preVerdict'),
-      yleiset: getDataForAccordion('preVerdict', 'yleiset'),
+      data: getDataForGroup("preVerdict"),
+      yleiset: getDataForAccordion("preVerdict", "yleiset"),
       erityissuunnitelmat: {
         open: ko.observable(),
-        data: getDataForGroup('preVerdict', 'erityissuunnitelmat'),
-        kvv_suunnitelma: getDataForAccordion('preVerdict',
-                                             'erityissuunnitelmat',
-                                             'kvv_suunnitelma'),
-        rakennesuunnitelma: getDataForAccordion('preVerdict',
-                                                'erityissuunnitelmat',
-                                                'rakennesuunnitelma')
+        data: getDataForGroup("preVerdict", "erityissuunnitelmat"),
+        kvv_suunnitelma: getDataForAccordion("preVerdict",
+                                             "erityissuunnitelmat",
+                                             "kvv_suunnitelma"),
+        rakennesuunnitelma: getDataForAccordion("preVerdict",
+                                                "erityissuunnitelmat",
+                                                "rakennesuunnitelma")
       }
     },
     postVerdict: {
