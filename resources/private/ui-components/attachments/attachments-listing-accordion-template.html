@@ -4,10 +4,13 @@
     <rollup params="open: $data.open">
       <rollup-status-button
          params="open: $parent.open,
-                 style: ($parent.level === 0 ? 'secondary' : 'tertiary') +
-                        ' attachments-accordion',
+                 style: {'secondary': $parent.level === 0,
+                         'tertiary': $parent.level > 0,
+                         'attachments-accordion': true,
+                         'caps': true},
                  status: $parent.data().status,
-                 text: $parent.name"></rollup-status-button>
+                 ltext: 'application.attachments.' + $parent.name">
+      </rollup-status-button>
       <div class="rollup__open attachments-accordion-content">
         <!-- ko if: $parent.data().type === "main" -->
         <div data-bind="foreach: $parent.accordions">
