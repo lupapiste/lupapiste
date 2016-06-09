@@ -308,7 +308,7 @@
         {:keys [attachments]} (query-application pena app-id)
         created (now)
         {vid :verdict-id :as resp0} (give-verdict raktark-jarvenpaa app-id :verdictId "321-2016")
-        expected-att-cnt (if (env/feature? :paatos-pdfa) 1 0)
+        expected-att-cnt 1
         resp1  (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
         file-id-1 (get-in resp1 [:files 0 :fileId])
         resp2  (upload-file raktark-jarvenpaa "dev-resources/test-pdf.pdf")
