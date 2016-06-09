@@ -1,9 +1,10 @@
-LUPAPISTE.ReservationSlotEditBubbleModel = function( params ) {
+LUPAPISTE.ReservationSlotEditBubbleModel = function() {
   "use strict";
   var self = this,
-      calendarService = lupapisteApp.services.calendarService;
+      calendarService = lupapisteApp.services.calendarService,
+      params = calendarService.params();
 
-  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.slotId = ko.observable();
   self.startTime = ko.observable();
@@ -13,12 +14,12 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function( params ) {
   self.positionTop = ko.observable();
   self.weekdayCss = ko.observable();
 
-  self.reservationTypes = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
+  self.reservationTypes = calendarService.calendarQuery.reservationTypes;
   self.selectedReservationTypes = ko.observableArray();
-  self.bubbleVisible = ko.observable(false);
 
-  self.waiting = params.waiting;
+  self.waiting = ko.observable();
   self.error = ko.observable(false);
+  self.bubbleVisible = ko.observable(false);
 
   self.okEnabled = self.disposedComputed(function() {
     return !_.isEmpty(self.selectedReservationTypes());
@@ -42,15 +43,14 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function( params ) {
 
   self.addEventListener("calendarView", "calendarSlotClicked", function(event) {
     var timestamp = moment(event.slot.startTime);
-    var durationHours = moment.duration(event.slot.duration).hours();
-    var durationMinutes = moment.duration(event.slot.duration).minutes();
+    var durationMoment = moment.duration(event.slot.duration);
     console.log(event.slot);
     self.slotId(event.slot.id);
     self.startTime(timestamp);
-    self.durationHours(durationHours);
-    self.durationMinutes(durationMinutes);
+    self.durationHours(durationMoment.hours());
+    self.durationMinutes(durationMoment.minutes());
     self.selectedReservationTypes(_.map(event.slot.reservationTypes, function(d) { return d.id; }));
-    self.positionTop((timestamp.hour() - params.tableFirstFullHour + 1) * 60 + "px");
+    self.positionTop((timestamp.hour() - params.firstFullHour + 1) * 60 + "px");
     self.weekdayCss("weekday-" + timestamp.isoWeekday());
     self.bubbleVisible(true);
   });

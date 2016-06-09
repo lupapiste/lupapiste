@@ -25,8 +25,8 @@ LUPAPISTE.CalendarService = function() {
     }
     var newStartOfWeek;
     if (event && event.week && event.year) {
-      newStartOfWeek = moment().set({"isoWeek": event.week, "year": event.year}).startOf("isoWeek").valueOf();
-      self.calendarQuery.startOfWeek(newStartOfWeek);
+      newStartOfWeek = moment().set({"isoWeek": event.week, "year": event.year}).startOf("isoWeek");
+      self.calendarQuery.startOfWeek(newStartOfWeek.valueOf());
     } else if (event && event.increment) {
       newStartOfWeek = moment(self.calendarQuery.startOfWeek()).add(event.increment, "weeks");
       self.calendarQuery.startOfWeek(newStartOfWeek.valueOf());
