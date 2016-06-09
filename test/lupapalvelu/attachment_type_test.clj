@@ -1,7 +1,10 @@
 (ns lupapalvelu.attachment-type-test
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.attachment-type :refer :all]
             [lupapalvelu.attachment-metadata :refer :all]))
+
+(testable-privates lupapalvelu.attachment-type attachment-types-by-operation)
 
 (facts "Test parse-attachment-type"
   (fact (parse-attachment-type "foo.bar")  => {:type-group :foo, :type-id :bar})
@@ -36,3 +39,14 @@
         all-unique (set all-except-commons)]
 
     (count all-except-commons) => (count all-unique)))
+
+(fact attachment-types-by-permit-type
+  (map :type-id (attachment-types-by-permit-type :R)) => (contains [:johtokartta :valtakirja :cv :patevyystodistus :suunnittelijan_tiedot :tutkintotodistus :aitapiirustus :asemapiirros :julkisivupiirustus :leikkauspiirustus :pohjapiirustus :todistus_hallintaoikeudesta :ote_yhtiokokouksen_poytakirjasta :kiinteiston_lohkominen :sopimusjaljennos :karttaaineisto :ote_alueen_peruskartasta :perustamistapalausunto :rakennusoikeuslaskelma :energiataloudellinen_selvitys :energiatodistus :haittaaineselvitys] :in-any-order :gaps-ok))
+
+(fact attachment-types-by-operation
+
+  (fact "basic R operation"
+    (attachment-types-by-operation "kerrostalo-rivitalo") => (attachment-types-by-permit-type :R))
+
+  (fact "foreman application has restricted set of attachment types"
+    (count (attachment-types-by-operation "tyonjohtajan-nimeaminen-v2")) => 5))
