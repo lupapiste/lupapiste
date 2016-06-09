@@ -49,8 +49,13 @@
   
   <div>
     <h2 data-bind="ltext: 'application.attachments.pre-verdict'"/>
-    <div data-bind="foreach: service.layout">
+    <div data-bind="foreach: groups[0].accordions">
       <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                                 data: $data}"></div>
+                                 data: _.merge($data, {level: 0})}"></div>
+    </div>
+    <h2 data-bind="ltext: 'application.attachments.post-verdict'"/>
+    <div data-bind="foreach: groups[1].accordions">
+      <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                                 data: _.merge($data, {level: 0})}"></div>
     </div>
 </script>
