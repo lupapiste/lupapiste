@@ -86,13 +86,6 @@
             :lang "fi"
             :attachmentsWithAmounts nil
             :orderInfo order-info) => fail?)
-        #_(fact
-           "without attachment versions order fails"
-           (command sonja :order-verdict-attachment-prints
-             :id app-id
-             :lang "fi"
-             :attachmentsWithAmounts (map #(dissoc % :versions) (filter :forPrinting attachments-with-amount))
-             :orderInfo order-info) => fail?)
         (fact "attachments without needed attachment key (amount) results in fail"
           (command sonja :order-verdict-attachment-prints
             :id app-id
@@ -135,6 +128,16 @@
                      (count result) => 2)
                    (fact "filenames end with 'test-attachment.txt'"
                      (every? #(.endsWith (:name %) "test-attachment.txt") result) => true)))))))
+
+        (fact "without attachment versions order fails"
+          (let [for-printing (filter :forPrinting attachments-with-amount)
+                {id :id, {:keys [fileId originalFileId]} :latestVersion} (first for-printing)]
+            (fact "delete latest version" (command sonja :delete-attachment-version :id app-id :attachmentId id :fileId fileId :originalFileId originalFileId) => ok?)
+            (command sonja :order-verdict-attachment-prints
+             :id app-id
+             :lang "fi"
+             :attachmentsWithAmounts (take 1 for-printing)
+             :orderInfo order-info)) => fail?)
 
         (fact "unsetting organization kopiolaitos-email leads to failure in kopiolaitos order"
           (command sipoo :set-kopiolaitos-info
