@@ -7,6 +7,7 @@
             [sade.core :refer [ok fail fail! def-]]
             [sade.email :as email]
             [sade.util :as util]
+            [sade.validators :as v]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.action :as action]
             [lupapalvelu.organization :as organization]
@@ -109,13 +110,11 @@
 
 (defn- get-kopiolaitos-email-addresses [organization-id]
   (let [email (organization/with-organization organization-id :kopiolaitos-email)]
-    (if-not (ss/blank? email)
+    (when-not (ss/blank? email)
       (let [emails (util/separate-emails email)]
-        ;; action/email-validator returns nil if email was valid
-        (when (some #(action/email-validator :email {:data {:email %}}) emails)
+        (when (some (complement v/email-and-domain-valid?) emails)
           (fail! :kopiolaitos-invalid-email))
-        emails)
-      nil)))
+        emails))))
 
 
 ;; Send the the prints order
