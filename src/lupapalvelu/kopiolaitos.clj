@@ -131,8 +131,6 @@
                         (filter :forPrinting)
                         (filter (comp pos? count :versions)))]
 
-      (warnf "Attachments: %d" (count attachments))
-
       (if (pos? (count attachments))
         (let [order {:type "verdict-attachment-print-order"
                      :user (select-keys user [:id :role :firstName :lastName])
