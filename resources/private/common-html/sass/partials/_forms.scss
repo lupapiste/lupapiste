@@ -1043,124 +1043,7 @@ $max-columns: 12;
   }
 }
 
-@mixin hide-radio-check-input () {
-  input[type=checkbox], input[type=radio] {
-    display: inherit;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    font-size: 0;
-  }
-}
 
-
-// Defines the following classes:
-// .cls-label
-// .cls-wrapper
-// .cls-wrapper--disabled
-@mixin toggle-helper ($cls, $on, $off,
-                      $size: $lupicon-size,
-                      $color: $input-color,
-                      $icon: $checkbox-color,
-                      $hover: $checkbox-hover-color,
-                      $selected: $checkbox-selected-color,
-                      $disabled: $input-select-disabled-icon,
-                      $border: $checkbox-border-color,
-                      $disabled-bg: $input-disabled-background-color,
-                      $display: inherit) {
-  label.#{$cls}-label {
-  width: 100%;
-  display: inline-block;
-  color: $color;
-  padding: {
-    left: 7px;
-    right: 7px;
-    bottom: 7px;
-    top: 7px;
-  }
-}
-  .#{$cls}-label:before {
-    @include lupicon-font( $size );
-    content: $off;
-    display: inline-block;
-    margin-right: 10px;
-    vertical-align: top;
-    color: $icon;
-    cursor: pointer;
-  }
-
-  .#{$cls}-label:hover.#{$cls}-label:before,
-  input:checked + .#{$cls}-label:hover.#{$cls}-label:before {
-    color: $hover;
-  }
-
-  input:checked + .#{$cls}-label:before {
-    @include lupicon-font($size);
-    content: $on;
-    color: $selected;
-  }
-
-  input:disabled + .#{$cls}-label:before,
-  input:disabled + .#{$cls}-label:hover.#{$cls}-label:before{
-    cursor: initial;
-    color: $disabled;
-  }
-
-  .#{$cls}-wrapper {
-    //display: $display;
-    border: 1px solid $border;
-    @include hide-radio-check-input ();
-}
-
-  .#{$cls}-wrapper--disabled {
-    background-color: $disabled-bg;
-}
-
-}
-
-@include toggle-helper ( arrow, "\e614", "\e611" ) {}
-
-
-@mixin label-checkbox ($label-cls, $size: $lupicon-size) {
-  label.#{$label-cls} {
-  width: 100%;
-  display: inline-block;
-  padding: {
-    left: 7px;
-    right: 7px;
-    bottom: 7px;
-    top: 7px;
-  }
-}
-  .#{$label-cls}:before {
-    @include lupicon-font( $size );
-    content: "\e603";
-    display: inline-block;
-    margin-right: 10px;
-    vertical-align: top;
-    color: $checkbox-color;
-    cursor: pointer;
-  }
-
-  .#{$label-cls}:hover.#{$label-cls}:before,
-  input[type=checkbox]:checked + .#{$label-cls}:hover.#{$label-cls}:before {
-    color: $checkbox-hover-color;
-  }
-
-  input[type=checkbox]:checked + .#{$label-cls}:before {
-    @include lupicon-font($size);
-    content: "\e604";
-    color: $checkbox-selected-color;
-  }
-
-  input[type=checkbox]:disabled + .#{$label-cls}:before {
-    cursor: initial;
-    color: $checkbox-color;
-  }
-}
-
-@include label-checkbox (checkbox-label) {}
 
 @mixin input-fields() {
   padding: 0 $marginM;
@@ -1183,32 +1066,6 @@ $max-columns: 12;
     background-color: $input-disabled-background-color;
   }
 }
-
-.radio-wrapper {
-  border: 1px solid $radio-border-color;
-  padding: $marginS $marginL $marginS $marginS;
-  label {
-    cursor: pointer;
-  }
-  @include hide-radio-check-input
-}
-
-.radio-label:before {
-  @include lupicon-font;
-  content: "\e634";
-  display: inline-block;
-  margin-right: 10px;
-  vertical-align: top;
-  color: $checkbox-color;
-  }
-
-input[type=radio]:checked + .radio-label:before {
-  @include lupicon-font;
-  content: "\e635";
-  color: $checkbox-selected-color;
-}
-
-@include toggle-helper (new-radio, "\e635", "\e634", $display: inline) {}
 
 .form-grid {
   // overflow-y: hidden;
@@ -1662,48 +1519,8 @@ div.review-done {
   }
 }
 
-.checkbox-wrapper.checkbox-wrapper--break {
-  margin-bottom: $marginL;
-}
-
-.checkbox-wrapper.checkbox-wrapper--break-small {
-  margin-bottom: $marginS;
-}
-
 .foreman-info {
   padding-left: $marginS;
 }
 
-// Attachment filters related
-
-.wrapper--inline {
-  display: inline-block;
-}
-
-.filter-group {
-  border: 1px solid $gray187;
-  padding: {
-    top: 7px;
-    left: 7px;
-    right: 7px;
-    bottom: 14px;
-  }
-  margin-bottom: 1em;
-  .filter-group__state {
-    i {
-      cursor: pointer;
-      color: $primary;
-    }
-    span {
-      text-transform: uppercase;
-    }
-  }
-  .filter-group__toggles {
-    margin-left: 2px;
-    margin-top: $marginS;
-    input {      
-      display: block;
-    }
-  }
-}
  

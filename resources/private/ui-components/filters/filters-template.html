@@ -9,11 +9,11 @@
       <span data-bind="ltext: 'filter.show-all'"></span>
     </div>
     <div class="filter-group__toggles"
-         data-bind="foreach: filters"><div class="checkbox-wrapper checkbox-wrapper--inline">
+         data-bind="foreach: filters"><div class="filter-wrapper">
         <input type="checkbox"
                data-bind="attr: {id: $parent.id( $index() )},
                           checked: filter">
-        <label class="checkbox-label"
+        <label class="filter-label"
                data-bind="attr: {'for': $parent.id( $index() )},
                           ltext: ltext"></label>
     </div></div>
