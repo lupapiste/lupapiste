@@ -1,0 +1,23 @@
+.attachments-accordions {
+  .attachments-accordion {
+    &.secondary {
+      margin-top: $marginL;
+    }
+    &.tertiary {
+      margin-top: $marginS;
+    }
+
+  }
+}
+
+.attachments-accordion-content {
+  padding: {
+    left: $marginL;
+    bottom: $marginL;
+  }
+  position: relative;
+  border: 1px solid $gray221;
+  border-top: none;
+  .attachments-accordion-content-part {
+  }
+}

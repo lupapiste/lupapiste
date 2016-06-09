@@ -25,3 +25,20 @@ button.rollup-button {
   display: table-cell;
   min-width: $lupicon-size;
 }
+
+.rollup-accordion {
+  .rollup-accordion-content {
+    padding: {
+      top: $marginS;
+    }
+    position: relative;
+    border: 1px solid $gray221;
+    border-top: none;
+    .rollup-accordion-content-part {
+      margin-left: $marginM;
+      margin-right: $marginM;
+      margin-bottom: $marginM;
+    }
+
+  }
+}

@@ -5,12 +5,15 @@
       <li>
         <p data-bind="text: $data.id"/>
         <!-- ko if: !($parent.isApproved($data)) -->
-        <button data-bind="click: $parent.approveAttachment($data.id)">Hyv\u00E4ksy</button>
+        <button data-bind="click: $parent.approveAttachment($data.id),
+                           ltext: 'attachment.approve'"></button>
         <!-- /ko -->
         <!-- ko if: !($parent.isRejected($data)) -->
-        <button data-bind="click: $parent.rejectAttachment($data.id)">Hylk\u00E4\u00E4</button>
+        <button data-bind="click: $parent.rejectAttachment($data.id),
+                           ltext: 'attachment.reject'"></button>
         <!-- /ko -->
-        <button data-bind="click: $parent.removeAttachment($data.id)">Poista</button>
+        <button data-bind="click: $parent.removeAttachment($data.id),
+                           ltext: 'attachment.delete'"></button>
       </li>
     </ul>
   </div>

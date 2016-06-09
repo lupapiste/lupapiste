@@ -1,16 +1,31 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-listing-accordion-template">
-  <!-- ko if: $data.data && $data.data().hasAttachments -->
+  <!-- ko if: $data.data && $data.data().hasContent -->
     <rollup params="open: $data.open">
       <rollup-status-button
          params="open: $parent.open,
-                 style: 'secondary',
+                 style: ($parent.level === 0 ? 'secondary' : 'tertiary') +
+                        ' attachments-accordion',
                  status: $parent.data().status,
-                 text: $parent.text"></rollup-status-button>
-      <div class="rollup__open">
-        <div data-bind="template:
+                 text: $parent.name"></rollup-status-button>
+      <div class="rollup__open attachments-accordion-content">
+        <!-- ko if: $parent.data().type === "main" -->
+        <div data-bind="foreach: $parent.accordions">
+          <div class="attachments-accordion-content-part"
+               data-bind="template:
+                          {name: 'attachments-listing-accordion-template',
+                           data: _.merge($data, {level: $parents[1].level + 1})}">
+          </div>
+        </div>
+        <!-- /ko -->
+        <!-- ko if: $parent.data().type === "sub" -->
+        <div class="rollup-accordion-content-part"
+             data-bind="template:
                         {name: 'attachments-listing-attachment-info-template',
-                         data: $parent.data().attachmentInfos}"></div>
+                        data: _.merge($parent.data().attachmentInfos,
+                                      {level: $parents[1].level + 1})}">
+        </div>
+        <!-- /ko -->
       </div>
     </rollup>
   <!-- /ko -->

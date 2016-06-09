@@ -49,47 +49,15 @@
   
   <div>
     <h2 data-bind="ltext: 'application.attachments.pre-verdict'"/>
-    <div
-       data-bind="template: {name: 'attachments-listing-accordion-template',
-                             data: groups.preVerdict.yleiset}"></div>
-    <!-- ko if: groups.preVerdict.erityissuunnitelmat.data().hasAttachments -->
-    <rollup params="{open: getAccordionToggle('preVerdict', 'erityissuunnitelmat')}">
-      <rollup-status-button params="{open: open,
-                                     style: 'secondary',
-                                     status: $parent.groups.preVerdict.erityissuunnitelmat.data().status,
-                                     text: 'erityissuunnitelmat'}">
-      </rollup-status-button>
-      <div class="rollup__open">
+    <div class="attachments-accordions">
+      <div data-bind="foreach: groups[0].accordions">
         <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                                   data: $parent.groups.preVerdict.erityissuunnitelmat['kvv_suunnitelma']}"></div>
-        <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                                   data: $parent.groups.preVerdict.erityissuunnitelmat.rakennesuunnitelma}"></div>
+                                   data: _.merge($data, {level: 0})}"></div>
       </div>
-    </rollup>
-    <!-- /ko -->
-  </div>  
-  <rollup params="{open: rollupToggle}">
-    <rollup-status-button params="open: $parent.rollupToggle,
-diff                                  style: 'tertiary',
-                                  status: $parent.rollupStatus,
-                                  text: 'Button with approval status'">
-      <span data-bind="text: 'Hello world!'"></span>
-    </rollup-status-button>
-    <div class="rollup__open" style="padding-left: 5em">
-      Body is now visible!
-      <rollup params="open: $parent.innerToggle">
-        <rollup-button params="open: $parents[1].innerToggle, 
-                               text: 'Inner rollup',
-                               css: {authority: 1}"></rollup-button>
-        <div class="rollup__open">Inner body is now visible!</div>
-      </rollup>
-      <rollup params="open: $parent.linkToggle">
-        No rollup button, just a <a data-bind="toggleClick: $parents[1].linkToggle">link</a>
-        <p class="rollup__open">
-          Paragraph is visible. You can <a data-bind="toggleClick: $parents[1].linkToggle">hide</a> it.
-        </p>
-        
-      </rollup>
     </div>
-  </rollup>
+    <h2 data-bind="ltext: 'application.attachments.post-verdict'"/>
+    <div data-bind="foreach: groups[1].accordions">
+      <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                                 data: _.merge($data, {level: 0})}"></div>
+    </div>
 </script>
