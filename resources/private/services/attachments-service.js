@@ -7585,10 +7585,170 @@ LUPAPISTE.AttachmentsService = function() {
       })
       .value();
   };
+  self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
+
   self.getAttachmentsOfMainGroup = function(mainGroupId) {
     return self.getAttachmentsHierarchy()[mainGroupId];
   };
   self.getAttachmentsOfSubGroup = function(mainGroupId, subGroupId) {
     return self.getAttachmentsHierarchy()[mainGroupId][subGroupId];
   };
+
+  function attachmentFn(f) {
+    return function(attachmentId) {
+      return function() {
+        f(attachmentId);
+      };
+    };
+  }
+
+  function idToAttachment(attachmentId) {
+    var attachment = self.getAttachment(attachmentId);
+    if (attachment) {
+      return attachment;
+    } else {
+      return null;
+    }
+  }
+
+  self.modelForAttachmentInfo = function(attachmentIds) {
+    return {
+      approveAttachment: attachmentFn(self.approveAttachment),
+      rejectAttachment:  attachmentFn(self.rejectAttachment),
+      removeAttachment:  attachmentFn(self.removeAttachment),
+      isApproved:        self.isApproved,
+      isRejected:        self.isRejected,
+      isNotNeeded:       self.isNotNeeded,
+      attachments:       _.map(attachmentIds, idToAttachment)
+    };
+  };
+
+  function modelForSubAccordion(subGroup) {
+    return {
+      type: "sub",
+      ltitle: subGroup.name, // TODO
+      attachmentInfos: self.modelForAttachmentInfo(subGroup.attachmentIds),
+      status: ko.pureComputed(self.attachmentsStatus(subGroup.attachmentIds)),
+      hasContent: ko.pureComputed(function() {
+        return subGroup.attachmentIds &&
+          subGroup.attachmentIds.length > 0;
+      })
+    };
+  }
+
+  function subGroupsStatus(subGroups) {
+
+    return ko.pureComputed(function() {
+      if (_.every(_.values(subGroups),
+                  function(sg) {
+                    return sg.status() === self.APPROVED;
+                 }))
+      {
+        return self.APPROVED;
+      } else {
+        return _.some(_.values(subGroups),
+                      function(sg) {
+                        return sg.status() === self.REJECTED;
+                     })
+        ? self.REJECTED : null;
+      }
+    });
+  }
+
+  function someSubGroupsHaveContent(subGroups) {
+    return ko.pureComputed(function() {
+      return _.some(_.values(subGroups),
+                    function(sg) { return sg.hasContent(); });
+    });
+  }
+
+  function modelForMainAccordion(mainGroup) {
+    var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
+    return _.merge({
+      type: "main",
+      ltitle: mainGroup.name, // TODO
+      status: subGroupsStatus(subGroups),
+      hasContent: someSubGroupsHaveContent(subGroups)
+    }, subGroups);
+  }
+
+  function hierarchyToGroups(hierarchy) {
+    return _(hierarchy).mapValues(function(group, name) {
+      if (_.isPlainObject(group)) {
+        return {
+          type: "main",
+          name: name,
+          subGroups: hierarchyToGroups(group)
+        };
+      } else {
+        return {
+          type: "sub",
+          name: name,
+          attachmentIds: group
+        };
+      }
+    }).value();
+  }
+
+  function groupToModel(group) {
+    if (group.type === "main") {
+      return modelForMainAccordion(group);
+    } else {
+      return modelForSubAccordion(group);
+    }
+  }
+
+  self.verdicts = ko.pureComputed(function() {
+    return  _.mapValues(hierarchyToGroups(self.attachmentsHierarchy()),
+                               groupToModel);
+  });
+
+  function getDataForGroup() {
+    var args = _.toArray(arguments);
+    return ko.pureComputed(function() {
+      return  _.merge(_.get(self.verdicts(), args));
+    });
+  }
+
+  function getDataForAccordion() {
+    var args = _.toArray(arguments);
+    return {
+      name: _.last(args),
+      open: ko.observable(),
+      data: _.spread(getDataForGroup)(args)
+    };
+  }
+
+  function attachmentTypeLayout(verdictType) {
+    return [
+      getDataForAccordion(verdictType, "yleiset"),
+      getDataForAccordion(verdictType, "osapuolet"),
+      getDataForAccordion(verdictType, "rakennuspaikka"),
+      {name: "erityissuunnitelmat",
+       open: ko.observable(),
+       data: getDataForGroup(verdictType, "erityissuunnitelmat"),
+       accordions: [
+         getDataForAccordion(verdictType, "erityissuunnitelmat", "paapiirustus"),
+         getDataForAccordion(verdictType, "erityissuunnitelmat", "kvv_suunnitelma"),
+         getDataForAccordion(verdictType, "erityissuunnitelmat", "iv_suunnitelma"),
+         getDataForAccordion(verdictType, "erityissuunnitelmat", "rakennesuunnitelma")
+       ]
+      }
+    ];
+  }
+  
+  self.layout = [
+    {
+      name: "preVerdict",
+      open: ko.observable(),
+      data: getDataForGroup("preVerdict"),
+      accordions: attachmentTypeLayout("preVerdict")
+    },
+    {
+      name: "postVerdict",
+      open: ko.observable(),
+      data: getDataForGroup("postVerdict"),
+      accordions: attachmentTypeLayout("postVerdict")
+    }
+  ];
 };
