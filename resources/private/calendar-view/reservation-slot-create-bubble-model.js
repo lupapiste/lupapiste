@@ -1,19 +1,26 @@
-LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
+LUPAPISTE.ReservationSlotCreateBubbleModel = function() {
   "use strict";
-  var self = this;
+  var self = this,
+      calendarService = lupapisteApp.services.calendarService,
+      params = calendarService.params();
 
-  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.startTime = ko.observable();
+  self.durationHours = params.timeSlotLengthMinutes / 60;
+  self.durationMinutes = params.timeSlotLengthMinutes % 60;
+
   self.positionTop = ko.observable();
   self.weekdayCss = ko.observable();
-  self.calendarId = lupapisteApp.services.calendarService.calendarQuery.calendarId;
-  self.reservationTypes = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
-  self.selectedReservationTypes = ko.observableArray();
+
+  self.calendarId = calendarService.calendarQuery.calendarId; // observable
   self.amount = ko.observable();
   self.maxAmount = ko.observable();
 
-  self.waiting = params.waiting;
+  self.reservationTypes = calendarService.calendarQuery.reservationTypes; // observable
+  self.selectedReservationTypes = ko.observableArray();
+
+  self.waiting = ko.observable();
   self.error = ko.observable(false);
   self.bubbleVisible = ko.observable(false);
 
@@ -28,9 +35,10 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
       self.error("calendar.error.cannot-create-overlapping-slots");
       return;
     }
+    var len = params.timeSlotLengthMinutes;
     var slots = _.map(_.range(self.amount()), function(d) {
-      var t1 = moment(self.startTime()).add(d, "h");
-      var t2 = moment(self.startTime()).add(d+1, "h");
+      var t1 = moment(self.startTime()).add(d*len, "minutes");
+      var t2 = moment(self.startTime()).add((d+1)*len, "minutes");
       return {
         start: t1.valueOf(),
         end: t2.valueOf(),
@@ -63,7 +71,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function( params ) {
     }
 
     self.startTime(timestamp);
-    self.positionTop((event.hour - params.tableFirstFullHour() + 1) * 60 + "px");
+    self.positionTop((event.hour - params.firstFullHour + 1) * 60 + "px");
     self.weekdayCss("weekday-" + timestamp.isoWeekday());
     self.selectedReservationTypes([]);
     self.amount(1);
