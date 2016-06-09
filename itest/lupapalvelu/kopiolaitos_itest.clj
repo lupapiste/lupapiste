@@ -62,13 +62,7 @@
 
     (fact "Order prints"
       (let [app (query-application sonja app-id)
-            attachments-with-amount (map
-                                      #(assoc %
-                                         :amount   "2"
-                                         :filename (-> % :latestVersion :filename)
-                                         :fileId   (-> % :latestVersion :fileId)
-                                         :contents (or (:contents %) (i18n/localize "fi" (str "attachmentType." (-> % :type :type-group) "." (-> % :type :type-id)))))
-                                      (:attachments app))
+            attachments-with-amount (map #(assoc % :amount 2) (:attachments app))
             order-info {:ordererOrganization "Testi"
                         :ordererAddress      "Testikuja 2"
                         :ordererPhone        "12345"
@@ -92,25 +86,19 @@
             :lang "fi"
             :attachmentsWithAmounts nil
             :orderInfo order-info) => fail?)
-        (fact
-          "without attachment versions order fails"
-          (command sonja :order-verdict-attachment-prints
-            :id app-id
-            :lang "fi"
-            :attachmentsWithAmounts (map #(dissoc % :versions) (filter :forPrinting attachments-with-amount))
-            :orderInfo order-info) => fail?)
         (fact "attachments without needed attachment key (amount) results in fail"
           (command sonja :order-verdict-attachment-prints
             :id app-id
             :lang "fi"
             :attachmentsWithAmounts (:attachments app)
-            :orderInfo order-info) => (and fail? (contains {:required-keys ["forPrinting" "amount" "versions"]})))
+            :orderInfo order-info) => (and fail? (contains {:required-keys ["id" "amount"]})))
         (fact "fail when all attachments for command don't have forPriting set to 'true'"
           (command sonja :order-verdict-attachment-prints
             :id app-id
             :lang "fi"
-            :attachmentsWithAmounts attachments-with-amount
+            :attachmentsWithAmounts (remove :forPrinting attachments-with-amount)
             :orderInfo order-info) => fail?)
+
         (fact "success as organization has email set"
           (command sonja :order-verdict-attachment-prints
             :id app-id
@@ -140,6 +128,16 @@
                      (count result) => 2)
                    (fact "filenames end with 'test-attachment.txt'"
                      (every? #(.endsWith (:name %) "test-attachment.txt") result) => true)))))))
+
+        (fact "without attachment versions order fails"
+          (let [for-printing (filter :forPrinting attachments-with-amount)
+                {id :id, {:keys [fileId originalFileId]} :latestVersion} (first for-printing)]
+            (fact "delete latest version" (command sonja :delete-attachment-version :id app-id :attachmentId id :fileId fileId :originalFileId originalFileId) => ok?)
+            (command sonja :order-verdict-attachment-prints
+             :id app-id
+             :lang "fi"
+             :attachmentsWithAmounts (take 1 for-printing)
+             :orderInfo order-info)) => fail?)
 
         (fact "unsetting organization kopiolaitos-email leads to failure in kopiolaitos order"
           (command sipoo :set-kopiolaitos-info
