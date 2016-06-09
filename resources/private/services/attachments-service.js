@@ -7755,14 +7755,10 @@ LUPAPISTE.AttachmentsService = function() {
   
   self.layout = [
     {
-      name: "preVerdict",
-      open: ko.observable(),
       data: getDataForGroup("preVerdict"),
       accordions: attachmentTypeLayout("preVerdict")
     },
     {
-      name: "postVerdict",
-      open: ko.observable(),
       data: getDataForGroup("postVerdict"),
       accordions: attachmentTypeLayout("postVerdict")
     }
