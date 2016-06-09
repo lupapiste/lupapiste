@@ -23,5 +23,4 @@
                                 attachments)
                           (fail :error.kopiolaitos-print-order-invalid-parameters-content)))]}
   [command]
-  (kopiolaitos/do-order-verdict-attachment-prints command)
-  (ok))
+  (kopiolaitos/do-order-verdict-attachment-prints command))

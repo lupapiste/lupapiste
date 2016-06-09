@@ -135,4 +135,4 @@
           {$push {:transfers order-with-normalized-attachments}
            $set {:modified created}})
         (ok)))
-    (fail! :no-kopiolaitos-email-defined)))
+    (fail :no-kopiolaitos-email-defined)))
