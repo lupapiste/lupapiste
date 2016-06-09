@@ -7496,8 +7496,9 @@ LUPAPISTE.AttachmentsService = function() {
 
   function getSubGroup(attachment) {
     // Dummy implementation for dummy data
-    var mainGroup = getMainGroup(attachment);
-    if (getOpId(attachment)) {
+    if (getMainGroup(attachment) === "osapuolet") {
+      return "no-sub-group";
+    } else if (getOpId(attachment)) {
       if (attachment.type["type-group"] === "paapiirustus") {
         return "paapiirustus";
       } else {
