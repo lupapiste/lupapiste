@@ -28,7 +28,7 @@ LUPAPISTE.AttachmentsService = function() {
         "name" : "linjasaneeraus",
         "description" : null,
         "created" : 1463307103457,
-        "id" : "replaced-uid-56ew8dw",
+        "id" : "op-id",
         "optional" : [
 
         ]
@@ -296,7 +296,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_user_action",
       "op" : {
-        "id" : "replaced-uid-1bvx9mb",
+        "id" : "op-id",
         "name" : "linjasaneeraus",
         "description" : null,
         "created" : 1463307103457
@@ -385,7 +385,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-f05y8uw",
+        "id" : "op-id",
         "name" : "linjasaneeraus",
         "description" : null,
         "created" : 1463307103457
@@ -1199,7 +1199,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-4dsxh4w"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -1355,7 +1355,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-grltums"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -1511,7 +1511,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-ayozn58"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -1667,7 +1667,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-pqpy3fy"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -1823,7 +1823,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-ydi07ek"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -1979,7 +1979,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-zpsmtq6"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -2135,7 +2135,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-nqws10s"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -2291,7 +2291,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-wfglidp"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -2446,7 +2446,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-t7sgs4t"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -2587,7 +2587,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-qzdj39t"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -2728,7 +2728,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-mnz900e"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -2869,7 +2869,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-am5sz9t"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -3010,7 +3010,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-n59an2a"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -3151,7 +3151,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-9mngsqa"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -3292,7 +3292,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-wr9exw9"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -3433,7 +3433,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-u7e1ine"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -3574,7 +3574,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-9gri8hx"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -3715,7 +3715,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-15mxcza"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -3841,7 +3841,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-5ybzz1d"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -3967,7 +3967,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-ny2583m"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -4093,7 +4093,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-m6fs8si"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -4219,7 +4219,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-92rnpxr"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -4345,7 +4345,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-mjpvk29"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -4471,7 +4471,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-9h8vjfp"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -4597,7 +4597,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-uywaub1"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -4723,7 +4723,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-4pqj7l9"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -4848,7 +4848,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-41s009q"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -4973,7 +4973,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-xiwndkk"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -5098,7 +5098,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-j1z7av6"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -5223,7 +5223,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-wzptjiy"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -5348,7 +5348,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-23459ha"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -5473,7 +5473,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-d0dqwmi"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -5598,7 +5598,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-fejamed"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -5723,7 +5723,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-08q4prb"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -5848,7 +5848,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-gff3f9g"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -5973,7 +5973,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-bl2sypu"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -6098,7 +6098,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-5u5p6f3"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -6223,7 +6223,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-hkvp53n"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -6349,7 +6349,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-e06f9iq"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -6475,7 +6475,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-vdq0byp"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -6601,7 +6601,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-mec5m06"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -6727,7 +6727,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-s2gomvk"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -6853,7 +6853,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-8nryjkm"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -6979,7 +6979,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-cb1mgw1"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -7105,7 +7105,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-e99rxix"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -7231,7 +7231,7 @@ LUPAPISTE.AttachmentsService = function() {
       },
       "state" : "requires_authority_action",
       "op" : {
-        "id" : "replaced-uid-car6vig"
+        "id" : "op-id"
       },
       "auth" : [
         {
@@ -7473,23 +7473,36 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
+  function getOpId(attachment) {
+    return attachment.op && attachment.op.id;
+  }
+
   function getMainGroup(attachment) {
     // Dummy implementation for dummy data
     switch (attachment.type["type-group"]) {
-    case "erityissuunnitelmat":     return "erityissuunnitelmat";
-    case "osapuolet":               return "osapuolet";
+    case "osapuolet":
+    case "hakija":
+      return "osapuolet";
     case "rakennuspaikan_hallinta":
     case "rakennuspaikka":
-                                    return "rakennuspaikka";
-    default:                        return "yleiset";
+      return "rakennuspaikka";
+    }
+    if (getOpId(attachment)) {
+      return getOpId(attachment);
+    } else {
+      return "yleiset";
     }
   }
 
   function getSubGroup(attachment) {
     // Dummy implementation for dummy data
     var mainGroup = getMainGroup(attachment);
-    if (mainGroup === "erityissuunnitelmat") {
-      return attachment.type["type-id"];
+    if (getOpId(attachment)) {
+      if (attachment.type["type-group"] === "paapiirustus") {
+        return "paapiirustus";
+      } else {
+        return attachment.type["type-id"];
+      }
     } else {
       return "no-sub-group";
     }
@@ -7724,14 +7737,15 @@ LUPAPISTE.AttachmentsService = function() {
       getDataForAccordion(verdictType, "yleiset"),
       getDataForAccordion(verdictType, "osapuolet"),
       getDataForAccordion(verdictType, "rakennuspaikka"),
-      {name: "erityissuunnitelmat",
+      {name: "op-id", // TODO generalize for any number of ops
        open: ko.observable(),
-       data: getDataForGroup(verdictType, "erityissuunnitelmat"),
+       data: getDataForGroup(verdictType, "op-id"),
        accordions: [
-         getDataForAccordion(verdictType, "erityissuunnitelmat", "paapiirustus"),
-         getDataForAccordion(verdictType, "erityissuunnitelmat", "kvv_suunnitelma"),
-         getDataForAccordion(verdictType, "erityissuunnitelmat", "iv_suunnitelma"),
-         getDataForAccordion(verdictType, "erityissuunnitelmat", "rakennesuunnitelma")
+         getDataForAccordion(verdictType, "op-id", "paapiirustus"),
+         getDataForAccordion(verdictType, "op-id", "kvv_suunnitelma"),
+         getDataForAccordion(verdictType, "op-id", "iv_suunnitelma"),
+         getDataForAccordion(verdictType, "op-id", "rakennesuunnitelma"),
+         getDataForAccordion(verdictType, "op-id", "muu_suunnitelma")
        ]
       }
     ];
