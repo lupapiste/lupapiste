@@ -1,11 +1,5 @@
-@import url('main-blessed1.css?z=1465461708931');
+@import url('main-blessed1.css?z=1465468816463');
 
-/* line 32, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form select, .metadata-editor-container .editor .editor-form input {
-  width: 100%;
-  box-sizing: border-box;
-  height: 30px;
-}
 /* line 37, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form input[type=checkbox] {
   width: auto;
@@ -748,6 +742,20 @@ button.rollup-button {
 .rollup-status__icon {
   display: table-cell;
   min-width: 22px;
+}
+
+/* line 30, ../../../private/common-html/sass/partials/_rollup.scss */
+.rollup-accordion .rollup-accordion-content {
+  padding-top: 6px;
+  position: relative;
+  border: 1px solid #dddddd;
+  border-top: none;
+}
+/* line 37, ../../../private/common-html/sass/partials/_rollup.scss */
+.rollup-accordion .rollup-accordion-content .rollup-accordion-content-part {
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-bottom: 12px;
 }
 
 /* VIEWS
