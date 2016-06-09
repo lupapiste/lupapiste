@@ -23,11 +23,12 @@ LUPAPISTE.CalendarService = function() {
     if (event && event.id) {
       self.calendarQuery.calendarId(event.id);
     }
+    var newStartOfWeek;
     if (event && event.week && event.year) {
-      var newStartOfWeek = moment().set({'isoWeek': event.week, 'year': event.year}).startOf("isoWeek").valueOf();
+      newStartOfWeek = moment().set({"isoWeek": event.week, "year": event.year}).startOf("isoWeek").valueOf();
       self.calendarQuery.startOfWeek(newStartOfWeek);
     } else if (event && event.increment) {
-      var newStartOfWeek = moment(self.calendarQuery.startOfWeek()).add(event.increment, "weeks");
+      newStartOfWeek = moment(self.calendarQuery.startOfWeek()).add(event.increment, "weeks");
       self.calendarQuery.startOfWeek(newStartOfWeek.valueOf());
     }
 
