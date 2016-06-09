@@ -44,7 +44,6 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function() {
   self.addEventListener("calendarView", "calendarSlotClicked", function(event) {
     var timestamp = moment(event.slot.startTime);
     var durationMoment = moment.duration(event.slot.duration);
-    console.log(event.slot);
     self.slotId(event.slot.id);
     self.startTime(timestamp);
     self.durationHours(durationMoment.hours());
