@@ -168,7 +168,7 @@
       ; normal price class
       (assoc op
         :priceClass price-class
-        :priceCode (get permit-type-price-code (:permitType application))
+        :priceCode (get permit-type-price-codes (:permitType application))
         :use nil
         :usagePriceCode nil))))
 
