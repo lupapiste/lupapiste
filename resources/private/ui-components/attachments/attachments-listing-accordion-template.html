@@ -22,11 +22,8 @@
         </div>
         <!-- /ko -->
         <!-- ko if: $parent.data().type === "sub" -->
-        <div class="rollup-accordion-content-part"
-             data-bind="template:
-                        {name: 'attachments-listing-attachment-info-template',
-                        data: _.merge($parent.data().attachmentInfos,
-                                      {level: $parents[1].level + 1})}">
+        <div class="rollup-accordion-content-part">
+          <attachments-table params="attachments: $parent.data().attachmentInfos.attachments"></attachments-table>
         </div>
         <!-- /ko -->
       </div>
