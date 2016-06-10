@@ -755,9 +755,7 @@
     (output-attachment preview-id false attachment-fn)))
 
 (defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
-  (when-not libreoffice-client/enabled?
-    (info "Danger: Libreoffice PDF/A conversion feature disabled."))
-  (if (and libreoffice-client/enabled?
+  (if (and (libreoffice-client/enabled?)
            (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
            (or (=as-kw type-group :paatoksenteko) (=as-kw type-group :muut))
            (#{:paatos :paatosote} (keyword type-id)))
