@@ -7347,10 +7347,6 @@ LUPAPISTE.AttachmentsService = function() {
   //
 
   // returns an observable
-  self.getFilter = function(filterId) {
-    return filters[filterId];
-  };
-
   var filters = {
         "hakemus": ko.observable(false),
         "rakentaminen": ko.observable(false),
@@ -7763,4 +7759,27 @@ LUPAPISTE.AttachmentsService = function() {
       accordions: attachmentTypeLayout("postVerdict")
     }
   ];
+
+   function getAllAccordionToggles() {
+     function getAllToggles(objectOrArray) {
+       if (_.isArray(objectOrArray)) {
+         return _.flatten(_.map(objectOrArray, getAllToggles));
+       } else if (_.isObject(objectOrArray)) {
+         return _.concat(objectOrArray.open? [objectOrArray.open] : [],
+                         getAllToggles(objectOrArray.accordions));
+       } else {
+         return [];
+       }
+     }
+     return getAllToggles(self.layout);
+  }
+
+  self.toggleAllAccordions = function() {
+    var toggles = getAllAccordionToggles();
+    if (_.some(toggles, function(t) { return !t(); })) {
+      _.forEach(toggles, function(t) { t(true); });
+    } else {
+      _.forEach(toggles, function(t) { t(false); });
+    }
+  };
 };

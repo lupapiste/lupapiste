@@ -51,7 +51,8 @@
     <!-- ko if: groups[0].data().hasContent && groups[0].data().hasContent() -->
     <h2 data-bind="ltext: 'application.attachments.pre-verdict'"/>
     <a class="link-btn right">
-      <span data-bind="text: 'Avaa / sulje kaikki'"></span>
+      <span data-bind="text: 'Avaa / sulje kaikki',
+                       click: closeAllGroups"></span>
     </a>
     <div class="attachments-accordions">
       <div data-bind="foreach: groups[0].accordions">
@@ -63,7 +64,8 @@
     <!-- ko if: groups[1].data().hasContent && groups[1].data().hasContent() -->
     <h2 data-bind="ltext: 'application.attachments.post-verdict'"/>
     <a class="link-btn right">
-      <span data-bind="text: 'Avaa / sulje kaikki'"></span>
+      <span data-bind="text: 'Avaa / sulje kaikki',
+                       click: closeAllGroups"></span>
     </a>
     <div data-bind="foreach: groups[1].accordions">
       <div data-bind="template: {name: 'attachments-listing-accordion-template',
