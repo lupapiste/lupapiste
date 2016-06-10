@@ -5,7 +5,7 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
   
   self.items = ko.observableArray();
   self.initialized = false;
-  self.calendarInView = lupapisteApp.services.calendarService.calendar;
+  self.calendarInView = ko.observable();
 
   function setEnabled(user, value) {
     if (self.initialized) {
@@ -32,11 +32,16 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
     self.initialized = true;
   };
 
-  var _init = hub.subscribe("calendarService::organizationCalendarsFetched", function() {
-    self.init(lupapisteApp.services.calendarService.organizationCalendars());
+  var _init = hub.subscribe("calendarService::organizationCalendarsFetched", function(event) {
+    self.init(event.calendars);
+  });
+
+  var _calendarFetched = hub.subscribe("calendarService::calendarFetched", function(event) {
+    self.calendarInView(event.calendar);
   });
 
   self.dispose = function() {
     hub.unsubscribe(_init);
+    hub.unsubscribe(_calendarFetched);
   };
 };

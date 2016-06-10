@@ -3,7 +3,6 @@ LUPAPISTE.CalendarViewModel = function () {
   var self = this,
       calendarService = lupapisteApp.services.calendarService;
 
-  self.calendar = calendarService.calendar;
   self.calendarWeekdays = calendarService.calendarWeekdays;
   self.startOfWeek = calendarService.calendarQuery.startOfWeek;
 
