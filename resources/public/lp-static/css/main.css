@@ -1,5 +1,33 @@
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1465551912934');
+=======
+@import url('main-blessed1.css?z=1465567909186');
+>>>>>>> Approve, Reject, Not needed and Download.
 
+/* line 11, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header div {
+  vertical-align: middle;
+  display: table-cell;
+}
+/* line 15, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header .edit-button-container {
+  width: 28px;
+  cursor: pointer;
+}
+/* line 18, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header .edit-button-container i {
+  margin: 0;
+}
+/* line 30, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form {
+  padding: 0 15px 15px 15px;
+}
+/* line 32, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form select, .metadata-editor-container .editor .editor-form input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 30px;
+}
 /* line 37, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form input[type=checkbox] {
   width: auto;

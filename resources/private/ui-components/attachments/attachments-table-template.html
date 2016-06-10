@@ -1,7 +1,7 @@
 <script type="text/x-jquery-tmpl" class="ko-template"
         id="attachments-table-template">
-  <div>
-    <table>
+  <div class="attachments-table-container">
+    <table class="attachments-table">
       <thead>
         <tr>
           <th data-bind="ltext:'application.attachmentState'"></th>
@@ -30,7 +30,7 @@
           <!-- /ko -->
           <!-- ko ifnot: $parent.hasFile( $data ) -->
           <td>
-            <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id'])"></span>
+            <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
             <br>
             <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
           </td>
@@ -43,7 +43,8 @@
           <td>
             <div class="checkbox-wrapper">
               <input type="checkbox"
-                     data-bind="attr: {id: $parent.inputId( $index() )}">
+                     data-bind="attr: {id: $parent.inputId( $index() )},
+                                checked: $parent.notNeeded( $data )">
               <label class="checkbox-label"
                      data-bind="attr: {'for': $parent.inputId( $index())},
                                 ltext: 'application.attachmentNotNeeded'"></label>
@@ -51,17 +52,22 @@
           </td>
           <!-- /ko -->
           <td>
-            <button class="positive">
+            <button class="positive"
+                    data-bind="disable: $parent.isApproved( $data ) || $parent.isNotNeeded,
+                               click: $parent.approve">
               <i class="lupicon-check"></i>
             </button>
           </td>
           <td>
-            <button class="negative">
+            <button class="negative"
+                    data-bind="disable: $parent.isRejected( $data ),
+                               click: $parent.reject">
               <i class="lupicon-circle-attention"></i>
             </button>
           </td>
           <td>
-            <button class="secondary">
+            <button class="secondary"
+                    data-bind="click: $parent.remove">
               <i class="lupicon-remove"></i>
             </button>
           </td>
@@ -69,5 +75,10 @@
         <!-- /ko -->
       </tbody>
     </table>
+    <button data-bind="enable: canDownload()"
+            class="secondary">
+      <i class="lupicon-download"></i>
+      <span data-bind="ltext: 'download-all'"></span>
+    </button>
   </div>
 </scripspan>

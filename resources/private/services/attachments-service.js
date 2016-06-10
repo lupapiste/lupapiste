@@ -7406,6 +7406,7 @@ LUPAPISTE.AttachmentsService = function() {
       return attachment.peek().id === attachmentId;
     });
   };
+
   self.removeAttachment = function(attachmentId) {
     self.attachments.remove(function(attachment) {
       return attachment().id === attachmentId;
@@ -7426,6 +7427,10 @@ LUPAPISTE.AttachmentsService = function() {
   };
   self.rejectAttachment = function(attachmentId) {
     self.updateAttachment(attachmentId, {state: self.REJECTED});
+  };
+
+  self.setNotNeeded = function(attachmentId, flag ) {
+    self.updateAttachment(attachmentId, {notNeeded: Boolean( flag )});
   };
 
   //helpers for checking relevant attachment states

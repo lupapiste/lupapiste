@@ -7581,9 +7581,9 @@ div.alleYli-radioGroup {
 }
 /* line 1325, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1325, ../../../private/common-html/sass/partials/_forms.scss */
@@ -9107,6 +9107,33 @@ table.company-users-table select {
 /* line 283, ../../../private/common-html/sass/partials/_tables.scss */
 table.company-users-table tr:hover, table.company-users-table tr:active {
   background-color: transparent;
+}
+
+/* line 288, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container {
+  padding-top: 1em;
+  padding-right: 1em;
+}
+/* line 293, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table {
+  margin-bottom: 1em;
+}
+/* line 295, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table .checkbox-wrapper {
+  border: none;
+}
+/* line 297, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table .checkbox-wrapper .checkbox-label {
+  padding-top: 2px;
+  padding-left: 0;
+}
+/* line 302, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table td {
+  vertical-align: top;
+}
+/* line 304, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table td .fileinfo {
+  font-style: normal;
 }
 
 /*Tab styles*/
@@ -11063,28 +11090,4 @@ ul.no-bullets {
   background-color: #4f4f4f;
   padding: 15px;
   min-height: 65px;
-}
-/* line 11, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-header div {
-  vertical-align: middle;
-  display: table-cell;
-}
-/* line 15, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-header .edit-button-container {
-  width: 28px;
-  cursor: pointer;
-}
-/* line 18, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-header .edit-button-container i {
-  margin: 0;
-}
-/* line 30, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form {
-  padding: 0 15px 15px 15px;
-}
-/* line 32, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form select, .metadata-editor-container .editor .editor-form input {
-  width: 100%;
-  box-sizing: border-box;
-  height: 30px;
 }
