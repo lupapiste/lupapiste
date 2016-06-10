@@ -7,7 +7,7 @@
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
   (:import (java.io File)))
 
-(def file-uri (str (.toURI (io/resource "resources/sample-paatosote.rtf"))))
+(def file-uri (str (.toURI (io/resource "sample-paatosote.rtf"))))
 
 ;;TODO: run multiple simoultanious requests in pararaller threads
 (facts "Test localhost pdfa-conversion service [in normal code floe conversion is not called when feature is disabled, so no :archivabilityError. Here we call the service even when it is disabled and assume it service is not running. So if the service is running in the ci/local env but feature disabled = fail]"
