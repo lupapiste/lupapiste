@@ -120,7 +120,18 @@ LUPAPISTE.OrganizationModel = function () {
     }
   });
 
+  ko.computed(function() {
+    var startDate = self.permanentArchiveInUseSince();
+    if (self.initialized && startDate) {
+      ajax.command("set-organization-permanent-archive-start-date", {date: startDate.getTime()})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
   self.init = function(data) {
+    self.initialized = false;
     var organization = data.organization;
     self.organizationId(organization.id);
     ajax
@@ -138,15 +149,6 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
     self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));
-    ko.computed(function() {
-      var startDate = self.permanentArchiveInUseSince();
-      if (self.initialized && startDate) {
-        ajax.command("set-organization-permanent-archive-start-date", {date: startDate.getTime()})
-          .success(util.showSavedIndicator)
-          .error(util.showSavedIndicator)
-          .call();
-      }
-    });
 
     // Operation attachments
     //
