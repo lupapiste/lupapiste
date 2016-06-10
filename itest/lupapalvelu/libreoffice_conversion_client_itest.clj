@@ -22,7 +22,7 @@
 
           (io/copy (:content response) file-out)
           (let [pdf-content (pdfbox/extract (.getAbsolutePath file-out))
-                rows (remove s/blank? (str/split pdf-content #"\r?\n"))]
+                rows (remove s/blank? (s/split pdf-content #"\r?\n"))]
             (fact "PDF data rows "
               (count rows) => 100
               (nth rows 1) => "Once there was a miller who was poor, but who had a beautiful"))
