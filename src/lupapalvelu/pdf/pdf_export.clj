@@ -152,7 +152,7 @@
         field-schemas (->> (filter is-field-type schema-body)
                            (remove :exclude-from-pdf))
         doc-title (-> schema :info :name)
-        doc-title (if (#{:op} (:schema-info doc))
+        doc-title (if (get-in doc [:schema-info :op :name])
                     (str "operations." (-> doc :schema-info :op :name))
                     doc-title)
         doc-desc (-> doc :schema-info :op :description)
@@ -217,7 +217,7 @@
     (loc "applications.authority") (get-authority app)
     (loc "application.address") (:address app)
     (loc "applicant") (clojure.string/join ", " (:_applicantIndex app))
-    (loc "selectm.source.label.edit-selected-operations") (get-operations app)))
+    (loc "operations") (get-operations app)))
 
 ; Deprecated, statement is replaced with replaced with libre-template
 (defn- collect-statement-fields [statements]
@@ -504,7 +504,7 @@
 
 (defn- render-tasks [fields]
   (let [title (loc "application.building")
-        empty (loc "hankkeen-kuvaus.hankkeenVaativuus.ei tiedossa")
+        empty (loc "ei-tiedossa")
         buildings (:rakennus fields)]
     `[~@(render-fields (take 12 fields))
       [:pagebreak]
@@ -526,8 +526,8 @@
 
 (defn- generate-pdf-data-with-child [{subtype :permitSubtype :as app} child-type id lang]
   (with-lang lang (let [title (cond
-                                (= child-type :statements) (loc "application.statement.status")
-                                (= child-type :neighbors) (loc "application.MM.neighbors")
+                                (= child-type :statements) (loc "lausunto")
+                                (= child-type :neighbors) (loc "application.neighbors")
                                 (= child-type :verdicts) (loc "application.verdict.title")
                                 (= child-type :tasks) (loc "task-katselmus.rakennus.tila._group_label")
                                 (ss/blank? (str subtype)) (loc "application.export.title")

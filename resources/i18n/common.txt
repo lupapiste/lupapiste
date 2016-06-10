@@ -2073,6 +2073,8 @@
 "selectm.source.label.edit-attachments" "sv" "Bilagtyper"
 "selectm.source.label.edit-selected-operations" "fi" "Toimenpiteet"
 "selectm.source.label.edit-selected-operations" "sv" "Åtgärder"
+"operations" "fi" "Toimenpiteet"
+"operations" "sv" "Åtgärder"
 "selectm.target" "fi" "Lisättävät liitetyypit"
 "selectm.target" "sv" "Bilagtyper som ska bifogas"
 "selectm.target.label" "fi" "Valitut"
