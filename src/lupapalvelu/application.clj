@@ -235,7 +235,7 @@
       (update :secondaryOperations (fn [operations] (map merge-operation-skeleton operations)))))
 
 ;; Meta fields with default values.
-(def- operation-meta-fields-to-enrich {:optional []})
+(def- operation-meta-fields-to-enrich {:attachment-op-selector true, :optional []})
 (defn- enrich-primary-operation-with-metadata [app]
   (let [enrichable-fields (-> (op/get-primary-operation-metadata app)
                               (select-keys (keys operation-meta-fields-to-enrich)))

@@ -810,6 +810,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required ["tyonjohtaja" "maksaja"]
                                  :attachments []
+                                 :attachment-op-selector false
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :max-outgoing-link-permits 1
@@ -823,6 +824,7 @@
                                  :state-graph-resolver tyonjohtaja-state-machine-resolver
                                  :required ["hankkeen-kuvaus-minimum"]
                                  :attachments []
+                                 :attachment-op-selector false
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :max-outgoing-link-permits 1
@@ -1018,6 +1020,8 @@
    (sc/optional-key :schema-data) [sc/Any]
 
    :attachments [sc/Any]
+
+   (sc/optional-key :attachment-op-selector) sc/Bool
 
    ; Type and workflow
    :permit-type (sc/pred permit/valid-permit-type?)
