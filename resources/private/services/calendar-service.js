@@ -3,11 +3,9 @@ LUPAPISTE.CalendarService = function() {
   var self = this,
       params = LUPAPISTE.config.calendars;
 
-  self.calendar = ko.observable();
   self.calendarWeekdays = ko.observableArray();
 
   self.myCalendars = ko.observableArray([]);
-  self.organizationCalendars = ko.observableArray();
   self.reservationTypesByOrganization = ko.observable();
 
   self.params = ko.observable(params);
@@ -59,7 +57,7 @@ LUPAPISTE.CalendarService = function() {
   var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {
     ajax.query("calendar", {calendarId: event.id, userId: event.user})
       .success(function(data) {
-        self.calendar(data.calendar);
+        hub.send("calendarService::calendarFetched", {calendar: data.calendar});
         self.calendarQuery.calendarId(data.calendar.id);
         self.calendarQuery.reservationTypes(self.reservationTypesByOrganization()[data.calendar.organization]);
         doFetchCalendarSlots({week: moment().isoWeek(), year: moment().year()});
@@ -70,8 +68,7 @@ LUPAPISTE.CalendarService = function() {
   var _fetchOrgCalendars = hub.subscribe("calendarService::fetchOrganizationCalendars", function() {
     ajax.query("calendars-for-authority-admin")
       .success(function(d) {
-        self.organizationCalendars(d.users || []);
-        hub.send("calendarService::organizationCalendarsFetched");
+        hub.send("calendarService::organizationCalendarsFetched", { calendars: d.users || [] });
       })
       .call();
    });
