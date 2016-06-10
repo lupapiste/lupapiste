@@ -274,14 +274,21 @@
      :metadata metadata
      :application (:application metadata)}))
 
+(defn file-metadata
+  "Returns only GridFS file metadata as map. Use download-find to get content."
+  [query]
+  (gfs/find-one-as-map (get-gfs) (with-_id (remove-null-chars query))))
+
 (defn download-find-many [query]
-  (map gridfs-file-as-map (gfs/find (get-gfs) query)))
+  (map gridfs-file-as-map (gfs/find (get-gfs) (with-_id (remove-null-chars query)))))
 
 (defn download-find [query]
   (when-let [attachment (gfs/find-one (get-gfs) (with-_id (remove-null-chars query)))]
     (gridfs-file-as-map attachment)))
 
-(defn ^{:perfmon-exclude true} download [file-id]
+(defn ^{:perfmon-exclude true} download
+  "Downloads file from Mongo GridFS"
+  [file-id]
   (download-find {:_id file-id}))
 
 (defn delete-file [query]
