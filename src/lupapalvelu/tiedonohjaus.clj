@@ -10,8 +10,9 @@
             [clj-time.core :as t]
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :as i18n])
-  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType ProtectionLevelType SecurityClassType AccessRightType)
+            [lupapalvelu.i18n :as i18n]
+            [sade.strings :as s])
+  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType ProtectionLevelType SecurityClassType AccessRightType ActionType RecordType AgentType ActionEvent Custom)
            (javax.xml.bind JAXBContext)
            (java.io StringWriter)
            [javax.xml.datatype DatatypeFactory]
@@ -144,7 +145,8 @@
   [{:type     :hakemus
     :category :document
     :ts       (:created application)
-    :user     (:applicant application)}])
+    :user     (:applicant application)
+    :id       (str (:id application) "-application")}])
 
 (defn- get-attachments-from-application [application]
   (reduce (fn [acc attachment]
@@ -156,7 +158,8 @@
                            :version  (:version ver)
                            :ts       (:created ver)
                            :contents (:contents attachment)
-                           :user     (full-name (:user ver))}))
+                           :user     (full-name (:user ver))
+                           :id       (:id attachment)}))
                    (concat acc))
               acc))
           []
@@ -171,10 +174,10 @@
 
 (defn- get-neighbour-requests-from-application [application]
   (map (fn [req] (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
-           {:text     (get-in req [:owner :name])
-            :category :request-neighbor
-            :ts       (:created status)
-            :user     (full-name (:user status))})) (:neighbors application)))
+                   {:text     (get-in req [:owner :name])
+                    :category :request-neighbor
+                    :ts       (:created status)
+                    :user     (full-name (:user status))})) (:neighbors application)))
 
 (defn- get-review-requests-from-application [application]
   (reduce (fn [acc task]
@@ -188,7 +191,7 @@
 
 (defn- get-held-reviews-from-application [application]
   (reduce (fn [acc task]
-              (if-let [held (get-in task [:data :katselmus :pitoPvm :modified])]
+            (if-let [held (get-in task [:data :katselmus :pitoPvm :modified])]
               (conj acc {:text     (:taskname task)
                          :category :review
                          :ts       held
@@ -276,7 +279,7 @@
       original-process-metadata)))
 
 (defn update-process-retention-period
-  "Update retention period of the process report to match the longest retention time of any document
+  "Update retention period of the process report to match the longest retention time of actionEvents document
    as per SAHKE2 operative system certification requirement 6.3"
   [app-id modified-ts]
   (let [{:keys [metadata attachments processMetadata] :as application} (domain/get-application-no-access-checking app-id)
@@ -287,7 +290,7 @@
         {$set {:modified modified-ts
                :processMetadata new-process-md}}))))
 
-(defn xml-date [ts-or-date]
+(defn- xml-date [ts-or-date]
   (when ts-or-date
     (let [factory (DatatypeFactory/newInstance)
           date (if (number? ts-or-date) (Date. (long ts-or-date)) ts-or-date)
@@ -295,19 +298,19 @@
                      (.setTime date))]
       (.newXMLGregorianCalendar factory calendar))))
 
-(defn publicity-class-type [{:keys [julkisuusluokka]}]
+(defn- publicity-class-type [{:keys [julkisuusluokka]}]
   (case (keyword julkisuusluokka)
     :julkinen PublicityClassType/JULKINEN
     :salainen PublicityClassType/SALASSA_PIDETTAVA
     :osittain-salassapidettava PublicityClassType/OSITTAIN_SALASSAPIDETTAVA))
 
-(defn personal-data-type [{:keys [henkilotiedot]}]
+(defn- personal-data-type [{:keys [henkilotiedot]}]
   (case (keyword henkilotiedot)
     :ei-sisalla PersonalDataType/EI_SISALLA_HENKILOTIETOJA
     :sisaltaa PersonalDataType/SISALTAA_HENKILOTIETOJA
     :sisaltaa-arkaluonteisia PersonalDataType/SISALTAA_ARKALUONTOISIA_HENKILOTIETOJA))
 
-(defn protection-level-type [{:keys [suojaustaso]}]
+(defn- protection-level-type [{:keys [suojaustaso]}]
   (case (keyword suojaustaso)
     :ei-luokiteltu nil
     :suojaustaso4 ProtectionLevelType/IV
@@ -315,7 +318,7 @@
     :suojaustaso2 ProtectionLevelType/II
     :suojaustaso1 ProtectionLevelType/I))
 
-(defn security-class-type [{:keys [turvallisuusluokka]}]
+(defn- security-class-type [{:keys [turvallisuusluokka]}]
   (case (keyword turvallisuusluokka)
     :ei-turvallisuusluokkaluokiteltu SecurityClassType/EI_TURVALLISUUSLUOKITELTU
     :turvallisuusluokka4 SecurityClassType/TURVALLISUUSLUOKKA_IV
@@ -323,7 +326,7 @@
     :turvallisuusluokka2 SecurityClassType/TURVALLISUUSLUOKKA_II
     :turvallisuusluokka1 SecurityClassType/TURVALLISUUSLUOKKA_I))
 
-(defn build-restriction-type [{:keys [processMetadata]}]
+(defn- build-restriction-type [{:keys [processMetadata]} lang]
   (let [r-type (doto (RestrictionType.)
                  (.setPublicityClass (publicity-class-type processMetadata))
                  (.setPersonalData (personal-data-type processMetadata)))]
@@ -335,11 +338,74 @@
         (.setProtectionLevel (protection-level-type processMetadata))
         (.setSecurityClass (security-class-type processMetadata)))
       (.add (.getAccessRight r-type) (doto (AccessRightType.)
-                                       (.setName (i18n/localize :fi (:kayttajaryhma processMetadata)))
-                                       (.setRole (i18n/localize :fi (:kayttajaryhmakuvaus processMetadata))))))
+                                       (.setName (i18n/localize lang (:kayttajaryhma processMetadata)))
+                                       (.setRole (i18n/localize lang (:kayttajaryhmakuvaus processMetadata))))))
     r-type))
 
-(defn retention-period [{{{:keys [pituus arkistointi]} :sailytysaika} :processMetadata}]
+(defn- agent-type [role name]
+  (doto (AgentType.)
+    (.setRole role)
+    (.setName name)))
+
+(defn- action-subevent [{:keys [correction user ts tosFunction text category]} lang]
+  (let [title (case category
+                :document (i18n/localize lang "caseFile.documentSubmitted")
+                :request-statement (i18n/localize lang "caseFile.operation.statement.request")
+                :request-neighbor (i18n/localize lang "caseFile.operation.neighbor.request")
+                :request-review (i18n/localize lang "caseFile.operation.review.request")
+                :review (i18n/localize lang "caseFile.operation.review")
+                :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
+                :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection"))
+        description (str title ": " text)
+        event (ActionEvent.)]
+    (when-not (s/blank? user)
+      (.add (.getAgent event) (agent-type "registrar" user)))
+    (doto event
+      (.setDescription description)
+      (.setCreated (xml-date ts))
+      (.setFunction (:code tosFunction))
+      (.setType (name category))
+      (.setCorrectionReason correction))))
+
+(defn- custom-type [lang documents]
+  (println documents)
+  (let [custom-obj (Custom.)]
+    (->> documents
+         (map #(action-subevent % lang))
+         vec
+         (.addAll (.getActionEvents custom-obj)))
+    custom-obj))
+
+(defn- record-type [{:keys [type id ts version contents user]} lang]
+  (let [record-obj (RecordType.)
+        type-str (if (map? type) (str (:type-group type) "." (:type-id type)) (name type))
+        loc-key (if (map? type) (str "attachmentType." type-str) type-str)]
+    (.add (.getCreated record-obj) (xml-date ts))
+    (when version
+      (.setVersion record-obj (str (:major version) "." (:minor version))))
+    (when contents
+      (.add (.getDescription record-obj) contents))
+    (.add (.getAgent record-obj) (agent-type "registrar" user))
+    (doto record-obj
+      (.setTitle (i18n/localize lang loc-key))
+      (.setType type-str)
+      (.setNativeId id))))
+
+(defn- action-type [{:keys [start action documents user]} lang]
+  (let [action-obj (ActionType.)]
+    (.add (.getAgent action-obj) (agent-type "registrar" user))
+    (->> (filter #(= :document (:category %)) documents)
+         (map #(record-type % lang))
+         vec
+         (.addAll (.getRecord action-obj)))
+    (when-let [non-records (seq (remove #(= :document (:category %)) documents))]
+      (.setCustom action-obj (custom-type lang non-records)))
+    (doto action-obj
+      (.setCreated (xml-date start))
+      (.setTitle action)
+      (.setType action))))
+
+(defn- retention-period [{{{:keys [pituus arkistointi]} :sailytysaika} :processMetadata}]
   (-> (cond
         (= :ei (keyword arkistointi)) 0
         (#{:ikuisesti :toistaiseksi} (keyword arkistointi)) 999999
@@ -351,18 +417,19 @@
         case-file-object (CaseFile.)
         context (JAXBContext/newInstance (into-array [(.getClass case-file-object)]))
         marshaller (.createMarshaller context)]
-    (println case-file)
-    (.add (.getCreated case-file-object) (xml-date (:start (first case-file))))
-    (.add (.getLanguage case-file-object) (name lang))
     (doto case-file-object
       (.setNativeId id)
-      (.setRestriction (build-restriction-type application))
+      (.setRestriction (build-restriction-type application lang))
       (.setTitle (str "K\u00e4sittelyprosessi: " id))
       (.setRetentionPeriod (BigInteger/valueOf (retention-period application)))
       (.setRetentionReason (get-in processMetadata [:sailytysaika :perustelu]))
       (.setRetentionPeriodEnd (xml-date (get-in processMetadata [:sailytysaika :retention-period-end])))
       (.setStatus (get processMetadata :tila "valmis"))
       (.setFunction (:tosFunction application)))
+    (.add (.getCreated case-file-object) (xml-date (:start (first case-file))))
+    (.add (.getLanguage case-file-object) (name lang))
+    (.addAll (.getAction case-file-object) (vec (map #(action-type % lang) case-file)))
+
     (with-open [sw (StringWriter.)]
       (.marshal marshaller case-file-object sw)
       (.toString sw))))
