@@ -8,15 +8,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
 
-  var filters = {
-        preVerdict: ko.observable(false),
-        postVerdict: ko.observable(false),
-        notNeeded: ko.observable(false),
-        ivSuunnitelmat: ko.observable(false),
-        kvvSuunnitelmat: ko.observable(false),
-        rakennesuunnitelmat: ko.observable(false),
-        paapiirrustukset: ko.observable(false)
-      };
   var dummyData = [
     {
       "type" : {
@@ -7356,18 +7347,24 @@ LUPAPISTE.AttachmentsService = function() {
   //
 
   // returns an observable
-  self.getFilter = function(filterId) {
-    return filters[filterId];
-  };
+  var filters = {
+        "hakemus": ko.observable(false),
+        "rakentaminen": ko.observable(false),
+        "ei-tarpeen": ko.observable(false),
+        "iv": ko.observable(false),
+        "kvv": ko.observable(false),
+        "rakenne": ko.observable(false),
+        "paapiirustukset": ko.observable(false)
+      };
 
-  self.getFilters = ko.pureComputed(function() {
-    return _.toPairs(filters);
-  });
-
-  self.setFilter = function(filterId, isFilterEnabled) {
-    filters[filterId](isFilterEnabled);
-    return filters[filterId]();
-  };
+  self.filtersArray = ko.observableArray(
+    _.map( ["hakemus", "rakentaminen", "iv", "kvv",
+            "rakenne", "ei-tarpeen", "paapiirustukset"],
+           function( s ) {
+             return {ltext: "filter." + s,
+                     filter: filters[s]};
+           }));
+  
   self.disableAllFilters = function() {
     _.forEach(_.values(filters), function(filter) {
       filter(false);
@@ -7522,29 +7519,29 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   var filterFunctions = {
-    preVerdict: isPreVerdict,
-    postVerdict: isPostVerdict,
-    notNeeded: self.isNotNeeded,
-    ivSuunnitelmat: isTypeId("iv_suunnitelma"),
-    kvvSuunnitelmat: isTypeId("kvv_suunnitelma"),
-    rakennesuunnitelmat: isTypeId("rakennesuunnitelma"),
-    paapiirrustukset: isTypeGroup("paapiirrustus")
+    "hakemus": isPreVerdict,
+    "rakentaminen": isPostVerdict,
+    "ei-tarpeen": self.isNotNeeded,
+    "iv": isTypeId("iv_suunnitelma"),
+    "kvv": isTypeId("kvv_suunnitelma"),
+    "rakenne": isTypeId("rakennesuunnitelma"),
+    "paapiirustukset": isTypeGroup("paapiirustus")
   };
 
   function showAll() {
     var filterValues = _.mapValues(filters, function(f) { return f(); });
-    return _(filterValues).omit("notNeeded").values()
+    return _(filterValues).omit("ei-tarpeen").values()
            .every(function(f) { return !f; });
   }
 
-  function preVerdictAttachments(attachments) {
+  function filteredAttachments(preOrPost, attachments) {
     var subFilters = [
-      "ivSuunnitelmat",
-      "kvvSuunnitelmat",
-      "rakennesuunnitelmat",
-      "paapiirrustukset"
+      "iv",
+      "kvv",
+      "rakenne",
+      "paapiirustukset"
     ];
-    if (filters.preVerdict() &&
+    if (filters[preOrPost]() &&
         !_.some(subFilters, function(f) {
           return filters[f]();
         })) {
@@ -7557,16 +7554,16 @@ LUPAPISTE.AttachmentsService = function() {
     });
   }
 
+  function preVerdictAttachments(attachments) {
+    return filteredAttachments("hakemus", attachments);
+  }
+
   function postVerdictAttachments(attachments) {
-    if (filters.postVerdict()) {
-      return attachments;
-    } else {
-      return [];
-    }
+    return filteredAttachments("rakentaminen", attachments);
   }
 
   function applyFilters(attachments) {
-    var atts = filters.notNeeded() ?
+    var atts = filters["ei-tarpeen"] ?
         attachments :
         _.filter(attachments, {notNeeded: false});
     if (showAll()) {
@@ -7754,16 +7751,35 @@ LUPAPISTE.AttachmentsService = function() {
   
   self.layout = [
     {
-      name: "preVerdict",
-      open: ko.observable(),
       data: getDataForGroup("preVerdict"),
       accordions: attachmentTypeLayout("preVerdict")
     },
     {
-      name: "postVerdict",
-      open: ko.observable(),
       data: getDataForGroup("postVerdict"),
       accordions: attachmentTypeLayout("postVerdict")
     }
   ];
+
+   function getAllAccordionToggles() {
+     function getAllToggles(objectOrArray) {
+       if (_.isArray(objectOrArray)) {
+         return _.flatten(_.map(objectOrArray, getAllToggles));
+       } else if (_.isObject(objectOrArray)) {
+         return _.concat(objectOrArray.open? [objectOrArray.open] : [],
+                         getAllToggles(objectOrArray.accordions));
+       } else {
+         return [];
+       }
+     }
+     return getAllToggles(self.layout);
+  }
+
+  self.toggleAllAccordions = function() {
+    var toggles = getAllAccordionToggles();
+    if (_.some(toggles, function(t) { return !t(); })) {
+      _.forEach(toggles, function(t) { t(true); });
+    } else {
+      _.forEach(toggles, function(t) { t(false); });
+    }
+  };
 };

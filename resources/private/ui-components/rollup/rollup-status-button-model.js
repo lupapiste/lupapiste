@@ -10,17 +10,16 @@ LUPAPISTE.RollupStatusButtonModel = function( params ) {
   self.status = params.status;
   self.text = params.ltext ? loc( params.ltext ) : params.text;
 
-  self.isApproved = self.disposedComputed( function() {
+  self.isApproved = self.disposedPureComputed( function() {
     return self.status() === APPROVED;
-    });
+  });
 
-  self.isRejected = self.disposedComputed( function() {
+  self.isRejected = self.disposedPureComputed( function() {
     return self.status() === REJECTED;
   });
 
-  self.statusStyles = self.disposedComputed( function() {
-    return _.set( {positive: self.isApproved},
-                  params.style || "secondary",
-                  !self.isApproved());
+  self.statusStyles = self.disposedPureComputed( function() {
+    return _.merge(params.style,
+                   {positive: self.isApproved});
   });
 };

@@ -5,12 +5,7 @@ LUPAPISTE.FiltersModel = function() {
 
   var prefix = _.uniqueId( "filters");
 
-  self.filters = ko.observableArray( _.map( ["hakemus", "rakentaminen", "iv", "kvv",
-                                             "rakenne", "ei-tarpeen", "paapiirustukset"],
-                                            function( s ) {
-                                              return {ltext: "filter." + s,
-                                                      filter: ko.observable()};
-                                            }));
+  self.filters = lupapisteApp.services.attachmentsService.filtersArray;
 
   self.id = function( index ) {
     return prefix + "-" + index;
