@@ -7760,7 +7760,7 @@ LUPAPISTE.AttachmentsService = function() {
     }
   ];
 
-   function getAllAccordionToggles() {
+   function getAccordionToggles(preOrPost) {
      function getAllToggles(objectOrArray) {
        if (_.isArray(objectOrArray)) {
          return _.flatten(_.map(objectOrArray, getAllToggles));
@@ -7771,15 +7771,22 @@ LUPAPISTE.AttachmentsService = function() {
          return [];
        }
      }
-     return getAllToggles(self.layout);
+     return getAllToggles(self.layout[preOrPost].accordions);
   }
 
-  self.toggleAllAccordions = function() {
-    var toggles = getAllAccordionToggles();
-    if (_.some(toggles, function(t) { return !t(); })) {
-      _.forEach(toggles, function(t) { t(true); });
-    } else {
+  function toggleAccordions(preOrPost) {
+    var toggles = getAccordionToggles(preOrPost);
+    if (_.every(toggles, function(t) { return t(); })) {
       _.forEach(toggles, function(t) { t(false); });
+    } else {
+      _.forEach(toggles, function(t) { t(true); });
     }
+  }
+
+  self.togglePreVerdictAccordions = function() {
+    toggleAccordions(0);
+  };
+  self.togglePostVerdictAccordions = function() {
+    toggleAccordions(1);
   };
 };

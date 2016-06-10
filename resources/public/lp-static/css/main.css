@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1465543606084');
+@import url('main-blessed1.css?z=1465551912934');
 
 /* line 37, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form input[type=checkbox] {
@@ -4454,22 +4454,15 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 .attachments-accordions {
   margin-bottom: 24px;
 }
-/* line 4, ../../../private/common-html/sass/views/_attachmentsPOC.scss */
-.attachments-accordions .attachments-accordion.secondary, .attachments-accordions .dataTables_paginate .attachments-accordion.paginate_disabled_previous, .dataTables_paginate .attachments-accordions .attachments-accordion.paginate_disabled_previous, .attachments-accordions .dataTables_paginate .attachments-accordion.paginate_disabled_next, .dataTables_paginate .attachments-accordions .attachments-accordion.paginate_disabled_next {
+/* line 3, ../../../private/common-html/sass/views/_attachmentsPOC.scss */
+.attachments-accordions .attachments-accordion {
   margin-top: 24px;
 }
-/* line 6, ../../../private/common-html/sass/views/_attachmentsPOC.scss */
-.attachments-accordions .attachments-accordion.secondary:first-child, .attachments-accordions .dataTables_paginate .attachments-accordion.paginate_disabled_previous:first-child, .dataTables_paginate .attachments-accordions .attachments-accordion.paginate_disabled_previous:first-child, .attachments-accordions .dataTables_paginate .attachments-accordion.paginate_disabled_next:first-child, .dataTables_paginate .attachments-accordions .attachments-accordion.paginate_disabled_next:first-child {
-  margin-top: 6px;
-}
-/* line 10, ../../../private/common-html/sass/views/_attachmentsPOC.scss */
-.attachments-accordions .attachments-accordion.tertiary {
-  margin-top: 6px;
-}
 
-/* line 17, ../../../private/common-html/sass/views/_attachmentsPOC.scss */
+/* line 8, ../../../private/common-html/sass/views/_attachmentsPOC.scss */
 .attachments-accordion-content {
-  padding-left: 24px;
+  padding-left: 6px;
+  padding-right: 6px;
   padding-bottom: 24px;
   position: relative;
   border: 1px solid #dddddd;

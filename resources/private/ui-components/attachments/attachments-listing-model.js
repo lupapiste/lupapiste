@@ -26,5 +26,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   self.service = lupapisteApp.services.attachmentsService;
   self.groups = self.service.layout;
-  self.closeAllGroups = self.service.toggleAllAccordions;
+  self.togglePreVerdictGroups = self.service.togglePreVerdictAccordions;
+  self.togglePostVerdictGroups = self.service.togglePostVerdictAccordions;
+
 };
