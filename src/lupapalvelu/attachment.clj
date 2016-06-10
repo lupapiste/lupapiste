@@ -12,7 +12,7 @@
             [sade.core :refer :all]
             [sade.http :as http]
             [lupapalvelu.action :refer [update-application application->command]]
-            [lupapalvelu.attachment-accessibility :as access]
+            [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.states :as states]

@@ -1,4 +1,4 @@
-(ns lupapalvelu.attachment-accessibility
+(ns lupapalvelu.attachment.accessibility
   (:require [lupapalvelu.attachment-metadata :as metadata]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.user :as user]

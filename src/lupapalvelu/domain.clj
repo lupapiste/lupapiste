@@ -6,7 +6,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.env :as env]
-            [lupapalvelu.attachment-accessibility :as attachment-access]
+            [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]

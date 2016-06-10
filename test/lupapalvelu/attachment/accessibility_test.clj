@@ -1,7 +1,7 @@
-(ns lupapalvelu.attachment-accessibility-test
+(ns lupapalvelu.attachment.accessibility-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.attachment-accessibility :refer :all]))
+            [lupapalvelu.attachment.accessibility :refer :all]))
 
 (facts "facts about accessing attachment(s)"
   (let [user1 {:id "1" :role "applicant"}

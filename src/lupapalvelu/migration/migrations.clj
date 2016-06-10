@@ -10,7 +10,7 @@
             [sade.validators :as v]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment-accessibility :as attaccess]
+            [lupapalvelu.attachment.accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]

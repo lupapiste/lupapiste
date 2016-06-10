@@ -13,7 +13,7 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment-metadata :as attachment-meta]
-            [lupapalvelu.attachment-accessibility :as access]
+            [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment-stamping :as stamping]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
