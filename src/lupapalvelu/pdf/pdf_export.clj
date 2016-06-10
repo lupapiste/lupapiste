@@ -217,7 +217,7 @@
     (loc "applications.authority") (get-authority app)
     (loc "application.address") (:address app)
     (loc "applicant") (clojure.string/join ", " (:_applicantIndex app))
-    (loc "selectm.source.label.edit-selected-operations") (get-operations app)))
+    (loc "operations") (get-operations app)))
 
 ; Deprecated, statement is replaced with replaced with libre-template
 (defn- collect-statement-fields [statements]
@@ -526,8 +526,8 @@
 
 (defn- generate-pdf-data-with-child [{subtype :permitSubtype :as app} child-type id lang]
   (with-lang lang (let [title (cond
-                                (= child-type :statements) (loc "application.statement.status")
-                                (= child-type :neighbors) (loc "application.MM.neighbors")
+                                (= child-type :statements) (loc "lausunto")
+                                (= child-type :neighbors) (loc "application.neighbors")
                                 (= child-type :verdicts) (loc "application.verdict.title")
                                 (= child-type :tasks) (loc "task-katselmus.rakennus.tila._group_label")
                                 (ss/blank? (str subtype)) (loc "application.export.title")
