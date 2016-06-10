@@ -1,4 +1,4 @@
-(ns lupapalvelu.libreoffice-conversion-client-test
+(ns lupapalvelu.libreoffice-conversion-client-itest
   (:require [midje.sweet :refer :all]
             [clojure.java.io :as io]
             [lupapalvelu.pdf.libreoffice-conversion-client :as client]
