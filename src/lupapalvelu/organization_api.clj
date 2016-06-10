@@ -17,7 +17,7 @@
             [sade.municipality :as muni]
             [sade.property :as p]
             [sade.strings :as ss]
-            [sade.util :as util]
+            [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
@@ -52,25 +52,26 @@
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
   [{scope :scope}]
-  (select-keys att-type/attachment-types-by-permit-type (map (comp keyword :permitType) scope)))
+  (let [permit-types (->> scope (map :permitType) distinct (map keyword))]
+    (->> (select-keys operations/operation-names-by-permit-type permit-types)
+         (map (fn [[permit-type operations]] (->> (map att-type/get-attachment-types-for-operation operations)
+                                                  (map att-type/->grouped-array)
+                                                  (zipmap operations))))
+         (zipmap permit-types))))
+
+(defn- operations-attachements-by-operation [organization operations]
+  (->> (map #(get-in organization [:operations-attachments %] []) operations)
+       (zipmap operations)))
 
 (defn- organization-operations-with-attachments
-  "Returns a map where key is permit type, value is a list of operations for the permit type"
+  "Returns a map of maps where key is permit type, value is a map operation names to list of attachment types"
   [{scope :scope :as organization}]
-  (let [selected-ops (->> organization :selected-operations (map keyword) set)]
-    (reduce
-      (fn [result-map permit-type]
-        (if-not (result-map permit-type)
-          (let [operation-names (keys (filter (fn [[_ op]] (= permit-type (:permit-type op))) operations/operations))
-                empty-operation-attachments (zipmap operation-names (repeat []))
-                saved-operation-attachments (select-keys (:operations-attachments organization) operation-names)
-                all-operation-attachments (merge empty-operation-attachments saved-operation-attachments)
-
-                selected-operation-attachments (into {} (filter (fn [[op attachments]] (selected-ops op)) all-operation-attachments))]
-            (assoc result-map permit-type selected-operation-attachments))
-          result-map))
-     {}
-     (map :permitType scope))))
+  (let [selected-ops (->> organization :selected-operations (map keyword) set)
+        permit-types (->> scope (map :permitType) distinct (map keyword))]
+    (zipmap permit-types (map (fn->> (operations/operation-names-by-permit-type)
+                                     (filter selected-ops)
+                                     (operations-attachements-by-operation organization))
+                              permit-types))))
 
 (defn- selected-operations-with-permit-types
   "Returns a map where key is permit type, value is a list of operations for the permit type"

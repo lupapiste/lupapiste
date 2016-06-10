@@ -1104,6 +1104,12 @@
     (sort-operation-tree
       (operations-filtered filtering-fn false))))
 
+(def operation-names-by-permit-type
+  (->> operations
+       (group-by (comp :permit-type val))
+       (map (juxt key (comp keys val)))
+       (into {})))
+
 (defn selected-operations-for-organizations [organizations]
   (let [orgs-with-selected-ops (filter (comp seq :selected-operations) organizations)
         ;; Resolving operation tree for organizations with "selected-operations" defined in db
