@@ -31,9 +31,10 @@ Ronja looks at her own calendar
   Wait until  Element should be visible by test id  timeline-slot-Friday-1000
 
 Goto following week view
-  ${startOfWeek}=  Get Element Attribute  xpath=//div[@data-test-id='calendar-month-and-week-label']@data-test-start-of-week
+  ${monday}=  Get Element Attribute  xpath=//td[@data-test-id='calendar-weekday-0']@data-test-timestamp
   Click by test id  calendar-view-following-week
-  Wait Until Page Does Not Contain Element  xpath=//div[@data-test-id='calendar-month-and-week-label'][@data-test-start-of-week='${startOfWeek}']
+  ${monday}=  Evaluate  ${monday}+604800000
+  Wait Until Page Contains Element  xpath=//td[@data-test-timestamp='${monday}']
 
 Create reservation slots for Friday next week
   Element should not be visible  xpath=//div[@class='calendar-slot-bubble']//h3

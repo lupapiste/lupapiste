@@ -1,9 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="calendar-view-template">
   <div class="calendar-table" data-test-id="calendar-view-calendar-table">
     <div class="nav-actions">
-      <div class="month" data-bind="calendarViewMonthText: startOfWeek,
-                                    attr: { 'data-test-id': 'calendar-month-and-week-label',
-                                            'data-test-start-of-week': startOfWeek.valueOf() }"></div>
+      <div class="month" data-bind="calendarViewMonthText: startOfWeek"></div>
       <div class="nav-links">
         <a data-bind="click: gotoPreviousWeek"><span data-bind="ltext: 'calendar.week.previous'"></span></a> |
         <a data-bind="click: gotoToday"><span data-bind="ltext: 'calendar.week.today'"></span></a> |
@@ -38,7 +36,8 @@
           </div>
         </td>
         <!-- ko foreach: calendarWeekdays -->
-        <td data-bind="css: {'date-today': today == true, 'date': today == false}">
+        <td data-bind="css: {'date-today': today == true, 'date': today == false},
+                       attr: {'data-test-timestamp': startOfDay, 'data-test-id': 'calendar-weekday-' + $index() }">
           <div style="position: relative;">
             <!-- ko foreach: $component.timelineSlots($data) -->
             <div class="timeline-slot" data-bind="attr: { 'data-test-id': dataTestId },
