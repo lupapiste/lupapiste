@@ -152,7 +152,7 @@
         field-schemas (->> (filter is-field-type schema-body)
                            (remove :exclude-from-pdf))
         doc-title (-> schema :info :name)
-        doc-title (if (#{:op} (:schema-info doc))
+        doc-title (if (get-in doc [:schema-info :op :name])
                     (str "operations." (-> doc :schema-info :op :name))
                     doc-title)
         doc-desc (-> doc :schema-info :op :description)
