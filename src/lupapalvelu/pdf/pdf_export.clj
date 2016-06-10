@@ -504,7 +504,7 @@
 
 (defn- render-tasks [fields]
   (let [title (loc "application.building")
-        empty (loc "hankkeen-kuvaus.hankkeenVaativuus.ei tiedossa")
+        empty (loc "ei-tiedossa")
         buildings (:rakennus fields)]
     `[~@(render-fields (take 12 fields))
       [:pagebreak]
