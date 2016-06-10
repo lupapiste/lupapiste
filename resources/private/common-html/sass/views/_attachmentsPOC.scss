@@ -1,7 +1,11 @@
 .attachments-accordions {
+  margin-bottom: $marginL;
   .attachments-accordion {
     &.secondary {
       margin-top: $marginL;
+      &:first-child {
+        margin-top: $marginS;
+      }
     }
     &.tertiary {
       margin-top: $marginS;
