@@ -22,7 +22,8 @@ LUPAPISTE.ReviewTasksModel = function( params ) {
     var app = lupapisteApp.models.application;
     var unsorted = _( ko.mapping.toJS( app.tasks || [])
               .filter( function( task ) {
-                return task["schema-info"].name === "task-katselmus";
+
+                return _.includes(["task-katselmus", "task-katselmus-backend"], task["schema-info"].name);
               })
               .map(function( task ) {
                 return {
