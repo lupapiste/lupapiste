@@ -1,4 +1,4 @@
-(ns lupapalvelu.attachment-stamping
+(ns lupapalvelu.attachment.stamping
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [lupapalvelu.attachment :as attachment]
