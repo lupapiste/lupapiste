@@ -7563,7 +7563,7 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   function applyFilters(attachments) {
-    var atts = filters["ei-tarpeen"] ?
+    var atts = filters["ei-tarpeen"]() ?
         attachments :
         _.filter(attachments, {notNeeded: false});
     if (showAll()) {
