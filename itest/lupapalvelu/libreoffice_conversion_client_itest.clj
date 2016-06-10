@@ -16,7 +16,7 @@
   (with-open [xin (io/input-stream file-uri)]
     (let [response (client/convert-to-pdfa file-uri xin)
           file-out (File/createTempFile "test-libre-rtf-" ".pdf")]
-      (if client/enabled?
+      (if (client/enabled?)
         (try
           (fact "libre enabled, No connnection error expected" (:archivabilityError response) => nil)
 

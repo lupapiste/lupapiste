@@ -17,7 +17,10 @@
 
 (def- url (str "http://" (env/value :libreoffice :host) ":" (or (env/value :libreoffice :port) 8001)))
 
-(def enabled? (and (env/feature? :libreoffice) (env/value :libreoffice :host)))
+(defn enabled? []
+  (boolean (if (or (not (env/feature? :libreoffice)) (ss/blank? (env/value :libreoffice :host)))
+             (info "Danger: Libreoffice PDF/A conversion feature disabled or service host not configured")
+             true)))
 
 (defn- convert-to-pdfa-request [filename content]
   (http/post url
