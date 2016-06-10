@@ -1,5 +1,5 @@
 (ns lupapalvelu.pdf.libreoffice-conversion-client
-  (:require [clj-http.client :as http]
+  (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [lupapalvelu.i18n :refer [localize]]
             [lupapalvelu.mime :as mime]
@@ -10,7 +10,7 @@
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [sade.env :as env]
-            [clojure.java.io :as io])
+            [sade.http :as http])
   (:import (org.apache.commons.io FilenameUtils)
            (java.io File ByteArrayOutputStream ByteArrayInputStream)))
 
@@ -52,7 +52,7 @@
             {:filename   (str (FilenameUtils/removeExtension filename) ".pdf")
              :content    body
              :archivable true}
-            (fallback filename bytes (str "response status is" status " with body: " body))))
+            (fallback filename bytes (str "response status is " status " with body: " body))))
         (catch Throwable t
           (fallback filename bytes (.getMessage t)))))))
 
