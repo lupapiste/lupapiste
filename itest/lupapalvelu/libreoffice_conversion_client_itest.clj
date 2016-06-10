@@ -1,10 +1,9 @@
 (ns lupapalvelu.libreoffice-conversion-client-itest
   (:require [midje.sweet :refer :all]
+            [clojure.string :as s]
             [clojure.java.io :as io]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as client]
             [pdfboxing.text :as pdfbox]
-            [clojure.string :as str]
-            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
+            [lupapalvelu.pdf.libreoffice-conversion-client :as client])
   (:import (java.io File)))
 
 (def file-uri (str (.toURI (io/resource "sample-paatosote.rtf"))))
@@ -23,7 +22,7 @@
 
           (io/copy (:content response) file-out)
           (let [pdf-content (pdfbox/extract (.getAbsolutePath file-out))
-                rows (remove str/blank? (str/split pdf-content #"\r?\n"))]
+                rows (remove s/blank? (str/split pdf-content #"\r?\n"))]
             (fact "PDF data rows "
               (count rows) => 100
               (nth rows 1) => "Once there was a miller who was poor, but who had a beautiful"))
