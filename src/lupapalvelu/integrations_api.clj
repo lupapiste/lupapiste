@@ -1,6 +1,7 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof info error errorf]]
+            [clojure.java.io :as io]
             [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
             [lupapalvelu.action :refer [defcommand defquery update-application notify] :as action]
             [lupapalvelu.application :as application]
@@ -26,6 +27,7 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -347,3 +349,31 @@
                                 (partial autologin/allowed-ip? ip)
                                 (user/organization-ids user))
                       (fail :error.ip-not-allowed))))]})
+
+(defn- list-dir [path pattern]
+  (->>
+    path
+    io/file
+    (.listFiles)
+    (filter #(re-matches pattern (.getName %)))
+    (map #(.getName %))))
+
+(defn- list-integration-dirs [output-dir id]
+  (let [xml-pattern (re-pattern (str "^" id "_.*\\.xml"))
+        id-pattern  (re-pattern (str "^" id "_.*"))]
+    {:waiting (list-dir output-dir xml-pattern)
+     :ok (list-dir (str output-dir env/file-separator "archive") xml-pattern)
+     :error (list-dir (str output-dir env/file-separator "error") id-pattern)}))
+
+(defquery transfers
+  {:parameters [id]
+   :user-roles #{:authority}
+   :states states/all-application-states}
+  [{:keys [application]}]
+  (let [organization (organization/get-organization (:organization application))
+        permit-type  (permit/permit-type application)
+        krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
+        ah-scope         (organization/resolve-organization-scope (:municipality application) permit-type organization)
+        ah-output-dir    (ah/resolve-output-directory ah-scope)]
+    (ok :krysp (list-integration-dirs krysp-output-dir id)
+        :ah    (list-integration-dirs ah-output-dir id))))

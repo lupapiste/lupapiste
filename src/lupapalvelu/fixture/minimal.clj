@@ -846,6 +846,10 @@
                        :krysp {:R
                                {:ftpUser "dev_kuopio"
                                 :url "http://localhost:8000/dev/krysp"
+                                :version "2.1.5"}
+                               :P
+                               {:ftpUser "dev_kuopio"
+                                :url "http://localhost:8000/dev/krysp"
                                 :version "2.1.5"}}
                        :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
