@@ -53,14 +53,14 @@
           <!-- /ko -->
           <td>
             <button class="positive"
-                    data-bind="disable: $parent.isApproved( $data ) || $parent.isNotNeeded,
+                    data-bind="disable: $parent.isApproved( $data ) || $parent.notNeeded( $data )(),
                                click: $parent.approve">
               <i class="lupicon-check"></i>
             </button>
           </td>
           <td>
             <button class="negative"
-                    data-bind="disable: $parent.isRejected( $data ),
+                    data-bind="disable: $parent.isRejected( $data ) || $parent.notNeeded( $data )(),
                                click: $parent.reject">
               <i class="lupicon-circle-attention"></i>
             </button>

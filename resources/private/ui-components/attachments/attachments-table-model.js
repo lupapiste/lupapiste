@@ -24,6 +24,7 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
     return idPrefix + index;
   };
 
+  // When foo = idFun( fun ), then foo(data) -> fun(data.id)
   var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
 
   self.isApproved = service.isApproved;
