@@ -13,7 +13,17 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
   };
 
   self.stateIcons = function( data ) {
-    return "icon";
+    return service.isNotNeeded( data )
+      ? []
+      : _( [[self.isApproved, "lupicon-circle-check positive"],
+            [self.isRejected, "lupicon-circle-attention negative"],
+            [_.partialRight( _.get, "signed.0"), "lupicon-circle-pen positive"]])
+      .map( function( xs ) {
+        return _.first( xs )( data ) ? _.last( xs ) : false;
+      })
+      .filter()
+      .value();
+
   };
 
   self.isFiltered = function( data ) {
