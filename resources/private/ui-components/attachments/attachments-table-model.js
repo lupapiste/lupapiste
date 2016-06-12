@@ -1,22 +1,10 @@
 LUPAPISTE.AttachmentsTableModel = function( params ) {
   "use strict";
-  var self = this;
-  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
-
-  var service = lupapisteApp.services.attachmentsService;
-  self.attachments = params.attachmentInfos().attachments;
-
-  var idPrefix = _.uniqueId( "at-input-");
-
-  self.hasFile = function( data ) {
-    return _.get( ko.utils.unwrapObservable(data), "latestVersion.fileId");
-  };
-
-  self.stateIcons = function( data ) {
-    return service.isNotNeeded( data )
+  function stateIcons( data ) {
+    return params.isNotNeeded( data )
       ? []
-      : _( [[self.isApproved, "lupicon-circle-check positive"],
-            [self.isRejected, "lupicon-circle-attention negative"],
+      : _( [[params.isApproved, "lupicon-circle-check positive"],
+            [params.isRejected, "lupicon-circle-attention negative"],
             [_.partialRight( _.get, "signed.0"), "lupicon-circle-pen positive"]])
       .map( function( xs ) {
         return _.first( xs )( data ) ? _.last( xs ) : false;
@@ -24,29 +12,33 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
       .filter()
       .value();
 
-  };
+  }
 
-  self.inputId = function( index ) {
-    return idPrefix + index;
-  };
+  function hasFile(data) {
+    return _.get(data, "latestVersion.fileId");
+  }
+
+  var idPrefix = _.uniqueId("at-input-");
 
   // When foo = idFun( fun ), then foo(data) -> fun(data.id)
   var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
-
-  self.isApproved = service.isApproved;
-  self.approve = idFun( service.approveAttachment );
-
-  self.isRejected = service.isRejected;
-  self.reject = idFun( service.rejectAttachment );
-
-  self.remove = idFun( service.removeAttachment );
-
-  self.canDownload = self.disposedComputed( _.partial( _.some,
-                                                       self.attachments,
-                                                       self.hasFile ));
-
-  self.toggleNotNeeded = function( data  ) {
-    service.setNotNeeded( data.id, !data.notNeeded);
+  return {
+    attachments: params.attachments,
+    idPrefix: idPrefix,
+    hasFile: hasFile,
+    stateIcons: stateIcons,
+    inputId: function(index) { return idPrefix + index; },
+    isApproved: params.isApproved,
+    approve: idFun(params.approve),
+    isRejected: params.isRejected,
+    reject: idFun(params.reject),
+    remove: idFun(params.remove),
+    canDownload: _.some(params.attachments, function(a) {
+      return hasFile(a());
+    }),
+    isNotNeeded: params.isNotNeeded,
+    toggleNotNeeded: function( data  ) {
+      params.setNotNeeded( data.id, !data.notNeeded);
+    }
   };
-  self.isNotNeeded = service.isNotNeeded;
 };

@@ -7426,7 +7426,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return attachment && attachment.state === self.APPROVED;
+    return attachment && (attachment.notNeeded || attachment.state === self.APPROVED);
   };
   self.isRejected = function(attachment) {
     return attachment && attachment.state === self.REJECTED;
@@ -7617,14 +7617,6 @@ LUPAPISTE.AttachmentsService = function() {
     return self.getAttachmentsHierarchy()[mainGroupId][subGroupId];
   };
 
-  function attachmentFn(f) {
-    return function(attachmentId) {
-      return function() {
-        f(attachmentId);
-      };
-    };
-  }
-
   function idToAttachment(attachmentId) {
     var attachment = self.getAttachment(attachmentId);
     if (attachment) {
@@ -7636,13 +7628,14 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.modelForAttachmentInfo = function(attachmentIds) {
     return {
-      approveAttachment: attachmentFn(self.approveAttachment),
-      rejectAttachment:  attachmentFn(self.rejectAttachment),
-      removeAttachment:  attachmentFn(self.removeAttachment),
-      isApproved:        self.isApproved,
-      isRejected:        self.isRejected,
-      isNotNeeded:       self.isNotNeeded,
-      attachments:       _.map(attachmentIds, idToAttachment)
+      approve:      self.approveAttachment,
+      reject:       self.rejectAttachment,
+      remove:       self.removeAttachment,
+      setNotNeeded: self.setNotNeeded,
+      isApproved:   self.isApproved,
+      isRejected:   self.isRejected,
+      isNotNeeded:  self.isNotNeeded,
+      attachments:  _.map(attachmentIds, idToAttachment)
     };
   };
 

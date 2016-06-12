@@ -22,7 +22,9 @@
         <!-- /ko -->
         <!-- ko if: $parent.data().type === "sub" -->
         <div class="rollup-accordion-content-part">
-          <attachments-table params="attachmentInfos: $parent.data().attachmentInfos"></attachments-table>
+          <div data-bind="template:
+                          {name: 'attachments-table-template',
+                           data: LUPAPISTE.AttachmentsTableModel($parent.data().attachmentInfos)}"></div>
         </div>
         <!-- /ko -->
       </div>
