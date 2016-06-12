@@ -26,10 +26,6 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
 
   };
 
-  self.isFiltered = function( data ) {
-    return false;
-  };
-
   self.inputId = function( index ) {
     return idPrefix + index;
   };

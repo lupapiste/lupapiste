@@ -8,15 +8,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
 
-  var filters = {
-        preVerdict: ko.observable(false),
-        postVerdict: ko.observable(false),
-        notNeeded: ko.observable(false),
-        ivSuunnitelmat: ko.observable(false),
-        kvvSuunnitelmat: ko.observable(false),
-        rakennesuunnitelmat: ko.observable(false),
-        paapiirrustukset: ko.observable(false)
-      };
   function dummyData()  {
     return _([
       {
@@ -7370,7 +7361,7 @@ LUPAPISTE.AttachmentsService = function() {
         "kvv": ko.observable(false),
         "rakenne": ko.observable(false),
         "paapiirustukset": ko.observable(false)
-      };
+  };
 
   self.filtersArray = ko.observableArray(
     _.map( ["hakemus", "rakentaminen", "iv", "kvv",

@@ -14,7 +14,6 @@
         </tr>
       </thead>
       <tbody data-bind="foreach: attachments">
-        <!--- ko ifnot: $parent.isFiltered( $data ) -->
         <tr>
           <td data-bind="foreach: $parent.stateIcons( $data )">
             <i data-bind="attr: {'class': $data}"></i>
@@ -75,7 +74,6 @@
             </button>
           </td>
         </tr>
-        <!-- /ko -->
       </tbody>
     </table>
     <button data-bind="enable: canDownload()"
