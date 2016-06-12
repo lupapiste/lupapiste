@@ -7352,7 +7352,7 @@ LUPAPISTE.AttachmentsService = function() {
       }
     ])
       .map( function( a ) {
-        return !_.random( 5) ? _.omit( a, "latestVersion") : a;
+        return !_.random( 2) ? _.omit( a, "latestVersion") : a;
       })
       .value();
   }

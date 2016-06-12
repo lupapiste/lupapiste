@@ -9112,26 +9112,27 @@ table.company-users-table tr:hover, table.company-users-table tr:active {
 /* line 288, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container {
   padding-top: 1em;
-  padding-right: 1em;
+  padding-right: .6em;
+  padding-left: .5em;
 }
-/* line 293, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 294, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container table.attachments-table {
   margin-bottom: 1em;
 }
-/* line 295, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 296, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container table.attachments-table .checkbox-wrapper {
   border: none;
 }
-/* line 297, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 298, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container table.attachments-table .checkbox-wrapper .checkbox-label {
   padding-top: 2px;
   padding-left: 0;
 }
-/* line 302, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 303, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container table.attachments-table td {
   vertical-align: top;
 }
-/* line 304, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 305, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container table.attachments-table td .fileinfo {
   font-style: normal;
 }

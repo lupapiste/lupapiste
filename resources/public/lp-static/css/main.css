@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-@import url('main-blessed1.css?z=1465551912934');
-=======
-@import url('main-blessed1.css?z=1465567909186');
->>>>>>> Approve, Reject, Not needed and Download.
+@import url('main-blessed1.css?z=1465733737351');
 
 /* line 11, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-header div {
@@ -764,22 +760,23 @@ button.rollup-button {
 .rollup-status__text {
   display: table-cell;
   width: 100%;
+  text-transform: uppercase;
 }
 
-/* line 24, ../../../private/common-html/sass/partials/_rollup.scss */
+/* line 25, ../../../private/common-html/sass/partials/_rollup.scss */
 .rollup-status__icon {
   display: table-cell;
   min-width: 22px;
 }
 
-/* line 30, ../../../private/common-html/sass/partials/_rollup.scss */
+/* line 31, ../../../private/common-html/sass/partials/_rollup.scss */
 .rollup-accordion .rollup-accordion-content {
   padding-top: 6px;
   position: relative;
   border: 1px solid #dddddd;
   border-top: none;
 }
-/* line 37, ../../../private/common-html/sass/partials/_rollup.scss */
+/* line 38, ../../../private/common-html/sass/partials/_rollup.scss */
 .rollup-accordion .rollup-accordion-content .rollup-accordion-content-part {
   margin-left: 12px;
   margin-right: 12px;

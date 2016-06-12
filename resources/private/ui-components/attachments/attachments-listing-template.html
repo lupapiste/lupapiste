@@ -49,7 +49,8 @@
   
   <div>
     <!-- ko if: groups[0].data().hasContent && groups[0].data().hasContent() -->
-    <h2 data-bind="ltext: 'application.attachments.pre-verdict'"/>
+    <h2 data-bind="ltext: 'application.attachments.pre-verdict'"
+        class="help-adjacent-title" />
     <button class="function right"
             data-bind="click: togglePreVerdictGroups">
       <i class="lupicon-menu"></i>
@@ -63,7 +64,8 @@
     </div>
     <!-- /ko -->
     <!-- ko if: groups[1].data().hasContent && groups[1].data().hasContent() -->
-    <h2 data-bind="ltext: 'application.attachments.post-verdict'"/>
+    <h2 data-bind="ltext: 'application.attachments.post-verdict'"
+        class="help-adjacent-title"/>
     <button class="function right"
             data-bind="click: togglePostVerdictGroups">
       <i class="lupicon-menu"></i>
