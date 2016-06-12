@@ -280,7 +280,7 @@
   var attachmentVersionTemplate =
         _.template( "<a href='/api/raw/download-attachment?attachment-id"
                     + "=<%- fileId %>'><%- filename %></a><br>"
-                    + "<i><%- contentText %> <%- sizeText %></i>");
+                    + "<i class='fileinfo'><%- contentText %> <%- sizeText %></i>");
 
   // Fills the target element with:
   // <a href="attachment file download url">filename</a><br>
