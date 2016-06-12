@@ -45,21 +45,12 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
 
   self.remove = idFun( service.removeAttachment );
 
-  var notNeededDict = _.reduce( self.attachments,
-                                 function( acc, data ) {
-                                   var obj = ko.utils.unwrapObservable( data );
-                                   return _.set( acc, obj.id, self.disposedComputed(
-                                     {read:  _.partial( _.flow( ko.utils.unwrapObservable,
-                                                                service.isNotNeeded ),
-                                                        data),
-                                      write: _.partial( service.setNotNeeded,
-                                                        obj.id)}) );
-                                 },
-                                {});
-
-  self.notNeeded = idFun( _.partial( _.get, notNeededDict ));
-
   self.canDownload = self.disposedComputed( _.partial( _.some,
                                                        self.attachments,
                                                        self.hasFile ));
+
+  self.toggleNotNeeded = function( data  ) {
+    service.setNotNeeded( data.id, !data.notNeeded);
+  };
+  self.isNotNeeded = service.isNotNeeded;
 };

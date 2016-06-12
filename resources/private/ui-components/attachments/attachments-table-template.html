@@ -36,7 +36,7 @@
             <br>
             <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
           </td>
-          <td>
+          <td data-bind="if: !$parent.isNotNeeded( $data )">
             <a class="link-btn link-btn--link">
               <i class="lupicon-circle-plus"></i>
               <span data-bind="ltext: 'attachment.addFile'"></span>
@@ -45,24 +45,25 @@
           <td>
             <div class="checkbox-wrapper">
               <input type="checkbox"
-                     data-bind="attr: {id: $parent.inputId( $index() )},
-                                checked: $parent.notNeeded( $data )">
+                     data-bind="attr: {id: $parent.inputId( $index() ),
+                                checked: $parent.isNotNeeded( $data )}">
               <label class="checkbox-label"
                      data-bind="attr: {'for': $parent.inputId( $index())},
-                                ltext: 'application.attachmentNotNeeded'"></label>
+                                ltext: 'application.attachmentNotNeeded',
+                                click: $parent.toggleNotNeeded"></label>
             </div>
           </td>
           <!-- /ko -->
           <td>
             <button class="positive"
-                    data-bind="disable: $parent.isApproved( $data ) || $parent.notNeeded( $data )(),
+                    data-bind="disable: $parent.isApproved( $data ) || $parent.isNotNeeded( $data ),
                                click: $parent.approve">
               <i class="lupicon-check"></i>
             </button>
           </td>
           <td>
             <button class="negative"
-                    data-bind="disable: $parent.isRejected( $data ) || $parent.notNeeded( $data )(),
+                    data-bind="disable: $parent.isRejected( $data ) || $parent.isNotNeeded( $data ),
                                click: $parent.reject">
               <i class="lupicon-circle-attention"></i>
             </button>
