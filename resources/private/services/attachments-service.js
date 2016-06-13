@@ -7430,7 +7430,6 @@ LUPAPISTE.AttachmentsService = function() {
     var attachmentIds = _(self.attachments()).map(function(attachment) {
       return attachment();
     }).filter({notNeeded: self.SCHEDULED_FOR_NOT_NEEDED}).map("id").value();
-    console.log(attachmentIds);
     _.forEach(attachmentIds, function(attachmentId) {
       self.updateAttachment(attachmentId, {notNeeded: true});
     });
