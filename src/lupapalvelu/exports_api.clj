@@ -206,4 +206,4 @@
 (defexport export-organizations
   {:user-roles #{:trusted-etl}}
   [_]
-  (export :organizations {} [:name :scope]))
+  (export :organizations {:scope.0 {$exists true}} [:name :scope]))
