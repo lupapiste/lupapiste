@@ -97,9 +97,9 @@
                                      (doseq [heading (localized-doc-headings schema-names)]
                                        pdf-content => (contains heading :gaps-ok))))
 
-                    #_(fact "PDF does not contain unlocalized strings"
-                            (doseq [row rows]
-                              row =not=> (contains "???"))))))
+                    (fact "PDF does not contain unlocalized strings"
+                          (doseq [row rows]
+                            row =not=> (contains "???"))))))
 
          (.delete file)))
 
