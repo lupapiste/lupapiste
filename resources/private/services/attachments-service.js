@@ -7,6 +7,7 @@ LUPAPISTE.AttachmentsService = function() {
   var self = this;
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
+  self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
 
   function dummyData()  {
     return _([
@@ -7421,7 +7422,18 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.setNotNeeded = function(attachmentId, flag ) {
-    self.updateAttachment(attachmentId, {notNeeded: Boolean( flag )});
+    self.updateAttachment(attachmentId, {notNeeded: !flag ?
+                                                    flag :
+                                                    self.SCHEDULED_FOR_NOT_NEEDED});
+  };
+  self.changeScheduledNotNeeded = function() {
+    var attachmentIds = _(self.attachments()).map(function(attachment) {
+      return attachment();
+    }).filter({notNeeded: self.SCHEDULED_FOR_NOT_NEEDED}).map("id").value();
+    console.log(attachmentIds);
+    _.forEach(attachmentIds, function(attachmentId) {
+      self.updateAttachment(attachmentId, {notNeeded: true});
+    });
   };
 
   //helpers for checking relevant attachment states
@@ -7432,7 +7444,7 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment && attachment.state === self.REJECTED;
   };
   self.isNotNeeded = function(attachment) {
-    return attachment && attachment.notNeeded;
+    return attachment && attachment.notNeeded === true;
   };
 
   function getAttachmentValue(attachmentId) {
@@ -7576,8 +7588,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   function applyFilters(attachments) {
     var atts = filters["ei-tarpeen"]() ?
-        attachments :
-        _.filter(attachments, {notNeeded: false});
+          attachments : _.filter(attachments, _.negate(self.isNotNeeded));
     if (showAll()) {
       return atts;
     }
@@ -7634,7 +7645,9 @@ LUPAPISTE.AttachmentsService = function() {
       setNotNeeded: self.setNotNeeded,
       isApproved:   self.isApproved,
       isRejected:   self.isRejected,
-      isNotNeeded:  self.isNotNeeded,
+      isNotNeeded:  function(attachment) {
+        return attachment.notNeeded;
+      },
       attachments:  _.map(attachmentIds, idToAttachment)
     };
   };

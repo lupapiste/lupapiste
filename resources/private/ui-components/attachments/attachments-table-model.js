@@ -15,7 +15,7 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
   }
 
   function hasFile(data) {
-    return _.get(data, "latestVersion.fileId");
+    return _.get(ko.utils.unwrapObservable(data), "latestVersion.fileId");
   }
 
   var idPrefix = _.uniqueId("at-input-");
