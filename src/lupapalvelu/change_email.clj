@@ -22,9 +22,10 @@
 
 (defn init-email-change [user email]
   (let [email (usr/canonize-email email)]
-    (if-not (usr/get-user-by-email email)
-      (notify-init-email-change user email)
-      (fail :error.duplicate-email))))
+    (let [user (usr/get-user-by-email email)]
+      (if (or (not user) (usr/dummy? user))
+        (notify-init-email-change user email)
+        (fail :error.duplicate-email)))))
 
 (defn- change-email-with-token [token stamp]
   {:pre [(map? token)]}
