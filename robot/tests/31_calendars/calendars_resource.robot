@@ -27,4 +27,5 @@ Add reservation type
   Wait until  Element should be visible  dialog-edit-reservation-type
   Input text by test id  reservation-type-name  ${name}
   Confirm   dialog-edit-reservation-type
+  Positive indicator should be visible
   Wait until  Element should be visible  //table[@data-test-id='organization-reservation-types']//td[text()='${name}']
