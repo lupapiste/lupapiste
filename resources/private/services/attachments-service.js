@@ -7365,8 +7365,8 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.filtersArray = ko.observableArray(
-    _.map( ["hakemus", "rakentaminen", "iv", "kvv",
-            "rakenne", "ei-tarpeen", "paapiirustukset"],
+    _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
+            "rakenne", "ei-tarpeen"],
            function( s ) {
              return {ltext: "filter." + s,
                      filter: filters[s]};
