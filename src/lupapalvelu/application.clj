@@ -4,17 +4,19 @@
             [clj-time.local :refer [local-now]]
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
-            [monger.operators :refer [$set $push]]
+            [monger.operators :refer [$set $push $in]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.company :as com]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
@@ -507,3 +509,36 @@
   [{org-id :organization :as application} & org-authz]
   (->> (apply usr/find-authorized-users-in-org org-id org-authz)
        (map #(select-keys % [:id :firstName :lastName]))))
+
+;; Cancellation
+
+(defn- remove-app-links [id]
+  (mongo/remove-many :app-links {:link {$in [id]}}))
+
+(defn cancel-inforequest [{:keys [created user data] :as command}]
+  {:pre [(seq (:application command))]}
+  (action/update-application command (state-transition-update :canceled created user))
+  (remove-app-links (:id data))
+  (ok))
+
+(defn cancel-application
+  [{:keys [created application user data] :as command}]
+  (let [{:keys [lang text]} data]
+   (action/update-application command
+                              (util/deep-merge
+                               (state-transition-update :canceled created user)
+                               (when (seq text)
+                                 (comment/comment-mongo-update
+                                  (:state application)
+                                  (str
+                                   (i18n/localize lang "application.canceled.text") ". "
+                                   (i18n/localize lang "application.canceled.reason") ": "
+                                   text)
+                                  {:type "application"}
+                                  (user :role)
+                                  false
+                                  user
+                                  nil
+                                  created)))))
+  (remove-app-links (:id application))
+  (ok))

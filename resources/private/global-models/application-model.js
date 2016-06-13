@@ -520,30 +520,15 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.cancelApplication = function() {
-    hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("areyousure"),
-      loc("areyousure.cancel-application"),
-      {title: loc("yes"),
-       fn: function() {
-        ajax
-          .command("cancel-application", {id: self.id()})
-          .success(function() {pageutil.openPage("applications");})
-          .processing(self.processing)
-          .call();
-        hub.send("track-click", {category:"Application", label:"", event:"ApplicationCanceled"});
-        return false;}},
-      {title: loc("no")}
-    );
-    hub.send("track-click", {category:"Application", label:"", event:"ApplicationCancelCanceled"});
-    return false;
-  };
-
   self.cancelText = ko.observable("");
 
-  self.cancelApplicationAuthority = function() {
-    hub.send("track-click", {category:"Application", label:"", event:"cancelApplicationAuthority"});
+
+
+  self.cancelApplication = function() {
+    var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
+          ? "cancel-application-authority"
+          : "cancel-application";
+    hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
     LUPAPISTE.ModalDialog.setDialogContent(
       $("#dialog-cancel-application"),
       loc("areyousure"),
@@ -551,7 +536,7 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("yes"),
        fn: function() {
         ajax
-          .command("cancel-application-authority", {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
+          .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
           .success(function() {
             self.cancelText("");
             pageutil.openPage("applications");

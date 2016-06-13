@@ -139,14 +139,7 @@
 ;; Cancel
 ;;
 
-(defn- remove-app-links [id]
-  (mongo/remove-many :app-links {:link {$in [id]}}))
 
-(defn- do-cancel [{:keys [created user data] :as command}]
-  {:pre [(seq (:application command))]}
-  (update-application command (app/state-transition-update :canceled created user))
-  (remove-app-links (:id data))
-  (ok))
 
 (defcommand cancel-inforequest
   {:parameters       [id]
@@ -156,18 +149,18 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
-  (do-cancel command))
+  (app/cancel-inforequest command))
 
 (defcommand cancel-application
-  {:parameters       [id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
+  {:parameters       [id text lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:applicant}
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
    :pre-checks       [(partial sm/validate-state-transition :canceled)]}
   [command]
-  (do-cancel command))
+  (app/cancel-application command))
 
 (defcommand cancel-application-authority
   {:parameters       [id text lang]
@@ -177,25 +170,8 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :canceled)]}
-  [{:keys [created application user] :as command}]
-  (update-application command
-    (util/deep-merge
-      (app/state-transition-update :canceled created user)
-      (when (seq text)
-        (comment/comment-mongo-update
-          (:state application)
-          (str
-            (i18n/localize lang "application.canceled.text") ". "
-            (i18n/localize lang "application.canceled.reason") ": "
-            text)
-          {:type "application"}
-          (-> command :user :role)
-          false
-          (:user command)
-          nil
-          created))))
-  (remove-app-links id)
-  (ok))
+  [command]
+  (app/cancel-application command))
 
 
 (defcommand request-for-complement
