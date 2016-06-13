@@ -12,28 +12,28 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [sade.strings :as s])
-  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType ProtectionLevelType SecurityClassType AccessRightType ActionType RecordType AgentType ActionEvent Custom)
-           (javax.xml.bind JAXBContext)
-           (java.io StringWriter)
+  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType ProtectionLevelType SecurityClassType AccessRightType ActionType RecordType AgentType ActionEvent Custom ClassificationScheme)
+           (javax.xml.bind JAXB)
+           (java.io StringWriter StringReader)
            [javax.xml.datatype DatatypeFactory]
            [java.util GregorianCalendar Date]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
 
-(defn- get-from-toj-api [organization-id & path-parts]
+(defn- get-from-toj-api [organization-id coerce? & path-parts]
   (when (:permanent-archive-enabled (o/get-organization organization-id))
     (try
       (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
-            response (http/get url {:as               :json
-                                    :throw-exceptions false})]
+            response (http/get url (cond-> {:throw-exceptions false}
+                                           coerce? (assoc :as :json)))]
         (when (= 200 (:status response))
           (:body response)))
       (catch Exception e
         (error "Error accessing TOJ API" e)))))
 
 (defn- get-tos-functions-from-toj [organization-id]
-  (or (get-from-toj-api organization-id) []))
+  (or (get-from-toj-api organization-id :coerce) []))
 
 (def available-tos-functions
   (memo/ttl get-tos-functions-from-toj
@@ -48,7 +48,7 @@
 (defn- get-metadata-for-document-from-toj [organization tos-function document-type]
   (if (and organization tos-function document-type)
     (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)]
-      (or (get-from-toj-api organization tos-function "/document/" doc-id) {}))
+      (or (get-from-toj-api organization :coerce tos-function "/document/" doc-id) {}))
     {}))
 
 (def metadata-for-document
@@ -57,7 +57,7 @@
 
 (defn- get-metadata-for-process-from-toj [organization tos-function]
   (if (and organization tos-function)
-    (or (get-from-toj-api organization tos-function) {})
+    (or (get-from-toj-api organization :coerce tos-function) {})
     {}))
 
 (def metadata-for-process
@@ -108,7 +108,7 @@
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
   (if (and organization tos-function state)
-    (or (get-from-toj-api organization tos-function "/toimenpide-for-state/" state) {})
+    (or (get-from-toj-api organization :coerce tos-function "/toimenpide-for-state/" state) {})
     {}))
 
 (def toimenpide-for-state
@@ -267,6 +267,11 @@
         {$set {:modified modified-ts
                :processMetadata new-process-md}}))))
 
+(defn- classification-xml [organization tos-function]
+  (when-let [xml-str (get-from-toj-api organization false tos-function "/classification")]
+    (with-open [reader (StringReader. xml-str)]
+      (JAXB/unmarshal reader ClassificationScheme))))
+
 (defn- xml-date [ts-or-date]
   (when ts-or-date
     (let [factory (DatatypeFactory/newInstance)
@@ -278,14 +283,14 @@
 (defn- publicity-class-type [{:keys [julkisuusluokka]}]
   (case (keyword julkisuusluokka)
     :julkinen PublicityClassType/JULKINEN
-    :salainen PublicityClassType/SALASSA_PIDETTAVA
-    :osittain-salassapidettava PublicityClassType/OSITTAIN_SALASSAPIDETTAVA))
+    :salainen (PublicityClassType/fromValue "Salassa pidett\u00e4v\u00e4")
+    :osittain-salassapidettava (PublicityClassType/fromValue "Osittain salassapidett\u00e4v\u00e4")))
 
 (defn- personal-data-type [{:keys [henkilotiedot]}]
   (case (keyword henkilotiedot)
-    :ei-sisalla PersonalDataType/EI_SISALLA_HENKILOTIETOJA
-    :sisaltaa PersonalDataType/SISALTAA_HENKILOTIETOJA
-    :sisaltaa-arkaluonteisia PersonalDataType/SISALTAA_ARKALUONTOISIA_HENKILOTIETOJA))
+    :ei-sisalla (PersonalDataType/fromValue "ei sis\u00e4ll\u00e4 henkil\u00f6tietoja")
+    :sisaltaa (PersonalDataType/fromValue "sis\u00e4lt\u00e4\u00e4 henkil\u00f6tietoja")
+    :sisaltaa-arkaluonteisia (PersonalDataType/fromValue "sis\u00e4lt\u00e4\u00e4 arkaluontoisia henkil\u00f6tietoja")))
 
 (defn- protection-level-type [{:keys [suojaustaso]}]
   (case (keyword suojaustaso)
@@ -349,7 +354,7 @@
     (->> documents
          (map #(action-subevent % lang))
          vec
-         (.addAll (.getActionEvents custom-obj)))
+         (.addAll (.getActionEvent custom-obj)))
     custom-obj))
 
 (defn- record-type [{:keys [type id ts version contents user]} lang]
@@ -388,11 +393,9 @@
         :else pituus)
       (BigInteger/valueOf)))
 
-(defn xml-case-file [{:keys [id processMetadata] :as application} lang]
+(defn xml-case-file [{:keys [id processMetadata tosFunction organization] :as application} lang]
   (let [case-file (generate-case-file-data application lang)
-        case-file-object (CaseFile.)
-        context (JAXBContext/newInstance (into-array [(.getClass case-file-object)]))
-        marshaller (.createMarshaller context)]
+        case-file-object (CaseFile.)]
     (doto case-file-object
       (.setNativeId id)
       (.setRestriction (build-restriction-type application lang))
@@ -401,11 +404,12 @@
       (.setRetentionReason (get-in processMetadata [:sailytysaika :perustelu]))
       (.setRetentionPeriodEnd (xml-date (get-in processMetadata [:sailytysaika :retention-period-end])))
       (.setStatus (get processMetadata :tila "valmis"))
-      (.setFunction (:tosFunction application)))
+      (.setFunction tosFunction)
+      (.setClassificationScheme (classification-xml organization tosFunction)))
     (.add (.getCreated case-file-object) (xml-date (:start (first case-file))))
     (.add (.getLanguage case-file-object) (name lang))
     (.addAll (.getAction case-file-object) (vec (map #(action-type % lang) case-file)))
 
     (with-open [sw (StringWriter.)]
-      (.marshal marshaller case-file-object sw)
+      (JAXB/marshal case-file-object sw)
       (.toString sw))))

@@ -257,6 +257,18 @@
 			<xs:documentation>SÄHKE2 Metatietomalli: 2.7 Nimeke (Title)</xs:documentation>
 		</xs:annotation>
 	</xs:element>
+	<xs:element name="ActionEvent">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="narc:Description"/>
+				<xs:element ref="narc:Type"/>
+				<xs:element ref="narc:Function" minOccurs="0"/>
+				<xs:element name="CorrectionReason" type="xs:string" minOccurs="0"/>
+				<xs:element ref="narc:Created"/>
+				<xs:element ref="narc:Agent" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="Custom">
 		<xs:annotation>
 			<xs:documentation>SÄHKE2 Metatietomalli: 2.8 Organisaatiokohtaiset metatiedot (Custom)</xs:documentation>
@@ -264,7 +276,8 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:sequence>
-				<xs:any processContents="skip" maxOccurs="unbounded"/>
+				<!--<xs:any processContents="skip" maxOccurs="unbounded"/>-->
+				<xs:element ref="narc:ActionEvent" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -872,16 +885,16 @@
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 	<!-- ClassificationScheme-rakenteen elementtimääritykset                               -->
 	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-	<xs:element name="ClassificationScheme" type="narc:ClassificationSchemeType">
+	<xs:element name="ClassificationScheme">
 		<xs:annotation>
 			<xs:documentation>SÄHKE2 Metatietomalli: 6.3 Tehtäväluokitus</xs:documentation>
 		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="narc:MainFunction"/>
+			</xs:sequence>
+		</xs:complexType>
 	</xs:element>
-	<xs:complexType name="ClassificationSchemeType">
-		<xs:sequence>
-			<xs:element ref="narc:MainFunction"/>
-		</xs:sequence>
-	</xs:complexType>
 	<xs:element name="MainFunction" type="narc:MainFunctionType">
 		<xs:annotation>
 			<xs:documentation>SÄHKE2 Metatietomalli: 6.3.1 Päätehtävä (ClassificationScheme.MainFunction)</xs:documentation>
