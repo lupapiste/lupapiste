@@ -7619,13 +7619,6 @@ LUPAPISTE.AttachmentsService = function() {
   };
   self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
 
-  self.getAttachmentsOfMainGroup = function(mainGroupId) {
-    return self.getAttachmentsHierarchy()[mainGroupId];
-  };
-  self.getAttachmentsOfSubGroup = function(mainGroupId, subGroupId) {
-    return self.getAttachmentsHierarchy()[mainGroupId][subGroupId];
-  };
-
   function idToAttachment(attachmentId) {
     var attachment = self.getAttachment(attachmentId);
     if (attachment) {
@@ -7739,6 +7732,19 @@ LUPAPISTE.AttachmentsService = function() {
                         groupToModel);
   });
 
+  self.getAttachmentsForGroup = function() {
+    function getAttachments(group) {
+      if (_.isPlainObject(group)) {
+        return _.flatten(_.map(_.values(group), getAttachments));
+      } else {
+        return group;
+      }
+    }
+    var args = _.toArray(arguments);
+    var group = _.get(self.attachmentsHierarchy(), args);
+    return getAttachments(group);
+  };
+
   function getDataForGroup() {
     var args = _.toArray(arguments);
     return ko.pureComputed(function() {
@@ -7751,7 +7757,12 @@ LUPAPISTE.AttachmentsService = function() {
     return {
       name: _.last(args),
       open: ko.observable(),
-      data: _.spread(getDataForGroup)(args)
+      data: ko.pureComputed(function() {
+        return modelForSubAccordion({
+          name: _.last(args),
+          attachmentIds: _.spread(self.getAttachmentsForGroup)(args)
+        });
+      })
     };
   }
 
