@@ -1,12 +1,15 @@
-LUPAPISTE.CalendarViewModel = function () {
+LUPAPISTE.CalendarViewModel = function (params) {
   "use strict";
   var self = this,
       calendarService = lupapisteApp.services.calendarService;
 
-  self.calendarWeekdays = calendarService.calendarWeekdays;
-  self.startOfWeek = calendarService.calendarQuery.startOfWeek;
+  self.calendarWeekdays = ko.observableArray();
+  self.reservationTypes = ko.observableArray();
+  self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
 
-  self.calendarId = ko.observable();
+  self.calendarId = params.calendarId; // observable from parent
+  self.userId = params.userId; // observable from parent
+  self.reservationTypes = params.reservationTypes; // observable from parent
 
   self.firstFullHour = calendarService.params().firstFullHour;
   self.lastFullHour = calendarService.params().lastFullHour;
@@ -61,16 +64,31 @@ LUPAPISTE.CalendarViewModel = function () {
     }
   };
 
+  self.calendarId.subscribe(function(val) {
+    if (typeof val !== "undefined") {
+      hub.send("calendarService::fetchCalendar",
+        {calendarId: self.calendarId(), user: self.userId(),
+         reservationTypesObservable: self.reservationTypes});
+    }
+  });
+
+  hub.subscribe("calendarService::calendarWeekFetched", function(event) {
+    self.calendarWeekdays(event.week);
+  });
+
   self.gotoToday = function() {
-    hub.send("calendarService::fetchCalendarSlots", { week: moment().isoWeek(), year: moment().year() });
+    self.startOfWeek(moment().startOf("isoWeek"));
+    hub.send("calendarService::fetchCalendarSlots", { calendarId: self.calendarId(), week: self.startOfWeek().isoWeek(), year: self.startOfWeek().year() });
   };
 
   self.gotoPreviousWeek = function() {
-    hub.send("calendarService::fetchCalendarSlots", { increment: -1 });
+    self.startOfWeek(self.startOfWeek().add(-1, "weeks"));
+    hub.send("calendarService::fetchCalendarSlots", { calendarId: self.calendarId(), week: self.startOfWeek().isoWeek(), year: self.startOfWeek().year() });
   };
 
   self.gotoFollowingWeek = function() {
-    hub.send("calendarService::fetchCalendarSlots", { increment: 1 });
+    self.startOfWeek(self.startOfWeek().add(1, "weeks"));
+    hub.send("calendarService::fetchCalendarSlots", { calendarId: self.calendarId(), week: self.startOfWeek().isoWeek(), year: self.startOfWeek().year() });
   };
 
 };

@@ -375,6 +375,13 @@
                                     <span data-bind="if: unseenStatements">
                                         <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
+                            <!-- Can be shown if calendars are active in the target municipality and sector -->
+                            <li data-bind="css: {'active': $parent.selectedTabName() === 'calendar'}">
+                              <a data-bind="click: changeTab" href="#" data-target="calendar" data-test-id="application-open-calendar-tab" class="link-btn">
+                                <span data-bind="ltext: 'application.tabCalendar'"></span>
+<!--                                      <span data-bind="if: partyDocumentIndicator">
+                                          <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span>--></a></li>
+
                             <li data-bind="ifnot: _.includes(['draft', 'open'], state()),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
                                 <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
@@ -1382,6 +1389,14 @@
                       </div>
                     </div>
                     <!-- /ko -->
+
+                    <!-- Calendars tab -->
+                    <div id="application-calendar-tab" data-bind="with: application" class="tab-content">
+                      <div>
+                        <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
+                      </div>
+                      <!-- <calendar-view params=""></calendar-view> -->
+                    </div>
                 </div>
             </div>
             <div id="boxes">

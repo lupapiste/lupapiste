@@ -1,8 +1,8 @@
-LUPAPISTE.ReservationSlotEditBubbleModel = function() {
+LUPAPISTE.ReservationSlotEditBubbleModel = function(params) {
   "use strict";
   var self = this,
       calendarService = lupapisteApp.services.calendarService,
-      params = calendarService.params();
+      config = calendarService.params();
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
@@ -14,7 +14,7 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function() {
   self.positionTop = ko.observable();
   self.weekdayCss = ko.observable();
 
-  self.reservationTypes = calendarService.calendarQuery.reservationTypes;
+  self.reservationTypes = params.reservationTypes; // observableArray from parent
   self.selectedReservationTypes = ko.observableArray();
 
   self.waiting = ko.observable();
@@ -28,7 +28,8 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function() {
   self.removeEnabled = true;
 
   self.doRemove = function() {
-    self.sendEvent("calendarService", "deleteCalendarSlot", {id: self.slotId()});
+    self.sendEvent("calendarService", "deleteCalendarSlot", {id: self.slotId(), calendarId: parseInt(params.calendarId()),
+                                                             weekObservable: params.weekdays});
     self.bubbleVisible(false);
   };
 
@@ -37,7 +38,9 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function() {
   };
 
   self.send = function() {
-    self.sendEvent("calendarService", "updateCalendarSlot", {id: self.slotId(), reservationTypes: self.selectedReservationTypes()});
+    self.sendEvent("calendarService", "updateCalendarSlot", {id: self.slotId(), calendarId: parseInt(params.calendarId()),
+                                                             reservationTypes: self.selectedReservationTypes(),
+                                                             weekObservable: params.weekdays});
     self.bubbleVisible(false);
   };
 
@@ -49,7 +52,7 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function() {
     self.durationHours(durationMoment.hours());
     self.durationMinutes(durationMoment.minutes());
     self.selectedReservationTypes(_.map(event.slot.reservationTypes, function(d) { return d.id; }));
-    self.positionTop((timestamp.hour() - params.firstFullHour + 1) * 60 + "px");
+    self.positionTop((timestamp.hour() - config.firstFullHour + 1) * 60 + "px");
     self.weekdayCss("weekday-" + timestamp.isoWeekday());
     self.bubbleVisible(true);
   });

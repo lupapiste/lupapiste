@@ -1,5 +1,7 @@
 "Ajanvaraus" "fi" "Ajanvaraus"
 "Ajanvaraus" "sv" "Tidsbeställning"
+"application.tabCalendar" "fi" "Ajanvaraus"
+"application.tabCalendar" "sv" "Tidsbeställning"
 "auth-admin.calendar.inuse" "fi" "Kalenteri käytössä"
 "auth-admin.calendar.inuse" "sv" "Kalender i bruk"
 "auth-admin.calendar.name" "fi" "Nimi"

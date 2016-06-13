@@ -3,35 +3,18 @@ LUPAPISTE.CalendarService = function() {
   var self = this,
       params = LUPAPISTE.config.calendars;
 
-  self.calendarWeekdays = ko.observableArray();
-
-  self.myCalendars = ko.observableArray([]);
   self.reservationTypesByOrganization = ko.observable();
-
   self.params = ko.observable(params);
 
-  // Data related to the current calendar view
-  self.calendarQuery = {
-    calendarId: ko.observable(),
-    reservationTypes: ko.observableArray(),
-    startOfWeek: ko.observable()
-  };
-
-  var doFetchCalendarSlots = function(event) {
-    if (event && event.id) {
-      self.calendarQuery.calendarId(event.id);
-    }
-    var newStartOfWeek;
+  var doFetchCalendarWeek = function(event) {
+    var startOfWeekMoment;
     if (event && event.week && event.year) {
-      newStartOfWeek = moment().set({"isoWeek": event.week, "year": event.year}).startOf("isoWeek");
-      self.calendarQuery.startOfWeek(newStartOfWeek.valueOf());
-    } else if (event && event.increment) {
-      newStartOfWeek = moment(self.calendarQuery.startOfWeek()).add(event.increment, "weeks");
-      self.calendarQuery.startOfWeek(newStartOfWeek.valueOf());
+      startOfWeekMoment = moment().set({"isoWeek": event.week, "year": event.year}).startOf("isoWeek");
+    } else if (event && event.weekObservable) {
+      startOfWeekMoment = moment(event.weekObservable()[0].startOfDay).startOf("isoWeek");
     }
 
-    var startOfWeekMoment = moment(self.calendarQuery.startOfWeek());
-    ajax.query("calendar-slots", { calendarId: self.calendarQuery.calendarId(),
+    ajax.query("calendar-slots", { calendarId: event.calendarId,
                                    week: startOfWeekMoment.isoWeek(),
                                    year: startOfWeekMoment.year() })
       .success(function(data) {
@@ -40,7 +23,7 @@ LUPAPISTE.CalendarService = function() {
           var day = startOfWeekMoment.set({ "isoWeekday": i, "hour": params.firstFullHour, "minutes": 0, "seconds": 0 });
           var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, "day"); });
           return {
-            calendarId: self.calendarQuery.calendarId(),
+            calendarId: event.calendarId,
             startOfDay: day.valueOf(),
             endOfDay: moment(day).hour(params.lastFullHour).valueOf(),
             today: day.isSame(now, "day"),
@@ -49,18 +32,24 @@ LUPAPISTE.CalendarService = function() {
                 return _.extend(s, { duration: moment(s.endTime).diff(s.startTime) });
               })};
         });
-        self.calendarWeekdays(weekdays);
+        if (event.weekObservable) {
+          event.weekObservable(weekdays);
+        }
+        hub.send("calendarService::calendarWeekFetched", { week: weekdays });
       })
       .call();
   };
 
   var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {
-    ajax.query("calendar", {calendarId: event.id, userId: event.user})
+    ajax.query("calendar", {calendarId: event.calendarId, userId: event.user})
       .success(function(data) {
-        hub.send("calendarService::calendarFetched", {calendar: data.calendar});
-        self.calendarQuery.calendarId(data.calendar.id);
-        self.calendarQuery.reservationTypes(self.reservationTypesByOrganization()[data.calendar.organization]);
-        doFetchCalendarSlots({week: moment().isoWeek(), year: moment().year()});
+        if (event.reservationTypesObservable) {
+          event.reservationTypesObservable(self.reservationTypesByOrganization()[data.calendar.organization]);
+        }
+        if (event.calendarObservable) {
+          event.calendarObservable(data.calendar);
+        }
+        doFetchCalendarWeek({calendarId: data.calendar.id, week: moment().isoWeek(), year: moment().year()});
       })
       .call();
   });
@@ -78,9 +67,8 @@ LUPAPISTE.CalendarService = function() {
       .success(function (data) {
         var obj = {};
         obj[data.organization] = data.reservationTypes;
-        self.calendarQuery.reservationTypes(data.reservationTypes);
         self.reservationTypesByOrganization(obj);
-        hub.send("calendarService::organizationReservationTypesFetched");
+        hub.send("calendarService::organizationReservationTypesFetched", { reservationTypes: data.reservationTypes });
       })
       .call();
   });
@@ -88,15 +76,14 @@ LUPAPISTE.CalendarService = function() {
   var _fetchMyCalendars = hub.subscribe("calendarService::fetchMyCalendars", function() {
     ajax.query("my-calendars")
       .success(function(data) {
-        self.myCalendars(data.calendars);
         self.reservationTypesByOrganization(data.reservationTypes);
-        hub.send("calendarService::myCalendarsFetched");
+        hub.send("calendarService::myCalendarsFetched", {calendars: data.calendars});
       })
       .call();
   });
 
   var _fetchSlots = hub.subscribe("calendarService::fetchCalendarSlots", function(event) {
-    doFetchCalendarSlots(event);
+    doFetchCalendarWeek(event);
   });
 
   var _createSlots = hub.subscribe("calendarService::createCalendarSlots", function(event) {
@@ -104,7 +91,7 @@ LUPAPISTE.CalendarService = function() {
       .command("create-calendar-slots", {calendarId: event.calendarId, slots: event.slots})
       .success(function() {
         hub.send("indicator", {style: "positive"});
-        doFetchCalendarSlots();
+        doFetchCalendarWeek({calendarId: event.calendarId, weekObservable: event.weekObservable});
       })
       .call();
   });
@@ -114,7 +101,7 @@ LUPAPISTE.CalendarService = function() {
       .command("update-calendar-slot", {slotId: event.id, reservationTypeIds: event.reservationTypes})
       .success(function() {
         hub.send("indicator", {style: "positive"});
-        doFetchCalendarSlots();
+        doFetchCalendarWeek({calendarId: event.calendarId, weekObservable: event.weekObservable});
       })
       .error(function (e) {
         hub.send("indicator", {style: "negative", message: e.text});
@@ -127,7 +114,7 @@ LUPAPISTE.CalendarService = function() {
       .command("delete-calendar-slot", {slotId: event.id})
       .success(function() {
         hub.send("indicator", {style: "positive", message: "calendar.deleted"});
-        doFetchCalendarSlots();
+        doFetchCalendarWeek({calendarId: event.calendarId, weekObservable: event.weekObservable});
       })
       .error(function (e) {
         hub.send("indicator", {style: "negative", message: e.text});

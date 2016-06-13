@@ -20,10 +20,14 @@
       <tr>
         <td colspan="6" style="height: 0px">
           <div style="position: relative;">
-            <div data-bind="component: { name: 'reservation-slot-create-bubble' }"></div>
+            <reservation-slot-create-bubble params="calendarId: $component.calendarId,
+                                                    weekdays: $component.calendarWeekdays,
+                                                    reservationTypes: $component.reservationTypes"></reservation-slot-create-bubble>
           </div>
           <div style="position: relative;">
-            <div data-bind="component: { name: 'reservation-slot-edit-bubble' }"></div>
+            <reservation-slot-edit-bubble params="calendarId: $component.calendarId,
+                                                  weekdays: $component.calendarWeekdays,
+                                                  reservationTypes: $component.reservationTypes"></reservation-slot-edit-bubble>
           </div>
         </td>
       </tr>

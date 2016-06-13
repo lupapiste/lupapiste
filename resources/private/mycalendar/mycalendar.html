@@ -18,15 +18,16 @@
         <!-- ko foreach: calendars -->
         <span data-bind="component: {name: 'radio-field',
                                      params: {value: id,
-                                              selectedValue: $parent.selectedCalendar,
-                                              name: 'selectedCalendar',
+                                              selectedValue: $parent.selectedCalendarId,
+                                              name: 'selectedCalendarId',
                                               label: organization}}"></span>
         <!-- /ko -->
       </div>
     <!-- /ko -->
 
-    <div data-bind="component: { name: 'calendar-view' },
-                    visible: selectedCalendar() !== undefined"></div>
+    <calendar-view params="calendarId: selectedCalendarId, userId: lupapisteApp.models.currentUser.id,
+                           reservationTypes: reservationTypes"
+                   visible="selectedCalendar() !== undefined"></calendar-view>
 
     <!-- ko if: noCalendarsFound -->
       <div class="context-error" data-test-id="mycalendar-no-active-calendar-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
