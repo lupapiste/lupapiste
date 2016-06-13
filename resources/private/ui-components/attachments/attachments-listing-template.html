@@ -20,23 +20,23 @@
   </div>
 
   <div class="attachment-operations">
-    <button class="function">
+    <button class="ghost">
       <i class="lupicon-circle-stamp"></i>
       <span data-bind="ltext: 'application.stampAttachments'"></span>
     </button>
-    <button class="function">
+    <button class="ghost">
       <i class="lupicon-circle-pen"></i>
       <span data-bind="ltext: 'signAttachment.select'"></span>
     </button>
-    <button class="function">
+    <button class="ghost">
       <i class="lupicon-circle-arrow-up"></i>
       <span data-bind="ltext: 'task.send'"></span>
     </button>
-    <button class="function">
+    <button class="ghost">
       <i class="lupicon-circle-section-sign"></i>
       <span data-bind="ltext: 'application.markVerdictAttachments'"></span>
     </button>
-    <button class="function">
+    <button class="ghost">
       <i class="lupicon-envelope"></i>
       <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
     </button>
@@ -51,7 +51,7 @@
     <!-- ko if: groups[0].data().hasContent && groups[0].data().hasContent() -->
     <h2 data-bind="ltext: 'application.attachments.pre-verdict'"
         class="help-adjacent-title" />
-    <button class="function right"
+    <button class="ghost right"
             data-bind="click: togglePreVerdictGroups">
       <i class="lupicon-menu"></i>
       <span data-bind="text: 'Avaa / sulje kaikki'"></span>
@@ -66,7 +66,7 @@
     <!-- ko if: groups[1].data().hasContent && groups[1].data().hasContent() -->
     <h2 data-bind="ltext: 'application.attachments.post-verdict'"
         class="help-adjacent-title"/>
-    <button class="function right"
+    <button class="ghost right"
             data-bind="click: togglePostVerdictGroups">
       <i class="lupicon-menu"></i>
       <span data-bind="text: 'Avaa / sulje kaikki'"></span>

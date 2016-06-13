@@ -15,7 +15,8 @@
       </thead>
       <tbody data-bind="foreach: attachments">
         <tr>
-          <td data-bind="foreach: $parent.stateIcons( $data )">
+          <td data-bind="foreach: $parent.stateIcons( $data )"
+              class="attachments-table__state-icons">
             <i data-bind="attr: {'class': $data}"></i>
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
@@ -55,14 +56,14 @@
           <!-- /ko -->
           <td>
             <button class="positive"
-                    data-bind="disable: $parent.isApproved( $data ) || $parent.isNotNeeded( $data ),
+                    data-bind="disable: $parent.isApproved( $data ) || !$parent.canVouch( $data ),
                                click: $parent.approve">
               <i class="lupicon-check"></i>
             </button>
           </td>
           <td>
             <button class="negative"
-                    data-bind="disable: $parent.isRejected( $data ) || $parent.isNotNeeded( $data ),
+                    data-bind="disable: $parent.isRejected( $data ) || !$parent.canVouch( $data ),
                                click: $parent.reject">
               <i class="lupicon-circle-attention"></i>
             </button>

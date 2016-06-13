@@ -1,22 +1,33 @@
 LUPAPISTE.AttachmentsTableModel = function( params ) {
   "use strict";
-  function stateIcons( data ) {
-    return params.isNotNeeded( data )
-      ? []
-      : _( [[params.isApproved, "lupicon-circle-check positive"],
-            [params.isRejected, "lupicon-circle-attention negative"],
-            [_.partialRight( _.get, "signed.0"), "lupicon-circle-pen positive"]])
-      .map( function( xs ) {
-        return _.first( xs )( data ) ? _.last( xs ) : false;
-      })
-      .filter()
-      .value();
-
-  }
 
   function hasFile(data) {
     return _.get(ko.utils.unwrapObservable(data), "latestVersion.fileId");
   }
+
+  function canVouch( $data ) {
+    var data = ko.utils.unwrapObservable( $data );
+    return hasFile( data ) || params.isNotNeeded( data );
+  }
+
+  function stateIcons( $data ) {
+    var data = ko.utils.unwrapObservable( $data );
+    var notNeeded = params.isNotNeeded( data );
+    var file = hasFile( data );
+    var approved = params.isApproved( data ) && canVouch( data );
+    var rejected = params.isRejected( data ) && canVouch( data );
+
+    return  _( [[approved, "lupicon-circle-check positive"],
+                [rejected || (!file && !notNeeded),
+                 "lupicon-circle-attention negative"],
+                [ _.get( data, "signed.0"), "lupicon-circle-pen positive"]])
+      .map( function( xs ) {
+        return _.first( xs ) ? _.last( xs ) : false;
+      })
+      .filter()
+      .value();
+  }
+
 
   var idPrefix = _.uniqueId("at-input-");
 
@@ -39,6 +50,7 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
     isNotNeeded: params.isNotNeeded,
     toggleNotNeeded: function( data  ) {
       params.setNotNeeded( data.id, !data.notNeeded);
-    }
+    },
+    canVouch: canVouch
   };
 };

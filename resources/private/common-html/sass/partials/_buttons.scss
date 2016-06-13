@@ -273,28 +273,32 @@ i.btn-small {
   @include styled-input( $bg: $blue-active, $hover-bg: $blue-hover, $active-bg: $blue-link );
 }
 
-@mixin function ($text, $hover-text, $active-text ) {
+@mixin function ($text, $hover-text, $active-text,
+                 $border-color: $gray221, $border-hover: $gray187, $border-active: $gray187 ) {
   @include styled-input($bg: white, $hover-bg: white, $active-bg: white,
                         $text: $text, $hover-text: $hover-text, $active-text: $active-text,
                         $disabled-text: $gray187, $disabled-bg: $gray246);
   border: {
     style: solid;
     width: 1px;
-    color: $gray221;
+    color: $border-color;
   }
   &:link, &:visited {
-    border-color: $gray221;
+    border-color: $border-color;
   }
-  &:hover, &:active {
-    border-color: $gray187;
+  &:hover {
+    border-color: $border-hover;
+           }
+  &:active {
+    border-color: $border-active;
   }
 }
 
 @include button-div-a-i-span (function) {
-  @include function( $orange-link, $orange-hover, $gray51 );
+  @include function( $orange-link, $orange-hover, $orange-active );
 }
 
-.function.disabled {
+.function.disabled, .function:disabled, .function.waiting {
   @include disabled( $gray187, $gray246 );
   &:hover, &:active, &:disabled {
                        border-color: $gray221 !important;
@@ -302,10 +306,10 @@ i.btn-small {
  }
 
 button.function {
-  &:disabled {
+  &:disabled, &:disabled:hover {
     border-color: $gray221 !important;
   }
- }
+}
 
 @include button-div-a-i-span ("function.authority") {
   @include function( $turqo-link, $turqo-hover, $gray51 );
@@ -315,6 +319,27 @@ button.function {
 @include button-div-a-i-span ("function.julkipano") {
   @include function( $blue-link, $blue-hover, $gray51 );
 }
+
+@include button-div-a-i-span( ghost ) {
+  @include function($orange-dark, $orange-hover, $orange-active,
+                    $orange-dark, $orange-hover, $orange-active );
+  
+}
+
+.ghost:disabled, ghost.disabled, .ghost.waiting {
+  @include disabled( $gray187, $gray246 );
+  border-color: $gray221 !important;
+  &:hover, &:active, &:disabled {
+                       border-color: $gray221 !important;
+                     }
+ }
+
+button.ghost {
+  &:disabled, &:disabled:hover {
+    border-color: $gray221 !important;
+  }
+ }
+
 
 // Link button is a link that is laid out as button.
 // However, no background or borders.
