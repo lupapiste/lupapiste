@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1465733737351');
+@import url('main-blessed1.css?z=1465824434435');
 
 /* line 11, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-header div {
@@ -4233,8 +4233,8 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
  */
 /* line 184, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar {
-  right: 0;
-  top: 0;
+  left: 0;
+  top: 80px;
 }
 
 /* layouts */
@@ -4243,56 +4243,57 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   line-height: 37px;
   border-top-width: 0;
   cursor: pointer;
+  width: 42px;
 }
 
 /* individual controls */
-/* line 197, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 198, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlNavigationItemInactive {
   border-top-width: 1px;
 }
-/* line 198, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 199, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlNavigationItemInactive:before {
   content: "\e642";
 }
 
-/* line 201, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 202, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlNavigationItemActive {
   border-top-width: 1px;
   color: #000;
 }
-/* line 202, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 203, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlNavigationItemActive:before {
   content: "\e642";
 }
 
-/* line 206, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 207, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemInactive:before {
   content: "\e904";
 }
 
-/* line 209, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 210, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlDrawFeaturePointItemActive:before {
   content: "\e904";
   color: #000;
 }
 
-/* line 213, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 214, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemInactive:before {
   content: "\e63f";
 }
 
-/* line 216, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 217, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlDrawFeaturePolygonItemActive:before {
   content: "\e63f";
   color: #000;
 }
 
-/* line 220, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 221, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlDrawFeatureCircleItemInactive:before {
   content: "\e903";
 }
 
-/* line 223, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 224, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olControlLupapisteEditingToolbar .olControlDrawFeatureCircleItemActive:before {
   content: "\e903";
   color: #000;
@@ -4301,7 +4302,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 /**
  * Animations
  */
-/* line 232, ../../../private/common-html/sass/views/_openlayers2.scss */
+/* line 233, ../../../private/common-html/sass/views/_openlayers2.scss */
 .olLayerGrid .olTileImage {
   -webkit-transition: opacity 0.2s linear;
   -moz-transition: opacity 0.2s linear;

@@ -182,8 +182,8 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
  * (using the editing_tool_bar.png sprint image)
  */
 .olControlLupapisteEditingToolbar {
-    right: 0;
-    top: 0;
+    left: 0;
+    top: 82px;
 }
 
 /* layouts */
@@ -191,6 +191,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
     line-height: 37px;
     border-top-width: 0;
     cursor: pointer;
+    width: 42px;
 
 }
 /* individual controls */
