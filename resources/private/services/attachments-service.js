@@ -5,6 +5,7 @@
 LUPAPISTE.AttachmentsService = function() {
   "use strict";
   var self = this;
+  ko.options.deferUpdates = true;
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
   self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
@@ -7597,7 +7598,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Return attachment ids grouped first by type-groups and then by type ids.
   self.getAttachmentsHierarchy = function() {
-    var attachments = _.map(self.attachments(), function (a) { return a(); });
+    var attachments = _.map(self.attachments(), function (a) { return a.peek(); });
     return _(applyFilters(attachments))
       .groupBy(getVerdictGroup)
       .mapValues(function(attachmentsOfVerdictGroup) {
@@ -7735,7 +7736,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.verdicts = ko.pureComputed(function() {
     return  _.mapValues(hierarchyToGroups(self.attachmentsHierarchy()),
-                               groupToModel);
+                        groupToModel);
   });
 
   function getDataForGroup() {
@@ -7813,4 +7814,5 @@ LUPAPISTE.AttachmentsService = function() {
   self.togglePostVerdictAccordions = function() {
     toggleAccordions(1);
   };
+  ko.options.deferUpdates = false;
 };
