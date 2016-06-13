@@ -7437,7 +7437,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return attachment && (attachment.notNeeded || attachment.state === self.APPROVED);
+    return attachment && attachment.state === self.APPROVED;
   };
   self.isRejected = function(attachment) {
     return attachment && attachment.state === self.REJECTED;
@@ -7586,14 +7586,12 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   function applyFilters(attachments) {
-    var atts = filters["ei-tarpeen"]() ?
-          attachments : _.filter(attachments, _.negate(self.isNotNeeded));
     if (showAll()) {
-      return atts;
+      return attachments;
     }
     return _.concat(
-      preVerdictAttachments(_.filter(atts, isPreVerdict)),
-      postVerdictAttachments(_.filter(atts, isPostVerdict))
+      preVerdictAttachments(_.filter(attachments, isPreVerdict)),
+      postVerdictAttachments(_.filter(attachments, isPostVerdict))
     );
   }
 
@@ -7636,7 +7634,17 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
+  function notNeededForModel(attachment) {
+    return attachment.notNeeded;
+  }
+
   self.modelForAttachmentInfo = function(attachmentIds) {
+    var visibleAttachments = _(attachmentIds)
+          .map(idToAttachment)
+          .filter(function(attachment) {
+            return filters["ei-tarpeen"]() ||
+              !self.isNotNeeded(ko.utils.unwrapObservable(attachment));
+          }).value();
     return {
       approve:      self.approveAttachment,
       reject:       self.rejectAttachment,
@@ -7644,22 +7652,21 @@ LUPAPISTE.AttachmentsService = function() {
       setNotNeeded: self.setNotNeeded,
       isApproved:   self.isApproved,
       isRejected:   self.isRejected,
-      isNotNeeded:  function(attachment) {
-        return attachment.notNeeded;
-      },
-      attachments:  _.map(attachmentIds, idToAttachment)
+      isNotNeeded:  notNeededForModel,
+      attachments:  visibleAttachments
     };
   };
 
   function modelForSubAccordion(subGroup) {
+    var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
       ltitle: subGroup.name, // TODO
-      attachmentInfos: self.modelForAttachmentInfo(subGroup.attachmentIds),
+      attachmentInfos: attachmentInfos,
       status: ko.pureComputed(self.attachmentsStatus(subGroup.attachmentIds)),
       hasContent: ko.pureComputed(function() {
-        return subGroup.attachmentIds &&
-          subGroup.attachmentIds.length > 0;
+        return attachmentInfos && attachmentInfos.attachments &&
+          attachmentInfos.attachments.length > 0;
       })
     };
   }
