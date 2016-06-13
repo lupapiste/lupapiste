@@ -1,5 +1,1218 @@
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1465824434435');
+=======
+@import url('main-blessed1.css?z=1465824984082');
+>>>>>>> Style tweaks and state logic.
 
+
+/* Customize your modal window here, you can add background image too */
+/* line 131, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-header {
+  padding: 2px 24px;
+  border-bottom: 1px solid;
+}
+/* line 134, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-header p {
+  margin: 0px;
+  font-size: 20px;
+  display: inline;
+}
+/* line 139, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-header .dialog-close {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  cursor: pointer;
+}
+
+/* line 147, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content {
+  /* somewhat less than .autosized - .dialog-header */
+  min-height: 96px;
+  position: relative;
+  margin: 12px 0;
+  padding-bottom: 64px;
+  /* [type=submit], .btn, button { */
+  /*   //padding: 4px $marginL; */
+  /*   min-width: $cols2; */
+  /*   max-width: $cols3; */
+  /* } */
+}
+/* line 154, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content .dialog-desc {
+  width: 300px;
+}
+/* line 158, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content .dialog-desc-wide {
+  width: 450px;
+}
+/* line 169, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content .file-upload {
+  margin: 12px 0;
+}
+/* line 173, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content .dialog-user-content {
+  padding: 12px 0;
+}
+
+/* line 179, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content p {
+  margin-bottom: 0;
+}
+/* line 183, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content div.finished {
+  background: #fff;
+  display: block;
+  text-align: left;
+  z-index: 5000;
+}
+/* line 190, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content div.pending {
+  background: #fff;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  z-index: 5000;
+}
+/* line 200, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content div.pending div.ajax {
+  background: url(/lp-static/img/ajax-loader.gif) no-repeat center center;
+  margin: auto;
+  height: 160px;
+}
+
+/* line 208, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content__footer {
+  margin-top: 24px;
+}
+
+/* line 212, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content.dialog-content--no-padding {
+  padding-bottom: 0;
+}
+
+/* line 216, ../../../private/common-html/sass/partials/_modal.scss */
+.scrolling-content {
+  overflow-y: scroll;
+  max-height: 288px;
+}
+
+/* line 221, ../../../private/common-html/sass/partials/_modal.scss */
+.dialog-content-low {
+  min-height: 72px;
+  padding-bottom: 0;
+}
+
+/* line 227, ../../../private/common-html/sass/partials/_modal.scss */
+.with-map {
+  /* .map-container { */
+  /*   //padding: 0; */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 480px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+  /* form { */
+  /*   /\* float: left; *\/ */
+  /*   /\* width: 200px; *\/ */
+  /*   display: inline-block; */
+  /* } */
+  /* .btn-primary { */
+  /*   left: auto; right: 260px; */
+  /*   bottom: 5px; */
+  /* } */
+  /* a.btn-dialog { */
+  /*   right:-70px; */
+  /*   bottom: 10px; */
+  /*   width: 100px; */
+  /* } */
+}
+
+/* .with-map > div { */
+/*   display: table-cell; */
+/*   vertical-align: top; */
+/*   padding-left: $marginM; */
+/* } */
+/* line 261, ../../../private/common-html/sass/partials/_modal.scss */
+.neighbors-message {
+  margin: 12px;
+}
+
+/* line 266, ../../../private/common-html/sass/partials/_modal.scss */
+#dialog-add-link-permit .combobox {
+  margin-bottom: 8px;
+}
+
+/* line 272, ../../../private/common-html/sass/partials/_modal.scss */
+#upload-dialog .dialog-content {
+  padding-bottom: 0;
+}
+
+/* line 278, ../../../private/common-html/sass/partials/_modal.scss */
+#dialog-cancel-application div.application-cancel-text-content p {
+  margin-bottom: 0;
+}
+
+/* line 284, ../../../private/common-html/sass/partials/_modal.scss */
+.authority-select-dialog select {
+  width: 100%;
+}
+
+/* line 290, ../../../private/common-html/sass/partials/_modal.scss */
+.company-invite-dialog select {
+  width: 100%;
+}
+
+/* line 296, ../../../private/common-html/sass/partials/_modal.scss */
+.with-map-top {
+  margin-top: 6px;
+  margin-bottom: 0;
+  margin-left: 6px;
+  margin-right: 6px;
+}
+
+/*
+  Bootstrap sets img width to 100% and that messes GoogleMaps and OpenLayers.
+*/
+/* line 5, ../../../private/common-html/sass/partials/_map.scss */
+.map {
+  margin-bottom: 12px;
+}
+/* line 7, ../../../private/common-html/sass/partials/_map.scss */
+.map img {
+  max-width: none;
+}
+
+/* line 12, ../../../private/common-html/sass/partials/_map.scss */
+.map-large {
+  width: 100%;
+  height: 384px;
+}
+
+/* line 17, ../../../private/common-html/sass/partials/_map.scss */
+.create-application-actions {
+  position: absolute;
+  bottom: 0px;
+  right: 6px;
+  z-index: 12000;
+}
+
+/* line 24, ../../../private/common-html/sass/partials/_map.scss */
+.related-map {
+  margin: 0 0 0 12px;
+}
+
+/* line 28, ../../../private/common-html/sass/partials/_map.scss */
+.organization-areas-map {
+  margin-bottom: 6px;
+}
+
+/* line 32, ../../../private/common-html/sass/partials/_map.scss */
+.map-component {
+  height: 400px;
+}
+
+/* line 37, ../../../private/common-html/sass/partials/_map.scss */
+.ol-popup .ol-popup-closer {
+  color: #595959;
+  font-size: 12px;
+  font-weight: bold;
+  top: 6px;
+}
+/* line 42, ../../../private/common-html/sass/partials/_map.scss */
+.ol-popup .ol-popup-closer:after {
+  content: " ";
+}
+
+/* line 1, ../../../private/common-html/sass/partials/_errors.scss */
+.context-error {
+  color: red;
+  border: 1px solid red;
+  border-radius: 3px;
+  padding: 6px;
+  margin: 12px 0;
+}
+
+/* line 9, ../../../private/common-html/sass/partials/_errors.scss */
+.error-message {
+  display: block;
+  margin-left: 5px;
+  font-style: italic;
+  color: red;
+}
+
+/* line 50, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog {
+  padding: 20px 20px 20px 20px;
+  margin-bottom: 20px;
+  position: relative;
+  background: white;
+  border: 1px solid #dddddd;
+}
+/* line 61, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog .autocomplete-component {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+/* line 68, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog .left-buttons {
+  margin-top: 20px;
+}
+/* line 72, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog label.mandatory:after {
+  content: " *";
+  color: #df3215;
+}
+/* line 76, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog input[type=text], .bubble-dialog textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 4px;
+  display: block;
+}
+/* line 81, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog input[type=text]:focus, .bubble-dialog textarea:focus {
+  border-color: #fbc732;
+}
+/* line 86, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog textarea {
+  min-height: 8em;
+}
+/* line 90, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog input.mandatory {
+  border-color: #f39129;
+  margin-bottom: 20px;
+}
+/* line 95, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog .error {
+  margin-top: 20px;
+  border: 1px solid red;
+  color: red;
+  padding: 20px;
+}
+/* line 103, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table tr {
+  background-color: initial;
+}
+/* line 105, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table tr td {
+  background-color: none;
+}
+/* line 108, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table tr td.full {
+  width: 33%;
+}
+/* line 115, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog table.mandatory td {
+  border: 1px solid #f39129;
+}
+
+/* line 9, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog-arrow {
+  position: relative;
+  z-index: 100;
+}
+
+/* line 14, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog-arrow:after,
+.bubble-dialog-arrow:before {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+  overflow-y: visible;
+}
+
+/* line 28, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog-arrow:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: white;
+  border-width: 19px;
+  margin-left: -19px;
+}
+
+/* line 34, ../../../private/common-html/sass/partials/_bubble.scss */
+.bubble-dialog-arrow:before {
+  border-color: rgba(221, 221, 221, 0);
+  border-bottom-color: #dddddd;
+  border-width: 20px;
+  margin-left: -20px;
+}
+
+/* line 42, ../../../private/common-html/sass/partials/_bubble.scss */
+.stacked .bubble-dialog-arrow,
+.stacked--inline .bubble-dialog-arrow {
+  overflow-y: visible;
+  margin-top: 25px;
+  margin-bottom: -1px;
+}
+
+/* line 9, ../../../private/common-html/sass/partials/_bubble.scss */
+.help-arrow {
+  position: relative;
+  z-index: 100;
+}
+
+/* line 14, ../../../private/common-html/sass/partials/_bubble.scss */
+.help-arrow:after,
+.help-arrow:before {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+  overflow-y: visible;
+}
+
+/* line 28, ../../../private/common-html/sass/partials/_bubble.scss */
+.help-arrow:after {
+  border-color: rgba(246, 246, 246, 0);
+  border-bottom-color: #f6f6f6;
+  border-width: 14px;
+  margin-left: -14px;
+}
+
+/* line 34, ../../../private/common-html/sass/partials/_bubble.scss */
+.help-arrow:before {
+  border-color: rgba(247, 172, 46, 0);
+  border-bottom-color: #f7ac2e;
+  border-width: 15px;
+  margin-left: -15px;
+}
+
+/* line 42, ../../../private/common-html/sass/partials/_bubble.scss */
+.stacked .help-arrow,
+.stacked--inline .help-arrow {
+  overflow-y: visible;
+  margin-top: 20px;
+  margin-bottom: -1px;
+}
+
+/* line 4, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle {
+  margin-left: 12px;
+  display: inline-block;
+  color: #f39129;
+  text-align: center;
+}
+/* line 11, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle .lupicon-circle-question {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+/* line 18, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle .lupicon-circle-question.expanded {
+  color: #f7ac2e;
+}
+
+/* line 23, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle.tight {
+  margin-left: 0;
+}
+/* line 25, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle.tight button.function {
+  border: none;
+  padding: 0 0 0 0;
+}
+/* line 29, ../../../private/common-html/sass/partials/_help.scss */
+.help-toggle.tight button.function:active span, .help-toggle.tight button.function:hover span {
+  text-decoration: underline;
+}
+
+/* line 36, ../../../private/common-html/sass/partials/_help.scss */
+.stacked.help-toggle,
+.stacked.help-toggle div {
+  overflow-y: visible;
+}
+
+/* line 44, ../../../private/common-html/sass/partials/_help.scss */
+.help-text {
+  display: none;
+  position: relative;
+  background: #f6f6f6;
+  color: #333333;
+  padding: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #f7ac2e;
+}
+/* line 53, ../../../private/common-html/sass/partials/_help.scss */
+.help-text p:last-child {
+  margin-bottom: 0;
+}
+
+/* line 59, ../../../private/common-html/sass/partials/_help.scss */
+.tab-info {
+  width: 80%;
+}
+
+/* line 66, ../../../private/common-html/sass/partials/_help.scss */
+.help-reset {
+  clear: both;
+  max-height: 6px;
+}
+
+/* line 71, ../../../private/common-html/sass/partials/_help.scss */
+.panel-info {
+  width: 100%;
+  text-align: justify;
+}
+
+/* line 76, ../../../private/common-html/sass/partials/_help.scss */
+.expanded-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 400ms;
+  -webkit-transition: max-height 400ms;
+  /* Safari */
+}
+/* line 81, ../../../private/common-html/sass/partials/_help.scss */
+.expanded-content.expand {
+  max-height: 1000px;
+}
+
+/* line 86, ../../../private/common-html/sass/partials/_help.scss */
+.page-info {
+  margin: 12px 0;
+}
+
+/* line 91, ../../../private/common-html/sass/partials/_help.scss */
+.help-adjacent-title {
+  margin-top: 0 !important;
+  line-height: normal;
+  display: inline-block;
+}
+
+/* line 1, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete {
+  background: #fff;
+  border: 1px solid #dddddd;
+}
+/* line 4, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete div {
+  line-height: 36px;
+  border-bottom: 1px solid #dddddd;
+  cursor: pointer;
+  padding-left: 6px;
+}
+/* line 9, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete div:hover {
+  background-color: #e9e9e9;
+}
+
+/* line 16, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component {
+  width: 100%;
+  position: relative;
+}
+/* line 19, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper {
+  position: relative;
+  width: inherit;
+  min-height: 40px;
+  border: 1px solid #bbbbbb;
+  min-height: 40px;
+  background-color: #fff;
+}
+/* line 20, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper.active {
+  border-color: #f7ac2e;
+}
+/* line 23, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper.disabled {
+  border-color: #dddddd;
+  background-color: #f6f6f6;
+}
+/* line 26, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper.disabled i.tag-chevron {
+  color: #bbbbbb;
+}
+/* line 29, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper.disabled li.tag {
+  color: #bbbbbb !important;
+  cursor: default !important;
+}
+/* line 32, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper.disabled li.tag i.tag-remove {
+  cursor: default !important;
+}
+/* line 43, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  box-sizing: border-box;
+}
+/* line 48, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags {
+  list-style: none;
+  padding: 0;
+}
+/* line 51, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: -7px;
+  margin-right: -4px;
+}
+/* line 56, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag {
+  cursor: pointer;
+  position: relative;
+  background-color: #fff;
+  border: 1px solid #bbbbbb;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: #f39129;
+}
+/* line 65, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag span.tag-label {
+  line-height: 36px;
+  vertical-align: top;
+  margin-right: 6px;
+}
+/* line 70, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag .tag-remove {
+  line-height: 36px;
+  margin: 0 6px;
+}
+/* line 79, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.caption, .autocomplete-component .autocomplete-selection-wrapper span.selection-text {
+  cursor: default;
+  line-height: 38px;
+  padding-left: 6px;
+}
+/* line 84, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  cursor: pointer;
+  color: #f39129;
+  margin: 0;
+}
+/* line 91, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
+  color: #fbc732;
+}
+/* line 97, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown {
+  width: inherit;
+  position: absolute;
+  z-index: 1;
+}
+/* line 101, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown input.autocomplete-input {
+  width: 100%;
+  height: 40px;
+  margin-top: -1px;
+  display: block;
+  box-sizing: border-box;
+}
+/* line 108, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
+  position: absolute;
+  top: 38px;
+  z-index: 1000;
+  width: inherit;
+  max-height: 800px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: auto;
+  padding: 0;
+  border: 1px solid #fbc732;
+  box-sizing: border-box;
+  background-color: #fff;
+  color: black;
+}
+/* line 124, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result.autocomplete-result-grouped li.autocomplete-result-item {
+  padding: 0 12px;
+}
+/* line 129, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li {
+  height: 40px;
+  line-height: 40px;
+}
+/* line 134, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
+  cursor: default;
+  display: list-item;
+  list-style-type: none;
+  padding: 0 6px;
+}
+/* line 140, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
+  cursor: pointer;
+  position: relative;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding-right: 6px;
+}
+/* line 147, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
+  background-color: #f7ac2e;
+  color: #fff;
+}
+/* line 150, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
+  background-color: #fbc732;
+}
+/* line 154, ../../../private/common-html/sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
+  font-weight: 700;
+  padding-left: 6px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* line 4, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree {
+  display: inline-block;
+  margin-left: 24px;
+  width: 800px;
+  overflow: hidden;
+}
+/* line 9, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-title {
+  color: white;
+  background: #4f4f4f;
+  padding: 5px 0px 3px 10px;
+}
+/* line 17, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-content {
+  width: 80000px;
+}
+/* line 20, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-link {
+  margin: 0;
+  width: 800px;
+  float: left;
+  width: 800px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  transition-property: font-size;
+  transition-duration: 200ms;
+}
+/* line 28, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-link span {
+  width: 100%;
+}
+/* line 32, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-link.btn, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next {
+  overflow-y: hidden;
+  max-height: none;
+  min-height: none;
+  line-height: initial;
+  vertical-align: middle;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+/* line 38, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-link.btn span, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous span, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous span, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next span, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next span, .operation-tree .tree-link.btn i, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous i, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous i, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next i, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next i {
+  vertical-align: middle;
+  white-space: initial;
+}
+/* line 48, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-nav .tree-back {
+  min-width: 5.625em;
+  display: inline-block;
+  margin: 24px 24px 0 30px;
+  height: 30px;
+}
+/* line 54, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-nav .tree-start {
+  min-width: 5.625em;
+  display: inline-block;
+  margin: 24px 24px 0 30px;
+  height: 30px;
+}
+/* line 61, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-page {
+  position: relative;
+  float: left;
+}
+/* line 65, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-last {
+  width: 90%;
+  padding: 24px 24px;
+  width: 800px;
+  float: left;
+  text-align: left;
+}
+/* line 71, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-last ul li {
+  list-style-type: circle;
+}
+/* line 73, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-last ul li a {
+  color: #f39129;
+  text-decoration: none;
+}
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.operation-tree .tree-last ul li a:link, .operation-tree .tree-last ul li a:visited {
+  color: #f39129;
+}
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.operation-tree .tree-last ul li a:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.operation-tree .tree-last ul li a:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
+/* line 77, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-last div {
+  width: 90%;
+  margin-top: 6px;
+}
+/* line 81, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-last button {
+  margin-top: 24px;
+  width: 18em;
+}
+/* line 85, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-last .operation-description {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+/* line 88, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-last .operation-description p {
+  margin: 12px 0;
+}
+/* line 92, ../../../private/common-html/sass/partials/_tree.scss */
+.operation-tree .tree-last .organization-links li {
+  list-style-type: none;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_tree.scss */
+.tree-width {
+  width: 800px;
+  height: 120px;
+}
+
+/* line 103, ../../../private/common-html/sass/partials/_tree.scss */
+ul.attachments-list {
+  list-style-type: circle;
+}
+/* line 105, ../../../private/common-html/sass/partials/_tree.scss */
+ul.attachments-list li.mandatory-attachments {
+  list-style-type: circle;
+}
+
+/* No list-style for links in organization-links in .tree-last */
+/* line 112, ../../../private/common-html/sass/partials/_tree.scss */
+.organization-links li {
+  list-style-type: none;
+}
+
+/* No list-style for links in loctext in .tree-last */
+/* line 118, ../../../private/common-html/sass/partials/_tree.scss */
+ul.no-bullets {
+  list-style-type: none;
+}
+
+/* line 1, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion {
+  width: 100%;
+  position: relative;
+  z-index: 5;
+  height: auto;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+/* line 9, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky {
+  width: 100%;
+  overflow-y: hidden;
+}
+/* line 12, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky span.bar-text {
+  width: 100%;
+  text-transform: uppercase;
+}
+/* line 16, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky span.description {
+  padding-right: 10px;
+  text-transform: none;
+}
+/* line 20, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky span.icons {
+  min-width: 22px;
+}
+/* line 22, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky span.icons .approved, .accordion div.sticky span.icons .rejected {
+  display: none;
+}
+/* line 25, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky span.icons .rejected {
+  padding-right: 0;
+}
+/* line 32, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky .identifier-component .form-indicator {
+  right: -100px;
+}
+/* line 38, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion-toggle > button, .accordion button.accordion-toggle {
+  width: 100%;
+  margin-bottom: 0 !important;
+}
+/* line 40, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion-toggle > button span.bar-text, .accordion button.accordion-toggle span.bar-text {
+  width: 100%;
+  text-transform: uppercase;
+}
+/* line 48, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky button.positive > span.icons > .approved {
+  display: table-cell;
+}
+/* line 52, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.sticky button.rejected > span.icons > .rejected {
+  display: table-cell;
+}
+/* line 58, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion_content {
+  display: none;
+  padding-top: 6px;
+  position: relative;
+  border: 1px solid #dddddd;
+  border-top: none;
+}
+/* line 67, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion_content .accordion-content-part {
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-bottom: 12px;
+}
+/* line 72, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion_content .accordion-fields {
+  width: 100%;
+}
+/* line 75, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion_content .accordion-fields h2 {
+  color: black;
+}
+/* line 79, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion_content .accordion-fields .authority-accept-fields h2 {
+  background: #f6f6f6;
+}
+/* line 83, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion_content .accordion-fields h3 {
+  margin-top: 12px;
+}
+/* line 86, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion_content .accordion-fields .form-group {
+  margin-top: 6px;
+}
+/* line 92, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion .accordion_content.expanded {
+  display: block;
+}
+
+/* line 97, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion-fields > .button-group:last-child {
+  border-bottom: none;
+}
+
+/* line 101, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion-indicator {
+  z-index: 12000;
+  width: 112px;
+  min-height: 18px;
+  display: none;
+  padding: 0 24px 0 0;
+  margin-left: 12px;
+}
+/* line 109, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion-indicator .icon {
+  display: none;
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
+  background-repeat: no-repeat;
+}
+/* line 114, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion-indicator.accordion-input-saved .icon {
+  display: inline-block;
+  background-position: 4px -2499px;
+  border-right: none;
+}
+/* line 121, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion-indicator.accordion-input-warn .icon {
+  display: inline-block;
+  background-position: 4px -3199px;
+  border-right: none;
+}
+/* line 128, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion-indicator.accordion-input-err .icon {
+  display: inline-block;
+  background-position: 4px -2399px;
+  border-right: none;
+}
+
+/* line 1, ../../../private/common-html/sass/partials/_datepicker.scss */
+#ui-datepicker-div {
+  background: #f6f6f6;
+  border: 1px solid #dddddd;
+  padding: 6px;
+  box-shadow: 2px 2px 3px #888888;
+  z-index: 100000 !important;
+}
+/* line 12, ../../../private/common-html/sass/partials/_datepicker.scss */
+#ui-datepicker-div .ui-datepicker-month {
+  font-size: 0.7em;
+  height: 28px;
+}
+/* line 16, ../../../private/common-html/sass/partials/_datepicker.scss */
+#ui-datepicker-div .ui-datepicker-year {
+  font-size: 0.7em;
+  height: 28px;
+}
+/* line 20, ../../../private/common-html/sass/partials/_datepicker.scss */
+#ui-datepicker-div .ui-datepicker-header {
+  height: 36px;
+}
+/* line 23, ../../../private/common-html/sass/partials/_datepicker.scss */
+#ui-datepicker-div .ui-datepicker-year, #ui-datepicker-div .ui-datepicker-month {
+  vertical-align: top;
+}
+/* line 26, ../../../private/common-html/sass/partials/_datepicker.scss */
+#ui-datepicker-div .ui-icon.ui-icon-circle-triangle-w {
+  position: relative;
+}
+/* line 29, ../../../private/common-html/sass/partials/_datepicker.scss */
+#ui-datepicker-div .ui-icon.ui-icon-circle-triangle-e {
+  position: relative;
+}
+
+/* line 12, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification {
+  color: white;
+  box-sizing: border-box;
+}
+/* line 16, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-info {
+  vertical-align: top;
+  float: left;
+}
+/* line 20, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-close {
+  vertical-align: top;
+  float: right;
+}
+/* line 23, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-close span {
+  margin-right: 12px;
+}
+/* line 27, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-list {
+  display: inline;
+  vertical-align: top;
+}
+/* line 30, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-list ul {
+  width: 80%;
+  list-style: none;
+  font-size: 1.2em;
+  padding-left: 0;
+  display: inline-block;
+}
+/* line 36, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-list ul li {
+  margin-left: 24px;
+  margin-right: 24px;
+}
+/* line 39, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-list ul li a {
+  color: white;
+}
+/* line 42, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-list ul li:last-child {
+  margin-bottom: 0px;
+  border-bottom: none;
+}
+
+/* line 51, ../../../private/common-html/sass/partials/_screenmessage.scss */
+.screenmessagebutton {
+  width: 170px;
+}
+
+/* selectm component styles*/
+/* line 5, ../../../private/common-html/sass/partials/_selectm.scss */
+.selectm-dialog .dialog-content {
+  width: 100%;
+  min-height: 350px;
+}
+
+/* line 11, ../../../private/common-html/sass/partials/_selectm.scss */
+.selectm {
+  margin: 0px;
+  padding: 0px;
+}
+/* line 15, ../../../private/common-html/sass/partials/_selectm.scss */
+.selectm label, .selectm input, .selectm select {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 6px;
+}
+/* line 21, ../../../private/common-html/sass/partials/_selectm.scss */
+.selectm .selectm-target, .selectm .selectm-source {
+  height: 100px;
+}
+/* line 24, ../../../private/common-html/sass/partials/_selectm.scss */
+.selectm input {
+  box-sizing: border-box;
+  margin: 0px;
+}
+/* line 29, ../../../private/common-html/sass/partials/_selectm.scss */
+.selectm .ok-cancel-row {
+  margin-top: 12px;
+}
+
+@media (min-height: 800px) {
+  /* line 35, ../../../private/common-html/sass/partials/_selectm.scss */
+  .selectm .selectm-target, .selectm .selectm-source {
+    height: auto;
+  }
+}
+/* line 1, ../../../private/common-html/sass/partials/_user_notification.scss */
+.user-notification {
+  color: white;
+  min-height: 50px;
+  background-color: #4f4f4f;
+  position: relative;
+  background: rgba(79, 79, 79, 0.9);
+  background: #4f4f4f \9;
+  /* IE 8 and below */
+  border: 1px solid #363636;
+  box-sizing: border-box;
+}
+/* line 11, ../../../private/common-html/sass/partials/_user_notification.scss */
+.user-notification .header {
+  padding: 2px 24px;
+}
+/* line 14, ../../../private/common-html/sass/partials/_user_notification.scss */
+.user-notification .header .title {
+  font-size: 20px;
+}
+/* line 18, ../../../private/common-html/sass/partials/_user_notification.scss */
+.user-notification .header .close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: 1.8em;
+  cursor: pointer;
+}
+/* line 24, ../../../private/common-html/sass/partials/_user_notification.scss */
+.user-notification .header .close:after {
+  content: "X";
+}
+/* line 29, ../../../private/common-html/sass/partials/_user_notification.scss */
+.user-notification p.message {
+  padding: 2px 24px;
+  color: white;
+  margin-bottom: 12px;
+}
+/* line 34, ../../../private/common-html/sass/partials/_user_notification.scss */
+.user-notification a {
+  color: white;
+}
+
+/* line 1, ../../../private/common-html/sass/partials/_tags_editor.scss */
+.tags-editor-component {
+  position: relative;
+}
+/* line 3, ../../../private/common-html/sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags {
+  list-style: none;
+  padding: 6px 0 0 0;
+  overflow: auto;
+}
+/* line 7, ../../../private/common-html/sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag {
+  position: relative;
+  background-color: #f39129;
+  font-size: 16px;
+  margin-right: 6px;
+  white-space: nowrap;
+  float: left;
+  margin-bottom: 6px;
+  line-height: 32px;
+}
+/* line 16, ../../../private/common-html/sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag span.tag-label, .tags-editor-component ul.tags li.tag input.tag-editor {
+  margin-left: 27px;
+  font-size: 16px;
+}
+/* line 20, ../../../private/common-html/sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag span.tag-label {
+  color: #fff;
+  margin-right: 36px;
+}
+/* line 24, ../../../private/common-html/sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag input.tag-editor {
+  color: black;
+  margin-right: 6px;
+  width: 300px;
+}
+/* line 29, ../../../private/common-html/sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag span.tag-remove {
+  cursor: pointer;
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+/* line 37, ../../../private/common-html/sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag span.tag-edit {
+  cursor: pointer;
+  position: absolute;
+  right: 6px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+/* line 1, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container {
+  margin-top: 15px;
+  width: 100%;
+}
+/* line 4, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor {
+  background-color: #f5f5f4;
+  font-size: 14px;
+}
+/* line 8, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header {
+  width: 100%;
+  display: table;
+  margin: 0 0 15px 0;
+  font-size: 20px;
+  color: white;
+  background-color: #4f4f4f;
+  padding: 15px;
+  min-height: 65px;
+}
 /* line 11, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-header div {
   vertical-align: middle;
@@ -2770,12 +3983,12 @@ td.comment-text {
   margin-top: 1em;
   margin-bottom: 2em;
 }
-/* line 563, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 588, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations .btn-base, .attachment-operations [type=submit], .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations .like-btn, .attachment-operations a.link-btn, .attachment-operations a.link-btn-julkipano, .attachment-operations .check-string, .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations div, .attachment-operations a {
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 569, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 594, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations :last-child {
   margin-right: 0;
 }
@@ -3903,13 +5116,13 @@ ul.appeals-files li span.appeals-files__size {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 460, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 485, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .check-string, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 465, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 490, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }

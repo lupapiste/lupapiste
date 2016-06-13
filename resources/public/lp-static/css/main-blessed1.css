@@ -4070,7 +4070,7 @@ button.function:hover {
 }
 /* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function:active, button.function.active {
-  color: #333333;
+  color: #fbc732;
   background-color: white;
 }
 /* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
@@ -4079,12 +4079,16 @@ button.function:disabled, button.function.disabled, button.function.waiting {
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function:link, button.function:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-button.function:hover, button.function:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+button.function:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+button.function:active {
   border-color: #bbbbbb;
 }
 
@@ -4109,7 +4113,7 @@ div.btn.function:hover, .dataTables_paginate div.function.paginate_disabled_prev
 }
 /* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function:active, .dataTables_paginate div.function.paginate_disabled_previous:active, .dataTables_paginate div.function.paginate_disabled_next:active, div.btn.function.active, .dataTables_paginate div.function.active.paginate_disabled_previous, .dataTables_paginate div.function.active.paginate_disabled_next {
-  color: #333333;
+  color: #fbc732;
   background-color: white;
 }
 /* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
@@ -4118,12 +4122,16 @@ div.btn.function:disabled, .dataTables_paginate div.function.paginate_disabled_p
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function:link, .dataTables_paginate div.function.paginate_disabled_previous:link, .dataTables_paginate div.function.paginate_disabled_next:link, div.btn.function:visited, .dataTables_paginate div.function.paginate_disabled_previous:visited, .dataTables_paginate div.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-div.btn.function:hover, .dataTables_paginate div.function.paginate_disabled_previous:hover, .dataTables_paginate div.function.paginate_disabled_next:hover, div.btn.function:active, .dataTables_paginate div.function.paginate_disabled_previous:active, .dataTables_paginate div.function.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.function:hover, .dataTables_paginate div.function.paginate_disabled_previous:hover, .dataTables_paginate div.function.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.function:active, .dataTables_paginate div.function.paginate_disabled_previous:active, .dataTables_paginate div.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4148,7 +4156,7 @@ a.btn.function:hover, .dataTables_paginate a.function.paginate_disabled_previous
 }
 /* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function:active, .dataTables_paginate a.function.paginate_disabled_previous:active, .dataTables_paginate a.function.paginate_disabled_next:active, a.btn.function.active, .dataTables_paginate a.function.active.paginate_disabled_previous, .dataTables_paginate a.function.active.paginate_disabled_next {
-  color: #333333;
+  color: #fbc732;
   background-color: white;
 }
 /* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
@@ -4157,12 +4165,16 @@ a.btn.function:disabled, .dataTables_paginate a.function.paginate_disabled_previ
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function:link, .dataTables_paginate a.function.paginate_disabled_previous:link, .dataTables_paginate a.function.paginate_disabled_next:link, a.btn.function:visited, .dataTables_paginate a.function.paginate_disabled_previous:visited, .dataTables_paginate a.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-a.btn.function:hover, .dataTables_paginate a.function.paginate_disabled_previous:hover, .dataTables_paginate a.function.paginate_disabled_next:hover, a.btn.function:active, .dataTables_paginate a.function.paginate_disabled_previous:active, .dataTables_paginate a.function.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.function:hover, .dataTables_paginate a.function.paginate_disabled_previous:hover, .dataTables_paginate a.function.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.function:active, .dataTables_paginate a.function.paginate_disabled_previous:active, .dataTables_paginate a.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4187,7 +4199,7 @@ i.btn.function:hover, .dataTables_paginate i.function.paginate_disabled_previous
 }
 /* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function:active, .dataTables_paginate i.function.paginate_disabled_previous:active, .dataTables_paginate i.function.paginate_disabled_next:active, i.btn.function.active, .dataTables_paginate i.function.active.paginate_disabled_previous, .dataTables_paginate i.function.active.paginate_disabled_next {
-  color: #333333;
+  color: #fbc732;
   background-color: white;
 }
 /* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
@@ -4196,12 +4208,16 @@ i.btn.function:disabled, .dataTables_paginate i.function.paginate_disabled_previ
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function:link, .dataTables_paginate i.function.paginate_disabled_previous:link, .dataTables_paginate i.function.paginate_disabled_next:link, i.btn.function:visited, .dataTables_paginate i.function.paginate_disabled_previous:visited, .dataTables_paginate i.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-i.btn.function:hover, .dataTables_paginate i.function.paginate_disabled_previous:hover, .dataTables_paginate i.function.paginate_disabled_next:hover, i.btn.function:active, .dataTables_paginate i.function.paginate_disabled_previous:active, .dataTables_paginate i.function.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.function:hover, .dataTables_paginate i.function.paginate_disabled_previous:hover, .dataTables_paginate i.function.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.function:active, .dataTables_paginate i.function.paginate_disabled_previous:active, .dataTables_paginate i.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4226,7 +4242,7 @@ span.btn.function:hover, .dataTables_paginate span.function.paginate_disabled_pr
 }
 /* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function:active, .dataTables_paginate span.function.paginate_disabled_previous:active, .dataTables_paginate span.function.paginate_disabled_next:active, span.btn.function.active, .dataTables_paginate span.function.active.paginate_disabled_previous, .dataTables_paginate span.function.active.paginate_disabled_next {
-  color: #333333;
+  color: #fbc732;
   background-color: white;
 }
 /* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
@@ -4235,12 +4251,16 @@ span.btn.function:disabled, .dataTables_paginate span.function.paginate_disabled
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function:link, .dataTables_paginate span.function.paginate_disabled_previous:link, .dataTables_paginate span.function.paginate_disabled_next:link, span.btn.function:visited, .dataTables_paginate span.function.paginate_disabled_previous:visited, .dataTables_paginate span.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-span.btn.function:hover, .dataTables_paginate span.function.paginate_disabled_previous:hover, .dataTables_paginate span.function.paginate_disabled_next:hover, span.btn.function:active, .dataTables_paginate span.function.paginate_disabled_previous:active, .dataTables_paginate span.function.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.function:hover, .dataTables_paginate span.function.paginate_disabled_previous:hover, .dataTables_paginate span.function.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.function:active, .dataTables_paginate span.function.paginate_disabled_previous:active, .dataTables_paginate span.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4265,7 +4285,7 @@ label.btn.function:hover, .dataTables_paginate label.function.paginate_disabled_
 }
 /* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function:active, .dataTables_paginate label.function.paginate_disabled_previous:active, .dataTables_paginate label.function.paginate_disabled_next:active, label.btn.function.active, .dataTables_paginate label.function.active.paginate_disabled_previous, .dataTables_paginate label.function.active.paginate_disabled_next {
-  color: #333333;
+  color: #fbc732;
   background-color: white;
 }
 /* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
@@ -4274,28 +4294,32 @@ label.btn.function:disabled, .dataTables_paginate label.function.paginate_disabl
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function:link, .dataTables_paginate label.function.paginate_disabled_previous:link, .dataTables_paginate label.function.paginate_disabled_next:link, label.btn.function:visited, .dataTables_paginate label.function.paginate_disabled_previous:visited, .dataTables_paginate label.function.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-label.btn.function:hover, .dataTables_paginate label.function.paginate_disabled_previous:hover, .dataTables_paginate label.function.paginate_disabled_next:hover, label.btn.function:active, .dataTables_paginate label.function.paginate_disabled_previous:active, .dataTables_paginate label.function.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.function:hover, .dataTables_paginate label.function.paginate_disabled_previous:hover, .dataTables_paginate label.function.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.function:active, .dataTables_paginate label.function.paginate_disabled_previous:active, .dataTables_paginate label.function.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
-/* line 297, ../../../private/common-html/sass/partials/_buttons.scss */
-.function.disabled {
+/* line 301, ../../../private/common-html/sass/partials/_buttons.scss */
+.function.disabled, .function:disabled, .function.waiting {
   cursor: default !important;
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 299, ../../../private/common-html/sass/partials/_buttons.scss */
-.function.disabled:hover, .function.disabled:active, .function.disabled:disabled {
+/* line 303, ../../../private/common-html/sass/partials/_buttons.scss */
+.function.disabled:hover, .function.disabled:active, .function.disabled:disabled, .function:disabled:hover, .function:disabled:active, .function:disabled:disabled, .function.waiting:hover, .function.waiting:active, .function.waiting:disabled {
   border-color: #dddddd !important;
 }
 
-/* line 305, ../../../private/common-html/sass/partials/_buttons.scss */
-button.function:disabled {
+/* line 309, ../../../private/common-html/sass/partials/_buttons.scss */
+button.function:disabled, button.function:disabled:hover {
   border-color: #dddddd !important;
 }
 
@@ -4329,12 +4353,16 @@ button.function.authority:disabled, button.function.authority.disabled, button.f
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function.authority:link, button.function.authority:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-button.function.authority:hover, button.function.authority:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+button.function.authority:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+button.function.authority:active {
   border-color: #bbbbbb;
 }
 
@@ -4368,12 +4396,16 @@ div.btn.function.authority:disabled, .dataTables_paginate div.function.authority
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function.authority:link, .dataTables_paginate div.function.authority.paginate_disabled_previous:link, .dataTables_paginate div.function.authority.paginate_disabled_next:link, div.btn.function.authority:visited, .dataTables_paginate div.function.authority.paginate_disabled_previous:visited, .dataTables_paginate div.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-div.btn.function.authority:hover, .dataTables_paginate div.function.authority.paginate_disabled_previous:hover, .dataTables_paginate div.function.authority.paginate_disabled_next:hover, div.btn.function.authority:active, .dataTables_paginate div.function.authority.paginate_disabled_previous:active, .dataTables_paginate div.function.authority.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.function.authority:hover, .dataTables_paginate div.function.authority.paginate_disabled_previous:hover, .dataTables_paginate div.function.authority.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.function.authority:active, .dataTables_paginate div.function.authority.paginate_disabled_previous:active, .dataTables_paginate div.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4407,12 +4439,16 @@ a.btn.function.authority:disabled, .dataTables_paginate a.function.authority.pag
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function.authority:link, .dataTables_paginate a.function.authority.paginate_disabled_previous:link, .dataTables_paginate a.function.authority.paginate_disabled_next:link, a.btn.function.authority:visited, .dataTables_paginate a.function.authority.paginate_disabled_previous:visited, .dataTables_paginate a.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-a.btn.function.authority:hover, .dataTables_paginate a.function.authority.paginate_disabled_previous:hover, .dataTables_paginate a.function.authority.paginate_disabled_next:hover, a.btn.function.authority:active, .dataTables_paginate a.function.authority.paginate_disabled_previous:active, .dataTables_paginate a.function.authority.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.function.authority:hover, .dataTables_paginate a.function.authority.paginate_disabled_previous:hover, .dataTables_paginate a.function.authority.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.function.authority:active, .dataTables_paginate a.function.authority.paginate_disabled_previous:active, .dataTables_paginate a.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4446,12 +4482,16 @@ i.btn.function.authority:disabled, .dataTables_paginate i.function.authority.pag
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function.authority:link, .dataTables_paginate i.function.authority.paginate_disabled_previous:link, .dataTables_paginate i.function.authority.paginate_disabled_next:link, i.btn.function.authority:visited, .dataTables_paginate i.function.authority.paginate_disabled_previous:visited, .dataTables_paginate i.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-i.btn.function.authority:hover, .dataTables_paginate i.function.authority.paginate_disabled_previous:hover, .dataTables_paginate i.function.authority.paginate_disabled_next:hover, i.btn.function.authority:active, .dataTables_paginate i.function.authority.paginate_disabled_previous:active, .dataTables_paginate i.function.authority.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.function.authority:hover, .dataTables_paginate i.function.authority.paginate_disabled_previous:hover, .dataTables_paginate i.function.authority.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.function.authority:active, .dataTables_paginate i.function.authority.paginate_disabled_previous:active, .dataTables_paginate i.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4485,12 +4525,16 @@ span.btn.function.authority:disabled, .dataTables_paginate span.function.authori
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function.authority:link, .dataTables_paginate span.function.authority.paginate_disabled_previous:link, .dataTables_paginate span.function.authority.paginate_disabled_next:link, span.btn.function.authority:visited, .dataTables_paginate span.function.authority.paginate_disabled_previous:visited, .dataTables_paginate span.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-span.btn.function.authority:hover, .dataTables_paginate span.function.authority.paginate_disabled_previous:hover, .dataTables_paginate span.function.authority.paginate_disabled_next:hover, span.btn.function.authority:active, .dataTables_paginate span.function.authority.paginate_disabled_previous:active, .dataTables_paginate span.function.authority.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.function.authority:hover, .dataTables_paginate span.function.authority.paginate_disabled_previous:hover, .dataTables_paginate span.function.authority.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.function.authority:active, .dataTables_paginate span.function.authority.paginate_disabled_previous:active, .dataTables_paginate span.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4524,12 +4568,16 @@ label.btn.function.authority:disabled, .dataTables_paginate label.function.autho
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function.authority:link, .dataTables_paginate label.function.authority.paginate_disabled_previous:link, .dataTables_paginate label.function.authority.paginate_disabled_next:link, label.btn.function.authority:visited, .dataTables_paginate label.function.authority.paginate_disabled_previous:visited, .dataTables_paginate label.function.authority.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-label.btn.function.authority:hover, .dataTables_paginate label.function.authority.paginate_disabled_previous:hover, .dataTables_paginate label.function.authority.paginate_disabled_next:hover, label.btn.function.authority:active, .dataTables_paginate label.function.authority.paginate_disabled_previous:active, .dataTables_paginate label.function.authority.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.function.authority:hover, .dataTables_paginate label.function.authority.paginate_disabled_previous:hover, .dataTables_paginate label.function.authority.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.function.authority:active, .dataTables_paginate label.function.authority.paginate_disabled_previous:active, .dataTables_paginate label.function.authority.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4563,12 +4611,16 @@ button.function.julkipano:disabled, button.function.julkipano.disabled, button.f
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 button.function.julkipano:link, button.function.julkipano:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-button.function.julkipano:hover, button.function.julkipano:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+button.function.julkipano:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+button.function.julkipano:active {
   border-color: #bbbbbb;
 }
 
@@ -4602,12 +4654,16 @@ div.btn.function.julkipano:disabled, .dataTables_paginate div.function.julkipano
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.function.julkipano:link, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate div.function.julkipano.paginate_disabled_next:link, div.btn.function.julkipano:visited, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate div.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-div.btn.function.julkipano:hover, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate div.function.julkipano.paginate_disabled_next:hover, div.btn.function.julkipano:active, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate div.function.julkipano.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.function.julkipano:hover, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate div.function.julkipano.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.function.julkipano:active, .dataTables_paginate div.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate div.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4641,12 +4697,16 @@ a.btn.function.julkipano:disabled, .dataTables_paginate a.function.julkipano.pag
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.function.julkipano:link, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate a.function.julkipano.paginate_disabled_next:link, a.btn.function.julkipano:visited, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate a.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-a.btn.function.julkipano:hover, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate a.function.julkipano.paginate_disabled_next:hover, a.btn.function.julkipano:active, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate a.function.julkipano.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.function.julkipano:hover, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate a.function.julkipano.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.function.julkipano:active, .dataTables_paginate a.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate a.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4680,12 +4740,16 @@ i.btn.function.julkipano:disabled, .dataTables_paginate i.function.julkipano.pag
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.function.julkipano:link, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate i.function.julkipano.paginate_disabled_next:link, i.btn.function.julkipano:visited, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate i.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-i.btn.function.julkipano:hover, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate i.function.julkipano.paginate_disabled_next:hover, i.btn.function.julkipano:active, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate i.function.julkipano.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.function.julkipano:hover, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate i.function.julkipano.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.function.julkipano:active, .dataTables_paginate i.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate i.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4719,12 +4783,16 @@ span.btn.function.julkipano:disabled, .dataTables_paginate span.function.julkipa
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.function.julkipano:link, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate span.function.julkipano.paginate_disabled_next:link, span.btn.function.julkipano:visited, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate span.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-span.btn.function.julkipano:hover, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate span.function.julkipano.paginate_disabled_next:hover, span.btn.function.julkipano:active, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate span.function.julkipano.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.function.julkipano:hover, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate span.function.julkipano.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.function.julkipano:active, .dataTables_paginate span.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate span.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
@@ -4758,16 +4826,295 @@ label.btn.function.julkipano:disabled, .dataTables_paginate label.function.julki
   color: #bbbbbb !important;
   background-color: #f6f6f6 !important;
 }
-/* line 285, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.function.julkipano:link, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:link, .dataTables_paginate label.function.julkipano.paginate_disabled_next:link, label.btn.function.julkipano:visited, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:visited, .dataTables_paginate label.function.julkipano.paginate_disabled_next:visited {
   border-color: #dddddd;
 }
-/* line 288, ../../../private/common-html/sass/partials/_buttons.scss */
-label.btn.function.julkipano:hover, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate label.function.julkipano.paginate_disabled_next:hover, label.btn.function.julkipano:active, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate label.function.julkipano.paginate_disabled_next:active {
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.function.julkipano:hover, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:hover, .dataTables_paginate label.function.julkipano.paginate_disabled_next:hover {
+  border-color: #bbbbbb;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.function.julkipano:active, .dataTables_paginate label.function.julkipano.paginate_disabled_previous:active, .dataTables_paginate label.function.julkipano.paginate_disabled_next:active {
   border-color: #bbbbbb;
 }
 
-/* line 322, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 205, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost:link, button.ghost:visited {
+  color: #f39129;
+  background-color: white;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost:active, button.ghost.active {
+  color: #fbc732;
+  background-color: white;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost:disabled, button.ghost.disabled, button.ghost.waiting {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: #f6f6f6 !important;
+}
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost:link, button.ghost:visited {
+  border-color: #f39129;
+}
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost:hover {
+  border-color: #f7ac2e;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost:active {
+  border-color: #fbc732;
+}
+
+/* line 206, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.ghost, .dataTables_paginate div.ghost.paginate_disabled_previous, .dataTables_paginate div.ghost.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.ghost:link, .dataTables_paginate div.ghost.paginate_disabled_previous:link, .dataTables_paginate div.ghost.paginate_disabled_next:link, div.btn.ghost:visited, .dataTables_paginate div.ghost.paginate_disabled_previous:visited, .dataTables_paginate div.ghost.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.ghost:hover, .dataTables_paginate div.ghost.paginate_disabled_previous:hover, .dataTables_paginate div.ghost.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.ghost:active, .dataTables_paginate div.ghost.paginate_disabled_previous:active, .dataTables_paginate div.ghost.paginate_disabled_next:active, div.btn.ghost.active, .dataTables_paginate div.ghost.active.paginate_disabled_previous, .dataTables_paginate div.ghost.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.ghost:disabled, .dataTables_paginate div.ghost.paginate_disabled_previous:disabled, .dataTables_paginate div.ghost.paginate_disabled_next:disabled, div.btn.ghost.disabled, .dataTables_paginate div.ghost.disabled.paginate_disabled_previous, .dataTables_paginate div.ghost.disabled.paginate_disabled_next, div.btn.ghost.waiting, .dataTables_paginate div.ghost.waiting.paginate_disabled_previous, .dataTables_paginate div.ghost.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: #f6f6f6 !important;
+}
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.ghost:link, .dataTables_paginate div.ghost.paginate_disabled_previous:link, .dataTables_paginate div.ghost.paginate_disabled_next:link, div.btn.ghost:visited, .dataTables_paginate div.ghost.paginate_disabled_previous:visited, .dataTables_paginate div.ghost.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.ghost:hover, .dataTables_paginate div.ghost.paginate_disabled_previous:hover, .dataTables_paginate div.ghost.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+div.btn.ghost:active, .dataTables_paginate div.ghost.paginate_disabled_previous:active, .dataTables_paginate div.ghost.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+/* line 207, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.ghost, .dataTables_paginate a.ghost.paginate_disabled_previous, .dataTables_paginate a.ghost.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.ghost:link, .dataTables_paginate a.ghost.paginate_disabled_previous:link, .dataTables_paginate a.ghost.paginate_disabled_next:link, a.btn.ghost:visited, .dataTables_paginate a.ghost.paginate_disabled_previous:visited, .dataTables_paginate a.ghost.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.ghost:hover, .dataTables_paginate a.ghost.paginate_disabled_previous:hover, .dataTables_paginate a.ghost.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.ghost:active, .dataTables_paginate a.ghost.paginate_disabled_previous:active, .dataTables_paginate a.ghost.paginate_disabled_next:active, a.btn.ghost.active, .dataTables_paginate a.ghost.active.paginate_disabled_previous, .dataTables_paginate a.ghost.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.ghost:disabled, .dataTables_paginate a.ghost.paginate_disabled_previous:disabled, .dataTables_paginate a.ghost.paginate_disabled_next:disabled, a.btn.ghost.disabled, .dataTables_paginate a.ghost.disabled.paginate_disabled_previous, .dataTables_paginate a.ghost.disabled.paginate_disabled_next, a.btn.ghost.waiting, .dataTables_paginate a.ghost.waiting.paginate_disabled_previous, .dataTables_paginate a.ghost.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: #f6f6f6 !important;
+}
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.ghost:link, .dataTables_paginate a.ghost.paginate_disabled_previous:link, .dataTables_paginate a.ghost.paginate_disabled_next:link, a.btn.ghost:visited, .dataTables_paginate a.ghost.paginate_disabled_previous:visited, .dataTables_paginate a.ghost.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.ghost:hover, .dataTables_paginate a.ghost.paginate_disabled_previous:hover, .dataTables_paginate a.ghost.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+a.btn.ghost:active, .dataTables_paginate a.ghost.paginate_disabled_previous:active, .dataTables_paginate a.ghost.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+/* line 208, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.ghost, .dataTables_paginate i.ghost.paginate_disabled_previous, .dataTables_paginate i.ghost.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.ghost:link, .dataTables_paginate i.ghost.paginate_disabled_previous:link, .dataTables_paginate i.ghost.paginate_disabled_next:link, i.btn.ghost:visited, .dataTables_paginate i.ghost.paginate_disabled_previous:visited, .dataTables_paginate i.ghost.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.ghost:hover, .dataTables_paginate i.ghost.paginate_disabled_previous:hover, .dataTables_paginate i.ghost.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.ghost:active, .dataTables_paginate i.ghost.paginate_disabled_previous:active, .dataTables_paginate i.ghost.paginate_disabled_next:active, i.btn.ghost.active, .dataTables_paginate i.ghost.active.paginate_disabled_previous, .dataTables_paginate i.ghost.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.ghost:disabled, .dataTables_paginate i.ghost.paginate_disabled_previous:disabled, .dataTables_paginate i.ghost.paginate_disabled_next:disabled, i.btn.ghost.disabled, .dataTables_paginate i.ghost.disabled.paginate_disabled_previous, .dataTables_paginate i.ghost.disabled.paginate_disabled_next, i.btn.ghost.waiting, .dataTables_paginate i.ghost.waiting.paginate_disabled_previous, .dataTables_paginate i.ghost.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: #f6f6f6 !important;
+}
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.ghost:link, .dataTables_paginate i.ghost.paginate_disabled_previous:link, .dataTables_paginate i.ghost.paginate_disabled_next:link, i.btn.ghost:visited, .dataTables_paginate i.ghost.paginate_disabled_previous:visited, .dataTables_paginate i.ghost.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.ghost:hover, .dataTables_paginate i.ghost.paginate_disabled_previous:hover, .dataTables_paginate i.ghost.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+i.btn.ghost:active, .dataTables_paginate i.ghost.paginate_disabled_previous:active, .dataTables_paginate i.ghost.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+/* line 209, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.ghost, .dataTables_paginate span.ghost.paginate_disabled_previous, .dataTables_paginate span.ghost.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.ghost:link, .dataTables_paginate span.ghost.paginate_disabled_previous:link, .dataTables_paginate span.ghost.paginate_disabled_next:link, span.btn.ghost:visited, .dataTables_paginate span.ghost.paginate_disabled_previous:visited, .dataTables_paginate span.ghost.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.ghost:hover, .dataTables_paginate span.ghost.paginate_disabled_previous:hover, .dataTables_paginate span.ghost.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.ghost:active, .dataTables_paginate span.ghost.paginate_disabled_previous:active, .dataTables_paginate span.ghost.paginate_disabled_next:active, span.btn.ghost.active, .dataTables_paginate span.ghost.active.paginate_disabled_previous, .dataTables_paginate span.ghost.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.ghost:disabled, .dataTables_paginate span.ghost.paginate_disabled_previous:disabled, .dataTables_paginate span.ghost.paginate_disabled_next:disabled, span.btn.ghost.disabled, .dataTables_paginate span.ghost.disabled.paginate_disabled_previous, .dataTables_paginate span.ghost.disabled.paginate_disabled_next, span.btn.ghost.waiting, .dataTables_paginate span.ghost.waiting.paginate_disabled_previous, .dataTables_paginate span.ghost.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: #f6f6f6 !important;
+}
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.ghost:link, .dataTables_paginate span.ghost.paginate_disabled_previous:link, .dataTables_paginate span.ghost.paginate_disabled_next:link, span.btn.ghost:visited, .dataTables_paginate span.ghost.paginate_disabled_previous:visited, .dataTables_paginate span.ghost.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.ghost:hover, .dataTables_paginate span.ghost.paginate_disabled_previous:hover, .dataTables_paginate span.ghost.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+span.btn.ghost:active, .dataTables_paginate span.ghost.paginate_disabled_previous:active, .dataTables_paginate span.ghost.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+/* line 210, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.ghost, .dataTables_paginate label.ghost.paginate_disabled_previous, .dataTables_paginate label.ghost.paginate_disabled_next {
+  color: #f39129;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #f39129;
+}
+/* line 219, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.ghost:link, .dataTables_paginate label.ghost.paginate_disabled_previous:link, .dataTables_paginate label.ghost.paginate_disabled_next:link, label.btn.ghost:visited, .dataTables_paginate label.ghost.paginate_disabled_previous:visited, .dataTables_paginate label.ghost.paginate_disabled_next:visited {
+  color: #f39129;
+  background-color: white;
+}
+/* line 223, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.ghost:hover, .dataTables_paginate label.ghost.paginate_disabled_previous:hover, .dataTables_paginate label.ghost.paginate_disabled_next:hover {
+  color: #f7ac2e;
+  background-color: white;
+  text-decoration: none;
+}
+/* line 228, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.ghost:active, .dataTables_paginate label.ghost.paginate_disabled_previous:active, .dataTables_paginate label.ghost.paginate_disabled_next:active, label.btn.ghost.active, .dataTables_paginate label.ghost.active.paginate_disabled_previous, .dataTables_paginate label.ghost.active.paginate_disabled_next {
+  color: #fbc732;
+  background-color: white;
+}
+/* line 232, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.ghost:disabled, .dataTables_paginate label.ghost.paginate_disabled_previous:disabled, .dataTables_paginate label.ghost.paginate_disabled_next:disabled, label.btn.ghost.disabled, .dataTables_paginate label.ghost.disabled.paginate_disabled_previous, .dataTables_paginate label.ghost.disabled.paginate_disabled_next, label.btn.ghost.waiting, .dataTables_paginate label.ghost.waiting.paginate_disabled_previous, .dataTables_paginate label.ghost.waiting.paginate_disabled_next {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: #f6f6f6 !important;
+}
+/* line 286, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.ghost:link, .dataTables_paginate label.ghost.paginate_disabled_previous:link, .dataTables_paginate label.ghost.paginate_disabled_next:link, label.btn.ghost:visited, .dataTables_paginate label.ghost.paginate_disabled_previous:visited, .dataTables_paginate label.ghost.paginate_disabled_next:visited {
+  border-color: #f39129;
+}
+/* line 289, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.ghost:hover, .dataTables_paginate label.ghost.paginate_disabled_previous:hover, .dataTables_paginate label.ghost.paginate_disabled_next:hover {
+  border-color: #f7ac2e;
+}
+/* line 292, ../../../private/common-html/sass/partials/_buttons.scss */
+label.btn.ghost:active, .dataTables_paginate label.ghost.paginate_disabled_previous:active, .dataTables_paginate label.ghost.paginate_disabled_next:active {
+  border-color: #fbc732;
+}
+
+/* line 329, ../../../private/common-html/sass/partials/_buttons.scss */
+.ghost:disabled, ghost.disabled, .ghost.waiting {
+  cursor: default !important;
+  color: #bbbbbb !important;
+  background-color: #f6f6f6 !important;
+  border-color: #dddddd !important;
+}
+/* line 332, ../../../private/common-html/sass/partials/_buttons.scss */
+.ghost:disabled:hover, .ghost:disabled:active, .ghost:disabled:disabled, ghost.disabled:hover, ghost.disabled:active, ghost.disabled:disabled, .ghost.waiting:hover, .ghost.waiting:active, .ghost.waiting:disabled {
+  border-color: #dddddd !important;
+}
+
+/* line 338, ../../../private/common-html/sass/partials/_buttons.scss */
+button.ghost:disabled, button.ghost:disabled:hover {
+  border-color: #dddddd !important;
+}
+
+/* line 347, ../../../private/common-html/sass/partials/_buttons.scss */
 a.link-btn {
   color: #f39129;
   background-color: none;
@@ -4796,12 +5143,12 @@ a.link-btn:disabled, a.link-btn.disabled, a.link-btn.waiting {
   background-color: none !important;
 }
 
-/* line 332, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 357, ../../../private/common-html/sass/partials/_buttons.scss */
 .link-btn--link:hover span, .link-btn--link:active span {
   text-decoration: underline;
 }
 
-/* line 338, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 363, ../../../private/common-html/sass/partials/_buttons.scss */
 a.link-btn-julkipano {
   color: #0fa8f7;
   background-color: none;
@@ -4846,7 +5193,7 @@ a.link-btn-julkipano:disabled, a.link-btn-julkipano.disabled, a.link-btn-julkipa
     transform: rotate(360deg);
   }
 }
-/* line 390, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 415, ../../../private/common-html/sass/partials/_buttons.scss */
 .spin {
   -webkit-animation: spin 4s linear infinite;
   -moz-animation: spin 4s linear infinite;
@@ -4854,141 +5201,141 @@ a.link-btn-julkipano:disabled, a.link-btn-julkipano.disabled, a.link-btn-julkipa
   vertical-align: middle;
 }
 
-/* line 395, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 420, ../../../private/common-html/sass/partials/_buttons.scss */
 i.wait {
   display: none;
   padding: 0 !important;
 }
 
-/* line 401, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 426, ../../../private/common-html/sass/partials/_buttons.scss */
 .waiting i {
   display: none;
 }
-/* line 404, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 429, ../../../private/common-html/sass/partials/_buttons.scss */
 .waiting i.wait {
   display: table-cell;
 }
 
-/* line 409, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 434, ../../../private/common-html/sass/partials/_buttons.scss */
 .waiting .wait + span {
   padding-left: 10px;
 }
 
-/* line 413, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 438, ../../../private/common-html/sass/partials/_buttons.scss */
 span + .waiting.wait {
   padding-right: 10px;
 }
 
-/* line 420, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 445, ../../../private/common-html/sass/partials/_buttons.scss */
 i.toggle {
   display: none;
   padding: 0 !important;
 }
 
-/* line 429, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 454, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled > i, .toggled > button > i {
   display: none;
 }
 
-/* line 433, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 458, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled i.toggle {
   display: table-cell;
 }
 
-/* line 437, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 462, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled .toggle + span {
   padding-left: 10px;
 }
 
-/* line 450, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 475, ../../../private/common-html/sass/partials/_buttons.scss */
 .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 470, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 495, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked {
   display: table;
 }
-/* line 460, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 485, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked .btn-base, .stacked [type=submit], .stacked .btn, .stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked .paginate_disabled_previous, .stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked .paginate_disabled_next, .stacked button, .stacked .like-btn, .stacked a.link-btn, .stacked a.link-btn-julkipano, .stacked .check-string, .stacked .btn, .stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked .paginate_disabled_previous, .stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked .paginate_disabled_next, .stacked button {
   width: 100%;
   display: block;
   margin: 0;
 }
-/* line 465, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 490, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked div {
   overflow-y: hidden;
 }
 
-/* line 474, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 499, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline {
   display: table;
   display: inline-table;
   vertical-align: top;
 }
-/* line 460, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 485, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline .btn-base, .stacked--inline [type=submit], .stacked--inline .btn, .stacked--inline .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked--inline .paginate_disabled_previous, .stacked--inline .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked--inline .paginate_disabled_next, .stacked--inline button, .stacked--inline .like-btn, .stacked--inline a.link-btn, .stacked--inline a.link-btn-julkipano, .stacked--inline .check-string, .stacked--inline .btn, .stacked--inline .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked--inline .paginate_disabled_previous, .stacked--inline .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked--inline .paginate_disabled_next, .stacked--inline button {
   width: 100%;
   display: block;
   margin: 0;
 }
-/* line 465, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 490, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline div {
   overflow-y: hidden;
 }
 
-/* line 482, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 507, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins .btn-base, .inner-margins [type=submit], .inner-margins .btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins .like-btn, .inner-margins a.link-btn, .inner-margins a.link-btn-julkipano, .inner-margins .check-string, .inner-margins .btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins div, .inner-margins a {
   margin-left: 12px;
 }
-/* line 485, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 510, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins :first-child {
   margin-left: 0;
 }
 
-/* line 491, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 516, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked .btn-base, .inner-margins.stacked [type=submit], .inner-margins.stacked .btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked .like-btn, .inner-margins.stacked a.link-btn, .inner-margins.stacked a.link-btn-julkipano, .inner-margins.stacked .check-string, .inner-margins.stacked .btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked div, .inner-margins.stacked a {
   margin-left: 0;
   margin-top: 12px;
 }
-/* line 495, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 520, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked :first-child {
   margin-top: 0;
 }
 
-/* line 501, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
 .margins-s {
   margin: 6px 6px 6px 6px;
 }
 
-/* line 507, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 532, ../../../private/common-html/sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 511, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 536, ../../../private/common-html/sass/partials/_buttons.scss */
 #partiesDocgen button {
   margin-bottom: 6px;
 }
 
-/* line 515, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 540, ../../../private/common-html/sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
 }
 
-/* line 521, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 546, ../../../private/common-html/sass/partials/_buttons.scss */
 button:focus {
   outline: 0;
 }
 
-/* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 551, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button {
   position: relative;
 }
-/* line 528, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 553, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
@@ -4998,30 +5345,30 @@ button:focus {
   overflow: hidden;
   z-index: 1;
 }
-/* line 536, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 561, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 539, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 564, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
 }
-/* line 542, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 567, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
-/* line 550, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 575, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 552, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 577, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
 
-/* line 557, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 582, ../../../private/common-html/sass/partials/_buttons.scss */
 .left-buttons > button {
   margin-right: 12px;
 }
@@ -5055,7 +5402,7 @@ label.arrow-label {
   display: inline-block;
   margin-right: 10px;
   vertical-align: top;
-  color: #bbbbbb;
+  color: #f39129;
   cursor: pointer;
 }
 
@@ -5140,7 +5487,7 @@ label.checkbox-label {
   display: inline-block;
   margin-right: 10px;
   vertical-align: top;
-  color: #bbbbbb;
+  color: #f39129;
   cursor: pointer;
 }
 
@@ -5225,7 +5572,7 @@ label.radio-label {
   display: inline-block;
   margin-right: 10px;
   vertical-align: top;
-  color: #bbbbbb;
+  color: #f39129;
   cursor: pointer;
 }
 
@@ -5310,7 +5657,7 @@ label.radio-field-label {
   display: inline-block;
   margin-right: 10px;
   vertical-align: top;
-  color: #bbbbbb;
+  color: #f39129;
   cursor: pointer;
 }
 
@@ -5410,7 +5757,7 @@ label.filter-label {
   display: inline-block;
   margin-right: 10px;
   vertical-align: top;
-  color: #bbbbbb;
+  color: #f39129;
   cursor: pointer;
 }
 
@@ -9882,1213 +10229,4 @@ ul.tabs {
   min-height: 120px;
   height: auto;
   width: 22.5em;
-}
-
-/* Customize your modal window here, you can add background image too */
-/* line 131, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-header {
-  padding: 2px 24px;
-  border-bottom: 1px solid;
-}
-/* line 134, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-header p {
-  margin: 0px;
-  font-size: 20px;
-  display: inline;
-}
-/* line 139, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-header .dialog-close {
-  position: absolute;
-  right: 14px;
-  top: 12px;
-  cursor: pointer;
-}
-
-/* line 147, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content {
-  /* somewhat less than .autosized - .dialog-header */
-  min-height: 96px;
-  position: relative;
-  margin: 12px 0;
-  padding-bottom: 64px;
-  /* [type=submit], .btn, button { */
-  /*   //padding: 4px $marginL; */
-  /*   min-width: $cols2; */
-  /*   max-width: $cols3; */
-  /* } */
-}
-/* line 154, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content .dialog-desc {
-  width: 300px;
-}
-/* line 158, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content .dialog-desc-wide {
-  width: 450px;
-}
-/* line 169, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content .file-upload {
-  margin: 12px 0;
-}
-/* line 173, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content .dialog-user-content {
-  padding: 12px 0;
-}
-
-/* line 179, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content p {
-  margin-bottom: 0;
-}
-/* line 183, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content div.finished {
-  background: #fff;
-  display: block;
-  text-align: left;
-  z-index: 5000;
-}
-/* line 190, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content div.pending {
-  background: #fff;
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  text-align: center;
-  z-index: 5000;
-}
-/* line 200, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content div.pending div.ajax {
-  background: url(/lp-static/img/ajax-loader.gif) no-repeat center center;
-  margin: auto;
-  height: 160px;
-}
-
-/* line 208, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content__footer {
-  margin-top: 24px;
-}
-
-/* line 212, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content.dialog-content--no-padding {
-  padding-bottom: 0;
-}
-
-/* line 216, ../../../private/common-html/sass/partials/_modal.scss */
-.scrolling-content {
-  overflow-y: scroll;
-  max-height: 288px;
-}
-
-/* line 221, ../../../private/common-html/sass/partials/_modal.scss */
-.dialog-content-low {
-  min-height: 72px;
-  padding-bottom: 0;
-}
-
-/* line 227, ../../../private/common-html/sass/partials/_modal.scss */
-.with-map {
-  /* .map-container { */
-  /*   //padding: 0; */
-  /*   /\* float: left; *\/ */
-  /*   /\* width: 480px; *\/ */
-  /*   display: inline-block; */
-  /* } */
-  /* form { */
-  /*   /\* float: left; *\/ */
-  /*   /\* width: 200px; *\/ */
-  /*   display: inline-block; */
-  /* } */
-  /* .btn-primary { */
-  /*   left: auto; right: 260px; */
-  /*   bottom: 5px; */
-  /* } */
-  /* a.btn-dialog { */
-  /*   right:-70px; */
-  /*   bottom: 10px; */
-  /*   width: 100px; */
-  /* } */
-}
-
-/* .with-map > div { */
-/*   display: table-cell; */
-/*   vertical-align: top; */
-/*   padding-left: $marginM; */
-/* } */
-/* line 261, ../../../private/common-html/sass/partials/_modal.scss */
-.neighbors-message {
-  margin: 12px;
-}
-
-/* line 266, ../../../private/common-html/sass/partials/_modal.scss */
-#dialog-add-link-permit .combobox {
-  margin-bottom: 8px;
-}
-
-/* line 272, ../../../private/common-html/sass/partials/_modal.scss */
-#upload-dialog .dialog-content {
-  padding-bottom: 0;
-}
-
-/* line 278, ../../../private/common-html/sass/partials/_modal.scss */
-#dialog-cancel-application div.application-cancel-text-content p {
-  margin-bottom: 0;
-}
-
-/* line 284, ../../../private/common-html/sass/partials/_modal.scss */
-.authority-select-dialog select {
-  width: 100%;
-}
-
-/* line 290, ../../../private/common-html/sass/partials/_modal.scss */
-.company-invite-dialog select {
-  width: 100%;
-}
-
-/* line 296, ../../../private/common-html/sass/partials/_modal.scss */
-.with-map-top {
-  margin-top: 6px;
-  margin-bottom: 0;
-  margin-left: 6px;
-  margin-right: 6px;
-}
-
-/*
-  Bootstrap sets img width to 100% and that messes GoogleMaps and OpenLayers.
-*/
-/* line 5, ../../../private/common-html/sass/partials/_map.scss */
-.map {
-  margin-bottom: 12px;
-}
-/* line 7, ../../../private/common-html/sass/partials/_map.scss */
-.map img {
-  max-width: none;
-}
-
-/* line 12, ../../../private/common-html/sass/partials/_map.scss */
-.map-large {
-  width: 100%;
-  height: 384px;
-}
-
-/* line 17, ../../../private/common-html/sass/partials/_map.scss */
-.create-application-actions {
-  position: absolute;
-  bottom: 0px;
-  right: 6px;
-  z-index: 12000;
-}
-
-/* line 24, ../../../private/common-html/sass/partials/_map.scss */
-.related-map {
-  margin: 0 0 0 12px;
-}
-
-/* line 28, ../../../private/common-html/sass/partials/_map.scss */
-.organization-areas-map {
-  margin-bottom: 6px;
-}
-
-/* line 32, ../../../private/common-html/sass/partials/_map.scss */
-.map-component {
-  height: 400px;
-}
-
-/* line 37, ../../../private/common-html/sass/partials/_map.scss */
-.ol-popup .ol-popup-closer {
-  color: #595959;
-  font-size: 12px;
-  font-weight: bold;
-  top: 6px;
-}
-/* line 42, ../../../private/common-html/sass/partials/_map.scss */
-.ol-popup .ol-popup-closer:after {
-  content: " ";
-}
-
-/* line 1, ../../../private/common-html/sass/partials/_errors.scss */
-.context-error {
-  color: red;
-  border: 1px solid red;
-  border-radius: 3px;
-  padding: 6px;
-  margin: 12px 0;
-}
-
-/* line 9, ../../../private/common-html/sass/partials/_errors.scss */
-.error-message {
-  display: block;
-  margin-left: 5px;
-  font-style: italic;
-  color: red;
-}
-
-/* line 50, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog {
-  padding: 20px 20px 20px 20px;
-  margin-bottom: 20px;
-  position: relative;
-  background: white;
-  border: 1px solid #dddddd;
-}
-/* line 61, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog .autocomplete-component {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-/* line 68, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog .left-buttons {
-  margin-top: 20px;
-}
-/* line 72, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog label.mandatory:after {
-  content: " *";
-  color: #df3215;
-}
-/* line 76, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog input[type=text], .bubble-dialog textarea {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 4px;
-  display: block;
-}
-/* line 81, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog input[type=text]:focus, .bubble-dialog textarea:focus {
-  border-color: #fbc732;
-}
-/* line 86, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog textarea {
-  min-height: 8em;
-}
-/* line 90, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog input.mandatory {
-  border-color: #f39129;
-  margin-bottom: 20px;
-}
-/* line 95, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog .error {
-  margin-top: 20px;
-  border: 1px solid red;
-  color: red;
-  padding: 20px;
-}
-/* line 103, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog table tr {
-  background-color: initial;
-}
-/* line 105, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog table tr td {
-  background-color: none;
-}
-/* line 108, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog table tr td.full {
-  width: 33%;
-}
-/* line 115, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog table.mandatory td {
-  border: 1px solid #f39129;
-}
-
-/* line 9, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog-arrow {
-  position: relative;
-  z-index: 100;
-}
-
-/* line 14, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog-arrow:after,
-.bubble-dialog-arrow:before {
-  bottom: 100%;
-  left: 50%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  z-index: 100;
-  overflow-y: visible;
-}
-
-/* line 28, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog-arrow:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: white;
-  border-width: 19px;
-  margin-left: -19px;
-}
-
-/* line 34, ../../../private/common-html/sass/partials/_bubble.scss */
-.bubble-dialog-arrow:before {
-  border-color: rgba(221, 221, 221, 0);
-  border-bottom-color: #dddddd;
-  border-width: 20px;
-  margin-left: -20px;
-}
-
-/* line 42, ../../../private/common-html/sass/partials/_bubble.scss */
-.stacked .bubble-dialog-arrow,
-.stacked--inline .bubble-dialog-arrow {
-  overflow-y: visible;
-  margin-top: 25px;
-  margin-bottom: -1px;
-}
-
-/* line 9, ../../../private/common-html/sass/partials/_bubble.scss */
-.help-arrow {
-  position: relative;
-  z-index: 100;
-}
-
-/* line 14, ../../../private/common-html/sass/partials/_bubble.scss */
-.help-arrow:after,
-.help-arrow:before {
-  bottom: 100%;
-  left: 50%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  z-index: 100;
-  overflow-y: visible;
-}
-
-/* line 28, ../../../private/common-html/sass/partials/_bubble.scss */
-.help-arrow:after {
-  border-color: rgba(246, 246, 246, 0);
-  border-bottom-color: #f6f6f6;
-  border-width: 14px;
-  margin-left: -14px;
-}
-
-/* line 34, ../../../private/common-html/sass/partials/_bubble.scss */
-.help-arrow:before {
-  border-color: rgba(247, 172, 46, 0);
-  border-bottom-color: #f7ac2e;
-  border-width: 15px;
-  margin-left: -15px;
-}
-
-/* line 42, ../../../private/common-html/sass/partials/_bubble.scss */
-.stacked .help-arrow,
-.stacked--inline .help-arrow {
-  overflow-y: visible;
-  margin-top: 20px;
-  margin-bottom: -1px;
-}
-
-/* line 4, ../../../private/common-html/sass/partials/_help.scss */
-.help-toggle {
-  margin-left: 12px;
-  display: inline-block;
-  color: #f39129;
-  text-align: center;
-}
-/* line 11, ../../../private/common-html/sass/partials/_help.scss */
-.help-toggle .lupicon-circle-question {
-  margin-top: 5px;
-  margin-bottom: 10px;
-  cursor: pointer;
-}
-/* line 18, ../../../private/common-html/sass/partials/_help.scss */
-.help-toggle .lupicon-circle-question.expanded {
-  color: #f7ac2e;
-}
-
-/* line 23, ../../../private/common-html/sass/partials/_help.scss */
-.help-toggle.tight {
-  margin-left: 0;
-}
-/* line 25, ../../../private/common-html/sass/partials/_help.scss */
-.help-toggle.tight button.function {
-  border: none;
-  padding: 0 0 0 0;
-}
-/* line 29, ../../../private/common-html/sass/partials/_help.scss */
-.help-toggle.tight button.function:active span, .help-toggle.tight button.function:hover span {
-  text-decoration: underline;
-}
-
-/* line 36, ../../../private/common-html/sass/partials/_help.scss */
-.stacked.help-toggle,
-.stacked.help-toggle div {
-  overflow-y: visible;
-}
-
-/* line 44, ../../../private/common-html/sass/partials/_help.scss */
-.help-text {
-  display: none;
-  position: relative;
-  background: #f6f6f6;
-  color: #333333;
-  padding: 12px;
-  margin-bottom: 24px;
-  border: 1px solid #f7ac2e;
-}
-/* line 53, ../../../private/common-html/sass/partials/_help.scss */
-.help-text p:last-child {
-  margin-bottom: 0;
-}
-
-/* line 59, ../../../private/common-html/sass/partials/_help.scss */
-.tab-info {
-  width: 80%;
-}
-
-/* line 66, ../../../private/common-html/sass/partials/_help.scss */
-.help-reset {
-  clear: both;
-  max-height: 6px;
-}
-
-/* line 71, ../../../private/common-html/sass/partials/_help.scss */
-.panel-info {
-  width: 100%;
-  text-align: justify;
-}
-
-/* line 76, ../../../private/common-html/sass/partials/_help.scss */
-.expanded-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 400ms;
-  -webkit-transition: max-height 400ms;
-  /* Safari */
-}
-/* line 81, ../../../private/common-html/sass/partials/_help.scss */
-.expanded-content.expand {
-  max-height: 1000px;
-}
-
-/* line 86, ../../../private/common-html/sass/partials/_help.scss */
-.page-info {
-  margin: 12px 0;
-}
-
-/* line 91, ../../../private/common-html/sass/partials/_help.scss */
-.help-adjacent-title {
-  margin-top: 0 !important;
-  line-height: normal;
-  display: inline-block;
-}
-
-/* line 1, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete {
-  background: #fff;
-  border: 1px solid #dddddd;
-}
-/* line 4, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete div {
-  line-height: 36px;
-  border-bottom: 1px solid #dddddd;
-  cursor: pointer;
-  padding-left: 6px;
-}
-/* line 9, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete div:hover {
-  background-color: #e9e9e9;
-}
-
-/* line 16, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component {
-  width: 100%;
-  position: relative;
-}
-/* line 19, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper {
-  position: relative;
-  width: inherit;
-  min-height: 40px;
-  border: 1px solid #bbbbbb;
-  min-height: 40px;
-  background-color: #fff;
-}
-/* line 20, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper.active {
-  border-color: #f7ac2e;
-}
-/* line 23, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper.disabled {
-  border-color: #dddddd;
-  background-color: #f6f6f6;
-}
-/* line 26, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper.disabled i.tag-chevron {
-  color: #bbbbbb;
-}
-/* line 29, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper.disabled li.tag {
-  color: #bbbbbb !important;
-  cursor: default !important;
-}
-/* line 32, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper.disabled li.tag i.tag-remove {
-  cursor: default !important;
-}
-/* line 43, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection {
-  width: 100%;
-  height: 100%;
-  display: inline-block;
-  box-sizing: border-box;
-}
-/* line 48, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags {
-  list-style: none;
-  padding: 0;
-}
-/* line 51, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li {
-  display: inline-block;
-  max-width: 100%;
-  margin-bottom: -7px;
-  margin-right: -4px;
-}
-/* line 56, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag {
-  cursor: pointer;
-  position: relative;
-  background-color: #fff;
-  border: 1px solid #bbbbbb;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  color: #f39129;
-}
-/* line 65, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag span.tag-label {
-  line-height: 36px;
-  vertical-align: top;
-  margin-right: 6px;
-}
-/* line 70, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection ul.tags li.tag .tag-remove {
-  line-height: 36px;
-  margin: 0 6px;
-}
-/* line 79, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.caption, .autocomplete-component .autocomplete-selection-wrapper span.selection-text {
-  cursor: default;
-  line-height: 38px;
-  padding-left: 6px;
-}
-/* line 84, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper i.tag-chevron {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  cursor: pointer;
-  color: #f39129;
-  margin: 0;
-}
-/* line 91, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper i.tag-chevron.toggle {
-  color: #fbc732;
-}
-/* line 97, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown {
-  width: inherit;
-  position: absolute;
-  z-index: 1;
-}
-/* line 101, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown input.autocomplete-input {
-  width: 100%;
-  height: 40px;
-  margin-top: -1px;
-  display: block;
-  box-sizing: border-box;
-}
-/* line 108, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
-  position: absolute;
-  top: 38px;
-  z-index: 1000;
-  width: inherit;
-  max-height: 800px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: auto;
-  padding: 0;
-  border: 1px solid #fbc732;
-  box-sizing: border-box;
-  background-color: #fff;
-  color: black;
-}
-/* line 124, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result.autocomplete-result-grouped li.autocomplete-result-item {
-  padding: 0 12px;
-}
-/* line 129, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li {
-  height: 40px;
-  line-height: 40px;
-}
-/* line 134, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
-  cursor: default;
-  display: list-item;
-  list-style-type: none;
-  padding: 0 6px;
-}
-/* line 140, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
-  cursor: pointer;
-  position: relative;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  padding-right: 6px;
-}
-/* line 147, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
-  background-color: #f7ac2e;
-  color: #fff;
-}
-/* line 150, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
-  background-color: #fbc732;
-}
-/* line 154, ../../../private/common-html/sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
-  font-weight: 700;
-  padding-left: 6px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-/* line 4, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree {
-  display: inline-block;
-  margin-left: 24px;
-  width: 800px;
-  overflow: hidden;
-}
-/* line 9, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-title {
-  color: white;
-  background: #4f4f4f;
-  padding: 5px 0px 3px 10px;
-}
-/* line 17, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-content {
-  width: 80000px;
-}
-/* line 20, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-link {
-  margin: 0;
-  width: 800px;
-  float: left;
-  width: 800px;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  transition-property: font-size;
-  transition-duration: 200ms;
-}
-/* line 28, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-link span {
-  width: 100%;
-}
-/* line 32, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-link.btn, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next {
-  overflow-y: hidden;
-  max-height: none;
-  min-height: none;
-  line-height: initial;
-  vertical-align: middle;
-  padding-top: 12px;
-  padding-bottom: 12px;
-}
-/* line 38, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-link.btn span, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous span, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous span, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next span, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next span, .operation-tree .tree-link.btn i, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_previous i, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_previous i, .operation-tree .dataTables_paginate .tree-link.paginate_disabled_next i, .dataTables_paginate .operation-tree .tree-link.paginate_disabled_next i {
-  vertical-align: middle;
-  white-space: initial;
-}
-/* line 48, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-nav .tree-back {
-  min-width: 5.625em;
-  display: inline-block;
-  margin: 24px 24px 0 30px;
-  height: 30px;
-}
-/* line 54, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-nav .tree-start {
-  min-width: 5.625em;
-  display: inline-block;
-  margin: 24px 24px 0 30px;
-  height: 30px;
-}
-/* line 61, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-page {
-  position: relative;
-  float: left;
-}
-/* line 65, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-last {
-  width: 90%;
-  padding: 24px 24px;
-  width: 800px;
-  float: left;
-  text-align: left;
-}
-/* line 71, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-last ul li {
-  list-style-type: circle;
-}
-/* line 73, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-last ul li a {
-  color: #f39129;
-  text-decoration: none;
-}
-/* line 10, ../../../private/common-html/sass/partials/_links.scss */
-.operation-tree .tree-last ul li a:link, .operation-tree .tree-last ul li a:visited {
-  color: #f39129;
-}
-/* line 13, ../../../private/common-html/sass/partials/_links.scss */
-.operation-tree .tree-last ul li a:hover {
-  color: #f7ac2e;
-  text-decoration: underline;
-}
-/* line 17, ../../../private/common-html/sass/partials/_links.scss */
-.operation-tree .tree-last ul li a:active {
-  color: #fbc732;
-  text-decoration: underline;
-}
-/* line 77, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-last div {
-  width: 90%;
-  margin-top: 6px;
-}
-/* line 81, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-last button {
-  margin-top: 24px;
-  width: 18em;
-}
-/* line 85, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-last .operation-description {
-  margin-top: 24px;
-  margin-bottom: 24px;
-}
-/* line 88, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-last .operation-description p {
-  margin: 12px 0;
-}
-/* line 92, ../../../private/common-html/sass/partials/_tree.scss */
-.operation-tree .tree-last .organization-links li {
-  list-style-type: none;
-}
-
-/* line 98, ../../../private/common-html/sass/partials/_tree.scss */
-.tree-width {
-  width: 800px;
-  height: 120px;
-}
-
-/* line 103, ../../../private/common-html/sass/partials/_tree.scss */
-ul.attachments-list {
-  list-style-type: circle;
-}
-/* line 105, ../../../private/common-html/sass/partials/_tree.scss */
-ul.attachments-list li.mandatory-attachments {
-  list-style-type: circle;
-}
-
-/* No list-style for links in organization-links in .tree-last */
-/* line 112, ../../../private/common-html/sass/partials/_tree.scss */
-.organization-links li {
-  list-style-type: none;
-}
-
-/* No list-style for links in loctext in .tree-last */
-/* line 118, ../../../private/common-html/sass/partials/_tree.scss */
-ul.no-bullets {
-  list-style-type: none;
-}
-
-/* line 1, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion {
-  width: 100%;
-  position: relative;
-  z-index: 5;
-  height: auto;
-  margin-bottom: 24px;
-  box-sizing: border-box;
-}
-/* line 9, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky {
-  width: 100%;
-  overflow-y: hidden;
-}
-/* line 12, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky span.bar-text {
-  width: 100%;
-  text-transform: uppercase;
-}
-/* line 16, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky span.description {
-  padding-right: 10px;
-  text-transform: none;
-}
-/* line 20, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky span.icons {
-  min-width: 22px;
-}
-/* line 22, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky span.icons .approved, .accordion div.sticky span.icons .rejected {
-  display: none;
-}
-/* line 25, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky span.icons .rejected {
-  padding-right: 0;
-}
-/* line 32, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky .identifier-component .form-indicator {
-  right: -100px;
-}
-/* line 38, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion-toggle > button, .accordion button.accordion-toggle {
-  width: 100%;
-  margin-bottom: 0 !important;
-}
-/* line 40, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion-toggle > button span.bar-text, .accordion button.accordion-toggle span.bar-text {
-  width: 100%;
-  text-transform: uppercase;
-}
-/* line 48, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky button.positive > span.icons > .approved {
-  display: table-cell;
-}
-/* line 52, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion div.sticky button.rejected > span.icons > .rejected {
-  display: table-cell;
-}
-/* line 58, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion_content {
-  display: none;
-  padding-top: 6px;
-  position: relative;
-  border: 1px solid #dddddd;
-  border-top: none;
-}
-/* line 67, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion_content .accordion-content-part {
-  margin-left: 12px;
-  margin-right: 12px;
-  margin-bottom: 12px;
-}
-/* line 72, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion_content .accordion-fields {
-  width: 100%;
-}
-/* line 75, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion_content .accordion-fields h2 {
-  color: black;
-}
-/* line 79, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion_content .accordion-fields .authority-accept-fields h2 {
-  background: #f6f6f6;
-}
-/* line 83, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion_content .accordion-fields h3 {
-  margin-top: 12px;
-}
-/* line 86, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion_content .accordion-fields .form-group {
-  margin-top: 6px;
-}
-/* line 92, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion .accordion_content.expanded {
-  display: block;
-}
-
-/* line 97, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion-fields > .button-group:last-child {
-  border-bottom: none;
-}
-
-/* line 101, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion-indicator {
-  z-index: 12000;
-  width: 112px;
-  min-height: 18px;
-  display: none;
-  padding: 0 24px 0 0;
-  margin-left: 12px;
-}
-/* line 109, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion-indicator .icon {
-  display: none;
-  background-image: url("/lp-static/img/icons-sprite-1.18.png");
-  background-repeat: no-repeat;
-}
-/* line 114, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion-indicator.accordion-input-saved .icon {
-  display: inline-block;
-  background-position: 4px -2499px;
-  border-right: none;
-}
-/* line 121, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion-indicator.accordion-input-warn .icon {
-  display: inline-block;
-  background-position: 4px -3199px;
-  border-right: none;
-}
-/* line 128, ../../../private/common-html/sass/partials/_accordion.scss */
-.accordion-indicator.accordion-input-err .icon {
-  display: inline-block;
-  background-position: 4px -2399px;
-  border-right: none;
-}
-
-/* line 1, ../../../private/common-html/sass/partials/_datepicker.scss */
-#ui-datepicker-div {
-  background: #f6f6f6;
-  border: 1px solid #dddddd;
-  padding: 6px;
-  box-shadow: 2px 2px 3px #888888;
-  z-index: 100000 !important;
-}
-/* line 12, ../../../private/common-html/sass/partials/_datepicker.scss */
-#ui-datepicker-div .ui-datepicker-month {
-  font-size: 0.7em;
-  height: 28px;
-}
-/* line 16, ../../../private/common-html/sass/partials/_datepicker.scss */
-#ui-datepicker-div .ui-datepicker-year {
-  font-size: 0.7em;
-  height: 28px;
-}
-/* line 20, ../../../private/common-html/sass/partials/_datepicker.scss */
-#ui-datepicker-div .ui-datepicker-header {
-  height: 36px;
-}
-/* line 23, ../../../private/common-html/sass/partials/_datepicker.scss */
-#ui-datepicker-div .ui-datepicker-year, #ui-datepicker-div .ui-datepicker-month {
-  vertical-align: top;
-}
-/* line 26, ../../../private/common-html/sass/partials/_datepicker.scss */
-#ui-datepicker-div .ui-icon.ui-icon-circle-triangle-w {
-  position: relative;
-}
-/* line 29, ../../../private/common-html/sass/partials/_datepicker.scss */
-#ui-datepicker-div .ui-icon.ui-icon-circle-triangle-e {
-  position: relative;
-}
-
-/* line 12, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification {
-  color: white;
-  box-sizing: border-box;
-}
-/* line 16, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification .notification-info {
-  vertical-align: top;
-  float: left;
-}
-/* line 20, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification .notification-close {
-  vertical-align: top;
-  float: right;
-}
-/* line 23, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification .notification-close span {
-  margin-right: 12px;
-}
-/* line 27, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification .notification-list {
-  display: inline;
-  vertical-align: top;
-}
-/* line 30, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification .notification-list ul {
-  width: 80%;
-  list-style: none;
-  font-size: 1.2em;
-  padding-left: 0;
-  display: inline-block;
-}
-/* line 36, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification .notification-list ul li {
-  margin-left: 24px;
-  margin-right: 24px;
-}
-/* line 39, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification .notification-list ul li a {
-  color: white;
-}
-/* line 42, ../../../private/common-html/sass/partials/_screenmessage.scss */
-#sys-notification .notification-list ul li:last-child {
-  margin-bottom: 0px;
-  border-bottom: none;
-}
-
-/* line 51, ../../../private/common-html/sass/partials/_screenmessage.scss */
-.screenmessagebutton {
-  width: 170px;
-}
-
-/* selectm component styles*/
-/* line 5, ../../../private/common-html/sass/partials/_selectm.scss */
-.selectm-dialog .dialog-content {
-  width: 100%;
-  min-height: 350px;
-}
-
-/* line 11, ../../../private/common-html/sass/partials/_selectm.scss */
-.selectm {
-  margin: 0px;
-  padding: 0px;
-}
-/* line 15, ../../../private/common-html/sass/partials/_selectm.scss */
-.selectm label, .selectm input, .selectm select {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-bottom: 6px;
-}
-/* line 21, ../../../private/common-html/sass/partials/_selectm.scss */
-.selectm .selectm-target, .selectm .selectm-source {
-  height: 100px;
-}
-/* line 24, ../../../private/common-html/sass/partials/_selectm.scss */
-.selectm input {
-  box-sizing: border-box;
-  margin: 0px;
-}
-/* line 29, ../../../private/common-html/sass/partials/_selectm.scss */
-.selectm .ok-cancel-row {
-  margin-top: 12px;
-}
-
-@media (min-height: 800px) {
-  /* line 35, ../../../private/common-html/sass/partials/_selectm.scss */
-  .selectm .selectm-target, .selectm .selectm-source {
-    height: auto;
-  }
-}
-/* line 1, ../../../private/common-html/sass/partials/_user_notification.scss */
-.user-notification {
-  color: white;
-  min-height: 50px;
-  background-color: #4f4f4f;
-  position: relative;
-  background: rgba(79, 79, 79, 0.9);
-  background: #4f4f4f \9;
-  /* IE 8 and below */
-  border: 1px solid #363636;
-  box-sizing: border-box;
-}
-/* line 11, ../../../private/common-html/sass/partials/_user_notification.scss */
-.user-notification .header {
-  padding: 2px 24px;
-}
-/* line 14, ../../../private/common-html/sass/partials/_user_notification.scss */
-.user-notification .header .title {
-  font-size: 20px;
-}
-/* line 18, ../../../private/common-html/sass/partials/_user_notification.scss */
-.user-notification .header .close {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  font-size: 1.8em;
-  cursor: pointer;
-}
-/* line 24, ../../../private/common-html/sass/partials/_user_notification.scss */
-.user-notification .header .close:after {
-  content: "X";
-}
-/* line 29, ../../../private/common-html/sass/partials/_user_notification.scss */
-.user-notification p.message {
-  padding: 2px 24px;
-  color: white;
-  margin-bottom: 12px;
-}
-/* line 34, ../../../private/common-html/sass/partials/_user_notification.scss */
-.user-notification a {
-  color: white;
-}
-
-/* line 1, ../../../private/common-html/sass/partials/_tags_editor.scss */
-.tags-editor-component {
-  position: relative;
-}
-/* line 3, ../../../private/common-html/sass/partials/_tags_editor.scss */
-.tags-editor-component ul.tags {
-  list-style: none;
-  padding: 6px 0 0 0;
-  overflow: auto;
-}
-/* line 7, ../../../private/common-html/sass/partials/_tags_editor.scss */
-.tags-editor-component ul.tags li.tag {
-  position: relative;
-  background-color: #f39129;
-  font-size: 16px;
-  margin-right: 6px;
-  white-space: nowrap;
-  float: left;
-  margin-bottom: 6px;
-  line-height: 32px;
-}
-/* line 16, ../../../private/common-html/sass/partials/_tags_editor.scss */
-.tags-editor-component ul.tags li.tag span.tag-label, .tags-editor-component ul.tags li.tag input.tag-editor {
-  margin-left: 27px;
-  font-size: 16px;
-}
-/* line 20, ../../../private/common-html/sass/partials/_tags_editor.scss */
-.tags-editor-component ul.tags li.tag span.tag-label {
-  color: #fff;
-  margin-right: 36px;
-}
-/* line 24, ../../../private/common-html/sass/partials/_tags_editor.scss */
-.tags-editor-component ul.tags li.tag input.tag-editor {
-  color: black;
-  margin-right: 6px;
-  width: 300px;
-}
-/* line 29, ../../../private/common-html/sass/partials/_tags_editor.scss */
-.tags-editor-component ul.tags li.tag span.tag-remove {
-  cursor: pointer;
-  position: absolute;
-  left: 6px;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-}
-/* line 37, ../../../private/common-html/sass/partials/_tags_editor.scss */
-.tags-editor-component ul.tags li.tag span.tag-edit {
-  cursor: pointer;
-  position: absolute;
-  right: 6px;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-}
-
-/* line 1, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container {
-  margin-top: 15px;
-  width: 100%;
-}
-/* line 4, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor {
-  background-color: #f5f5f4;
-  font-size: 14px;
-}
-/* line 8, ../../../private/common-html/sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-header {
-  width: 100%;
-  display: table;
-  margin: 0 0 15px 0;
-  font-size: 20px;
-  color: white;
-  background-color: #4f4f4f;
-  padding: 15px;
-  min-height: 65px;
 }
