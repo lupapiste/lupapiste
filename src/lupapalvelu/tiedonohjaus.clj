@@ -21,18 +21,19 @@
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
 
-(defn- get-tos-functions-from-toj [organization-id]
-  (if (:permanent-archive-enabled (o/get-organization organization-id))
+(defn- get-from-toj-api [organization-id & path-parts]
+  (when (:permanent-archive-enabled (o/get-organization organization-id))
     (try
-      (let [url (build-url "/tiedonohjaus/api/org/" organization-id "/asiat")
+      (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
             response (http/get url {:as               :json
                                     :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
-          []))
-      (catch Exception _
-        []))
-    []))
+        (when (= 200 (:status response))
+          (:body response)))
+      (catch Exception e
+        (error "Error accessing TOJ API" e)))))
+
+(defn- get-tos-functions-from-toj [organization-id]
+  (or (get-from-toj-api organization-id) []))
 
 (def available-tos-functions
   (memo/ttl get-tos-functions-from-toj
@@ -46,16 +47,8 @@
 
 (defn- get-metadata-for-document-from-toj [organization tos-function document-type]
   (if (and organization tos-function document-type)
-    (try
-      (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)
-            url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/document/" doc-id)
-            response (http/get url {:as               :json
-                                    :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
-          {}))
-      (catch Exception _
-        {}))
+    (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)]
+      (or (get-from-toj-api organization tos-function "/document/" doc-id) {}))
     {}))
 
 (def metadata-for-document
@@ -64,15 +57,7 @@
 
 (defn- get-metadata-for-process-from-toj [organization tos-function]
   (if (and organization tos-function)
-    (try
-      (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function)
-            response (http/get url {:as               :json
-                                    :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
-          {}))
-      (catch Exception _
-        {}))
+    (or (get-from-toj-api organization tos-function) {})
     {}))
 
 (def metadata-for-process
@@ -123,15 +108,7 @@
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
   (if (and organization tos-function state)
-    (try
-      (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/toimenpide-for-state/" state)
-            response (http/get url {:as               :json
-                                    :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
-          {}))
-      (catch Exception _
-        {}))
+    (or (get-from-toj-api organization tos-function "/toimenpide-for-state/" state) {})
     {}))
 
 (def toimenpide-for-state
@@ -368,7 +345,6 @@
       (.setCorrectionReason correction))))
 
 (defn- custom-type [lang documents]
-  (println documents)
   (let [custom-obj (Custom.)]
     (->> documents
          (map #(action-subevent % lang))
