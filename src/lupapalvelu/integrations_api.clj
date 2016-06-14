@@ -359,21 +359,25 @@
     (map (fn [^java.io.File f] {:name (.getName f), :modified (.lastModified f)}))))
 
 (defn- list-integration-dirs [output-dir id]
-  (let [xml-pattern (re-pattern (str "^" id "_.*\\.xml"))
-        id-pattern  (re-pattern (str "^" id "_.*"))]
-    {:waiting (list-dir output-dir xml-pattern)
-     :ok (list-dir (str output-dir env/file-separator "archive") xml-pattern)
-     :error (list-dir (str output-dir env/file-separator "error") id-pattern)}))
+  (if output-dir
+    (let [xml-pattern (re-pattern (str "^" id "_.*\\.xml"))
+          id-pattern  (re-pattern (str "^" id "_.*"))]
+      {:waiting (list-dir output-dir xml-pattern)
+       :ok (list-dir (str output-dir env/file-separator "archive") xml-pattern)
+       :error (list-dir (str output-dir env/file-separator "error") id-pattern)})
+    {:waiting []
+     :ok []
+     :error []}))
 
 (defquery transfers
   {:parameters [id]
    :user-roles #{:authority}
-   :states states/all-application-states}
+   :states #{:sent :complementNeeded}}
   [{:keys [application]}]
   (let [organization (organization/get-organization (:organization application))
         permit-type  (permit/permit-type application)
         krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
         ah-scope         (organization/resolve-organization-scope (:municipality application) permit-type organization)
-        ah-output-dir    (ah/resolve-output-directory ah-scope)]
+        ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
     (ok :krysp (list-integration-dirs krysp-output-dir id)
         :ah    (list-integration-dirs ah-output-dir id))))

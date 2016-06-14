@@ -13,7 +13,7 @@
 
 (def- begin-of-link (str (env/value :fileserver-address) ah-from-dir "/"))
 
-(defn- asianhallinta-enabled? [scope]
+(defn asianhallinta-enabled? [scope]
   (true? (get-in scope [:caseManagement :enabled])))
 
 (defn is-asianhallinta-version?
