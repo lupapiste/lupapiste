@@ -68,6 +68,20 @@
                                    :operations []
                                    :organizations []
                                    :areas []}}]}
+
+   ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
+   {:id "777777777777777777000016"
+    :email "veikko.viranomainen@tampere.fi"
+    :enabled true
+    :role "authority"
+    :orgAuthz {:837-R #{:authority}}
+    :firstName "Veikko"
+    :lastName "Viranomainen"
+    :phone "03121991"
+    :username "veikko"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
+              :apikey "5051ba0caa2480f374dcfeff"}}
+
    ])
 
 (def- default-keys-for-organizations {:app-required-fields-filling-obligatory false
@@ -84,7 +98,11 @@
                       {:id "753-R-TESTI"
                        :name {:fi "Sipoon rakennusvalvonta"
                               :sv "Sipoon rakennusvalvonta"}
-                       :calendars-enabled true}]))
+                       :calendars-enabled true}
+                      {:id "837-R"
+                       :name {:fi "Tampereen rakennusvalvonta"
+                              :sv "Tampereen rakennusvalvonta"}
+                       :calendars-enabled false}]))
 
 (deffixture "ajanvaraus" {}
   (mongo/clear!)
