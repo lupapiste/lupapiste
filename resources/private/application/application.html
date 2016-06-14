@@ -227,7 +227,8 @@
                                     <span data-bind="ltext: 'application.requestForComplement'"></span>
                                 </button>
                                 <button class="function"
-                                        data-bind="click: _.partial(hub.send, 'show-dialog', {ltitle: 'application.transfers.title', size: 'medium', component: 'transfer-monitor'}), visible: $root.authorization.ok('transfers'), enable: !processing() && $root.authorization.ok('transfers')"
+                                        data-bind="click: _.partial(hub.send, 'show-dialog', {ltitle: 'application.transfers.title', size: 'medium', component: 'transfer-monitor', componentParams: {id:id()}}),
+                                                   visible: $root.authorization.ok('transfers'), enable: !processing() && $root.authorization.ok('transfers')"
                                         data-test-id="show-transfers">
                                     <i class="lupicon-upload"></i>
                                     <span data-bind="ltext: 'application.transfers.open'"></span>
