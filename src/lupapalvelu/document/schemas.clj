@@ -51,6 +51,7 @@
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
+                 :removable-by-role
                  :group-help :section-help
                  :after-update
                  :repeating :no-repeat-button :order
@@ -1593,7 +1594,8 @@
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"
            :order 4
-           :removable false
+           :removable  true
+           :removable-by-role #{:authority}
            :approvable true
            :accordion-fields designer-accordion-paths
            :type :party
