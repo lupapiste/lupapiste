@@ -14,6 +14,7 @@
             [lupapalvelu.attachment.metadata :as attachment-meta]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.stamping :as stamping]
+            [lupapalvelu.attachment.notifications :as att-notifications]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
             [lupapalvelu.mongo :as mongo]
@@ -219,7 +220,8 @@
    :states states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (attachment/create-ram-attachment! application attachment-id created)]
-    (ok :applicationId id :attachmentId attachment-id)
+    (do (att-notifications/notify-new-ram-attachment! application attachment-id created)
+        (ok :applicationId id :attachmentId attachment-id))
     (fail :error.attachment-placeholder)))
 
 ;;
