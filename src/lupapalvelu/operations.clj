@@ -1111,7 +1111,7 @@
 (def operation-names-by-permit-type
   (->> operations
        (group-by (comp :permit-type val))
-       (map (juxt key (comp keys val)))
+       (map (juxt (comp keyword key) (comp keys val)))
        (into {})))
 
 (defn selected-operations-for-organizations [organizations]
