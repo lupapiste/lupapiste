@@ -24,7 +24,7 @@
                         <span class="narrow-hide" data-bind="ltext: 'navigation'"></span>
                     </a>
                 </div>
-                <div class="header-box" data-bind="visible: $root.showCalendarMenuOptions">
+                <div class="header-box" data-bind="visible: $root.showCalendarMenuOptions && !lupapisteApp.models.currentUser.isAuthorityAdmin">
                   <a href="#!/mycalendar" data-bind="attr: {'title': loc('Ajanvaraus')}">
                     <span class="lupicon-calendar"></span>
                     <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
