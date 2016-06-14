@@ -2220,6 +2220,12 @@
                             {:versions.documents {$elemMatch {:data.kesto.arki {$exists true}
                                                      :schema-info.name "ymp-ilm-kesto"}}}))
 
+(defmigration add-calendars-property-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:calendars-enabled {$exists false}}))}
+  (doseq [organization (mongo/select :organizations {:calendars-enabled {$exists false}})]
+    (mongo/update-by-id :organizations (:id organization)
+                        {$set {:calendars-enabled false}})))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections

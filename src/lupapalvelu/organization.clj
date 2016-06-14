@@ -231,6 +231,9 @@
        (first)
        (:permanent-archive-in-use-since)))
 
+(defn some-organization-has-calendars-enabled? [organization-ids]
+  (pos? (mongo/count :organizations {:_id {$in organization-ids} :calendars-enabled true})))
+
 ;;
 ;; Organization/municipality provided map support.
 ;;

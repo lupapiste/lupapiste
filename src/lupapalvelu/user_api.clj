@@ -725,3 +725,17 @@
                     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
   [_])
+
+(defn calendars-enabled-api-pre-check
+  [rolez command {:keys [organization]}]
+  (let [org-set (if organization
+                  #{organization}
+                  (usr/organization-ids-by-roles (:user command) rolez))]
+    (println org-set)
+    (when (or (empty? org-set) (not (organization/some-organization-has-calendars-enabled? org-set)))
+      unauthorized)))
+
+(defquery calendars-enabled
+  {:user-roles #{:authority :authorityAdmin}
+   :pre-checks [(partial calendars-enabled-api-pre-check #{:authority :authorityAdmin})]}
+  [_])
