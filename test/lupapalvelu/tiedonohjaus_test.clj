@@ -9,89 +9,93 @@
             [lupapalvelu.i18n :as i18n]))
 
 (facts "about tiedonohjaus utils"
-  (fact "case file report data is generated from application"
-    (let [application {:organization "753-R"
-                       :tosFunction  "10 03 00 01"
-                       :created      100
-                       :applicant    "Testaaja Testi"
-                       :statements   [{:person    {:text "Pelastusviranomainen"
-                                                   :name "Pia Nyman"}
-                                       :requested 302
-                                       :given     500
-                                       :status    "ehdollinen"
-                                       :text      "Lausunto liitteen\u00e4"
-                                       :state     "given"}
-                                      {:person    {:text "Rakennussuunnittelu"
-                                                   :name "Sampo S\u00e4levaara"}
-                                       :requested 301
-                                       :given     nil
-                                       :status    nil
-                                       :state     "requested"}]
-                       :neighbors    [{:propertyId "111"
-                                       :owner      {:type "luonnollinen"
-                                                    :name "Joku naapurin nimi"}
-                                       :id         "112"
-                                       :status     [{:state   "open"
-                                                     :created 600}
-                                                    {:state   "mark-done"
-                                                     :user    {:firstName "Etu" :lastName "Suku"}
-                                                     :created 500}]}]
-                       :tasks        [{:data        {}
-                                       :state       "requires_user_action"
-                                       :taskname    "rakennuksen paikan tarkastaminen"
-                                       :schema-info {:name    "task-katselmus"
-                                                     :version 1}
-                                       :closed      nil
-                                       :created     300
-                                       :duedate     nil
-                                       :assignee    {:lastName  "Suku"
-                                                     :firstName "Etu"
-                                                     :id        1111}
-                                       :source      nil
-                                       :id          "2222"}
-                                      ]
-                       :attachments  [{:type     {:foo :bar}
-                                       :versions [{:version 1
-                                                   :created 200
-                                                   :user    {:firstName "Testi"
-                                                             :lastName  "Testaaja"}}
-                                                  {:version 2
-                                                   :created 500
-                                                   :user    {:firstName "Testi"
-                                                             :lastName  "Testaaja"}}]
-                                       :user     {:firstName "Testi"
-                                                  :lastName  "Testaaja"}
-                                       :contents "Great attachment"}
-                                      {:type     {:foo :qaz}
-                                       :versions [{:version 1
-                                                   :created 300
-                                                   :user    {:firstName "Testi"
-                                                             :lastName  "Testaaja"}}]}]
-                       :history      [{:state "draft"
-                                       :ts    100
-                                       :user  {:firstName "Testi"
-                                               :lastName  "Testaaja"}}
-                                      {:state "open"
-                                       :ts    250
-                                       :user  {:firstName "Testi"
-                                               :lastName  "Testaaja"}}
-                                      {:state "complementNeeded"
-                                       :ts 4000
-                                       :user {:firstName "Heikki"
-                                              :lastName "Hepokatti"}}]}]
+  (let [application {:organization "753-R"
+                     :tosFunction  "10 03 00 01"
+                     :created      100
+                     :applicant    "Testaaja Testi"
+                     :id           "1"
+                     :statements   [{:person    {:text "Pelastusviranomainen"
+                                                 :name "Pia Nyman"}
+                                     :requested 302
+                                     :given     500
+                                     :status    "ehdollinen"
+                                     :text      "Lausunto liitteen\u00e4"
+                                     :state     "given"}
+                                    {:person    {:text "Rakennussuunnittelu"
+                                                 :name "Sampo S\u00e4levaara"}
+                                     :requested 301
+                                     :given     nil
+                                     :status    nil
+                                     :state     "requested"}]
+                     :neighbors    [{:propertyId "111"
+                                     :owner      {:type "luonnollinen"
+                                                  :name "Joku naapurin nimi"}
+                                     :id         "112"
+                                     :status     [{:state   "open"
+                                                   :created 600}
+                                                  {:state   "mark-done"
+                                                   :user    {:firstName "Etu" :lastName "Suku"}
+                                                   :created 500}]}]
+                     :tasks        [{:data        {}
+                                     :state       "requires_user_action"
+                                     :taskname    "rakennuksen paikan tarkastaminen"
+                                     :schema-info {:name    "task-katselmus"
+                                                   :version 1}
+                                     :closed      nil
+                                     :created     300
+                                     :duedate     nil
+                                     :assignee    {:lastName  "Suku"
+                                                   :firstName "Etu"
+                                                   :id        1111}
+                                     :source      nil
+                                     :id          "2222"}
+                                    ]
+                     :attachments  [{:type     {:foo :bar}
+                                     :versions [{:version 1
+                                                 :created 200
+                                                 :user    {:firstName "Testi"
+                                                           :lastName  "Testaaja"}}
+                                                {:version 2
+                                                 :created 500
+                                                 :user    {:firstName "Testi"
+                                                           :lastName  "Testaaja"}}]
+                                     :id       "2"
+                                     :contents "Great attachment"}
+                                    {:type     {:foo :qaz}
+                                     :id       "3"
+                                     :versions [{:version 1
+                                                 :created 300
+                                                 :user    {:firstName "Testi"
+                                                           :lastName  "Testaaja"}}]}]
+                     :history      [{:state "draft"
+                                     :ts    100
+                                     :user  {:firstName "Testi"
+                                             :lastName  "Testaaja"}}
+                                    {:state "open"
+                                     :ts    250
+                                     :user  {:firstName "Testi"
+                                             :lastName  "Testaaja"}}
+                                    {:state "complementNeeded"
+                                     :ts 4000
+                                     :user {:firstName "Heikki"
+                                            :lastName "Hepokatti"}}]}]
+
+    (fact "case file report data is generated from application"
       (generate-case-file-data application :fi) => [{:action    "Valmisteilla"
                                                      :start     100
                                                      :user      "Testaaja Testi"
                                                      :documents [{:type     :hakemus
                                                                   :category :document
                                                                   :ts       100
-                                                                  :user     "Testaaja Testi"}
+                                                                  :user     "Testaaja Testi"
+                                                                  :id       "1-application"}
                                                                  {:type     {:foo :bar}
                                                                   :category :document
                                                                   :version  1
                                                                   :ts       200
                                                                   :user     "Testaaja Testi"
-                                                                  :contents "Great attachment"}]}
+                                                                  :contents "Great attachment"
+                                                                  :id       "2"}]}
                                                     {:action    "K\u00e4sittelyss\u00e4"
                                                      :start     250
                                                      :user      "Testaaja Testi"
@@ -100,16 +104,18 @@
                                                                   :version  1
                                                                   :ts       300
                                                                   :user     "Testaaja Testi"
-                                                                  :contents nil}
+                                                                  :contents nil
+                                                                  :id       "3"}
                                                                  {:category :request-review, :ts 300, :text "rakennuksen paikan tarkastaminen", :user "Suku Etu"}
                                                                  {:category :request-statement, :ts 301, :text "Rakennussuunnittelu", :user ""}
                                                                  {:category :request-statement, :ts 302, :text "Pelastusviranomainen", :user ""}
                                                                  {:type     {:foo :bar}
                                                                   :category :document
                                                                   :version  2
-                                                              '    :ts       500
+                                                                  :ts       500
                                                                   :user     "Testaaja Testi"
-                                                                  :contents "Great attachment"}
+                                                                  :contents "Great attachment"
+                                                                  :id       "2"}
                                                                  {:text     "Joku naapurin nimi"
                                                                   :category :request-neighbor
                                                                   :ts       600
@@ -122,6 +128,7 @@
         (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"}
         (toimenpide-for-state "753-R" "10 03 00 01" "complementNeeded") => {})))
+
 
   (fact "application and attachment state (tila) is changed correctly"
     (let [metadata {:tila                :luonnos
@@ -347,4 +354,6 @@
                                                                               :myyntipalvelu   false
                                                                               :kieli           :fi
                                                                               :henkilotiedot   :sisaltaa
-                                                                              :julkisuusluokka :julkinen})))
+                                                                              :julkisuusluokka :julkinen}))
+
+  )
