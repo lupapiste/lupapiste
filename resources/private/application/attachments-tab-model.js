@@ -16,7 +16,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
 
   self.primaryOperation = ko.observable({});
 
-  self.showPostAtachmentsActions = ko.pureComputed(function() {
+  self.showPostAttachmentsActions = ko.pureComputed(function() {
     return (!self.appModel.inPostVerdictState() && self.preAttachmentsByOperation().length > 0) ||
            (self.appModel.inPostVerdictState()  && self.postAttachmentsByOperation().length > 0);
   });
