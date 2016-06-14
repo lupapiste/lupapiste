@@ -68,11 +68,46 @@
                                    :operations []
                                    :organizations []
                                    :areas []}}]}
+
+   ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
+   {:id "777777777777777777000016"
+    :email "veikko.viranomainen@tampere.fi"
+    :enabled true
+    :role "authority"
+    :orgAuthz {:837-R #{:authority}}
+    :firstName "Veikko"
+    :lastName "Viranomainen"
+    :phone "03121991"
+    :username "veikko"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
+              :apikey "5051ba0caa2480f374dcfeff"}}
+
    ])
+
+(def- default-keys-for-organizations {:app-required-fields-filling-obligatory false
+                                      :validate-verdict-given-date true
+                                      :kopiolaitos-email nil
+                                      :kopiolaitos-orderer-address nil
+                                      :kopiolaitos-orderer-email nil
+                                      :kopiolaitos-orderer-phone nil
+                                      :calendars-enabled false})
+
+(def organizations (map
+                     (partial merge default-keys-for-organizations)
+                     [
+                      {:id "753-R-TESTI"
+                       :name {:fi "Sipoon rakennusvalvonta"
+                              :sv "Sipoon rakennusvalvonta"}
+                       :calendars-enabled true}
+                      {:id "837-R"
+                       :name {:fi "Tampereen rakennusvalvonta"
+                              :sv "Tampereen rakennusvalvonta"}
+                       :calendars-enabled false}]))
 
 (deffixture "ajanvaraus" {}
   (mongo/clear!)
   (mongo/insert-batch :ssoKeys [{:_id "12342424c26b7342d92a4321" :ip "127.0.0.1" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
                                 {:_id "12342424c26b7342d92a9876" :ip "109.204.231.126" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}])
   (mongo/insert-batch :users users)
+  (mongo/insert-batch :organizations organizations)
   (lupapalvelu.calendars-api/clear-database))

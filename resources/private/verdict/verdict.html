@@ -40,7 +40,7 @@
         <label class="form-label" data-bind="ltext: 'verdict.given', css: {tip: !given()}"></label><br/>
         <input type="text" class="form-input long" data-bind="datepicker: given, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-given"/>
 
-        <label class="form-label" data-bind="ltext: 'verdict.official', css: {tip: !official()}"></label><br/>
+        <label class="form-label" data-bind="ltext: 'verdict.official'"></label><br/>
         <input type="text" class="form-input long" data-bind="datepicker: official, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-official"/>
 
         <label class="form-label" data-bind="ltext: 'verdict.text'"></label><br/>

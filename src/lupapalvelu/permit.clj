@@ -16,7 +16,7 @@
    :multiple-parties-allowed sc/Bool
    :extra-statement-selection-values sc/Bool
    :state-graph     {sc/Keyword [sc/Keyword]}
-   (sc/optional-key :allow-state-change) (sc/either sc/Keyword [(sc/either sc/Keyword sc/Str)] )
+   (sc/optional-key :allow-state-change) (sc/cond-pre sc/Keyword [(sc/cond-pre sc/Keyword sc/Str)] )
    (sc/optional-key :wfs-krysp-ns-name) sc/Str
    (sc/optional-key :wfs-krysp-url-asia-prefix) sc/Str})
 

@@ -65,21 +65,22 @@
   (let [terms (get-localizations)]
     (or (terms (keyword lang)) (terms default-lang))))
 
-(defn unknown-term [term]
-  (if (env/dev-mode?)
-    (str "???" term "???")
-    (do
-      (errorf "unknown localization term '%s'" term)
+(defn- terms->term [terms] (s/join \. (map #(if (nil? %) "" (name %)) terms)))
+
+(defn unknown-term [& terms]
+  (let [term (terms->term terms)]
+    (errorf "unknown localization term '%s', parameters were %s" term terms)
+    (if (env/dev-mode?)
+      (str "???" term "???")
       "")))
 
 (defn has-term? [lang & terms]
-  (not (nil? (get (get-terms (keyword lang)) (s/join \. terms)))))
+  (not (nil? (get (get-terms (keyword lang)) (terms->term terms)))))
 
 (defn localize [lang & terms]
-  (let [term (s/join \. (map name terms))]
-    (if-let [result (get (get-terms (keyword lang)) term)]
-      result
-      (unknown-term term))))
+  (if-let [result (get (get-terms (keyword lang)) (terms->term terms))]
+    result
+    (apply unknown-term terms)))
 
 (defn localizer [lang]
   (partial localize (keyword lang)))

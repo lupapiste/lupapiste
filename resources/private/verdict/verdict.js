@@ -149,7 +149,7 @@ LUPAPISTE.verdictPageController = (function($) {
     };
 
     self.disabled = ko.computed(function() {
-      return self.processing() || !(self.backendId() && self.status() && self.name() && self.given() && self.official());
+      return self.processing() || !(self.backendId() && self.status() && self.name() && self.given());
     });
   }
 

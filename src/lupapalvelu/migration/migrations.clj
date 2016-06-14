@@ -2194,15 +2194,15 @@
        (map add-ym-in-scope)
        (run! #(mongo/update-by-id :organizations (:id %) {$set {:scope (:scope %)}}))))
 
-(defmigration add-missing-submit-rights-to-company-users
+(defmigration add-missing-submit-rights-to-company-users-v2
   {:apply-when (pos? (mongo/count :users {:company.id {$exists true}
-                                          :company.submit {$exists false}}))}
+                                          :company.submit nil}))}
   (mongo/update-by-query :users
                          {:company.id {$exists true}
-                          :company.submit {$exists false}}
+                          :company.submit nil}
                          {$set {:company.submit true}}))
 
-(defmigration add-missing-submit-rights-to-company-tokens
+(defmigration add-missing-submit-rights-to-company-tokens-v2
   {:apply-when (pos? (mongo/count :token {:token-type {$in [:new-company-user :invite-company-user]}
                                           :data.submit {$exists false}}))}
   (mongo/update-by-query :token
@@ -2219,6 +2219,12 @@
                             change-kesto-doc-as-repeating
                             {:versions.documents {$elemMatch {:data.kesto.arki {$exists true}
                                                      :schema-info.name "ymp-ilm-kesto"}}}))
+
+(defmigration add-calendars-property-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:calendars-enabled {$exists false}}))}
+  (doseq [organization (mongo/select :organizations {:calendars-enabled {$exists false}})]
+    (mongo/update-by-id :organizations (:id organization)
+                        {$set {:calendars-enabled false}})))
 
 ;;
 ;; ****** NOTE! ******

@@ -24,8 +24,8 @@
     };
   }
 
-  function getAllOrganizationAttachmentTypes(permitType) {
-    return _.map(organizationModel.attachmentTypes[permitType], function(g) {
+  function getAllOrganizationAttachmentTypesForOperation(permitType, operation) {
+    return _.map(organizationModel.attachmentTypes[permitType][operation], function(g) {
       var groupId = g[0],
           groupText = loc(["attachmentType", groupId, "_group_label"]),
           attachmentIds = g[1],
@@ -44,7 +44,7 @@
     self.open = function(op) {
       self.op(op);
       self.selectm.reset(
-          getAllOrganizationAttachmentTypes(op.permitType),
+          getAllOrganizationAttachmentTypesForOperation(op.permitType, op.id),
           _.map(op.attachments, function(a) {
             return toAttachmentData.apply(null, a.id);
           }));

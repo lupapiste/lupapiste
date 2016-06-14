@@ -1,5 +1,5 @@
 (ns lupapalvelu.permit-test
-  (:require [lupapalvelu.attachment :as attachment]
+  (:require [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.i18n :refer [has-term?]]
             [lupapalvelu.permit :refer :all]
             [midje.sweet :refer :all]))
@@ -37,4 +37,4 @@
 (fact "All permits have attachments defined"
   (doseq [permit (keys (permit-types))]
     (fact {:midje/description permit}
-      (get attachment/attachment-types-by-permit-type (keyword permit)) =not=> empty?)))
+      (get att-type/attachment-types-by-permit-type (keyword permit)) =not=> empty?)))

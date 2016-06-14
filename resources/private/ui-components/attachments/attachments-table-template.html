@@ -1,0 +1,86 @@
+<script type="text/x-jquery-tmpl" class="ko-template"
+        id="attachments-table-template">
+  <div class="attachments-table-container">
+    <table class="attachments-table">
+      <thead>
+        <tr>
+          <th data-bind="ltext:'application.attachmentState'"></th>
+          <th data-bind="ltext: 'attachment.th-type'"></th>
+          <th data-bind="ltext: 'application.attachmentFile'"></th>
+          <th data-bind="ltext: 'attachment.th-not-needed'"></th>
+          <th data-bind="ltext: 'ok'"></th>
+          <th data-bind="ltext: 'attachment.th-not-ok'"></th>
+          <th data-bind="ltext: 'remove'"></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: attachments">
+        <tr>
+          <td data-bind="foreach: $parent.stateIcons( $data )"
+              class="attachments-table__state-icons">
+            <i data-bind="attr: {'class': $data}"></i>
+          </td>
+          <!-- ko if: $parent.hasFile( $data ) -->
+          <td>
+            <a data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></a><br>
+            <span data-bind="text: contents"></span>
+          </td>
+          <td data-bind="attachmentVersion: latestVersion"></td>
+          <td>
+            <span data-bind="dateString: latestVersion.created"></span><br>
+            <span data-bind="firstLastName: latestVersion.user"></span>
+          </td>
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.hasFile( $data ) -->
+          <td>
+            <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+            <br>
+            <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
+          </td>
+          <td data-bind="if: !$parent.isNotNeeded( $data )">
+            <a class="link-btn link-btn--link">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'attachment.addFile'"></span>
+            </a>
+          </td>
+          <td>
+            <div class="checkbox-wrapper">
+              <input type="checkbox"
+                     data-bind="attr: {id: $parent.inputId( $index() ),
+                                checked: $parent.isNotNeeded( $data )}">
+              <label class="checkbox-label"
+                     data-bind="attr: {'for': $parent.inputId( $index())},
+                                ltext: 'application.attachmentNotNeeded',
+                                click: $parent.toggleNotNeeded"></label>
+            </div>
+          </td>
+          <!-- /ko -->
+          <td>
+            <button class="positive"
+                    data-bind="disable: $parent.isApproved( $data ) || !$parent.canVouch( $data ),
+                               click: $parent.approve">
+              <i class="lupicon-check"></i>
+            </button>
+          </td>
+          <td>
+            <button class="negative"
+                    data-bind="disable: $parent.isRejected( $data ) || !$parent.canVouch( $data ),
+                               click: $parent.reject">
+              <i class="lupicon-circle-attention"></i>
+            </button>
+          </td>
+          <td>
+            <button class="secondary"
+                    data-bind="click: $parent.remove">
+              <i class="lupicon-remove"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button data-bind="enable: canDownload"
+            class="secondary">
+      <i class="lupicon-download"></i>
+      <span data-bind="ltext: 'download-all'"></span>
+    </button>
+  </div>
+</scripspan>

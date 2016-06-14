@@ -42,6 +42,8 @@ var attachment = (function() {
     return false;
   }
 
+  var imgRegex = /^image\/(jpeg|png|gif|bmp)$/;
+
   model = {
     id:                           ko.observable(),
     application:                  applicationModel,
@@ -88,7 +90,7 @@ var attachment = (function() {
       var version = model.latestVersion();
       if (!version) { return false; }
       var contentType = version.contentType;
-      return contentType && contentType.indexOf("image/") === 0;
+      return contentType && imgRegex.test(contentType);
     },
 
     isPdf: function() {

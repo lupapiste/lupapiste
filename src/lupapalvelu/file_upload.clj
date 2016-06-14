@@ -4,7 +4,10 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime]))
 
-(defn save-file [file & metadata]
+(defn save-file
+  "Saves given file to mongo GridFS, with metadata (map or kvs).
+   File is file map from request, actual file object is taken from :tempfile key."
+  [file & metadata]
   (let [metadata (if (map? (first metadata))
                    (first metadata)
                    (apply hash-map metadata))
