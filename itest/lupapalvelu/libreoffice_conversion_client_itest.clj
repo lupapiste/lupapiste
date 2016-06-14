@@ -29,7 +29,7 @@
 (facts "pdfa-conversion service"
   (fact "input-stream"
     (with-open [xin (io/input-stream (io/resource "sample-paatosote.rtf"))]
-      (let [response (client/convert-to-pdfa file-uri xin)]
+      (let [response (client/convert-to-pdfa "sample-paatosote.rtf" xin)]
         (if (client/enabled?)
           (verify-pdf response)
           (fact "libre is not enabled in this ENV [so the service should *NOT* be running in this ENV], expect connection error"
@@ -37,6 +37,6 @@
 
   (if (client/enabled?)
     (fact "file"
-      (let [response (client/convert-to-pdfa file-uri (io/file "dev-resources/sample-paatosote.rtf"))]
+      (let [response (client/convert-to-pdfa "sample-paatosote.rtf" (io/file "dev-resources/sample-paatosote.rtf"))]
         (verify-pdf response)))
     (println "libre conversion disabled, skipped test")))
