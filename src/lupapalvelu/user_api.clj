@@ -731,7 +731,6 @@
   (let [org-set (if organization
                   #{organization}
                   (usr/organization-ids-by-roles (:user command) rolez))]
-    (println org-set)
     (when (or (empty? org-set) (not (organization/some-organization-has-calendars-enabled? org-set)))
       unauthorized)))
 
