@@ -35,7 +35,7 @@
   {(sc/optional-key :role)           (apply sc/enum all-authz-roles)
    (sc/optional-key :path)           sc/Str
    :email                            ssc/Email
-   (sc/optional-key :application)    aps/ApplicationId ; FIXME delete key, migration
+   (sc/optional-key :application)    aps/ApplicationId ; FIXME delete key after prod is migrated
    :created                          ssc/Timestamp
    :inviter                          usr/SummaryUser
    (sc/optional-key :documentName)   sc/Str
