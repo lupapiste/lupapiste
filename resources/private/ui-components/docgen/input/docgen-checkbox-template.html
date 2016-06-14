@@ -20,7 +20,7 @@
   <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
   <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
   <div class="col--horizontal checkbox-wrapper"
-       data-bind="css: {'checkbox-wrapper--disabled': disabled() || readonly()}">
+       data-bind="css: {'wrapper--disabled': disabled() || readonly()}">
     <input type="checkbox" data-bind="checked: value,
                                       disable: disabled() || readonly(),
                                       attr: {name: path.join( '-' ), id: path.join( '-' )},

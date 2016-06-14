@@ -36,10 +36,12 @@
           </li>
         <!-- ko if: lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.isCompanyUser()) -->
           <li><a href="mailto:tuki@lupapiste.fi">tuki@lupapiste.fi</a></li>
-          <li><span><span data-bind="ltext: 'footer.tel'"></span> 044 750 4471</span></li>
+          <li><span><span data-bind="ltext: 'footer.tel'"></span> 044 750 4471</span><br />
+          (<span data-bind="ltext: 'footer.phoneservice.time'"></span>)</li>
         <!-- /ko -->
         <!-- ko if: lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.isApplicant() && !lupapisteApp.models.currentUser.isCompanyUser() -->
-          <li><span><span data-bind="ltext: 'footer.tel'"></span> 0600 303500</span><br />(ma-pe 8-16, 0,77&euro;/min+pvm)</li>
+          <li><span><span data-bind="ltext: 'footer.tel'"></span> 0600 303500</span><br />
+          (<span data-bind="ltext: 'footer.phoneservice.time'"></span>, <span data-bind="ltext: 'footer.phoneservice.price'"></span>)</li>
         <!-- /ko -->
         </ul>
       </div>

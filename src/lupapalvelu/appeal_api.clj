@@ -223,7 +223,6 @@
   (->> (filter #(= id (get-in % [:target :id])) attachments)
        (map :latestVersion)
        (map #(select-keys % [:fileId :filename :contentType :size]))
-       (map #(rename-keys % {:fileId :id}))
        (assoc appeal :files)))
 
 (defn- validate-output-format

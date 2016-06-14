@@ -4,6 +4,13 @@ LUPAPISTE.AccordionModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.ltitle = params.ltitle;
-  self.accordionContentTemplate = params.accordionContentTemplate;
-  self.accordionContentTemplateData = params.accordionContentTemplateData;
+  self.contentIsTemplate = params.accordionContentTemplate !== undefined;
+  self.contentIsComponent = params.accordionContentComponent !== undefined;
+  self.contents = self.contentIsTemplate ? {
+    name: params.accordionContentTemplate,
+    data: params.accordionContentTemplateData
+  } : {
+    name:   params.accordionContentComponent,
+    params: params.accordionContentComponentParams
+  };
 };

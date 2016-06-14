@@ -4,7 +4,7 @@
             [pdfa-generator.core :as pdf]
             [clj-time.local :as tl]
             [clj-time.format :as tf]
-            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.i18n :refer [loc] :as i18n]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [sade.util :as util]
@@ -139,10 +139,11 @@
 
 (defn- collect-single-document
   "Build a map of the data of a single document. Entry point for recursive traversal of document data."
-  [doc]
+  [{:keys [data schema-info] :as doc}]
   (let [schema (schemas/get-schema (:schema-info doc))
-        doc-data (:data doc)
-        unselected-groups (removable-groups schema doc-data)
+        op     (:op schema-info)
+        unselected-groups (removable-groups schema data)
+        schema-name (-> schema :info :name)
         schema-body (remove #(= schemas/select-one-of-key (:name %)) (:body schema)) ; don't print _selected radioGroups
         group-schemas (->> schema-body
                            (filter is-printable-group-type)
@@ -151,21 +152,18 @@
                            (remove #(some #{(:name %)} unselected-groups)))
         field-schemas (->> (filter is-field-type schema-body)
                            (remove :exclude-from-pdf))
-        doc-title (-> schema :info :name)
-        doc-title (if (#{:op} (:schema-info doc))
-                    (str "operations." (-> doc :schema-info :op :name))
-                    doc-title)
-        doc-desc (-> doc :schema-info :op :description)
+        doc-title (if (ss/not-blank? (:name op)) (str "operations." (:name op)) schema-name)
+        doc-desc  (:description op)
         i18name (-> schema :info :i18name)
-        locstring (if-not (nil? i18name)
+        locstring (if-not (ss/blank? i18name)
                     i18name
-                    doc-title)]
+                    schema-name)]
     ; document is (almost) like just another group
     (array-map
       :title doc-title
       :title-desc doc-desc
-      :fields (collect-fields field-schemas doc-data locstring)
-      :groups (collect-groups group-schemas doc-data locstring))))
+      :fields (collect-fields field-schemas data locstring)
+      :groups (collect-groups group-schemas data locstring))))
 
 (defn- doc-order-comparator [x y]
   (cond
@@ -217,7 +215,7 @@
     (loc "applications.authority") (get-authority app)
     (loc "application.address") (:address app)
     (loc "applicant") (clojure.string/join ", " (:_applicantIndex app))
-    (loc "selectm.source.label.edit-selected-operations") (get-operations app)))
+    (loc "operations") (get-operations app)))
 
 ; Deprecated, statement is replaced with replaced with libre-template
 (defn- collect-statement-fields [statements]
@@ -408,14 +406,12 @@
 (defmethod render-group-by-type :default [group]
   (render-group group))
 
-(defn- localized-title [doc]
-  (let [description (:title-desc doc)
-        desc-postfix (str " - " description)
-        title (loc (str (:title doc) "." "_group_label"))]
-    (str
-      title
-      (when-not (ss/blank? description)
-        desc-postfix))))
+(defn- localized-title [{:keys [title title-desc]}]
+  (let [desc-postfix (str " - " title-desc)
+        loc-title (if (i18n/has-term? i18n/*lang* title)
+                    (loc title)
+                    (loc title :_group_label))]
+    (str loc-title (when-not (ss/blank? title-desc) desc-postfix))))
 
 (defn- document-section-header [title]
   [[:pdf-table single-column-table-opts [1]
@@ -491,9 +487,9 @@
 (defn generate
   ([application lang]
    (let [out (ByteArrayOutputStream.)]
-     (with-lang lang
-                (gen-pdf-data application out)
-                (ByteArrayInputStream. (.toByteArray out)))))
+     (i18n/with-lang lang
+                     (gen-pdf-data application out)
+                     (ByteArrayInputStream. (.toByteArray out)))))
   ([application lang file]
    (let [stream (generate application lang)]
      (with-open [out (io/output-stream file)]
@@ -504,7 +500,7 @@
 
 (defn- render-tasks [fields]
   (let [title (loc "application.building")
-        empty (loc "hankkeen-kuvaus.hankkeenVaativuus.ei tiedossa")
+        empty (loc "ei-tiedossa")
         buildings (:rakennus fields)]
     `[~@(render-fields (take 12 fields))
       [:pagebreak]
@@ -525,33 +521,34 @@
     :else render-fields-plain))
 
 (defn- generate-pdf-data-with-child [{subtype :permitSubtype :as app} child-type id lang]
-  (with-lang lang (let [title (cond
-                                (= child-type :statements) (loc "application.statement.status")
-                                (= child-type :neighbors) (loc "application.MM.neighbors")
-                                (= child-type :verdicts) (loc "application.verdict.title")
-                                (= child-type :tasks) (loc "task-katselmus.rakennus.tila._group_label")
-                                (ss/blank? (str subtype)) (loc "application.export.title")
-                                :else (loc "permitSubtype" subtype))
-                        app-data (collect-export-data app title false)
-                        child (filter #(= id (:id %)) (child-type app))
-                        child-data (cond
-                                     (= child-type :statements) (collect-statement-fields child)
-                                     (= child-type :neighbors) (collect-neighbour-fields child)
-                                     (= child-type :tasks) (collect-task-fields child)
-                                     (= child-type :verdicts) nil
-                                     :else (collect-documents app))]
-                    ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper
-                    ; function into the body of the literal vector defined here.
-                    ; E.g. if (defn x [] [3 4]) then:
-                    ; [1 2 (x)] -> [1 2 [3 4]]
-                    ; `[1 2 ~@(x)] -> [1 2 3 4]
-                    ;(debug "child: " (with-out-str (clojure.pprint/pprint child)))
-                    ;(debug "child-data: " (with-out-str  (clojure.pprint/pprint child-data)))
-                    `[~(pdf-metadata)
-                      ~@(common-header app-data)
-                      ~@(common-fields (:common-fields app-data))
-                      ~@(document-section-header title)
-                      ~@(map (child-renderer child-type) child-data)])))
+  (i18n/with-lang lang
+    (let [title (cond
+                  (= child-type :statements) (loc "lausunto")
+                  (= child-type :neighbors) (loc "application.neighbors")
+                  (= child-type :verdicts) (loc "application.verdict.title")
+                  (= child-type :tasks) (loc "task-katselmus.rakennus.tila._group_label")
+                  (ss/blank? (str subtype)) (loc "application.export.title")
+                  :else (loc "permitSubtype" subtype))
+          app-data (collect-export-data app title false)
+          child (filter #(= id (:id %)) (child-type app))
+          child-data (cond
+                       (= child-type :statements) (collect-statement-fields child)
+                       (= child-type :neighbors) (collect-neighbour-fields child)
+                       (= child-type :tasks) (collect-task-fields child)
+                       (= child-type :verdicts) nil
+                       :else (collect-documents app))]
+      ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper
+      ; function into the body of the literal vector defined here.
+      ; E.g. if (defn x [] [3 4]) then:
+      ; [1 2 (x)] -> [1 2 [3 4]]
+      ; `[1 2 ~@(x)] -> [1 2 3 4]
+      ;(debug "child: " (with-out-str (clojure.pprint/pprint child)))
+      ;(debug "child-data: " (with-out-str  (clojure.pprint/pprint child-data)))
+      `[~(pdf-metadata)
+        ~@(common-header app-data)
+        ~@(common-fields (:common-fields app-data))
+        ~@(document-section-header title)
+        ~@(map (child-renderer child-type) child-data)])))
 
 (defn generate-pdf-with-child
   ([app child-type id lang out]

@@ -1,0 +1,8 @@
+"filter.hakemus" "fi" "Hakemuksen aikaiset"
+"filter.rakentaminen" "fi" "Rakentamisen aikaiset"
+"filter.iv" "fi" "IV-suunnitelmat"
+"filter.kvv" "fi" "KVV-suunnitelmat"
+"filter.rakenne" "fi" "Rakennesuunnitelmat"
+"filter.ei-tarpeen" "fi" "Liite ei tarpeen"
+"filter.paapiirustukset" "fi" "Pääpiirustukset"
+"filter.show-all" "fi" "Näytä kaikki liitteet"

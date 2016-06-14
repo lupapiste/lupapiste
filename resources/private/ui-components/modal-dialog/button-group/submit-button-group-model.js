@@ -2,14 +2,11 @@ LUPAPISTE.SubmitButtonGroupModel = function (params) {
   "use strict";
   var self = this;
 
-  params = params || {};
-  self.isSubmitVisible = params.isSubmitVisible || true;
-  self.isSubmitEnabled = params.isSubmitEnabled || true;
-  self.submitCssClasses = params.submitCssClasses || "btn btn-primary";
-  self.submitTitle = params.lSubmitTitle ? loc(params.lSubmitTitle) : params.submitTitle;
-  self.submit = params.submit || _.noop;
+  var p = params || {};
+  self.isSubmitVisible = p.isSubmitVisible || true;
+  self.isSubmitEnabled = p.isSubmitEnabled || true;
+  self.submitCssClasses = p.submitCssClasses || "btn btn-primary";
+  self.submitTitle = p.lSubmitTitle ? loc(p.lSubmitTitle) : p.submitTitle;
+  self.submit = p.submit || _.noop;
 
-  self.close = function() {
-    hub.send("close-dialog");
-  };
 };

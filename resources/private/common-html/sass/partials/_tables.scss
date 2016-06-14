@@ -269,7 +269,7 @@ table.review-buildings-table {
     border: none;
     text-align: center;
   }
-  div.checkbox-wrapper--disabled {
+  div.checkbox-wrapper.wrapper--disabled {
     background-color: initial;
   }
 }
@@ -284,3 +284,30 @@ table.company-users-table {
     background-color: transparent;
   }
 }
+
+div.attachments-table-container {
+  padding: {
+  top: 1em;
+  right: .6em;
+  left: .5em;
+}
+  table.attachments-table {
+    margin-bottom: 1em;
+    .checkbox-wrapper {
+      border: none;
+      .checkbox-label {
+        padding-top: 2px;
+        padding-left: 0;
+      }
+    }
+    td {
+      vertical-align: top;
+      .fileinfo {
+        font-style: normal;
+      }
+    }
+    td.attachments-table__state-icons {
+      margin-left: 1px;
+      magint-right: 1px;
+    }
+  }}

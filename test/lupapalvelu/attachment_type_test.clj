@@ -2,7 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.attachment-type :refer :all]
-            [lupapalvelu.attachment-metadata :refer :all]))
+            [lupapalvelu.attachment.metadata :refer :all]))
 
 (testable-privates lupapalvelu.attachment-type attachment-types-by-operation)
 

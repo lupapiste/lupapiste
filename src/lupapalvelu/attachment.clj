@@ -13,8 +13,8 @@
             [sade.http :as http]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment-type :as att-type]
-            [lupapalvelu.attachment-accessibility :as access]
-            [lupapalvelu.attachment-metadata :as metadata]
+            [lupapalvelu.attachment.accessibility :as access]
+            [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
@@ -67,6 +67,9 @@
 (def attachment-states #{:ok :requires_user_action :requires_authority_action})
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
+
+(defschema AttachmentId
+  (ssc/min-length-string 24))
 
 (defschema AttachmentAuthUser
   "User summary for authorized users in attachment.
@@ -131,7 +134,7 @@
    :type-group                           (apply sc/enum att-type/all-attachment-type-groups)})
 
 (defschema Attachment
-  {:id                                   sc/Str
+  {:id                                   AttachmentId
    :type                                 Type               ;; Attachment type
    :modified                             ssc/Timestamp      ;; last modified
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
@@ -145,7 +148,7 @@
                                           :fileId ssc/ObjectIdStr }
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
-   (sc/optional-key :ramLink)           sc/Str            ;; reference from ram attachment to base attachment
+   (sc/optional-key :ramLink)            AttachmentId       ;; reference from ram attachment to base attachment
    :required                             sc/Bool            ;;
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;
@@ -632,9 +635,7 @@
     (output-attachment preview-id false attachment-fn)))
 
 (defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
-  (when-not libreoffice-client/enabled?
-    (info "Danger: Libreoffice PDF/A conversion feature disabled."))
-  (if (and libreoffice-client/enabled?
+  (if (and (libreoffice-client/enabled?)
            (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
            (or (=as-kw type-group :paatoksenteko) (=as-kw type-group :muut))
            (#{:paatos :paatosote} (keyword type-id)))

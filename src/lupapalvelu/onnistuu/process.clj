@@ -185,7 +185,7 @@
            name
            document)
     (let [company  (c/create-company (merge (:company process) {:process-id process-id, :document document}))
-          token-id (if (nil? (:currentUser signer)) (c/add-user-after-company-creation! signer company :admin))
+          token-id (if (nil? (:currentUser signer)) (c/add-user-after-company-creation! signer company :admin true))
           mail-model (assoc (select-keys process [:company :signer]) :document document :signature (first signatures))]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"
              process-id
@@ -194,7 +194,7 @@
              (:id company)
              token-id)
       (when (:currentUser signer)
-        (c/link-user-to-company! (:currentUser signer) (:id company) :admin)
+        (c/link-user-to-company! (:currentUser signer) (:id company) :admin true)
         (infof "added current user to created-company: company [%s], user [%s]"
                (:id company)
                (:currentUser signer)))

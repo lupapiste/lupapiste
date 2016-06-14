@@ -26,7 +26,7 @@
       (fact "Attachment id must match with uploaded file"
         (command pena :remove-uploaded-file :attachmentId "asdasd" :cookie-store cookie-store) => (partial expected-failure? :error.file-upload.not-found))
       (fact "Attachment can be deleted"
-        (command pena :remove-uploaded-file :attachmentId (:id uploaded-file) :cookie-store cookie-store) => ok?)
+        (command pena :remove-uploaded-file :attachmentId (:fileId uploaded-file) :cookie-store cookie-store) => ok?)
       (fact "Attachment can not be deleted after linking it to post"
         (let [bulletin (bulletin-util/create-application-and-bulletin :cookie-store cookie-store)
               upload-resp   (-> (bulletin-util/send-file cookie-store)
@@ -42,4 +42,4 @@
           (command sonja :add-bulletin-comment :bulletinId (:id bulletin) :bulletinVersionId (:versionId bulletin) :comment "foobar" :files [uploaded-file] :cookie-store cookie-store) => ok?
 
           ;try to remove
-          (command pena :remove-uploaded-file :attachmentId (:id uploaded-file) :cookie-store cookie-store) => (partial expected-failure? :error.file-upload.already-linked))))))
+          (command pena :remove-uploaded-file :attachmentId (:fileId uploaded-file) :cookie-store cookie-store) => (partial expected-failure? :error.file-upload.already-linked))))))

@@ -242,6 +242,10 @@ i.btn-small {
   @include styled-input( $bg: $gray-link, $hover-bg: $gray-hover, $active-bg: $gray-active );
 }
 
+@include button-div-a-i-span (tertiary) {
+  @include styled-input( $bg: $light-gray-link, $hover-bg: $light-gray-hover, $active-bg: $light-gray-active );
+}
+
 @include button-div-a-i-span (positive) {
   @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
 }
@@ -269,28 +273,32 @@ i.btn-small {
   @include styled-input( $bg: $blue-active, $hover-bg: $blue-hover, $active-bg: $blue-link );
 }
 
-@mixin function ($text, $hover-text, $active-text ) {
+@mixin function ($text, $hover-text, $active-text,
+                 $border-color: $gray221, $border-hover: $gray187, $border-active: $gray187 ) {
   @include styled-input($bg: white, $hover-bg: white, $active-bg: white,
                         $text: $text, $hover-text: $hover-text, $active-text: $active-text,
                         $disabled-text: $gray187, $disabled-bg: $gray246);
   border: {
     style: solid;
     width: 1px;
-    color: $gray221;
+    color: $border-color;
   }
   &:link, &:visited {
-    border-color: $gray221;
+    border-color: $border-color;
   }
-  &:hover, &:active {
-    border-color: $gray187;
+  &:hover {
+    border-color: $border-hover;
+           }
+  &:active {
+    border-color: $border-active;
   }
 }
 
 @include button-div-a-i-span (function) {
-  @include function( $orange-link, $orange-hover, $gray51 );
+  @include function( $orange-link, $orange-hover, $orange-active );
 }
 
-.function.disabled {
+.function.disabled, .function:disabled, .function.waiting {
   @include disabled( $gray187, $gray246 );
   &:hover, &:active, &:disabled {
                        border-color: $gray221 !important;
@@ -298,10 +306,10 @@ i.btn-small {
  }
 
 button.function {
-  &:disabled {
+  &:disabled, &:disabled:hover {
     border-color: $gray221 !important;
   }
- }
+}
 
 @include button-div-a-i-span ("function.authority") {
   @include function( $turqo-link, $turqo-hover, $gray51 );
@@ -312,6 +320,27 @@ button.function {
   @include function( $blue-link, $blue-hover, $gray51 );
 }
 
+@include button-div-a-i-span( ghost ) {
+  @include function($orange-dark, $orange-hover, $orange-active,
+                    $orange-dark, $orange-hover, $orange-active );
+  
+}
+
+.ghost:disabled, ghost.disabled, .ghost.waiting {
+  @include disabled( $gray187, $gray246 );
+  border-color: $gray221 !important;
+  &:hover, &:active, &:disabled {
+                       border-color: $gray221 !important;
+                     }
+ }
+
+button.ghost {
+  &:disabled, &:disabled:hover {
+    border-color: $gray221 !important;
+  }
+ }
+
+
 // Link button is a link that is laid out as button.
 // However, no background or borders.
 
@@ -321,6 +350,14 @@ a.link-btn {
                          $text: $orange-link, $hover-text: $orange-hover,
                          $active-text: $orange-active, $disabled-bg: none);
   cursor: pointer;
+}
+
+.link-btn--link {
+  &:hover, &:active {
+             span {
+               text-decoration: underline;
+             }             
+  }
 }
 
 a.link-btn-julkipano {
@@ -544,4 +581,17 @@ button {
 
 .left-buttons > button {
   margin-right: $btn-spacer;
+}
+
+// Mixin for a button row that wraps
+@mixin button-row ($margin-right: $btn-spacer, $margin-bottom: $btn-spacer ){
+  .btn-base, .btn, button, div, a {
+    margin: {
+    right: $margin-right;
+    bottom: $margin-bottom;
+  }
+  }
+  :last-child {
+    margin-right: 0;
+  }
 }

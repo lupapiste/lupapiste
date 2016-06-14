@@ -1,4 +1,4 @@
-(ns lupapalvelu.attachment-metadata
+(ns lupapalvelu.attachment.metadata
   (:require [lupapiste-commons.tos-metadata-schema :as tosmeta]))
 
 

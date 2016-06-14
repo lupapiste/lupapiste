@@ -204,12 +204,12 @@ Mikko logs in and invites Pena directly
   Invite pena@example.com to application
   [Teardown]  Logout
 
-Pena logs in, accepts invitation and could now submit application
+Pena logs in, accepts invitation and still cannot submit application
   Pena logs in
   Open application  ${appname}  ${propertyId}
   Confirm yes no dialog
   Open tab  requiredFieldSummary
-  Test id enabled  application-submit-btn
+  Test id disabled  application-submit-btn
   [Teardown]  Logout
 
 # Custom account

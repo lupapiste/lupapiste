@@ -10,7 +10,7 @@
             [sade.validators :as v]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment-accessibility :as attaccess]
+            [lupapalvelu.attachment.accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
@@ -621,6 +621,23 @@
           (for [collection [:applications :submitted-applications]
                 application (mongo/select collection query {k 1})]
             (mongo/update-n collection {:_id (:id application)} {$set {k (map f (k application))}}))))
+
+(defn update-bulletin-versions [k f query]
+  "Maps f over each element of list with key k in application
+   bulletins, obtained by the given query. Returns the number
+   of bulletins updated."
+  {:pre [(keyword? k) (fn? f) (map? query)]}
+  (let [version-key (keyword (str "versions." (name k)))]
+    (reduce + 0
+      (for [bulletin (mongo/select :application-bulletins query {:versions 1})]
+        (mongo/update-n :application-bulletins
+          {:_id (:id bulletin)}
+          {$set
+            {:versions
+              (map
+                (fn [versio]
+                  (assoc versio k (map f (get versio k))))
+                (:versions bulletin))}})))))
 
 (defn- populate-buildingids-to-doc [doc]
   (let [rakennusnro (get-in doc [:data :rakennusnro])
@@ -2177,21 +2194,31 @@
        (map add-ym-in-scope)
        (run! #(mongo/update-by-id :organizations (:id %) {$set {:scope (:scope %)}}))))
 
-(defmigration add-missing-submit-rights-to-company-users
+(defmigration add-missing-submit-rights-to-company-users-v2
   {:apply-when (pos? (mongo/count :users {:company.id {$exists true}
-                                          :company.submit {$exists false}}))}
+                                          :company.submit nil}))}
   (mongo/update-by-query :users
                          {:company.id {$exists true}
-                          :company.submit {$exists false}}
+                          :company.submit nil}
                          {$set {:company.submit true}}))
 
-(defmigration add-missing-submit-rights-to-company-tokens
+(defmigration add-missing-submit-rights-to-company-tokens-v2
   {:apply-when (pos? (mongo/count :token {:token-type {$in [:new-company-user :invite-company-user]}
                                           :data.submit {$exists false}}))}
   (mongo/update-by-query :token
                          {:token-type {$in [:new-company-user :invite-company-user]}
                           :data.submit {$exists false}}
                          {$set {:data.submit true}}))
+
+
+;; update also bulletins as per change-meluilmoitus-kesto-as-repeating
+(defmigration change-meluilmoitus-bulletins-kesto-as-repeating
+  {:apply-when (pos? (mongo/count :application-bulletins {:versions.documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                                         :schema-info.name "ymp-ilm-kesto"}}}))}
+  (update-bulletin-versions :documents
+                            change-kesto-doc-as-repeating
+                            {:versions.documents {$elemMatch {:data.kesto.arki {$exists true}
+                                                     :schema-info.name "ymp-ilm-kesto"}}}))
 
 ;;
 ;; ****** NOTE! ******

@@ -9,7 +9,7 @@
 
 (defschema FrontendAppealFile
   "File presentation expected by the frontend from appeals query."
-  {:id          ssc/ObjectIdStr
+  {:fileId      ssc/ObjectIdStr
    :filename    sc/Str
    :contentType sc/Str
    :size        sc/Num})

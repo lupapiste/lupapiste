@@ -265,7 +265,7 @@
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
           (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary
           (opt :order)                       sc/Int}    ;;
-   (opt :rows) [(sc/either [sc/Str] {sc/Keyword sc/Str})]
+   (opt :rows) [(sc/cond-pre {sc/Keyword sc/Str} [sc/Str])]
    (opt :template) sc/Str
    :body  [Element]})
 

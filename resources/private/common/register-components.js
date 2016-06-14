@@ -124,7 +124,12 @@ jQuery(document).ready(function() {
     {name: "cell-select"},
     {name: "review-tasks"},
     {name: "task"},
-    {name: "ram-links"}
+    {name: "ram-links"},
+    {name: "attachments-listing"},
+    {name: "rollup"},
+    {name: "rollup-button"},
+    {name: "rollup-status-button"},
+    {name: "filters"}
 ];
 
   _.forEach(components, function(component) {

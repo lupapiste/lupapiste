@@ -5,23 +5,23 @@
     <script type="text/x-jquery-tmpl" id="modal-dialog-template">
     <!-- dummy div for catching keypress events -->
     <div data-bind="visible: false, documentEvent: {keypress: closeDialog, key: 27}"></div>
-    <!-- ko if: showDialog -->
-    <div class="mask" data-bind="visible: dialogVisible, click: closeDialog"></div>
-    <div class="dialog" id="modal-dialog-content" data-test-id="modal-dialog-content"
-         data-bind="fader: dialogVisible, duration: 600,
-                    style: {'max-height': dialogHeightPx(),
-                            'margin-top': dialogTop() + 'px'},
-                    css: css">
-      <div class="header">
-        <span class="title" data-bind="html: title"></span>
-        <span class="close lupicon-remove" data-bind="click: closeDialog"></span>
+    <div data-bind="if: showDialog" id="modal-dialog-content-container">
+      <div class="mask" data-bind="visible: dialogVisible, click: closeDialog"></div>
+      <div class="dialog" id="modal-dialog-content" data-test-id="modal-dialog-content"
+           data-bind="fader: dialogVisible, duration: 600,
+                      style: {'max-height': dialogHeightPx(),
+                              'margin-top': dialogTop() + 'px'},
+                      css: css">
+        <div class="header">
+          <span class="title" data-bind="html: title"></span>
+          <span class="close lupicon-remove" data-bind="click: closeDialog"></span>
+        </div>
+        <div id="modal-dialog-content-component" class="component"
+             data-bind="component: {name: component, params: componentParams},
+                        style: {'height': dialogContentHeightPx()},
+                        click: componentClicked"></div>
       </div>
-      <div id="modal-dialog-content-component" class="component"
-           data-bind="component: {name: component, params: componentParams},
-                      style: {'height': dialogContentHeightPx()},
-                      click: componentClicked"></div>
     </div>
-    <!-- /ko -->
     </script>
   </section>
 </body>

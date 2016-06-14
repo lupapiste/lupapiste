@@ -242,9 +242,9 @@
                                    :recipients-fn notif/from-user
                                    :model-fn      (fn [model _ __] model)})
 
-(defn add-user-after-company-creation! [user company role]
+(defn add-user-after-company-creation! [user company role submit]
   (let [user (update-in user [:email] usr/canonize-email)
-        token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
+        token-id (token/make-token :new-company-user nil {:user user, :company company, :role role, :submit submit} :auto-consume false)]
     (notif/notify! :new-company-admin-user {:user       user
                                             :company    company
                                             :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
@@ -266,15 +266,15 @@
 (defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
   (usr/create-new-user nil {:email       (:email user)
-                             :username    (:email user)
-                             :firstName   (:firstName user)
-                             :lastName    (:lastName user)
-                             :company     {:id (:id company) :role role :submit submit}
-                             :personId    (:personId user)
-                             :password    password
-                             :role        :applicant
-                             :architect   true
-                             :enabled     true}
+                            :username    (:email user)
+                            :firstName   (:firstName user)
+                            :lastName    (:lastName user)
+                            :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
+                            :personId    (:personId user)
+                            :password    password
+                            :role        :applicant
+                            :architect   true
+                            :enabled     true}
     :send-email false)
   (ok))
 
@@ -392,10 +392,8 @@
     (ok)))
 
 (defn cannot-submit
-  "Pre-check that fails only if the user is authed as company user
-  without submit rights"
-  [{user :user} application]
-  (when-not (and (not (domain/owner-or-write-access? application (:id user)))
-             (domain/company-access? application (-> user :company :id))
-             (not (-> user :company :submit)))
+  "Pre-check that succeeds only if a company user does not have submit
+  rights"
+  [{{company :company} :user} application]
+  (when-not (and company  (not (:submit company)))
     (fail :error.authorized)))

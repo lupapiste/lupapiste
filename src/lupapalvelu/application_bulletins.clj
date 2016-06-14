@@ -5,7 +5,7 @@
             [clojure.set :refer [difference]]
             [sade.util :refer [fn->] :as util]
             [sade.core :refer :all]
-            [lupapalvelu.attachment-metadata :as metadata]
+            [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
@@ -126,9 +126,9 @@
   (update-bulletin bulletin-id {} changes :upsert true))
 
 (defn update-file-metadata [bulletin-id comment-id files]
-  (mongo/update-by-query :fs.files {:_id {$in (map :id files)}} {$set {:metadata.linked     true
-                                                                       :metadata.bulletinId bulletin-id
-                                                                       :metadata.commentId  comment-id}}))
+  (mongo/update-by-query :fs.files {:_id {$in (map :fileId files)}} {$set {:metadata.linked     true
+                                                                           :metadata.bulletinId bulletin-id
+                                                                           :metadata.commentId  comment-id}}))
 
 ;;;
 ;;; Date checkers

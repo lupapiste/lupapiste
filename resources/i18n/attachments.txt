@@ -1,0 +1,3 @@
+"attachment.th-type" "fi" "Tyyppi / Sisältö / Milloin tarvitaan"
+"attachment.th-not-needed" "fi" "Ei tarpeen / Muokattu"
+"attachment.th-not-ok" "fi" "Tark."

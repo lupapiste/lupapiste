@@ -11,7 +11,8 @@
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-scales, attachment-sizes]]
             [lupapalvelu.attachment-type :as att-type]
-            [lupapalvelu.attachment-metadata :as attachment-meta]
+            [lupapalvelu.attachment.metadata :as attachment-meta]
+            [lupapalvelu.calendar :as cal]
             [lupapalvelu.company :as company]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.document.model :as model]
@@ -78,7 +79,8 @@
                  :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
                  :supportedLangs        i18n/languages
-                 :urgencyStates         ["normal" "urgent" "pending"]}]
+                 :urgencyStates         ["normal" "urgent" "pending"]
+                 :calendars             (cal/ui-params)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -189,7 +191,8 @@
                    "verdict-appeal-service.js"
                    "scroll-service.js"
                    "ram-service.js"
-                   "calendar-service.js"]}
+                   "calendar-service.js"
+                   "attachments-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

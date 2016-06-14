@@ -476,8 +476,12 @@
     (try
       (handler request)
       (finally
-        (when-let [tempfile (get-in request [:params :upload :tempfile])]
-          (fs/delete tempfile))))))
+        (when-let [tempfile (or (get-in request [:params :upload :tempfile])
+                                (get-in request [:params :files]))]
+          (if (sequential? tempfile)
+            (doseq [{file :tempfile} tempfile] ; files as array from fileupload-service /api/raw/upload-file
+              (fs/delete file))
+            (fs/delete tempfile)))))))
 
 ;;
 ;; Server is alive
