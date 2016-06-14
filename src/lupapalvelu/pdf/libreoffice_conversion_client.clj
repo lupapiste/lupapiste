@@ -30,7 +30,7 @@
                                   :part-name "file"
                                   :mime-type (mime/mime-type (mime/sanitize-filename filename))
                                   :encoding  "UTF-8"
-                                  :content   "content"}]}))
+                                  :content   content}]}))
 
 (defn- success [filename content]
   {:filename   (str (FilenameUtils/removeExtension filename) ".pdf")
@@ -75,15 +75,14 @@
   (let [filename (str (localize lang "caseFile.heading") ".fodt")
         tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
     (history/write-history-libre-doc application lang tmp-file)
-    (:content (convert-to-pdfa filename (io/input-stream tmp-file)))))
-
+    (:content (convert-to-pdfa filename tmp-file))))
 
 (defn generate-verdict-pdfa [application verdict-id paatos-idx lang dst-file]
   (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-idx ", lang: " lang)
   (let [filename (str (localize lang "application.verdict.title") ".fodt")
         tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
     (verdict/write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
-    (io/copy (:content (convert-to-pdfa filename (io/input-stream tmp-file))) dst-file)
+    (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file)
     (io/delete-file tmp-file :silently)))
 
 (defn generate-statment-pdfa-to-file! [application id lang dst-file]
@@ -91,5 +90,5 @@
   (let [filename (str (localize lang "application.statement.status") ".fodt")
         tmp-file (File/createTempFile (str "temp-export-statement-" (name lang) "-") ".fodt")]
     (statement/write-statement-libre-doc application id lang tmp-file)
-    (io/copy (:content (convert-to-pdfa filename (io/input-stream tmp-file))) dst-file)
+    (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file)
     (io/delete-file tmp-file :silently)))
