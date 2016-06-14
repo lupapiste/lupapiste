@@ -66,10 +66,10 @@
   (let [body  (json/decode (:body response) keyword)]
     (error response)
     (if (= 401 (:status response))
-      (fail! "Unathorized" :code "unauthorized-access" :message "Bad credentials"))
+      (fail! "Unathorized" :code "calendar.error.unauthorized-access" :message "Bad credentials"))
     (if (= 403 (:status response))
-      (fail! "Unathorized" :code "unauthorized-access" :message "Forbidden"))
-    (fail! "Bad request" :code (:code body) :message (:message body))))
+      (fail! "Unathorized" :code "calendar.error.unauthorized-access" :message "Forbidden"))
+    (fail! "Bad request" :code (str "calendar.error." (:code body)) :message (:message body))))
 
 (defn- api-query
   ([action]
@@ -77,7 +77,7 @@
   ([action params]
    (let [response (api-call http/get (str "/api/" (name action)) {:query-params params})]
      (when-not (= 200 (:status response))
-       (handle-error-response response)
+       (handle-error-response response))
      (:body response))))
 
 (defn- post-command
@@ -86,8 +86,8 @@
   ([command request-body]
    (let [response (api-post-command (str "/api/" (name command)) request-body)]
      (when-not (= 200 (:status response))
-       (handle-error-response response)
-      (:body response)))))
+       (handle-error-response response))
+     (:body response))))
 
 (defn- put-command
   ([command]
@@ -95,8 +95,8 @@
   ([command request-body]
    (let [response (api-put-command (str "/api/" (name command)) request-body)]
      (when-not (= 200 (:status response))
-       (handle-error-response response)
-      (:body response)))))
+       (handle-error-response response))
+     (:body response))))
 
 (defn- delete-command
   ([command]
@@ -104,8 +104,8 @@
   ([command request-body]
    (let [response (api-delete-command (str "/api/" (name command)) request-body)]
      (when-not (= 200 (:status response))
-       (handle-error-response response)
-      (:body response)))))
+       (handle-error-response response))
+     (:body response))))
 
 ; -- calendar API functions
 
@@ -311,8 +311,6 @@
         calendarId (:resourceId slot)]
     (when-not (authorized-to-edit-calendar? user calendarId)
       (unauthorized!))
-    (when (:fullyBooked slot)
-      (fail! :calendar.error.cannot-update-a-booked-slot))
     (info "Updating calendar slot #" slotId)
     (ok :result (put-command (str "reservationslots/" slotId) {:capacity 1 :reservationTypeIds reservationTypeIds}))))
 
@@ -327,8 +325,6 @@
         calendarId (:resourceId slot)]
     (when-not (authorized-to-edit-calendar? user calendarId)
       (unauthorized!))
-    (when (:fullyBooked slot)
-      (fail! :calendar.error.cannot-delete-a-booked-slot))
     (info "Deleting reservation slot #" slotId)
     (ok :result (delete-command (str "reservationslots/" slotId)))))
 
