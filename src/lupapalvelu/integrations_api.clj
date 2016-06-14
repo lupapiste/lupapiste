@@ -355,8 +355,8 @@
     path
     io/file
     (.listFiles)
-    (filter #(re-matches pattern (.getName %)))
-    (map #(.getName %))))
+    (filter (fn [^java.io.File f] (re-matches pattern (.getName f))))
+    (map (fn [^java.io.File f] {:name (.getName f), :modified (.lastModified f)}))))
 
 (defn- list-integration-dirs [output-dir id]
   (let [xml-pattern (re-pattern (str "^" id "_.*\\.xml"))

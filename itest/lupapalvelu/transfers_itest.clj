@@ -38,5 +38,6 @@
             (fact "no files transferred" ok => empty?)
             (fact "no files in errors" error => empty?)
             (fact "at least one file waits to be transferred" (count waiting) => pos?)
-            (fact "all filenames start with application id" waiting => (has every? #(.startsWith % app-id))))))))
+            (fact "all filenames start with application id" (map :name waiting) => (has every? #(.startsWith % app-id)))
+            (fact "file has modification time" (map :modified waiting) => (has every? pos?)))))))
   )
