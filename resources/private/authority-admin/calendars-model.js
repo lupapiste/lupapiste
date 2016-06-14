@@ -14,6 +14,10 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
           util.showSavedIndicator(response);
           user.calendarId(response.calendarId);
         })
+        .error(function(e) {
+          hub.send("indicator", {style: "negative", message: e.code});
+          hub.send("calendarService::fetchOrganizationCalendars");
+        })
         .call();
     }
   }
