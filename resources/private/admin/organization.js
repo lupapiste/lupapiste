@@ -133,7 +133,7 @@
           self.organization()["permanent-archive-enabled"](value);
         })
         .call();
-    })
+    });
 
     ajax
       .query("permit-types")
