@@ -7412,7 +7412,7 @@ LUPAPISTE.AttachmentsService = function() {
         "notNeeded": false,
         "signatures": [],
         "forPrinting": false,
-        "contents": "Tämä päätös pitää",
+        "contents": "T\u00e4m\u00e4 p\u00e4\u00e4t\u00f6s pit\u00e4\u00e4",
         "target": {
           "urlHash": "236d9b2cfff88098d4f8ad532820c9fb93393237",
           "id": "57594864487b9a70edc99f3a",
