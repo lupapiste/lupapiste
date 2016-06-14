@@ -6,9 +6,13 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.calendarWeekdays = ko.observableArray();
   self.reservationTypes = ko.observableArray();
   self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
+  self.calendarId = ko.observable();
+  self.userId = ko.observable();
 
-  self.calendarId = params.calendarId; // observable from parent
-  self.userId = params.userId; // observable from parent
+  if (params.searchConditions && params.searchConditions.calendarId) {
+    self.calendarId = params.searchConditions.calendarId; // observable from parent
+    self.userId = params.searchConditions.userId; // observable from parent
+  }
   self.reservationTypes = params.reservationTypes; // observable from parent
 
   self.firstFullHour = calendarService.params().firstFullHour;
@@ -72,23 +76,24 @@ LUPAPISTE.CalendarViewModel = function (params) {
     }
   });
 
-  hub.subscribe("calendarService::calendarWeekFetched", function(event) {
-    self.calendarWeekdays(event.week);
+  ko.computed(function() {
+    hub.send("calendarService::fetchCalendarSlots",
+      { calendarId: self.calendarId(),
+        week: self.startOfWeek().isoWeek(),
+        year: self.startOfWeek().year(),
+        weekObservable: self.calendarWeekdays});
   });
 
   self.gotoToday = function() {
     self.startOfWeek(moment().startOf("isoWeek"));
-    hub.send("calendarService::fetchCalendarSlots", { calendarId: self.calendarId(), week: self.startOfWeek().isoWeek(), year: self.startOfWeek().year() });
   };
 
   self.gotoPreviousWeek = function() {
     self.startOfWeek(self.startOfWeek().add(-1, "weeks"));
-    hub.send("calendarService::fetchCalendarSlots", { calendarId: self.calendarId(), week: self.startOfWeek().isoWeek(), year: self.startOfWeek().year() });
   };
 
   self.gotoFollowingWeek = function() {
     self.startOfWeek(self.startOfWeek().add(1, "weeks"));
-    hub.send("calendarService::fetchCalendarSlots", { calendarId: self.calendarId(), week: self.startOfWeek().isoWeek(), year: self.startOfWeek().year() });
   };
 
 };

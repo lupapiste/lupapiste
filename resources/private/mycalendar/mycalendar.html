@@ -25,7 +25,8 @@
       </div>
     <!-- /ko -->
 
-    <calendar-view params="calendarId: selectedCalendarId, userId: lupapisteApp.models.currentUser.id,
+    <calendar-view params="searchConditions: { calendarId: selectedCalendarId,
+                                               userId: lupapisteApp.models.currentUser.id },
                            reservationTypes: reservationTypes"
                    visible="selectedCalendar() !== undefined"></calendar-view>
 

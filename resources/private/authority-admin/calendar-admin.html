@@ -12,7 +12,8 @@
       <h3 data-bind="with: calendars.calendarInView"><!--ko text: name --><!--/ko--> (<!--ko text: organization --><!--/ko-->) </h3>
       <div>&nbsp;</div>
     </div>
-    <calendar-view params="calendarId: calendars.calendarIdInView, userId: calendars.userIdInView,
+    <calendar-view params="searchConditions: { calendarId: calendars.calendarIdInView,
+                                               userId: calendars.userIdInView },
                            reservationTypes: $root.reservationTypes.items"></calendar-view>
   </div>
 </section>

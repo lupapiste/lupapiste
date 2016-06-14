@@ -6,6 +6,29 @@ LUPAPISTE.CalendarService = function() {
   self.reservationTypesByOrganization = ko.observable();
   self.params = ko.observable(params);
 
+  var _weekdays = function(slots, startOfWeekMoment) {
+    var now = moment();
+    return _.map([1, 2, 3, 4, 5], function(i) {
+      var day = startOfWeekMoment.set({ "isoWeekday": i, "hour": params.firstFullHour, "minutes": 0, "seconds": 0 });
+      var slotsForDay = _.filter(slots, function(s) { return day.isSame(s.startTime, "day"); });
+      return {
+        calendarId: event.calendarId,
+        startOfDay: day.valueOf(),
+        endOfDay: moment(day).hour(params.lastFullHour).valueOf(),
+        today: day.isSame(now, "day"),
+        slots: _.map(slotsForDay,
+          function(s) {
+            return _.extend(s, { duration: moment(s.endTime).diff(s.startTime) });
+          })};
+    });
+  };
+
+  var notifyView = function(event, weekdays) {
+    if (event.weekObservable) {
+      event.weekObservable(weekdays);
+    }
+  }
+
   var doFetchCalendarWeek = function(event) {
     var startOfWeekMoment;
     if (event && event.week && event.year) {
@@ -14,30 +37,18 @@ LUPAPISTE.CalendarService = function() {
       startOfWeekMoment = moment(event.weekObservable()[0].startOfDay).startOf("isoWeek");
     }
 
-    ajax.query("calendar-slots", { calendarId: event.calendarId,
-                                   week: startOfWeekMoment.isoWeek(),
-                                   year: startOfWeekMoment.year() })
-      .success(function(data) {
-        var now = moment();
-        var weekdays = _.map([1, 2, 3, 4, 5], function(i) {
-          var day = startOfWeekMoment.set({ "isoWeekday": i, "hour": params.firstFullHour, "minutes": 0, "seconds": 0 });
-          var slotsForDay = _.filter(data.slots, function(s) { return day.isSame(s.startTime, "day"); });
-          return {
-            calendarId: event.calendarId,
-            startOfDay: day.valueOf(),
-            endOfDay: moment(day).hour(params.lastFullHour).valueOf(),
-            today: day.isSame(now, "day"),
-            slots: _.map(slotsForDay,
-              function(s) {
-                return _.extend(s, { duration: moment(s.endTime).diff(s.startTime) });
-              })};
-        });
-        if (event.weekObservable) {
-          event.weekObservable(weekdays);
-        }
-        hub.send("calendarService::calendarWeekFetched", { week: weekdays });
-      })
-      .call();
+    if (event.calendarId) {
+      ajax.query("calendar-slots", { calendarId: event.calendarId,
+                                     week: startOfWeekMoment.isoWeek(),
+                                     year: startOfWeekMoment.year() })
+        .success(function(data) {
+          notifyView(event, _weekdays(data.slots, startOfWeekMoment));
+        })
+        .call();
+    } else {
+      notifyView(event, _weekdays([], startOfWeekMoment));
+    }
+
   };
 
   var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {
@@ -49,7 +60,6 @@ LUPAPISTE.CalendarService = function() {
         if (event.calendarObservable) {
           event.calendarObservable(data.calendar);
         }
-        doFetchCalendarWeek({calendarId: data.calendar.id, week: moment().isoWeek(), year: moment().year()});
       })
       .call();
   });
