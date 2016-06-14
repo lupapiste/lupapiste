@@ -24,8 +24,10 @@
           (let [pdf-content (pdfbox/extract (.getAbsolutePath file-out))
                 rows (remove s/blank? (s/split pdf-content #"\r?\n"))]
             (fact "PDF data rows "
-              (count rows) => 100
-              (nth rows 1) => "Once there was a miller who was poor, but who had a beautiful"))
+              (count rows) => 18
+              (first rows) => "Lupapiste"
+              (second rows) => "P\u00e4\u00e4t\u00f6sote"))
+
           (finally
             (.delete file-out)))
 
