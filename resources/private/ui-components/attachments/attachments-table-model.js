@@ -20,7 +20,9 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
     return  _( [[approved, "lupicon-circle-check positive"],
                 [rejected || (!file && !notNeeded),
                  "lupicon-circle-attention negative"],
-                [ _.get( data, "signed.0"), "lupicon-circle-pen positive"]])
+                [ _.get( data, "signed.0"), "lupicon-circle-pen positive"],
+                [data.state === "requires_authority_action", "lupicon-circle-star primary"],
+                [data.stamped, "lupicon-circle-stamp positive"]])
       .map( function( xs ) {
         return _.first( xs ) ? _.last( xs ) : false;
       })

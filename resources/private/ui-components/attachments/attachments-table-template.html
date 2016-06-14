@@ -55,21 +55,21 @@
           </td>
           <!-- /ko -->
           <td>
-            <button class="positive"
+            <button class="positive btn-icon-only"
                     data-bind="disable: $parent.isApproved( $data ) || !$parent.canVouch( $data ),
                                click: $parent.approve">
               <i class="lupicon-check"></i>
             </button>
           </td>
           <td>
-            <button class="negative"
+            <button class="negative btn-icon-only"
                     data-bind="disable: $parent.isRejected( $data ) || !$parent.canVouch( $data ),
                                click: $parent.reject">
               <i class="lupicon-circle-attention"></i>
             </button>
           </td>
           <td>
-            <button class="secondary"
+            <button class="secondary btn-icon-only"
                     data-bind="click: $parent.remove">
               <i class="lupicon-remove"></i>
             </button>

@@ -56,11 +56,10 @@
       <i class="lupicon-menu"></i>
       <span data-bind="text: 'Avaa / sulje kaikki'"></span>
     </button>
-    <div class="attachments-accordions">
-      <div data-bind="foreach: groups[0].accordions">
-        <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                                   data: _.merge($data, {level: 0})}"></div>
-      </div>
+    <div class="attachments-accordions"
+         data-bind="foreach: groups[0].accordions">     
+      <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                      data: _.merge($data, {level: 0})}"></div>
     </div>
     <!-- /ko -->
     <!-- ko if: groups[1].data().hasContent && groups[1].data().hasContent() -->
@@ -71,9 +70,10 @@
       <i class="lupicon-menu"></i>
       <span data-bind="text: 'Avaa / sulje kaikki'"></span>
     </button>
-    <div data-bind="foreach: groups[1].accordions">
+    <div class="attachments-accordions"
+         data-bind="foreach: groups[1].accordions">
       <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                                 data: _.merge($data, {level: 0})}"></div>
+                      data: _.merge($data, {level: 0})}"></div>
     </div>
     <!-- /ko -->
   </div>
