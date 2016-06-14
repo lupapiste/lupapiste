@@ -36,26 +36,28 @@
 (defn- fallback [filename original-bytes error-message]
   (error "libreoffice conversion error: " error-message)
   {:filename           filename
-   :content            (ByteArrayInputStream. original-bytes)
+   :content            original-bytes ;(ByteArrayInputStream. original-bytes)
    :archivabilityError :libre-conversion-error})
 
 (defn convert-to-pdfa [filename content]
+  ; FIXME
   ; Content input stream can be read only once (see LPK-1596).
   ; Content is read the first time when it is streamed to LibreOffice and
   ; second time if the conversion fails and we fall back to original content.
-  (with-open [in (io/reader content), out (ByteArrayOutputStream.)]
+  ;(with-open [in (io/reader content), out (ByteArrayOutputStream.)]
     ; TODO can be optimized in case content is a File.
-    (io/copy in out)
-    (let [bytes (.toByteArray out)]
+    ;(io/copy in out)
+    ;(let [bytes (.toByteArray out)]
       (try
-        (let [{:keys [status body]} (convert-to-pdfa-request filename (ByteArrayInputStream. bytes) )]
+        (let [{:keys [status body]} (convert-to-pdfa-request filename content #_(ByteArrayInputStream. bytes) )]
           (if (= status 200)
             {:filename   (str (FilenameUtils/removeExtension filename) ".pdf")
              :content    body
              :archivable true}
-            (fallback filename bytes (str "response status is " status " with body: " body))))
+            (fallback filename content #_bytes (str "response status is " status " with body: " body))))
         (catch Throwable t
-          (fallback filename bytes (.getMessage t)))))))
+          (fallback filename content #_bytes (.getMessage t)))))
+  ;))
 
 (defn generate-casefile-pdfa [application lang]
   (let [filename (str (localize lang "caseFile.heading") ".fodt")
