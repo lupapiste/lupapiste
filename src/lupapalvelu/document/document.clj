@@ -41,11 +41,17 @@
           doc-count (count (domain/get-documents-by-name documents (:name info)))]
       (and (:deny-removing-last-document info) (<= doc-count 1)))))
 
-(defn remove-doc-validator [{data :data} application]
+(defn- deny-remove-for-non-authority-user [{role :role} {schema-info :schema-info}]
+  (and (not= :authority role)
+       schema-info
+       (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
+
+(defn remove-doc-validator [{data :data user :user} application]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
     (cond
-      (deny-remove-of-last-document document application) (fail :error.removal-of-last-document-denied)
-      (deny-remove-of-primary-operation document application) (fail! :error.removal-of-primary-document-denied))))
+      (deny-remove-for-non-authority-user user document)      (fail :error.action-allowed-only-for-authority)
+      (deny-remove-of-last-document document application)     (fail :error.removal-of-last-document-denied)
+      (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied))))
 
 ;;
 ;; KTJ-info updation
