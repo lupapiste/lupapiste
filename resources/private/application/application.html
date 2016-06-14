@@ -227,6 +227,12 @@
                                     <span data-bind="ltext: 'application.requestForComplement'"></span>
                                 </button>
                                 <button class="function"
+                                        data-bind="click: _.partial(hub.send, 'show-dialog', {ltitle: 'application.transfers.title', size: 'medium', component: 'transfer-monitor'}), visible: $root.authorization.ok('transfers'), enable: !processing() && $root.authorization.ok('transfers')"
+                                        data-test-id="show-transfers">
+                                    <i class="lupicon-upload"></i>
+                                    <span data-bind="ltext: 'application.transfers.open'"></span>
+                                </button>
+                                <button class="function"
                                         data-bind="click: addOperation, visible: $root.authorization.ok('add-operation'), enable: !processing() && $root.authorization.ok('add-operation')"
                                         data-test-id="add-operation">
                                     <i class="lupicon-circle-plus"></i>
@@ -635,7 +641,7 @@
                     <!-- AttachmentsPOC tab -->
                     <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
                     <div id="application-attachmentsPOC-tab" class="tab-content feature--no-border"
-                         data-bind="feature: 'attachments-poc'">                     
+                         data-bind="feature: 'attachments-poc'">
                       <attachments-listing/>
                     </div>
                     <!-- /ko -->
