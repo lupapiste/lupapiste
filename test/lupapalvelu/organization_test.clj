@@ -10,8 +10,8 @@
                              :bad3 {}}}
        valid-op     {:name "kikka"}
        invalid-op   {:name "kukka"}]
-   (get-organization-attachments-for-operation organization valid-op) => [{:type-group :type-group-1 :type-id :type-id-123}]
-   (get-organization-attachments-for-operation organization invalid-op) => []
+   (get-organization-attachments-for-operation organization valid-op) => [["type-group-1" "type-id-123"]]
+   (get-organization-attachments-for-operation organization invalid-op) => nil
    (fact "KRYSP integration defined"
          (krysp-integration? organization :good) => true?
          (krysp-integration? organization :bad1) => falsey

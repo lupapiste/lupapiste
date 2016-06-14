@@ -409,8 +409,8 @@
    :user-roles (subset-of auth/all-user-roles)
    ; Parameters can be keywords or symbols. Symbols will be available in the action body.
    ; If a parameter is missing from request, an error will be raised.
-   (sc/optional-key :parameters)  [(sc/either sc/Keyword sc/Symbol)]
-   (sc/optional-key :optional-parameters)  [(sc/either sc/Keyword sc/Symbol)]
+   (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
+   (sc/optional-key :optional-parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
    ; Set of application context role keywords.
    (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
    ; Set of application organization context role keywords
@@ -422,14 +422,14 @@
    ; Prechecks take two parameters: the command and the application.
    ; Command does not have :data when pre-check is called on validation phase (allowed-actions)
    ; but has :data when pre-check is called during action execution.
-   (sc/optional-key :pre-checks)  [(sc/either util/Fn sc/Symbol)]
+   (sc/optional-key :pre-checks)  [(sc/cond-pre util/Fn sc/Symbol)]
    ; Input validators take one parameter, the command. Application is not yet available.
-   (sc/optional-key :input-validators)  [(sc/either util/Fn sc/Symbol)]
+   (sc/optional-key :input-validators)  [(sc/cond-pre util/Fn sc/Symbol)]
    ; Application state keywords
    (sc/optional-key :states)      (subset-of states/all-states)
-   (sc/optional-key :on-complete) (sc/either util/Fn [util/Fn])
-   (sc/optional-key :on-success)  (sc/either util/Fn [util/Fn])
-   (sc/optional-key :on-fail)     (sc/either util/Fn [util/Fn])
+   (sc/optional-key :on-complete) (sc/cond-pre util/Fn [util/Fn])
+   (sc/optional-key :on-success)  (sc/cond-pre util/Fn [util/Fn])
+   (sc/optional-key :on-fail)     (sc/cond-pre util/Fn [util/Fn])
    ; Allow command execution even if the system is in readonly mode.
    (sc/optional-key :allowed-in-lockdown)    sc/Bool
    ; Feature flag name. Action is run only if the feature flag is true.

@@ -6,6 +6,7 @@
     var isLoading = false;
     self.organization = ko.observable();
     self.permanentArchiveEnabled = ko.observable(false);
+    self.calendarsEnabled = ko.observable(false);
     self.indicator = ko.observable(false).extend({notify: "always"});
     self.pending = ko.observable();
 
@@ -40,6 +41,7 @@
           self.organization(ko.mapping.fromJS(result.data));
           isLoading = true;
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
+          self.calendarsEnabled(result.data["calendars-enabled"]);
           isLoading = false;
         })
         .call();
@@ -114,6 +116,18 @@
         return;
       }
       ajax.command("set-organization-permanent-archive-enabled", {organizationId: self.organization().id(), enabled: value})
+        .success(function() {
+          self.indicator(true);
+          self.organization()["permanent-archive-enabled"](value);
+        })
+        .call();
+    });
+
+    self.calendarsEnabled.subscribe(function(value) {
+      if (isLoading) {
+        return;
+      }
+      ajax.command("set-organization-calendars-enabled", {organizationId: self.organization().id(), enabled: value})
         .success(function() {
           self.indicator(true);
           self.organization()["permanent-archive-enabled"](value);

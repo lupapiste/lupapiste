@@ -13,6 +13,9 @@
               <th data-bind="ltext: 'organization.name'"></th>
               <th data-bind="ltext: 'login.with-rights'"></th>
               <th data-bind="ltext: 'organization.archive.enabled'"></th>
+              <!-- ko if: features.enabled('ajanvaraus') -->
+              <th data-bind="ltext: 'organization.calendars.enabled'"></th>
+              <!-- /ko -->
               <th data-bind="ltext: 'admin.municipality'"></th>
               <th data-bind="ltext: 'organization.scope'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
@@ -36,6 +39,11 @@
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
                   <span data-bind="text: $data['permanent-archive-enabled'] ? 'arkisto' : '-'"></span>
                 </td>
+                <!-- ko if: features.enabled('ajanvaraus') -->
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  <span data-bind="text: $data['calendars-enabled'] ? 'varaus' : '-'"></span>
+                </td>
+                <!-- /ko -->
               <!-- /ko -->
               <td><abbr data-bind="text: $data.municipality, attr: {'title': loc(['municipality',$data.municipality])}"></abbr></td>
               <td><abbr data-bind="text: $data.permitType, attr: {'title':loc($data.permitType)}"></abbr></td>

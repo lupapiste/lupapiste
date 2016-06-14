@@ -3,15 +3,25 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="help-toggle-template">
-        <div class="stacked help-toggle">
-            <span class="lupicon-circle-question" data-bind="click: toggleHelp,
-                                                             css: {expanded: flag}"></span>
-            <div data-bind="css: {'help-arrow': flag}"></div>
+      <div class="stacked help-toggle"
+           data-bind="css: {tight: lbutton}">
+        <!-- ko ifnot: lbutton -->
+        <span class="lupicon-circle-question" data-bind="click: toggleHelp,
+                                                         css: {expanded: flag}"></span>
+        <!-- /ko -->
+        <!-- ko if: lbutton -->
+        <button class="function"
+            data-bind="click: toggleHelp,
+                       css: {expanded: flag}">
+          <i class="lupicon-circle-question"></i>
+          <span data-bind="ltext: lbutton"></span>
+        </button>
+        <!-- /ko -->
+        <div data-bind="css: {'help-arrow': flag}"></div>
         </div>
         <div class="help-text"
              data-bind="slider: flag,
-                        foreach: lhtml">
-            <p data-bind="lhtml: $data"></p>
+                        html: html">
         </div>
         <div class="help-reset">&nbsp;</div>
     </script>

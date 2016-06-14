@@ -123,7 +123,7 @@
                                   [rhizome "0.2.5"]
                                   [pdfboxing "0.1.9"]]
                    :plugins [[lein-midje "3.2"]
-                             [jonase/eastwood "0.2.1" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
+                             [jonase/eastwood "0.2.3" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
                              [lupapiste/lein-nitpicker "0.5.1"]]
                    :resource-paths ["dev-resources"]

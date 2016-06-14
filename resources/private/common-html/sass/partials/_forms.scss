@@ -1043,60 +1043,7 @@ $max-columns: 12;
   }
 }
 
-@mixin label-checkbox ($label-cls, $size: $lupicon-size ) {
-  label.#{$label-cls} {
-  width: 100%;
-  display: inline-block;
-}
-  .#{$label-cls}:before {
-    @include lupicon-font( $size );
-    content: "\e603";
-    display: inline-block;
-    margin-right: 10px;
-    vertical-align: top;
-    color: $checkbox-color;
-    cursor: pointer;
-  }
 
-  input[type=checkbox]:checked + .#{$label-cls}:before {
-    @include lupicon-font($size);
-    content: "\e604";
-    color: $checkbox-selected-color;
-  }
-
-  input[type=checkbox]:disabled + .#{$label-cls}:before {
-    cursor: initial;
-    color: $checkbox-color;
-  }
-}
-
-@mixin hide-radio-check-input {
-  input[type=checkbox], input[type=radio] {
-    display: inherit;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    font-size: 0;
-  }
-}
-
-.checkbox-wrapper {
-  border: 1px solid $checkbox-border-color;
-  padding: {
-    left: 7px;
-    right: 0;
-    bottom: 7px;
-    top: 7px;
-  }
-   @include hide-radio-check-input
-}
-
-.checkbox-wrapper--disabled {
-  background-color: $input-disabled-background-color;
-}
-
-@include label-checkbox (checkbox-label) {}
 
 @mixin input-fields() {
   padding: 0 $marginM;
@@ -1142,15 +1089,6 @@ $max-columns: 12;
     margin: 0 !important;
   }
 
-  .radio-wrapper {
-    border: 1px solid $radio-border-color;
-    padding: $marginS $marginL $marginS $marginS;
-    label {
-      cursor: pointer;
-    }
-    @include hide-radio-check-input
-  }
-
   .col--no-margin {
     padding: 0 !important;
     .checkbox-wrapper {
@@ -1183,20 +1121,6 @@ $max-columns: 12;
   }
 
 
-  .radio-label:before {
-    @include lupicon-font;
-    content: "\e634";
-    display: inline-block;
-    margin-right: 10px;
-    vertical-align: top;
-    color: $checkbox-color;
-  }
-
-  input[type=radio]:checked + .radio-label:before {
-    @include lupicon-font;
-    content: "\e635";
-    color: $checkbox-selected-color;
-  }
 
   select.required, input.required {
     border-color: $input-required-border-color;
@@ -1600,14 +1524,8 @@ div.review-done {
   }
 }
 
-.checkbox-wrapper.checkbox-wrapper--break {
-  margin-bottom: $marginL;
-}
-
-.checkbox-wrapper.checkbox-wrapper--break-small {
-  margin-bottom: $marginS;
-}
-
 .foreman-info {
   padding-left: $marginS;
 }
+
+ 

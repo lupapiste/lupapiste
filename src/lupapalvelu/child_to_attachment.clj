@@ -29,19 +29,12 @@
      :size               (.length file)
      :content            file
      :attachment-id      attachment-id
-     :attachment-type    (if (env/feature? :updated-attachments)
-                           (case type
-                             :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
-                             :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
-                             :tasks {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
-                             :verdicts {:type-group "paatoksenteko" :type-id "paatos"}
-                             {:type-group "muut" :type-id "muu"})
-                           (case type
-                             :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "selvitys_naapurien_kuulemisesta"}
-                             :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
-                             :tasks {:type-group "muut" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
-                             :verdicts {:type-group "paatoksenteko" :type-id "paatos"}
-                             {:type-group "muut" :type-id "muu"}))
+     :attachment-type    (case type
+                           :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
+                           :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
+                           :tasks {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
+                           :verdicts {:type-group "paatoksenteko" :type-id "paatos"}
+                           {:type-group "muut" :type-id "muu"})
      :op                 nil
      :contents           (case type
                            :statements (get-in child [:person :text])
@@ -90,4 +83,3 @@
 
 (defn delete-child-attachment [app child-type id]
   (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))
-

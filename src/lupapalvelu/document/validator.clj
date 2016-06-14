@@ -18,12 +18,8 @@
                                             (every? #(or (keyword? %) (fn? %) (symbol? %)) (second field-pair))))
                                   (partition 2 fields)))
                               "field")
-   :facts   {:ok            (sc/either
-                              []
-                              [(sc/pred vector? "The expected OK fact results must be in a vector")])
-             :fail          (sc/either
-                              []
-                              [(sc/pred vector? "The expected FAIL fact results must be in a vector")])}})
+   :facts   {:ok            [(sc/pred vector? "The expected OK fact results must be in a vector")]
+             :fail          [(sc/pred vector? "The expected FAIL fact results must be in a vector")]}})
 
 (defn validate
   "Runs all validators, returning list of concatenated validation results."

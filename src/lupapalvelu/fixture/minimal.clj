@@ -545,7 +545,8 @@
                                       :kopiolaitos-email nil
                                       :kopiolaitos-orderer-address nil
                                       :kopiolaitos-orderer-email nil
-                                      :kopiolaitos-orderer-phone nil})
+                                      :kopiolaitos-orderer-phone nil
+                                      :calendars-enabled false})
 
 (def organizations (map
                      (partial merge default-keys-for-organizations)

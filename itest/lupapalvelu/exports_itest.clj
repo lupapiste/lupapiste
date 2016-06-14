@@ -50,7 +50,7 @@
                      :follow-redirects false
                      :throw-exceptions false})
         resp (:body (decode-response http-resp))]
-    (println (:operations (last (:applications resp))))
+
     resp => ok?
     (count (:applications resp)) => 2
     (-> resp :applications last :operations first :priceClass) => "B" ; from kayttotarkoitus-hinnasto.xlsx

@@ -1,0 +1,45 @@
+.rollup--closed > .rollup__open {
+  display: none;
+}
+
+.rollup--open > .rollup__closed {
+  display: none;
+} 
+
+button.rollup-button {
+  width: 100%;
+  display: table-cell;
+}
+
+.rollup-status {
+  width: 100%;
+  display: table-cell;
+}
+
+.rollup-status__text {
+  display: table-cell;
+  width: 100%;
+  text-transform: uppercase;
+}
+
+.rollup-status__icon {
+  display: table-cell;
+  min-width: $lupicon-size;
+}
+
+.rollup-accordion {
+  .rollup-accordion-content {
+    padding: {
+      top: $marginS;
+    }
+    position: relative;
+    border: 1px solid $gray221;
+    border-top: none;
+    .rollup-accordion-content-part {
+      margin-left: $marginM;
+      margin-right: $marginM;
+      margin-bottom: $marginM;
+    }
+
+  }
+}

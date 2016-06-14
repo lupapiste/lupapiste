@@ -44,7 +44,11 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
           .command("update-reservation-type", {reservationTypeId: id, name: reservationType})
           .success(function() {
             hub.send("calendarService::fetchOrganizationReservationTypes");
+            hub.send("indicator", {style: "positive"});
             LUPAPISTE.ModalDialog.close();
+          })
+          .error(function() {
+            hub.send("indicator", {style: "negative"});
           })
           .call();
       }
@@ -60,7 +64,11 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
           .command("add-reservation-type-for-organization", {reservationType: reservationType})
           .success(function() {
             hub.send("calendarService::fetchOrganizationReservationTypes");
+            hub.send("indicator", {style: "positive"});
             LUPAPISTE.ModalDialog.close();
+          })
+          .error(function() {
+            hub.send("indicator", {style: "negative"});
           })
           .call();
       }
@@ -71,7 +79,13 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
   self.deleteReservationType = function(reservationType) {
     ajax
       .command("delete-reservation-type", {reservationTypeId: reservationType.id})
-      .success(_.partial(hub.send("calendarService::fetchOrganizationReservationTypes")))
+      .success(function() {
+        hub.send("calendarService::fetchOrganizationReservationTypes");
+        hub.send("indicator", {style: "positive"});
+      })
+      .error(function() {
+        hub.send("indicator", {style: "negative"});
+      })
       .call();
   };
 

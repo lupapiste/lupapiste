@@ -3,24 +3,17 @@ LUPAPISTE.CalendarViewModel = function () {
   var self = this,
       calendarService = lupapisteApp.services.calendarService;
 
-  self.calendar = calendarService.calendar;
   self.calendarWeekdays = calendarService.calendarWeekdays;
-  self.week = calendarService.calendarQuery.week;
-  self.year = calendarService.calendarQuery.year;
-
-  // helper function for the view
-  self.month = function() {
-    return moment().set({"year": self.year(), "isoWeek": self.week(), "isoWeekday": 1 /* Monday */}).valueOf();
-  };
+  self.startOfWeek = calendarService.calendarQuery.startOfWeek;
 
   self.calendarId = ko.observable();
 
-  self.firstFullHour = calendarService.firstFullHour;
-  self.lastFullHour = calendarService.lastFullHour;
+  self.firstFullHour = calendarService.params().firstFullHour;
+  self.lastFullHour = calendarService.params().lastFullHour;
 
   var timelineTimesBuilder = function() {
     var times = [];
-    ko.utils.arrayForEach(ko.utils.range(self.firstFullHour(), self.lastFullHour()), function(hour) {
+    ko.utils.arrayForEach(ko.utils.range(self.firstFullHour, self.lastFullHour), function(hour) {
       times.push({ viewText: _.padStart(hour + ":00", 5, "0") });
     });
     return times;
@@ -31,7 +24,7 @@ LUPAPISTE.CalendarViewModel = function () {
   self.timelineSlots = function(weekday) {
     var times = [];
     var weekdayStr = moment(weekday.startOfDay).format("dddd");
-    ko.utils.arrayForEach(ko.utils.range(self.firstFullHour(), self.lastFullHour()), function(hour) {
+    ko.utils.arrayForEach(ko.utils.range(self.firstFullHour, self.lastFullHour), function(hour) {
       times.push({ weekday: weekday,
                    calendarId: weekday.calendarId,
                    hour: hour,
@@ -43,7 +36,7 @@ LUPAPISTE.CalendarViewModel = function () {
 
   self.slotPositionTop = function(slot) {
     var start = moment(slot.startTime);
-    return ((start.hour() - self.firstFullHour()) * 60 + start.minute()) + "px";
+    return ((start.hour() - self.firstFullHour) * 60 + start.minute()) + "px";
   };
 
   self.slotHeight = function(slot) {

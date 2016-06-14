@@ -242,7 +242,7 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     var isAuthorizedToCalendars = function() {
-      return lupapisteApp.models.globalAuthModel.ok("my-calendars");
+      return lupapisteApp.models.globalAuthModel.ok("calendars-enabled");
     };
 
     self.showArchiveMenuOptions = ko.observable(false);
