@@ -42,7 +42,7 @@
       (and (:deny-removing-last-document info) (<= doc-count 1)))))
 
 (defn- deny-remove-for-non-authority-user [{role :role} {schema-info :schema-info}]
-  (and (not= :authority role)
+  (and (not= :authority (keyword role))
        schema-info
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
