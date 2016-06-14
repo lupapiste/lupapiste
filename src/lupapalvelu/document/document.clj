@@ -31,6 +31,9 @@
   (when-not (or (ss/blank? user-id) (user-can-be-set? user-id application))
     (fail :error.application-does-not-have-given-auth)))
 
+(defn- deny-remove-of-non-removable-doc [{schema-info :schema-info}]
+  (and schema-info
+       (not (get-in (schemas/get-schema schema-info) [:info :removable]))))
 
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))
@@ -49,6 +52,7 @@
 (defn remove-doc-validator [{data :data user :user} application]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
     (cond
+      (deny-remove-of-non-removable-doc document)             (fail :error.not-allowed-to-remove-document)
       (deny-remove-for-non-authority-user user document)      (fail :error.action-allowed-only-for-authority)
       (deny-remove-of-last-document document application)     (fail :error.removal-of-last-document-denied)
       (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied))))

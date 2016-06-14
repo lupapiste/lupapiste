@@ -471,3 +471,4 @@
 "error.ram-not-approved" "fi" "Toimepide ei ole mahdollinen, koska RAM-liitettä ei olla hyväksytty."
 "error.ram-not-approved" "sv" "Åtgärden är inte möjlig eftersom RAM-bilagan inte är godkänd."
 "error.action-allowed-only-for-authority" "fi" "Toiminto on sallittu vain viranomaiskäyttäjälle."
+"error.not-allowed-to-remove-document" "fi" "Dokumentin poisto ei ole sallittu."
