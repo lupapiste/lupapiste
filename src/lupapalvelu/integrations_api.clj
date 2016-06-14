@@ -2,8 +2,9 @@
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof info error errorf]]
             [clojure.java.io :as io]
+            [noir.response :as resp]
             [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
-            [lupapalvelu.action :refer [defcommand defquery update-application notify] :as action]
+            [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.autologin :as autologin]
@@ -16,6 +17,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
@@ -29,6 +31,7 @@
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.http :as http]
             [sade.util :as util]))
 
 ;;
@@ -83,7 +86,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:authority}
    :notified         true
-   :on-success       (notify :application-state-change)
+   :on-success       (action/notify :application-state-change)
    :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user] :as command}]
@@ -265,7 +268,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
    :notified   true
-   :on-success (notify :application-state-change)
+   :on-success (action/notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
    :states     #{:submitted :complementNeeded}}
   [{:keys [application created user]:as command}]
@@ -373,11 +376,43 @@
   {:parameters [id]
    :user-roles #{:authority}
    :states #{:sent :complementNeeded}}
-  [{:keys [application]}]
-  (let [organization (organization/get-organization (:organization application))
-        permit-type  (permit/permit-type application)
+  [{{org-id :organization municipality :municipality permit-type :permitType} :application}]
+  (let [organization (organization/get-organization org-id)
         krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
-        ah-scope         (organization/resolve-organization-scope (:municipality application) permit-type organization)
+        ah-scope         (organization/resolve-organization-scope municipality permit-type organization)
         ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
     (ok :krysp (list-integration-dirs krysp-output-dir id)
         :ah    (list-integration-dirs ah-output-dir id))))
+
+(defraw transfer
+  {:parameters [id transferType fileType filename]
+   :user-roles #{:authority}
+   :input-validators [(fn [{data :data}]
+                        (when-not (#{"waiting" "ok" "error"} (:fileType data))
+                          (fail :error.unknown-type)))
+                      (fn [{data :data}]
+                        (when-not (#{"krysp" "ah"} (:transferType data))
+                          (fail :error.unknown-type)))
+                      (fn [{data :data}]
+                        (when-not (re-matches #"^([\w_\-\.]+)\.(txt|xml)$" (:filename data))
+                          (fail :error.invalid-filename)))]
+   :states #{:sent :complementNeeded}}
+  [{{org-id :organization municipality :municipality permit-type :permitType} :application}]
+  (let [organization (organization/get-organization org-id)
+        dir (case transferType
+              "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
+              "ah" (ah/resolve-output-directory
+                     (organization/resolve-organization-scope municipality permit-type organization)))
+        sanitized (mime/sanitize-filename filename) ; input validator doesn't allow slashes, but sanitize anyway
+        path (case fileType
+               "ok" (str env/file-separator "archive" env/file-separator)
+               "error" (str env/file-separator "error" env/file-separator)
+               "waiting" env/file-separator)
+        f (io/file (str dir path sanitized))]
+    (if (.exists f)
+      (->>
+        (resp/content-type (mime/mime-type sanitized) f)
+        (resp/set-headers http/no-cache-headers)
+        (resp/status 200))
+      (resp/status 404 "File Not Found")))
+  )

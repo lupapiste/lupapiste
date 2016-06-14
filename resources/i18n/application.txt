@@ -582,8 +582,7 @@
 "application.transfers.waiting" "sv" ""
 "application.transfers.ok" "fi" "Taustajärjestelmä noutanut"
 "application.transfers.ok" "sv" ""
-"application.transfers.error" "fi" "Virhe taustajärjestelmän noutamisessa"
+"application.transfers.error" "fi" "Siirtovirheet"
 "application.transfers.error" "sv" ""
 "application.transfers.loading" "fi" "Ladataan siirtotiedostolistaa..."
 "application.transfers.loading" "sv" ""
-

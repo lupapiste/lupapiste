@@ -10,8 +10,14 @@ LUPAPISTE.TransferMonitorModel = function(params) {
     .processing(self.processing)
     .success(function(resp) {
       self.fileGroups(_.map(["waiting", "error", "ok"], function(group) {
+        var files = _.map(["krysp","ah"], function(t) {
+          return _.map(resp[t][group], function(f) {
+            f.href = _.sprintf("/api/raw/transfer?id=%s&transferType=%s&fileType=%s&filename=%s", params.id, t, group, f.name);
+            return f;
+          });
+        });
         return {lname: loc(["application.transfers", group]),
-                files: _.sortBy(_.concat(resp.krysp[group], resp.ah[group]), "modified").reverse()};
+                files: _.sortBy(_.flatten(files), "modified").reverse()};
       }));
     })
     .call();
