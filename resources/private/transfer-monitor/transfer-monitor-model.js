@@ -1,19 +1,18 @@
-LUPAPISTE.TransferMonitorModel = function() {
+LUPAPISTE.TransferMonitorModel = function(params) {
   "use strict";
   var self = this;
 
   self.processing = ko.observable(true);
-  self.waiting = ko.observable([]);
-  self.ok = ko.observable([]);
-  self.error = ko.observable([]);
+  self.fileGroups = ko.observable([]);
 
   self.init = function() {
-    var id = lupapisteApp.models.application.id();
-    ajax.query("transfers", {id:id})
+    ajax.query("transfers", {id:params.id})
     .processing(self.processing)
     .success(function(resp) {
-      self.waiting(_.sortBy(_.concat(resp.krysp.waiting, resp.ah.waiting), "modified").reverse());
-      setTimeout(_.partial(hub.send, "resize-dialog"), 100); // FIXME after-render
+      self.fileGroups(_.map(["waiting", "error", "ok"], function(group) {
+        return {lname: loc(["application.transfers", group]),
+                files: _.sortBy(_.concat(resp.krysp[group], resp.ah[group]), "modified").reverse()};
+      }));
     })
     .call();
   };

@@ -1,20 +1,11 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="transfer-monitor-template">
 <div data-bind="ifnot: processing" class="content">
-<h2 data-bind="if: waiting().length, ltext:'application.transfers.waiting'"></h2>
-<ul data-bind="foreach: waiting">
-  <li><span data-bind="text: name"></span> - <span data-bind="dateTimeString: modified"></span></li>
-</ul>
-<h2 data-bind="if: error().length, ltext:'application.transfers.error'"></h2>
-<ul data-bind="foreach: error">
-  <li><span data-bind="text: name"></span> - <span data-bind="dateTimeString: modified"></span></li>
-</ul>
-<h2 data-bind="if: ok().length, ltext:'application.transfers.ok'"></h2>
-<ul data-bind="foreach: ok">
-  <li><span data-bind="text: name"></span> - <span data-bind="dateTimeString: modified"></span></li>
-</ul>
+<!-- ko foreach: { data: fileGroups, afterRender: function(){hub.send('resize-dialog');} } -->
+  <h3 data-bind="if: files.length"><span data-bind="text: lname"></span>:</h3>
+  <ul data-bind="foreach: files">
+    <li><span data-bind="text: name"></span> (<span data-bind="dateTimeString: modified"></span>)</li>
+  </ul>
+<!-- /ko -->
 </div>
-<div data-bind="if: processing">
-<span data-bind="ltext:'application.transfers.loading'"></span>
-Loading...
-</div>
+<div data-bind="if: processing"><span data-bind="ltext:'application.transfers.loading'"></span></div>
 </script>
