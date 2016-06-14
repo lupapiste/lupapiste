@@ -14,7 +14,9 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
   self.attachmentsOperation = ko.observable();
   self.attachmentsOperations = ko.observable([]);
 
-  self.showPostAttachmentsActions = ko.pureComputed(function() {
+  self.primaryOperation = ko.observable({});
+
+  self.showPostAtachmentsActions = ko.pureComputed(function() {
     return (!self.appModel.inPostVerdictState() && self.preAttachmentsByOperation().length > 0) ||
            (self.appModel.inPostVerdictState()  && self.postAttachmentsByOperation().length > 0);
   });
@@ -125,6 +127,8 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
     var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
 
+    self.primaryOperation(lupapisteApp.models.application._js.primaryOperation);
+
     // pre verdict attachments are not editable after verdict has been given
     var preGroupEditable = lupapisteApp.models.currentUser.isAuthority() || !_.includes(LUPAPISTE.config.postVerdictStates, self.appModel.state());
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
@@ -158,7 +162,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
       attachmentId: null,
       attachmentType: null,
       typeSelector: true,
-      opSelector: true
+      opSelector: self.primaryOperation()["attachment-op-selector"]
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };

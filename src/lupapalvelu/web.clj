@@ -31,7 +31,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.user :as user]
-            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization-api]
             [lupapalvelu.application-api :as application]
@@ -455,7 +455,7 @@
                       :locked (java.lang.Boolean/parseBoolean locked)
                       :text text
                       :op operation)
-        attachment-type (attachment/parse-attachment-type attachmentType)
+        attachment-type (att-type/parse-attachment-type attachmentType)
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)

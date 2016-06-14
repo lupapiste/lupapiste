@@ -9,6 +9,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.company :as com]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -234,7 +235,7 @@
       (update :secondaryOperations (fn [operations] (map merge-operation-skeleton operations)))))
 
 ;; Meta fields with default values.
-(def- operation-meta-fields-to-enrich {:optional []})
+(def- operation-meta-fields-to-enrich {:attachment-op-selector true, :optional []})
 (defn- enrich-primary-operation-with-metadata [app]
   (let [enrichable-fields (-> (op/get-primary-operation-metadata app)
                               (select-keys (keys operation-meta-fields-to-enrich)))
@@ -260,8 +261,9 @@
 (defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
   (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
         types          (->> (org/get-organization-attachments-for-operation organization operation)
-                            (remove (difference existing-types att/operation-specific-attachment-types)))
-        ops            (map #(when (att/operation-specific-attachment-types %) operation) types)
+                            (map (partial apply att-type/attachment-type))
+                            (filter #(or (get-in % [:metadata :operation-specific]) (not (att-type/contains? existing-types %)))))
+        ops            (map #(when (get-in % [:metadata :operation-specific]) operation) types)
         metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
     (map (partial att/make-attachment created target true false false applicationState) ops types metadatas)))
 

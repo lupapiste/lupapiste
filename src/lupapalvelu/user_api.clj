@@ -15,6 +15,7 @@
             [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]
@@ -612,7 +613,7 @@
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename size]}] :files attachmentType :attachmentType}
   (let [user              (usr/current-user (request/ring-request))
         filename          (mime/sanitize-filename filename)
-        attachment-type   (attachment/parse-attachment-type attachmentType)
+        attachment-type   (att-type/parse-attachment-type attachmentType)
         attachment-id     (mongo/create-id)
         content-type      (mime/mime-type filename)
         file-info         {:attachment-type  attachment-type
@@ -625,7 +626,7 @@
     (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
-    (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
+    (when-not ((set att-type/osapuolet) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
     (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
