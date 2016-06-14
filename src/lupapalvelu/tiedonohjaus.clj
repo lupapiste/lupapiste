@@ -12,8 +12,10 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [sade.strings :as s])
-  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType ProtectionLevelType SecurityClassType AccessRightType ActionType RecordType AgentType ActionEvent Custom ClassificationScheme)
-           (javax.xml.bind JAXB)
+  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType
+                                     ProtectionLevelType SecurityClassType AccessRightType ActionType
+                                     RecordType AgentType ActionEvent Custom ClassificationScheme)
+           (javax.xml.bind JAXB JAXBContext)
            (java.io StringWriter StringReader)
            [javax.xml.datatype DatatypeFactory]
            [java.util GregorianCalendar Date]))
@@ -21,7 +23,7 @@
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
 
-(defn- get-from-toj-api [organization-id coerce? & path-parts]
+(defn get-from-toj-api [organization-id coerce? & path-parts]
   (when (:permanent-archive-enabled (o/get-organization organization-id))
     (try
       (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
@@ -411,5 +413,7 @@
     (.addAll (.getAction case-file-object) (vec (map #(action-type % lang) case-file)))
 
     (with-open [sw (StringWriter.)]
-      (JAXB/marshal case-file-object sw)
-      (.toString sw))))
+      (let [marshaller (-> (JAXBContext/newInstance (into-array [CaseFile]))
+                           (.createMarshaller))]
+        (.marshal marshaller case-file-object sw)
+        (.toString sw)))))
