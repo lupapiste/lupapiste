@@ -35,7 +35,7 @@
   {(sc/optional-key :role)           (apply sc/enum all-authz-roles)
    (sc/optional-key :path)           sc/Str
    :email                            ssc/Email
-   :application                      aps/ApplicationId
+   (sc/optional-key :application)    aps/ApplicationId ; FIXME delete key, migration
    :created                          ssc/Timestamp
    :inviter                          usr/SummaryUser
    (sc/optional-key :documentName)   sc/Str
@@ -93,8 +93,7 @@
 
 (defn create-invite-auth [inviter invited application-id role timestamp & [text document-name document-id path]]
   {:pre [(seq inviter) (seq invited) application-id role timestamp]}
-  (let [invite (cond-> {:application  application-id
-                        :created      timestamp
+  (let [invite (cond-> {:created      timestamp
                         :email        (:email invited)
                         :role         role
                         :user         (usr/summary invited)
