@@ -166,12 +166,14 @@
                :opening nil) => ok?)))
 
 (fact* "Tampere-ya sees (only) YA operations and attachments (LUPA-917, LUPA-1006)"
-  (let [resp (query tampere-ya :organization-by-user) => ok?
+       (let [resp (query tampere-ya :organization-by-user) => ok?
         tre  (:organization resp)]
-    (keys (:operationsAttachments tre)) => [:YA]
-    (-> tre :operationsAttachments :YA) => truthy
-    (keys (:attachmentTypes resp)) => [:YA]
-    (-> resp :attachmentTypes :YA) => truthy))
+         (fact "operations attachments"
+           (keys (:operationsAttachments tre)) => [:YA]
+           (-> tre :operationsAttachments :YA) => truthy)
+         (fact "attachment types"
+           (keys (:attachmentTypes resp)) => [:YA]
+           (-> resp :attachmentTypes :YA) => truthy)))
 
 
 (facts "Selected operations"

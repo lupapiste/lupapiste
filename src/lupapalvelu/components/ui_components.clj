@@ -10,7 +10,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :refer [attachment-scales, attachment-sizes]]
-            [lupapalvelu.attachment-type :as att-type]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.metadata :as attachment-meta]
             [lupapalvelu.calendar :as cal]
             [lupapalvelu.company :as company]

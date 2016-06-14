@@ -1,10 +1,10 @@
-(ns lupapalvelu.attachment-type-test
+(ns lupapalvelu.attachment.type-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.attachment-type :refer :all]
+            [lupapalvelu.attachment.type :refer :all]
             [lupapalvelu.attachment.metadata :refer :all]))
 
-(testable-privates lupapalvelu.attachment-type attachment-types-by-operation)
+(testable-privates lupapalvelu.attachment.type attachment-types-by-operation)
 
 (facts "Test parse-attachment-type"
   (fact (parse-attachment-type "foo.bar")  => {:type-group :foo, :type-id :bar})

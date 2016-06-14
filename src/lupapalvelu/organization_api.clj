@@ -21,7 +21,7 @@
             [sade.validators :as v]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment-type :as att-type]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
             [lupapalvelu.wfs :as wfs]

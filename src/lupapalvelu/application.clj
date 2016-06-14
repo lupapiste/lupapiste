@@ -9,7 +9,7 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.attachment-type :as att-type]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.company :as com]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]

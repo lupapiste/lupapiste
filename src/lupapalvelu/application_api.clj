@@ -14,7 +14,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.attachment-type :as att-type]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]

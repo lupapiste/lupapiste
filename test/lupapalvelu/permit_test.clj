@@ -1,5 +1,5 @@
 (ns lupapalvelu.permit-test
-  (:require [lupapalvelu.attachment-type :as att-type]
+  (:require [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.i18n :refer [has-term?]]
             [lupapalvelu.permit :refer :all]
             [midje.sweet :refer :all]))

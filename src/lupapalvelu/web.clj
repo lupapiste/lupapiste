@@ -31,7 +31,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.user :as user]
-            [lupapalvelu.attachment-type :as att-type]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization-api]
             [lupapalvelu.application-api :as application]

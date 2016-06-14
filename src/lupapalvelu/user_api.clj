@@ -15,7 +15,7 @@
             [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment-type :as att-type]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
             [lupapalvelu.mongo :as mongo]

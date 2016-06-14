@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.attachment-type :as att-type]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.stamper :as stamper]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]

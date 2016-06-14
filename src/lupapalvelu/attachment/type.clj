@@ -1,4 +1,4 @@
-(ns lupapalvelu.attachment-type
+(ns lupapalvelu.attachment.type
   (:refer-clojure :exclude [contains?])
   (:require [lupapiste-commons.attachment-types :as attachment-types]
             [lupapalvelu.i18n :as i18n]

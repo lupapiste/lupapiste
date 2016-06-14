@@ -7,7 +7,7 @@
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
-            [lupapalvelu.attachment-type :as att-type]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.metadata :refer :all]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.states :as states]
