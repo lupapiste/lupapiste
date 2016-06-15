@@ -3,7 +3,7 @@
   <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
   <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
   <span type="text"
-        data-bind="ltext: value() && (schema.locPrefix ? (schema.locPrefix + '.') : '') + value(),
+        data-bind="ltext: value() && schema.locPrefix + '.' + value(),
                    css: inputClasses,
                    event: events,
                    attr: { 'data-test-id': path.join('.') }">

@@ -137,7 +137,7 @@ LUPAPISTE.ApplicationModel = function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
     tasks = _.filter(tasks, function(task) {
-      return !_.includes( ["task-vaadittu-tyonjohtaja", "task-katselmus", "task-katselmus-backend"],
+      return !_.includes( ["task-vaadittu-tyonjohtaja", "task-katselmus"],
                           task["schema-info"].name);
     });
     var schemaInfos = _.reduce(tasks, function(m, task){
