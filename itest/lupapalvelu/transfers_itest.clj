@@ -1,7 +1,7 @@
 (ns lupapalvelu.transfers-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            ))
+            [lupapalvelu.integrations-api :as iapi]))
 
 (apply-remote-minimal)
 
@@ -39,5 +39,17 @@
             (fact "no files in errors" error => empty?)
             (fact "at least one file waits to be transferred" (count waiting) => pos?)
             (fact "all filenames start with application id" (map :name waiting) => (has every? #(.startsWith % app-id)))
-            (fact "file has modification time" (map :modified waiting) => (has every? pos?)))))))
-  )
+            (fact "file has modification time" (map :modified waiting) => (has every? pos?))))))))
+
+(facts "response"
+  (let [hetu "121212-1212"
+        filename "LP-123.xml"
+        content (str "<?xml version=\"1.0\" encoding=\"UTF-8\"?><yht:Osapuoli><yht:henkilo><yht:henkilotunnus>" hetu "</yht:henkilotunnus></yht:henkilo></yht:Osapuoli>")
+        {:keys [status headers body] :as resp} (iapi/transferred-file-response filename content)
+        content-type (get headers "Content-Type")]
+
+    (fact "status OK" status => 200)
+    (fact "xml mime type" content-type => "application/xml")
+    (fact "person id is masked"
+      body =not=> (contains hetu)
+      body => (contains "******x****"))))

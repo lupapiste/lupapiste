@@ -386,6 +386,13 @@
     (ok :krysp (list-integration-dirs krysp-output-dir id)
         :ah    (list-integration-dirs ah-output-dir id))))
 
+(defn transferred-file-response [filename content-str]
+  (->>
+    (ss/replace content-str (re-pattern validators/finnish-hetu-str) "******x****")
+    (resp/content-type (mime/mime-type filename))
+    (resp/set-headers http/no-cache-headers)
+    (resp/status 200)))
+
 (defraw transfer
   {:parameters [id transferType fileType filename]
    :user-roles #{:authority}
@@ -412,9 +419,5 @@
                "error" (str env/file-separator "error" env/file-separator))
         f (io/file (str dir path sanitized))]
     (if (.exists f)
-      (let [masked-content (ss/replace (slurp f) (re-pattern validators/finnish-hetu-str) "******x****")]
-        (->>
-          (resp/content-type (mime/mime-type sanitized) masked-content)
-          (resp/set-headers http/no-cache-headers)
-          (resp/status 200)))
+      (transferred-file-response sanitized (slurp f))
       (resp/status 404 "File Not Found"))))
