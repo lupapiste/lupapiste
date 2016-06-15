@@ -45,7 +45,7 @@
               :zip                           (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
               (sc/optional-key :country)     (sc/maybe (ssc/max-length-string 64))
               (sc/optional-key :ovt)         (sc/if ss/blank? ssc/BlankStr ssc/FinnishOVTid)
-              (sc/optional-key :netbill)     sc/Str
+              (sc/optional-key :netbill)     (sc/maybe sc/Str)
               (sc/optional-key :pop)         (sc/maybe (apply sc/enum "" (map :name schema/e-invoice-operators)))
               (sc/optional-key :document)    sc/Str
               (sc/optional-key :process-id)  sc/Str
