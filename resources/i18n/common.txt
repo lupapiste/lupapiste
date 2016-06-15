@@ -685,6 +685,7 @@
 "email.title.statement-request-reminder" "sv" "Påminnelse om begäran om utlåtande"
 "email.title.verdict" "fi" "päätös"
 "email.title.verdict" "sv" "beslut"
+"email.title.new-ram-attachment" "fi" "Ilmoitus uudesta RAM:sta"
 "email-in-use" "fi" "Sähköpostiosoite on jo käytössä"
 "email-in-use" "sv" "E-postadressen används redan"
 "esikatselu" "fi" "Esikatselu"

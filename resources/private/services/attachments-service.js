@@ -7347,6 +7347,219 @@ LUPAPISTE.AttachmentsService = function() {
       .map( function( a ) {
         return !_.random( 2) ? _.omit( a, "latestVersion") : a;
       })
+      .concat( [{
+        "type": {
+          "type-id": "paatos",
+          "type-group": "paatoksenteko"
+        },
+        "approved": {
+          "fileId": "575949bf487b9a70edc99f4f",
+          "timestamp": 1465469372438,
+          "user": {
+            "lastName": "Sibbo",
+            "firstName": "Sonja",
+            "id": "777777777777777777000023"
+          },
+          "value": "approved"
+        },
+        "state": "ok",
+        "op": null,
+        "auth": [
+          {
+            "role": "uploader",
+            "lastName": "Sibbo",
+            "firstName": "Sonja",
+            "username": "sonja",
+            "id": "777777777777777777000023"
+          },
+          {
+            "role": "stamper",
+            "lastName": "Sibbo",
+            "firstName": "Sonja",
+            "username": "sonja",
+            "id": "777777777777777777000023"
+          }
+        ],
+        "modified": 1465476276622,
+        "isPublic": true,
+        "requestedByAuthority": false,
+        "applicationState": "verdictGiven",
+        "readOnly": false,
+        "locked": true,
+        "id": "236d9b2cfff88098d4f8ad532820c9fb93393237",
+        "latestVersion": {
+          "created": 1465469372438,
+          "size": 13826,
+          "filename": "sample-verdict.pdf",
+          "originalFileId": "575949bf487b9a70edc99f4f",
+          "archivabilityError": "invalid-pdfa",
+          "contentType": "application/pdf",
+          "archivable": false,
+          "version": {
+            "minor": 2,
+            "major": 0
+          },
+          "stamped": true,
+          "user": {
+            "role": "authority",
+            "lastName": "Sibbo",
+            "firstName": "Sonja",
+            "username": "sonja",
+            "id": "777777777777777777000023"
+          },
+          "fileId": "575949bf487b9a70edc99f4f"
+        },
+        "notNeeded": false,
+        "signatures": [],
+        "forPrinting": false,
+        "contents": "T\u00e4m\u00e4 p\u00e4\u00e4t\u00f6s pit\u00e4\u00e4",
+        "target": {
+          "urlHash": "236d9b2cfff88098d4f8ad532820c9fb93393237",
+          "id": "57594864487b9a70edc99f3a",
+          "type": "verdict"
+        },
+        "versions": [
+          {
+            "fileId": "57594864487b9a70edc99f3e",
+            "user": {
+              "role": "authority",
+              "lastName": "Sibbo",
+              "firstName": "Sonja",
+              "username": "sonja",
+              "id": "777777777777777777000023"
+            },
+            "stamped": false,
+            "version": {
+              "minor": 1,
+              "major": 0
+            },
+            "contentType": "application/pdf",
+            "originalFileId": "57594864487b9a70edc99f3e",
+            "filename": "sample-verdict.pdf",
+            "size": 8201,
+            "created": 1378036800000
+          },
+          {
+            "created": 1465469372438,
+            "size": 13826,
+            "filename": "sample-verdict.pdf",
+            "originalFileId": "575949bf487b9a70edc99f4f",
+            "archivabilityError": "invalid-pdfa",
+            "contentType": "application/pdf",
+            "archivable": false,
+            "version": {
+              "minor": 2,
+              "major": 0
+            },
+            "stamped": true,
+            "user": {
+              "role": "authority",
+              "lastName": "Sibbo",
+              "firstName": "Sonja",
+              "username": "sonja",
+              "id": "777777777777777777000023"
+            },
+            "fileId": "575949bf487b9a70edc99f4f"
+          }
+        ],
+        "metadata": {
+          "tila": "valmis",
+          "nakyvyys": "julkinen"
+        },
+        "required": false,
+        "signed": false,
+        "isSent": false,
+        "sentDateString": "-",
+        "stamped": true
+      },
+                {
+                  "type": {
+                    "type-id": "poytakirjaote",
+                    "type-group": "paatoksenteko"
+                  },
+                  "state": "requires_authority_action",
+                  "op": null,
+                  "auth": [
+                    {
+                      "role": "uploader",
+                      "lastName": "Sibbo",
+                      "firstName": "Sonja",
+                      "username": "sonja",
+                      "id": "777777777777777777000023"
+                    }
+                  ],
+                  "modified": 1465914145257,
+                  "isPublic": true,
+                  "requestedByAuthority": true,
+                  "applicationState": "verdictGiven",
+                  "readOnly": false,
+                  "locked": true,
+                  "id": "57601321487b9a1e83a7fb80",
+                  "latestVersion": {
+                    "missing-fonts": [],
+                    "created": 1465914145257,
+                    "size": 15038,
+                    "filename": "ah-example-attachment.pdf",
+                    "originalFileId": "57601321487b9a1e83a7fb81",
+                    "archivabilityError": "invalid-mime-type",
+                    "contentType": "application/pdf",
+                    "archivable": false,
+                    "version": {
+                      "minor": 1,
+                      "major": 0
+                    },
+                    "stamped": false,
+                    "user": {
+                      "role": "authority",
+                      "lastName": "Sibbo",
+                      "firstName": "Sonja",
+                      "username": "sonja",
+                      "id": "777777777777777777000023"
+                    },
+                    "fileId": "57601321487b9a1e83a7fb81"
+                  },
+                  "notNeeded": false,
+                  "signatures": [],
+                  "forPrinting": false,
+                  "contents": null,
+                  "target": {
+                    "id": "57594864487b9a70edc99f42",
+                    "type": "task"
+                  },
+                  "versions": [
+                    {
+                      "missing-fonts": [],
+                      "created": 1465914145257,
+                      "size": 15038,
+                      "filename": "ah-example-attachment.pdf",
+                      "originalFileId": "57601321487b9a1e83a7fb81",
+                      "archivabilityError": "invalid-mime-type",
+                      "contentType": "application/pdf",
+                      "archivable": false,
+                      "version": {
+                        "minor": 1,
+                        "major": 0
+                      },
+                      "stamped": false,
+                      "user": {
+                        "role": "authority",
+                        "lastName": "Sibbo",
+                        "firstName": "Sonja",
+                        "username": "sonja",
+                        "id": "777777777777777777000023"
+                      },
+                      "fileId": "57601321487b9a1e83a7fb81"
+                    }
+                  ],
+                  "metadata": {
+                    "nakyvyys": "julkinen"
+                  },
+                  "required": false,
+                  "signed": false,
+                  "isSent": false,
+                  "sentDateString": "-",
+                  "stamped": false
+                }])
       .value();
   }
 

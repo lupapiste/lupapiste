@@ -2226,6 +2226,13 @@
     (mongo/update-by-id :organizations (:id organization)
                         {$set {:calendars-enabled false}})))
 
+(defmigration remove-invites-application-id
+  {:apply-when (pos? (mongo/count :applications {:auth.invite.application {$exists true}}))}
+  (update-applications-array
+    :auth
+    (fn [a] (util/dissoc-in a [:invite :application]))
+    {:auth.invite.application {$exists true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
