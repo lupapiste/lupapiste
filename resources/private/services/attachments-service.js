@@ -7850,7 +7850,7 @@ LUPAPISTE.AttachmentsService = function() {
           .map(idToAttachment)
           .filter(function(attachment) {
             return filters["ei-tarpeen"]() ||
-              !self.isNotNeeded(ko.utils.unwrapObservable(attachment));
+              !self.isNotNeeded(attachment());
           }).value();
     return {
       approve:      self.approveAttachment,
@@ -7865,6 +7865,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   function modelForSubAccordion(subGroup) {
+    _.forEach(_.values(filters), function(f) { f(); });
     var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
@@ -7954,7 +7955,7 @@ LUPAPISTE.AttachmentsService = function() {
       }
     }
     var args = _.toArray(arguments);
-    var group = _.get(self.attachmentsHierarchy(), args);
+    var group = _.get(self.attachmentsHierarchy.peek(), args);
     return getAttachments(group);
   };
 
@@ -8000,27 +8001,112 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.layout = [
     {
+      name: "preVerdict",
       data: getDataForGroup("preVerdict"),
       accordions: attachmentTypeLayout("preVerdict")
     },
     {
+      name: "postVerdict",
       data: getDataForGroup("postVerdict"),
       accordions: attachmentTypeLayout("postVerdict")
     }
   ];
 
-   function getAccordionToggles(preOrPost) {
-     function getAllToggles(objectOrArray) {
-       if (_.isArray(objectOrArray)) {
-         return _.flatten(_.map(objectOrArray, getAllToggles));
-       } else if (_.isObject(objectOrArray)) {
-         return _.concat(objectOrArray.open? [objectOrArray.open] : [],
-                         getAllToggles(objectOrArray.accordions));
-       } else {
-         return [];
-       }
-     }
-     return getAllToggles(self.layout[preOrPost].accordions);
+
+  //
+  // Automatically open relevant accordions when filters are toggled.
+  //
+
+  function attachmentsToAmounts(val) {
+    if (_.isPlainObject(val)) {
+      return _.mapValues(val, attachmentsToAmounts);
+    } else if (_.isArray(val)) {
+      return val.length;
+    } else {
+      return _.clone(val);
+    }
+  }
+
+  function mergeAttachmentAmounts(newVal, oldVal) {
+    if (_.isPlainObject(newVal)) {
+      return _.mapValues(newVal, function(value, key) {
+        return mergeAttachmentAmounts(value, (oldVal && oldVal[key]) || null);
+      });
+    } else if (_.isNumber(newVal)) {
+      return newVal - (oldVal || 0);
+    } else {
+      return 0;
+    }
+  }
+
+  function objectToPaths(obj) {
+    if (!_.isPlainObject(obj)) {
+      return [obj];
+    } else {
+      return _(obj).mapValues(objectToPaths).toPairs().value();
+    }
+  }
+
+  function getTogglesInPaths(paths) {
+    function getToggles(paths, objectOrArray) {
+      if (_.isArray(objectOrArray)) {
+        return _.flatten(_.map(paths, function(path) {
+          var subPath = _.find(objectOrArray, function(x) {
+            return x.name === _.first(path);
+          });
+          return getToggles(_.tail(path), subPath);
+        }));
+      } else if (_.isPlainObject(objectOrArray)) {
+        return _.concat(objectOrArray.open ? [objectOrArray.open] : [],
+                        getToggles(_.first(paths), objectOrArray.accordions));
+      } else {
+        return [];
+      }
+    }
+    return getToggles(paths, self.layout);
+  }
+
+  // Track changes in filter values and visible attachments in the hierarchy
+  self.previousAttachmentsHierarchy = self.attachmentsHierarchy();
+  self.attachmentsHierarchy.subscribe(function(oldValue) {
+    self.previousAttachmentsHierarchy = oldValue;
+  }, self, "beforeChange");
+  self.previousFilterValues = _.mapValues(filters, function() { return false; });
+  self.filterValues = ko.pureComputed(function() {
+    return _.mapValues(filters, function(f) { return f(); });
+  });
+  self.filterValues.subscribe(function(oldValue) {
+    self.previousFilterValues = oldValue || self.previousFilterValues;
+  }, self, "beforeChange");
+
+  self.openRelevantAccordionsOnFilterToggle = ko.computed(function() {
+
+    if (_.some(_.keys(self.filterValues()), function(k) {
+      return self.filterValues.peek()[k]  && !self.previousFilterValues[k];
+    })) {
+      var diff =  _.mergeWith(attachmentsToAmounts(self.attachmentsHierarchy.peek()),
+                              attachmentsToAmounts(self.previousAttachmentsHierarchy),
+                              mergeAttachmentAmounts);
+      var diffPaths = objectToPaths(diff);
+      var toggles = getTogglesInPaths(diffPaths, self.layout);
+      _.forEach(toggles, function(toggle) {
+        toggle(true);
+      });
+    }
+  }).extend({rateLimit: {timeout: 0}});
+
+  function getAccordionToggles(preOrPost) {
+    function getAllToggles(objectOrArray) {
+      if (_.isArray(objectOrArray)) {
+        return _.flatten(_.map(objectOrArray, getAllToggles));
+      } else if (_.isObject(objectOrArray)) {
+        return _.concat(objectOrArray.open ? [objectOrArray.open] : [],
+                        getAllToggles(objectOrArray.accordions));
+      } else {
+        return [];
+      }
+    }
+    return getAllToggles(self.layout[preOrPost].accordions);
   }
 
   function toggleAccordions(preOrPost) {
