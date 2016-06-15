@@ -22,21 +22,20 @@
 ;; Invites
 ;;
 
+(defn- invites-with-application [application]
+  (->>
+    (domain/invites application)
+    (map #(assoc % :application (select-keys application [:id :address :primaryOperation :municipality])))))
+
 (defquery invites
   {:user-roles #{:applicant :authority :oirAuthority}}
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}
         data       (mongo/select :applications query [:auth :primaryOperation :address :municipality])
-        invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))
-        invites-with-application (map
-                                   #(update-in % [:application]
-                                               (fn [app-id]
-                                                 (select-keys
-                                                   (util/find-by-id app-id data)
-                                                   [:id :address :primaryOperation :municipality])))
-                                   invites)]
-    (ok :invites invites-with-application)))
+        invites    (mapcat invites-with-application data)
+        my-invites (filter #(= id (get-in % [:user :id])) invites)]
+    (ok :invites my-invites)))
 
 (defn- create-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)

@@ -148,6 +148,14 @@ i.btn-small {
   }
 }
 
+// If the button does not include span, we'll make the button
+// rectangular.
+.btn-icon-only {
+  padding: {
+  left: 9px;
+  right: 9x;
+}
+}
 
 // You probably still need to tweak
 // the vertical properties case by case, since
