@@ -8067,25 +8067,27 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   // Track changes in filter values and visible attachments in the hierarchy
-  self.previousAttachmentsHierarchy = self.attachmentsHierarchy();
+  var previousAttachmentsHierarchy = self.attachmentsHierarchy();
   self.attachmentsHierarchy.subscribe(function(oldValue) {
-    self.previousAttachmentsHierarchy = oldValue;
+    previousAttachmentsHierarchy = oldValue;
   }, self, "beforeChange");
+
   self.previousFilterValues = _.mapValues(filters, function() { return false; });
-  self.filterValues = ko.pureComputed(function() {
+  var filterValues = ko.pureComputed(function() {
     return _.mapValues(filters, function(f) { return f(); });
   });
-  self.filterValues.subscribe(function(oldValue) {
+  filterValues.subscribe(function(oldValue) {
     self.previousFilterValues = oldValue || self.previousFilterValues;
   }, self, "beforeChange");
 
-  self.openRelevantAccordionsOnFilterToggle = ko.computed(function() {
-
-    if (_.some(_.keys(self.filterValues()), function(k) {
-      return self.filterValues.peek()[k]  && !self.previousFilterValues[k];
+  // Open relevant accordions on filter toggle
+  ko.computed(function() {
+    if (_.some(_.keys(filterValues()), function(k) {
+      return k !== "hakemus" && k !== "rakentaminen" &&
+        filterValues.peek()[k]  && !self.previousFilterValues[k];
     })) {
       var diff =  _.mergeWith(attachmentsToAmounts(self.attachmentsHierarchy.peek()),
-                              attachmentsToAmounts(self.previousAttachmentsHierarchy),
+                              attachmentsToAmounts(previousAttachmentsHierarchy),
                               mergeAttachmentAmounts);
       var diffPaths = objectToPaths(diff);
       var toggles = getTogglesInPaths(diffPaths, self.layout);
