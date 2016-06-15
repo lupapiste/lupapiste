@@ -255,33 +255,38 @@
 (defn update-key-in-schema? [schema [update-key _]]
   (model/find-by-name schema update-key))
 
+(defn- subject->updates [subject path-arr schema set-empty-values?]
+  (when-not (map? schema) (fail! :error.schema-not-found))
+
+  (let [with-hetu (model/has-hetu? (:body schema) path-arr)
+        person    (tools/unwrapped (case (first path-arr)
+                                     "henkilo" (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? set-empty-values?)
+                                     "yritys" (model/->yritys subject :with-empty-defaults? set-empty-values?)
+                                     (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? set-empty-values?)))
+        model     (if (seq path-arr)
+                    (assoc-in {:_selected (first path-arr)} (map keyword path-arr) person)
+                    person)
+
+        include-update (fn [path-val]
+                         (let [v (second path-val)]
+                           (and
+                             ; Path must exist in schema!
+                             (update-key-in-schema? (:body schema) path-val)
+                             (or (ss/other-than-string? v)
+                               ; Optionally skip empty values
+                               set-empty-values?  (not (ss/blank? v))))))]
+    (filterv include-update (tools/path-vals model))))
+
 (defn set-subject-to-document
   ([application document subject path timestamp]
     (set-subject-to-document application document subject path timestamp true))
   ([application document subject path timestamp set-empty-values?]
     {:pre [(map? document) (map? subject) (util/boolean? set-empty-values?)]}
     (when (seq subject)
-      (let [path-arr     (if-not (ss/blank? path) (ss/split path #"\.") [])
-            schema       (schemas/get-schema (:schema-info document))
-            with-hetu    (model/has-hetu? (:body schema) path-arr)
-            person       (tools/unwrapped (case (first path-arr)
-                                            "henkilo" (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? set-empty-values?)
-                                            "yritys" (model/->yritys subject :with-empty-defaults? set-empty-values?)
-                                            (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults? set-empty-values?)))
-            model        (if (seq path-arr)
-                           (assoc-in {:_selected (first path-arr)} (map keyword path-arr) person)
-                           person)
-            include-update (fn [path-val]
-                             (let [v (second path-val)]
-                               (and
-                                ; Path must exist in schema!
-                                (update-key-in-schema? (:body schema) path-val)
-                                (or (ss/other-than-string? v)
-                                    ; Optionally skip empty values
-                                    set-empty-values?  (not (ss/blank? v))))))
-            updates      (filter include-update (tools/path-vals model))]
-        (when-not schema (fail! :error.schema-not-found))
-        (debugf "merging user %s with best effort into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
+      (let [path-arr (if-not (ss/blank? path) (ss/split path #"\.") [])
+            schema   (schemas/get-schema (:schema-info document))
+            updates  (subject->updates subject path-arr schema set-empty-values?)]
+        (debugf "merging user %s with best effort into %s %s: %s" (:email subject) (get-in document [:schema-info :name]) (:id document) updates)
         (persist-model-updates application "documents" document updates timestamp)))))
 
 (defn do-set-user-to-document
