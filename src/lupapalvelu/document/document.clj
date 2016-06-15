@@ -10,6 +10,7 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
 
@@ -33,7 +34,7 @@
 
 (defn- deny-remove-of-non-removable-doc [{schema-info :schema-info}]
   (and schema-info
-       (false? (get-in (schemas/get-schema schema-info) [:info :removable]))))
+       (not (get-in (schemas/get-schema schema-info) [:info :removable]))))
 
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))
@@ -45,7 +46,7 @@
       (and (:deny-removing-last-document info) (<= doc-count 1)))))
 
 (defn- deny-remove-for-non-authority-user [{role :role} {schema-info :schema-info}]
-  (and (not= :authority (keyword role))
+  (and (not (usr/authority? (keyword role)))
        schema-info
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
