@@ -31,14 +31,6 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
   });
 
   self.send = function() {
-    if (self.amount() > self.maxAmountUntilEndOfDay()) {
-      self.error("calendar.error.cannot-create-slots-outside-calendar-day");
-      return;
-    }
-    if (self.amount() > self.maxAmountUntilNextSlot()) {
-      self.error("calendar.error.cannot-create-overlapping-slots");
-      return;
-    }
     var len = config.timeSlotLengthMinutes;
     var slots = _.map(_.range(self.amount()), function(d) {
       var t1 = moment(self.startTime()).add(d*len, "minutes");
@@ -53,6 +45,16 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
         {calendarId: parseInt(params.calendarId()), slots: slots, weekObservable: params.weekdays});
     self.bubbleVisible(false);
   };
+
+  self.disposedComputed(function() {
+    if (self.amount() > self.maxAmountUntilEndOfDay()) {
+      self.error("calendar.error.cannot-create-slots-outside-calendar-day");
+    } else if (self.amount() > self.maxAmountUntilNextSlot()) {
+      self.error("calendar.error.cannot-create-overlapping-slots");
+    } else {
+      self.error(false);
+    }
+  });
 
   self.init = function() {
   };

@@ -14,12 +14,10 @@ LUPAPISTE.CalendarService = function() {
       return {
         calendarId: event.calendarId,
         startOfDay: day.valueOf(),
-        endOfDay: moment(day).hour(params.lastFullHour).valueOf(),
+        endOfDay: moment(day).hour(params.lastFullHour).add(params.timeSlotLengthMinutes, "minutes").valueOf(),
         today: day.isSame(now, "day"),
         slots: _.map(slotsForDay,
-          function(s) {
-            return _.extend(s, { duration: moment(s.endTime).diff(s.startTime) });
-          })};
+          function(s) { return _.extend(s, { duration: moment(s.endTime).diff(s.startTime) }); })};
     });
   };
 
