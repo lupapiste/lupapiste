@@ -33,7 +33,7 @@
 
 (defn- deny-remove-of-non-removable-doc [{schema-info :schema-info}]
   (and schema-info
-       (not (get-in (schemas/get-schema schema-info) [:info :removable]))))
+       (false? (get-in (schemas/get-schema schema-info) [:info :removable]))))
 
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))
