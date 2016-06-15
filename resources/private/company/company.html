@@ -95,10 +95,15 @@
             <br/>
 
             <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'osapuoli.yritys.verkkolaskutustieto.verkkolaskuTunnus'"></label>
+              <input class="form-input text" data-bind="textInput: model().netbill, enable: edit" type="text"/>
+            </div>
+                        
+            <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
               <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text" maxlength="17"/>
-            </div>
-
+            </div>          
+            
             <div class="form-entry" data-test-id="company-pop">
               <span data-bind="component: {name: 'invoice-operator-selector', params: {selected: model().pop, enabled: edit}}"></span>
             </div>
