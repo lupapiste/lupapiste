@@ -27,7 +27,7 @@
 
 (defn can-access-attachment?
   "Checks user's access right to attachment from application auth and attachment auth"
-  [{authz :orgAuthz :as user} {app-auth :auth :as application} {:keys [latestVersion metadata auth] :as attachment}]
+  [user {app-auth :auth :as application} {:keys [latestVersion metadata auth] :as attachment}]
   {:pre [(map? attachment)]}
   (assert (if latestVersion (seq auth) true))
   (boolean
