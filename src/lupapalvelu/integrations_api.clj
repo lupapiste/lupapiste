@@ -375,6 +375,7 @@
 (defquery transfers
   {:parameters [id]
    :user-roles #{:authority}
+   :org-authz-roles  #{:approver}
    :states #{:sent :complementNeeded}}
   [{{org-id :organization municipality :municipality permit-type :permitType} :application}]
   (let [organization (organization/get-organization org-id)
@@ -387,6 +388,7 @@
 (defraw transfer
   {:parameters [id transferType fileType filename]
    :user-roles #{:authority}
+   :org-authz-roles  #{:approver}
    :input-validators [(fn [{data :data}]
                         (when-not (#{"waiting" "ok" "error"} (:fileType data))
                           (fail :error.unknown-type)))
