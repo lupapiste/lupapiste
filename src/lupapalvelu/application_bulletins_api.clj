@@ -7,6 +7,7 @@
             [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.mongo :as mongo]
@@ -58,9 +59,8 @@
                (query/sort (make-sort sort))
                (query/paginate :page page :per-page bulletin-page-size))]
     (->> apps
-         (map
-           #(assoc (first (:versions %)) :id (:_id %)))
-         (filter bulletins/bulletin-date-valid? ))))
+         (map #(assoc (first (:versions %)) :id (:_id %)))
+         (filter bulletins/bulletin-date-valid?))))
 
 (defn- page-size-validator [{{page :page} :data}]
   (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
@@ -224,6 +224,7 @@
           append-schema-fn     (fn [{schema-info :schema-info :as doc}]
                                  (assoc doc :schema (schemas/get-schema schema-info)))
           bulletin             (-> bulletin-version
+                                   (domain/filter-application-content-for {})
                                    (update-in [:documents] (partial map append-schema-fn))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
           bulletin-commentable (= (bulletin-can-be-commented command) nil)]
