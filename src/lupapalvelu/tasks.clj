@@ -122,33 +122,19 @@
     :readonly true :hidden true}])
 
 (def- task-katselmus-body-backend
-  (let [path-rakennus-tila-body [2 :body 1 :body 0 :body]
-        path-rakennus-tila [2 :body 1 :body 0]
-        path-toplevel-tila-body [3 :body 0 :body]
-        path-toplevel-tila [3 :body 0]
-        map-in-vec? #(contains? (set %1) %2)]
-
-    (doseq [path [path-rakennus-tila-body path-toplevel-tila-body]]
-      (assert (map-in-vec? (get-in task-katselmus-body path) {:name "osittainen"}) (get-in task-katselmus-body path)))
-    (doseq [path [path-rakennus-tila path-toplevel-tila]]
-      (assert (= "tila" (:name (get-in task-katselmus-body path)))))
-
-    (-> task-katselmus-body
-        (update-in path-rakennus-tila-body conj
-                   {:name "pidetty" :i18nkey "task-katselmus.katselmus.tila.pidetty"})
-        (update-in path-toplevel-tila-body
-                   {:name "pidetty" :i18nkey "task-katselmus.katselmus.tila.pidetty"})
-        (update-in path-rakennus-tila assoc :readonly true)
-        (update-in path-toplevel-tila assoc :readonly true))))
+  (-> task-katselmus-body
+      (update-in [2 :body 1 :body 0 :body] conj
+                 {:name "pidetty" :i18nkey "task-katselmus.katselmus.tila.pidetty"})
+      (update-in [3 :body 0 :body] conj
+                 {:name "pidetty" :i18nkey "task-katselmus.katselmus.tila.pidetty"})
+      (update-in [2 :body 1 :body 0] assoc :readonly true)
+      (update-in [3 :body 0] assoc :readonly true)))
 
 (def- task-katselmus-body-ya
-  (let [kuvaus-path [1 :body 2 :body 0]
-        trimmed-katselmus-body (tools/schema-body-without-element-by-name
-                                task-katselmus-body "rakennus" "tila" "katselmuksenLaji" "tiedoksianto")]
-    (assert (= "kuvaus" (:name (get-in trimmed-katselmus-body kuvaus-path))))
-    (concat [katselmuksenLaji-ya]
-            (update-in trimmed-katselmus-body
-                       kuvaus-path assoc :required true))))
+  (concat [katselmuksenLaji-ya]
+          (update-in (tools/schema-body-without-element-by-name task-katselmus-body
+                                                                "rakennus" "tila" "katselmuksenLaji" "tiedoksianto")
+                     [1 :body 2 :body 0] assoc :required true)))
 
 (schemas/defschemas
   task-schemas-version
@@ -318,7 +304,7 @@
               :muuTunnus (get-muuTunnus katselmus)
               }
 
-        schema-name (if (= (:tila katselmus-data) "pidetty")
+        schema-name (if (-> katselmus-data :tila (= "pidetty"))
                       "task-katselmus-backend"
                       ;; else
                       "task-katselmus")
