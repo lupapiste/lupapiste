@@ -7641,12 +7641,13 @@ LUPAPISTE.AttachmentsService = function() {
                                                     self.SCHEDULED_FOR_NOT_NEEDED});
   };
   self.changeScheduledNotNeeded = function() {
-    var attachmentIds = _(self.attachments()).map(function(attachment) {
+    var attachmentIds = _(self.attachments.peek()).map(function(attachment) {
       return attachment();
     }).filter({notNeeded: self.SCHEDULED_FOR_NOT_NEEDED}).map("id").value();
     _.forEach(attachmentIds, function(attachmentId) {
       self.updateAttachment(attachmentId, {notNeeded: true});
     });
+    self.attachments.valueHasMutated();
   };
 
   //helpers for checking relevant attachment states
@@ -7799,13 +7800,21 @@ LUPAPISTE.AttachmentsService = function() {
     return filteredAttachments("rakentaminen", attachments);
   }
 
+  function notNeededForModel(attachment) {
+    return attachment.notNeeded;
+  }
+
   function applyFilters(attachments) {
+    var atts = _(attachments)
+          .filter(function(attachment) {
+            return filters["ei-tarpeen"]() || !self.isNotNeeded(attachment);
+          }).value();
     if (showAll()) {
-      return attachments;
+      return atts;
     }
     return _.concat(
-      preVerdictAttachments(_.filter(attachments, isPreVerdict)),
-      postVerdictAttachments(_.filter(attachments, isPostVerdict))
+      preVerdictAttachments(_.filter(atts, isPreVerdict)),
+      postVerdictAttachments(_.filter(atts, isPostVerdict))
     );
   }
 
@@ -7841,17 +7850,11 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
-  function notNeededForModel(attachment) {
-    return attachment.notNeeded;
-  }
 
   self.modelForAttachmentInfo = function(attachmentIds) {
-    var visibleAttachments = _(attachmentIds)
+    var attachments = _(attachmentIds)
           .map(idToAttachment)
-          .filter(function(attachment) {
-            return filters["ei-tarpeen"]() ||
-              !self.isNotNeeded(attachment());
-          }).value();
+          .value();
     return {
       approve:      self.approveAttachment,
       reject:       self.rejectAttachment,
@@ -7860,7 +7863,7 @@ LUPAPISTE.AttachmentsService = function() {
       isApproved:   self.isApproved,
       isRejected:   self.isRejected,
       isNotNeeded:  notNeededForModel,
-      attachments:  visibleAttachments
+      attachments:  attachments
     };
   };
 
