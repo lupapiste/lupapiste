@@ -390,7 +390,7 @@
    :user-roles #{:authority}
    :org-authz-roles  #{:approver}
    :input-validators [(fn [{data :data}]
-                        (when-not (#{"waiting" "ok" "error"} (:fileType data))
+                        (when-not (#{"ok" "error"} (:fileType data))
                           (fail :error.unknown-type)))
                       (fn [{data :data}]
                         (when-not (#{"krysp" "ah"} (:transferType data))
@@ -408,8 +408,7 @@
         sanitized (mime/sanitize-filename filename) ; input validator doesn't allow slashes, but sanitize anyway
         path (case fileType
                "ok" (str env/file-separator "archive" env/file-separator)
-               "error" (str env/file-separator "error" env/file-separator)
-               "waiting" env/file-separator)
+               "error" (str env/file-separator "error" env/file-separator))
         f (io/file (str dir path sanitized))]
     (if (.exists f)
       (->>

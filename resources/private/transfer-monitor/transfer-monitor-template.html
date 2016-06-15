@@ -3,7 +3,13 @@
 <!-- ko foreach: { data: fileGroups, afterRender: function(){hub.send('resize-dialog');} } -->
   <h3 data-bind="if: files.length"><span data-bind="text: lname"></span>:</h3>
   <ul data-bind="foreach: files">
-    <li><a data-bind="text: name, attr: {href: href}" target="_blank"></a>
+    <li>
+    <!-- ko if: $data.href -->
+    <a data-bind="text: name, attr: {href: href}" target="_blank"></a>
+    <!-- /ko -->
+    <!-- ko ifnot: $data.href -->
+    <span data-bind="text: name"></span>
+    <!-- /ko -->
     (<span data-bind="dateTimeString: modified"></span>)</li>
   </ul>
 <!-- /ko -->

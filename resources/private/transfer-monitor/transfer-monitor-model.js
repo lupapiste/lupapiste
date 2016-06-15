@@ -12,7 +12,9 @@ LUPAPISTE.TransferMonitorModel = function(params) {
       self.fileGroups(_.map(["waiting", "error", "ok"], function(group) {
         var files = _.map(["krysp","ah"], function(t) {
           return _.map(resp[t][group], function(f) {
-            f.href = _.sprintf("/api/raw/transfer?id=%s&transferType=%s&fileType=%s&filename=%s", params.id, t, group, f.name);
+            if (group !== "waiting") {
+              f.href = _.sprintf("/api/raw/transfer?id=%s&transferType=%s&fileType=%s&filename=%s", params.id, t, group, f.name);
+            }
             return f;
           });
         });
