@@ -2296,6 +2296,8 @@
 "task.type" "sv" "Typ av krav"
 "task-katselmus._group_label" "fi" "Kokoukset, katselmukset ja tarkastukset"
 "task-katselmus._group_label" "sv" "Möten, syner och granskningar"
+"task-katselmus-backend._group_label" "fi" "Kokoukset, katselmukset ja tarkastukset"
+"task-katselmus-backend._group_label" "sv" "Möten, syner och granskningar"
 "task-katselmus-ya._group_label" "fi" "Kokoukset, katselmukset ja tarkastukset"
 "task-katselmus-ya._group_label" "sv" "Möten, syner och granskningar"
 "task-lupamaarays._group_label" "fi" "Muut lupamääräykset"
