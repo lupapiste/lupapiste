@@ -26,7 +26,8 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role "authorityAdmin"
-    :orgAuthz {:753-R-TESTI #{:authorityAdmin}}
+    :orgAuthz {:753-R-TESTI #{:authorityAdmin}
+               :753-R #{:authorityAdmin}}
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
@@ -40,7 +41,7 @@
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
     :orgAuthz {:753-R-TESTI #{:authority :approver}
-               :753-YA #{:authority :approver}
+               :753-R #{:authority :approver}
                :998-R-TESTI-2 #{:authority :approver}}
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -95,9 +96,22 @@
 (def organizations (map
                      (partial merge default-keys-for-organizations)
                      [
-                      {:id "753-R-TESTI"
+                      {:id "753-R"
                        :name {:fi "Sipoon rakennusvalvonta"
                               :sv "Sipoon rakennusvalvonta"}
+                       :scope [{:municipality "753" :permitType "R" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "YM" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "YI" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "YL" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "MAL" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "KT" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "MM" :inforequest-enabled true :new-application-enabled true}]
+                       :calendars-enabled true}
+                      {:id "753-R-TESTI"
+                       :name {:fi "Sipoon rakennusvalvonta TESTI"
+                              :sv "Sipoon rakennusvalvonta TESTI"}
                        :calendars-enabled true}
                       {:id "837-R"
                        :name {:fi "Tampereen rakennusvalvonta"
