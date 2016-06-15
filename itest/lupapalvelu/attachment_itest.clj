@@ -563,18 +563,21 @@
 
 
 (facts "RAM attachments"
-       (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
-             application-id (:id application)
-             {attachments :attachments} (query-application pena application-id)
-             base-attachment (first attachments)]
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        {attachments :attachments} (query-application pena application-id)
+        base-attachment (first attachments)]
+
+    (fact "Assign application to Ronja"
+      (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?)
 
     (fact "Cannot create ram attachment before verdict is given"
       (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
       => (partial expected-failure? :error.command-illegal-state))
 
     (fact "Give verdict"
-          (command sonja :check-for-verdict :id application-id)
-          => ok?)
+      (command sonja :check-for-verdict :id application-id)
+      => ok?)
 
     (fact "Attachment id should match attachment in the application"
       (command pena :create-ram-attachment :id application-id :attachmentId "invalid_id")
@@ -583,6 +586,11 @@
     (fact "RAM link is created"
       (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
       => ok?)
+
+    (fact "Email notification about new RAM is sent"
+      (let [email (last-email)]
+        (:to email) => (contains (email-for-key ronja))
+        (:subject email) => "Lupapiste: foo 42, bar - Ilmoitus uudesta RAM:sta"))
 
     (fact "RAM link cannot be created twice on same attachment"
           (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
