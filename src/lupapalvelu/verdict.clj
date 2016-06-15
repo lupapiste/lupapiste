@@ -451,12 +451,12 @@
 (defn- merge-review-tasks
   "Add review tasks with new IDs to existing tasks map"
   [from-update existing]
-
   (let [bg-id #(get-in % [:data :muuTunnus :value])
+        review-task? #(= "task-katselmus" (get-in % [:schema-info :name]))
         tasks->backend-ids (fn [tasks]
                              (set (remove ss/blank?
                                           (map bg-id tasks))))
-        ids-existing (tasks->backend-ids (filter tasks/task-is-review? existing))
+        ids-existing (tasks->backend-ids (filter review-task? existing))
         ids-from-update (tasks->backend-ids from-update)
         has-new-id? #(let [i (bg-id %)] (and (contains? ids-from-update i)
                                              (not (contains? ids-existing i))))
@@ -486,8 +486,6 @@
     [existing-without-empties-matching-updates from-update-with-new-id]))
 
 
-
-
 (defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
@@ -500,32 +498,34 @@
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {} source {:buildings buildings-summary} %)
         review-tasks (map review-to-task reviews)
+
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
         validation-errors (doall  (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
+
         task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
 
-    (doseq [task (filter #(and (tasks/task-is-review? %)
-                               (-> % :data :rakennus)) updated-tasks-with-updated-buildings)]
+
+    (doseq [task (filter #(and (= "task-katselmus" (-> % :schema-info :name))
+                               (-> % :data :rakennus)) updated-tasks)]
       (if-not (= (count buildings-summary)
                  (-> task :data :rakennus count))
               (errorf "buildings count %s != task rakennus count %s for id %s"
                       (count buildings-summary)
                       (-> task :data :rakennus count) (:id application))))
-    (assert (map? application))
+
     (assert (every? not-empty updated-tasks))
     (assert (every? map? updated-tasks))
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
     (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
-
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
-    (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
+    (assert (every? #(get-in % [:schema-info :name]) updated-tasks))
     (if (some seq validation-errors)
       (do
-        (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
+        (errorf "verdict->tasks: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
         (fail :error.invalid-task-type))
       ;; else
       (do
