@@ -22,7 +22,7 @@
 
   function LoginAsModel() {
     var self = this;
-    self.role = ko.observable("authority");
+    self.role = ko.observable("approver");
     self.password = ko.observable("");
     self.organizationId = null;
 
@@ -36,7 +36,7 @@
       ajax
         .command("impersonate-authority", {organizationId: self.organizationId, role: self.role(), password: self.password()})
         .success(function() {
-          var redirectLocation = self.role() === "archivist" ? "authority" : self.role();
+          var redirectLocation = self.role() === "authorityAdmin" ? self.role() : "authority";
           window.location.href = "/app/fi/" + _.kebabCase(redirectLocation);
         })
         .call();
