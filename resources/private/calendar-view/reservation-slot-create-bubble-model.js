@@ -14,7 +14,8 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
   self.weekdayCss = ko.observable();
 
   self.amount = ko.observable();
-  self.maxAmount = ko.observable();
+  self.maxAmountUntilNextSlot = ko.observable();
+  self.maxAmountUntilEndOfDay = ko.observable();
 
   self.reservationTypes = params.reservationTypes; // observable
   self.selectedReservationTypes = ko.observableArray();
@@ -30,7 +31,11 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
   });
 
   self.send = function() {
-    if (self.amount() > self.maxAmount()) {
+    if (self.amount() > self.maxAmountUntilEndOfDay()) {
+      self.error("calendar.error.cannot-create-slots-outside-calendar-day");
+      return;
+    }
+    if (self.amount() > self.maxAmountUntilNextSlot()) {
       self.error("calendar.error.cannot-create-overlapping-slots");
       return;
     }
@@ -52,10 +57,11 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
   self.init = function() {
   };
 
-  function maxFreeTimeAfterGivenTime(weekday, timestamp) {
+  function calculateFreeTimeAfterGivenTime(weekday, timestamp) {
     var laterSlots = _.filter(weekday.slots, function(slot) { return slot.startTime > timestamp; });
     var nextSlotStartTime = laterSlots[0] ? laterSlots[0].startTime : weekday.endOfDay;
-    return moment(nextSlotStartTime).diff(timestamp, "seconds");
+    self.maxAmountUntilNextSlot(moment(nextSlotStartTime).diff(timestamp, "seconds") / (config.timeSlotLengthMinutes * 60));
+    self.maxAmountUntilEndOfDay(moment(weekday.endOfDay).diff(timestamp, "seconds") / (config.timeSlotLengthMinutes * 60));
   }
 
   self.addEventListener("calendarView", "timelineSlotClicked", function(event) {
@@ -75,7 +81,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
     self.weekdayCss("weekday-" + timestamp.isoWeekday());
     self.selectedReservationTypes([]);
     self.amount(1);
-    self.maxAmount(maxFreeTimeAfterGivenTime(weekday, timestamp.valueOf()) / 3600);
+    calculateFreeTimeAfterGivenTime(weekday, timestamp.valueOf());
     self.bubbleVisible(true);
   });
 

@@ -9,6 +9,8 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
   self.calendarIdInView = ko.observable();
   self.userIdInView = ko.observable();
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
   function setEnabled(user, value) {
     if (self.initialized) {
       ajax.command("set-calendar-enabled-for-authority", {userId: user.id, enabled: value})
@@ -35,16 +37,13 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
   };
 
   self.calendarIdInView.subscribe(function(val) {
-    if (typeof val !== "undefined") {
-      self.calendarInView(_.filter(self.items(), function(item) { return item.calendarId() === self.calendarIdInView() })[0]);
+    if (!_.isUndefined(val)) {
+      self.calendarInView(_.filter(self.items(), function(item) { return item.calendarId() === val })[0]);
     }
   });
 
-  var _init = hub.subscribe("calendarService::organizationCalendarsFetched", function(event) {
+  self.addEventListener("calendarService", "organizationCalendarsFetched", function(event) {
     self.init(event.calendars);
   });
 
-  self.dispose = function() {
-    hub.unsubscribe(_init);
-  };
 };

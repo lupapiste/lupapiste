@@ -9,7 +9,9 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.calendarId = ko.observable();
   self.userId = ko.observable();
 
-  if (params.searchConditions && params.searchConditions.calendarId) {
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
+  if (_.get(params, "searchConditions.calendarId")) {
     self.calendarId = params.searchConditions.calendarId; // observable from parent
     self.userId = params.searchConditions.userId; // observable from parent
   }
@@ -56,27 +58,26 @@ LUPAPISTE.CalendarViewModel = function (params) {
 
   self.clickHandler = function(clazz) {
     if (clazz === "timeline-slot") {
-      hub.send("calendarView::timelineSlotClicked",
+      self.sendEvent("calendarView", "timelineSlotClicked",
         { calendarId: this.calendarId,
           weekday: this.weekday,
           hour: this.hour,
           minutes: this.minutes });
     } else if (clazz === "calendar-slot") {
-      hub.send("calendarView::calendarSlotClicked",
+      self.sendEvent("calendarView", "calendarSlotClicked",
         { calendarId: this.calendarWeekday.calendarId,
           slot: this.slot });
     }
   };
 
   self.calendarId.subscribe(function(val) {
-    if (typeof val !== "undefined") {
-      hub.send("calendarService::fetchCalendar",
-        {calendarId: self.calendarId(), user: self.userId(),
-         reservationTypesObservable: self.reservationTypes});
+    if (!_.isUndefined(val)) {
+      self.sendEvent("calendarService", "fetchCalendar",
+        {calendarId: val, user: self.userId(), reservationTypesObservable: self.reservationTypes});
     }
   });
 
-  ko.computed(function() {
+  self.disposedComputed(function() {
     hub.send("calendarService::fetchCalendarSlots",
       { calendarId: self.calendarId(),
         week: self.startOfWeek().isoWeek(),
