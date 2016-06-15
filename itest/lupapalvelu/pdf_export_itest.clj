@@ -43,7 +43,6 @@
                        "ottamis-suunnitelman-laatija"
                        "kaupunkikuvatoimenpide"
                        "task-katselmus"
-                       "task-katselmus-backend"
                        "approval-model-with-approvals"
                        "approval-model-without-approvals"})
 

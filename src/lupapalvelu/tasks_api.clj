@@ -35,12 +35,19 @@
       {$set {:tasks.$.state state :modified created}}
       updates)))
 
+(defn- task-is-review? [task]
+  (some->> (get-in task [:schema-info :name])
+           (schemas/get-schema tasks/task-schemas-version)
+           (#(get-in % [:info :subtype]))
+           (keyword)
+           (= :review)))
+
 (defn- validate-task-is-not-review [{{task-id :taskId} :data} {tasks :tasks}]
-  (when (tasks/task-is-review? (util/find-by-id task-id tasks))
+  (when (task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
 (defn- validate-task-is-review [{{task-id :taskId} :data} {tasks :tasks}]
-  (when-not (tasks/task-is-review? (util/find-by-id task-id tasks))
+  (when-not (task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
 (defn- task-is-end-review? [task]
@@ -70,7 +77,7 @@
     (fail! :illegal-schema))
   (let [meta {:created created :assignee user}
         source (or (valid-source (:source data)) {:type :authority :id (:id user)})
-        rakennus-data (when (contains? #{"task-katselmus" "task-katselmus-backend"} schemaName)
+        rakennus-data (when (= "task-katselmus" schemaName)
                         (util/strip-empty-maps {:rakennus (tasks/rakennus-data-from-buildings {} (:buildings application))}))
         task (tasks/new-task schemaName
                              taskName
@@ -106,7 +113,7 @@
      $set  {:modified  created}}))
 
 (defn generate-task-pdfa [application {info :schema-info :as task} user lang]
-  (when (tasks/task-is-review? task)
+  (when (= "task-katselmus" (:name info))
     (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
 
 (defcommand approve-task
@@ -225,7 +232,7 @@
             meta {:created created :assignee (:assignee task)}
             source {:type :task :id taskId}
             laji (get-in task [:data :katselmuksenLaji :value])
-            rakennus-data (when (tasks/task-is-review? task)
+            rakennus-data (when (= "task-katselmus" schema-name)
                             (util/strip-empty-maps {:rakennus (tasks/rakennus-data-from-buildings {} (:buildings application))}))
             data (merge rakennus-data {:katselmuksenLaji laji})
             new-task (tasks/new-task schema-name (:taskname task) data meta source)]

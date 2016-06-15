@@ -173,7 +173,7 @@
 
 (defn- get-review-requests-from-application [application]
   (reduce (fn [acc task]
-            (if (contains? #{"task-katselmus" "task-katselmus-backend"} (name (get-in task [:schema-info :name])))
+            (if (= "task-katselmus" (name (get-in task [:schema-info :name])))
               (conj acc {:text     (:taskname task)
                          :category :request-review
                          :ts       (:created task)
