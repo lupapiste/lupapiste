@@ -32,7 +32,8 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.http :as http]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.validators :as validators]))
 
 ;;
 ;; Application approval
@@ -411,9 +412,9 @@
                "error" (str env/file-separator "error" env/file-separator))
         f (io/file (str dir path sanitized))]
     (if (.exists f)
-      (->>
-        (resp/content-type (mime/mime-type sanitized) f)
-        (resp/set-headers http/no-cache-headers)
-        (resp/status 200))
-      (resp/status 404 "File Not Found")))
-  )
+      (let [masked-content (ss/replace (slurp f) (re-pattern validators/finnish-hetu-str) "******x****")]
+        (->>
+          (resp/content-type (mime/mime-type sanitized) masked-content)
+          (resp/set-headers http/no-cache-headers)
+          (resp/status 200)))
+      (resp/status 404 "File Not Found"))))

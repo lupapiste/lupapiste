@@ -45,7 +45,9 @@
 
 (def vrk-checksum-chars ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"])
 
-(def finnish-hetu-regex #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$")
+(def finnish-hetu-str "(0[1-9]|[12]\\d|3[01])(0[1-9]|1[0-2])([5-9]\\d\\+|\\d\\d-|\\d\\dA)\\d{3}[\\dA-Y]")
+
+(def finnish-hetu-regex (re-pattern (str "^" finnish-hetu-str "$")))
 
 (defn vrk-checksum [^Long l]
   (nth vrk-checksum-chars (mod l 31)))
