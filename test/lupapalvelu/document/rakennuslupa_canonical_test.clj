@@ -66,6 +66,12 @@
                                       :version 1}
    :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}
                                              :suoramarkkinointilupa {:value false}})}})
+(def- asiamies-henkilo
+  {:id "asiamies-henkilo" :schema-info {:name "hakijan-asiamies"
+                                      :version 1}
+   :data {:henkilo (assoc henkilo :kytkimet {:vainsahkoinenAsiointiKytkin {:value true}
+                                             :suoramarkkinointilupa {:value false}})}})
+
 (def- hakija-tj-henkilo
   (assoc-in hakija-henkilo [:schema-info :name] "hakija-tj"))
 
@@ -418,6 +424,7 @@
 
 (def documents [hankkeen-kuvaus
                 hakija-henkilo
+                asiamies-henkilo
                 hakija-yritys
                 paasuunnittelija
                 suunnittelija1
@@ -435,6 +442,7 @@
 
 (def documents-ilman-ilmoitusta [hankkeen-kuvaus
                                  hakija-henkilo
+                                 asiamies-henkilo
                                  paasuunnittelija
                                  maksaja-yritys
                                  rakennuspaikka-ilman-ilmoitusta
@@ -610,6 +618,22 @@
     (fact "turvakieltoKytkin" (:turvakieltoKytkin hakija-model) => true)
     (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
     (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin hakija-model) => true)
+    (validate-person henkilo)
+    (fact "yritys is nil" yritys => nil)))
+
+(facts "Canonical asiamies-henkilo model is correct"
+  (let [osapuoli (tools/unwrapped (:data asiamies-henkilo))
+        asiamies-model (get-osapuoli-data osapuoli (-> asiamies-henkilo :schema-info :name keyword))
+        _ (clojure.pprint/pprint asiamies-model)
+        henkilo (:henkilo asiamies-model)
+        ht (:henkilotiedot henkilo)
+        yritys (:yritys asiamies-model)]
+    (fact "model" asiamies-model => truthy)
+    (fact "kuntaRooliKoodi" (:kuntaRooliKoodi asiamies-model) => "Hakijan asiamies")
+    (fact "VRKrooliKoodi" (:VRKrooliKoodi asiamies-model) => "muu osapuoli")
+    (fact "turvakieltoKytkin" (:turvakieltoKytkin asiamies-model) => true)
+    (fact "vainsahkoinenAsiointiKytkin" (:vainsahkoinenAsiointiKytkin henkilo) => true)
+    (fact "suoramarkkinointikieltoKytkin" (:suoramarkkinointikieltoKytkin asiamies-model) => true)
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 

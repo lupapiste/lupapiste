@@ -545,6 +545,7 @@
   [canonical krysp-version]
   {:pre [krysp-version]}
   (-> (case (name krysp-version)
+        ;; kaikkiin näihin (< 2.2.0) hakijan-asiamies -> ei-tiedossa mappays
         "2.1.2" (map-enums-212 canonical)
         "2.1.3" (map-enums-213-218 canonical)
         "2.1.4" (map-enums-213-218 canonical)
@@ -575,6 +576,7 @@
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
+        ;; tätä ennen jossain pitäisi poistaa asiamies liian vanhoilta krysp-versioilta
         xml (rakennuslupa-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]

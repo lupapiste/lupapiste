@@ -239,6 +239,7 @@
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
+  (println "application-to-canonical")
   (let [application (tools/unwrapped application)
         link-permits (:linkPermitData application)
         documents-by-type (documents-by-type-without-blanks application)
