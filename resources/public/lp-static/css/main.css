@@ -1,5 +1,31 @@
-@import url('main-blessed1.css?z=1465997962318');
+@import url('main-blessed1.css?z=1466062356941');
 
+/* line 95, ../../../private/common-html/sass/partials/_modal.scss */
+.mask.white {
+  background-color: #fff;
+}
+
+/* line 100, ../../../private/common-html/sass/partials/_modal.scss */
+.window {
+  position: fixed;
+  display: none;
+  z-index: 9999;
+  padding: 12px 12px 12px 12px;
+  background: white;
+  overflow: hidden;
+}
+/* line 107, ../../../private/common-html/sass/partials/_modal.scss */
+.window.rounded {
+  border-radius: 6px;
+}
+
+/* line 112, ../../../private/common-html/sass/partials/_modal.scss */
+.autosized {
+  min-width: 22.5em;
+  min-height: 144px;
+  height: auto;
+  width: auto;
+}
 
 /* line 119, ../../../private/common-html/sass/partials/_modal.scss */
 .autosized-yes-no {

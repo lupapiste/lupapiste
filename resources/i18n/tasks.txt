@@ -74,6 +74,8 @@
 "task-katselmus.katselmus.tila.lopullinen" "sv" "Slutlig"
 "task-katselmus.katselmus.tila.osittainen" "fi" "Osittainen"
 "task-katselmus.katselmus.tila.osittainen" "sv" "Delvis"
+"task-katselmus.katselmus.tila.pidetty" "fi" "Pidetty"
+"task-katselmus.katselmus.tila.pidetty" "sv" "Genomförd"
 "task-katselmus.rakennus._append_label" "fi" "Lisää rakennus"
 "task-katselmus.rakennus._append_label" "sv" "Lägg till byggnad"
 "task-katselmus.rakennus._group_label" "fi" "Katselmoitava rakennus"
