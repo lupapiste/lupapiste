@@ -23,6 +23,7 @@
       po:           ko.observable("").extend({required: true}),
       zip:          ko.observable("").extend({required: true, number: true, maxLength: 5, minLength: 5}),
       country:      ko.observable(""),
+      netbill:      ko.observable(""),
       ovt:          ko.observable("").extend({ovt: true}),
       pop:          ko.observable(""),
       // Signer:
@@ -34,7 +35,7 @@
     });
 
     self.accountFieldNames = ["accountType"];
-    self.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
+    self.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "netbill", "ovt", "pop"];
     self.companyFields = self.companyFieldNames.concat(self.accountFieldNames);
     self.signerFieldNames = ["firstName", "lastName", "email", "personId"];
 

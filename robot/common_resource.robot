@@ -1296,6 +1296,10 @@ Test id should contain
   [Arguments]  ${id}  ${text}
   Wait until  Element should contain  jquery=[data-test-id=${id}]  ${text}
 
+Test id input is
+  [Arguments]  ${id}  ${text}
+  Wait until  Textfield value should be  jquery=[data-test-id=${id}]  ${text}
+
 Javascript? helper
   [Arguments]  ${expression}
   ${result}=  Execute JavaScript  return ${expression};

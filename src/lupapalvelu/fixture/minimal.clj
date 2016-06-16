@@ -937,6 +937,7 @@
                  :po "Tampere"
                  :country "FINLAND"
                  :y "1060155-5"
+                 :netbill "solitabilling"
                  :ovt "003710601555"
                  :pop "BAWCFI22"
                  :reference "Lupis"
