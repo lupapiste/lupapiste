@@ -1,12 +1,21 @@
-LUPAPISTE.CalendarViewModel = function () {
+LUPAPISTE.CalendarViewModel = function (params) {
   "use strict";
   var self = this,
       calendarService = lupapisteApp.services.calendarService;
 
-  self.calendarWeekdays = calendarService.calendarWeekdays;
-  self.startOfWeek = calendarService.calendarQuery.startOfWeek;
-
+  self.calendarWeekdays = ko.observableArray();
+  self.reservationTypes = ko.observableArray();
+  self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
   self.calendarId = ko.observable();
+  self.userId = ko.observable();
+
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
+  if (_.get(params, "searchConditions.calendarId")) {
+    self.calendarId = params.searchConditions.calendarId; // observable from parent
+    self.userId = params.searchConditions.userId; // observable from parent
+  }
+  self.reservationTypes = params.reservationTypes; // observable from parent
 
   self.firstFullHour = calendarService.params().firstFullHour;
   self.lastFullHour = calendarService.params().lastFullHour;
@@ -49,28 +58,43 @@ LUPAPISTE.CalendarViewModel = function () {
 
   self.clickHandler = function(clazz) {
     if (clazz === "timeline-slot") {
-      hub.send("calendarView::timelineSlotClicked",
+      self.sendEvent("calendarView", "timelineSlotClicked",
         { calendarId: this.calendarId,
           weekday: this.weekday,
           hour: this.hour,
           minutes: this.minutes });
     } else if (clazz === "calendar-slot") {
-      hub.send("calendarView::calendarSlotClicked",
+      self.sendEvent("calendarView", "calendarSlotClicked",
         { calendarId: this.calendarWeekday.calendarId,
           slot: this.slot });
     }
   };
 
+  self.calendarId.subscribe(function(val) {
+    if (!_.isUndefined(val)) {
+      self.sendEvent("calendarService", "fetchCalendar",
+        {calendarId: val, user: self.userId(), reservationTypesObservable: self.reservationTypes});
+    }
+  });
+
+  self.disposedComputed(function() {
+    hub.send("calendarService::fetchCalendarSlots",
+      { calendarId: self.calendarId(),
+        week: self.startOfWeek().isoWeek(),
+        year: self.startOfWeek().year(),
+        weekObservable: self.calendarWeekdays});
+  });
+
   self.gotoToday = function() {
-    hub.send("calendarService::fetchCalendarSlots", { week: moment().isoWeek(), year: moment().year() });
+    self.startOfWeek(moment().startOf("isoWeek"));
   };
 
   self.gotoPreviousWeek = function() {
-    hub.send("calendarService::fetchCalendarSlots", { increment: -1 });
+    self.startOfWeek(self.startOfWeek().add(-1, "weeks"));
   };
 
   self.gotoFollowingWeek = function() {
-    hub.send("calendarService::fetchCalendarSlots", { increment: 1 });
+    self.startOfWeek(self.startOfWeek().add(1, "weeks"));
   };
 
 };

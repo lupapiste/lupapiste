@@ -129,6 +129,15 @@
   {:pre [(keyword? template-name) (sc/validate Email m)]}
   (swap! mail-config assoc template-name m))
 
+(def non-notified-roles
+  #{"rest-api" "trusted-etl"})
+
+(defn invalid-recipient? [rec]
+  "Notifications are not sent to certain roles, or to users who do not 
+   have a valid email address."
+  (or (ss/blank? (:email rec))
+      (contains? non-notified-roles (:role rec))))
+
 (defn notify! [template-name command]
   {:pre [template-name (map? command) (template-name @mail-config)]}
   (let [conf (template-name @mail-config)]
@@ -137,7 +146,7 @@
             application    (application-fn (:application command))
             command        (assoc command :application application)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
-            recipients     (remove (fn-> :email ss/blank?) (recipients-fn command))
+            recipients     (remove invalid-recipient? (recipients-fn command))
             subject        (get-email-subject application (get conf :subject-key (name template-name)) (get conf :show-municipality-in-subject false))
             model-fn       (get conf :model-fn create-app-model)
             template-file  (get conf :template (str (name template-name) ".md"))]

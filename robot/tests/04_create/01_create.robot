@@ -67,23 +67,28 @@ The contents of unsent inforequest's message field is resetted properly when mov
   Create inforequest the fast way  create-info-2  360603.153  6734222.95  753-416-25-22  kerrostalo-rivitalo  init-comment-2
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "";
 
+Mikko cancels the initial inforequest
+  Open inforequest  create-info  753-416-25-22
+  Close current inforequest
+  Wait until  Applications page should be open
+  Request should not be visible  create-info
+
 Mikko creates new application
   [Tags]  firefox
-  Go to page  applications
-  Applications page should be open
+  Wait until  Applications page should be open
   Create application the fast way  create-app-2  753-416-25-22  kerrostalo-rivitalo
   Go to page  applications
   Request should be visible  create-app
-  Request should be visible  create-info
   Request should be visible  create-app-2
 
 Mikko closes application at Latokuja 3 and logs out
   [Tags]  firefox
   Open application  create-app-2  753-416-25-22
-  Close current application
+  Close current application  Zaijian
   Wait Until  Request should be visible  create-app
-  Wait Until  Request should be visible  create-info
   Wait Until  Request should not be visible  create-app-2
+  Open canceled application  create-app-2  753-416-25-22
+  Check comment  Zaijian
   [Teardown]  logout
 
 # LUPA-23
@@ -105,6 +110,8 @@ Veikko sees application in list
   Go to page  applications
   Request should be visible  create-veikko-auth-app
   [Teardown]  logout
+
+
 
 #Setting maps disabled again after the tests
 #  Set integration proxy off
