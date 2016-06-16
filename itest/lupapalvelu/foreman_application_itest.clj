@@ -266,7 +266,7 @@
 
         base-foreman-app-id  (create-foreman-application history-base-app-id mikko mikko-id "vastaava ty\u00F6njohtaja" "B")] ;for calling history
 
-    (command mikko :cancel-application :id foreman-app-canceled) => ok?
+    (command mikko :cancel-application :id foreman-app-canceled :text nil :lang "fi") => ok?
 
     (facts "reduced"
       (fact "reduced history should contain reduced history (excluding canceled application)"

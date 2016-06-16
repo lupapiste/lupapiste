@@ -131,7 +131,7 @@
     (:opened app1) => nil
     (:opened app2) => number?))
 
-(facts* "cancel application"
+(facts* "cancel application authority"
   (last-email) ; Inbox zero
 
   (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Peruutustie 23")
@@ -169,7 +169,35 @@
           (count (:comments application)) => 1
           (-> application :comments (first) :text) => (contains cancel-reason))))))
 
-(fact "Authority in unable to create an application to a municipality in another organization"
+(facts* "Pena cancels his application"
+  (last-email) ; Inbox zero
+
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id :address "Penahouse 88")
+        application-id (:id application)
+        reason-text "Cancellation notice."]
+
+    (fact "Pena sees the application" (query pena :application :id application-id) => ok?)
+    (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
+    (fact "Pena can cancel his application with reason text"
+          (command pena :cancel-application :id application-id :text reason-text :lang "fi") => ok?)
+    (fact "Sonja sees the canceled application"
+      (let [application (query-application sonja application-id)]
+        (-> application :history last :state) => "canceled"))
+    (fact "Pena sees the cancel reason text in comments"
+          (let [application (query-application pena application-id)]
+            (count (:comments application)) => 1
+            (-> application :comments (first) :text) => (contains reason-text)))
+    (fact "Sonja sees the cancel reason text in comments"
+          (let [application (query-application sonja application-id)]
+            (count (:comments application)) => 1
+            (-> application :comments (first) :text) => (contains reason-text)))
+    (let [email (last-email)]
+      (:to email) => (contains (email-for-key pena))
+      (:subject email) => "Lupapiste: Penahouse 88 - hakemuksen tila muuttunut"
+      (get-in email [:body :plain]) => (contains "Peruutettu")
+      email => (partial contains-application-link? application-id "applicant"))))
+
+(fact "Authority is unable to create an application to a municipality in another organization"
   (create-app sonja :propertyId tampere-property-id) => unauthorized?)
 
 (facts "Add operations"

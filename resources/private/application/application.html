@@ -262,7 +262,7 @@
                                     <span data-bind="ltext: 'application.cancelApplication'"></span>
                                 </button>
                                 <button class="function"
-                                        data-bind="click: cancelApplicationAuthority, visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
+                                        data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
                                         data-test-id="application-cancel-authority-btn">
                                     <i class="lupicon-circle-remove"></i>
                                     <span data-bind="ltext: 'application.cancelApplication'"></span>
@@ -1589,7 +1589,9 @@
                     </div>
                     <div class="dialog-content" data-bind="with: application">
                         <label data-bind="ltext: 'application.canceled.reason'"></label>
-                        <textarea rows=10 class="form-input textarea really-long high" data-bind="textInput: cancelText"></textarea>
+                        <textarea rows=10 class="form-input textarea grid-style-input really-long high"
+                                  data-bind="textInput: cancelText"
+                                  data-test-id="cancel-application-reason"></textarea>
                         <div class='dialog-user-content application-cancel-text-content'></div>
                         <button class='positive btn-dialog close' data-test-id='confirm-yes'></button>
                         <button class='secondary btn-dialog close' data-test-id='confirm-no'></button>
