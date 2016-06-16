@@ -3,6 +3,7 @@
 Documentation  Common stuff for the Lupapiste Functional Tests.
 Library        Selenium2Library   timeout=10  run_on_failure=Nothing
 Library        String
+Library        Collections
 Library        OperatingSystem
 
 *** Variables ***
@@ -38,13 +39,24 @@ Set DB cookie
   Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
   Log  Cookie: ${DB COOKIE} = ${dbname}
 
+Browser Firefox
+  # Follow instructions at https://developer.mozilla.org/en-US/docs/Mozilla/QA/Marionette/WebDriver#Setting_up_the_Marionette_executable
+  # to set up the executable first!
+  ${desired_capabilities}=  Evaluate   sys.modules['selenium.webdriver'].common.desired_capabilities.DesiredCapabilities.FIREFOX    sys,selenium.webdriver
+  Set To Dictionary  ${desired_capabilities}  marionette  ${True}
+  Open Browser  ${SERVER}/dev-pages/init.html   ${BROWSER}   desired_capabilites=${desired_capabilities}   remote_url=${SELENIUM}
+
+Browser Other
+  Open Browser  ${SERVER}/dev-pages/init.html   ${BROWSER}   remote_url=${SELENIUM}
+
 Browser
   [Arguments]
   # Setting cookies on login page fails on IE8, perhaps because of
   # caching headers:
   # https://code.google.com/p/selenium/issues/detail?id=6985
   # Open a static HTML page and set cookie there
-  Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
+  Run Keyword If  '${BROWSER}' == 'firefox'   Browser Firefox
+  ...             ELSE                        Browser Other
   Set DB cookie
 
 Open browser to login page
