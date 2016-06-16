@@ -117,8 +117,11 @@ LUPAPISTE.ConversationModel = function(params) {
   }
 
   self.isCalendarComment = function(comment) {
-    var res = _.startsWith(util.getIn(comment, ["target", "type"]), "reservation");
-    return res;
+    return _.startsWith(util.getIn(comment, ["target", "type"]), "reservation");
+  }
+
+  self.reservationForComment = function(comment) {
+    return _.find(lupapisteApp.models.application._js.reservations, function(r) { return r.id === comment.target.id; });
   }
 
   self.showCalendarComments = function() { return lupapisteApp.models.applicationAuthModel.ok("calendars-enabled"); };
