@@ -7938,9 +7938,9 @@ div.alleYli-radioGroup {
 }
 /* line 1330, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100%;
-  min-width: 100%;
-  max-width: 100%;
+  width: 100.0%;
+  min-width: 100.0%;
+  max-width: 100.0%;
 }
 
 /* line 1330, ../../../private/common-html/sass/partials/_forms.scss */

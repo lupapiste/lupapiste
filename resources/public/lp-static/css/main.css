@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1466062356941');
+@import url('main-blessed1.css?z=1466067444197');
 
 /* line 95, ../../../private/common-html/sass/partials/_modal.scss */
 .mask.white {
@@ -6261,6 +6261,12 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   color: black;
   padding: 3px;
   border-radius: 5px;
+}
+
+/* line 19, ../../../private/common-html/sass/partials/_todo.scss */
+.feature.feature--no-border {
+  border: none;
+  padding: 0 0 0 0;
 }
 
 /*
