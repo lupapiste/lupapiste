@@ -270,9 +270,10 @@
                :processMetadata new-process-md}}))))
 
 (defn- classification-xml [organization tos-function]
-  (when-let [xml-str (get-from-toj-api organization false tos-function "/classification")]
+  (if-let [xml-str (get-from-toj-api organization false tos-function "/classification")]
     (with-open [reader (StringReader. xml-str)]
-      (JAXB/unmarshal reader ClassificationScheme))))
+      (JAXB/unmarshal reader ClassificationScheme))
+    (error "Could not get classification XML from TOJ API for" organization "/" tos-function)))
 
 (defn- xml-date [ts-or-date]
   (when ts-or-date
