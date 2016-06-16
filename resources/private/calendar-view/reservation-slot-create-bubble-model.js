@@ -7,8 +7,8 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.startTime = ko.observable();
-  self.durationHours = parseInt(config.timeSlotLengthMinutes / 60);
-  self.durationMinutes = parseInt(config.timeSlotLengthMinutes % 60);
+  self.durationHours = _.parseInt(config.timeSlotLengthMinutes / 60);
+  self.durationMinutes = _.parseInt(config.timeSlotLengthMinutes % 60);
 
   self.positionTop = ko.observable();
   self.weekdayCss = ko.observable();
@@ -42,7 +42,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
       };
     });
     self.sendEvent("calendarService", "createCalendarSlots",
-        {calendarId: parseInt(params.calendarId()), slots: slots, weekObservable: params.weekdays});
+        {calendarId: _.parseInt(params.calendarId()), slots: slots, weekObservable: params.weekdays});
     self.bubbleVisible(false);
   };
 
@@ -57,11 +57,14 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
   });
 
   self.amountMinus = function() {
-    alert('minus');
+    var amount = self.amount();
+    if (_.isInteger(amount) && amount > 1) {
+      self.amount(amount - 1);
+    }
   };
 
   self.amountPlus = function() {
-    alert('plus');
+    self.amount(self.amount() + 1);
   };
 
   self.init = function() {

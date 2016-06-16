@@ -28,7 +28,7 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function(params) {
   self.removeEnabled = true;
 
   self.doRemove = function() {
-    self.sendEvent("calendarService", "deleteCalendarSlot", {id: self.slotId(), calendarId: parseInt(params.calendarId()),
+    self.sendEvent("calendarService", "deleteCalendarSlot", {id: self.slotId(), calendarId: _.parseInt(params.calendarId()),
                                                              weekObservable: params.weekdays});
     self.bubbleVisible(false);
   };
@@ -38,7 +38,7 @@ LUPAPISTE.ReservationSlotEditBubbleModel = function(params) {
   };
 
   self.send = function() {
-    self.sendEvent("calendarService", "updateCalendarSlot", {id: self.slotId(), calendarId: parseInt(params.calendarId()),
+    self.sendEvent("calendarService", "updateCalendarSlot", {id: self.slotId(), calendarId: _.parseInt(params.calendarId()),
                                                              reservationTypes: self.selectedReservationTypes(),
                                                              weekObservable: params.weekdays});
     self.bubbleVisible(false);

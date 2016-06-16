@@ -25,7 +25,7 @@ LUPAPISTE.CalendarService = function() {
     if (event.weekObservable) {
       event.weekObservable(weekdays);
     }
-  }
+  };
 
   var doFetchCalendarWeek = function(event) {
     var startOfWeekMoment;

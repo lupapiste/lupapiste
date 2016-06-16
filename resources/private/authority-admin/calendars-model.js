@@ -38,7 +38,7 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
 
   self.calendarIdInView.subscribe(function(val) {
     if (!_.isUndefined(val)) {
-      self.calendarInView(_.filter(self.items(), function(item) { return item.calendarId() === val })[0]);
+      self.calendarInView(_.filter(self.items(), function(item) { return item.calendarId() === val; })[0]);
     }
   });
 

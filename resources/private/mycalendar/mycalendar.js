@@ -1,6 +1,5 @@
 ;(function() {
   "use strict";
-  var calendarService = lupapisteApp.services.calendarService;
 
   function MyCalendarsModel() {
     var self = this;
