@@ -17,9 +17,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Role"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Name" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}CorporateName" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Role"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Name" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}CorporateName" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

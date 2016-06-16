@@ -21,19 +21,19 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Accepted" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Issued" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Created"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Sent" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Modified" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Valid" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Description" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Abstract" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Title"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Custom" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Agent" maxOccurs="unbounded"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Type"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Record" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Accepted" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Issued" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Created"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Sent" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Modified" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Valid" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Description" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Abstract" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Title"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Custom" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Agent" maxOccurs="unbounded"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Type"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Record" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

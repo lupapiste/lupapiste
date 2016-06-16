@@ -18,10 +18,10 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}NativeId"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Title"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}TransferContractId"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}MetadataSchema"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}NativeId"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Title"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}TransferContractId"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}MetadataSchema"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

@@ -21,12 +21,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}AcceptionDate"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}AcceptionDescription"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}NotificationPeriod" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Delivered" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}DeliveryDate" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}ArrivalDate" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}AcceptionDate"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}AcceptionDescription"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}NotificationPeriod" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Delivered" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}DeliveryDate" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}ArrivalDate" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

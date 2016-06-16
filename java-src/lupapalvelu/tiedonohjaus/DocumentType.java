@@ -17,14 +17,14 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}NativeId"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}UseType"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}File"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Format"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}MediumID" minOccurs="0"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}HashAlgorithm"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}HashValue"/>
- *         &lt;element ref="{http://www.arkisto.fi/skeemat/Sahke2/2011/12/20}Encryption" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}NativeId"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}UseType"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}File"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Format"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}MediumID" minOccurs="0"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}HashAlgorithm"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}HashValue"/>
+ *         &lt;element ref="{http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1}Encryption" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
