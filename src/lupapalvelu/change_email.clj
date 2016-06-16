@@ -22,22 +22,42 @@
 
 (defn init-email-change [user email]
   (let [email (usr/canonize-email email)]
-    (let [user (usr/get-user-by-email email)]
-      (if (or (not user) (usr/dummy? user))
+    (let [dummy-user (usr/get-user-by-email email)]
+      (if (or (not dummy-user) (usr/dummy? dummy-user))
         (notify-init-email-change user email)
         (fail :error.duplicate-email)))))
+
+(defn- remove-dummy-auths-where-user-already-has-auth [user-id new-email]
+  (mongo/update-by-query :applications
+                         {"auth.id" user-id}
+                         {$pull {"auth" {"username"         new-email
+                                         "invite.user.role" "dummy"}}}))
+
+(defn- change-auths-dummy-id-to-user-id [{:keys [id username email] :as user} dummy-id]
+  (mongo/update-by-query :applications
+                         {"auth" {$elemMatch {"id" dummy-id
+                                              "invite.user.role" "dummy"}}}
+                         {$set {"auth.$.id" id
+                                "auth.$.username" username
+                                "auth.$.invite.email" email
+                                "auth.$.invite.user" (usr/summary user)}}))
 
 (defn- change-email-with-token [token stamp]
   {:pre [(map? token)]}
 
   (let [vetuma-data (vetuma/get-user stamp)
         new-email (get-in token [:data :new-email])
-        {hetu :personId old-email :email :as user} (usr/get-user-by-id! (:user-id token))]
-
+        {hetu :personId old-email :email id :id :as user} (usr/get-user-by-id! (:user-id token))]
     (cond
       (not= (:token-type token) :change-email) (fail! :error.token-not-found)
       (not= hetu (:userid vetuma-data)) (fail! :error.personid-mismatch)
-      (usr/get-user-by-email new-email) (fail! :error.duplicate-email))
+      (usr/email-in-use? new-email) (fail! :error.duplicate-email))
+
+    (when-let [{dummy-id :id :as dummy-user} (usr/get-user-by-email new-email)]
+      (when (usr/dummy? dummy-user)
+        (remove-dummy-auths-where-user-already-has-auth id new-email)
+        (change-auths-dummy-id-to-user-id user dummy-id)
+        (usr/remove-dummy-user dummy-id)))
 
     ; Strictly this atomic update is enough.
     ; Access to applications is determined by user id.
