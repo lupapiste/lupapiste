@@ -23,8 +23,9 @@
           <!-- ko text: $parent.durationMinutes --><!-- /ko --> <span data-bind="ltext: 'calendar.slot.duration.minutes'"></span>
         <!-- /ko -->
       </p>
-      <p><span data-bind="ltext: 'calendar.create-slot.amount'"></span>: <input type="text" class="form-input" data-test-id="reservation-slot-create-amount"
-                                 data-bind="value: $parent.amount"></p>
+      <p><span data-bind="ltext: 'calendar.create-slot.amount'"></span>:</p>
+      <p class="amount-controls"><i class="lupicon-circle-minus" data-bind="click: $parent.amountMinus"></i><input type="text" class="form-input" style="display: inline" data-test-id="reservation-slot-create-amount"
+                                 data-bind="value: $parent.amount"><i class="lupicon-circle-plus" data-bind="click: $parent.amountPlus"></i></p>
       <p><span data-bind="ltext: 'calendar.slot.reservation-types'"></span>:</p>
       <div data-bind="foreach: $parent.reservationTypes">
         <p>

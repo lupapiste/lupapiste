@@ -7,8 +7,8 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.startTime = ko.observable();
-  self.durationHours = config.timeSlotLengthMinutes / 60;
-  self.durationMinutes = config.timeSlotLengthMinutes % 60;
+  self.durationHours = parseInt(config.timeSlotLengthMinutes / 60);
+  self.durationMinutes = parseInt(config.timeSlotLengthMinutes % 60);
 
   self.positionTop = ko.observable();
   self.weekdayCss = ko.observable();
@@ -55,6 +55,14 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
       self.error(false);
     }
   });
+
+  self.amountMinus = function() {
+    alert('minus');
+  };
+
+  self.amountPlus = function() {
+    alert('plus');
+  };
 
   self.init = function() {
   };
