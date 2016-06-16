@@ -82,8 +82,9 @@
 
 @include toggle-helper ( arrow, "\e614", "\e611" ) {}
 
-// Checkbox
+// Checkboxes
 @include toggle-helper ( checkbox, "\e604", "\e603" ) {}
+@include toggle-helper ( docgen-checkbox, "\e604", "\e603", $wrapper-display: block ) {}
 
 // Radio buttons
 @include toggle-helper (radio, "\e635", "\e634", $wrapper-display: inline-block, $input-display: block) {}
@@ -103,6 +104,10 @@
 
 .wrapper--break-small {
   margin-bottom: $marginS;
+}
+
+.wrapper--block {
+  
 }
 
 
