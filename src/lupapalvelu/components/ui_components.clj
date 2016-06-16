@@ -276,7 +276,14 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :verdict-attachment-prints]
+   :calendar-view {:depends [:common-html]
+                   :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
+                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
+                   :html ["reservation-slot-edit-bubble-template.html"
+                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html" ]}
+
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
+                            :signing :invites :verdict-attachment-prints :calendar-view]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
@@ -371,12 +378,6 @@
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
                              :company :analytics :register-company :footer :ui-components]}
-
-   :calendar-view {:depends [:common-html]
-                   :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
-                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
-                   :html ["reservation-slot-edit-bubble-template.html"
-                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html" ]}
 
    :mycalendar   {:depends [:calendar-view]
                   :js ["mycalendar.js"]

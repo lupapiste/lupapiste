@@ -6,6 +6,10 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
   self.items = ko.observableArray();
   self.initialized = false;
   self.calendarInView = ko.observable();
+  self.calendarIdInView = ko.observable();
+  self.userIdInView = ko.observable();
+
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   function setEnabled(user, value) {
     if (self.initialized) {
@@ -32,16 +36,14 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
     self.initialized = true;
   };
 
-  var _init = hub.subscribe("calendarService::organizationCalendarsFetched", function(event) {
+  self.calendarIdInView.subscribe(function(val) {
+    if (!_.isUndefined(val)) {
+      self.calendarInView(_.filter(self.items(), function(item) { return item.calendarId() === val })[0]);
+    }
+  });
+
+  self.addEventListener("calendarService", "organizationCalendarsFetched", function(event) {
     self.init(event.calendars);
   });
 
-  var _calendarFetched = hub.subscribe("calendarService::calendarFetched", function(event) {
-    self.calendarInView(event.calendar);
-  });
-
-  self.dispose = function() {
-    hub.unsubscribe(_init);
-    hub.unsubscribe(_calendarFetched);
-  };
 };

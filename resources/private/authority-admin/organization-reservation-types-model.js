@@ -4,7 +4,11 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
   var self = this;
 
   self.reservationType = ko.observable();
-  self.items = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
+  self.items = ko.observableArray([]);
+
+  hub.subscribe("calendarService::organizationReservationTypesFetched", function(event) {
+    self.items(event.reservationTypes || []);
+  });
 
   function EditReservationTypeModel() {
     var self = this;
