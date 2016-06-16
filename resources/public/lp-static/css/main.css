@@ -1,5 +1,23 @@
-@import url('main-blessed1.css?z=1465198704226');
+@import url('main-blessed1.css?z=1465457801565');
 
+
+/* line 144, ../../../private/common-html/sass/views/_applications.scss */
+.invitations {
+  margin-bottom: 24px;
+}
+/* line 146, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation {
+  display: table-row;
+}
+/* line 148, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation span {
+  margin-right: 12px;
+}
+/* line 151, ../../../private/common-html/sass/views/_applications.scss */
+.invitations .invitation div {
+  padding-right: 24px;
+  display: table-cell;
+}
 /* line 154, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div .btn, .invitations .invitation div .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .invitations .invitation div .paginate_disabled_previous, .invitations .invitation div .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .invitations .invitation div .paginate_disabled_next {
   margin: 0 6px 0 6px;
