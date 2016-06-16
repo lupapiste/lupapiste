@@ -17,7 +17,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
   self.documentId = params.documentId || params.schema.documentId;
   self.model = service.getInDocument(self.documentId, params.path);
   self.value = self.model.model;
-  self.schemaCss = self.schema.css;
+  self.schemaCss = self.schema.css && self.schema.css.join( " ");
 
   self.i18npath = params.schema.i18nkey ? [params.schema.i18nkey] : params.schema.i18npath;
   if (!self.i18npath) {
@@ -63,7 +63,8 @@ LUPAPISTE.DocgenInputModel = function(params) {
                         "inline-string": "form-input inline",
                         "localized-string": "form-string",
                         "check-string": "check-string",
-                        "paragraph" : "form-paragraph"};
+                        "paragraph" : "form-paragraph",
+                        "date": "form-input"};
     return _.get( typeDefaults, (self.schema.inputType || self.schema.type), "");
   }
 

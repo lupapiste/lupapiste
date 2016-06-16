@@ -265,11 +265,11 @@ table.review-buildings-table {
   select.dropdown {
     min-width: 10em;
   }
-  div.checkbox-wrapper {
+  div.docgen-checkbox-wrapper {
     border: none;
     text-align: center;
   }
-  div.checkbox-wrapper.wrapper--disabled {
+  div.docgen-checkbox-wrapper.wrapper--disabled {
     background-color: initial;
   }
 }

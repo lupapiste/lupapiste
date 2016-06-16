@@ -74,7 +74,6 @@
     :whitelist {:roles [:authority] :otherwise :disabled}
     :repeating true
     :repeating-init-empty true
-    :i18nkey ""
     :uicomponent :docgen-review-buildings
     :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :hidden true}
                                                  {:name "valtakunnallinenNumero" :type :string :hidden true}
@@ -95,7 +94,7 @@
    {:name "katselmus" :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
-    [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
+    [{:name "tila" :type :select :css [:dropdown :form-input] :sortBy :displayname
       :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
       :required true

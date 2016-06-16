@@ -51,11 +51,12 @@ LUPAPISTE.DocgenGroupModel = function(params) {
         var splitted = schemaName.split("::");
         var cols = splitted[1] || 1;
         var schema = getInSchema(params.schema, splitted[0]);
+        var path = self.path.concat(splitted[0].split("/"));
         return _.extend({}, schema, {
-                  path: self.path.concat(splitted[0].split("/")),
+          path: path,
                   uicomponent: schema.uicomponent || "docgen-" + schema.type,
                   schemaI18name: params.schemaI18name,
-                  i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name),
+                  i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(path),
                   applicationId: params.applicationId,
                   documentId: params.documentId,
                   service: self.service,

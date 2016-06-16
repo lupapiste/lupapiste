@@ -19,13 +19,13 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="docgen-checkbox-wrapper-template">
   <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
   <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
-  <div class="col--horizontal checkbox-wrapper"
+  <div class="docgen-checkbox-wrapper"
        data-bind="css: {'wrapper--disabled': disabled() || readonly()}">
     <input type="checkbox" data-bind="checked: value,
                                       disable: disabled() || readonly(),
                                       attr: {name: path.join( '-' ), id: path.join( '-' )},
                                       css: inputClasses" />
-    <label class="inline-label checkbox-label"
+    <label class="docgen-checkbox-label"
            data-bind="ltext: label,
                       attr: {'for': path.join( '-')}"></label>
   </div>
