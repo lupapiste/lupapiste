@@ -74,7 +74,6 @@
     :whitelist {:roles [:authority] :otherwise :disabled}
     :repeating true
     :repeating-init-empty true
-    :i18nkey ""
     :uicomponent :docgen-review-buildings
     :body [{:name "rakennus" :type :group :body [{:name "jarjestysnumero" :type :string :hidden true}
                                                  {:name "valtakunnallinenNumero" :type :string :hidden true}
