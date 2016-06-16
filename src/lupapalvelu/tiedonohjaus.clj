@@ -11,7 +11,7 @@
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [sade.strings :as s])
+            [clojure.string :as s])
   (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType
                                      ProtectionLevelType SecurityClassType AccessRightType ActionType
                                      RecordType AgentType ActionEvent Custom ClassificationScheme)
@@ -395,7 +395,7 @@
         :else pituus)
       (BigInteger/valueOf)))
 
-(defn xml-case-file [{:keys [id processMetadata tosFunction organization] :as application} lang]
+(defn xml-case-file [{:keys [id processMetadata tosFunction organization authority] :as application} lang]
   (let [case-file (generate-case-file-data application lang)
         case-file-object (CaseFile.)]
     (doto case-file-object
@@ -410,6 +410,7 @@
       (.setClassificationScheme (classification-xml organization tosFunction)))
     (.add (.getCreated case-file-object) (xml-date (:start (first case-file))))
     (.add (.getLanguage case-file-object) (name lang))
+    (.add (.getAgent case-file-object) (agent-type "responsible" (str (:firstName authority) " " (:lastName authority))))
     (.addAll (.getAction case-file-object) (vec (map #(action-type % lang) case-file)))
 
     (with-open [sw (StringWriter.)]
