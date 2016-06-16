@@ -98,6 +98,8 @@
 "task-katselmus.katselmus.tila" "sv" ""
 "task-katselmus.tiedoksianto"  "fi"  "Tiedoksianto verottajalle laiminlyöty"
 "task-katselmus.tiedoksianto" "sv" "Tillkännagivande till skattemyndigheten har underlåtits"
+"task-katselmus.katselmus.tiedoksianto"  "fi"  "Tiedoksianto verottajalle laiminlyöty"
+"task-katselmus.katselmus.tiedoksianto" "sv" "Tillkännagivande till skattemyndigheten har underlåtits"
 "task-katselmus.rakennus.tila.tila.lopullinen" "fi" "Lopullinen"
 "task-katselmus.rakennus.tila.tila.lopullinen" "sv" "Slutlig"
 "task-katselmus.rakennus.tila.tila.osittainen" "fi" "Osittainen"
