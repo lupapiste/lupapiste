@@ -624,7 +624,6 @@
 (facts "Canonical asiamies-henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data asiamies-henkilo))
         asiamies-model (get-osapuoli-data osapuoli (-> asiamies-henkilo :schema-info :name keyword))
-        _ (clojure.pprint/pprint asiamies-model)
         henkilo (:henkilo asiamies-model)
         ht (:henkilotiedot henkilo)
         yritys (:yritys asiamies-model)]
@@ -988,7 +987,10 @@
         osapuolettieto (:osapuolettieto rakennusvalvontaasia) => truthy
         osapuolet (:Osapuolet osapuolettieto) => truthy
         osapuolitieto-hakija (first (:osapuolitieto osapuolet)) => truthy
+        _ (clojure.pprint/pprint (:osapuolitieto osapuolet))
+        osapuolitieto-hakijan-asiamies (first (filter #(= (get-in % [:Osapuoli :kuntaRooliKoodi]) "Hakijan asiamies") (:osapuolitieto osapuolet))) => truthy
         hakija-osapuoli1 (:Osapuoli osapuolitieto-hakija) => truthy
+        hakijan-asiamies1 (:Osapuoli osapuolitieto-hakijan-asiamies) => truthy
         suunnittelijat (:suunnittelijatieto osapuolet) => truthy
         paasuunnitelija (:Suunnittelija (last suunnittelijat)) => truthy
         tyonjohtajat (:tyonjohtajatieto osapuolet) => truthy
