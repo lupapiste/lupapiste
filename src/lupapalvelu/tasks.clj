@@ -34,6 +34,13 @@
 (defn all-states-but [& states]
   (apply disj task-states states))
 
+(defn task-is-review? [task]
+  (some->> (get-in task [:schema-info :name])
+           (schemas/get-schema task-schemas-version)
+           (#(get-in % [:info :subtype]))
+           (keyword)
+           (contains? #{:review :review-backend})))
+
 (def- katselmuksenLaji
   {:name "katselmuksenLaji"
    :type :select :sortBy :displayname
@@ -114,6 +121,15 @@
    {:name "muuTunnus" :type :text
     :readonly true :hidden true}])
 
+(def- task-katselmus-body-backend
+  (-> task-katselmus-body
+      (update-in [2 :body 1 :body 0 :body] conj
+                 {:name "pidetty" :i18nkey "task-katselmus.katselmus.tila.pidetty"})
+      (update-in [3 :body 0 :body] conj
+                 {:name "pidetty" :i18nkey "task-katselmus.katselmus.tila.pidetty"})
+      (update-in [2 :body 1 :body 0] assoc :readonly true)
+      (update-in [3 :body 0] assoc :readonly true)))
+
 (def- task-katselmus-body-ya
   (concat [katselmuksenLaji-ya]
           (update-in (tools/schema-body-without-element-by-name task-katselmus-body
@@ -140,6 +156,26 @@
            ["katselmus/poikkeamat::3"]]
     :template "form-grid-docgen-group-template"
     :body task-katselmus-body}
+
+   {:info {:name "task-katselmus-backend"
+           :type :task
+           :subtype :review-backend
+           :order 1
+           :section-help "authority-fills"
+           :i18name "task-katselmus"
+           :i18nprefix "task-katselmus.katselmuksenLaji"
+           } ; Had :i18npath ["katselmuksenLaji"]
+    :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
+           ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
+           ["katselmus/tiedoksianto::2"]
+           ["rakennus::4"]
+           {:h2 "task-katselmus.huomautukset"}
+           ["katselmus/huomautukset/kuvaus::3"]
+           ["katselmus/huomautukset/maaraAika" "katselmus/huomautukset/toteaja" "katselmus/huomautukset/toteamisHetki"]
+           ["katselmus/lasnaolijat::3"]
+           ["katselmus/poikkeamat::3"]]
+    :template "form-grid-docgen-group-template"
+    :body task-katselmus-body-backend}
 
    {:info {:name "task-katselmus-ya"
            :type :task
@@ -168,6 +204,7 @@
     :body [{:name "maarays" :type :text :inputType :paragraph :max-len 20000 :readonly true}
            {:name "kuvaus"  :type :text :max-len 4000 }
            {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
+
 
 (defn task-doc-validation [schema-name doc]
   (let [schema (schemas/get-schema task-schemas-version schema-name)
@@ -231,14 +268,11 @@
                                  :valtakunnallinenNumero             (:nationalId build)
                                  :kunnanSisainenPysyvaRakennusnumero (:localId build)}
                       :tila (get build :task-tila default-tila)}]
-        (if (:task-tila build)
-          (debugf "rakennus-data-from-buildings: got tila from building: %s" (:task-tila build)))
         (assoc acc index rakennus)))
     initial-rakennus
     buildings))
 
 (defn katselmus->task [meta source {:keys [buildings]} katselmus]
-  ;; (debugf "type of :muuTunnustieto is %s (value=%s)" (type (:muuTunnustieto katselmus)) (:muuTunnustieto katselmus))
   (let [task-name (or (:tarkastuksenTaiKatselmuksenNimi katselmus) (:katselmuksenLaji katselmus))
         rakennustieto (map :KatselmuksenRakennus (:katselmuksenRakennustieto katselmus))
         get-muuTunnus (fn [katselmus]
@@ -269,8 +303,13 @@
               :katselmus katselmus-data
               :muuTunnus (get-muuTunnus katselmus)
               }
-        task (new-task "task-katselmus" task-name data meta source)
-        ]
+
+        schema-name (if (-> katselmus-data :tila (= "pidetty"))
+                      "task-katselmus-backend"
+                      ;; else
+                      "task-katselmus")
+        task (new-task schema-name task-name data meta source)]
+    ;; (debugf "katselmus->task: made task with schema-name %s, id %s, katselmuksenLaji %s" schema-name (:id task) (:katselmuksenLaji data))
     task))
 
 (defn- verdict->tasks [verdict meta application]
@@ -315,7 +354,7 @@
 
 
 (defn generate-task-pdfa [application {info :schema-info :as task} user lang]
-  (when (= "task-katselmus" (:name info))
+  (when (task-is-review? task)
     (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
 
 (defn- update-building [old-buildings new-building]
@@ -333,19 +372,23 @@
                                                (not= nil top-value)
                                                (= top-value task-value))))
                                       (vals old-buildings)))
+        ;; default-tila {:tila "" :kayttoonottava ""}
         matching-old (or (match-old-by-id :nationalId :valtakunnallinenNumero)
                          (match-old-by-id :localId :kunnanSisainenPysyvaRakennusnumero)
                          (match-old-by-id :index :jarjestysnumero))
         update-from-old (fn [new-building old-rakennus]
-                          (assoc new-building :task-tila (tools/unwrapped  (:tila old-rakennus))))]
+                          (if (contains? (:tila old-rakennus) :tila)
+                            (assoc new-building :task-tila (tools/unwrapped  (:tila old-rakennus)))
+                            ;; else
+                            (debugf ":tila :tila missing from old-rakennus :tila")
+                            ))]
     (if-not (nil? matching-old)
       (update-from-old new-building matching-old)
       ;; else
       new-building)))
 
 (defn update-task-buildings [new-buildings task]
-
-  (if (not= (-> task :schema-info :name) "task-katselmus")
+  (if (not (task-is-review? task))
     task
     ;; else
 
@@ -357,12 +400,8 @@
           new-buildings-with-states (map (fn [new-building]
                                            (update-building old-buildings new-building)) new-buildings)
           task-rakennus (rakennus-data-from-buildings {} new-buildings-with-states)
-          ]
+          updated-task (assoc-in task [:data :rakennus] (tools/wrapped task-rakennus))]
+
       (if (> (count task-rakennus) (count new-buildings-with-states))
-        (errorf "too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states))
-        ;; else
-        ;;(debugf "enough buildings: task has %s, :buildings %s" (count task-rakennus) (count new-buildings-with-states))
-        )
-      ;;(println "new buildings: " task-rakennus)
-      ;;(println "old buildings: " task-rakennus)
-      (assoc-in task [:data :rakennus] (tools/wrapped task-rakennus)))))
+        (errorf "update-task-buildings: too many buildings: task has %s but :buildings %s" (count task-rakennus) (count new-buildings-with-states)))
+      updated-task)))

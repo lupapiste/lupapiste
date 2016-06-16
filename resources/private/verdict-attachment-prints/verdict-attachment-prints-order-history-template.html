@@ -42,7 +42,7 @@
                     <tbody data-bind="foreach: attachments" data-test-id="verdict-attachments-tbody">
                       <tr>
                         <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])" data-test-id="test-order-attachment-type"></td>
-                        <td data-bind="text: contents" data-test-id="test-order-attachment-contents"></td>
+                        <td data-bind="text: $data.contents" data-test-id="test-order-attachment-contents"></td>
                         <td data-bind="text: filename" data-test-id="test-order-attachment-filename"></td>
                         <td class="center">
                           <input type="text" data-bind="textInput: amount, attr: {id: 'orderAmount-' + id}"
