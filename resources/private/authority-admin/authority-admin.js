@@ -442,10 +442,10 @@
     hub.onPageLoad("calendar-admin", function() {
       var path = pageutil.getPagePath();
       if (path.length > 1) {
-        // calendar-view can be initialized with fetchCalendar event after reservationtypes have been init'ed
-        hub.subscribe("calendarService::organizationReservationTypesFetched", function() {
-          hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
-        }, true);
+        calendarsModel.userIdInView(path[0]);
+        calendarsModel.calendarIdInView(path[1]);
+        hub.send("calendarService::fetchCalendar", {user: path[0], calendarId: path[1],
+                                                    calendarObservable: calendarsModel.calendarInView})
       }
       hub.send("calendarService::fetchOrganizationReservationTypes");
     });

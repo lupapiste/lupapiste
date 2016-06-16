@@ -7347,6 +7347,219 @@ LUPAPISTE.AttachmentsService = function() {
       .map( function( a ) {
         return !_.random( 2) ? _.omit( a, "latestVersion") : a;
       })
+      .concat( [{
+        "type": {
+          "type-id": "paatos",
+          "type-group": "paatoksenteko"
+        },
+        "approved": {
+          "fileId": "575949bf487b9a70edc99f4f",
+          "timestamp": 1465469372438,
+          "user": {
+            "lastName": "Sibbo",
+            "firstName": "Sonja",
+            "id": "777777777777777777000023"
+          },
+          "value": "approved"
+        },
+        "state": "ok",
+        "op": null,
+        "auth": [
+          {
+            "role": "uploader",
+            "lastName": "Sibbo",
+            "firstName": "Sonja",
+            "username": "sonja",
+            "id": "777777777777777777000023"
+          },
+          {
+            "role": "stamper",
+            "lastName": "Sibbo",
+            "firstName": "Sonja",
+            "username": "sonja",
+            "id": "777777777777777777000023"
+          }
+        ],
+        "modified": 1465476276622,
+        "isPublic": true,
+        "requestedByAuthority": false,
+        "applicationState": "verdictGiven",
+        "readOnly": false,
+        "locked": true,
+        "id": "236d9b2cfff88098d4f8ad532820c9fb93393237",
+        "latestVersion": {
+          "created": 1465469372438,
+          "size": 13826,
+          "filename": "sample-verdict.pdf",
+          "originalFileId": "575949bf487b9a70edc99f4f",
+          "archivabilityError": "invalid-pdfa",
+          "contentType": "application/pdf",
+          "archivable": false,
+          "version": {
+            "minor": 2,
+            "major": 0
+          },
+          "stamped": true,
+          "user": {
+            "role": "authority",
+            "lastName": "Sibbo",
+            "firstName": "Sonja",
+            "username": "sonja",
+            "id": "777777777777777777000023"
+          },
+          "fileId": "575949bf487b9a70edc99f4f"
+        },
+        "notNeeded": false,
+        "signatures": [],
+        "forPrinting": false,
+        "contents": "T\u00e4m\u00e4 p\u00e4\u00e4t\u00f6s pit\u00e4\u00e4",
+        "target": {
+          "urlHash": "236d9b2cfff88098d4f8ad532820c9fb93393237",
+          "id": "57594864487b9a70edc99f3a",
+          "type": "verdict"
+        },
+        "versions": [
+          {
+            "fileId": "57594864487b9a70edc99f3e",
+            "user": {
+              "role": "authority",
+              "lastName": "Sibbo",
+              "firstName": "Sonja",
+              "username": "sonja",
+              "id": "777777777777777777000023"
+            },
+            "stamped": false,
+            "version": {
+              "minor": 1,
+              "major": 0
+            },
+            "contentType": "application/pdf",
+            "originalFileId": "57594864487b9a70edc99f3e",
+            "filename": "sample-verdict.pdf",
+            "size": 8201,
+            "created": 1378036800000
+          },
+          {
+            "created": 1465469372438,
+            "size": 13826,
+            "filename": "sample-verdict.pdf",
+            "originalFileId": "575949bf487b9a70edc99f4f",
+            "archivabilityError": "invalid-pdfa",
+            "contentType": "application/pdf",
+            "archivable": false,
+            "version": {
+              "minor": 2,
+              "major": 0
+            },
+            "stamped": true,
+            "user": {
+              "role": "authority",
+              "lastName": "Sibbo",
+              "firstName": "Sonja",
+              "username": "sonja",
+              "id": "777777777777777777000023"
+            },
+            "fileId": "575949bf487b9a70edc99f4f"
+          }
+        ],
+        "metadata": {
+          "tila": "valmis",
+          "nakyvyys": "julkinen"
+        },
+        "required": false,
+        "signed": false,
+        "isSent": false,
+        "sentDateString": "-",
+        "stamped": true
+      },
+                {
+                  "type": {
+                    "type-id": "poytakirjaote",
+                    "type-group": "paatoksenteko"
+                  },
+                  "state": "requires_authority_action",
+                  "op": null,
+                  "auth": [
+                    {
+                      "role": "uploader",
+                      "lastName": "Sibbo",
+                      "firstName": "Sonja",
+                      "username": "sonja",
+                      "id": "777777777777777777000023"
+                    }
+                  ],
+                  "modified": 1465914145257,
+                  "isPublic": true,
+                  "requestedByAuthority": true,
+                  "applicationState": "verdictGiven",
+                  "readOnly": false,
+                  "locked": true,
+                  "id": "57601321487b9a1e83a7fb80",
+                  "latestVersion": {
+                    "missing-fonts": [],
+                    "created": 1465914145257,
+                    "size": 15038,
+                    "filename": "ah-example-attachment.pdf",
+                    "originalFileId": "57601321487b9a1e83a7fb81",
+                    "archivabilityError": "invalid-mime-type",
+                    "contentType": "application/pdf",
+                    "archivable": false,
+                    "version": {
+                      "minor": 1,
+                      "major": 0
+                    },
+                    "stamped": false,
+                    "user": {
+                      "role": "authority",
+                      "lastName": "Sibbo",
+                      "firstName": "Sonja",
+                      "username": "sonja",
+                      "id": "777777777777777777000023"
+                    },
+                    "fileId": "57601321487b9a1e83a7fb81"
+                  },
+                  "notNeeded": false,
+                  "signatures": [],
+                  "forPrinting": false,
+                  "contents": null,
+                  "target": {
+                    "id": "57594864487b9a70edc99f42",
+                    "type": "task"
+                  },
+                  "versions": [
+                    {
+                      "missing-fonts": [],
+                      "created": 1465914145257,
+                      "size": 15038,
+                      "filename": "ah-example-attachment.pdf",
+                      "originalFileId": "57601321487b9a1e83a7fb81",
+                      "archivabilityError": "invalid-mime-type",
+                      "contentType": "application/pdf",
+                      "archivable": false,
+                      "version": {
+                        "minor": 1,
+                        "major": 0
+                      },
+                      "stamped": false,
+                      "user": {
+                        "role": "authority",
+                        "lastName": "Sibbo",
+                        "firstName": "Sonja",
+                        "username": "sonja",
+                        "id": "777777777777777777000023"
+                      },
+                      "fileId": "57601321487b9a1e83a7fb81"
+                    }
+                  ],
+                  "metadata": {
+                    "nakyvyys": "julkinen"
+                  },
+                  "required": false,
+                  "signed": false,
+                  "isSent": false,
+                  "sentDateString": "-",
+                  "stamped": false
+                }])
       .value();
   }
 
@@ -7428,12 +7641,13 @@ LUPAPISTE.AttachmentsService = function() {
                                                     self.SCHEDULED_FOR_NOT_NEEDED});
   };
   self.changeScheduledNotNeeded = function() {
-    var attachmentIds = _(self.attachments()).map(function(attachment) {
+    var attachmentIds = _(self.attachments.peek()).map(function(attachment) {
       return attachment();
     }).filter({notNeeded: self.SCHEDULED_FOR_NOT_NEEDED}).map("id").value();
     _.forEach(attachmentIds, function(attachmentId) {
       self.updateAttachment(attachmentId, {notNeeded: true});
     });
+    self.attachments.valueHasMutated();
   };
 
   //helpers for checking relevant attachment states
@@ -7586,13 +7800,21 @@ LUPAPISTE.AttachmentsService = function() {
     return filteredAttachments("rakentaminen", attachments);
   }
 
+  function notNeededForModel(attachment) {
+    return attachment.notNeeded;
+  }
+
   function applyFilters(attachments) {
+    var atts = _(attachments)
+          .filter(function(attachment) {
+            return filters["ei-tarpeen"]() || !self.isNotNeeded(attachment);
+          }).value();
     if (showAll()) {
-      return attachments;
+      return atts;
     }
     return _.concat(
-      preVerdictAttachments(_.filter(attachments, isPreVerdict)),
-      postVerdictAttachments(_.filter(attachments, isPostVerdict))
+      preVerdictAttachments(_.filter(atts, isPreVerdict)),
+      postVerdictAttachments(_.filter(atts, isPostVerdict))
     );
   }
 
@@ -7628,17 +7850,11 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
-  function notNeededForModel(attachment) {
-    return attachment.notNeeded;
-  }
 
   self.modelForAttachmentInfo = function(attachmentIds) {
-    var visibleAttachments = _(attachmentIds)
+    var attachments = _(attachmentIds)
           .map(idToAttachment)
-          .filter(function(attachment) {
-            return filters["ei-tarpeen"]() ||
-              !self.isNotNeeded(ko.utils.unwrapObservable(attachment));
-          }).value();
+          .value();
     return {
       approve:      self.approveAttachment,
       reject:       self.rejectAttachment,
@@ -7647,11 +7863,12 @@ LUPAPISTE.AttachmentsService = function() {
       isApproved:   self.isApproved,
       isRejected:   self.isRejected,
       isNotNeeded:  notNeededForModel,
-      attachments:  visibleAttachments
+      attachments:  attachments
     };
   };
 
   function modelForSubAccordion(subGroup) {
+    _.forEach(_.values(filters), function(f) { f(); });
     var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
@@ -7741,7 +7958,7 @@ LUPAPISTE.AttachmentsService = function() {
       }
     }
     var args = _.toArray(arguments);
-    var group = _.get(self.attachmentsHierarchy(), args);
+    var group = _.get(self.attachmentsHierarchy.peek(), args);
     return getAttachments(group);
   };
 
@@ -7787,27 +8004,114 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.layout = [
     {
+      name: "preVerdict",
       data: getDataForGroup("preVerdict"),
       accordions: attachmentTypeLayout("preVerdict")
     },
     {
+      name: "postVerdict",
       data: getDataForGroup("postVerdict"),
       accordions: attachmentTypeLayout("postVerdict")
     }
   ];
 
-   function getAccordionToggles(preOrPost) {
-     function getAllToggles(objectOrArray) {
-       if (_.isArray(objectOrArray)) {
-         return _.flatten(_.map(objectOrArray, getAllToggles));
-       } else if (_.isObject(objectOrArray)) {
-         return _.concat(objectOrArray.open? [objectOrArray.open] : [],
-                         getAllToggles(objectOrArray.accordions));
-       } else {
-         return [];
-       }
-     }
-     return getAllToggles(self.layout[preOrPost].accordions);
+
+  //
+  // Automatically open relevant accordions when filters are toggled.
+  //
+
+  function attachmentsToAmounts(val) {
+    if (_.isPlainObject(val)) {
+      return _.mapValues(val, attachmentsToAmounts);
+    } else if (_.isArray(val)) {
+      return val.length;
+    } else {
+      return _.clone(val);
+    }
+  }
+
+  function mergeAttachmentAmounts(newVal, oldVal) {
+    if (_.isPlainObject(newVal)) {
+      return _.mapValues(newVal, function(value, key) {
+        return mergeAttachmentAmounts(value, (oldVal && oldVal[key]) || null);
+      });
+    } else if (_.isNumber(newVal)) {
+      return newVal - (oldVal || 0);
+    } else {
+      return 0;
+    }
+  }
+
+  function objectToPaths(obj) {
+    if (!_.isPlainObject(obj)) {
+      return [obj];
+    } else {
+      return _(obj).mapValues(objectToPaths).toPairs().value();
+    }
+  }
+
+  function getTogglesInPaths(paths) {
+    function getToggles(paths, objectOrArray) {
+      if (_.isArray(objectOrArray)) {
+        return _.flatten(_.map(paths, function(path) {
+          var subPath = _.find(objectOrArray, function(x) {
+            return x.name === _.first(path);
+          });
+          return getToggles(_.tail(path), subPath);
+        }));
+      } else if (_.isPlainObject(objectOrArray)) {
+        return _.concat(objectOrArray.open ? [objectOrArray.open] : [],
+                        getToggles(_.first(paths), objectOrArray.accordions));
+      } else {
+        return [];
+      }
+    }
+    return getToggles(paths, self.layout);
+  }
+
+  // Track changes in filter values and visible attachments in the hierarchy
+  var previousAttachmentsHierarchy = self.attachmentsHierarchy();
+  self.attachmentsHierarchy.subscribe(function(oldValue) {
+    previousAttachmentsHierarchy = oldValue;
+  }, self, "beforeChange");
+
+  self.previousFilterValues = _.mapValues(filters, function() { return false; });
+  var filterValues = ko.pureComputed(function() {
+    return _.mapValues(filters, function(f) { return f(); });
+  });
+  filterValues.subscribe(function(oldValue) {
+    self.previousFilterValues = oldValue || self.previousFilterValues;
+  }, self, "beforeChange");
+
+  // Open relevant accordions on filter toggle
+  ko.computed(function() {
+    if (_.some(_.keys(filterValues()), function(k) {
+      return k !== "hakemus" && k !== "rakentaminen" &&
+        filterValues.peek()[k]  && !self.previousFilterValues[k];
+    })) {
+      var diff =  _.mergeWith(attachmentsToAmounts(self.attachmentsHierarchy.peek()),
+                              attachmentsToAmounts(previousAttachmentsHierarchy),
+                              mergeAttachmentAmounts);
+      var diffPaths = objectToPaths(diff);
+      var toggles = getTogglesInPaths(diffPaths, self.layout);
+      _.forEach(toggles, function(toggle) {
+        toggle(true);
+      });
+    }
+  }).extend({rateLimit: {timeout: 0}});
+
+  function getAccordionToggles(preOrPost) {
+    function getAllToggles(objectOrArray) {
+      if (_.isArray(objectOrArray)) {
+        return _.flatten(_.map(objectOrArray, getAllToggles));
+      } else if (_.isObject(objectOrArray)) {
+        return _.concat(objectOrArray.open ? [objectOrArray.open] : [],
+                        getAllToggles(objectOrArray.accordions));
+      } else {
+        return [];
+      }
+    }
+    return getAllToggles(self.layout[preOrPost].accordions);
   }
 
   function toggleAccordions(preOrPost) {

@@ -173,7 +173,7 @@
 
     (fact "Pena is inveted to a deleted doc"
       (invite mikko application-id paasuunnittelija-doc "paasuunnittelija" (email-for "pena")) => ok?
-      (command mikko :remove-doc :id application-id :docId paasuunnittelija-doc) => ok?
+      (command sonja :remove-doc :id application-id :docId paasuunnittelija-doc) => ok?
       (count (:invites (query pena :invites))) => 1
 
       (fact "Pena can still approve invite"

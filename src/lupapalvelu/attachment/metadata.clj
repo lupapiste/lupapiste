@@ -13,10 +13,9 @@
   (get metadata :julkisuusluokka))
 
 (defn public-attachment?
-  "Returns false if either julkisuusluokka or nakyvyys metadata is not public. Without metadata returns true."
+  "Returns false if julkisuusluokka is not public or if julkisuusluokka is not set and nakyvyys metadata is not public.
+  Without metadata returns true."
   [attachment]
-  (let [visibility (get-visibility attachment)
-        publicity-class (get-publicity-class attachment)]
-    (if (or publicity-class visibility)
-      (= public-visibility (or publicity-class visibility))
-      true)))
+  (if-let [visibility (or (get-publicity-class attachment) (get-visibility attachment))]
+    (= public-visibility visibility)
+    true))

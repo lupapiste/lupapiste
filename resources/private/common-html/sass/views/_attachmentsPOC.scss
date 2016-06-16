@@ -1,7 +1,10 @@
 .attachments-accordions {
   margin-bottom: $marginL;
   .attachments-accordion {
-    margin-top: $marginL;
+    margin-top: $marginS;    
+  }
+  .rollup {
+    margin-bottom: $marginS;
   }
 }
 
@@ -10,6 +13,7 @@
     left: $marginS;
     right: $marginS;
     bottom: $marginL;
+    top: $marginS;
   }
   position: relative;
   border: 1px solid $gray221;

@@ -258,6 +258,7 @@
           (opt :approvable)                  sc/Bool    ;;
           (opt :repeating)                   sc/Bool    ;;
           (opt :removable)                   sc/Bool    ;;
+          (opt :removable-only-by-authority) sc/Bool    ;; Deny removing document by user role
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
           (opt :no-repeat-button)            sc/Bool    ;;
           (opt :construction-time)           sc/Bool    ;; Is a construction time doc

@@ -39,6 +39,10 @@ LUPAPISTE.CurrentUser = function() {
     return self.id();
   });
 
+  self.isAuthorityAdmin = ko.pureComputed(function() {
+    return self.role() === "authorityAdmin";
+  });
+
   self.isAuthority = ko.pureComputed(function() {
     return self.role() === "authority";
   });

@@ -96,7 +96,10 @@
           var additionalDetail = "";
           switch(retentionMode) {
             case "toistaiseksi":
-              additionalDetail = ", " + loc("laskentaperuste") + " " + loc(retention.laskentaperuste());
+              var laskentaperuste = util.getIn(retention, ["laskentaperuste"]);
+              if (laskentaperuste) {
+                additionalDetail = ", " + loc("laskentaperuste") + " " + loc(laskentaperuste);
+              }
               break;
             case "m\u00E4\u00E4r\u00E4ajan":
               additionalDetail = ", " + retention.pituus() + " " + loc("vuotta");
