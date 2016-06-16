@@ -129,11 +129,14 @@
   {:pre [(keyword? template-name) (sc/validate Email m)]}
   (swap! mail-config assoc template-name m))
 
+(def non-notified-roles
+  #{"rest-api" "trusted-etl"})
+
 (defn invalid-recipient? [rec]
   "Notifications are not sent to certain roles, or to users who do not 
    have a valid email address."
   (or (ss/blank? (:email rec))
-      (= "rest-api" (:role rec))))
+      (contains? non-notified-roles (:role rec))))
 
 (defn notify! [template-name command]
   {:pre [template-name (map? command) (template-name @mail-config)]}
