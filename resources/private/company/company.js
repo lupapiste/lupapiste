@@ -278,6 +278,7 @@
       zip:          ko.observable().extend({required: true, number: true, maxLength: 5}),
       country:      ko.observable().extend(notRequired),
       ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
+      netbill:      ko.observable().extend(notRequired),
       pop:          ko.observable().extend(notRequired)
     });
     this.defaults = {
@@ -289,6 +290,7 @@
       zip: undefined,
       country: undefined,
       ovt: undefined,
+      netbill: undefined,
       pop: undefined,
       accountType: undefined,
       customAccountLimit: undefined

@@ -601,7 +601,8 @@
       util/strip-empty-maps
       tools/wrapped)))
 
-(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop allowDirectMarketing]}
+(defn ->yritys [{:keys [firstName lastName email phone address1 zip po
+                        turvakieltokytkin name y netbill ovt pop allowDirectMarketing]}
                 & {:keys [with-empty-defaults?]}]
   {:pre [(good-flag? turvakieltokytkin) (good-flag? allowDirectMarketing)]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
@@ -618,7 +619,7 @@
                                       :puhelin        (wrap phone)}
                        :kytkimet {:suoramarkkinointilupa (when (or allowDirectMarketing with-empty-defaults?) (boolean allowDirectMarketing))}}
        :verkkolaskutustieto {:ovtTunnus               (wrap ovt)
-                             :verkkolaskuTunnus       ""
+                             :verkkolaskuTunnus       (wrap netbill)
                              :valittajaTunnus         (wrap pop)}}
       util/strip-nils
       util/strip-empty-maps

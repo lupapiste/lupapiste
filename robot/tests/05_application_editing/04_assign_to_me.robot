@@ -141,7 +141,11 @@ Sonja assigns application to herself
   Page Should Not Contain  jquery=option[value=777777777777777777000024]
 
 # LUPA-791
-Sonja cancels the application
+Sonja cancels the application with reason
   Open application  ${appname}  ${propertyId}
-  Close current application as authority
-  Logout
+  Close current application as authority  Hao de
+
+Sonja checks that the reason is in the comments
+  Open canceled application  ${appname}  ${propertyId}
+  Check comment  Hao de  
+  [Teardown]  Logout

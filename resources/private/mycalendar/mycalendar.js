@@ -1,32 +1,24 @@
 ;(function() {
   "use strict";
-  var calendarService = lupapisteApp.services.calendarService,
-      currentUserModel = lupapisteApp.models.currentUser;
 
   function MyCalendarsModel() {
     var self = this;
-    self.calendars = calendarService.myCalendars; // observableArray
+    self.calendars = ko.observableArray([]);
     self.noCalendarsFound = ko.observable(false);
-    self.selectedCalendar = ko.observable();
+    self.selectedCalendarId = ko.observable();
+    self.reservationTypes = ko.observableArray();
 
-    hub.subscribe("calendarService::myCalendarsFetched", function() {
-      if (calendarService.myCalendars().length > 0) {
+    hub.subscribe("calendarService::myCalendarsFetched", function(event) {
+      self.calendars(event.calendars);
+      if (event.calendars.length > 0) {
         // conversion to string for compatibility with radio-field...
-        self.selectedCalendar("" + calendarService.myCalendars()[0].id);
+        self.selectedCalendarId("" + event.calendars[0].id);
         self.noCalendarsFound(false);
       } else {
-        self.selectedCalendar(undefined);
+        self.selectedCalendarId(undefined);
         self.noCalendarsFound(true);
       }
     });
-
-    self.selectedCalendar.subscribe(function(val) {
-      if (typeof val !== "undefined") {
-        hub.send("calendarService::fetchCalendar",
-          {id: self.selectedCalendar(), user: currentUserModel.id()});
-      }
-    });
-
   }
 
   $(function() {

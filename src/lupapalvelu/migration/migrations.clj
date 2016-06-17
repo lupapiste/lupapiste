@@ -2233,6 +2233,30 @@
     (fn [a] (util/dissoc-in a [:invite :application]))
     {:auth.invite.application {$exists true}}))
 
+(defn set-missing-metadata-laskentaperuste [{:keys [metadata] :as attachment}]
+  (if (and (= "toistaiseksi" (get-in metadata [:sailytysaika :arkistointi])) (nil? (get-in metadata [:sailytysaika :laskentaperuste])))
+    (assoc-in attachment [:metadata :sailytysaika :laskentaperuste] "rakennuksen_purkamisp\u00e4iv\u00e4")
+    attachment))
+
+(defmigration add-missing-laskentaperuste-to-metadata-maps
+  {:apply-when (pos? (mongo/count :applications {$or [{:metadata.sailytysaika.arkistointi "toistaiseksi"
+                                                       :metadata.sailytysaika.laskentaperuste {$exists false}}
+                                                      {:processMetadata.sailytysaika.arkistointi "toistaiseksi"
+                                                       :processMetadata.sailytysaika.laskentaperuste {$exists false}}
+                                                      {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi "toistaiseksi"
+                                                                                 :metadata.sailytysaika.laskentaperuste {$exists false}}}}]}))}
+  (doseq [collection [:applications :submitted-applications]]
+    (mongo/update-by-query collection
+                           {:metadata.sailytysaika.arkistointi "toistaiseksi"
+                            :metadata.sailytysaika.laskentaperuste {$exists false}}
+                           {$set {:metadata.sailytysaika.laskentaperuste "rakennuksen_purkamisp\u00e4iv\u00e4"}})
+    (mongo/update-by-query collection
+                           {:processMetadata.sailytysaika.arkistointi "toistaiseksi"
+                            :processMetadata.sailytysaika.laskentaperuste {$exists false}}
+                           {$set {:processMetadata.sailytysaika.laskentaperuste "rakennuksen_purkamisp\u00e4iv\u00e4"}}))
+  (update-applications-array :attachments set-missing-metadata-laskentaperuste {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi "toistaiseksi"
+                                                                                                          :metadata.sailytysaika.laskentaperuste {$exists false}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections

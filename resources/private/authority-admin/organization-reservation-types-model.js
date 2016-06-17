@@ -4,7 +4,11 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
   var self = this;
 
   self.reservationType = ko.observable();
-  self.items = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
+  self.items = ko.observableArray([]);
+
+  hub.subscribe("calendarService::organizationReservationTypesFetched", function(event) {
+    self.items(event.reservationTypes || []);
+  });
 
   function EditReservationTypeModel() {
     var self = this;
@@ -47,8 +51,8 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
             hub.send("indicator", {style: "positive"});
             LUPAPISTE.ModalDialog.close();
           })
-          .error(function() {
-            hub.send("indicator", {style: "negative"});
+          .error(function(e) {
+            hub.send("indicator", {style: "negative", message: e.code});
           })
           .call();
       }
@@ -67,8 +71,8 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
             hub.send("indicator", {style: "positive"});
             LUPAPISTE.ModalDialog.close();
           })
-          .error(function() {
-            hub.send("indicator", {style: "negative"});
+          .error(function(e) {
+            hub.send("indicator", {style: "negative", message: e.code});
           })
           .call();
       }
@@ -83,8 +87,8 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         hub.send("calendarService::fetchOrganizationReservationTypes");
         hub.send("indicator", {style: "positive"});
       })
-      .error(function() {
-        hub.send("indicator", {style: "negative"});
+      .error(function(e) {
+        hub.send("indicator", {style: "negative", message: e.code});
       })
       .call();
   };

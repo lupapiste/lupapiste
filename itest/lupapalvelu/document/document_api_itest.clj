@@ -140,16 +140,16 @@
         (get-in approved-uusi-rakennus [:meta :_approved :timestamp]) => modified
         (get-in approved-uusi-rakennus [:meta :_approved :user :id]) => sonja-id))))
 
-(facts* "remove document"
+(facts "remove document"
   (let [application-id (:id (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
-        _              (command pena :add-operation :id application-id :operation "vapaa-ajan-asuinrakennus") => truthy
-        _              (command pena :add-operation :id application-id :operation "aloitusoikeus") => truthy
+        _              (command pena :add-operation :id application-id :operation "vapaa-ajan-asuinrakennus")
+        _              (command pena :add-operation :id application-id :operation "aloitusoikeus")
         application    (query-application pena application-id)
-        hakija         (domain/get-applicant-document (:documents application)) => truthy
-        paasuunnittelija (domain/get-document-by-name application "paasuunnittelija") => truthy
-        uusi-rakennus  (domain/get-document-by-name application "uusiRakennus") => truthy
-        sauna          (domain/get-document-by-name application "uusi-rakennus-ei-huoneistoa") => truthy
-        aloitusoikeus  (domain/get-document-by-name application "aloitusoikeus") => truthy
+        hakija         (domain/get-applicant-document (:documents application))
+        paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
+        uusi-rakennus  (domain/get-document-by-name application "uusiRakennus")
+        sauna          (domain/get-document-by-name application "uusi-rakennus-ei-huoneistoa")
+        aloitusoikeus  (domain/get-document-by-name application "aloitusoikeus")
         primary-op     (:primaryOperation application)
         sec-operations (:secondaryOperations application)]
 
@@ -202,15 +202,22 @@
       (command pena :remove-doc :id application-id :docId (:id uusi-rakennus)) => fail?)
 
 
-    (fact* "sauna doc and operation are removed"
-           (let [sauna-attachment (first (attachment/get-attachments-by-operation application (:id (first sec-operations))))
-                 _ (upload-attachment pena application-id sauna-attachment true)
-                 _ (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
-                 updated-app (query-application pena application-id)]
-             (domain/get-document-by-name updated-app "uusi-rakennus-ei-huoneistoa") => nil
-             (:primaryOperation updated-app) =not=> nil?
-             (count (:secondaryOperations updated-app)) => 1
-             (fact "attachments belonging to operation don't exist anymore"
-               (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)
-             (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
-               (some (hash-set (:id sauna-attachment)) (map :id (:attachments updated-app))))))))
+    (fact "sauna doc and operation are removed"
+
+      (let [sauna-attachment (first (attachment/get-attachments-by-operation application (:id (first sec-operations))))]
+        (fact "Upload sauna-attachment"
+            sauna-attachment => truthy
+            (upload-attachment pena application-id sauna-attachment true))
+
+        (:id sauna) => truthy
+        (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
+
+        (let [updated-app (query-application pena application-id)]
+
+          (domain/get-document-by-name updated-app "uusi-rakennus-ei-huoneistoa") => nil
+          (:primaryOperation updated-app) =not=> nil?
+          (count (:secondaryOperations updated-app)) => 1
+          (fact "attachments belonging to operation don't exist anymore"
+            (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)
+          (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
+            (some (hash-set (:id sauna-attachment)) (map :id (:attachments updated-app)))))))))
