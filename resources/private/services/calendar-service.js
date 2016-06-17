@@ -103,7 +103,7 @@ LUPAPISTE.CalendarService = function() {
       })
       .error(function(e) {
         hub.send("indicator", {style: "negative", message: e.code});
-        doFetchCalendarSlots();
+        doFetchCalendarWeek(event);
       })
       .call();
   });
@@ -117,7 +117,7 @@ LUPAPISTE.CalendarService = function() {
       })
       .error(function (e) {
         hub.send("indicator", {style: "negative", message: e.code});
-        doFetchCalendarSlots();
+        doFetchCalendarWeek(event);
       })
       .call();
   });
@@ -131,7 +131,7 @@ LUPAPISTE.CalendarService = function() {
       })
       .error(function (e) {
         hub.send("indicator", {style: "negative", message: e.code});
-        doFetchCalendarSlots();
+        doFetchCalendarWeek(event);
       })
       .call();
   });
