@@ -6,6 +6,7 @@
             [cheshire.core :as json]
             [me.raynes.fs :as fs]
             [ring.util.response :refer [resource-response]]
+            [ring.util.io :as ring-io]
             [ring.middleware.content-type :refer [content-type-response]]
             [ring.middleware.anti-forgery :as anti-forgery]
             [noir.core :refer [defpage]]
@@ -46,7 +47,8 @@
             [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]
             [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.calendars-api :as calendars]))
+            [lupapalvelu.calendars-api :as calendars])
+  (:import (java.io OutputStreamWriter BufferedWriter)))
 
 ;;
 ;; Helpers
@@ -194,11 +196,20 @@
             (resp/status 404 (resp/json response)))))
       basic-401)))
 
+(defn json-data-as-stream [data]
+  (ring-io/piped-input-stream
+    #(json/generate-stream data (BufferedWriter. (OutputStreamWriter. % "utf-8")))))
+
+(defn json-stream-response [data]
+  (resp/content-type
+    "application/json; charset=utf-8"
+    (json-data-as-stream data)))
+
 (defpage [:get "/data-api/json/:name"] {name :name}
   (let [request (request/ring-request)
         user (basic-authentication request)]
     (if user
-      (resp/json (execute-export name (from-query request) (assoc request :user user)))
+      (json-stream-response (execute-export name (from-query request) (assoc request :user user)))
       basic-401)))
 
 (defpage [:any "/api/raw/:name"] {name :name :as params}
