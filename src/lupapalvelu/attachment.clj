@@ -126,7 +126,8 @@
    (sc/optional-key :stamped)            sc/Bool
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
-   (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
+   (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])
+   (sc/optional-key :auto-conversion)    (sc/maybe sc/Bool)})
 
 (defschema Type
   "Attachment type"
@@ -377,7 +378,7 @@
        (sort-by version-number)
        (last)))
 
-(defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts]}]
+(defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts auto-conversion]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
                                 last
@@ -396,7 +397,8 @@
       (not (nil? stamped))       (assoc :stamped stamped)
       (not (nil? archivable))    (assoc :archivable archivable)
       (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
-      (not (nil? missing-fonts)) (assoc :missing-fonts missing-fonts))))
+      (not (nil? missing-fonts)) (assoc :missing-fonts missing-fonts)
+      (not (nil? auto-conversion)) (assoc :auto-conversion auto-conversion))))
 
 (defn- ->approval [state user timestamp file-id]
   {:value (if (= :ok state) :approved :rejected)
@@ -634,11 +636,10 @@
         (create-preview! file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
-(defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
+(defn pre-process-attachment [{:keys [filename content skip-pdfa-conversion]}]
   (if (and (libreoffice-client/enabled?)
            (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
-           (or (=as-kw type-group :paatoksenteko) (=as-kw type-group :muut))
-           (#{:paatos :paatosote} (keyword type-id)))
+           (not (true? skip-pdfa-conversion)))
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
@@ -660,7 +661,8 @@
              :filename sanitized-filename
              :content-type content-type}
       (true? archivable) (assoc :archivable true)
-      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError))))
+      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
+      (and (true? archivable) (not (true? (:skip-pdfa-conversion options)))) (assoc :auto-conversion true))))
 
 (defn attach-file!
   "1) Converts file to PDF/A, if required by attachment type and

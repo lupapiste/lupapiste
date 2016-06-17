@@ -367,7 +367,8 @@
     "image/tiff"      (let [valid? (tiff-validation/valid-tiff? content)
                             attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
                         (attach-or-fail! application attachment-data))
-    (attach-or-fail! application attachment-data)))
+    (let [attachment-result (attachment/attach-file! application (assoc attachment-data :skip-pdfa-conversion true))]
+      (attach-or-fail! application (assoc attachment-data :attachment-id (:id attachment-result))))))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
