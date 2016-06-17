@@ -225,6 +225,8 @@
                                  (assoc doc :schema (schemas/get-schema schema-info)))
           bulletin             (-> bulletin-version
                                    (domain/filter-application-content-for {})
+                                   ; unset keys (with empty values) set by filter-application-content-for
+                                   (dissoc :comments :neighbors :statements)
                                    (update-in [:documents] (partial map append-schema-fn))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
           bulletin-commentable (= (bulletin-can-be-commented command) nil)]
