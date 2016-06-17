@@ -33,8 +33,8 @@
     (fail :error.application-does-not-have-given-auth)))
 
 (defn- deny-remove-of-non-removable-doc [{schema-info :schema-info}]
-  (and schema-info
-       (not (get-in (schemas/get-schema schema-info) [:info :removable]))))
+  ; removable flag can be overwritten per document
+  (not (:removable schema-info)))
 
 (defn- deny-remove-of-primary-operation [document application]
   (= (get-in document [:schema-info :op :id]) (get-in application [:primaryOperation :id])))
@@ -45,8 +45,8 @@
           doc-count (count (domain/get-documents-by-name documents (:name info)))]
       (and (:deny-removing-last-document info) (<= doc-count 1)))))
 
-(defn- deny-remove-for-non-authority-user [{role :role} {schema-info :schema-info}]
-  (and (not (usr/authority? (keyword role)))
+(defn- deny-remove-for-non-authority-user [user {schema-info :schema-info}]
+  (and (not (usr/authority? user))
        schema-info
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
