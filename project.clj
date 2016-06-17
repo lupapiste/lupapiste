@@ -139,6 +139,7 @@
                         :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
+  :java-source-paths ["java-src"]
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"

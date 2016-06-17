@@ -9,119 +9,140 @@
             [lupapalvelu.i18n :as i18n]))
 
 (facts "about tiedonohjaus utils"
-  (fact "case file report data is generated from application"
-    (let [application {:organization "753-R"
-                       :tosFunction  "10 03 00 01"
-                       :created      100
-                       :applicant    "Testaaja Testi"
-                       :statements   [{:person    {:text "Pelastusviranomainen"
-                                                   :name "Pia Nyman"}
-                                       :requested 302
-                                       :given     500
-                                       :status    "ehdollinen"
-                                       :text      "Lausunto liitteen\u00e4"
-                                       :state     "given"}
-                                      {:person    {:text "Rakennussuunnittelu"
-                                                   :name "Sampo S\u00e4levaara"}
-                                       :requested 301
-                                       :given     nil
-                                       :status    nil
-                                       :state     "requested"}]
-                       :neighbors    [{:propertyId "111"
-                                       :owner      {:type "luonnollinen"
-                                                    :name "Joku naapurin nimi"}
-                                       :id         "112"
-                                       :status     [{:state   "open"
-                                                     :created 600}
-                                                    {:state   "mark-done"
-                                                     :user    {:firstName "Etu" :lastName "Suku"}
-                                                     :created 500}]}]
-                       :tasks        [{:data        {}
-                                       :state       "requires_user_action"
-                                       :taskname    "rakennuksen paikan tarkastaminen"
-                                       :schema-info {:name    "task-katselmus"
-                                                     :version 1}
-                                       :closed      nil
-                                       :created     300
-                                       :duedate     nil
-                                       :assignee    {:lastName  "Suku"
-                                                     :firstName "Etu"
-                                                     :id        1111}
-                                       :source      nil
-                                       :id          "2222"}
-                                      ]
-                       :attachments  [{:type     {:foo :bar}
-                                       :versions [{:version 1
-                                                   :created 200
-                                                   :user    {:firstName "Testi"
-                                                             :lastName  "Testaaja"}}
-                                                  {:version 2
-                                                   :created 500
-                                                   :user    {:firstName "Testi"
-                                                             :lastName  "Testaaja"}}]
-                                       :user     {:firstName "Testi"
-                                                  :lastName  "Testaaja"}
-                                       :contents "Great attachment"}
-                                      {:type     {:foo :qaz}
-                                       :versions [{:version 1
-                                                   :created 300
-                                                   :user    {:firstName "Testi"
-                                                             :lastName  "Testaaja"}}]}]
-                       :history      [{:state "draft"
-                                       :ts    100
-                                       :user  {:firstName "Testi"
-                                               :lastName  "Testaaja"}}
-                                      {:state "open"
-                                       :ts    250
-                                       :user  {:firstName "Testi"
-                                               :lastName  "Testaaja"}}
-                                      {:state "complementNeeded"
-                                       :ts 4000
-                                       :user {:firstName "Heikki"
-                                              :lastName "Hepokatti"}}]}]
+  (let [application {:organization "753-R"
+                     :tosFunction  "10 03 00 01"
+                     :created      100
+                     :applicant    "Testaaja Testi"
+                     :id           "1"
+                     :authority    {:firstName "Monni" :lastName "Tiskaa"}
+                     :processMetadata {:julkisuusluokka "julkinen"
+                                       :henkilotiedot "ei-sisalla"
+                                       :sailytysaika {:arkistointi :ikuisesti
+                                                      :perusteli "Laki"}}
+                     :statements   [{:person    {:text "Pelastusviranomainen"
+                                                 :name "Pia Nyman"}
+                                     :requested 653238400000
+                                     :given     663238400000
+                                     :status    "ehdollinen"
+                                     :text      "Lausunto liitteen\u00e4"
+                                     :state     "given"}
+                                    {:person    {:text "Rakennussuunnittelu"
+                                                 :name "Sampo S\u00e4levaara"}
+                                     :requested 643238400000
+                                     :given     nil
+                                     :status    nil
+                                     :state     "requested"}]
+                     :neighbors    [{:propertyId "111"
+                                     :owner      {:type "luonnollinen"
+                                                  :name "Joku naapurin nimi"}
+                                     :id         "112"
+                                     :status     [{:state   "open"
+                                                   :created 923238400000}
+                                                  {:state   "mark-done"
+                                                   :user    {:firstName "Etu" :lastName "Suku"}
+                                                   :created 933238400000}]}]
+                     :tasks        [{:data        {}
+                                     :state       "requires_user_action"
+                                     :taskname    "rakennuksen paikan tarkastaminen"
+                                     :schema-info {:name    "task-katselmus"
+                                                   :version 1}
+                                     :closed      nil
+                                     :created     633238400000
+                                     :duedate     nil
+                                     :assignee    {:lastName  "Suku"
+                                                   :firstName "Etu"
+                                                   :id        1111}
+                                     :source      nil
+                                     :id          "2222"}
+                                    ]
+                     :attachments  [{:type     {:type-group "paapiirustus" :type-id "asemapiirros"}
+                                     :versions [{:version {:major 1 :minor 0}
+                                                 :created 200
+                                                 :user    {:firstName "Testi"
+                                                           :lastName  "Testaaja"}}
+                                                {:version {:major 2 :minor 2}
+                                                 :created 663238400000
+                                                 :user    {:firstName "Testi"
+                                                           :lastName  "Testaaja"}}]
+                                     :id       "2"
+                                     :contents "Great attachment"}
+                                    {:type     {:type-group "paapiirustus" :type-id "pohjapiirros"}
+                                     :id       "3"
+                                     :versions [{:version {:major 0 :minor 1}
+                                                 :created 623238400000
+                                                 :user    {:firstName "Testi"
+                                                           :lastName  "Testaaja"}}]}]
+                     :history      [{:state "open"
+                                     :ts    100
+                                     :user  {:firstName "Testi"
+                                             :lastName  "Testaaja"}}
+                                    {:state "submitted"
+                                     :ts    523238400000
+                                     :user  {:firstName "Testi"
+                                             :lastName  "Testaaja"}}
+                                    {:state "complementNeeded"
+                                     :ts   1462060800000
+                                     :user {:firstName "Heikki"
+                                            :lastName "Hepokatti"}}]}]
+
+    (fact "case file report data is generated from application"
       (generate-case-file-data application :fi) => [{:action    "Valmisteilla"
                                                      :start     100
                                                      :user      "Testaaja Testi"
                                                      :documents [{:type     :hakemus
                                                                   :category :document
                                                                   :ts       100
-                                                                  :user     "Testaaja Testi"}
-                                                                 {:type     {:foo :bar}
+                                                                  :user     "Testaaja Testi"
+                                                                  :id       "1-application"}
+                                                                 {:type     {:type-group "paapiirustus" :type-id "asemapiirros"}
                                                                   :category :document
-                                                                  :version  1
+                                                                  :version  {:major 1 :minor 0}
                                                                   :ts       200
                                                                   :user     "Testaaja Testi"
-                                                                  :contents "Great attachment"}]}
-                                                    {:action    "K\u00e4sittelyss\u00e4"
-                                                     :start     250
+                                                                  :contents "Great attachment"
+                                                                  :id       "2"}]}
+                                                    {:action    "Vireilletulo"
+                                                     :start     523238400000
                                                      :user      "Testaaja Testi"
-                                                     :documents [{:type     {:foo :qaz}
+                                                     :documents [{:type     {:type-group "paapiirustus" :type-id "pohjapiirros"}
                                                                   :category :document
-                                                                  :version  1
-                                                                  :ts       300
+                                                                  :version {:major 0 :minor 1}
+                                                                  :ts       623238400000
                                                                   :user     "Testaaja Testi"
-                                                                  :contents nil}
-                                                                 {:category :request-review, :ts 300, :text "rakennuksen paikan tarkastaminen", :user "Suku Etu"}
-                                                                 {:category :request-statement, :ts 301, :text "Rakennussuunnittelu", :user ""}
-                                                                 {:category :request-statement, :ts 302, :text "Pelastusviranomainen", :user ""}
-                                                                 {:type     {:foo :bar}
+                                                                  :contents nil
+                                                                  :id       "3"}
+                                                                 {:category :request-review, :ts 633238400000, :text "rakennuksen paikan tarkastaminen", :user "Suku Etu"}
+                                                                 {:category :request-statement, :ts 643238400000, :text "Rakennussuunnittelu", :user ""}
+                                                                 {:category :request-statement, :ts 653238400000, :text "Pelastusviranomainen", :user ""}
+                                                                 {:type     {:type-group "paapiirustus" :type-id "asemapiirros"}
                                                                   :category :document
-                                                                  :version  2
-                                                              '    :ts       500
+                                                                  :version  {:major 2 :minor 2}
+                                                                  :ts       663238400000
                                                                   :user     "Testaaja Testi"
-                                                                  :contents "Great attachment"}
+                                                                  :contents "Great attachment"
+                                                                  :id       "2"}
                                                                  {:text     "Joku naapurin nimi"
                                                                   :category :request-neighbor
-                                                                  :ts       600
+                                                                  :ts       923238400000
                                                                   :user     " "}]}
                                                     {:action (i18n/localize :fi "caseFile.complementNeeded")
-                                                     :start 4000
+                                                     :start 1462060800000
                                                      :user "Hepokatti Heikki"
                                                      :documents []}]
       (provided
-        (toimenpide-for-state "753-R" "10 03 00 01" "draft") => {:name "Valmisteilla"}
-        (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "K\u00e4sittelyss\u00e4"}
-        (toimenpide-for-state "753-R" "10 03 00 01" "complementNeeded") => {})))
+        (toimenpide-for-state "753-R" "10 03 00 01" "submitted") => {:name "Vireilletulo"}
+        (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "Valmisteilla"}
+        (toimenpide-for-state "753-R" "10 03 00 01" "complementNeeded") => {}))
+
+    (fact "case file report can be generated as xml"
+      (xml-case-file application :fi) => "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><CaseFile xmlns=\"http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1\"><Created>1970-01-01+02:00</Created><NativeId>1</NativeId><Language>fi</Language><Restriction><PublicityClass>Julkinen</PublicityClass><PersonalData>ei sisällä henkilötietoja</PersonalData></Restriction><Title>Käsittelyprosessi: 1</Title><RetentionPeriod>999999</RetentionPeriod><Status>valmis</Status><ClassificationScheme><MainFunction><Title>Maankäyttö, Rakentaminen ja Asuminen</Title><FunctionCode>10</FunctionCode><FunctionClassification><Title>Rakentaminen, ylläpito ja käyttö</Title><FunctionCode>10 03</FunctionCode><SubFunction><Title>Rakennusvalvonta</Title><FunctionCode>10 03 00</FunctionCode><SubFunction><Title>Rakennuslupamenettely</Title><FunctionCode>10 03 00 01</FunctionCode></SubFunction></SubFunction></FunctionClassification></MainFunction></ClassificationScheme><Function>10 03 00 01</Function><Agent><Role>responsible</Role><Name>Monni Tiskaa</Name></Agent><Action><Created>1970-01-01+02:00</Created><Title>Valmisteilla</Title><Agent><Role>registrar</Role><Name>Testaaja Testi</Name></Agent><Type>Valmisteilla</Type><Record><Created>1970-01-01+02:00</Created><NativeId>1-application</NativeId><Title>Hakemus</Title><Type>hakemus</Type><Agent><Role>registrar</Role><Name>Testaaja Testi</Name></Agent></Record><Record><Created>1970-01-01+02:00</Created><NativeId>2</NativeId><Description>Great attachment</Description><Title>Asemapiirros</Title><Type>paapiirustus.asemapiirros</Type><Version>1.0</Version><Agent><Role>registrar</Role><Name>Testaaja Testi</Name></Agent></Record></Action><Action><Created>1986-08-01+03:00</Created><Title>Vireilletulo</Title><Custom><ActionEvent><Description>Vaatimus lisätty: rakennuksen paikan tarkastaminen</Description><Type>request-review</Type><Created>1990-01-25+02:00</Created><Agent><Role>registrar</Role><Name>Suku Etu</Name></Agent></ActionEvent><ActionEvent><Description>Lausuntopyyntö tehty: Rakennussuunnittelu</Description><Type>request-statement</Type><Created>1990-05-21+03:00</Created></ActionEvent><ActionEvent><Description>Lausuntopyyntö tehty: Pelastusviranomainen</Description><Type>request-statement</Type><Created>1990-09-13+03:00</Created></ActionEvent><ActionEvent><Description>Naapurin kuuleminen tehty: Joku naapurin nimi</Description><Type>request-neighbor</Type><Created>1999-04-04+03:00</Created></ActionEvent></Custom><Agent><Role>registrar</Role><Name>Testaaja Testi</Name></Agent><Type>Vireilletulo</Type><Record><Created>1989-10-01+02:00</Created><NativeId>3</NativeId><Title>Pohjapiirros</Title><Type>paapiirustus.pohjapiirros</Type><Version>0.1</Version><Agent><Role>registrar</Role><Name>Testaaja Testi</Name></Agent></Record><Record><Created>1991-01-07+02:00</Created><NativeId>2</NativeId><Description>Great attachment</Description><Title>Asemapiirros</Title><Type>paapiirustus.asemapiirros</Type><Version>2.2</Version><Agent><Role>registrar</Role><Name>Testaaja Testi</Name></Agent></Record></Action><Action><Created>2016-05-01+03:00</Created><Title>Palautettu täydennettäväksi</Title><Agent><Role>registrar</Role><Name>Hepokatti Heikki</Name></Agent><Type>Palautettu täydennettäväksi</Type></Action></CaseFile>"
+
+      (provided
+        (toimenpide-for-state "753-R" "10 03 00 01" "submitted") => {:name "Vireilletulo"}
+        (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "Valmisteilla"}
+        (toimenpide-for-state "753-R" "10 03 00 01" "complementNeeded") => {}
+        (get-from-toj-api "753-R" false "10 03 00 01" "/classification") => "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a:ClassificationScheme xmlns:a=\"http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1\"><a:MainFunction><a:FunctionCode>10</a:FunctionCode><a:Title>Maankäyttö, Rakentaminen ja Asuminen</a:Title><a:FunctionClassification><a:FunctionCode>10 03</a:FunctionCode><a:Title>Rakentaminen, ylläpito ja käyttö</a:Title><a:SubFunction><a:FunctionCode>10 03 00</a:FunctionCode><a:Title>Rakennusvalvonta</a:Title><a:SubFunction><a:FunctionCode>10 03 00 01</a:FunctionCode><a:Title>Rakennuslupamenettely</a:Title></a:SubFunction></a:SubFunction></a:FunctionClassification></a:MainFunction></a:ClassificationScheme>")))
+
 
   (fact "application and attachment state (tila) is changed correctly"
     (let [metadata {:tila                :luonnos

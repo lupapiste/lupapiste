@@ -231,16 +231,22 @@
                                          (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
                                        attachments)
           application-archive-id (str id "-application")
-          case-file-archive-id (str id "-case-file")]
+          case-file-archive-id (str id "-case-file")
+          case-file-xml-id     (str case-file-archive-id "-xml")]
       (when (document-ids application-archive-id)
         (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
               metadata (generate-archive-metadata application user)]
           (upload-and-set-state application-archive-id application-file "application/pdf" metadata application created set-application-state)))
       (when (document-ids case-file-archive-id)
         (let [case-file-file (libre/generate-casefile-pdfa application :fi)
+              case-file-xml (tiedonohjaus/xml-case-file application :fi)
+              xml-tmp-file (File/createTempFile "case-file" "xml")
               metadata (-> (generate-archive-metadata application user)
-                           (assoc :type :case-file))]
-          (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)))
+                           (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
+              xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
+          (spit xml-tmp-file case-file-xml)
+          (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)
+          (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state)))
       (doseq [attachment selected-attachments]
         (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]
