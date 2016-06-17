@@ -171,6 +171,7 @@
    :auth :authority :authorityNotice :comments :created :documents
    :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitSubtype :primaryOperation :state :statements
+   :organization ; required for authorization checks
    :submitted :tasks :urgency :verdicts])
 
 (def- indicator-fields
