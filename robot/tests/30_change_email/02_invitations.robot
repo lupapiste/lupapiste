@@ -36,9 +36,9 @@ Mikko sees the invitation modal dialog and accepts
   [Tags]  integration
   Wait Until  Page should contain  Sinut on kutsuttu tälle hakemukselle. Voit hyväksyä kutsun heti tai jatkaa hakemuksen katseluun.
   Click by test id  confirm-yes
-  Wait until  Mask is invisible
+  Wait until  Dialog is invisible
   Sleep  2s
-  Wait until  Mask is invisible
+  Wait until  Dialog is invisible
 
 *** Keywords ***
 
@@ -50,7 +50,7 @@ Invite Mikko
   Input Text  person-invite-email-1  mikko@example.com
   Element should be enabled  xpath=//*[@data-test-id='person-invite-bubble-dialog-ok']
   Click by test id  person-invite-bubble-dialog-ok
-  Wait until  Mask is invisible
+  Wait until  Dialog is invisible
   Wait until  Invite count is  1
 
 Mikko changes email to mikko@example.net
@@ -84,8 +84,8 @@ Navigate to email change
   Open accordion by test id  mypage-change-email-accordion
   Wait Until  Element Should be visible  oldEmail
 
-Mask is invisible
-  Element should not be visible  xpath=//div[@id='ModalDialogMask']
+Dialog is invisible
+  Element should not be visible  xpath=//div[@id='modal-dialog-content']
 
 Vetuma button is visible
   Wait until page contains element  vetuma-init-email
