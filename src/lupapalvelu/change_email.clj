@@ -29,18 +29,18 @@
 
 (defn- remove-dummy-auths-where-user-already-has-auth [user-id new-email]
   (mongo/update-by-query :applications
-                         {"auth.id" user-id}
-                         {$pull {"auth" {"username"         new-email
-                                         "invite.user.role" "dummy"}}}))
+                         {:auth.id user-id}
+                         {$pull {:auth {:username         new-email
+                                        :invite.user.role "dummy"}}}))
 
 (defn- change-auths-dummy-id-to-user-id [{:keys [id username email] :as user} dummy-id]
   (mongo/update-by-query :applications
-                         {"auth" {$elemMatch {"id" dummy-id
-                                              "invite.user.role" "dummy"}}}
-                         {$set {"auth.$.id" id
-                                "auth.$.username" username
-                                "auth.$.invite.email" email
-                                "auth.$.invite.user" (usr/summary user)}}))
+                         {:auth {$elemMatch {:id dummy-id
+                                             :invite.user.role "dummy"}}}
+                         {$set {:auth.$.id id
+                                :auth.$.username username
+                                :auth.$.invite.email email
+                                :auth.$.invite.user (usr/summary user)}}))
 
 (defn- change-email-with-token [token stamp]
   {:pre [(map? token)]}
@@ -79,8 +79,8 @@
     (loop [n 1]
       (when (pos? n)
         (recur (mongo/update-by-query :applications
-                                      {:auth {$elemMatch {:id (:id user)
-                                                          :invite.username old-email}}}
+                                      {:auth {$elemMatch {:id id
+                                                          :invite.email old-email}}}
                                       {$set {:auth.$.invite.email new-email
                                              :auth.$.invite.user.username new-email}}))))
 
