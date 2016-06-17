@@ -61,14 +61,28 @@
 
     ; Strictly this atomic update is enough.
     ; Access to applications is determined by user id.
-    (usr/update-user-by-email old-email {:personId hetu} {$set {:username new-email :email new-email}})
+    (usr/update-user-by-email old-email
+                              {:personId hetu}
+                              {$set {:username new-email :email new-email}})
 
     ; Update application.auth arrays.
     ; They might have duplicates due to old bugs, ensure everything is updated.
     (loop [n 1]
       (when (pos? n)
-        ; loop exists when no applications with the old username were found
-        (recur (mongo/update-by-query :applications {:auth {$elemMatch {:id (:id user), :username old-email}}} {$set {:auth.$.username new-email}}))))
+        ; loop exits when no applications with the old username were found
+        (recur (mongo/update-by-query :applications
+                                      {:auth {$elemMatch {:id (:id user)
+                                                          :username old-email}}}
+                                      {$set {:auth.$.username new-email}}))))
+
+    ; Also update emails in invite auths
+    (loop [n 1]
+      (when (pos? n)
+        (recur (mongo/update-by-query :applications
+                                      {:auth {$elemMatch {:id (:id user)
+                                                          :invite.username old-email}}}
+                                      {$set {:auth.$.invite.email new-email
+                                             :auth.$.invite.user.username new-email}}))))
 
     ; Cleanup tokens
     (vetuma/consume-user stamp)
