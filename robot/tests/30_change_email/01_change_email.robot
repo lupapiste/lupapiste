@@ -4,6 +4,7 @@ Documentation   Mikko changes email address
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/vetuma_helpers.robot
+Resource        ../common_keywords/email_helpers.robot
 
 *** Test Cases ***
 
@@ -86,6 +87,13 @@ Party table has been updated
   Open tab  parties
   Page Should Not Contain  mikko@example.com
   Page Should Contain  mikko@example.net
+
+Mikko changes his email back to mikko@example.com
+  [Tags]  integration
+  Change email to  mikko@example.com
+  Open last email and click the email change link
+  Identify for email change via Vetuma
+  Log in with new email address  mikko@example.com  mikko123  Mikko Intonen
   Logout
 
 *** Keywords ***

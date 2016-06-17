@@ -1,9 +1,10 @@
 *** Settings ***
 
-Documentation   Mikko can change his email address to one with dummy user
+Documentation   Mikko can change his email address to one with an existing dummy user
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/vetuma_helpers.robot
+Resource        ../common_keywords/email_helpers.robot
 
 *** Test Cases ***
 
@@ -45,11 +46,11 @@ Mikko opens the second application and accepts invitation
 Mikko changes his email to mikko@example.net
   [Tags]  integration
   Change email to  mikko@example.net
-  Mikko receives email and clicks the email change link
-  Mikko identifies himself via Vetuma
-  Mikko logs in with the new email address
+  Open last email and click the email change link
+  Identify for email change via Vetuma
+  Log in with new email address  mikko@example.net  mikko123  Mikko Intonen
 
-The invitation for mikko@example.net has been removed from the second application
+The invitation for mikko@example.net has been removed
   [Tags]  integration
   Open application  ${appname2}  ${propertyId2}
   Wait until  Invite count is  0
@@ -72,32 +73,6 @@ Invite to application with email
   Element should be enabled  xpath=//*[@data-test-id='person-invite-bubble-dialog-ok']
   Click by test id  person-invite-bubble-dialog-ok
   Wait until  Mask is invisible
-
-Change email to
-  [Arguments]  ${newEmail}
-  Navigate to email change
-  Input text by test id  newEmail  ${newEmail}
-  Wait Until  Element Should Be Enabled  //section[@id='mypage']//button[@data-test-id='change-email']
-  Click element  //section[@id='mypage']//button[@data-test-id='change-email']
-  Wait Until  Page should contain  Uuteen sähköpostiosoitteeseen on lähetetty viesti osoitteen vaihdosta
-
-Mikko receives email and clicks the email change link
-  Open last email
-  Wait Until  Page Should Contain  mikko@example.net
-  Page Should Contain  /app/fi/welcome#!/email/
-  ## Click the first link
-  Click link  xpath=//a
-
-Mikko identifies himself via Vetuma
-  Vetuma button is visible
-  Authenticate via Nordea via Vetuma  vetuma-init-email
-  Wait Until  Page should contain  Voit nyt kirjautua sisään uudella sähköpostiosoitteellasi.
-
-Mikko logs in with the new email address
-  Element should be visible by test id  login-new-email
-  Click by test id  login-new-email
-  Wait Until  Page should contain  Haluan kirjautua palveluun
-  Applicant logs in  mikko@example.net  mikko123  Mikko Intonen
 
 Navigate to email change
   Click Element  user-name
