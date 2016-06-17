@@ -88,7 +88,7 @@
       (when (pos? n)
         (recur (mongo/update-by-query :applications
                                       {:auth {$elemMatch {:id (:id user)
-                                                          :invite.username old-email}}}
+                                                          :invite.email old-email}}}
                                       {$set {:auth.$.invite.email new-email
                                              :auth.$.invite.user.username new-email}}))))
 
