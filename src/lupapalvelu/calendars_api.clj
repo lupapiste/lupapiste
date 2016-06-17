@@ -63,13 +63,12 @@
                                 :content-type :json}))
 
 (defn- handle-error-response [response]
-  (let [body  (json/decode (:body response) keyword)]
+  (let [body (json/decode (:body response) keyword)]
     (error response)
-    (if (= 401 (:status response))
-      (fail! "Unathorized" :code "calendar.error.unauthorized-access" :message "Bad credentials"))
-    (if (= 403 (:status response))
-      (fail! "Unathorized" :code "calendar.error.unauthorized-access" :message "Forbidden"))
-    (fail! "Bad request" :code (str "calendar.error." (:code body)) :message (:message body))))
+    (case (:status response)
+      401 (fail! "Unauthorized" :code "calendar.error.unauthorized-access" :message "Bad credentials")
+      403 (fail! "Unauthorized" :code "calendar.error.unauthorized-access" :message "Forbidden")
+      (fail! "Bad request" :code (str "calendar.error." (:code body)) :message (:message body)))))
 
 (defn- api-query
   ([action]
