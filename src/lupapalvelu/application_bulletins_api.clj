@@ -245,7 +245,7 @@
                             (merge {:comments 1
                                     :versions.id 1
                                     :bulletinState 1}))
-        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))
+        bulletin (bulletins/get-bulletin bulletinId bulletin-fields)
         versions (map count-comments (:versions bulletin))
         bulletin (assoc bulletin :versions versions)]
     (ok :bulletin bulletin)))
