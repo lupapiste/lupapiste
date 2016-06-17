@@ -144,8 +144,8 @@
                             (first))))
                 (remove nil?)
                 (first))]
-    (when ts
-      (->iso-8601-date (c/from-long ts)))))
+    (when (number? ts)
+      (->iso-8601-date (c/from-long (long ts))))))
 
 (defn- get-from-verdict-minutes [{:keys [verdicts]} key]
   (->> verdicts
@@ -163,8 +163,8 @@
                 (remove nil?)
                 (sort)
                 (last))]
-    (when ts
-      (->iso-8601-date (c/from-long ts)))))
+    (when (number? ts)
+      (->iso-8601-date (c/from-long (long ts))))))
 
 (defn- get-usages [{:keys [documents]} op-id]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
