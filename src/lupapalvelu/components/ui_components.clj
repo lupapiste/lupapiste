@@ -356,8 +356,8 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
-   :transfer-monitor {:js [ "transfer-monitor-model.js"]
-                       :html ["transfer-monitor-template.html"]}
+   :integration-message-monitor {:js [ "integration-message-monitor-model.js"]
+                       :html ["integration-message-monitor-template.html"]}
 
    :ui-components {:depends [:common-html]
                    :js (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js"))
@@ -388,7 +388,7 @@
 
    :authority-app {:depends [] :js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :external-api :authenticated :map :applications
-                             :transfer-monitor :application
+                             :integration-message-monitor :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics :metadata-editor :footer :mycalendar :ui-components]}
 

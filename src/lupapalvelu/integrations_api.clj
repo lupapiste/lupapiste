@@ -373,7 +373,7 @@
      :ok []
      :error []}))
 
-(defquery transfers
+(defquery integration-messages
   {:parameters [id]
    :user-roles #{:authority}
    :org-authz-roles  #{:approver}
@@ -393,7 +393,7 @@
     (resp/set-headers http/no-cache-headers)
     (resp/status 200)))
 
-(defraw transfer
+(defraw integration-message
   {:parameters [id transferType fileType filename]
    :user-roles #{:authority}
    :org-authz-roles  #{:approver}

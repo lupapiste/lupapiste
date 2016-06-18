@@ -1,4 +1,4 @@
-<script class="ko-template" type="text/x-jquery-tmpl" id="transfer-monitor-template">
+<script class="ko-template" type="text/x-jquery-tmpl" id="integration-message-monitor-template">
 <div data-bind="ifnot: processing" class="content">
 <!-- ko foreach: { data: fileGroups, afterRender: function(){hub.send('resize-dialog');} } -->
   <h3 data-bind="if: files.length"><span data-bind="text: lname"></span>:</h3>
@@ -14,5 +14,5 @@
   </ul>
 <!-- /ko -->
 </div>
-<div data-bind="if: processing"><span data-bind="ltext:'application.transfers.loading'"></span></div>
+<div data-bind="if: processing"><span data-bind="ltext:'application.integration-messages.loading'"></span></div>
 </script>

@@ -1,4 +1,4 @@
-(ns lupapalvelu.transfers-itest
+(ns lupapalvelu.integration-messages-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.integrations-api :as iapi]))
@@ -27,10 +27,10 @@
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?)
 
     (fact "applicant can not access transfer info"
-      (query pena :transfers :id app-id) => unauthorized?)
+      (query pena :integration-messages :id app-id) => unauthorized?)
 
     (fact {:midje/description (str "list transfers of " app-id)}
-      (let [{:keys [krysp ah] :as resp} (query velho :transfers :id app-id)]
+      (let [{:keys [krysp ah] :as resp} (query velho :integration-messages :id app-id)]
         resp => ok?
         (doseq [[dirs n] [[krysp "krysp"] [ah "ah"]]
                 :let [{:keys [ok error waiting]} dirs]]

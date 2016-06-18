@@ -1,4 +1,4 @@
-LUPAPISTE.TransferMonitorModel = function(params) {
+LUPAPISTE.IntegrationMessageMonotorModel = function(params) {
   "use strict";
   var self = this;
 
@@ -6,19 +6,19 @@ LUPAPISTE.TransferMonitorModel = function(params) {
   self.fileGroups = ko.observable([]);
 
   self.init = function() {
-    ajax.query("transfers", {id:params.id})
+    ajax.query("integration-messages", {id:params.id})
     .processing(self.processing)
     .success(function(resp) {
       self.fileGroups(_.map(["waiting", "error", "ok"], function(group) {
         var files = _.map(["krysp","ah"], function(t) {
           return _.map(resp[t][group], function(f) {
             if (group !== "waiting") {
-              f.href = _.sprintf("/api/raw/transfer?id=%s&transferType=%s&fileType=%s&filename=%s", params.id, t, group, f.name);
+              f.href = _.sprintf("/api/raw/integration-message?id=%s&transferType=%s&fileType=%s&filename=%s", params.id, t, group, f.name);
             }
             return f;
           });
         });
-        return {lname: loc(["application.transfers", group]),
+        return {lname: loc(["application.integration-messages", group]),
                 files: _.sortBy(_.flatten(files), "modified").reverse()};
       }));
     })
@@ -28,4 +28,4 @@ LUPAPISTE.TransferMonitorModel = function(params) {
   self.init();
 };
 
-ko.components.register("transfer-monitor", {viewModel: LUPAPISTE.TransferMonitorModel, template: {element: "transfer-monitor-template"}});
+ko.components.register("integration-message-monitor", {viewModel: LUPAPISTE.IntegrationMessageMonotorModel, template: {element: "integration-message-monitor-template"}});
