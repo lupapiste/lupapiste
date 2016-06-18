@@ -393,6 +393,14 @@
     (resp/set-headers http/no-cache-headers)
     (resp/status 200)))
 
+(defn validate-integration-message-filename [{{:keys [id filename]} :data}]
+  ; Action pipeline checks that the curren user has access to application.
+  ; Check that the file is related to that application
+  ; and that a directory traversal is not attempted.
+  (when (or (not (re-matches #"^([\w_\-\.]+)\.(txt|xml)$" filename))
+            (not (ss/starts-with filename id)))
+    (fail :error.invalid-filename)))
+
 (defraw integration-message
   {:parameters [id transferType fileType filename]
    :user-roles #{:authority}
@@ -404,20 +412,22 @@
                         (when-not (#{"krysp" "ah"} (:transferType data))
                           (fail :error.unknown-type)))
                       (fn [{data :data}]
-                        (when-not (re-matches #"^([\w_\-\.]+)\.(txt|xml)$" (:filename data))
-                          (fail :error.invalid-filename)))]
+                        (when-not (validators/application-id? (:id data))
+                          (fail :error.invalid-key)))
+                      validate-integration-message-filename]
    :states #{:sent :complementNeeded}}
-  [{{org-id :organization municipality :municipality permit-type :permitType} :application}]
+  [{{org-id :organization municipality :municipality permit-type :permitType :as application} :application}]
   (let [organization (organization/get-organization org-id)
         dir (case transferType
               "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
               "ah" (ah/resolve-output-directory
                      (organization/resolve-organization-scope municipality permit-type organization)))
+        subdir (case fileType
+                 "ok" (str env/file-separator "archive" env/file-separator)
+                 "error" (str env/file-separator "error" env/file-separator))
         sanitized (mime/sanitize-filename filename) ; input validator doesn't allow slashes, but sanitize anyway
-        path (case fileType
-               "ok" (str env/file-separator "archive" env/file-separator)
-               "error" (str env/file-separator "error" env/file-separator))
-        f (io/file (str dir path sanitized))]
+        f (io/file (str dir subdir sanitized))]
+    (assert (ss/starts-with (.getName f) (:id application))) ; Can't be too paranoid...
     (if (.exists f)
       (transferred-file-response sanitized (slurp f))
       (resp/status 404 "File Not Found"))))

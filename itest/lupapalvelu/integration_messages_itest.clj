@@ -41,6 +41,23 @@
             (fact "all filenames start with application id" (map :name waiting) => (has every? #(.startsWith % app-id)))
             (fact "file has modification time" (map :modified waiting) => (has every? pos?))))))))
 
+(facts "filename validation"
+  (let [some-id "LP-123-1234-12345"
+        mkcmd (fn [id n] {:data {:filename n, :id id}})]
+    (fact "missing" (iapi/validate-integration-message-filename (mkcmd some-id nil)) => fail?)
+    (fact "empty" (iapi/validate-integration-message-filename (mkcmd some-id "")) => fail?)
+
+    (fact "valid txt" (iapi/validate-integration-message-filename (mkcmd some-id (str some-id "_error.txt"))) => nil?)
+    (fact "valid xml" (iapi/validate-integration-message-filename (mkcmd some-id (str some-id "_123.xml"))) => nil?)
+
+    (fact "application pdf" (iapi/validate-integration-message-filename (mkcmd some-id (str some-id "_current_application.pdf"))) => fail?)
+
+    (fact "id mismatch" (iapi/validate-integration-message-filename (mkcmd some-id "LP-123-1234-12346_123.xml")) => fail?)
+
+    (fact "directory traversal"
+      (iapi/validate-integration-message-filename (mkcmd some-id "../../other-user/rakennus/LP-124-1234-21345_123.xml")) => fail?
+      (iapi/validate-integration-message-filename (mkcmd some-id (str "../../other-user/rakennus/" some-id "_123.xml"))) => fail?)))
+
 (facts "response"
   (let [hetu "121212-1212"
         filename "LP-123.xml"
