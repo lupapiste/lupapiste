@@ -1,5 +1,5 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="integration-message-monitor-template">
-<div data-bind="ifnot: processing" class="content">
+<div data-bind="ifnot: processing" class="content" data-test-id="integration-message-monitor">
 <!-- ko foreach: { data: fileGroups, afterRender: function(){hub.send('resize-dialog');} } -->
   <h3 data-bind="if: files.length"><span data-bind="text: lname"></span>:</h3>
   <ul data-bind="foreach: files">
