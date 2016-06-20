@@ -394,11 +394,11 @@
              :filename       filename
              :contentType    content-type
              :size           size}
-      (not (nil? stamped))       (assoc :stamped stamped)
-      (not (nil? archivable))    (assoc :archivable archivable)
-      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
-      (not (nil? missing-fonts)) (assoc :missing-fonts missing-fonts)
-      (not (nil? autoConversion)) (assoc :autoConversion autoConversion))))
+      (util/assoc-when {} :stamped stamped)
+      (util/assoc-when {} :archivable archivable)
+      (util/assoc-when {} :archivabilityError archivabilityError)
+      (util/assoc-when {} :missing-fonts missing-fonts)
+      (util/assoc-when {} :autoConversion autoConversion))))
 
 (defn- ->approval [state user timestamp file-id]
   {:value (if (= :ok state) :approved :rejected)
@@ -622,6 +622,15 @@
         (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
         (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpeg" preview-content :application application-id)))))
 
+(def file-types
+  #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
+   :application/vnd.openxmlformats-officedocument.wordprocessingml.document
+   :application/vnd.oasis.opendocument.text
+   :application/vnd.ms-powerpoint
+   :application/rtf
+   :application/msword
+   :text/plain})
+
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
   [file-id attachment-fn]
@@ -639,7 +648,8 @@
 (defn pre-process-attachment [{:keys [filename content skip-pdfa-conversion]}]
   (if (and (libreoffice-client/enabled?)
            (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
-           (not (true? skip-pdfa-conversion)))
+           (not skip-pdfa-conversion)
+           (contains? file-types (keyword (mime/mime-type (mime/sanitize-filename filename)))))
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
@@ -662,7 +672,7 @@
              :content-type content-type}
       (true? archivable) (assoc :archivable true)
       (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
-      (and (true? archivable) (not (true? (:skip-pdfa-conversion options)))) (assoc :autoConversion true))))
+      (and (true? archivable) (not (:skip-pdfa-conversion options))) (assoc :autoConversion true))))
 
 (defn attach-file!
   "1) Converts file to PDF/A, if required by attachment type and

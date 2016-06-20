@@ -119,10 +119,8 @@
                       <td>
                         <span data-bind="fullName: user"></span>
                       </td>
-                      <td>
-                        <div data-bind="if: $data['autoConversion']" style="text-align:center">
+                      <td data-bind="if: $data.autoConversion" style="text-align:center">
                           <span class="lupicon-circle-check positive"></span>
-                        </div>
                       </td>
                       <td>
                         <a data-bind="click: $root.attachment.deleteVersion,
