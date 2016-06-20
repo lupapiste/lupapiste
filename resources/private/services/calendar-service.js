@@ -6,13 +6,13 @@ LUPAPISTE.CalendarService = function() {
   self.reservationTypesByOrganization = ko.observable();
   self.params = ko.observable(params);
 
-  var _weekdays = function(slots, startOfWeekMoment) {
+  var _weekdays = function(calendarId, slots, startOfWeekMoment) {
     var now = moment();
     return _.map([1, 2, 3, 4, 5], function(i) {
       var day = startOfWeekMoment.set({ "isoWeekday": i, "hour": params.firstFullHour, "minutes": 0, "seconds": 0 });
       var slotsForDay = _.filter(slots, function(s) { return day.isSame(s.startTime, "day"); });
       return {
-        calendarId: event.calendarId,
+        calendarId: calendarId,
         startOfDay: day.valueOf(),
         endOfDay: moment(day).hour(params.lastFullHour).add(params.timeSlotLengthMinutes, "minutes").valueOf(),
         today: day.isSame(now, "day"),
@@ -40,11 +40,11 @@ LUPAPISTE.CalendarService = function() {
                                      week: startOfWeekMoment.isoWeek(),
                                      year: startOfWeekMoment.year() })
         .success(function(data) {
-          notifyView(event, _weekdays(data.slots, startOfWeekMoment));
+          notifyView(event, _weekdays(event.calendarId, data.slots, startOfWeekMoment));
         })
         .call();
     } else {
-      notifyView(event, _weekdays([], startOfWeekMoment));
+      notifyView(event, _weekdays(null, [], startOfWeekMoment));
     }
 
   };
