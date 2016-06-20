@@ -86,6 +86,26 @@ Party table has been updated
   Open tab  parties
   Page Should Not Contain  mikko@example.com
   Page Should Contain  mikko@example.net
+
+Mikko changes his email back to mikko@example.com
+  [Tags]  integration
+  Navigate to email change
+  Wait Until  Textfield Value Should Be  newEmail  mikko@example.net
+  Input text by test id  newEmail  mikko@example.com
+  Wait Until  Element Should Be Enabled  //section[@id='mypage']//button[@data-test-id='change-email']
+  Click element  //section[@id='mypage']//button[@data-test-id='change-email']
+  Wait Until  Page should contain  Uuteen sähköpostiosoitteeseen on lähetetty viesti osoitteen vaihdosta
+  Open last email
+  Wait Until  Page Should Contain  mikko@example.net
+  Page Should Contain  /app/fi/welcome#!/email/
+  ## Click the first link
+  Click link  xpath=//a
+  Vetuma button is visible
+  Authenticate via Nordea via Vetuma  vetuma-init-email
+  Wait Until  Page should contain  Voit nyt kirjautua sisään uudella sähköpostiosoitteellasi.
+  Element should be visible by test id  login-new-email
+  Click by test id  login-new-email
+  Wait Until  Page should contain  Haluan kirjautua palveluun
   Logout
 
 *** Keywords ***
