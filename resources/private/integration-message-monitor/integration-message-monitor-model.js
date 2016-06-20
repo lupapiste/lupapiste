@@ -25,6 +25,10 @@ LUPAPISTE.IntegrationMessageMonitorModel = function(params) {
     .call();
   };
 
+  // Dialog is initially short, but the content can be quite height after loading the data.
+  // Resize the dialog after message lists are rendered.
+  self.afterRender = _.partial(hub.send, "resize-dialog");
+
   self.init();
 };
 
