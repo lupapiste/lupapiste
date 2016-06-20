@@ -26,13 +26,13 @@ Authority creates another application
 Authority invites mikko@example.net to the first application
   [Tags]  integration
   Open application  ${appname}  ${propertyId}
-  Invite to application with email  mikko@example.net
+  Invite mikko@example.net to application
 
-Authority invites Mikko and mikko@example.net to the first application
+Authority invites Mikko and mikko@example.net to the second application
   [Tags]  integration
   Open application  ${appname2}  ${propertyId2}
-  Invite to application with email  mikko@example.com
-  Invite to application with email  mikko@example.net
+  Invite mikko@example.com to application
+  Invite mikko@example.net to application
   Wait until  Invite count is  2
   Logout
 
@@ -50,7 +50,7 @@ Mikko changes his email to mikko@example.net
   Identify for email change via Vetuma
   Log in with new email address  mikko@example.net  mikko123  Mikko Intonen
 
-The invitation for mikko@example.net has been removed
+The invitation for mikko@example.net has been removed from the second application
   [Tags]  integration
   Open application  ${appname2}  ${propertyId2}
   Wait until  Invite count is  0
@@ -64,28 +64,10 @@ Mikko now has an invitation for the first application
 
 *** Keywords ***
 
-Invite to application with email
-  [Arguments]  ${userEmail}
-  Open tab  parties
-  Click by test id  application-invite-person
-  Wait until  Element should be visible  person-invite-email-1
-  Input Text  person-invite-email-1  ${userEmail}
-  Element should be enabled  xpath=//*[@data-test-id='person-invite-bubble-dialog-ok']
-  Click by test id  person-invite-bubble-dialog-ok
-  Wait until  Mask is invisible
-
-Navigate to email change
-  Click Element  user-name
-  Open accordion by test id  mypage-change-email-accordion
-  Wait Until  Element Should be visible  oldEmail
-
-Mask is invisible
-  Element should not be visible  xpath=//div[@id='ModalDialogMask']
-
 Vetuma button is visible
   Wait until page contains element  vetuma-init-email
 
 Accept invitation
   Wait Until  Page should contain  Sinut on kutsuttu tälle hakemukselle. Voit hyväksyä kutsun heti tai jatkaa hakemuksen katseluun.
   Click by test id  confirm-yes
-  Wait until  Mask is invisible
+  Wait until  Dialog is invisible

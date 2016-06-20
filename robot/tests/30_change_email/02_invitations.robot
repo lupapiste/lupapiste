@@ -93,8 +93,5 @@ Navigate to email change
   Open accordion by test id  mypage-change-email-accordion
   Wait Until  Element Should be visible  oldEmail
 
-Dialog is invisible
-  Element should not be visible  xpath=//div[@id='modal-dialog-content']
-
 Vetuma button is visible
   Wait until page contains element  vetuma-init-email

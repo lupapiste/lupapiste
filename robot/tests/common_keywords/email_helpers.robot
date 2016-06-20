@@ -3,6 +3,11 @@ Resource        ../common_keywords/vetuma_helpers.robot
 
 *** Keywords ***
 
+Navigate to email change
+  Click Element  user-name
+  Open accordion by test id  mypage-change-email-accordion
+  Wait Until  Element Should be visible  oldEmail
+
 Change email to
   [Arguments]  ${newEmail}
   Navigate to email change
@@ -29,3 +34,6 @@ Log in with new email address
   Click by test id  login-new-email
   Wait Until  Page should contain  Haluan kirjautua palveluun
   Applicant logs in  ${newEmail}  ${password}  ${name}
+
+Dialog is invisible
+  Element should not be visible  xpath=//div[@id='modal-dialog-content']
