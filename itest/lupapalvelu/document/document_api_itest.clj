@@ -120,7 +120,7 @@
   (let [application-id        (create-app-id pena)
         application0          (query-application pena application-id)
         party-document-names  (:partyDocumentNames (query pena :party-document-names :id application-id))]
-    party-document-names => ["hakija-r" "maksaja" "suunnittelija"]))
+    party-document-names => ["hakija-r" "maksaja" "suunnittelija" "hakijan-asiamies"]))
 
 (facts* "approve and reject document"
   (let [application    (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)

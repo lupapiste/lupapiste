@@ -1596,7 +1596,6 @@
            }
     :body party}
 
-
    {:info {:name "hakijan-asiamies"
            :i18name "osapuoli"
            :order 3
@@ -1605,7 +1604,7 @@
            :deny-removing-last-document false
            :approvable true
            :type :party
-           :subtype :hakija
+           :subtype :hakijan-asiamies
            :group-help nil
            :section-help nil
            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
