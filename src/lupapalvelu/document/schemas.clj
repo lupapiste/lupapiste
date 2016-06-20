@@ -340,8 +340,8 @@
                           {:name "SBANFIHH"} ; S-Pankki Oy (uusi)
                           ])
 
-(def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
-                          {:name "verkkolaskuTunnus" :type :string}
+(def verkkolaskutustieto [{:name "verkkolaskuTunnus" :type :string}
+                          {:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "valittajaTunnus"
                            :type :select
                            :i18nkey "osapuoli.yritys.verkkolaskutustieto.valittajaTunnus"
