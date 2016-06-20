@@ -2257,6 +2257,14 @@
   (update-applications-array :attachments set-missing-metadata-laskentaperuste {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi "toistaiseksi"
                                                                                                           :metadata.sailytysaika.laskentaperuste {$exists false}}}}))
 
+(defmigration paasuunnittelija-is-removable
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" "paasuunnittelija", "schema-info.removable" false}}}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (mongo/update-by-query collection
+        {:documents {$elemMatch {:schema-info.name "paasuunnittelija", :schema-info.removable false}}}
+        {$set {:documents.$.schema-info.removable true}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
