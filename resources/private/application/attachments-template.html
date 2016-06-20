@@ -100,11 +100,12 @@
               <td class="attachment-file-info"
               data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <span data-bind="if: $data.latestVersion">
-                  <a href="#" data-bind="text: latestVersion.filename,
-                                         attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId,
-                                                title: loc('download')},
-                                         click: function() {return true;},
-                                         clickBubble: false"></a><br/>
+                  <a href="#" target="_blank"
+                     data-bind="text: latestVersion.filename,
+                                attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion.fileId,
+                                       title: loc('download')},
+                                click: function() {return true;},
+                                clickBubble: false"></a><br/>
                   <i data-bind="ltext: latestVersion.contentType"></i>
                   <i data-bind="size: latestVersion.size"></i>
                 </span>
