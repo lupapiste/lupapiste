@@ -52,10 +52,8 @@ Organization 753-R has now inforequest enabled and application disabled
   Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  neuvonta
   Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="application-enabled-753-R"]  -
   Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
-  [Teardown]  Logout
 
 Admin impersonated Sipoo authority
-  SolitaAdmin logs in
   Click link  Organisaatiot
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
   Scroll to  [data-impersonate=753-R]
@@ -70,4 +68,11 @@ Admin sees Mikko's inforequest
 Admin sees comment on Mikko's application
   Open application  ${appname}app  753-416-25-31
   Comment count is  1
-  [Teardown]  Logout
+
+Admin is back to admin-page after logout
+  Element should not be visible  admin
+  Click link  xpath=//a[@title="Kirjaudu ulos"]
+  Wait until  Element should be visible  admin
+
+Logout for real
+  Logout

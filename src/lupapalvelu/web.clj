@@ -306,13 +306,12 @@
   (resp/redirect (str (env/value :host) (or (env/value :frontpage (keyword lang)) "/"))))
 
 (defn- landing-page
-  ([]
-    (landing-page default-lang))
-  ([lang]
-    (let [request (request/ring-request)]
-      (if-let [application-page (and (logged-in? request) (user/applicationpage-for (:role (user/current-user request))))]
-       (redirect lang application-page)
-       (redirect-to-frontpage lang)))))
+  ([]     (landing-page default-lang (user/current-user (request/ring-request))))
+  ([lang] (landing-page lang         (user/current-user (request/ring-request))) )
+  ([lang user]
+    (if-let [application-page (and (:id user) (user/applicationpage-for (:role user)))]
+     (redirect lang application-page)
+     (redirect-to-frontpage lang))))
 
 (defn- ->hashbang [s]
   (let [hash (cond
@@ -351,18 +350,20 @@
 ;; Login/logout:
 ;;
 
+(defn- user-to-application-page [user lang]
+  (ssess/merge-to-session (request/ring-request) (landing-page lang user) {:user (user/session-summary user)}))
+
 (defn- logout! []
   (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
   {:session nil})
 
-(defjson [:post "/api/logout"] []
-  (merge (logout!) (ok)))
-
-(defpage "/logout" []
-  (merge (logout!) (redirect-after-logout default-lang)))
-
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (merge (logout!) (redirect-after-logout lang)))
+  (let [session-user (user/current-user (request/ring-request))]
+    (if (:impersonating session-user)
+      ; Just stop impersonating
+      (user-to-application-page (user/get-user {:id (:id session-user), :enabled true}) lang)
+      ; Actually kill the session
+      (merge (logout!) (redirect-after-logout lang)))))
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
@@ -401,8 +402,7 @@
   (if-let [user (activation/activate-account key)]
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
-      (let [application-page (user/applicationpage-for (:role user))]
-        (ssess/merge-to-session (request/ring-request) (redirect default-lang application-page) {:user (user/session-summary user)})))
+      (user-to-application-page user default-lang))
     (do
       (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
       (landing-page))))
