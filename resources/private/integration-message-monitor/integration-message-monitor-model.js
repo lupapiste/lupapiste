@@ -1,4 +1,4 @@
-LUPAPISTE.IntegrationMessageMonotorModel = function(params) {
+LUPAPISTE.IntegrationMessageMonitorModel = function(params) {
   "use strict";
   var self = this;
 
@@ -28,4 +28,4 @@ LUPAPISTE.IntegrationMessageMonotorModel = function(params) {
   self.init();
 };
 
-ko.components.register("integration-message-monitor", {viewModel: LUPAPISTE.IntegrationMessageMonotorModel, template: {element: "integration-message-monitor-template"}});
+ko.components.register("integration-message-monitor", {viewModel: LUPAPISTE.IntegrationMessageMonitorModel, template: {element: "integration-message-monitor-template"}});
