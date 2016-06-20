@@ -270,7 +270,8 @@ table.review-buildings-table {
     text-align: center;
   }
   div.docgen-checkbox-wrapper.wrapper--disabled {
-    background-color: initial;
+    // Initial value does not work with IE9.
+    background-color: transparent;
   }
 }
 

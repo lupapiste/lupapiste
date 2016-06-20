@@ -1391,7 +1391,10 @@ select.dropdown {
   border-radius: 0 0 0 0;
   padding: {
     left: 12px;
-    right: 17px + 12px + 4px; // arrow position + arrow width + padding
+    right: 17px;
+    // The next line can be retaken into use, when every supported IE can hide
+    // the native select knob.
+    //right: 17px + 12px + 4px; // arrow position + arrow width + padding
 
   }
   height: 40px;
