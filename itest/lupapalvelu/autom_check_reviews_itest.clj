@@ -31,6 +31,7 @@
 
 (defn  query-tasks [user application-id]
   (:tasks (query-application local-query user application-id)))
+
 (defn count-reviews [user app-id] (count (filter task-is-review? (query-tasks user app-id))))
 
 (facts "Automatic checking for reviews"
@@ -77,6 +78,8 @@
                                    pruned))]
               (count-reviews sonja application-id-submitted) => 0
               (count poll-result) => pos?
+
+              (:state (last (filter task-is-review? (query-tasks sonja application-id-verdict-given)))) => "sent"
               (count-reviews sonja application-id-submitted) => 0
               (count-reviews sonja application-id-verdict-given) => 4)))
 
