@@ -532,17 +532,13 @@
               (fn [role] (or (designer-roles-mapping-new-to-old-220 role) role))))
        %)))
 
-
 (def hakijan-asiamies-mapping-new-to-old-220 {"Hakijan asiamies"  "ei tiedossa"})
 
 (defn map-hakijan-asiamies-pre220 [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :osapuolitieto]
     #(map (fn [osapuoli]
-            (println "mapping osapuoli:" osapuoli)
             (update-in osapuoli [:Osapuoli :kuntaRooliKoodi]
-              (fn [role] (or (hakijan-asiamies-mapping-new-to-old-220 role) role))))
-       %))
-  )
+              (fn [role] (or (hakijan-asiamies-mapping-new-to-old-220 role) role)))) %)))
 
 (def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka map-hakijan-asiamies-pre220))
 
@@ -557,7 +553,6 @@
   [canonical krysp-version]
   {:pre [krysp-version]}
   (-> (case (name krysp-version)
-        ;; kaikkiin naihin (< 2.2.0) hakijan-asiamies -> ei-tiedossa mappays
         "2.1.2" (map-enums-212 canonical)
         "2.1.3" (map-enums-213-218 canonical)
         "2.1.4" (map-enums-213-218 canonical)
@@ -570,7 +565,6 @@
 
 (defn- rakennuslupa-element-to-xml [canonical krysp-version]
   (def *c canonical)
-  ;; (println "canonical VRKrooliKoodi " (sade.xml/select canonical [:osapuolettieto :VRKrooliKoodi]))
   (element-to-xml (map-enums canonical krysp-version) (get-rakennuslupa-mapping krysp-version)))
 
 (defn save-application-as-krysp
@@ -590,7 +584,6 @@
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
-        ;; tata ennen jossain pitaisi poistaa asiamies liian vanhoilta krysp-versioilta
         xml (rakennuslupa-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]

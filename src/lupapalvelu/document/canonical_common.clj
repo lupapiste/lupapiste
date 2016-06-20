@@ -606,7 +606,6 @@
 
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
-  ;; (println "osapuolet (-> get-parties)" (get-parties application documents-by-type))
   {:Osapuolet
    {:osapuolitieto (get-parties application documents-by-type)
     :suunnittelijatieto (get-designers documents-by-type)
