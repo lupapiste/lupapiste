@@ -750,6 +750,8 @@
 "hakija-r._append_label" "sv" "Lägg till sökande"
 "hakija-r._group_label" "fi" "Hakija (hankkeeseen ryhtyvä)"
 "hakija-r._group_label" "sv" "Sökande (åtar sig projektet)"
+"hakijan-asiamies._group_label" "fi" "Hakijan asiamies"
+"hakijan-asiamies._append_label" "fi" "Lisää asiamies"
 "hakija-tj._append_label" "fi" "Lisää hakija"
 "hakija-tj._append_label" "sv" "Lägg till sökande"
 "hakija-tj._group_label" "fi" "Hakija (hankkeeseen ryhtyvä)"

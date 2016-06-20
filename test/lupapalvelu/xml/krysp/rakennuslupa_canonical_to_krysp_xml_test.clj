@@ -40,6 +40,7 @@
 
 (defn- do-test [application & {:keys [validate-tyonjohtaja-type validate-pysyva-tunnus? finnish? validate-operations?]
                                :or {validate-tyonjohtaja-type nil validate-pysyva-tunnus? false finnish? false validate-operations? false}}]
+  ;; (println "do-test: application document ids:" (map :id (:documents application)))
   (facts "Rakennusvalvonta KRYSP checks"
     (let [canonical (application-to-canonical application "fi")
           xml_212 (rakennuslupa-element-to-xml canonical "2.1.2")
@@ -73,6 +74,10 @@
             tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
             tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
+
+        (println "do-test: canonical -> osapuolitieto:")
+        (clojure.pprint/pprint (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]))
+        (clojure.pprint/pprint (xml/select lp-xml_220 [:osapuolettieto :VRKrooliKoodi]))
 
         (when validate-operations?
           (fact "Toimenpiteet"
@@ -111,7 +116,8 @@
           (let [osapuoli-codes (->> (xml/select lp-xml_220 [:osapuolettieto :Osapuoli])
                                  (map (comp :kuntaRooliKoodi cr/all-of)))]
             (->> osapuoli-codes (filter #(= % "Rakennusvalvonta-asian hakija")) count) => pos?
-            (->> osapuoli-codes (filter #(= % "Hakijan asiamies")) count) => pos?
+            (if (= (:id application) (:id application-rakennuslupa))
+              (->> osapuoli-codes (filter #(= % "Hakijan asiamies")) count) => 1)
             (->> osapuoli-codes (filter #(= % "Rakennusvalvonta-asian laskun maksaja")) count) => pos?))
 
         (fact "saapumisPvm"

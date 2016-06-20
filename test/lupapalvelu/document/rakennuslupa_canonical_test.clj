@@ -987,7 +987,7 @@
         osapuolettieto (:osapuolettieto rakennusvalvontaasia) => truthy
         osapuolet (:Osapuolet osapuolettieto) => truthy
         osapuolitieto-hakija (first (:osapuolitieto osapuolet)) => truthy
-        _ (clojure.pprint/pprint (:osapuolitieto osapuolet))
+        ;; _ (clojure.pprint/pprint (:osapuolitieto osapuolet))
         osapuolitieto-hakijan-asiamies (first (filter #(= (get-in % [:Osapuoli :kuntaRooliKoodi]) "Hakijan asiamies") (:osapuolitieto osapuolet))) => truthy
         hakija-osapuoli1 (:Osapuoli osapuolitieto-hakija) => truthy
         hakijan-asiamies1 (:Osapuoli osapuolitieto-hakijan-asiamies) => truthy
@@ -1045,7 +1045,7 @@
 
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
-    (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 8)
+    (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 9)
     (fact "rakennuspaikkojen maara" (count rakennuspaikkatiedot) => 1)
     (fact "tilanNimi" (:tilannimi Kiinteisto) => "Hiekkametsa")
     (fact "kiinteistotunnus" (:kiinteistotunnus Kiinteisto) => "21111111111111")

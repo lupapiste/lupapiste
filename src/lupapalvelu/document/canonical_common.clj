@@ -411,9 +411,7 @@
     {tag-name (doc-transformer osapuoli party-type subtype)}))
 
 (defn get-parties [{:keys [schema-version] :as app} documents]
-  ;; rakennetaan oma käsittely asiamiehille, haetaan osapuolet jotka
   (let [hakija-schema-names (conj (schemas/get-hakija-schema-names schema-version) "hakijan-asiamies")
-        _ (println "XXX:" hakija-schema-names)
         hakija-key (some #(when (hakija-schema-names (name %)) %) (keys documents))
         applicant-schema-name (op/get-applicant-doc-schema-name app)]
     (when-not (= hakija-key (keyword applicant-schema-name))
@@ -421,7 +419,8 @@
     (filter #(seq (:Osapuoli %))
       (into
         (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
-        (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
+        (into (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)
+              (get-parties-by-type documents :Osapuoli :hakijan-asiamies get-osapuoli-data))))))
 
 (defn get-suunnittelija-data [suunnittelija party-type & [subtype]]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
@@ -607,7 +606,7 @@
 
 (defn osapuolet [{neighbors :neighbors :as application} documents-by-type lang]
   {:pre [(map? documents-by-type) (string? lang)]}
-  (println "osapuolet")
+  ;; (println "osapuolet (-> get-parties)" (get-parties application documents-by-type))
   {:Osapuolet
    {:osapuolitieto (get-parties application documents-by-type)
     :suunnittelijatieto (get-designers documents-by-type)
