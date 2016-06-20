@@ -5,6 +5,7 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.states :as states]
             [lupapalvelu.application-bulletins-api :as bulletins-api]
+            [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.action :as action]))
@@ -30,7 +31,7 @@
    :input-validators [bulletins-api/bulletin-exists]
    :states     states/all-states}
   [{:keys [lang user]}]
-  (if-let [bulletin (mongo/select-one :application-bulletins {:_id bulletinId})]
+  (if-let [bulletin (bulletins/get-bulletin bulletinId {})]
     {:status 200
      :headers {"Content-Type" "application/pdf"}
      :body (-> (last (:versions bulletin)) (a/with-masked-person-ids user) (pdf-export/generate lang))}

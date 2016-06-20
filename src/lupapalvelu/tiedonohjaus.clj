@@ -10,23 +10,32 @@
             [clj-time.core :as t]
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [clojure.string :as s])
+  (:import (lupapalvelu.tiedonohjaus CaseFile RestrictionType PublicityClassType PersonalDataType
+                                     ProtectionLevelType SecurityClassType AccessRightType ActionType
+                                     RecordType AgentType ActionEvent Custom ClassificationScheme)
+           (javax.xml.bind JAXB JAXBContext)
+           (java.io StringWriter StringReader)
+           [javax.xml.datatype DatatypeFactory]
+           [java.util GregorianCalendar Date]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
 
-(defn- get-tos-functions-from-toj [organization-id]
-  (if (:permanent-archive-enabled (o/get-organization organization-id))
+(defn get-from-toj-api [organization-id coerce? & path-parts]
+  (when (:permanent-archive-enabled (o/get-organization organization-id))
     (try
-      (let [url (build-url "/tiedonohjaus/api/org/" organization-id "/asiat")
-            response (http/get url {:as               :json
-                                    :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
-          []))
-      (catch Exception _
-        []))
-    []))
+      (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
+            response (http/get url (cond-> {:throw-exceptions false}
+                                           coerce? (assoc :as :json)))]
+        (when (= 200 (:status response))
+          (:body response)))
+      (catch Exception e
+        (error "Error accessing TOJ API" e)))))
+
+(defn- get-tos-functions-from-toj [organization-id]
+  (or (get-from-toj-api organization-id :coerce) []))
 
 (def available-tos-functions
   (memo/ttl get-tos-functions-from-toj
@@ -40,16 +49,8 @@
 
 (defn- get-metadata-for-document-from-toj [organization tos-function document-type]
   (if (and organization tos-function document-type)
-    (try
-      (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)
-            url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/document/" doc-id)
-            response (http/get url {:as               :json
-                                    :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
-          {}))
-      (catch Exception _
-        {}))
+    (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)]
+      (or (get-from-toj-api organization :coerce tos-function "/document/" doc-id) {}))
     {}))
 
 (def metadata-for-document
@@ -58,15 +59,7 @@
 
 (defn- get-metadata-for-process-from-toj [organization tos-function]
   (if (and organization tos-function)
-    (try
-      (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function)
-            response (http/get url {:as               :json
-                                    :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
-          {}))
-      (catch Exception _
-        {}))
+    (or (get-from-toj-api organization :coerce tos-function) {})
     {}))
 
 (def metadata-for-process
@@ -117,15 +110,7 @@
 
 (defn- get-tos-toimenpide-for-application-state-from-toj [organization tos-function state]
   (if (and organization tos-function state)
-    (try
-      (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/toimenpide-for-state/" state)
-            response (http/get url {:as               :json
-                                    :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
-          {}))
-      (catch Exception _
-        {}))
+    (or (get-from-toj-api organization :coerce tos-function "/toimenpide-for-state/" state) {})
     {}))
 
 (def toimenpide-for-state
@@ -139,7 +124,8 @@
   [{:type     :hakemus
     :category :document
     :ts       (:created application)
-    :user     (:applicant application)}])
+    :user     (:applicant application)
+    :id       (str (:id application) "-application")}])
 
 (defn- get-attachments-from-application [application]
   (reduce (fn [acc attachment]
@@ -151,7 +137,8 @@
                            :version  (:version ver)
                            :ts       (:created ver)
                            :contents (:contents attachment)
-                           :user     (full-name (:user ver))}))
+                           :user     (full-name (:user ver))
+                           :id       (:id attachment)}))
                    (concat acc))
               acc))
           []
@@ -166,10 +153,10 @@
 
 (defn- get-neighbour-requests-from-application [application]
   (map (fn [req] (let [status (first (filterv #(= "open" (name (:state %))) (:status req)))]
-           {:text     (get-in req [:owner :name])
-            :category :request-neighbor
-            :ts       (:created status)
-            :user     (full-name (:user status))})) (:neighbors application)))
+                   {:text     (get-in req [:owner :name])
+                    :category :request-neighbor
+                    :ts       (:created status)
+                    :user     (full-name (:user status))})) (:neighbors application)))
 
 (defn- get-review-requests-from-application [application]
   (reduce (fn [acc task]
@@ -183,7 +170,7 @@
 
 (defn- get-held-reviews-from-application [application]
   (reduce (fn [acc task]
-              (if-let [held (get-in task [:data :katselmus :pitoPvm :modified])]
+            (if-let [held (get-in task [:data :katselmus :pitoPvm :modified])]
               (conj acc {:text     (:taskname task)
                          :category :review
                          :ts       held
@@ -271,8 +258,8 @@
       original-process-metadata)))
 
 (defn update-process-retention-period
-  "Update retention period of the process report to match the longest retention time of any document
-   as per SAHKE2 operative system sertification requirement 6.3"
+  "Update retention period of the process report to match the longest retention time of actionEvents document
+   as per SAHKE2 operative system certification requirement 6.3"
   [app-id modified-ts]
   (let [{:keys [metadata attachments processMetadata] :as application} (domain/get-application-no-access-checking app-id)
         new-process-md (calculate-process-metadata processMetadata metadata attachments)]
@@ -281,3 +268,154 @@
         (action/application->command application)
         {$set {:modified modified-ts
                :processMetadata new-process-md}}))))
+
+(defn- classification-xml [organization tos-function]
+  (if-let [xml-str (get-from-toj-api organization false tos-function "/classification")]
+    (with-open [reader (StringReader. xml-str)]
+      (JAXB/unmarshal reader ClassificationScheme))
+    (error "Could not get classification XML from TOJ API for" organization "/" tos-function)))
+
+(defn- xml-date [ts-or-date]
+  (when ts-or-date
+    (let [factory (DatatypeFactory/newInstance)
+          date (if (number? ts-or-date) (Date. (long ts-or-date)) ts-or-date)
+          calendar (doto (GregorianCalendar.)
+                     (.setTime date))]
+      (.newXMLGregorianCalendar factory calendar))))
+
+(defn- publicity-class-type [{:keys [julkisuusluokka]}]
+  (case (keyword julkisuusluokka)
+    :julkinen PublicityClassType/JULKINEN
+    :salainen (PublicityClassType/fromValue "Salassa pidett\u00e4v\u00e4")
+    :osittain-salassapidettava (PublicityClassType/fromValue "Osittain salassapidett\u00e4v\u00e4")))
+
+(defn- personal-data-type [{:keys [henkilotiedot]}]
+  (case (keyword henkilotiedot)
+    :ei-sisalla (PersonalDataType/fromValue "ei sis\u00e4ll\u00e4 henkil\u00f6tietoja")
+    :sisaltaa (PersonalDataType/fromValue "sis\u00e4lt\u00e4\u00e4 henkil\u00f6tietoja")
+    :sisaltaa-arkaluonteisia (PersonalDataType/fromValue "sis\u00e4lt\u00e4\u00e4 arkaluontoisia henkil\u00f6tietoja")))
+
+(defn- protection-level-type [{:keys [suojaustaso]}]
+  (case (keyword suojaustaso)
+    :ei-luokiteltu nil
+    :suojaustaso4 ProtectionLevelType/IV
+    :suojaustaso3 ProtectionLevelType/III
+    :suojaustaso2 ProtectionLevelType/II
+    :suojaustaso1 ProtectionLevelType/I))
+
+(defn- security-class-type [{:keys [turvallisuusluokka]}]
+  (case (keyword turvallisuusluokka)
+    :ei-turvallisuusluokkaluokiteltu SecurityClassType/EI_TURVALLISUUSLUOKITELTU
+    :turvallisuusluokka4 SecurityClassType/TURVALLISUUSLUOKKA_IV
+    :turvallisuusluokka3 SecurityClassType/TURVALLISUUSLUOKKA_III
+    :turvallisuusluokka2 SecurityClassType/TURVALLISUUSLUOKKA_II
+    :turvallisuusluokka1 SecurityClassType/TURVALLISUUSLUOKKA_I))
+
+(defn- build-restriction-type [{:keys [processMetadata]} lang]
+  (let [r-type (doto (RestrictionType.)
+                 (.setPublicityClass (publicity-class-type processMetadata))
+                 (.setPersonalData (personal-data-type processMetadata)))]
+    (when-not (= :julkinen (keyword (:julkisuusluokka processMetadata)))
+      (doto r-type
+        (.setSecurityPeriod (BigInteger/valueOf (:salassapitoaika processMetadata)))
+        (.setSecurityPeriodEnd (xml-date (:security-period-end processMetadata)))
+        (.setSecurityReason (:salassapitoperuste processMetadata))
+        (.setProtectionLevel (protection-level-type processMetadata))
+        (.setSecurityClass (security-class-type processMetadata)))
+      (.add (.getAccessRight r-type) (doto (AccessRightType.)
+                                       (.setName (i18n/localize lang (:kayttajaryhma processMetadata)))
+                                       (.setRole (i18n/localize lang (:kayttajaryhmakuvaus processMetadata))))))
+    r-type))
+
+(defn- agent-type [role name]
+  (doto (AgentType.)
+    (.setRole role)
+    (.setName name)))
+
+(defn- action-subevent [{:keys [correction user ts tosFunction text category]} lang]
+  (let [title (case category
+                :document (i18n/localize lang "caseFile.documentSubmitted")
+                :request-statement (i18n/localize lang "caseFile.operation.statement.request")
+                :request-neighbor (i18n/localize lang "caseFile.operation.neighbor.request")
+                :request-review (i18n/localize lang "caseFile.operation.review.request")
+                :review (i18n/localize lang "caseFile.operation.review")
+                :tos-function-change (i18n/localize lang "caseFile.tosFunctionChange")
+                :tos-function-correction (i18n/localize lang "caseFile.tosFunctionCorrection"))
+        description (str title ": " text)
+        event (ActionEvent.)]
+    (when-not (s/blank? user)
+      (.add (.getAgent event) (agent-type "registrar" user)))
+    (doto event
+      (.setDescription description)
+      (.setCreated (xml-date ts))
+      (.setFunction (:code tosFunction))
+      (.setType (name category))
+      (.setCorrectionReason correction))))
+
+(defn- custom-type [lang documents]
+  (let [custom-obj (Custom.)]
+    (->> documents
+         (map #(action-subevent % lang))
+         vec
+         (.addAll (.getActionEvent custom-obj)))
+    custom-obj))
+
+(defn- record-type [{:keys [type id ts version contents user]} lang]
+  (let [record-obj (RecordType.)
+        type-str (if (map? type) (str (:type-group type) "." (:type-id type)) (name type))
+        loc-key (if (map? type) (str "attachmentType." type-str) type-str)]
+    (.add (.getCreated record-obj) (xml-date ts))
+    (when version
+      (.setVersion record-obj (str (:major version) "." (:minor version))))
+    (when contents
+      (.add (.getDescription record-obj) contents))
+    (.add (.getAgent record-obj) (agent-type "registrar" user))
+    (doto record-obj
+      (.setTitle (i18n/localize lang loc-key))
+      (.setType type-str)
+      (.setNativeId id))))
+
+(defn- action-type [{:keys [start action documents user]} lang]
+  (let [action-obj (ActionType.)]
+    (.add (.getAgent action-obj) (agent-type "registrar" user))
+    (->> (filter #(= :document (:category %)) documents)
+         (map #(record-type % lang))
+         vec
+         (.addAll (.getRecord action-obj)))
+    (when-let [non-records (seq (remove #(= :document (:category %)) documents))]
+      (.setCustom action-obj (custom-type lang non-records)))
+    (doto action-obj
+      (.setCreated (xml-date start))
+      (.setTitle action)
+      (.setType action))))
+
+(defn- retention-period [{{{:keys [pituus arkistointi]} :sailytysaika} :processMetadata}]
+  (-> (cond
+        (= :ei (keyword arkistointi)) 0
+        (#{:ikuisesti :toistaiseksi} (keyword arkistointi)) 999999
+        :else pituus)
+      (BigInteger/valueOf)))
+
+(defn xml-case-file [{:keys [id processMetadata tosFunction organization authority] :as application} lang]
+  (let [case-file (generate-case-file-data application lang)
+        case-file-object (CaseFile.)]
+    (doto case-file-object
+      (.setNativeId id)
+      (.setRestriction (build-restriction-type application lang))
+      (.setTitle (str "K\u00e4sittelyprosessi: " id))
+      (.setRetentionPeriod (BigInteger/valueOf (retention-period application)))
+      (.setRetentionReason (get-in processMetadata [:sailytysaika :perustelu]))
+      (.setRetentionPeriodEnd (xml-date (get-in processMetadata [:sailytysaika :retention-period-end])))
+      (.setStatus (get processMetadata :tila "valmis"))
+      (.setFunction tosFunction)
+      (.setClassificationScheme (classification-xml organization tosFunction)))
+    (.add (.getCreated case-file-object) (xml-date (:start (first case-file))))
+    (.add (.getLanguage case-file-object) (name lang))
+    (.add (.getAgent case-file-object) (agent-type "responsible" (str (:firstName authority) " " (:lastName authority))))
+    (.addAll (.getAction case-file-object) (vec (map #(action-type % lang) case-file)))
+
+    (with-open [sw (StringWriter.)]
+      (let [marshaller (-> (JAXBContext/newInstance (into-array [CaseFile]))
+                           (.createMarshaller))]
+        (.marshal marshaller case-file-object sw)
+        (.toString sw)))))

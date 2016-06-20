@@ -225,6 +225,8 @@
                                  (assoc doc :schema (schemas/get-schema schema-info)))
           bulletin             (-> bulletin-version
                                    (domain/filter-application-content-for {})
+                                   ; unset keys (with empty values) set by filter-application-content-for
+                                   (dissoc :comments :neighbors :statements)
                                    (update-in [:documents] (partial map append-schema-fn))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
           bulletin-commentable (= (bulletin-can-be-commented command) nil)]
@@ -245,7 +247,7 @@
                             (merge {:comments 1
                                     :versions.id 1
                                     :bulletinState 1}))
-        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))
+        bulletin (bulletins/get-bulletin bulletinId bulletin-fields)
         versions (map count-comments (:versions bulletin))
         bulletin (assoc bulletin :versions versions)]
     (ok :bulletin bulletin)))

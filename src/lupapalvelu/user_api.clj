@@ -736,5 +736,6 @@
 
 (defquery calendars-enabled
   {:user-roles #{:authority :authorityAdmin}
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authority :authorityAdmin})]}
+   :pre-checks [(partial calendars-enabled-api-pre-check #{:authority :authorityAdmin})]
+   :feature :ajanvaraus}
   [_])
