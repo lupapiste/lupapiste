@@ -597,7 +597,8 @@
           response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
-                              "Content-Length" (str (:content-length attachment))}}]
+                              "Content-Length" (str (:content-length attachment))
+                              "Content-Disposition" (format "filename=\"%s\"" filename)}}]
       (if download?
         (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" filename))
         (update response :headers merge http/no-cache-headers)))
