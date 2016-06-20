@@ -2311,6 +2311,10 @@
                                     {:attachments true})]
     (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
 
+(defmigration add-use-attachment-links-integration-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:use-attachment-links-integration {$exists false}}))}
+  (mongo/update-by-query :organizations {:use-attachment-links-integration {$exists false}} {$set {:use-attachment-links-integration false}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
