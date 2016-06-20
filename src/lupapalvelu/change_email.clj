@@ -21,11 +21,11 @@
                                    :token     token}})))
 
 (defn init-email-change [user email]
-  (let [email (usr/canonize-email email)]
-    (let [dummy-user (usr/get-user-by-email email)]
-      (if (or (not dummy-user) (usr/dummy? dummy-user))
-        (notify-init-email-change user email)
-        (fail :error.duplicate-email)))))
+  (let [email (usr/canonize-email email)
+        dummy-user (usr/get-user-by-email email)]
+    (if (or (not dummy-user) (usr/dummy? dummy-user))
+      (notify-init-email-change user email)
+      (fail :error.duplicate-email))))
 
 (defn- remove-dummy-auths-where-user-already-has-auth [user-id new-email]
   (mongo/update-by-query :applications
