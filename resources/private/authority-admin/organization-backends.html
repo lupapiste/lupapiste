@@ -65,6 +65,14 @@
         </table>
       </section>
 
+      <section>
+        <h2 data-bind="ltext: 'authorityAdmin.attachmentLinks.title'"></h2>
+        <div style="margin-bottom: 0.7em;" data-bind="ltext: 'authorityAdmin.attachmentLinks.guide'"></div>
+        <input type="checkbox" class="form-input" id="attachments-as-links-enabled"
+               data-bind="checked: organization.useAttachmentLinksIntegration, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-use-attachment-links-integration')" />
+        <label for="attachments-as-links-enabled" class="form-label" data-bind="ltext: 'authorityAdmin.attachmentLinks.label'"></label>
+      </section>g
+
       <section data-bind="if: organization.validateVerdictGivenDateVisible">
         <h2 data-bind="ltext: 'auth-admin.validate-verdict.title'"></h2>
         <span data-bind="ltext: 'auth-admin.validate-verdict.rp.info'"></span><br/>
