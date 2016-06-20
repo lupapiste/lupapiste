@@ -329,7 +329,7 @@
         app-id (:id application)
         op1    (:primaryOperation application)
         doc-count (count (:documents application))]
-    doc-count => 9
+    doc-count => 10
 
     (override-krysp-xml sipoo "753-R" :R [{:selector [:rakval:rakennuksenTiedot :rakval:rakennustunnus :rakval:muuTunnustieto :rakval:MuuTunnus :yht:tunnus] :value (:id op1)}])
 
@@ -347,7 +347,7 @@
         (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")
 
       (fact "Rakennusjateselvitys is a new document"
-        (count new-docs) => 10
+        (count new-docs) => 11
         (-> (last new-docs)
             :schema-info
             :name) => "rakennusjateselvitys")))
