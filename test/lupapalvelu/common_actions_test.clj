@@ -50,7 +50,8 @@
                           :authority-notice
                           :application-guests
                           :statement-attachment-allowed
-                          :ram-linked-attachments}
+                          :ram-linked-attachments
+                          :latest-attachment-version}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)
@@ -92,7 +93,7 @@
                            :pdfa-casefile
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
-                           :application-guests}]
+                           :application-guests :latest-attachment-version}]
     (doseq [command (ca/foreach-action {} user {} application)
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]

@@ -275,7 +275,7 @@
 ;;
 
 (defraw "preview-attachment"
-        {:parameters [:attachment-id]
+          {:parameters [:attachment-id]                       ;; Note that this is actually file id
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles auth/all-authz-roles
@@ -284,7 +284,7 @@
         (attachment/output-attachment-preview! attachment-id (partial attachment/get-attachment-file-as! user)))
 
 (defraw "view-attachment"
-        {:parameters [:attachment-id]
+        {:parameters [:attachment-id]                       ;; Note that this is actually file id
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles auth/all-authz-roles
@@ -293,13 +293,23 @@
         (attachment/output-attachment attachment-id false (partial attachment/get-attachment-file-as! user)))
 
 (defraw "download-attachment"
-  {:parameters [:attachment-id]
+  {:parameters [:attachment-id]                             ;; Note that this is actually file id
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-file-as! user)))
+
+(defraw "latest-attachment-version"
+  {:parameters       [:attachment-id]
+   :optional-parameters [:download]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
+  [{{:keys [attachment-id download]} :data user :user}]
+  (attachment/output-attachment (attachment/get-attachment-latest-version-file user attachment-id) (= download "true")))
 
 (defraw "download-bulletin-attachment"
   {:parameters [attachment-id]

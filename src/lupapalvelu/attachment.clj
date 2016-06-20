@@ -589,9 +589,18 @@
     (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
       (when (seq application) attachment-file))))
 
+(defn get-attachment-latest-version-file
+  "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil."
+  [user attachment-id]
+  (let [application (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
+        file-id (attachment-latest-file-id application attachment-id)]
+    (when (and application file-id (access/can-access-attachment-file? user file-id application))
+      (mongo/download file-id))))
+
 (defn output-attachment
-  [file-id download? attachment-fn]
-  (if-let [attachment (attachment-fn file-id)]
+  ([attachment download?]
+   (println (type attachment))
+  (if attachment
     (let [filename (ss/encode-filename (:file-name attachment))
           response {:status 200
                     :body ((:content attachment))
@@ -604,6 +613,8 @@
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
+  ([file-id download? attachment-fn]
+   (output-attachment (attachment-fn file-id) download?)))
 
 (hystrix/defcommand create-preview!
   {:hystrix/group-key   "Attachment"
