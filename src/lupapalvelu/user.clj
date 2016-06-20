@@ -595,3 +595,15 @@
         (ok)
         (fail :error.user-not-found)))))
 
+;;
+;; ==============================================================================
+;; Remove dummy user
+;; ==============================================================================
+;;
+(defn remove-dummy-user
+  "Removes a dummy user with the given id"
+  [user-id]
+  {:pre [(string? user-id)]}
+  (mongo/remove-many :users
+                     {:_id user-id
+                      :role "dummy"}))
