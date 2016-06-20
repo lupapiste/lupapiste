@@ -401,6 +401,22 @@
             (not (ss/starts-with filename id)))
     (fail :error.invalid-filename)))
 
+(defn- resolve-integration-message-file
+  "Resolves organization's integration output directory and returns a File from there."
+  [application transfer-type file-type filename]
+  (let [{org-id :organization municipality :municipality permit-type :permitType} application
+        organization (organization/get-organization org-id)
+        dir (case transfer-type
+              "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
+              "ah" (ah/resolve-output-directory
+                     (organization/resolve-organization-scope municipality permit-type organization)))
+        subdir (case file-type
+                 "ok" (str env/file-separator "archive" env/file-separator)
+                 "error" (str env/file-separator "error" env/file-separator))
+        ; input validator doesn't allow slashes, but sanitize anyway
+        sanitized (mime/sanitize-filename filename)]
+    (io/file (str dir subdir sanitized))))
+
 (defraw integration-message
   {:parameters [id transferType fileType filename]
    :user-roles #{:authority}
@@ -416,18 +432,9 @@
                           (fail :error.invalid-key)))
                       validate-integration-message-filename]
    :states #{:sent :complementNeeded}}
-  [{{org-id :organization municipality :municipality permit-type :permitType :as application} :application}]
-  (let [organization (organization/get-organization org-id)
-        dir (case transferType
-              "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
-              "ah" (ah/resolve-output-directory
-                     (organization/resolve-organization-scope municipality permit-type organization)))
-        subdir (case fileType
-                 "ok" (str env/file-separator "archive" env/file-separator)
-                 "error" (str env/file-separator "error" env/file-separator))
-        sanitized (mime/sanitize-filename filename) ; input validator doesn't allow slashes, but sanitize anyway
-        f (io/file (str dir subdir sanitized))]
+  [{application :application :as command}]
+  (let [f (resolve-integration-message-file application transferType fileType filename)]
     (assert (ss/starts-with (.getName f) (:id application))) ; Can't be too paranoid...
     (if (.exists f)
-      (transferred-file-response sanitized (slurp f))
+      (transferred-file-response (.getName f) (slurp f))
       (resp/status 404 "File Not Found"))))
