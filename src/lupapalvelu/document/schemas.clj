@@ -469,7 +469,7 @@
 
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
-               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size :s :required true}
+               {:name "valmistumisvuosi" :type :string :subtype :recent-year :range 100 :required true}
                {:name "fise" :type :string :required false}
                {:name "fiseKelpoisuus" :type :select :sortBy :displayname :i18nkey "fisekelpoisuus" :size :l :required false :body fise-kelpoisuus-lajit}
                patevyysluokka
