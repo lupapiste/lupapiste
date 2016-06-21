@@ -22,7 +22,7 @@
    :post [%]}
   (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/"))
 
-(defn- resolve-output-directory [organization permit-type]
+(defn resolve-output-directory [organization permit-type]
   {:pre  [organization permit-type]
    :post [%]}
   (let [sftp-user (get-in organization [:krysp (keyword permit-type) :ftpUser])]

@@ -104,8 +104,14 @@ Sonja logs in and approves group kaytto: rakennuksen-muuttaminen is now approved
 Party tab has indicators
   Wait Until  Element should be visible  applicationPartyDocumentIndicator
 
+Integration message monotor button is not enabled
+  Test id disabled  show-integration-messages
+
 Sonja approves application
   Approve application
+
+Integration message monotor button is enabled
+  Test id enabled  show-integration-messages
 
 Sonja cant re-approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
@@ -126,9 +132,15 @@ Building selector keeps its value
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complementNeeded
-  Kill session
+
+Authority opens integration message monitor
+  Click enabled by test id  show-integration-messages
+
+At least one message is displayed in the monitor
+  Wait Until  Page Should Contain Element  //div[@data-test-id="integration-message-monitor"]/ul/li
 
 Mikko comes back, fills in missing parts and no submit button enabled
+  Kill session
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open accordions  info

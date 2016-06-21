@@ -227,6 +227,13 @@
                                     <span data-bind="ltext: 'application.requestForComplement'"></span>
                                 </button>
                                 <button class="function"
+                                        data-bind="click: _.partial(hub.send, 'show-dialog', {ltitle: 'application.integration-messages.title', size: 'medium', component: 'integration-message-monitor', componentParams: {id:id()}}),
+                                                   visible: $root.authorization.ok('integration-messages'), enable: !processing() && $root.authorization.ok('integration-messages')"
+                                        data-test-id="show-integration-messages">
+                                    <i class="lupicon-upload"></i>
+                                    <span data-bind="ltext: 'application.integration-messages.open'"></span>
+                                </button>
+                                <button class="function"
                                         data-bind="click: addOperation, visible: $root.authorization.ok('add-operation'), enable: !processing() && $root.authorization.ok('add-operation')"
                                         data-test-id="add-operation">
                                     <i class="lupicon-circle-plus"></i>
@@ -635,7 +642,7 @@
                     <!-- AttachmentsPOC tab -->
                     <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
                     <div id="application-attachmentsPOC-tab" class="tab-content feature--no-border"
-                         data-bind="feature: 'attachments-poc'">                     
+                         data-bind="feature: 'attachments-poc'">
                       <attachments-listing/>
                     </div>
                     <!-- /ko -->

@@ -1,8 +1,10 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof info error errorf]]
+            [clojure.java.io :as io]
+            [noir.response :as resp]
             [monger.operators :refer [$in $set $unset $push $each $elemMatch]]
-            [lupapalvelu.action :refer [defcommand defquery update-application notify] :as action]
+            [lupapalvelu.action :refer [defcommand defquery defraw update-application] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.autologin :as autologin]
@@ -15,6 +17,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
@@ -26,8 +29,11 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.asianhallinta.core :as ah]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.http :as http]
+            [sade.util :as util]
+            [sade.validators :as validators]))
 
 ;;
 ;; Application approval
@@ -81,7 +87,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:authority}
    :notified         true
-   :on-success       (notify :application-state-change)
+   :on-success       (action/notify :application-state-change)
    :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user] :as command}]
@@ -263,7 +269,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
    :notified   true
-   :on-success (notify :application-state-change)
+   :on-success (action/notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
    :states     #{:submitted :complementNeeded}}
   [{:keys [application created user]:as command}]
@@ -347,3 +353,88 @@
                                 (partial autologin/allowed-ip? ip)
                                 (user/organization-ids user))
                       (fail :error.ip-not-allowed))))]})
+
+(defn- list-dir [path pattern]
+  (->>
+    path
+    io/file
+    (.listFiles)
+    (filter (fn [^java.io.File f] (re-matches pattern (.getName f))))
+    (map (fn [^java.io.File f] {:name (.getName f), :modified (.lastModified f)}))))
+
+(defn- list-integration-dirs [output-dir id]
+  (if output-dir
+    (let [xml-pattern (re-pattern (str "^" id "_.*\\.xml"))
+          id-pattern  (re-pattern (str "^" id "_.*"))]
+      {:waiting (list-dir output-dir xml-pattern)
+       :ok (list-dir (str output-dir env/file-separator "archive") xml-pattern)
+       :error (list-dir (str output-dir env/file-separator "error") id-pattern)})
+    {:waiting []
+     :ok []
+     :error []}))
+
+(defquery integration-messages
+  {:parameters [id]
+   :user-roles #{:authority}
+   :org-authz-roles  #{:approver}
+   :states #{:sent :complementNeeded}}
+  [{{org-id :organization municipality :municipality permit-type :permitType} :application}]
+  (let [organization (organization/get-organization org-id)
+        krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
+        ah-scope         (organization/resolve-organization-scope municipality permit-type organization)
+        ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
+    (ok :krysp (list-integration-dirs krysp-output-dir id)
+        :ah    (list-integration-dirs ah-output-dir id))))
+
+(defn transferred-file-response [filename content-str]
+  (->>
+    (ss/replace content-str (re-pattern validators/finnish-hetu-str) "******x****")
+    (resp/content-type (mime/mime-type filename))
+    (resp/set-headers http/no-cache-headers)
+    (resp/status 200)))
+
+(defn validate-integration-message-filename [{{:keys [id filename]} :data}]
+  ; Action pipeline checks that the curren user has access to application.
+  ; Check that the file is related to that application
+  ; and that a directory traversal is not attempted.
+  (when (or (not (re-matches #"^([\w_\-\.]+)\.(txt|xml)$" filename))
+            (not (ss/starts-with filename id)))
+    (fail :error.invalid-filename)))
+
+(defn- resolve-integration-message-file
+  "Resolves organization's integration output directory and returns a File from there."
+  [application transfer-type file-type filename]
+  (let [{org-id :organization municipality :municipality permit-type :permitType} application
+        organization (organization/get-organization org-id)
+        dir (case transfer-type
+              "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
+              "ah" (ah/resolve-output-directory
+                     (organization/resolve-organization-scope municipality permit-type organization)))
+        subdir (case file-type
+                 "ok" (str env/file-separator "archive" env/file-separator)
+                 "error" (str env/file-separator "error" env/file-separator))
+        ; input validator doesn't allow slashes, but sanitize anyway
+        sanitized (mime/sanitize-filename filename)]
+    (io/file (str dir subdir sanitized))))
+
+(defraw integration-message
+  {:parameters [id transferType fileType filename]
+   :user-roles #{:authority}
+   :org-authz-roles  #{:approver}
+   :input-validators [(fn [{data :data}]
+                        (when-not (#{"ok" "error"} (:fileType data))
+                          (fail :error.unknown-type)))
+                      (fn [{data :data}]
+                        (when-not (#{"krysp" "ah"} (:transferType data))
+                          (fail :error.unknown-type)))
+                      (fn [{data :data}]
+                        (when-not (validators/application-id? (:id data))
+                          (fail :error.invalid-key)))
+                      validate-integration-message-filename]
+   :states #{:sent :complementNeeded}}
+  [{application :application :as command}]
+  (let [f (resolve-integration-message-file application transferType fileType filename)]
+    (assert (ss/starts-with (.getName f) (:id application))) ; Can't be too paranoid...
+    (if (.exists f)
+      (transferred-file-response (.getName f) (slurp f))
+      (resp/status 404 "File Not Found"))))

@@ -13,7 +13,7 @@
 
 (def- begin-of-link (str (env/value :fileserver-address) ah-from-dir "/"))
 
-(defn- asianhallinta-enabled? [scope]
+(defn asianhallinta-enabled? [scope]
   (true? (get-in scope [:caseManagement :enabled])))
 
 (defn is-asianhallinta-version?
@@ -44,7 +44,7 @@
         (error (str "Asianhallinta version not found for scope: municipality:" (:municipality scope) ", permit-type: " (:permitType scope)))
         (fail! :error.integration.asianhallinta-version-missing)))))
 
-(defn- resolve-output-directory [scope]
+(defn resolve-output-directory [scope]
   {:pre  [scope]
    :post [%]}
   (if-let [sftp-user (get-in scope [:caseManagement :ftpUser])]
