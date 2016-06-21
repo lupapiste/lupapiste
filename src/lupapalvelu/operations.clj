@@ -190,7 +190,6 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def- common-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma" "hakijan-asiamies"]) ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
-;; Q: put hakija-asiamies in mini-rakval-schemas?
 (def- mini-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija" "hakijan-asiamies"])  ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
 
 (def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])

@@ -564,7 +564,6 @@
       (common-map-enums krysp-version)))
 
 (defn- rakennuslupa-element-to-xml [canonical krysp-version]
-  (def *c canonical)
   (element-to-xml (map-enums canonical krysp-version) (get-rakennuslupa-mapping krysp-version)))
 
 (defn save-application-as-krysp
