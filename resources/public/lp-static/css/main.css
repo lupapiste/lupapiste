@@ -1,5 +1,33 @@
-@import url('main-blessed1.css?z=1466430908199');
+@import url('main-blessed1.css?z=1466517085445');
 
+/* line 6, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .medium {
+  width: 480px;
+}
+/* line 9, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .large {
+  width: 980px;
+}
+/* line 13, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog {
+  display: none;
+  position: fixed;
+  right: 0;
+  left: 0;
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 9999;
+  padding: 12px;
+  background-color: #fff;
+  min-height: 150px;
+}
+/* line 25, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component {
+  overflow: auto;
+  margin: 12px 12px 75px 12px;
+  min-height: 50px;
+}
 /* line 29, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .dialog .component .button-group {
   position: absolute;
