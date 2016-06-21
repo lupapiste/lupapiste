@@ -278,6 +278,11 @@ var attachment = (function() {
     return model.groupIndex() < model.groupAttachments().length - 1;
   });
 
+  model.opSelector = ko.pureComputed(function() {
+    var primaryOperation = applicationModel.primaryOperation();
+    return util.getIn(primaryOperation, ["attachment-op-selector"]);
+  });
+
   function saveLabelInformation(name, data) {
     data.id = applicationId;
     data.attachmentId = attachmentId;
