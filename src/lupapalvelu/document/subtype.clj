@@ -38,6 +38,23 @@
         (< number min-double) [:warn "illegal-decimal:too-small"]
         (> number max-double) [:warn "illegal-decimal:too-big"]))))
 
+(defmethod subtype-validation :recent-year [{:keys [range]} v]
+  (cond
+    (nil? v)
+      nil
+    (re-matches #"^[1-9][0-9]*$" v) ;; n>0
+      (let [given (util/->int v 0)
+            current (+ 1900 (.getYear (java.util.Date.)))]
+        (cond
+          (> given current)
+            [:warn "illegal-recent-year:future"]
+          (< given (- current range))
+            [:warn "illegal-recent-year:too-past"]
+          :else
+            nil))
+    :else
+      [:warn "illegal-recent-year:not-integer"]))
+
 (defmethod subtype-validation :digit [_ v]
   (cond
     (blank? v) nil

@@ -87,6 +87,12 @@
           (opt :min)          sc/Int
           (opt :max)          sc/Int}))
 
+(defschema RecentYear
+  "A valid recent year"
+  (merge GenString
+         {:subtype            (sc/eq :recent-year)
+          :range              sc/Int}))
+
 (defschema Letter
   (merge GenString
          {:subtype            (sc/eq :letter)
@@ -164,6 +170,7 @@
 (defschema Str
   (sc/conditional (subtype-pred :number)           Num
                   (subtype-pred :decimal)          Decimal
+                  (subtype-pred :recent-year)      RecentYear
                   (subtype-pred :digit)            Digit
                   (subtype-pred :letter)           Letter
                   (subtype-pred :tel)              Tel
