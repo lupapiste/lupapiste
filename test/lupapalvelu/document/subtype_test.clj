@@ -33,6 +33,17 @@
     (fact (subtype-validation {:subtype :number :min -1 :max 12} "12") => nil?)
     (fact (subtype-validation {:subtype :number :min -1 :max 12} "13") => [:warn "illegal-number:too-big"])))
 
+(facts "Recent year validation"
+  (facts (subtype-validation {:subtype :recent-year :range 10} "9000") => [:warn "illegal-recent-year:future"])
+  (facts (subtype-validation {:subtype :recent-year :range 10} "2000") => [:warn "illegal-recent-year:too-past"])
+  (facts (subtype-validation {:subtype :recent-year :range 10} "x2000") => [:warn "illegal-recent-year:not-integer"])
+  (facts (subtype-validation {:subtype :recent-year :range 10} "2000x") => [:warn "illegal-recent-year:not-integer"])
+  (facts (subtype-validation {:subtype :recent-year :range 10} "0x2000") => [:warn "illegal-recent-year:not-integer"])
+  (facts (subtype-validation {:subtype :recent-year :range 10} "02016") => [:warn "illegal-recent-year:not-integer"])
+  (facts (subtype-validation {:subtype :recent-year :range 10} "2016") => nil?)
+  (facts (subtype-validation {:subtype :recent-year :range 15} "2011") => nil?))
+
+
 (facts "Facts about decimal validation"
   (fact (subtype-validation {:subtype :decimal} "0")    => nil?)
   (fact (subtype-validation {:subtype :decimal} "0,0")  => nil?)

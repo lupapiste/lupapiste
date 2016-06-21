@@ -46,10 +46,10 @@
       (let [given (util/->int v 0)
             current (+ 1900 (.getYear (java.util.Date.)))]
         (cond
-          ((> given current)
-            [:warn "illegal-recent-year:future"])
-          ((< given (- current range))
-            [:warn "illegal-recent-year:too-past"])
+          (> given current)
+            [:warn "illegal-recent-year:future"]
+          (< given (- current range))
+            [:warn "illegal-recent-year:too-past"]
           :else
             nil))
     :else
