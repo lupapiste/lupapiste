@@ -384,7 +384,7 @@
                                 last
                                 :version)
                            (next-attachment-version (get-in attachment [:latestVersion :version]) user))]
-    (cond-> {:version        version-number
+    (util/assoc-when {:version        version-number
              :fileId         file-id
              :originalFileId (or original-file-id file-id)
              :created        now
@@ -394,11 +394,11 @@
              :filename       filename
              :contentType    content-type
              :size           size}
-      (util/assoc-when {} :stamped stamped)
-      (util/assoc-when {} :archivable archivable)
-      (util/assoc-when {} :archivabilityError archivabilityError)
-      (util/assoc-when {} :missing-fonts missing-fonts)
-      (util/assoc-when {} :autoConversion autoConversion))))
+      :stamped stamped
+      :archivable archivable
+      :archivabilityError archivabilityError
+      :missing-fonts missing-fonts
+      :autoConversion autoConversion)))
 
 (defn- ->approval [state user timestamp file-id]
   {:value (if (= :ok state) :approved :rejected)
