@@ -94,7 +94,7 @@
    {:name "katselmus" :type :group
     :whitelist {:roles [:authority] :otherwise :disabled}
     :body
-    [{:name "tila" :type :select :css [:dropdown] :sortBy :displayname
+    [{:name "tila" :type :select :css [:dropdown :form-input] :sortBy :displayname
       :readonly-after-sent true
       :whitelist {:roles [:authority] :otherwise :disabled}
       :required true

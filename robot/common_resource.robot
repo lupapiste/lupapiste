@@ -755,15 +755,25 @@ Click tree item by text
   Wait and click  //section[@id="create-part-2"]//div[@class="tree-content"]//*[text()=${itemName}]
 
 
-# Closes the application that is currently open by clicking cancel button
-Close current application
-  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
-  Click enabled by test id  application-cancel-btn
+# Cancel application or inforequest
+  
+Close current inforequest
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="inforequest-cancel-btn"]
+  Click enabled by test id  inforequest-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
 
+Close current application
+  [Arguments]  ${reason}=${EMPTY}
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
+  Click enabled by test id  application-cancel-btn
+  Fill test id  cancel-application-reason  ${reason}
+  Confirm  dialog-cancel-application
+
 Close current application as authority
+  [Arguments]  ${reason}=${EMPTY}
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
   Click enabled by test id  application-cancel-authority-btn
+  Fill test id  cancel-application-reason  ${reason}
   Confirm  dialog-cancel-application
 
 # New yes no modal dialog
@@ -832,8 +842,9 @@ Confirm notification dialog
 #
 
 Open the request
-  [Arguments]  ${address}
+  [Arguments]  ${address}  ${tab}=all
   Go to page  applications
+  Click by test id  search-tab-${tab}
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
   Wait for jQuery
 
@@ -846,6 +857,12 @@ Open the request at index
 Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
+  Wait until  Element Should Be Visible  application
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+
+Open canceled application
+  [Arguments]  ${address}  ${propertyId}
+  Open the request  ${address}  canceled
   Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
@@ -873,6 +890,12 @@ Add comment
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Close side panel  conversation
+
+Check comment
+  [Arguments]  ${message}
+  Open side panel  conversation
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[contains(., '${message}')]
   Close side panel  conversation
 
 Open to authorities
@@ -1272,6 +1295,10 @@ No such test id
 Test id should contain
   [Arguments]  ${id}  ${text}
   Wait until  Element should contain  jquery=[data-test-id=${id}]  ${text}
+
+Test id input is
+  [Arguments]  ${id}  ${text}
+  Wait until  Textfield value should be  jquery=[data-test-id=${id}]  ${text}
 
 Javascript? helper
   [Arguments]  ${expression}

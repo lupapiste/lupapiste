@@ -1,7 +1,8 @@
-(ns lupapalvelu.attachment-stamping
+(ns lupapalvelu.attachment.stamping
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
-            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.stamper :as stamper]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
@@ -42,9 +43,9 @@
       (debug "uploading stamped file: " (.getAbsolutePath file))
       (mongo/upload new-file-id filename contentType file :application (:id application))
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-        (attachment/update-latest-version-content! user application attachment-id new-file-id (.length file) now)
-        (attachment/set-attachment-version! application
-                                           (attachment/get-attachment-info application attachment-id)
+        (att/update-latest-version-content! user application attachment-id new-file-id (.length file) now)
+        (att/set-attachment-version! application
+                                           (att/get-attachment-info application attachment-id)
                                            {:attachment-id  attachment-id
                                             :file-id new-file-id :original-file-id new-file-id
                                             :filename filename
@@ -62,7 +63,7 @@
 
 (defn- operation-specific? [{attachment-type :attachment-type}]
   (->> (util/convert-values attachment-type keyword)
-       (contains? attachment/operation-specific-attachment-types)))
+       (contains? att-type/operation-specific-types)))
 
 (defn- select-buildings-by-operation [buildings operation-id]
   (filter (comp #{operation-id} :operation-id) buildings))

@@ -1,0 +1,80 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-listing-template">
+  
+  <h1>Suunnitelmat ja liitteet POC</h1>
+  <span data-bind="component: {
+                   name: 'help-toggle',
+                   params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
+                   }"></span>
+  <div class="clear"></div>
+
+  <div class="inner-margins">
+    <button class="positive caps">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'application.attachmentsAdd'"></span>
+    </button>
+    <button class="positive caps">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
+    </button>
+  </div>
+
+  <div class="attachment-operations">
+    <button class="ghost">
+      <i class="lupicon-circle-stamp"></i>
+      <span data-bind="ltext: 'application.stampAttachments'"></span>
+    </button>
+    <button class="ghost">
+      <i class="lupicon-circle-pen"></i>
+      <span data-bind="ltext: 'signAttachment.select'"></span>
+    </button>
+    <button class="ghost">
+      <i class="lupicon-circle-arrow-up"></i>
+      <span data-bind="ltext: 'task.send'"></span>
+    </button>
+    <button class="ghost">
+      <i class="lupicon-circle-section-sign"></i>
+      <span data-bind="ltext: 'application.markVerdictAttachments'"></span>
+    </button>
+    <button class="ghost">
+      <i class="lupicon-envelope"></i>
+      <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
+    </button>
+  </div>
+
+  <filters></filters>
+  
+  <help-toggle params="html: legendHtml,
+                       lbutton: 'attachment.legend.help'"></help-toggle>
+  
+  <div>
+    <!-- ko if: groups[0].data().hasContent && groups[0].data().hasContent() -->
+    <h2 data-bind="ltext: 'application.attachments.pre-verdict'"
+        class="help-adjacent-title" />
+    <button class="ghost right"
+            data-bind="click: togglePreVerdictGroups">
+      <i class="lupicon-menu"></i>
+      <span data-bind="text: 'Avaa / sulje kaikki'"></span>
+    </button>
+    <div class="attachments-accordions"
+         data-bind="foreach: groups[0].accordions">     
+      <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                      data: _.merge($data, {level: 0})}"></div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: groups[1].data().hasContent && groups[1].data().hasContent() -->
+    <h2 data-bind="ltext: 'application.attachments.post-verdict'"
+        class="help-adjacent-title"/>
+    <button class="ghost right"
+            data-bind="click: togglePostVerdictGroups">
+      <i class="lupicon-menu"></i>
+      <span data-bind="text: 'Avaa / sulje kaikki'"></span>
+    </button>
+    <div class="attachments-accordions"
+         data-bind="foreach: groups[1].accordions">
+      <div data-bind="template: {name: 'attachments-listing-accordion-template',
+                      data: _.merge($data, {level: 0})}"></div>
+    </div>
+    <!-- /ko -->
+  </div>
+</script>

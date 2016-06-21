@@ -23,7 +23,7 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.user :as user]
             [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.attachment-metadata :as metadata]))
+            [lupapalvelu.attachment.metadata :as metadata]))
 
 (defn- valid-token? [token statuses ts-now]
   {:pre [(number? ts-now) (pos? ts-now)]}

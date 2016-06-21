@@ -94,6 +94,7 @@ jQuery(function($) {
                   .append($("<p>")
                           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
                           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal").click(function() { applyFixture("minimal"); }))
+                          .append($("<a>").attr("id", "debug-apply-ajanvaraus").attr("href", "#").text("Apply ajanvaraus-fixture").click(function() { applyFixture("ajanvaraus"); }))
                           .append($("<p>").text("Create:")
                                   .append($("<span>").attr("id", "debug-create-done").css("font-weight", "bold").hide())
                                   .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/asuinkerrostalo")

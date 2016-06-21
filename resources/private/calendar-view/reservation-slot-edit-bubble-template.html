@@ -19,8 +19,15 @@
         <h3 data-bind="ltext: 'calendar.edit-slot.title'"></h3>
       </div>
       <p><span data-bind="ltext: 'calendar.slot.start-time'"></span>: <span data-bind="dateTimeString: $parent.startTime"></span></p>
-      <p><span data-bind="ltext: 'calendar.slot.duration'"></span>: 1h</p>
-      <p>Tapahtumalajit:</p>
+      <p><span data-bind="ltext: 'calendar.slot.duration'"></span>:
+        <!-- ko if: $parent.durationHours() !== 0 -->
+          <!-- ko text: $parent.durationHours --><!-- /ko --> <span data-bind="ltext: 'calendar.slot.duration.hours'"></span>
+        <!-- /ko -->
+        <!-- ko if: $parent.durationMinutes() !== 0 -->
+          <!-- ko text: $parent.durationMinutes --><!-- /ko --> <span data-bind="ltext: 'calendar.slot.duration.minutes'"></span>
+        <!-- /ko -->
+      </p>
+      <p><span data-bind="ltext: 'calendar.slot.reservation-types'"></span>:</p>
       <div data-bind="foreach: $parent.reservationTypes">
         <p>
           <input type="checkbox" data-bind="checkedValue: $data.id, checked: $parents[1].selectedReservationTypes">

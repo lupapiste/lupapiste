@@ -163,6 +163,9 @@ Kaino logs in and removes Ulla's admin rights
   Open company user listing
   # Panaani, Ser, Solita
   Edit company user  1  user  Kyllä
+  Click by test id  company-user-save-1
+  Confirm  dynamic-yes-no-confirm-dialog
+  Check company user  1  user2@solita.fi  Ser  Ulla  Käyttäjä  Kyllä  
   [Teardown]  Logout
 
 Mikko logs in, creates application and invites Solita

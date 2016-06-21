@@ -73,9 +73,9 @@
                  :i18nprefix "task-katselmus.katselmuksenLaji"
                  :version    1}
    :data        {:katselmuksenLaji {:value name}
-   :rakennus {"0" {:kayttoonottava {:value false} :rakennusnro {:value "rak0"}}
-              "1" {:kayttoonottava {:value false} :rakennusnro {:value "rak1"}}
-              "2" {:kayttoonottava {:value true} :rakennusnro {:value "rak2"}}
+                 :rakennus {"0" {:kayttoonottava {:value false} :rakennus {:rakennusnro {:value "rak0"}}}
+                            "1" {:kayttoonottava {:value false} :rakennus {:rakennusnro {:value "rak1"}}}
+                            "2" {:kayttoonottava {:value true} :rakennus {:rakennusnro {:value "rak2"}}}
                                     }}})
 
 (facts "Generate PDF file from application with all documents"

@@ -1,7 +1,7 @@
-(ns lupapalvelu.attachment-accessibility-test
+(ns lupapalvelu.attachment.accessibility-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.attachment-accessibility :refer :all]))
+            [lupapalvelu.attachment.accessibility :refer :all]))
 
 (facts "facts about accessing attachment(s)"
   (let [user1 {:id "1" :role "applicant"}
@@ -46,8 +46,6 @@
     (fact "nils und nulls"
       (can-access-attachment? nil nil nil) => (throws AssertionError)
       (can-access-attachment? nil nil att1-auth-empty) => (throws AssertionError)
-      (fact "application needs to have auth and organization"
-        (can-access-attachment? user1 nil att1-no-meta-u1) => (throws AssertionError))
       (can-access-attachment? nil application-skeleton att1-no-meta-u1) => true) ; anonymous can't access, check this
     (fact "if versions exists, then should also auth, else assert fail"
       (can-access-attachment? user-authority application-skeleton att1-auth-empty) => (throws AssertionError))

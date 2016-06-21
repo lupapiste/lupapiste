@@ -1,74 +1,69 @@
-<!DOCTYPE html>
-<html>
-<body>
-<section class="page container">
-  <script type="text/x-jquery-tmpl" id="calendar-view-template">
-    <div class="calendar-table">
-      <div class="nav-actions">
-        <div class="month" data-bind="calendarViewMonthText: month()"></div>
-        <div class="nav-links">
-          <a data-bind="click: gotoPreviousWeek"><< Edellinen</a> |
-          <a data-bind="click: gotoToday">T&auml;n&auml;&auml;n</a> |
-          <a data-bind="click: gotoFollowingWeek">Seuraava >></a>
-        </div>
+<script class="ko-template" type="text/x-jquery-tmpl" id="calendar-view-template">
+  <div class="calendar-table" data-test-id="calendar-view-calendar-table">
+    <div class="nav-actions">
+      <div class="month" data-bind="calendarViewMonthText: startOfWeek"></div>
+      <div class="nav-links">
+        <a data-bind="click: gotoPreviousWeek"><span data-bind="ltext: 'calendar.week.previous'"></span></a> |
+        <a data-bind="click: gotoToday"><span data-bind="ltext: 'calendar.week.today'"></span></a> |
+        <a data-bind="click: gotoFollowingWeek" data-test-id="calendar-view-following-week"><span data-bind="ltext: 'calendar.week.next'"></span></a>
       </div>
-      <table>
-        <thead>
-        <tr>
-          <th>&nbsp;</th>
-          <!-- ko foreach: calendarWeekdays -->
+    </div>
+    <table>
+      <thead>
+      <tr>
+        <th>&nbsp;</th>
+        <!-- ko foreach: calendarWeekdays -->
           <th data-bind="calendarDayColumnHeader: startOfDay,
                          css: {'date-today': today == true}"></th>
-          <!-- /ko -->
-        </tr>
-        <tr>
-          <td colspan="6" style="height: 0px">
-            <div style="position: relative;">
-              <div data-bind="component: { name: 'reservation-slot-create-bubble',
-                                           params: { tableFirstFullHour: $component.firstFullHour,
-                                                     tableLastFullHour: $component.lastFullHour }}"></div>
+        <!-- /ko -->
+      </tr>
+      <tr>
+        <td colspan="6" style="height: 0px">
+          <div style="position: relative;">
+            <reservation-slot-create-bubble params="calendarId: $component.calendarId,
+                                                    weekdays: $component.calendarWeekdays,
+                                                    reservationTypes: $component.reservationTypes"></reservation-slot-create-bubble>
+          </div>
+          <div style="position: relative;">
+            <reservation-slot-edit-bubble params="calendarId: $component.calendarId,
+                                                  weekdays: $component.calendarWeekdays,
+                                                  reservationTypes: $component.reservationTypes"></reservation-slot-edit-bubble>
+          </div>
+        </td>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td data-bind="foreach: timelineTimes">
+          <div class="timestamp">
+            <!--ko text: viewText --><!--/ko-->
+          </div>
+        </td>
+        <!-- ko foreach: calendarWeekdays -->
+        <td data-bind="css: {'date-today': today == true, 'date': today == false},
+                       attr: {'data-test-timestamp': startOfDay, 'data-test-id': 'calendar-weekday-' + $index() }">
+          <div style="position: relative;">
+            <!-- ko foreach: $component.timelineSlots($data) -->
+            <div class="timeline-slot" data-bind="attr: { 'data-test-id': dataTestId },
+                                                  click: $component.clickHandler.bind($data, 'timeline-slot')">
+              &nbsp;
             </div>
-            <div style="position: relative;">
-              <div data-bind="component: { name: 'reservation-slot-edit-bubble',
-                                           params: { tableFirstFullHour: $component.firstFullHour,
-                                                     tableLastFullHour: $component.lastFullHour }}"></div>
-            </div>
-          </td>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td data-bind="foreach: timelineTimes">
-            <div class="timestamp">
-              <!--ko text: viewText --><!--/ko-->
-            </div>
-          </td>
-          <!-- ko foreach: calendarWeekdays -->
-          <td data-bind="css: {'date-today': today == true, 'date': today == false}">
-            <div style="position: relative;">
-              <!-- ko foreach: $component.timelineTimes -->
-              <div class="timeline-slot" data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'timeline-slot')">
-                &nbsp;
-              </div>
-              <!-- /ko -->
-              <!-- ko foreach: slots -->
+            <!-- /ko -->
+            <!-- ko foreach: slots -->
               <div class="calendar-slot" data-bind="style: { top: $component.slotPositionTop($data),
-                                                                height: $component.slotHeight($data) },
-                                                       css: { 'calendar-slot': 1,
-                                                              'booked': status == 'booked',
-                                                              'accepted': status == 'accepted' }">
-                <a data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'calendar-slot'),
-                              text: $component.slotViewText($data)"></a>
-              </div>
-              <!-- /ko -->
+                                                             height: $component.slotHeight($data) },
+                                                    css: { 'calendar-slot': 1,
+                                                           'booked': status == 'booked',
+                                                           'accepted': status == 'accepted' }">
+              <a data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'calendar-slot'),
+                            text: $component.slotViewText($data)"></a>
             </div>
-          </td>
-          <!-- /ko -->
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </script>
-</section>
-</body>
-</html>
+            <!-- /ko -->
+          </div>
+        </td>
+        <!-- /ko -->
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</script>

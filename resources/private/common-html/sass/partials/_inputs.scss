@@ -1,0 +1,145 @@
+// Support for miscellaneous inputs and other stuff.
+// See also _forms.scss.
+
+@mixin hide-radio-check-input ($display: inherit) {
+  input[type=checkbox], input[type=radio] {
+    display: $display;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    font-size: 0;
+  }
+}
+
+
+// Defines the following classes:
+// .cls-label
+// .cls-wrapper
+// and the definition 
+// .cls-wrapper.wrapper--disabled
+@mixin toggle-helper ($cls, $on, $off,
+                      $size: $lupicon-size,
+                      $color: $input-color,
+                      $icon: $checkbox-color,
+                      $hover: $checkbox-hover-color,
+                      $selected: $checkbox-selected-color,
+                      $disabled: $input-select-disabled-icon,
+                      $border: $checkbox-border-color,
+                      $disabled-bg: $input-disabled-background-color,
+                      $wrapper-display: inherit,
+                      $input-display: block,
+                      $label-display: inline-block) {
+  label.#{$cls}-label {
+  width: 100%;
+  display: $label-display;
+  color: $color;
+  padding: {
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    top: 7px;
+  }
+}
+  .#{$cls}-label:before {
+    @include lupicon-font( $size );
+    content: $off;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: top;
+    color: $icon;
+    cursor: pointer;
+  }
+
+  .#{$cls}-label:hover.#{$cls}-label:before,
+  input:checked + .#{$cls}-label:hover.#{$cls}-label:before {
+    color: $hover;
+  }
+
+  input:checked + .#{$cls}-label:before {
+    @include lupicon-font($size);
+    content: $on;
+    color: $selected;
+  }
+
+  input:disabled + .#{$cls}-label:before,
+  input:disabled + .#{$cls}-label:hover.#{$cls}-label:before{
+    cursor: initial;
+    color: $disabled;
+  }
+
+  .#{$cls}-wrapper {
+    display: $wrapper-display;
+    box-sizing: border-box;
+    border: 1px solid $border;
+    @include hide-radio-check-input ($input-display);
+}
+
+  .#{$cls}-wrapper.wrapper--disabled {
+    background-color: $disabled-bg;
+}
+}
+
+@include toggle-helper ( arrow, "\e614", "\e611" ) {}
+
+// Checkboxes
+@include toggle-helper ( checkbox, "\e604", "\e603" ) {}
+@include toggle-helper ( docgen-checkbox, "\e604", "\e603", $wrapper-display: block ) {}
+
+// Radio buttons
+@include toggle-helper (radio, "\e635", "\e634", $wrapper-display: inline-block, $input-display: block) {}
+
+// Radio field component. In order to make sure that the components are adjacent without
+// gaps, some adjustments are needed.
+@include toggle-helper (radio-field, "\e635", "\e634", $wrapper-display: inline,
+                        $input-display: inline-block, $label-display: inline) {}
+.radio-field-wrapper {
+  padding: 7px 7px 7px 7px;
+}
+
+// Wrapper helpers
+.wrapper--break {
+  margin-bottom: $marginL;
+}
+
+.wrapper--break-small {
+  margin-bottom: $marginS;
+}
+
+.wrapper--block {
+  
+}
+
+
+// Attachment filters related
+@include toggle-helper ( filter, "\e604", "\e603", $wrapper-display: inline-block, $input-display: block ) {}
+
+.filter-group {
+  border: 1px solid $gray187;
+  padding: {
+    top: 7px;
+    left: 7px;
+    right: 7px;
+    bottom: 14px;
+  }
+  margin-bottom: 1em;
+  .filter-group__state {
+    i {
+      cursor: pointer;
+      color: $primary;
+    }
+    span {
+      text-transform: uppercase;
+    }
+    &:hover > i {
+      color: $checkbox-hover-color;
+    }
+  }
+  .filter-group__toggles {
+    margin-left: 2px;
+    margin-top: $marginS;
+  }
+}
+
+
+

@@ -5,7 +5,11 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
   
   self.items = ko.observableArray();
   self.initialized = false;
-  self.calendarInView = lupapisteApp.services.calendarService.calendar;
+  self.calendarInView = ko.observable();
+  self.calendarIdInView = ko.observable();
+  self.userIdInView = ko.observable();
+
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   function setEnabled(user, value) {
     if (self.initialized) {
@@ -13,6 +17,10 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
         .success(function(response) {
           util.showSavedIndicator(response);
           user.calendarId(response.calendarId);
+        })
+        .error(function(e) {
+          hub.send("indicator", {style: "negative", message: e.code});
+          hub.send("calendarService::fetchOrganizationCalendars");
         })
         .call();
     }
@@ -32,11 +40,14 @@ LUPAPISTE.AuthAdminCalendarsModel = function () {
     self.initialized = true;
   };
 
-  var _init = hub.subscribe("calendarService::organizationCalendarsFetched", function() {
-    self.init(lupapisteApp.services.calendarService.organizationCalendars());
+  self.calendarIdInView.subscribe(function(val) {
+    if (!_.isUndefined(val)) {
+      self.calendarInView(_.filter(self.items(), function(item) { return item.calendarId() === val; })[0]);
+    }
   });
 
-  self.dispose = function() {
-    hub.unsubscribe(_init);
-  };
+  self.addEventListener("calendarService", "organizationCalendarsFetched", function(event) {
+    self.init(event.calendars);
+  });
+
 };

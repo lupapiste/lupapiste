@@ -25,10 +25,18 @@
                     </a>
                 </div>
                 <div class="header-box" data-bind="visible: $root.showCalendarMenuOptions">
-                  <a href="#!/mycalendar" data-bind="attr: {'title': loc('Ajanvaraus')}">
-                    <span class="lupicon-calendar"></span>
-                    <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
-                  </a>
+                  <!-- ko if: lupapisteApp.models.currentUser.isAuthorityAdmin -->
+                    <a href="#!/organization-calendars" data-bind="attr: {'title': loc('Ajanvaraus')}">
+                      <span class="lupicon-calendar"></span>
+                      <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
+                    </a>
+                  <!-- /ko -->
+                  <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                    <a href="#!/mycalendar" data-bind="attr: {'title': loc('Ajanvaraus')}">
+                      <span class="lupicon-calendar"></span>
+                      <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
+                    </a>
+                  <!-- /ko -->
                 </div>
                 <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
                     <a href="/document-search" data-bind="attr: {'title': loc('Dokumentit')}">

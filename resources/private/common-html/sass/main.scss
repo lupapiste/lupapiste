@@ -92,6 +92,7 @@
 \*------------------------------------*/
 
 @import "partials/_buttons";
+@import "partials/_inputs";
 @import "partials/_forms";
 @import "partials/_tables";
 @import "partials/_breadcrum";
@@ -117,6 +118,7 @@
 @import "partials/_indicator-icon";
 @import "partials/_guests";
 @import "partials/_case-file";
+@import "partials/_rollup";
 
 /* VIEWS
 ------------------------------------------------------------------------------*/
@@ -138,6 +140,7 @@
 @import "views/_attachment_multiselect";
 @import "views/_openlayers2";
 @import "views/_calendars";
+@import "views/_attachmentsPOC";
 
 // Bulletins dpepends on application
 @import "partials/_bulletins";

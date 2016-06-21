@@ -72,33 +72,43 @@
 
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.address'"></label>
-              <input class="form-input text" data-bind="textInput: model().address1, enable: edit" type="text" maxlength="64"/>
+              <input class="form-input text" data-bind="textInput: model().address1, enable: edit" type="text" maxlength="64"
+                     data-test-id="edit-company-address1">
             </div>
 
             <br/>
 
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.zip'"></label>
-              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text" maxlength="5"/>
+              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text" maxlength="5"
+                      data-test-id="edit-company-zip">
             </div>
 
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.po'"></label>
-              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text" maxlength="64"/>
+              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text" maxlength="64"
+                      data-test-id="edit-company-po">
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.country'"></label>
-              <input class="form-input text" data-bind="textInput: model().country, enable: edit" type="text" maxlength="64"/>
+              <input class="form-input text" data-bind="textInput: model().country, enable: edit" type="text" maxlength="64">
             </div>
 
             <br/>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
-              <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text" maxlength="17"/>
+              <label class="form-label" data-bind="ltext: 'osapuoli.yritys.verkkolaskutustieto.verkkolaskuTunnus'"></label>
+              <input class="form-input text" data-bind="textInput: model().netbill, enable: edit" type="text"
+                     data-test-id="edit-company-netbill">
             </div>
-
+                        
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
+              <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text" maxlength="17"
+                      data-test-id="edit-company-ovt">
+            </div>          
+            
             <div class="form-entry" data-test-id="company-pop">
               <span data-bind="component: {name: 'invoice-operator-selector', params: {selected: model().pop, enabled: edit}}"></span>
             </div>
@@ -300,7 +310,7 @@
           <input data-bind="textInput: lastName,
                             disable: done() || oldUser()"
                  class="form-input" type="text" data-test-id="company-new-user-lastname"/>
-          <div class="checkbox-wrapper checkbox-wrapper--break-small">
+          <div class="checkbox-wrapper wrapper--break-small">
             <input data-bind="checked: admin,
                               disable: done"
                    class="form-input" type="checkbox" id="company-new-user-admin"/>

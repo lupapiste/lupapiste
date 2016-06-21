@@ -262,7 +262,7 @@
                                     <span data-bind="ltext: 'application.cancelApplication'"></span>
                                 </button>
                                 <button class="function"
-                                        data-bind="click: cancelApplicationAuthority, visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
+                                        data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
                                         data-test-id="application-cancel-authority-btn">
                                     <i class="lupicon-circle-remove"></i>
                                     <span data-bind="ltext: 'application.cancelApplication'"></span>
@@ -355,6 +355,13 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
+                            <li data-bind="feature: 'attachments-poc',
+                                           css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
+                                <a data-bind="click: changeTab" href="#" data-target="attachmentsPOC" data-test-id="application-open-attachmentsPOC-tab" class="link-btn">
+                                    <span>Suunnitelmat ja liitteet POC</span>
+                                    <span data-bind="if: attachmentsRequiringAction">
+                                        <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
+
                             <li data-bind="if: _.includes(['draft', 'open', 'submitted', 'complementNeeded'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
@@ -381,6 +388,13 @@
                                 <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab"
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
+
+                            <!-- Can be shown if calendars are active in the target municipality and sector -->
+                            <li data-bind="if: $root.authorization.ok('calendars-enabled'), css: {'active': $parent.selectedTabName() === 'calendar'}">
+                              <a data-bind="click: changeTab" href="#" data-target="calendar" data-test-id="application-open-calendar-tab" class="link-btn">
+                                <span data-bind="ltext: 'application.tabCalendar'"></span>
+<!--                                      <span data-bind="if: partyDocumentIndicator">
+                                          <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span>--></a></li>
 
                             <li data-bind="if: $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
                                            css: {'active': $parent.selectedTabName() === 'archival'}">
@@ -570,7 +584,7 @@
                             <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
                         </div>
 
-                        <!-- ko if: showPostAtachmentsActions -->
+                        <!-- ko if: showPostAttachmentsActions -->
                         <div data-bind="template: {name: 'attachment-actions-template',
                                         data: {appModel: $data.appModel,
                                         attachmentsOperation: $data.attachmentsOperation,
@@ -615,6 +629,14 @@
                                 <span data-bind="ltext: 'application.previous-tab'"></span>
                             </a>
                         </div>
+                    </div>
+                    <!-- /ko -->
+
+                    <!-- AttachmentsPOC tab -->
+                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
+                    <div id="application-attachmentsPOC-tab" class="tab-content feature--no-border"
+                         data-bind="feature: 'attachments-poc'">                     
+                      <attachments-listing/>
                     </div>
                     <!-- /ko -->
 
@@ -1367,6 +1389,14 @@
                       </div>
                     </div>
                     <!-- /ko -->
+
+                    <!-- Calendars tab -->
+                    <div id="application-calendar-tab" data-bind="with: application, visible: $root.authorization.ok('calendars-enabled')" class="tab-content">
+                      <div>
+                        <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
+                      </div>
+                      <calendar-view params="searchConditions: { }"></calendar-view>
+                    </div>
                 </div>
             </div>
             <div id="boxes">
@@ -1559,7 +1589,9 @@
                     </div>
                     <div class="dialog-content" data-bind="with: application">
                         <label data-bind="ltext: 'application.canceled.reason'"></label>
-                        <textarea rows=10 class="form-input textarea really-long high" data-bind="textInput: cancelText"></textarea>
+                        <textarea rows=10 class="form-input textarea grid-style-input really-long high"
+                                  data-bind="textInput: cancelText"
+                                  data-test-id="cancel-application-reason"></textarea>
                         <div class='dialog-user-content application-cancel-text-content'></div>
                         <button class='positive btn-dialog close' data-test-id='confirm-yes'></button>
                         <button class='secondary btn-dialog close' data-test-id='confirm-no'></button>

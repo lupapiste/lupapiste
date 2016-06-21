@@ -29,7 +29,16 @@
   }
 
   input[type=text] {
+    padding-left: $baseline / 4;
     width: $baseline * 2;
+  }
+
+  p.amount-controls {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 4px;
+    line-height: $baseline;
+    margin: 2px $marginS $marginM 0;
   }
 }
 

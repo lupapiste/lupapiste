@@ -110,13 +110,15 @@ $grid-margin: 20px;
 $grid-margin-large: 40px;
 $grid-font-size: 16px;
 
-$checkbox-color:          $gray187;
-$checkbox-selected-color: $orange-light;
+$checkbox-color:          $orange-dark; 
+$checkbox-selected-color: $orange-dark;
 $checkbox-border-color:   $gray221;
+$checkbox-hover-color:    $orange-light;
 
 $radio-color:          $checkbox-color;
 $radio-selected-color: $checkbox-selected-color;
 $radio-border-color:   $checkbox-border-color;
+$radio-hover-color:    $checkbox-hover-color;
 
 $input-color:       $gray51;
 $input-focus-color: $gray51;
@@ -133,6 +135,12 @@ $label-required-star-color: $red-dark;
 $gray-link:   $gray85;
 $gray-hover:  $gray119;
 $gray-active: $gray153;
+
+$light-gray-link:   $gray119;
+$light-gray-hover:  $gray153;
+$light-gray-active: $gray187;
+
+
 
 // Somewhat semantic colors.
 // These are used in "normal" circumstances.

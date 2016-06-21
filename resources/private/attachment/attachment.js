@@ -42,6 +42,8 @@ var attachment = (function() {
     return false;
   }
 
+  var imgRegex = /^image\/(jpeg|png|gif|bmp)$/;
+
   model = {
     id:                           ko.observable(),
     application:                  applicationModel,
@@ -88,7 +90,7 @@ var attachment = (function() {
       var version = model.latestVersion();
       if (!version) { return false; }
       var contentType = version.contentType;
-      return contentType && contentType.indexOf("image/") === 0;
+      return contentType && imgRegex.test(contentType);
     },
 
     isPdf: function() {
@@ -274,6 +276,11 @@ var attachment = (function() {
 
   model.nextAttachmentPresent = ko.pureComputed(function() {
     return model.groupIndex() < model.groupAttachments().length - 1;
+  });
+
+  model.opSelector = ko.pureComputed(function() {
+    var primaryOperation = applicationModel.primaryOperation();
+    return util.getIn(primaryOperation, ["attachment-op-selector"]);
   });
 
   function saveLabelInformation(name, data) {

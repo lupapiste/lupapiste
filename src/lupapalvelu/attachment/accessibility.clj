@@ -1,5 +1,5 @@
-(ns lupapalvelu.attachment-accessibility
-  (:require [lupapalvelu.attachment-metadata :as metadata]
+(ns lupapalvelu.attachment.accessibility
+  (:require [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.user :as user]
             [sade.core :refer :all]
@@ -27,8 +27,8 @@
 
 (defn can-access-attachment?
   "Checks user's access right to attachment from application auth and attachment auth"
-  [{authz :orgAuthz :as user} {app-auth :auth :as application} {:keys [latestVersion metadata auth] :as attachment}]
-  {:pre [(map? attachment) (sequential? app-auth)]}
+  [user {app-auth :auth :as application} {:keys [latestVersion metadata auth] :as attachment}]
+  {:pre [(map? attachment)]}
   (assert (if latestVersion (seq auth) true))
   (boolean
     (or

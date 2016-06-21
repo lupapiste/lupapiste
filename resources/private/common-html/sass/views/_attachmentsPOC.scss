@@ -1,0 +1,23 @@
+.attachments-accordions {
+  margin-bottom: $marginL;
+  .attachments-accordion {
+    margin-top: $marginS;    
+  }
+  .rollup {
+    margin-bottom: $marginS;
+  }
+}
+
+.attachments-accordion-content {
+  padding: {
+    left: $marginS;
+    right: $marginS;
+    bottom: $marginL;
+    top: $marginS;
+  }
+  position: relative;
+  border: 1px solid $gray221;
+  border-top: none;
+  .attachments-accordion-content-part {
+  }
+}

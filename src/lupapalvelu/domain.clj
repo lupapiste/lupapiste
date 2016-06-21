@@ -6,7 +6,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.env :as env]
-            [lupapalvelu.attachment-accessibility :as attachment-access]
+            [lupapalvelu.attachment.accessibility :as attachment-access]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
@@ -77,56 +77,37 @@
     application
     (dissoc application :urgency :authorityNotice)))
 
+(defn- relates-to-draft-verdict? [{verdicts :verdicts} {target :target source :source}]
+  (or (and (= (:type target) "verdict") (:draft (util/find-by-id (:id target) verdicts)))
+      (and (= (:type source) "verdict") (:draft (util/find-by-id (:id source) verdicts)))))
+
 (defn- authorized-to-statement? [user statement]
-  (or
-    (user/authority? user)
-    (and
-      (user/applicant? user)
-      (= (-> statement :person :email user/canonize-email) (-> user :email user/canonize-email)))))
+  (or (:given statement)
+      (user/authority? user)
+      (and (user/applicant? user)
+           (= (-> statement :person :email user/canonize-email)
+              (-> user :email user/canonize-email)))))
 
-(defn- authorized-to-statement-attachment? [user attachment ids-of-own-statements]
-  {:pre [user attachment (set? ids-of-own-statements)]}
-  (if (= "statement" (-> attachment :target :type))
-    (or (user/authority? user) (ids-of-own-statements (-> attachment :target :id)))
-    true))
+(defn- statement-attachment-hidden-for-user? [{statements :statements} user {target :target :as attachment}]
+  (and (= (:type target) "statement")
+       (not (->> (util/find-by-id (:id target) statements) (authorized-to-statement? user)))))
 
-(defn- only-authority-or-owner-sees-statement-drafts-and-statement-attachments [application user]
-  (let [ids-of-own-statements (->> (:statements application)
-                                (filter #(or
-                                           (:given %)  ;; including given statements as "own" statements
-                                           (= (:id user) (-> % :person :userId))))
-                                (map :id)
-                                set)]
-    (-> application
-      (assoc :statements (map
-                           (fn [statement]
-                             (if (or
-                                   (:given statement)  ;; including given statements
-                                   (authorized-to-statement? user statement))
-                               statement
-                               (select-keys statement [:id :person :requested :given :state])))
-                           (:statements application)))
-      (assoc :attachments (filter
-                            #(authorized-to-statement-attachment? user % ids-of-own-statements)
-                            (:attachments application))))))
-
+(defn- statement-summary [statement]
+  (select-keys statement [:id :person :requested :given :state]))
 
 (defn filter-application-content-for [application user]
   (when (seq application)
-    (let [draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
-          relates-to-draft (fn [m]
-                             (let [reference (or (:target m) (:source m))]
-                               (and (= (:type reference) "verdict") (draft-verdict-ids (:id reference)))))]
-      (-> application
-        (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
+    (-> application
+        (update-in [:comments] (partial filter (fn [comment] ((set (:roles comment)) (name (:role user))))))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
-        (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
+        (update-in [:statements] (partial map #(if (authorized-to-statement? user %) % (statement-summary %))))
+        (update-in [:attachments] (partial remove (partial statement-attachment-hidden-for-user? application user)))
+        (update-in [:attachments] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
         (update-in [:attachments] (partial attachment-access/filter-attachments-for user application))
         (update-in [:neighbors] (partial normalize-neighbors user))
         filter-targeted-attachment-comments
-        (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
-        (filter-notice-from-application user)
-        (only-authority-or-owner-sees-statement-drafts-and-statement-attachments user)))))
+        (update-in [:tasks] (partial only-authority-sees user (partial relates-to-draft-verdict? application)))
+        (filter-notice-from-application user))))
 
 (defn get-application-as [query-or-id user & {:keys [include-canceled-apps?] :or {include-canceled-apps? false}}]
   {:pre [query-or-id (map? user)]}

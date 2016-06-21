@@ -51,6 +51,7 @@
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
+                 :removable-only-by-authority
                  :group-help :section-help
                  :after-update
                  :repeating :no-repeat-button :order
@@ -339,8 +340,8 @@
                           {:name "SBANFIHH"} ; S-Pankki Oy (uusi)
                           ])
 
-(def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
-                          {:name "verkkolaskuTunnus" :type :string}
+(def verkkolaskutustieto [{:name "verkkolaskuTunnus" :type :string}
+                          {:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "valittajaTunnus"
                            :type :select
                            :i18nkey "osapuoli.yritys.verkkolaskutustieto.valittajaTunnus"
@@ -1593,7 +1594,8 @@
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"
            :order 4
-           :removable false
+           :removable  true
+           :removable-only-by-authority true
            :approvable true
            :accordion-fields designer-accordion-paths
            :type :party

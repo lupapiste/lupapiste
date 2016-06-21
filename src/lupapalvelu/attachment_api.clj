@@ -1,34 +1,31 @@
 (ns lupapalvelu.attachment-api
   (:require [clojure.java.io :as io]
             [clojure.set :refer [intersection union]]
-            [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
             [sade.core :refer [ok fail fail! now def-]]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment-metadata :as attachment-meta]
-            [lupapalvelu.attachment-accessibility :as access]
-            [lupapalvelu.attachment-stamping :as stamping]
+            [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.metadata :as attachment-meta]
+            [lupapalvelu.attachment.accessibility :as access]
+            [lupapalvelu.attachment.stamping :as stamping]
+            [lupapalvelu.attachment.notifications :as att-notifications]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
-            [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.states :as states]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
@@ -97,14 +94,9 @@
     (when (and size (not (contains? (set attachment/attachment-sizes) (keyword size))))
       (fail :error.illegal-attachment-size :parameters size))))
 
-(defn- allowed-attachment-type-for-application? [attachment-type application]
-  {:pre [(map? attachment-type)]}
-  (let [allowed-types (attachment/get-attachment-types-for-application application)]
-    (attachment/allowed-attachment-types-contain? allowed-types attachment-type)))
-
 (defn- validate-attachment-type [{{attachment-type :attachmentType} :data} application]
   (when attachment-type
-    (when-not (allowed-attachment-type-for-application? attachment-type application)
+    (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
 
 ;;
@@ -117,7 +109,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{application :application}]
-  (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
+  (ok :attachmentTypes (->> (att-type/get-attachment-types-for-application application)
+                            (att-type/->grouped-array))))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
@@ -128,8 +121,8 @@
    :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
 
-  (let [attachment-type (attachment/parse-attachment-type attachmentType)]
-    (if (allowed-attachment-type-for-application? attachment-type application)
+  (let [attachment-type (att-type/parse-attachment-type attachmentType)]
+    (if (att-type/allowed-attachment-type-for-application? attachment-type application)
       (let [metadata (-> (tiedonohjaus/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
                          (tiedonohjaus/update-end-dates (:verdicts application)))]
         (attachment/update-attachment-data! command attachmentId {:type attachment-type :metadata metadata} created))
@@ -197,7 +190,7 @@
    :parameters  [id attachmentTypes]
 
    :pre-checks [(fn [{{attachment-types :attachmentTypes} :data} application]
-                  (when (and attachment-types (not (every? #(allowed-attachment-type-for-application? % application) attachment-types)))
+                  (when (and attachment-types (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
                     (fail :error.unknown-attachment-type)))
                 a/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
@@ -224,7 +217,8 @@
    :states states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (attachment/create-ram-attachment! application attachment-id created)]
-    (ok :applicationId id :attachmentId attachment-id)
+    (do (att-notifications/notify-new-ram-attachment! application attachment-id created)
+        (ok :applicationId id :attachmentId attachment-id))
     (fail :error.attachment-placeholder)))
 
 ;;

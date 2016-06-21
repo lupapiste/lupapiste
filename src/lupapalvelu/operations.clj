@@ -810,6 +810,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required ["tyonjohtaja" "maksaja"]
                                  :attachments []
+                                 :attachment-op-selector false
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :max-outgoing-link-permits 1
@@ -823,6 +824,7 @@
                                  :state-graph-resolver tyonjohtaja-state-machine-resolver
                                  :required ["hankkeen-kuvaus-minimum"]
                                  :attachments []
+                                 :attachment-op-selector false
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :max-outgoing-link-permits 1
@@ -1019,6 +1021,8 @@
 
    :attachments [sc/Any]
 
+   (sc/optional-key :attachment-op-selector) sc/Bool
+
    ; Type and workflow
    :permit-type (sc/pred permit/valid-permit-type?)
    (sc/optional-key :subtypes) [(sc/maybe sc/Keyword)]
@@ -1103,6 +1107,12 @@
         filtering-fn (fn [node] (permit-types (permit-type-of-operation node)))]
     (sort-operation-tree
       (operations-filtered filtering-fn false))))
+
+(def operation-names-by-permit-type
+  (->> operations
+       (group-by (comp :permit-type val))
+       (map (juxt (comp keyword key) (comp keys val)))
+       (into {})))
 
 (defn selected-operations-for-organizations [organizations]
   (let [orgs-with-selected-ops (filter (comp seq :selected-operations) organizations)

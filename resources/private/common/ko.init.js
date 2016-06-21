@@ -272,7 +272,7 @@
   ko.bindingHandlers.download = {
     update: function( element, valueAccessor) {
       var file = ko.utils.unwrapObservable(valueAccessor());
-      $(element).attr( "href", "/api/raw/download-attachment?attachment-id=" + file.id);
+      $(element).attr( "href", "/api/raw/download-attachment?attachment-id=" + file.fileId);
       $(element).text( file.filename);
     }
   };
@@ -280,7 +280,7 @@
   var attachmentVersionTemplate =
         _.template( "<a href='/api/raw/download-attachment?attachment-id"
                     + "=<%- fileId %>'><%- filename %></a><br>"
-                    + "<i><%- contentText %> <%- sizeText %></i>");
+                    + "<i class='fileinfo'><%- contentText %> <%- sizeText %></i>");
 
   // Fills the target element with:
   // <a href="attachment file download url">filename</a><br>
@@ -564,6 +564,10 @@
     return names[month];
   }
 
+  function weekText(timeValue) {
+    return "(" + loc("calendar.week") + moment(timeValue).format(" WW") + ")";
+  }
+
   ko.bindingHandlers.calendarDayColumnHeader = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
@@ -575,7 +579,7 @@
   ko.bindingHandlers.calendarViewMonthText = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      var dateStr = value ? monthName(value) + moment(value).format(" YYYY"): "";
+      var dateStr = value ? monthName(value) + moment(value).format(" YYYY ") + weekText(value) : "";
       $(element).html(dateStr);
     }
   };

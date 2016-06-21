@@ -7,6 +7,7 @@
             [slingshot.slingshot :refer [try+]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.mongo :as mongo]
@@ -58,9 +59,8 @@
                (query/sort (make-sort sort))
                (query/paginate :page page :per-page bulletin-page-size))]
     (->> apps
-         (map
-           #(assoc (first (:versions %)) :id (:_id %)))
-         (filter bulletins/bulletin-date-valid? ))))
+         (map #(assoc (first (:versions %)) :id (:_id %)))
+         (filter bulletins/bulletin-date-valid?))))
 
 (defn- page-size-validator [{{page :page} :data}]
   (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
@@ -112,7 +112,7 @@
 
 (defn- referenced-file-can-be-attached
   [{{files :files} :data}]
-  (let [files-found (map #(mongo/any? :fs.files {:_id (:id %) "metadata.sessionId" (vetuma/session-id)}) files)]
+  (let [files-found (map #(mongo/any? :fs.files {:_id (:fileId %) "metadata.sessionId" (vetuma/session-id)}) files)]
     (when-not (every? true? files-found)
       (fail :error.invalid-files-attached-to-comment))))
 
@@ -224,6 +224,9 @@
           append-schema-fn     (fn [{schema-info :schema-info :as doc}]
                                  (assoc doc :schema (schemas/get-schema schema-info)))
           bulletin             (-> bulletin-version
+                                   (domain/filter-application-content-for {})
+                                   ; unset keys (with empty values) set by filter-application-content-for
+                                   (dissoc :comments :neighbors :statements)
                                    (update-in [:documents] (partial map append-schema-fn))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
           bulletin-commentable (= (bulletin-can-be-commented command) nil)]
@@ -244,7 +247,7 @@
                             (merge {:comments 1
                                     :versions.id 1
                                     :bulletinState 1}))
-        bulletin (mongo/with-id (mongo/by-id :application-bulletins bulletinId bulletin-fields))
+        bulletin (bulletins/get-bulletin bulletinId bulletin-fields)
         versions (map count-comments (:versions bulletin))
         bulletin (assoc bulletin :versions versions)]
     (ok :bulletin bulletin)))

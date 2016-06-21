@@ -367,7 +367,7 @@
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- katselmus-pk? [{:keys [type-group type-id] :as attachment-type}]
-  (and (= type-group (if (env/feature? :updated-attachments) "katselmukset_ja_tarkastukset" "muut"))
+  (and (= type-group "katselmukset_ja_tarkastukset")
     (#{"katselmuksen_tai_tarkastuksen_poytakirja" "aloituskokouksen_poytakirja"} type-id)))
 
 (defn- save-katselmus-xml [application

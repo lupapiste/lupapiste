@@ -32,7 +32,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.user :as user]
-            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization-api]
             [lupapalvelu.application-api :as application]
@@ -466,7 +466,7 @@
                       :locked (java.lang.Boolean/parseBoolean locked)
                       :text text
                       :op operation)
-        attachment-type (attachment/parse-attachment-type attachmentType)
+        attachment-type (att-type/parse-attachment-type attachmentType)
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
@@ -487,8 +487,12 @@
     (try
       (handler request)
       (finally
-        (when-let [tempfile (get-in request [:params :upload :tempfile])]
-          (fs/delete tempfile))))))
+        (when-let [tempfile (or (get-in request [:params :upload :tempfile])
+                                (get-in request [:params :files]))]
+          (if (sequential? tempfile)
+            (doseq [{file :tempfile} tempfile] ; files as array from fileupload-service /api/raw/upload-file
+              (fs/delete file))
+            (fs/delete tempfile)))))))
 
 ;;
 ;; Server is alive

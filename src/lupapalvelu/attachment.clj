@@ -12,8 +12,9 @@
             [sade.core :refer :all]
             [sade.http :as http]
             [lupapalvelu.action :refer [update-application application->command]]
-            [lupapalvelu.attachment-accessibility :as access]
-            [lupapalvelu.attachment-metadata :as metadata]
+            [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.accessibility :as access]
+            [lupapalvelu.attachment.metadata :as metadata]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
@@ -24,7 +25,6 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
-            [lupapiste-commons.attachment-types :as attachment-types]
             [lupapiste-commons.preview :as preview]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.tiff-validation :as tiff-validation])
@@ -53,78 +53,18 @@
 ;; Metadata
 ;;
 
-(def attachment-types-osapuoli attachment-types/osapuolet-v2)
-
 (def attachment-meta-types [:size :scale :op :contents])
 
 (def attachment-scales
-  [:1:20
-   :1:50
-   :1:100
-   :1:200
-   :1:500
+  [:1:20 :1:50 :1:100 :1:200 :1:500
    :muu])
 
 (def attachment-sizes
-  [:A0
-   :A1
-   :A2
-   :A3
-   :A4
-   :A5
-   :B0
-   :B1
-   :B2
-   :B3
-   :B4
-   :B5
+  [:A0 :A1 :A2 :A3 :A4 :A5
+   :B0 :B1 :B2 :B3 :B4 :B5
    :muu])
 
 (def attachment-states #{:ok :requires_user_action :requires_authority_action})
-
-(def- attachment-types-by-permit-type-unevaluated
-  (cond-> {:R    'attachment-types/Rakennusluvat
-           :P    'attachment-types/Rakennusluvat
-           :YA   'attachment-types/YleistenAlueidenLuvat
-           :YI   'attachment-types/Ymparistoilmoitukset
-           :YL   'attachment-types/Ymparistolupa
-           :YM   'attachment-types/MuutYmparistoluvat
-           :VVVL 'attachment-types/Ymparistoilmoitukset
-           :MAL  'attachment-types/Maa-ainesluvat
-           :MM   'attachment-types/Kiinteistotoimitus
-           :KT   'attachment-types/Kiinteistotoimitus}
-    (env/feature? :updated-attachments) (merge {:R  'attachment-types/Rakennusluvat-v2
-                                                :P  'attachment-types/Rakennusluvat-v2
-                                                :YA 'attachment-types/YleistenAlueidenLuvat-v2})))
-
-(def- attachment-types-by-permit-type (eval attachment-types-by-permit-type-unevaluated))
-
-(def operation-specific-attachment-types #{{:type-id :pohjapiirros       :type-group :paapiirustus}
-                                           {:type-id :leikkauspiirros    :type-group :paapiirustus}
-                                           {:type-id :julkisivupiirros   :type-group :paapiirustus}
-                                           {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
-                                           {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
-                                           {:type-id :energiatodistus    :type-group :muut}
-                                           {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
-                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}
-                                           {:type-id :pohjapiirustus     :type-group :paapiirustus}
-                                           {:type-id :leikkauspiirustus  :type-group :paapiirustus}
-                                           {:type-id :julkisivupiirustus :type-group :paapiirustus}
-                                           {:type-id :muu_paapiirustus   :type-group :paapiirustus}
-                                           {:type-id :energiatodistus    :type-group :energiatodistus}
-                                           {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}})
-
-(def all-attachment-type-ids
-  (->> (vals attachment-types-by-permit-type)
-       (apply concat)
-       (#(flatten (map second (partition 2 %))))
-       (set)))
-
-(def all-attachment-type-groups
-  (->> (vals attachment-types-by-permit-type)
-       (apply concat)
-       (#(map first (partition 2 %)))
-       (set)))
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
 
@@ -190,8 +130,8 @@
 
 (defschema Type
   "Attachment type"
-  {:type-id                              (apply sc/enum all-attachment-type-ids)
-   :type-group                           (apply sc/enum all-attachment-type-groups)})
+  {:type-id                              (apply sc/enum att-type/all-attachment-type-ids)
+   :type-group                           (apply sc/enum att-type/all-attachment-type-groups)})
 
 (defschema Attachment
   {:id                                   AttachmentId
@@ -224,41 +164,6 @@
    (sc/optional-key :metadata)           {sc/Any sc/Any}})
 
 
-;; Helper for reporting purposes
-(defn localised-attachments-by-permit-type [permit-type]
-  (let [localize-attachment-section
-        (fn [lang [title attachment-names]]
-          [(i18n/localize lang (ss/join "." ["attachmentType" (name title) "_group_label"]))
-           (reduce
-             (fn [result attachment-name]
-               (let [lockey                    (ss/join "." ["attachmentType" (name title) (name attachment-name)])
-                     localized-attachment-name (i18n/localize lang lockey)]
-                 (conj
-                   result
-                   (ss/join \tab [(name attachment-name) localized-attachment-name]))))
-             []
-             attachment-names)])]
-    (reduce
-      (fn [accu lang]
-        (assoc accu (keyword lang)
-          (->> (get attachment-types-by-permit-type (keyword permit-type))
-            (partition 2)
-            (map (partial localize-attachment-section lang))
-            vec)))
-      {}
-     ["fi" "sv"])))
-
-(defn print-attachment-types-by-permit-type []
-  (let [permit-types-with-names (into {}
-                                      (for [[k v] attachment-types-by-permit-type-unevaluated]
-                                        [k (name v)]))]
-    (doseq [[permit-type permit-type-name] permit-types-with-names]
-    (println permit-type-name)
-    (doseq [[group-name types] (:fi (localised-attachments-by-permit-type permit-type))]
-      (println "\t" group-name)
-      (doseq [type types]
-        (println "\t\t" type))))))
-
 ;;
 ;; Utils
 ;;
@@ -281,7 +186,6 @@
   (mongo/update-by-id :fs.files fileId {$set {:metadata.application app-id
                                               :metadata.linked true}}))
 
-
 (defn- by-file-ids [file-ids {versions :versions :as attachment}]
   (some (comp (set file-ids) :fileId) versions))
 
@@ -301,22 +205,9 @@
 (defn create-read-only-update-statements [attachments file-ids]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :readOnly true))
 
-(defn get-attachment-types-by-permit-type
-  "Returns partitioned list of allowed attachment types or throws exception"
-  [permit-type]
-  {:pre [permit-type]}
-  (if-let [types (get attachment-types-by-permit-type (keyword permit-type))]
-    (partition 2 types)
-    (fail! (str "unsupported permit-type: " (name permit-type)))))
-
-(defn get-attachment-types-for-application
-  [application]
-  {:pre [application]}
-  (get-attachment-types-by-permit-type (:permitType application)))
-
 (defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id contents read-only? source]]
   (cond-> {:id (or attachment-id (mongo/create-id))
-           :type attachment-type
+           :type (select-keys attachment-type [:type-id :type-group])
            :modified now
            :locked locked?
            :readOnly (boolean read-only?)
@@ -627,17 +518,6 @@
       @find-application-delay   (get-attachment-info @find-application-delay attachment-id)
       :else (create-attachment! application attachment-type op created target locked required requested-by-authority? attachment-id contents read-only source))))
 
-(defn parse-attachment-type [attachment-type]
-  (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
-    (let [[type-group type-id] (->> match (drop 1) (map keyword))]
-      {:type-group type-group :type-id type-id})))
-
-(defn allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
-  (let [type-group (keyword type-group)
-        type-id (keyword type-id)]
-    (if-let [types (some (fn [[group-name group-types]] (if (=as-kw group-name type-group) group-types)) allowed-types)]
-      (some #(=as-kw % type-id) types))))
-
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
   [{:keys [attachments]} file-id]
@@ -845,15 +725,6 @@
 (defn post-process-attachments [application]
   (update-in application [:attachments] (partial map post-process-attachment)))
 
-(defn- attachment-type-for-appeal [appeal-type]
-  (case (keyword appeal-type)
-    :appealVerdict  {:type-group :paatoksenteko
-                     :type-id    :paatos}
-    :appeal         {:type-group :muutoksenhaku
-                     :type-id    :valitus}
-    :rectification  {:type-group :muutoksenhaku
-                     :type-id    :oikaisuvaatimus}))
-
 (defn save-pdfa-file!
   "Save PDF/A file from pdf-conversion processing result to mongo gridfs.
    Returns map with archivability flags (archivable, missing-fonts, archivability error)
@@ -922,7 +793,7 @@
   "Return attachment model for new appeal attachment with version(s) included.
    If PDF, converts to PDF/A (if applicable) and thus creates a new file to GridFS as side effect."
   [{app :application now :created user :user :as command} appeal-id appeal-type file]
-  (let [type                 (attachment-type-for-appeal appeal-type)
+  (let [type                 (att-type/attachment-type-for-appeal appeal-type)
         target               {:id appeal-id
                               :type appeal-type}
         attachment-data      (create-attachment-data app type nil now target true false false nil nil true)

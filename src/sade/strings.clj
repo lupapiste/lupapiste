@@ -150,3 +150,7 @@
 (defn escaped-re-pattern
   [string]
   (re-pattern (str "\\Q" string "\\E")))
+
+(defn to-camel-case
+  [string]
+  (s/replace string #"-(\w)" #(upper-case (second %1))))

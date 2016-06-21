@@ -15,6 +15,11 @@
   (fact "authority-admin users should be able to use the calendar admin API"
     (query sipoo :calendars-for-authority-admin) => ok?)
 
+  (fact "organization with calendars-enabled := false can not use the calendar API functions"
+    (query veikko :my-calendars) => unauthorized?
+    (query veikko :calendar :calendarId 999 :userId "foobar") => unauthorized?
+    (command veikko :create-calendar-slots :calendarId 999 :slots []) => unauthorized?)
+
   (fact "calendars-for-authority-admin returns the users in the appropriate organization"
     (let [result   (:users (query sipoo :calendars-for-authority-admin))]
       (map :id result) => (just #{"777777777777777777888823"})))

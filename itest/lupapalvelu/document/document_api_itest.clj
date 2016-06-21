@@ -140,54 +140,84 @@
         (get-in approved-uusi-rakennus [:meta :_approved :timestamp]) => modified
         (get-in approved-uusi-rakennus [:meta :_approved :user :id]) => sonja-id))))
 
-(facts* "remove document"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
-        _              (command pena :add-operation :id application-id :operation "vapaa-ajan-asuinrakennus") => truthy
+(facts "remove document"
+  (let [application-id (:id (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
+        _              (command pena :add-operation :id application-id :operation "vapaa-ajan-asuinrakennus")
+        _              (command pena :add-operation :id application-id :operation "aloitusoikeus")
         application    (query-application pena application-id)
-        hakija         (domain/get-applicant-document (:documents application)) => truthy
-        uusi-rakennus  (domain/get-document-by-name application "uusiRakennus") => truthy
-        sauna          (domain/get-document-by-name application "uusi-rakennus-ei-huoneistoa") => truthy
+        hakija         (domain/get-applicant-document (:documents application))
+        paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
+        uusi-rakennus  (domain/get-document-by-name application "uusiRakennus")
+        sauna          (domain/get-document-by-name application "uusi-rakennus-ei-huoneistoa")
+        aloitusoikeus  (domain/get-document-by-name application "aloitusoikeus")
         primary-op     (:primaryOperation application)
         sec-operations (:secondaryOperations application)]
 
-    (fact "new application has a primary operation and a secondary operation"
+
+    (fact "new application has a primary operation and two secondary operations"
       (:name primary-op) => "kerrostalo-rivitalo"
-      (count sec-operations) => 1
+      (count sec-operations) => 2
       (:name (first sec-operations)) => "vapaa-ajan-asuinrakennus")
 
     (fact "application has attachments with primary operation" (count (attachment/get-attachments-by-operation application (:id primary-op))) => pos?)
 
     (fact "application has attachments with secondary operation" (count (attachment/get-attachments-by-operation application (:id (first sec-operations)))) => pos?)
 
+    (facts "not removable document cannot be removed"
+      (get-in aloitusoikeus [:schema-info :removable]) => false
+
+      (fact "by applicant"
+        (command pena  :remove-doc :id application-id :docId (:id aloitusoikeus)) => (partial expected-failure? "error.not-allowed-to-remove-document"))
+
+      (fact "by authority"
+        (command sonja :remove-doc :id application-id :docId (:id aloitusoikeus)) => (partial expected-failure? "error.not-allowed-to-remove-document")))
+
+    (fact "only authority can remove removable-only-by-authority document"
+      (get-in paasuunnittelija [:schema-info :removable]) => true
+      (get-in paasuunnittelija [:schema-info :removable-only-by-authority]) => true
+      (command pena :remove-doc :id application-id :docId (:id paasuunnittelija)) => (partial expected-failure? "error.action-allowed-only-for-authority")
+      (command sonja :remove-doc :id application-id :docId (:id paasuunnittelija)) => ok?)
+
     (fact "last hakija doc cannot be removed due :deny-removing-last-document flag"
       (get-in hakija [:schema-info :deny-removing-last-document]) => true
       (command pena :remove-doc :id application-id :docId (:id hakija)) => fail?)
 
     (fact "hakija doc is removed if there is more than one hakija-doc"
-      (command pena :create-doc :id application-id :schemaName (get-in hakija [:schema-info :name])) => ok?
-      (-> (query-application pena application-id) :documents domain/get-applicant-documents count) => 2
+      (let [application (query-application pena application-id)]
+        (command pena :create-doc :id application-id :schemaName (get-in hakija [:schema-info :name])) => ok?
+        (-> (query-application pena application-id) :documents domain/get-applicant-documents count) => 2
 
-      (command pena :remove-doc :id application-id :docId (:id hakija)) => ok?
-      (let [updated-app (query-application pena application-id)]
-        (-> (:documents updated-app) domain/get-applicant-documents count) => 1
-        (fact "every other doc nad operation remains untouched"
-          (count (:documents updated-app)) => (count (:documents application))
-          (count (:secondaryOperations updated-app)) => (count (:secondaryOperations application))
-          (:primaryOperation updated-app) => (:primaryOperation application))))
+        (command pena :remove-doc :id application-id :docId (:id hakija)) => ok?
+        (let [updated-app (query-application pena application-id)]
+          (-> (:documents updated-app) domain/get-applicant-documents count) => 1
+          (facts "every other doc and operation remains untouched"
+            (fact "docs"
+              (count (:documents updated-app)) => (count (:documents application)))
+            (fact "secondary operations"
+              (count (:secondaryOperations updated-app)) => (count (:secondaryOperations application)))
+            (fact "primary operation"
+              (:primaryOperation updated-app) => (:primaryOperation application))))))
 
     (fact "primary operation cannot be removed"
       (command pena :remove-doc :id application-id :docId (:id uusi-rakennus)) => fail?)
 
 
-    (fact* "sauna doc and operation are removed"
-      (let [sauna-attachment (first (attachment/get-attachments-by-operation application (:id (first sec-operations))))
-            _ (upload-attachment pena application-id sauna-attachment true)
-            _ (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
-            updated-app (query-application pena application-id)]
-        (domain/get-document-by-name updated-app "uusi-rakennus-ei-huoneistoa") => nil
-        (:primaryOperation updated-app) =not=> nil?
-        (count (:secondaryOperations updated-app)) => 0
-        (fact "attachments belonging to operation don't exist anymore"
-          (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)
-        (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
-          (some (hash-set (:id sauna-attachment)) (map :id (:attachments updated-app))))))))
+    (fact "sauna doc and operation are removed"
+
+      (let [sauna-attachment (first (attachment/get-attachments-by-operation application (:id (first sec-operations))))]
+        (fact "Upload sauna-attachment"
+            sauna-attachment => truthy
+            (upload-attachment pena application-id sauna-attachment true))
+
+        (:id sauna) => truthy
+        (command pena :remove-doc :id application-id :docId (:id sauna)) => ok?
+
+        (let [updated-app (query-application pena application-id)]
+
+          (domain/get-document-by-name updated-app "uusi-rakennus-ei-huoneistoa") => nil
+          (:primaryOperation updated-app) =not=> nil?
+          (count (:secondaryOperations updated-app)) => 1
+          (fact "attachments belonging to operation don't exist anymore"
+            (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)
+          (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
+            (some (hash-set (:id sauna-attachment)) (map :id (:attachments updated-app)))))))))

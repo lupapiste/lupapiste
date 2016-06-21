@@ -4,7 +4,11 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
   var self = this;
 
   self.reservationType = ko.observable();
-  self.items = lupapisteApp.services.calendarService.calendarQuery.reservationTypes;
+  self.items = ko.observableArray([]);
+
+  hub.subscribe("calendarService::organizationReservationTypesFetched", function(event) {
+    self.items(event.reservationTypes || []);
+  });
 
   function EditReservationTypeModel() {
     var self = this;
@@ -44,7 +48,11 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
           .command("update-reservation-type", {reservationTypeId: id, name: reservationType})
           .success(function() {
             hub.send("calendarService::fetchOrganizationReservationTypes");
+            hub.send("indicator", {style: "positive"});
             LUPAPISTE.ModalDialog.close();
+          })
+          .error(function(e) {
+            hub.send("indicator", {style: "negative", message: e.code});
           })
           .call();
       }
@@ -60,7 +68,11 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
           .command("add-reservation-type-for-organization", {reservationType: reservationType})
           .success(function() {
             hub.send("calendarService::fetchOrganizationReservationTypes");
+            hub.send("indicator", {style: "positive"});
             LUPAPISTE.ModalDialog.close();
+          })
+          .error(function(e) {
+            hub.send("indicator", {style: "negative", message: e.code});
           })
           .call();
       }
@@ -71,7 +83,13 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
   self.deleteReservationType = function(reservationType) {
     ajax
       .command("delete-reservation-type", {reservationTypeId: reservationType.id})
-      .success(_.partial(hub.send("calendarService::fetchOrganizationReservationTypes")))
+      .success(function() {
+        hub.send("calendarService::fetchOrganizationReservationTypes");
+        hub.send("indicator", {style: "positive"});
+      })
+      .error(function(e) {
+        hub.send("indicator", {style: "negative", message: e.code});
+      })
       .call();
   };
 

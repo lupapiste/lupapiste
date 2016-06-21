@@ -10,7 +10,7 @@
             [sade.validators :as v]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment-accessibility :as attaccess]
+            [lupapalvelu.attachment.accessibility :as attaccess]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
@@ -2220,6 +2220,19 @@
                             {:versions.documents {$elemMatch {:data.kesto.arki {$exists true}
                                                      :schema-info.name "ymp-ilm-kesto"}}}))
 
+(defmigration add-calendars-property-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:calendars-enabled {$exists false}}))}
+  (doseq [organization (mongo/select :organizations {:calendars-enabled {$exists false}})]
+    (mongo/update-by-id :organizations (:id organization)
+                        {$set {:calendars-enabled false}})))
+
+(defmigration remove-invites-application-id
+  {:apply-when (pos? (mongo/count :applications {:auth.invite.application {$exists true}}))}
+  (update-applications-array
+    :auth
+    (fn [a] (util/dissoc-in a [:invite :application]))
+    {:auth.invite.application {$exists true}}))
+
 (defn set-missing-metadata-laskentaperuste [{:keys [metadata] :as attachment}]
   (if (and (= "toistaiseksi" (get-in metadata [:sailytysaika :arkistointi])) (nil? (get-in metadata [:sailytysaika :laskentaperuste])))
     (assoc-in attachment [:metadata :sailytysaika :laskentaperuste] "rakennuksen_purkamisp\u00e4iv\u00e4")
@@ -2243,6 +2256,14 @@
                            {$set {:processMetadata.sailytysaika.laskentaperuste "rakennuksen_purkamisp\u00e4iv\u00e4"}}))
   (update-applications-array :attachments set-missing-metadata-laskentaperuste {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi "toistaiseksi"
                                                                                                           :metadata.sailytysaika.laskentaperuste {$exists false}}}}))
+
+(defmigration paasuunnittelija-is-removable
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" "paasuunnittelija", "schema-info.removable" false}}}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (mongo/update-by-query collection
+        {:documents {$elemMatch {:schema-info.name "paasuunnittelija", :schema-info.removable false}}}
+        {$set {:documents.$.schema-info.removable true}}))))
 
 ;;
 ;; ****** NOTE! ******

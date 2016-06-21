@@ -24,8 +24,8 @@
     };
   }
 
-  function getAllOrganizationAttachmentTypes(permitType) {
-    return _.map(organizationModel.attachmentTypes[permitType], function(g) {
+  function getAllOrganizationAttachmentTypesForOperation(permitType, operation) {
+    return _.map(organizationModel.attachmentTypes[permitType][operation], function(g) {
       var groupId = g[0],
           groupText = loc(["attachmentType", groupId, "_group_label"]),
           attachmentIds = g[1],
@@ -44,7 +44,7 @@
     self.open = function(op) {
       self.op(op);
       self.selectm.reset(
-          getAllOrganizationAttachmentTypes(op.permitType),
+          getAllOrganizationAttachmentTypesForOperation(op.permitType, op.id),
           _.map(op.attachments, function(a) {
             return toAttachmentData.apply(null, a.id);
           }));
@@ -442,10 +442,10 @@
     hub.onPageLoad("calendar-admin", function() {
       var path = pageutil.getPagePath();
       if (path.length > 1) {
-        // calendar-view can be initialized with fetchCalendar event after reservationtypes have been init'ed
-        hub.subscribe("calendarService::organizationReservationTypesFetched", function() {
-          hub.send("calendarService::fetchCalendar", {user: path[0], id: path[1]});
-        }, true);
+        calendarsModel.userIdInView(path[0]);
+        calendarsModel.calendarIdInView(path[1]);
+        hub.send("calendarService::fetchCalendar", {user: path[0], calendarId: path[1],
+                                                    calendarObservable: calendarsModel.calendarInView});
       }
       hub.send("calendarService::fetchOrganizationReservationTypes");
     });
