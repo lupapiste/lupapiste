@@ -340,8 +340,8 @@
                           {:name "SBANFIHH"} ; S-Pankki Oy (uusi)
                           ])
 
-(def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
-                          {:name "verkkolaskuTunnus" :type :string}
+(def verkkolaskutustieto [{:name "verkkolaskuTunnus" :type :string}
+                          {:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "valittajaTunnus"
                            :type :select
                            :i18nkey "osapuoli.yritys.verkkolaskutustieto.valittajaTunnus"
@@ -1393,6 +1393,11 @@
   [["henkilotiedot" "etunimi"]
    ["henkilotiedot" "sukunimi"]])
 
+(def hakijan-asiamies-accordion-paths
+  "Data from paths are visible in accordion header"
+  [["henkilotiedot" "etunimi"]
+   ["henkilotiedot" "sukunimi"]])
+
 (def foreman-accordion-paths
   "Data from paths are visible in accordion header"
   [["kuntaRoolikoodi"]
@@ -1590,6 +1595,22 @@
            :accordion-fields hakija-accordion-paths
            }
     :body party}
+
+   {:info {:name "hakijan-asiamies"
+           :i18name "osapuoli"
+           :order 3
+           :removable true
+           :repeating true
+           :deny-removing-last-document false
+           :approvable true
+           :type :party
+           :subtype :hakijan-asiamies
+           :group-help nil
+           :section-help nil
+           :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+           :accordion-fields hakijan-asiamies-accordion-paths
+           }
+       :body party}
 
    {:info {:name "paasuunnittelija"
            :i18name "osapuoli"

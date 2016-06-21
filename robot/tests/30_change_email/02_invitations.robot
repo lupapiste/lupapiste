@@ -4,6 +4,7 @@ Documentation   Mikko can accept invitations created for the old email after ema
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/vetuma_helpers.robot
+Resource        ../common_keywords/email_helpers.robot
 
 *** Test Cases ***
 
@@ -39,6 +40,14 @@ Mikko sees the invitation modal dialog and accepts
   Wait until  Dialog is invisible
   Sleep  2s
   Wait until  Dialog is invisible
+
+Mikko changes his email back to mikko@example.com
+  [Tags]  integration
+  Change email to  mikko@example.com
+  Open last email and click the email change link
+  Identify for email change via Vetuma
+  Log in with new email address  mikko@example.com  mikko123  Mikko Intonen
+  Logout
 
 *** Keywords ***
 
@@ -83,9 +92,6 @@ Navigate to email change
   Click Element  user-name
   Open accordion by test id  mypage-change-email-accordion
   Wait Until  Element Should be visible  oldEmail
-
-Dialog is invisible
-  Element should not be visible  xpath=//div[@id='modal-dialog-content']
 
 Vetuma button is visible
   Wait until page contains element  vetuma-init-email

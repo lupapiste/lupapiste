@@ -145,6 +145,18 @@ Mikko adds party maksaja using dialog
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
+Mikko adds party hakijan-asiamies using dialog
+  Click enabled by test id  add-party
+  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
+  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
+  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
+  Click enabled by test id  add-party-button
+  Wait Until  Element Should Not Be Visible  dialog-add-party
+  Open accordions  parties
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.hakijan-asiamies']
+  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
+
+
 Mikko adds party hakija-r using button
   Set Suite Variable  ${hakijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  1

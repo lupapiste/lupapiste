@@ -267,7 +267,7 @@
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
    "Ilmoituksen tekij\u00e4"        "hakija"
-   "Hakijan asiamies"                               "hakija"
+   "Hakijan asiamies"               "muu osapuoli"
    "Rakennusvalvonta-asian laskun maksaja"  "maksaja"
    "p\u00e4\u00e4suunnittelija"     "p\u00e4\u00e4suunnittelija"
    "GEO-suunnittelija"              "erityissuunnittelija"
@@ -300,7 +300,8 @@
    :hakija                 "Rakennusvalvonta-asian hakija"
    :ilmoittaja             "Ilmoituksen tekij\u00e4"
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
-   :rakennuksenomistaja    "Rakennuksen omistaja"})
+   :rakennuksenomistaja    "Rakennuksen omistaja"
+   :hakijan-asiamies       "Hakijan asiamies"})
 
 (defn assoc-country
   "Augments given (address) map with country and foreign address
@@ -410,7 +411,7 @@
     {tag-name (doc-transformer osapuoli party-type subtype)}))
 
 (defn get-parties [{:keys [schema-version] :as app} documents]
-  (let [hakija-schema-names (schemas/get-hakija-schema-names schema-version)
+  (let [hakija-schema-names (conj (schemas/get-hakija-schema-names schema-version) "hakijan-asiamies")
         hakija-key (some #(when (hakija-schema-names (name %)) %) (keys documents))
         applicant-schema-name (op/get-applicant-doc-schema-name app)]
     (when-not (= hakija-key (keyword applicant-schema-name))
@@ -418,7 +419,8 @@
     (filter #(seq (:Osapuoli %))
       (into
         (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
-        (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
+        (into (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)
+              (get-parties-by-type documents :Osapuoli :hakijan-asiamies get-osapuoli-data))))))
 
 (defn get-suunnittelija-data [suunnittelija party-type & [subtype]]
   (when (-> suunnittelija :henkilotiedot :sukunimi)

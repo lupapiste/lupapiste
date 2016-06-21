@@ -107,10 +107,12 @@
                     (fact "with sovellus=Lupapiste"
                       (xml/get-text lupapiste-id [:MuuTunnus :tunnus]) =not=> ss/blank?)))))))
 
-        (fact "hakija and maksaja parties exist"
+        (fact "hakija, maksaja and hakijan asiamies parties exist"
           (let [osapuoli-codes (->> (xml/select lp-xml_220 [:osapuolettieto :Osapuoli])
                                  (map (comp :kuntaRooliKoodi cr/all-of)))]
             (->> osapuoli-codes (filter #(= % "Rakennusvalvonta-asian hakija")) count) => pos?
+            (if (= (:id application) (:id application-rakennuslupa))
+              (->> osapuoli-codes (filter #(= % "Hakijan asiamies")) count) => 1)
             (->> osapuoli-codes (filter #(= % "Rakennusvalvonta-asian laskun maksaja")) count) => pos?))
 
         (fact "saapumisPvm"
