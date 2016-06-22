@@ -244,12 +244,14 @@
          (ss/optional-string? url)
          (ss/optional-string? username)
          (ss/optional-string? password)]}
-  (let [credentials (if (ss/blank? password)
-                      {:username username
-                       :password password}
-                      (encode-credentials username password))
-        server      (assoc credentials :url url)]
-   (update-organization org-id {$set {mongo-path server}})))
+  (let [server (cond
+                 (ss/blank? username) {:url url, :username nil, :password nil} ; this should replace the server map (removes password)
+                 (ss/blank? password) {:url url, :username username} ; update these keys only, password not changed
+                 :else (assoc (encode-credentials username password) :url url)) ; this should replace the server map
+        updates (if-not (contains? server :password)
+                  (into {} (map (fn [[k v]] [(str (name mongo-path) \. (name k)) v]) server) )
+                  {mongo-path server})]
+   (update-organization org-id {$set updates})))
 
 ;;
 ;; Organization/municipality provided map support.
