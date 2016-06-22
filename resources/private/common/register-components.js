@@ -126,13 +126,7 @@ jQuery(document).ready(function() {
     {name: "rollup-button"},
     {name: "rollup-status-button"},
     {name: "filters"}
-];
+    ];
 
-  _.forEach(components, function(component) {
-    ko.components.register(component.name, {
-      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name + "Model"))],
-      template: { element: (component.template ? component.template : component.name + "-template")},
-      synchronous: component.synchronous ? true : false
-    });
-  });
+  ko.registerLupapisteComponents(components);
 });
