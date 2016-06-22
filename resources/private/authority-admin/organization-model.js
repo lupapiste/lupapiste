@@ -47,8 +47,8 @@ LUPAPISTE.OrganizationModel = function () {
   self.permanentArchiveInUseSince = ko.observable();
   self.features = ko.observable();
   self.allowedRoles = ko.observable([]);
-
   self.permitTypes = ko.observable([]);
+  self.suti = ko.observable();
 
   self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
@@ -236,6 +236,8 @@ LUPAPISTE.OrganizationModel = function () {
     self.allowedRoles(organization.allowedRoles);
 
     self.permitTypes(_(organization.scope).map("permitType").uniq().value());
+
+    self.suti(organization.suti);
 
     self.initialized = true;
   };
