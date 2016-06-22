@@ -9,12 +9,14 @@
       usr/authority-admins-organization-id
       org/get-organization))
 
-(defn add-operation [organization operation-id]
-  (when-not (contains? (set (some-> organization :suti :operations)) operation-id)
-    (org/update-organization (:id organization)
-                             {$push {:suti.operations operation-id}})))
+(defn toggle-operation [organization operation-id flag]
+  (let [already (contains? (-> organization :suti :operations set) operation-id)]
+    (when (not= (boolean already) (boolean flag))
+      (org/update-organization (:id organization)
+                               {(if flag $push $pull) {:suti.operations operation-id}}))))
 
-(defn remove-operation [organization operation-id]
-  (when (contains? (set (some-> organization :suti :operations)) operation-id)
-    (org/update-organization (:id organization)
-                             {$pull {:suti.operations operation-id}})))
+(defn toggle-section-operation [organization operation-id flag]
+  (let [already (contains? (-> organization :section-operations set) operation-id)]
+    (when (not= (boolean already) (boolean flag))
+      (org/update-organization (:id organization)
+                               {(if flag $push $pull) {:section-operations operation-id}}))))

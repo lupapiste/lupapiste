@@ -11,6 +11,7 @@
             <thead>
               <tr>
                 <th data-bind="ltext: permitType"></th>
+                <th data-bind="ltext: 'verdict.pykala'"></th>
                 <!-- ko if: $root.organization.sutiEnabled -->
                 <th data-bind="ltext: 'suti.column',
                                feature: 'suti-integration'"></th>
@@ -20,9 +21,19 @@
             <tbody data-bind="foreach: operations">
               <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">                
                 <td data-bind="text: text"></td>
+                <td>
+                  <div class="sectionbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="attr: {id: 'section-' + id},
+                                      checked: $root.organization.isSectionOperation( $data )">
+                    <label class="sectionbox-label"
+                           data-bind="attr: {'for': 'section-' + id},
+                                      click: $root.organization.toggleSectionOperation"></label>
+                  </div>
+                </td>
                 <!-- ko if: $root.organization.sutiEnabled -->
                 <td data-bind="feature: 'suti-integration'">
-                  <div class="checkbox-wrapper checkbox-wrapper--no-border">
+                  <div class="checkbox-wrapper">
                     <input type="checkbox"
                            data-bind="attr: {id: 'suti-' + id},
                                       checked: $root.organization.isSutiOperation( $data )">

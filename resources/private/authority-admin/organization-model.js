@@ -53,6 +53,8 @@ LUPAPISTE.OrganizationModel = function () {
   self.sutiEnabled = ko.observable();
   self.sutiOperations = ko.observableArray();
 
+  self.sectionOperations = ko.observableArray();
+
   self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
   ko.computed(function() {
@@ -245,6 +247,7 @@ LUPAPISTE.OrganizationModel = function () {
     // Suti integration
     self.sutiEnabled(_.get( organization, "suti.enabled", false ));
     self.sutiOperations( _.get( organization, "suti.operations", [] ));
+    self.sectionOperations( _.get( organization, "section-operations", []));
     self.initialized = true;
   };
 
@@ -261,6 +264,22 @@ LUPAPISTE.OrganizationModel = function () {
     }
     ajax.command( "suti-toggle-operation", {operationId: $data.id,
                                             flag: flag })
+      .call();
+  };
+
+  self.isSectionOperation = function ( $data )  {
+    return self.sectionOperations.indexOf( $data.id ) >= 0;
+  };
+
+  self.toggleSectionOperation = function( $data ) {
+    var flag = !self.isSectionOperation( $data );
+    if( flag ) {
+      self.sectionOperations.push( $data.id );
+    } else {
+      self.sectionOperations.remove( $data.id );
+    }
+    ajax.command( "section-toggle-operation", {operationId: $data.id,
+                                               flag: flag })
       .call();
   };
 

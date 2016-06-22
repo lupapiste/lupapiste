@@ -14,5 +14,13 @@
    :user-roles #{:authorityAdmin}
    :feature :suti-integration}
   [{user :user}]
-  (let [fun (if flag suti/add-operation suti/remove-operation)]
-    (fun (suti/admin-org user) operationId)))
+  (suti/toggle-operation (suti/admin-org user) operationId flag))
+
+(defcommand section-toggle-operation
+  {:description "Toggles operation either requiring section or not."
+   :parameters [operationId flag]
+   :input-validators [(partial action/non-blank-parameters [:operationId])
+                      (partial action/boolean-parameters [:flag])]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (suti/toggle-section-operation (suti/admin-org user) operationId flag))
