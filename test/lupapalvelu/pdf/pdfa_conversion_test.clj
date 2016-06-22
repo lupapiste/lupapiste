@@ -13,19 +13,19 @@
   (against-background [(#'lupapalvelu.pdf.pdfa-conversion/store-converted-page-count anything anything) => nil]
     (facts "PDF/A conversion"
       (let [invalid-pdf (io/file "dev-resources/invalid-pdfa.pdf")
-            temp-target-path (.getCanonicalPath (File/createTempFile "pdfa-conversion-test" "pdf"))]
+            opts {:target-file-path (.getCanonicalPath (File/createTempFile "pdfa-conversion-test" "pdf"))}]
         (fact "PDF conversion ok with file"
           (convert-to-pdf-a invalid-pdf
-                            temp-target-path) => (contains {:output-file (partial instance? java.io.File)
+                            opts) => (contains {:output-file (partial instance? java.io.File)
                                                                       :pdfa? true}))
 
         (fact "Conversion with InputStream is OK"
           (convert-to-pdf-a (FileInputStream. invalid-pdf)
-                            temp-target-path) => (contains {:output-file (partial instance? java.io.File)
+                            opts) => (contains {:output-file (partial instance? java.io.File)
                                                                       :pdfa?        true}))
 
         (fact "If conversion result is empty, original is returned"
-          (convert-to-pdf-a invalid-pdf temp-target-path) => {:pdfa? false}
+          (convert-to-pdf-a invalid-pdf opts) => {:pdfa? false}
           (provided
-            (#'lupapalvelu.pdf.pdfa-conversion/run-pdf-to-pdf-a-conversion anything anything) => {:pdfa? true
-                                                                                              :output-file (File/createTempFile "pdfa-conversion-test" "pdf")}))))))
+            (#'lupapalvelu.pdf.pdfa-conversion/run-pdf-to-pdf-a-conversion anything anything opts) => {:pdfa? true
+                                                                                                       :output-file (File/createTempFile "pdfa-conversion-test" "pdf")}))))))
