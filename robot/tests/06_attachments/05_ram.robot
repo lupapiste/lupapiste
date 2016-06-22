@@ -100,6 +100,7 @@ Sonja logs in and could delete base attachment
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Open attachment details  muut.muu
+  Wait test id visible  ram-link-type-0
   Click link  jquery=td[data-test-id=ram-link-type-0] a
   No such test id  ram-prefix
   Delete allowed  True
