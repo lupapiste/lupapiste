@@ -482,13 +482,13 @@
                                                                           nil)
                             (-> "753-YA" local-org-api/get-organization :map-layers :server
                                 (select-keys [:password :crypto-iv])) => {:password nil})
-                      (fact "No extra credentials are stored (\"\")"
+                      (fact "No extra credentials are stored ('')"
                             (local-org-api/update-organization-map-server "753-YA"
                                                                           "http://stilldoesnotmatter"
                                                                           ""
                                                                           "")
                             (-> "753-YA" local-org-api/get-organization :map-layers :server
-                                (select-keys [:password :crypto-iv])) => {:password ""})))))))
+                                (select-keys [:password :crypto-iv])) => {:password nil})))))))
 
 (doseq [[command-name config-key] [[:set-organization-neighbor-order-email :neighbor-order-emails]
                                    [:set-organization-submit-notification-email :submit-notification-emails
@@ -519,7 +519,7 @@
   (fact "initially empty"
     (let [initial-org-resp (query sipoo :organization-by-user)]
       initial-org-resp => ok?
-      (get-in initial-org-resp [:organization :suti :server]) => nil))
+      (get-in initial-org-resp [:organization :suti :server]) => empty?))
 
   (fact "updated succeeds"
     (command sipoo :update-suti-server-details :url "http://localhost:8000/dev/suti" :username "sipoo" :password "xx") => ok?)
@@ -529,9 +529,8 @@
      org-resp => ok?
      (get-in organization [:suti :server]) => (contains {:url "http://localhost:8000/dev/suti" :username "sipoo"})
 
-     (fact "with encrypted password"
-       (get-in organization [:suti :server :password]) => string?
-       (get-in organization [:suti :server :password]) =not=> "xx"))))
+     (fact "password not echoed"
+       (get-in organization [:suti :server :password]) => nil))))
 
 (facts "Construction waste feeds"
   (mongo/with-db local-db-name

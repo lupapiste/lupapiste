@@ -113,7 +113,8 @@
                                :selectedOperations selected-operations-with-permit-type
                                :allowedRoles allowed-roles)
                         (dissoc :operations-attachments :selected-operations)
-                        (update-in [:suti :server] select-keys [:url :username :password]))
+                        (update-in [:map-layers :server] select-keys [:url :username])
+                        (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
 (defquery user-organizations-for-permit-type
