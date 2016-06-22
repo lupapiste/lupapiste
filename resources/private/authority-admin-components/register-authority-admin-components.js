@@ -1,8 +1,8 @@
 jQuery(document).ready(function() {
   "use strict";
 
-  var components = [{name: "municipality-maps"},
-                    {name: "municipality-maps-server"},
+  var components = [{name: "server-settings"},
+                    {name: "municipality-maps"},
                     {name: "municipality-maps-layers"},
                     {name: "municipality-maps-map"}];
 

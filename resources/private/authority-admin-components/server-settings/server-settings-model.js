@@ -1,5 +1,4 @@
-
-LUPAPISTE.MunicipalityMapsServerModel = function( params ) {
+LUPAPISTE.ServerSettingsModel = function(params) {
   "use strict";
 
   var self = this;
