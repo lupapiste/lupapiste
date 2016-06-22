@@ -531,7 +531,6 @@
 
      (fact "with encrypted password"
        (get-in organization [:suti :server :password]) => string?
-       (get-in organization [:suti :server :crypto-iv]) => string?
        (get-in organization [:suti :server :password]) =not=> "xx"))))
 
 (facts "Construction waste feeds"
