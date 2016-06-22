@@ -621,6 +621,15 @@
         (ok))
       (fail :error.missing-parameters))))
 
+(defcommand update-suti-server-details
+  {:parameters [url username password]
+   :input-validators [(partial validate-optional-url :url)]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (o/update-organization-suti-server (user/authority-admins-organization-id user)
+                                     (ss/trim url) username password)
+  (ok))
+
 (defraw waste-ads-feed
   {:description "Simple RSS feed for construction waste information."
    :parameters [fmt]

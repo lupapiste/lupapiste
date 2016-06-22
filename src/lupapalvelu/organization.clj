@@ -235,6 +235,23 @@
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :calendars-enabled true})))
 
 ;;
+;; Backend server addresses
+;;
+
+(defn- update-organization-server [mongo-path org-id url username password]
+  {:pre [mongo-path (ss/not-blank? (name mongo-path))
+         (string? org-id)
+         (ss/optional-string? url)
+         (ss/optional-string? username)
+         (ss/optional-string? password)]}
+  (let [credentials (if (ss/blank? password)
+                      {:username username
+                       :password password}
+                      (encode-credentials username password))
+        server      (assoc credentials :url url)]
+   (update-organization org-id {$set {mongo-path server}})))
+
+;;
 ;; Organization/municipality provided map support.
 ;;
 
@@ -259,13 +276,14 @@
                             (decode-credentials password crypto-iv))}
        :layers layers})))
 
-(defn update-organization-map-server [org-id url username password]
-  (let [credentials (if (ss/blank? password)
-                      {:username username
-                       :password password}
-                      (encode-credentials username password))
-        server      (assoc credentials :url url)]
-   (update-organization org-id {$set {:map-layers.server server}})))
+(def update-organization-map-server (partial update-organization-server :map-layers.server))
+
+;;
+;; Suti
+;;
+
+(def update-organization-suti-server (partial update-organization-server :suti.server))
+
 
 ;;
 ;; Construction waste feeds

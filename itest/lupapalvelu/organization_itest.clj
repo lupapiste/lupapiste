@@ -515,6 +515,25 @@
       (-> (query sipoo :organization-by-user)
         (get-in [:organization :notifications config-key])) => empty?)))
 
+(facts "Suti server datails"
+  (fact "initially empty"
+    (let [initial-org-resp (query sipoo :organization-by-user)]
+      initial-org-resp => ok?
+      (get-in initial-org-resp [:organization :suti :server]) => nil))
+
+  (fact "updated succeeds"
+    (command sipoo :update-suti-server-details :url "http://localhost:8000/dev/suti" :username "sipoo" :password "xx") => ok?)
+
+  (fact "is set"
+    (let [{:keys [organization] :as org-resp} (query sipoo :organization-by-user)]
+     org-resp => ok?
+     (get-in organization [:suti :server]) => (contains {:url "http://localhost:8000/dev/suti" :username "sipoo"})
+
+     (fact "with encrypted password"
+       (get-in organization [:suti :server :password]) => string?
+       (get-in organization [:suti :server :crypto-iv]) => string?
+       (get-in organization [:suti :server :password]) =not=> "xx"))))
+
 (facts "Construction waste feeds"
   (mongo/with-db local-db-name
     (mongo/insert :applications
