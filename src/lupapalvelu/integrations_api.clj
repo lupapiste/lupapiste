@@ -390,7 +390,7 @@
   (->>
     (ss/replace content-str (re-pattern validators/finnish-hetu-str) "******x****")
     (resp/content-type (mime/mime-type filename))
-    (resp/set-headers http/no-cache-headers)
+    (resp/set-headers (assoc http/no-cache-headers "Content-Disposition" (format "filename=\"%s\"" filename)))
     (resp/status 200)))
 
 (defn validate-integration-message-filename [{{:keys [id filename]} :data}]
