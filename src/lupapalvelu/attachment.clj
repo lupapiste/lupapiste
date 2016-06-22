@@ -749,7 +749,7 @@
   [{application :application} {:keys [content-type content file-name]}]
   (case (name content-type)
     "application/pdf" (when (pdf-conversion/pdf-a-required? (:organization application))
-                        (let [processing-result (pdf-conversion/convert-to-pdf-a (content))] ; content is a function from mongo.clj
+                        (let [processing-result (pdf-conversion/convert-to-pdf-a (content) {:application application :filename file-name})] ; content is a function from mongo.clj
                           (if (:already-valid-pdfa? processing-result)
                             {:archivable true :archivabilityError nil :already-valid true}
                             (save-pdfa-file! application processing-result file-name content-type))))

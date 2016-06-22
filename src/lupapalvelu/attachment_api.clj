@@ -359,7 +359,7 @@
 (defn- upload! [application {:keys [filename content] :as attachment-data}]
   (case (mime/mime-type filename)
     "application/pdf" (if (pdf-conversion/pdf-a-required? (:organization application))
-                        (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
+                        (let [processing-result (pdf-conversion/convert-to-pdf-a content {:application application :filename filename})]
                           (if (:already-valid-pdfa? processing-result)
                             (attach-or-fail! application (assoc attachment-data :archivable true :archivabilityError nil))
                             (convert-pdf-and-upload! application processing-result attachment-data)))
