@@ -1,1 +1,3 @@
 "suti.column" "fi" "Suti"
+"suti.enabled" "fi" "Suunnittelun lähtötietopaketti saatavilla"
+"suti.admin.title" "fi" "Suunnittelun lähtötietopaketti (Suti)"

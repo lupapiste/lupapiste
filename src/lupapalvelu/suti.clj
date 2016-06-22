@@ -9,6 +9,10 @@
       usr/authority-admins-organization-id
       org/get-organization))
 
+(defn enable [organization-id flag]
+  (org/update-organization organization-id
+                           {$set {:suti.enabled flag}}))
+
 (defn toggle-operation [organization operation-id flag]
   (let [already (contains? (-> organization :suti :operations set) operation-id)]
     (when (not= (boolean already) (boolean flag))

@@ -251,6 +251,13 @@ LUPAPISTE.OrganizationModel = function () {
     self.initialized = true;
   };
 
+
+  ko.computed( function() {
+    if( _.isBoolean( self.sutiEnabled() && self.initialized )) {
+      ajax.command( "suti-enabled", {flag: self.sutiEnabled()}).call();
+    }
+  });
+
   self.isSutiOperation = function ( $data )  {
     return self.sutiOperations.indexOf( $data.id ) >= 0;
   };

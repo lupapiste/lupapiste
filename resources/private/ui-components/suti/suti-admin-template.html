@@ -1,8 +1,11 @@
 <script class="ko-template" type="text/jx-query-tmpl"
-        id="suti-admin">
-<div data-bind="if: features.enabled( 'suti-integration' ),
-                css: {feature: features.enabled( 'suti-integration' )}">
-  <h2 data-bind="ltext: suti.admin.title"></h2>
-  
-</div>
+        id="suti-admin-template">
+<div data-bind="feature: 'suti-integration'">
+  <h2 data-bind="ltext: 'suti.admin.title'"></h2>
+  <div class="checkbox-wrapper">
+    <input type="checkbox" id="suti-enabled-box"
+           data-bind="checked: enabled">
+    <label class="checkbox-label" for="suti-enabled-box"
+           data-bind="ltext: 'suti.enabled'"></label>
+  </div>
 </script>
