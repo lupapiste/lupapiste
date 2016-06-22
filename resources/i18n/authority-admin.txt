@@ -188,3 +188,6 @@
 "auth-admin.vendor-backend-link.param-value" "sv" "Värde"
 "auth-admin.version" "fi" "Versio"
 "auth-admin.version" "sv" "Version"
+"auth-admin.suti-api-settings.title" "fi" "Sutin rajapinta"
+"auth-admin.suti-api-settings.header" "fi" "Sutin rajapinnan osoite"
+"auth-admin.suti-api-settings.urlLabel" "fi" "Palvelimen osoite ja polku"
