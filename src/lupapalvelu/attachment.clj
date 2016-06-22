@@ -99,10 +99,7 @@
 (defschema Operation
   "Operation for operation specific attachments"
   {:id                                   ssc/ObjectIdStr    ;;
-   (sc/optional-key :optional)           [sc/Str]           ;; FIXME: only empty arrays @ talos
-   (sc/optional-key :name)               sc/Str             ;;
-   (sc/optional-key :description)        (sc/maybe sc/Str)  ;;
-   (sc/optional-key :created)            ssc/Timestamp})    ;;
+   (sc/optional-key :name)               sc/Str})           ;;
 
 (defschema Signature
   "Signature for attachment version"
@@ -220,7 +217,7 @@
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
            :notNeeded false
            :forPrinting false
-           :op op
+           :op (select-keys op [:id :name])
            :signatures []
            :versions []
            :auth []
