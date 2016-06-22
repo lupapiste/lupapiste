@@ -23,26 +23,27 @@ table.admin-settings {
   }
 }
 
+.serversettings--error {
+  color: $red-dark;
+  margin: {
+    left: $marginS;
+    right: $marginS;
+    bottom: $marginL;
+  }
+  font-size: 16px;
+}
+
 // Municipality maps
 .munimaps {
-  margin-top: 24px;
+  margin: 24px 0;
 
   h3 {
     margin-top: .5em;
   }
-  .munimaps--wide {
+  .munimaps--wide, .serversettings--wide {
     input, select {
       width: 90%;
     }
-  }
-  .munimaps--error {
-    color: $red-dark;
-    margin: {
-      left: $marginS;
-      right: $marginS;
-      bottom: $marginL;
-    }
-    font-size: 16px;
   }
   .munimaps--check input {
     margin-left: $marginL;
@@ -51,6 +52,15 @@ table.admin-settings {
     width: 100%;
     height: 500px;
     margin-top: $marginL;
+  }
+}
+
+// Suti
+.sutiapi {
+  .serversettings--wide {
+    input, select {
+      width: 90%;
+    }
   }
 }
 
