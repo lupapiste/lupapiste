@@ -51,6 +51,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.suti = ko.observable();
 
   self.sutiEnabled = ko.observable();
+  self.sutiOperations = ko.observableArray();
 
   self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
@@ -242,15 +243,25 @@ LUPAPISTE.OrganizationModel = function () {
     self.suti(organization.suti);
 
     // Suti integration
-    console.log( "Organization:", organization);
-    self.sutiEnabled(util.getIn( organization, ["suti", "enabled"] ));
-    self.sutiOperations = util.getIn( organization, ["suti", "operations"]);
-
+    self.sutiEnabled(_.get( organization, "suti.enabled", false ));
+    self.sutiOperations( _.get( organization, "suti.operations", [] ));
     self.initialized = true;
   };
 
-  self.isSutiOperation = function( operationId ) {
-    return _.includes( self.sutiOperations, operationId );
+  self.isSutiOperation = function ( $data )  {
+    return self.sutiOperations.indexOf( $data.id ) >= 0;
+  };
+
+  self.toggleSutiOperation = function( $data ) {
+    var flag = !self.isSutiOperation( $data );
+    if( flag ) {
+      self.sutiOperations.push( $data.id );
+    } else {
+      self.sutiOperations.remove( $data.id );
+    }
+    ajax.command( "suti-toggle-operation", {operationId: $data.id,
+                                            flag: flag })
+      .call();
   };
 
   self.editLink = function(indexFn) {

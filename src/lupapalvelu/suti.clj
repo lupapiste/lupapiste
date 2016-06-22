@@ -9,8 +9,12 @@
       usr/authority-admins-organization-id
       org/get-organization))
 
-(defn update-operations [organization operations]
-  (org/update-organization (:id organization)
-                           {$set {:suti.operations (if (seq? operations)
-                                                     operations
-                                                     [])}}))
+(defn add-operation [organization operation-id]
+  (when-not (contains? (set (some-> organization :suti :operations)) operation-id)
+    (org/update-organization (:id organization)
+                             {$push {:suti.operations operation-id}})))
+
+(defn remove-operation [organization operation-id]
+  (when (contains? (set (some-> organization :suti :operations)) operation-id)
+    (org/update-organization (:id organization)
+                             {$pull {:suti.operations operation-id}})))

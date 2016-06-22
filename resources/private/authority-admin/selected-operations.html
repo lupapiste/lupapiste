@@ -25,9 +25,10 @@
                   <div class="checkbox-wrapper checkbox-wrapper--no-border">
                     <input type="checkbox"
                            data-bind="attr: {id: 'suti-' + id},
-                                      checked: $root.organization.isSutiOperation( id )">
+                                      checked: $root.organization.isSutiOperation( $data )">
                     <label class="checkbox-label"
-                           data-bind="attr: {'for': 'suti-' + id}"></label>
+                           data-bind="attr: {'for': 'suti-' + id},
+                                      click: $root.organization.toggleSutiOperation"></label>
                   </div>
                 </td>
                 <!-- /ko-->
