@@ -217,7 +217,7 @@
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
            :notNeeded false
            :forPrinting false
-           :op (select-keys op [:id :name])
+           :op (not-empty (select-keys op [:id :name]))
            :signatures []
            :versions []
            :auth []
