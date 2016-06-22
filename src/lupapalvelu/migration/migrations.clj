@@ -2265,6 +2265,30 @@
         {:documents {$elemMatch {:schema-info.name "paasuunnittelija", :schema-info.removable false}}}
         {$set {:documents.$.schema-info.removable true}}))))
 
+(defn operation-cleanup-updates-for-application [{attachments :attachments}]
+  (->>  ["description" "optional" "created" "attachment-op-selector"]
+        (map #(mongo/generate-array-updates :attachments attachments (constantly true) (str "op." %) ""))
+        (apply merge)
+        (hash-map $unset)))
+
+(defmigration attachment-operation-cleanup
+  {:apply-when (or (pos? (mongo/count :applications {$or [{:attachments.op.description {$exists true}}
+                                                          {:attachments.op.optional {$exists true}}
+                                                          {:attachments.op.created {$exists true}}
+                                                          {:attachments.op.attachment-op-selector {$exists true}}]}))
+                   (pos? (mongo/count :submitted-applications {$or [{:attachments.op.description {$exists true}}
+                                                                    {:attachments.op.optional {$exists true}}
+                                                                    {:attachments.op.created {$exists true}}
+                                                                    {:attachments.op.attachment-op-selector {$exists true}}]})))}
+  (doseq [collection  [:applications :submitted-applications]
+          application (mongo/select collection
+                                    {$or [{:attachments.op.description {$exists true}}
+                                          {:attachments.op.optional {$exists true}}
+                                          {:attachments.op.created {$exists true}}
+                                          {:attachments.op.attachment-op-selector {$exists true}}]}
+                                    {:attachments true})]
+         (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
