@@ -444,8 +444,7 @@
         top-keys [:tila :pitoPvm :pitaja]
         h-keys [:kuvaus :maaraAika :toteaja :toteamisHetki]
         ]
-    (and (not-empty katselmus-data)
-         (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
+    (and (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
          (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
 
 (defn- merge-review-tasks
