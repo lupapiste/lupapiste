@@ -291,7 +291,7 @@
                       (-> (http-post
                             (str (server-address) "/api/command/impersonate-authority")
                             (assoc params
-                              :form-params (merge {:organizationId sipoo-rakval :role "authority"} (when password {:password password}))
+                              :form-params (merge {:organizationId sipoo-rakval :role "approver"} (when password {:password password}))
                               :content-type :json))
                         decode-response :body))
        role         (fn [] (-> (http-get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
