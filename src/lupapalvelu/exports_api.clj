@@ -157,20 +157,34 @@
   (ok collection (mongo/select collection query fields)))
 
 (defn- resolve-price-class [application op]
-  (let [price-class (get price-classes-for-operation (keyword (:name op)))]
-    (if (= uuden-rakentaminen price-class)
-      (let [{:keys [price-class kayttotarkoitus]} (price-class application op)]
+  (let [op-name  (keyword (:name op))
+        price-class (get price-classes-for-operation op-name)]
+
+    (cond
+      ; special case 1: paperilupa
+      (= :aiemmalla-luvalla-hakeminen op-name )
+      (assoc op
+        :priceClass nil
+        :priceCode nil
+        :use nil
+        :usagePriceCode nil)
+
+      ; new buildings: fixed price code, but usage price code is determined from the building data
+      (= uuden-rakentaminen price-class)
+      (let [{:keys [price-class kayttotarkoitus]} (uuden-rakentaminen application op)]
         (assoc op
           :priceClass price-class
           :priceCode 900
           :use kayttotarkoitus
           :usagePriceCode (get usage-price-codes price-class)))
-      ; normal price class
-      (assoc op
-        :priceClass price-class
-        :priceCode (get permit-type-price-codes (:permitType application))
-        :use nil
-        :usagePriceCode nil))))
+
+       ; In other cases the price code is determined from permit type
+       :else
+       (assoc op
+         :priceClass price-class
+         :priceCode (get permit-type-price-codes (:permitType application))
+         :use nil
+         :usagePriceCode nil))))
 
 (defn- operation-mapper [application op]
   (util/assoc-when (resolve-price-class application op)
