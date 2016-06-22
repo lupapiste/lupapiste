@@ -76,7 +76,7 @@ LUPAPISTE.OrganizationModel = function () {
   ko.computed(function() {
     var useAttachmentLinks = self.useAttachmentLinksIntegration();
     if (self.initialized) {
-      ajax.command("set-organization-use-attachment-links-integration", {enabled: useAttachmentLinksIntegration})
+      ajax.command("set-organization-use-attachment-links-integration", {enabled: useAttachmentLinks})
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
