@@ -164,7 +164,7 @@
       ; special case 1: paperilupa
       (= :aiemmalla-luvalla-hakeminen op-name )
       (assoc op
-        :priceClass nil
+        :priceClass price-class
         :priceCode nil
         :use nil
         :usagePriceCode nil)
