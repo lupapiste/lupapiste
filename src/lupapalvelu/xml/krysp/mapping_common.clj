@@ -627,13 +627,13 @@
 (defn add-generated-pdf-attachments
   "Adds the generated application pdf information to the canonical
   attachments."
-  [{:keys [id submitted]} begin-of-link attachments]
+  [{:keys [id submitted]} begin-of-link attachments lang]
   (let [use-http-links? (re-matches #"https?://.*" begin-of-link)]
     (conj attachments
           {:Liite
            {:kuvaus            "Vireille tullut hakemus"
             :linkkiliitteeseen (str begin-of-link (if use-http-links?
-                                                    (str "submitted-application-pdf-export?id=" id "&lang=fi")
+                                                    (str "submitted-application-pdf-export?id=" id "&lang=" lang)
                                                     (writer/get-submitted-filename id)))
             :muokkausHetki     (util/to-xml-datetime submitted)
             :versionumero      1
@@ -641,7 +641,7 @@
           {:Liite
            {:kuvaus            "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
             :linkkiliitteeseen (str begin-of-link (if use-http-links?
-                                                    (str "pdf-export?id=" id "&lang=fi")
+                                                    (str "pdf-export?id=" id "&lang=" lang)
                                                     (writer/get-current-filename id)))
             :muokkausHetki     (util/to-xml-datetime (now))
             :versionumero      1
