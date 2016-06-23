@@ -27,5 +27,5 @@
 
 (defn organization-details [{{server :server :as suti} :suti}]
   (-> suti
-      (select-keys [:enabled :operations :www])
+      (select-keys [:enabled ::www])
       (assoc :server (select-keys server [:url :username]))))

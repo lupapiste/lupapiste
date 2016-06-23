@@ -4,6 +4,7 @@ LUPAPISTE.SutiAdminModel = function( params ) {
 
   var service = lupapisteApp.services.sutiService;
   service.fetchAdminDetails();
+  service.fetchOperations();
 
   self.organization = params.organization;
 

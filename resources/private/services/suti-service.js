@@ -5,6 +5,7 @@ LUPAPISTE.SutiService = function() {
   self.serviceName = "sutiService";
 
   var suti = ko.observable({});
+  var operations = ko.observableArray([]);
 
   self.sutiDetails = ko.pureComputed( function() {
     return _.cloneDeep( suti() );
@@ -12,8 +13,16 @@ LUPAPISTE.SutiService = function() {
 
   self.fetchAdminDetails = function() {
     ajax.query( "suti-admin-details")
+      .success( function( res ) {
+        suti( res.suti || {} );
+      })
+      .call();
+  };
+
+  self.fetchOperations = function() {
+    ajax.query( "suti-operations")
         .success( function( res ) {
-          suti( res.suti || {} );
+          operations( res.operations || []);
         })
       .call();
   };
@@ -23,10 +32,35 @@ LUPAPISTE.SutiService = function() {
       .processing( processing )
       .success( function( res ) {
         util.showSavedIndicator( res );
-        // Sync the service data and as a side effect clears the
+        // Syncs the service details and as a side effect clears the
         // password field.
         self.fetchAdminDetails();
       })
       .call();
   };
+
+
+  // ko.computed( function() {
+  //   if( _.isBoolean( self.sutiEnabled() && self.initialized )) {
+  //     ajax.command( "suti-toggle-enabled", {flag: self.sutiEnabled()}).call();
+  //   }
+  // });
+
+  self.isSutiOperation = function ( dataOrId )  {
+    return operations.indexOf( _.get( dataOrId, "id", dataOrId) ) >= 0;
+  };
+
+  self.toggleSutiOperation = function( dataOrId ) {
+    var id = _.get( dataOrId, "id", dataOrId );
+    var flag = !self.isSutiOperation( id );
+    if( flag ) {
+      operations.push( id );
+    } else {
+      operations.remove( id );
+    }
+    ajax.command( "suti-toggle-operation", {operationId: id,
+                                            flag: flag })
+      .call();
+  };
+
 };

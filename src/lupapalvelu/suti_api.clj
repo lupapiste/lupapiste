@@ -40,3 +40,10 @@
    :feature :suti-integration}
   [{user :user}]
   (ok :suti (suti/organization-details (suti/admin-org user))))
+
+(defquery suti-operations
+  {:description "Suti operations for the current authority admin's organization."
+   :user-roles #{:authorityAdmin}
+   :feature :suti-integration}
+  [{user :user}]
+  (ok :operations (-> user suti/admin-org :suti :operations)))

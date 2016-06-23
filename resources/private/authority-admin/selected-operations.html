@@ -7,7 +7,7 @@
           <h2 data-bind="ltext: 'auth-admin.selected-operations'"></h2>
           <table data-test-id="organization-selected-operations"
                  class="selected-operations-table">
-          <!-- ko foreach: organization.selectedOperations -->
+            <!-- ko foreach: organization.selectedOperations -->
             <thead>
               <tr>
                 <th data-bind="ltext: permitType"></th>
@@ -36,10 +36,10 @@
                   <div class="checkbox-wrapper">
                     <input type="checkbox"
                            data-bind="attr: {id: 'suti-' + id},
-                                      checked: $root.organization.isSutiOperation( $data )">
+                                      checked: lupapisteApp.services.sutiService.isSutiOperation( $data )">
                     <label class="checkbox-label"
                            data-bind="attr: {'for': 'suti-' + id},
-                                      click: $root.organization.toggleSutiOperation"></label>
+                                      click: lupapisteApp.services.sutiService.toggleSutiOperation"></label>
                   </div>
                 </td>
                 <!-- /ko-->

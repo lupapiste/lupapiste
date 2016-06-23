@@ -248,33 +248,11 @@ LUPAPISTE.OrganizationModel = function () {
     // Suti integration
     self.sutiEnabled(_.get( organization, "suti.enabled", false ));
     self.sutiWww( _.get( organization, "suti.www"));
-    self.sutiOperations( _.get( organization, "suti.operations", [] ));
     self.sectionOperations( _.get( organization, "section-operations", []));
     self.initialized = true;
   };
 
 
-  ko.computed( function() {
-    if( _.isBoolean( self.sutiEnabled() && self.initialized )) {
-      ajax.command( "suti-toggle-enabled", {flag: self.sutiEnabled()}).call();
-    }
-  });
-
-  self.isSutiOperation = function ( $data )  {
-    return self.sutiOperations.indexOf( $data.id ) >= 0;
-  };
-
-  self.toggleSutiOperation = function( $data ) {
-    var flag = !self.isSutiOperation( $data );
-    if( flag ) {
-      self.sutiOperations.push( $data.id );
-    } else {
-      self.sutiOperations.remove( $data.id );
-    }
-    ajax.command( "suti-toggle-operation", {operationId: $data.id,
-                                            flag: flag })
-      .call();
-  };
 
   self.isSectionOperation = function ( $data )  {
     return self.sectionOperations.indexOf( $data.id ) >= 0;
