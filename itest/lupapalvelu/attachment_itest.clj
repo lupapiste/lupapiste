@@ -123,7 +123,7 @@
       (fact "Pena change attachment metadata"
 
         (fact "Pena can change operation"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)
+          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "aaabbbcccdddeeefff000111"}}) => ok?)
         (fact "Pena can change contents"
           (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
         (fact "Pena can change size"
@@ -138,11 +138,16 @@
                 contents (:contents attachment)
                 size (:size attachment)
                 scale (:scale attachment)]
-            (:id op) => "foo"
-            (:name op) => "bar"
+            (:id op) => "aaabbbcccdddeeefff000111"
             contents => "foobart"
             size => "A4"
-            scale => "1:500")))
+            scale => "1:500"))
+
+        (fact "Metadata for op is validated against schema"
+          (command pena :set-attachment-meta
+                   :id application-id
+                   :attachmentId (first attachment-ids)
+                   :meta {:op {:id "aaabbbcccdddeeefff000111" :description "foofaa"}}) => (partial expected-failure? :error.illegal-attachment-operation)))
 
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero
