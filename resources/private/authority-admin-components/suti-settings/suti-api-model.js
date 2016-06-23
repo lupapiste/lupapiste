@@ -22,23 +22,16 @@ LUPAPISTE.SutiApiModel = function(params) {
     errorMessageTerm: null
   };
 
- self.serverParams.channel.send = function(e) {
-    ajax.command("update-suti-server-details", e)
-      .processing(self.serverParams.waiting)
-      .success(function(resp){
-        self.serverParams.server(_.pick(e, visibleKeys));
-        util.showSavedIndicator(resp);
-      })
-      .call();
-  };
-
   // Service
   var service = lupapisteApp.services.sutiService;
 
+  self.serverParams.channel.send = function(e) {
+    service.configureServer( e, self.serverParams.waiting );
+  };
+
   self.disposedComputed( function() {
-    self.serverParams.server( _.defaults( self.serverParams.server(),
-                                          service.sutiDetails().server) );
+    self.serverParams.server( _.merge( self.serverParams.server(),
+                                       service.sutiDetails().server) );
   });
 
-  service.fetchAdminDetails();
 };

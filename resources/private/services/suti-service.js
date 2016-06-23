@@ -11,12 +11,22 @@ LUPAPISTE.SutiService = function() {
   });
 
   self.fetchAdminDetails = function() {
-    if( lupapisteApp.models.globalAuthModel.ok( "suti-admin-details")) {
-      ajax.query( "suti-admin-details")
+    ajax.query( "suti-admin-details")
         .success( function( res ) {
           suti( res.suti || {} );
         })
-        .call();
-    }
+      .call();
+  };
+
+  self.configureServer = function( server, processing ) {
+    ajax.command( "update-suti-server-details", server )
+      .processing( processing )
+      .success( function( res ) {
+        util.showSavedIndicator( res );
+        // Sync the service data and as a side effect clears the
+        // password field.
+        self.fetchAdminDetails();
+      })
+      .call();
   };
 };
