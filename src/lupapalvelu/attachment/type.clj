@@ -67,6 +67,11 @@
    {:type-id :energiatodistus    :type-group :energiatodistus}
    {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}])
 
+(def- group-tag-mapping
+  {{:type-id :iv_suunnitelma :type-group :erityissuunnitelmat} :iv_suunnitelma
+   {:type-id :kvv_suunnitelma :type-group :erityissuunnitelmat} :kvv_suunnitelma
+   {:type-id :rakennesuunnitelma :type-group :}})
+
 (defn attachment-type
   ([{type-group :type-group type-id :type-id :as attachment-type}]
    (->> (update attachment-type :metadata util/assoc-when-pred util/not-empty-or-nil?
@@ -142,6 +147,12 @@
   (let [allowed-types (or (not-empty (get-attachment-types-for-application application))
                           (-> application :permitType keyword attachment-types-by-permit-type))]
     (contains? allowed-types attachment-type)))
+
+(defn tag-by-type [{type :type :as attachment}]
+  (get group-tag-mapping
+       (-> (select-keys type [:type-group :type-id])
+           (util/convert-values keyword))
+       (keyword (:type-group type))))
 
 ;;
 ;; Helpers for reporting purposes

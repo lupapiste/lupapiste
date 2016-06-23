@@ -6,7 +6,7 @@
             [swiss.arrows :refer [-<> -<>>]]
             [sade.core :refer [ok fail fail! now def-]]
             [sade.strings :as ss]
-            [sade.util :as util]
+            [sade.util :refer [fn->] :as util]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as a]
@@ -110,7 +110,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{{attachments :attachments} :application}]
-  (ok :attachments attachments))
+  (ok :attachments (map #(assoc % :group (attachment/attachment-grouping %)) attachments)))
 
 ;;
 ;; Types

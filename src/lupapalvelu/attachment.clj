@@ -178,6 +178,11 @@
 ;; Api
 ;;
 
+(defn attachment-grouping [{operation :op target :target type :type :as attachment}]
+  {:type       (att-type/tag-by-type attachment)
+   :relates-to {:operation operation
+                :target    (not-empty (select-keys target [:id :type]))}})
+
 (defn link-file-to-application [app-id fileId]
   {:pre [(string? app-id)]}
   (mongo/update-by-id :fs.files fileId {$set {:metadata.application app-id
