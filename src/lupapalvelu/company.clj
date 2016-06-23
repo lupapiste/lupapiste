@@ -389,7 +389,7 @@
       (update-application
        (application->command application)
        {:auth {$elemMatch {:invite.user.id company-id}}}
-       {$set  {:auth.$ (-> company company->auth (util/assoc-when :inviter inviter :inviteAccepted (now)))}}))
+       {$set  {:auth.$ (-> company company->auth (util/assoc-when-pred util/not-empty-or-nil? :inviter inviter :inviteAccepted (now)))}}))
     (ok)))
 
 (defn cannot-submit

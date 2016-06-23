@@ -69,7 +69,7 @@
 
 (defn attachment-type
   ([{type-group :type-group type-id :type-id :as attachment-type}]
-   (->> (update attachment-type :metadata util/assoc-when
+   (->> (update attachment-type :metadata util/assoc-when-pred util/not-empty-or-nil?
                 :operation-specific (contains? operation-specific-types attachment-type)
                 :for-operations     (not-empty (for-operations attachment-type)))
         (sc/validate AttachmentType)))
