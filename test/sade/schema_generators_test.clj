@@ -7,8 +7,8 @@
             [clojure.test.check.properties :as prop]))
 
 (def email-prop
-  (prop/for-all [(gen/generate email)]
-    (every-pred validators/valid-email? #(<= (count %) 255))))
+  (prop/for-all [e email]
+    ((every-pred validators/valid-email? #(<= (count %) 255)) e)))
 
 (defspec email-generator-test 100 email-prop)
 
