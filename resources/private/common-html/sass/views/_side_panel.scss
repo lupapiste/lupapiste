@@ -44,6 +44,10 @@
         @include spite-bg;
         background-position: 1px -5396px;
         width: $lupicon-size;
+        margin: {
+          top: 10px;
+          bottom: -4px;
+        }
         height: 30px;
         padding-top: 3px;
         color: $color-text;
