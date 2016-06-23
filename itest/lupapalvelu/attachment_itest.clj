@@ -121,28 +121,41 @@
 
 
       (fact "Pena change attachment metadata"
+        (let [{:keys [primaryOperation]} (query-application pena application-id)
+              op-id (:id primaryOperation)]
 
-        (fact "Pena can change operation"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)
-        (fact "Pena can change contents"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
-        (fact "Pena can change size"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
-        (fact "Pena can change scale"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
+          (fact "Pena can change operation"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id op-id}}) => ok?)
+          (fact "Pena can change contents"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
+          (fact "Pena can change size"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
+          (fact "Pena can change scale"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
 
-        (fact "Metadata is set"
-          (let [application (query-application pena application-id)
-                attachment (get-attachment-info application (first attachment-ids))
-                op (:op attachment)
-                contents (:contents attachment)
-                size (:size attachment)
-                scale (:scale attachment)]
-            (:id op) => "foo"
-            (:name op) => "bar"
-            contents => "foobart"
-            size => "A4"
-            scale => "1:500")))
+          (fact "Metadata is set"
+            (let [application (query-application pena application-id)
+                  attachment (get-attachment-info application (first attachment-ids))
+                  op (:op attachment)
+                  contents (:contents attachment)
+                  size (:size attachment)
+                  scale (:scale attachment)]
+              (:id op) => op-id
+              contents => "foobart"
+              size => "A4"
+              scale => "1:500"))
+
+          (fact "Operation id must exist in application"
+            (command pena :set-attachment-meta
+                     :id application-id
+                     :attachmentId (first attachment-ids)
+                     :meta {:op {:id "aaabbbcccdddeeefff000111"}}) => (partial expected-failure? :error.illegal-attachment-operation))
+
+          (fact "Metadata for op is validated against schema"
+            (command pena :set-attachment-meta
+                     :id application-id
+                     :attachmentId (first attachment-ids)
+                     :meta {:op {:id op-id :unknown "foofaa"}}) => (partial expected-failure? :error.illegal-attachment-operation))))
 
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero

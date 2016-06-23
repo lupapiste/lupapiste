@@ -82,7 +82,7 @@
         op (resolve-price-class application {:name "ya-jatkoaika"})]
     (:priceClass op) => "D"
     (:priceCode op) => 902
-    (:usagePriceCode op) => nil
+    (:usagePriceCode op) => 908
     (:use op) => nil))
 
 (fact "Paperilupa"
@@ -90,5 +90,5 @@
         op (resolve-price-class application {:name "aiemmalla-luvalla-hakeminen"})]
     (:priceClass op) => "D"
     (:priceCode op) => nil
-    (:usagePriceCode op) => nil
+    (:usagePriceCode op) => 908
     (:use op) => nil))

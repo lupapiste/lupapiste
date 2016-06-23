@@ -7,6 +7,7 @@
             [sade.core :refer [ok fail fail! now def-]]
             [sade.strings :as ss]
             [sade.util :as util]
+            [schema.core :as sc]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as a]
@@ -80,9 +81,9 @@
       (fail :error.illegal-meta-type :parameters k))))
 
 (defn- validate-operation [{{meta :meta} :data}]
-  (let [op (:op meta)]
-    (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
-      (fail :error.missing-parameters :parameters missing))))
+  (when-let [op (:op meta)]
+    (when (sc/check attachment/Operation op)
+      (fail :error.illegal-attachment-operation))))
 
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
@@ -98,6 +99,12 @@
   (when attachment-type
     (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
+
+(defn- validate-operation-in-application [{{meta :meta} :data} application]
+  (when-let [op (:op meta)]
+    (let [operation-ids (map :id (a/get-operations application))]
+      (when (not-any? #{(:id op)} operation-ids)
+        (fail :error.illegal-attachment-operation)))))
 
 ;;
 ;; Types
@@ -555,7 +562,10 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
+   :pre-checks [a/validate-authority-in-drafts
+                attachment-editable-by-application-state
+                attachment-not-readOnly
+                validate-operation-in-application]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId meta created)
   (ok))
