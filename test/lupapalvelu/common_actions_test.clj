@@ -31,6 +31,7 @@
                           :upload-attachment
                           :rotate-pdf
                           :pdf-export
+                          :submitted-application-pdf-export
                           :download-all-attachments
                           :download-attachment
                           :delete-attachment-version
@@ -93,7 +94,7 @@
                            :pdfa-casefile
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
-                           :application-guests :latest-attachment-version}]
+                           :application-guests :latest-attachment-version :submitted-application-pdf-export}]
     (doseq [command (ca/foreach-action {} user {} application)
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]
