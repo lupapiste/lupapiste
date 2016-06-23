@@ -239,7 +239,7 @@
                  file-id         (ssg/generator ssc/ObjectIdStr)
                  archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
                                                            :archivabilityError (apply sc/enum archivability-errors)
-                                                           :missing-fonts [sc/Str]}))
+                                                           :missing-fonts (sc/eq ["Arial"])}))
                  general-options (ssg/generator {:filename sc/Str
                                                 :content-type sc/Str
                                                 :size sc/Int
