@@ -23,9 +23,9 @@ Admin inputs bad server address
   No error
   No layers
   Scroll to test id  server-details-send
-  Input text with jQuery  [data-test-id=server-details-url]  foobar
+  Input text with jQuery  .munimaps [data-test-id=server-details-url]  foobar
 
-  Scroll and click  [data-test-id=server-details-send]
+  Scroll and click  .munimaps [data-test-id=server-details-send]
   # Error popup
   Confirm  dynamic-ok-confirm-dialog
   Yes error
@@ -75,10 +75,10 @@ Admin unsets layers
 *** Keywords ***
 
 No error
-  Wait until  element should not be visible  jquery=p.munimaps--error
+  Wait until  element should not be visible  jquery=.munimaps p.serversettings--error
 
 Yes error
-  Wait until  element should be visible  jquery=p.munimaps--error
+  Wait until  element should be visible  jquery=.munimaps p.serversettings--error
 
 No layers
   Wait until  Element should not be visible  jquery=table[data-test-id=layers-table]
