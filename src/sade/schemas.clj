@@ -128,6 +128,14 @@
 (defschema IpAddress
   (sc/pred validators/ip-address? "IP address"))
 
+;; Schemas for blank or valid values
+
+(sc/defschema OptionalHttpUrl
+  (sc/if ss/blank? BlankStr HttpUrl))
+
+(sc/defschema OptionalEmail
+  (sc/if ss/blank? BlankStr Email))
+
 ;;
 ;; Dynamic schema constructors
 ;;
