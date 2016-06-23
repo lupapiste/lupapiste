@@ -94,7 +94,7 @@
 (defn validate-optional-url [param command]
   (let [url (ss/trim (get-in command [:data param]))]
     (when-not (ss/blank? url)
-      (util/validate-url url))))
+      (action/validate-url url))))
 
 ;;
 ;; Actions
