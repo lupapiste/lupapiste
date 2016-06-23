@@ -104,6 +104,7 @@
                       <th data-bind="ltext: 'attachment.version'">Versio</th>
                       <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
                       <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
+                      <th data-bind="ltext: 'attachment.autoConversion'">Muunnettu</th>
                       <th data-bind="ltext: 'attachment.actions'">Toiminto</th>
                     </tr>
                   </thead>
@@ -117,6 +118,9 @@
                       <td data-bind="dateString: created"></td>
                       <td>
                         <span data-bind="fullName: user"></span>
+                      </td>
+                      <td data-bind="if: $data.autoConversion" style="text-align:center">
+                          <span class="lupicon-circle-check positive"></span>
                       </td>
                       <td>
                         <a data-bind="click: $root.attachment.deleteVersion,
@@ -219,6 +223,9 @@
                         <div data-bind="foreach: $data['missing-fonts']">
                           <span data-bind="text: $data"></span><br>
                         </div>
+                      </div>
+                      <div data-bind="if: $data['autoConversion']">
+                        <span data-bind="ltext: 'attachment.converted'"></span>
                       </div>
                     </div>
                   </div>
