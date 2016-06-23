@@ -148,14 +148,14 @@
         (last-email) ; Inbox zero
 
         (fact "Meta"
-          (get-in versioned-attachment [:latestVersion :version :major]) => 1
+          (get-in versioned-attachment [:latestVersion :version :major]) => 2
           (get-in versioned-attachment [:latestVersion :version :minor]) => 0)
 
         (fact "Veikko uploads a new version"
           (upload-attachment veikko application-id versioned-attachment true)
           (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-            (get-in updated-attachment [:latestVersion :version :major]) => 1
-            (get-in updated-attachment [:latestVersion :version :minor]) => 1
+            (get-in updated-attachment [:latestVersion :version :major]) => 2
+            (get-in updated-attachment [:latestVersion :version :minor]) => 2
 
            (fact "upload has Veikko's auth"
              (get-in updated-attachment [:auth 1 :id]) => veikko-id)
@@ -176,8 +176,8 @@
                        :fileId (get-in updated-attachment [:latestVersion :fileId])
                        :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
               (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-                (get-in ver-del-attachment [:latestVersion :version :major]) => 1
-                (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
+                (get-in ver-del-attachment [:latestVersion :version :major]) => 2
+                (get-in ver-del-attachment [:latestVersion :version :minor]) => 1))
 
             (fact "Applicant cannot delete attachment that is required"
               (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
@@ -191,7 +191,7 @@
         (let [signed-attachment (get-attachment-by-id pena application-id (:id versioned-attachment))]
 
           (fact "Pena has only one auth entry, although has many versions uploaded"
-            (count (filter #(= (-> % :user :id) (id-for-key pena)) (:versions signed-attachment))) => 2
+            (count (filter #(= (-> % :user :id) (id-for-key pena)) (:versions signed-attachment))) => 4
             (count (filter #(= (:id %) (id-for-key pena)) (:auth signed-attachment))) => 1)
 
           (fact "Attachment is signed"
@@ -208,7 +208,7 @@
 
           (fact "Deleting the last version clears attachment auth"
                 (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-                  (count (:versions attachment )) => 1
+                  (count (:versions attachment )) => 4
                   (command veikko
                        :delete-attachment-version
                        :id application-id
