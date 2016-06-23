@@ -9689,6 +9689,15 @@ div.attachments-table-container table.attachments-table td.attachments-table__st
   magint-right: 1px;
 }
 
+/* line 318, ../../../private/common-html/sass/partials/_tables.scss */
+table.suti-admin-table td:nth-child(even) {
+  width: 50%;
+}
+/* line 320, ../../../private/common-html/sass/partials/_tables.scss */
+table.suti-admin-table td:nth-child(even) input {
+  width: 100%;
+}
+
 /*Tab styles*/
 /* line 42, ../../../private/common-html/sass/partials/_tabs.scss */
 .tab-wrapper {
@@ -10244,14 +10253,4 @@ ul.tabs {
 /* line 10, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble-authority a:link, .comment-bubble-authority a:visited {
   color: #f39129;
-}
-/* line 13, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble-authority a:hover {
-  color: #f7ac2e;
-  text-decoration: underline;
-}
-/* line 17, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble-authority a:active {
-  color: #fbc732;
-  text-decoration: underline;
 }

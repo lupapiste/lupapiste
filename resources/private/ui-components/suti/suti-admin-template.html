@@ -8,4 +8,22 @@
     <label class="checkbox-label" for="suti-enabled-box"
            data-bind="ltext: 'suti.enabled'"></label>
   </div>
+  <table class="suti-admin-table">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'auth-admin.parameter'"></th>
+        <th data-bind="ltext: 'auth-admin.value'"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-bind="ltext: 'suti.admin.www'"></td>
+        <td><input type="url"
+                   data-bind="value: www,
+                              enable: enabled"
+                   data-test-id="suti-www"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 </script>

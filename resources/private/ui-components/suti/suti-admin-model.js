@@ -5,4 +5,6 @@ LUPAPISTE.SutiAdminModel = function( params ) {
   var org = params.organization;
 
   self.enabled = org.sutiEnabled;
+
+  self.www = org.sutiWww;
 };

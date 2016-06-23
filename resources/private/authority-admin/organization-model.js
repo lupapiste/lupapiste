@@ -52,6 +52,7 @@ LUPAPISTE.OrganizationModel = function () {
 
   self.sutiEnabled = ko.observable();
   self.sutiOperations = ko.observableArray();
+  self.sutiWww = ko.observable();
 
   self.sectionOperations = ko.observableArray();
 
@@ -246,6 +247,7 @@ LUPAPISTE.OrganizationModel = function () {
 
     // Suti integration
     self.sutiEnabled(_.get( organization, "suti.enabled", false ));
+    self.sutiWww( _.get( organization, "suti.www"));
     self.sutiOperations( _.get( organization, "suti.operations", [] ));
     self.sectionOperations( _.get( organization, "section-operations", []));
     self.initialized = true;

@@ -311,4 +311,14 @@ div.attachments-table-container {
       margin-left: 1px;
       magint-right: 1px;
     }
-  }}
+  }
+}
+
+table.suti-admin-table {
+  td:nth-child(even) {
+    width: 50%;
+    input {
+      width: 100%;
+    }
+  }
+}
