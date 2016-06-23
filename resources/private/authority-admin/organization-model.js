@@ -256,7 +256,7 @@ LUPAPISTE.OrganizationModel = function () {
 
   ko.computed( function() {
     if( _.isBoolean( self.sutiEnabled() && self.initialized )) {
-      ajax.command( "suti-enabled", {flag: self.sutiEnabled()}).call();
+      ajax.command( "suti-toggle-enabled", {flag: self.sutiEnabled()}).call();
     }
   });
 

@@ -9,7 +9,7 @@
       usr/authority-admins-organization-id
       org/get-organization))
 
-(defn enable [organization-id flag]
+(defn toggle-enable [organization-id flag]
   (org/update-organization organization-id
                            {$set {:suti.enabled flag}}))
 
@@ -24,3 +24,8 @@
     (when (not= (boolean already) (boolean flag))
       (org/update-organization (:id organization)
                                {(if flag $push $pull) {:section-operations operation-id}}))))
+
+(defn organization-details [{{server :server :as suti} :suti}]
+  (-> suti
+      (select-keys [:enabled :operations :www])
+      (assoc :server (select-keys server [:url :username]))))
