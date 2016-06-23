@@ -78,6 +78,9 @@
 (defschema Tel
   (sc/constrained sc/Str (partial re-matches #"^\+?[\d\s-]+") "Telephone number"))
 
+(defschema HttpUrl
+  (sc/constrained sc/Str validators/http-url? "HTTP(S) URL"))
+
 (defschema Rakennusnumero
   (sc/constrained sc/Str validators/rakennusnumero? "Finnish building number"))
 

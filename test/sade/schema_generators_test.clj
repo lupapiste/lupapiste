@@ -12,6 +12,12 @@
 
 (defspec email-generator-test 100 email-prop)
 
+(def http-url-prop
+  (prop/for-all [url http-url]
+    (validators/http-url? url)))
+
+(defspec http-url-generator-test 100 http-url-prop)
+
 (def fixed-length-generator-prop
   (prop/for-all [len gen/pos-int]
    (->> (gen/generate (fixed-length-string len))
