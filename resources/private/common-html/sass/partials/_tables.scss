@@ -315,10 +315,15 @@ div.attachments-table-container {
 }
 
 table.suti-admin-table {
+  margin-top: $marginM;
   td:nth-child(even) {
     width: 50%;
     input {
-      width: 100%;
+      width: 90%;
     }
   }
+}
+
+div.suti-admin-container .serversettings--wide {
+  width: 50%;
 }

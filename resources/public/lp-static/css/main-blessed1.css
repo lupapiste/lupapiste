@@ -9689,13 +9689,22 @@ div.attachments-table-container table.attachments-table td.attachments-table__st
   magint-right: 1px;
 }
 
-/* line 318, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 317, ../../../private/common-html/sass/partials/_tables.scss */
+table.suti-admin-table {
+  margin-top: 12px;
+}
+/* line 319, ../../../private/common-html/sass/partials/_tables.scss */
 table.suti-admin-table td:nth-child(even) {
   width: 50%;
 }
-/* line 320, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 321, ../../../private/common-html/sass/partials/_tables.scss */
 table.suti-admin-table td:nth-child(even) input {
-  width: 100%;
+  width: 90%;
+}
+
+/* line 327, ../../../private/common-html/sass/partials/_tables.scss */
+div.suti-admin-container .serversettings--wide {
+  width: 50%;
 }
 
 /*Tab styles*/
@@ -10249,8 +10258,4 @@ ul.tabs {
 .comment-bubble-authority a {
   color: #f39129;
   text-decoration: none;
-}
-/* line 10, ../../../private/common-html/sass/partials/_links.scss */
-.comment-bubble-authority a:link, .comment-bubble-authority a:visited {
-  color: #f39129;
 }

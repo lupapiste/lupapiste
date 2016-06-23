@@ -2,9 +2,9 @@ LUPAPISTE.SutiAdminModel = function( params ) {
   "use strict";
   var self = this;
 
-  var org = params.organization;
+  self.organization = params.organization;
 
-  self.enabled = org.sutiEnabled;
+  self.enabled = self.organization.sutiEnabled;
 
-  self.www = org.sutiWww;
+  self.www = self.organization.sutiWww;
 };

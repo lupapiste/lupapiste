@@ -1,6 +1,7 @@
 <script class="ko-template" type="text/jx-query-tmpl"
         id="suti-admin-template">
-<div data-bind="feature: 'suti-integration'">
+  <div data-bind="feature: 'suti-integration'"
+       class="suti-admin-container">
   <h2 data-bind="ltext: 'suti.admin.title'"></h2>
   <div class="checkbox-wrapper">
     <input type="checkbox" id="suti-enabled-box"
@@ -19,11 +20,12 @@
       <tr>
         <td data-bind="ltext: 'suti.admin.www'"></td>
         <td><input type="url"
-                   data-bind="value: www,
-                              enable: enabled"
+                   data-bind="value: www"
                    data-test-id="suti-www"></td>
       </tr>
     </tbody>
   </table>
+
+  <suti-api params="organization: organization"></suti-api>
 </div>
 </script>
