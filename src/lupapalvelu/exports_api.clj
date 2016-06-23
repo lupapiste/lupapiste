@@ -156,7 +156,12 @@
 (defn- export [collection query fields]
   (ok collection (mongo/select collection query fields)))
 
-(defn- resolve-price-class [application op]
+(defn- resolve-price-class
+  "priceClass = legacy price class, which is mapped in .csv in dw.
+   priceCode = new price codes for 'puitesopimus'
+   use = for some price classes, description of usage (kayttotarkoitus)
+   usagePriceCode = mapping from legacy priceClass to new price code (called 'kayttotarkoitushinnasto')"
+  [application op]
   (let [op-name  (keyword (:name op))
         price-class (get price-classes-for-operation op-name)]
 
@@ -167,7 +172,7 @@
         :priceClass price-class
         :priceCode nil
         :use nil
-        :usagePriceCode nil)
+        :usagePriceCode (get usage-price-codes price-class))
 
       ; new buildings: fixed price code, but usage price code is determined from the building data
       (= uuden-rakentaminen price-class)
@@ -184,7 +189,7 @@
          :priceClass price-class
          :priceCode (get permit-type-price-codes (:permitType application))
          :use nil
-         :usagePriceCode nil))))
+         :usagePriceCode (get usage-price-codes price-class)))))
 
 (defn- operation-mapper [application op]
   (util/assoc-when (resolve-price-class application op)
