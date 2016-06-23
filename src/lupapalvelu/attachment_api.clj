@@ -100,6 +100,12 @@
     (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
 
+(defn- validate-operation-in-application [{{meta :meta} :data} application]
+  (when-let [op (:op meta)]
+    (let [operation-ids (map :id (a/get-operations application))]
+      (when (not-any? #{(:id op)} operation-ids)
+        (fail :error.illegal-attachment-operation)))))
+
 ;;
 ;; Types
 ;;
@@ -548,7 +554,10 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
+   :pre-checks [a/validate-authority-in-drafts
+                attachment-editable-by-application-state
+                attachment-not-readOnly
+                validate-operation-in-application]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId meta created)
   (ok))
