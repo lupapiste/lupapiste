@@ -137,7 +137,7 @@
              :id app-id
              :lang "fi"
              :attachmentsWithAmounts (take 1 for-printing)
-             :orderInfo order-info)) => fail?)
+             :orderInfo order-info)) => ok?)
 
         (fact "unsetting organization kopiolaitos-email leads to failure in kopiolaitos order"
           (command sipoo :set-kopiolaitos-info

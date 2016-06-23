@@ -215,7 +215,7 @@
                        :attachmentId (:id attachment)
                        :fileId (get-in attachment [:latestVersion :fileId])
                        :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?)
-                (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment))) => empty?)
+                (count (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 2)
 
           (fact "Authority deletes attachment"
             (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
@@ -303,8 +303,8 @@
     (fact "Can not rotate PDF 0 degrees"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 0) => fail?)
 
-    (fact "Can not rotate txt"
-      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
+    (fact "Can rotate txt converted to pdf"
+      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => ok?)))
 
 (facts "Rotate PDF - versions and files"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
