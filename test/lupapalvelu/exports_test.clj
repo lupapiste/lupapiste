@@ -88,7 +88,7 @@
 (fact "Paperilupa"
   (let [application {:permitType "R"}
         op (resolve-price-class application {:name "aiemmalla-luvalla-hakeminen"})]
-    (:priceClass op) => nil
+    (:priceClass op) => "D"
     (:priceCode op) => nil
     (:usagePriceCode op) => nil
     (:use op) => nil))
