@@ -30,12 +30,7 @@
         {name: "bulletin-info-tab"},
         {name: "bulletin-instructions-tab"}];
 
-    _.forEach(components, function(component) {
-      ko.components.register(component.name, {
-        viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name + "Model"))],
-        template: { element: (component.template ? component.template : component.name + "-template")}
-      });
-    });
+    ko.registerLupapisteComponents(components);
 
     var dummyAuth = { ok: function() { return false; }};
     $("#bulletins").applyBindings({ bulletinService: new LUPAPISTE.ApplicationBulletinsService(),

@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1466517085445');
+@import url('main-blessed1.css?z=1466598380682');
 
 /* line 6, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .medium {
@@ -4357,69 +4357,75 @@ table.admin-settings td.value .save-indicator {
   top: 0px;
 }
 
-/* line 27, ../../../private/common-html/sass/views/_authority_admin.scss */
-.munimaps {
-  margin-top: 24px;
-}
-/* line 30, ../../../private/common-html/sass/views/_authority_admin.scss */
-.munimaps h3 {
-  margin-top: .5em;
-}
-/* line 34, ../../../private/common-html/sass/views/_authority_admin.scss */
-.munimaps .munimaps--wide input, .munimaps .munimaps--wide select {
-  width: 90%;
-}
-/* line 38, ../../../private/common-html/sass/views/_authority_admin.scss */
-.munimaps .munimaps--error {
+/* line 26, ../../../private/common-html/sass/views/_authority_admin.scss */
+.serversettings--error {
   color: #df3215;
   margin-left: 6px;
   margin-right: 6px;
   margin-bottom: 24px;
   font-size: 16px;
 }
-/* line 47, ../../../private/common-html/sass/views/_authority_admin.scss */
+
+/* line 37, ../../../private/common-html/sass/views/_authority_admin.scss */
+.munimaps {
+  margin: 24px 0;
+}
+/* line 40, ../../../private/common-html/sass/views/_authority_admin.scss */
+.munimaps h3 {
+  margin-top: .5em;
+}
+/* line 44, ../../../private/common-html/sass/views/_authority_admin.scss */
+.munimaps .munimaps--wide input, .munimaps .munimaps--wide select, .munimaps .serversettings--wide input, .munimaps .serversettings--wide select {
+  width: 90%;
+}
+/* line 48, ../../../private/common-html/sass/views/_authority_admin.scss */
 .munimaps .munimaps--check input {
   margin-left: 24px;
 }
-/* line 50, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 51, ../../../private/common-html/sass/views/_authority_admin.scss */
 .munimaps .munimaps__map {
   width: 100%;
   height: 500px;
   margin-top: 24px;
 }
 
-/* line 57, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 61, ../../../private/common-html/sass/views/_authority_admin.scss */
+.sutiapi .serversettings--wide input, .sutiapi .serversettings--wide select {
+  width: 90%;
+}
+
+/* line 67, ../../../private/common-html/sass/views/_authority_admin.scss */
 .authority-admin .mask {
   /* cover the tabs*/
   margin-top: -38px;
 }
 
-/* line 63, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 73, ../../../private/common-html/sass/views/_authority_admin.scss */
 .guest-authorities {
   margin-top: 1em;
 }
 
-/* line 68, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 78, ../../../private/common-html/sass/views/_authority_admin.scss */
 .form-input--inline {
   display: inline-block;
 }
 
-/* line 73, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 83, ../../../private/common-html/sass/views/_authority_admin.scss */
 .form-input--error {
   border-color: red;
 }
 
-/* line 77, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 87, ../../../private/common-html/sass/views/_authority_admin.scss */
 .form-error-message {
   padding: 2px 2px 2px 2px;
   color: red;
 }
 
-/* line 83, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 93, ../../../private/common-html/sass/views/_authority_admin.scss */
 .permanent-archive-date-input label {
   margin-right: 6px;
 }
-/* line 86, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 96, ../../../private/common-html/sass/views/_authority_admin.scss */
 .permanent-archive-date-input input {
   width: 100px;
 }

@@ -235,6 +235,25 @@
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :calendars-enabled true})))
 
 ;;
+;; Backend server addresses
+;;
+
+(defn- update-organization-server [mongo-path org-id url username password]
+  {:pre [mongo-path (ss/not-blank? (name mongo-path))
+         (string? org-id)
+         (ss/optional-string? url)
+         (ss/optional-string? username)
+         (ss/optional-string? password)]}
+  (let [server (cond
+                 (ss/blank? username) {:url url, :username nil, :password nil} ; this should replace the server map (removes password)
+                 (ss/blank? password) {:url url, :username username} ; update these keys only, password not changed
+                 :else (assoc (encode-credentials username password) :url url)) ; this should replace the server map
+        updates (if-not (contains? server :password)
+                  (into {} (map (fn [[k v]] [(str (name mongo-path) \. (name k)) v]) server) )
+                  {mongo-path server})]
+   (update-organization org-id {$set updates})))
+
+;;
 ;; Organization/municipality provided map support.
 ;;
 
@@ -259,13 +278,14 @@
                             (decode-credentials password crypto-iv))}
        :layers layers})))
 
-(defn update-organization-map-server [org-id url username password]
-  (let [credentials (if (ss/blank? password)
-                      {:username username
-                       :password password}
-                      (encode-credentials username password))
-        server      (assoc credentials :url url)]
-   (update-organization org-id {$set {:map-layers.server server}})))
+(def update-organization-map-server (partial update-organization-server :map-layers.server))
+
+;;
+;; Suti
+;;
+
+(def update-organization-suti-server (partial update-organization-server :suti.server))
+
 
 ;;
 ;; Construction waste feeds
