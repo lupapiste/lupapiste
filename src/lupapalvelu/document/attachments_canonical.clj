@@ -94,7 +94,7 @@
       ;; should probably be unique among application, but for now we just use local value.
       {:Rakennustunnus (assoc bid :jarjestysnumero (inc i))})))
 
-(defn get-attachments-as-canonical [{:keys [attachments title] :as application} begin-of-link & [target]]
+(defn get-attachments-as-canonical [{:keys [attachments] :as application} begin-of-link & [target]]
   (let [unwrapped-app (tools/unwrapped application)]
     (not-empty (for [attachment attachments
                      :when (and (:latestVersion attachment)
@@ -108,8 +108,9 @@
                                               (str attachment-localized-name ": " (:contents attachment))
                                               attachment-localized-name)
                            file-id (get-in attachment [:latestVersion :fileId])
-                           attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                           link (str begin-of-link attachment-file-name)
+                           use-http-links? (re-matches #"https?://.*" begin-of-link)
+                           attachment-file-name (when-not use-http-links? (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename])))
+                           link (str begin-of-link (if use-http-links? (:id attachment) attachment-file-name))
                            meta (get-attachment-meta attachment application)
                            building-ids (get-attachment-building-ids attachment unwrapped-app)]]
                  {:Liite (get-Liite attachment-title link attachment type-id file-id attachment-file-name meta building-ids)}))))
@@ -142,8 +143,9 @@
   (let [type "lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
-        attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-        link (str begin-of-link attachment-file-name)
+        use-http-links? (re-matches #"https?://.*" begin-of-link)
+        attachment-file-name (when-not use-http-links? (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename])))
+        link (str begin-of-link (if use-http-links? (:id attachment) attachment-file-name))
         meta (get-attachment-meta attachment application)
         building-ids (get-attachment-building-ids attachment (tools/unwrapped application))]
     {:Liite (get-Liite title link attachment type file-id attachment-file-name meta building-ids)}))

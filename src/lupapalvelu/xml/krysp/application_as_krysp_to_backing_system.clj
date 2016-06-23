@@ -17,10 +17,12 @@
             [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]
             [lupapiste-commons.attachment-types :as attachment-types]))
 
-(defn- get-begin-of-link [permit-type]
+(defn- get-begin-of-link [permit-type use-http-links?]
   {:pre  [permit-type]
    :post [%]}
-  (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/"))
+  (if use-http-links?
+    (str (env/value :host) "/api/raw/latest-attachment-version?attachment-id=")
+    (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/")))
 
 (defn resolve-output-directory [organization permit-type]
   {:pre  [organization permit-type]
@@ -68,7 +70,7 @@
         krysp-fn      (permit/get-application-mapper permit-type)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
-        begin-of-link (get-begin-of-link permit-type)
+        begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
         filtered-app  (-> application remove-unsupported-attachments remove-non-approved-designers)
         filtered-submitted-app (remove-unsupported-attachments submitted-application)]
     (assert krysp-fn "KRYSP mapper function not found/defined?")
@@ -82,7 +84,7 @@
         krysp-fn      (permit/get-review-mapper permit-type)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
-        begin-of-link (get-begin-of-link permit-type)
+        begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
         filtered-app  (remove-unsupported-attachments application)]
     (when (organization/krysp-integration? organization permit-type)
       (assert krysp-fn "KRYSP 'review mapper' function not found/defined?")
@@ -95,7 +97,7 @@
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
-        begin-of-link (get-begin-of-link permit-type)
+        begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
         filtered-app  (remove-unsupported-attachments application)]
     (assert (= permit/R permit-type)
       (str "Sending unsent attachments to backing system is not supported for " (name permit-type) " type of permits."))
@@ -107,7 +109,7 @@
   (let [permit-type   (permit/permit-type application)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
-        begin-of-link (get-begin-of-link permit-type)
+        begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
         filtered-app  (remove-unsupported-attachments application)]
     (assert (= permit/YA permit-type)
       (str "Saving jatkoaika as krysp is not supported for " (name permit-type) " type of permits."))
