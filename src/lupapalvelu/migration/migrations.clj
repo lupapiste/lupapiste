@@ -2289,6 +2289,11 @@
                                     {:attachments true})]
          (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
 
+(defmigration unset-organization-municipalities-legacy-key
+  {:apply-when (pos? (mongo/count :organizations {:municipalities {$exists true}}))}
+  (mongo/update-by-query :organizations {:municipalities {$exists true}} {$unset {:municipalities 1}}))
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections

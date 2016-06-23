@@ -53,6 +53,61 @@
    :base sc/Bool
    :name sc/Str})
 
+(sc/defschema Link
+  {:url  ssc/OptionalHttpUrl
+   :name {:fi sc/Str, :sv sc/Str}})
+
+(sc/defschema Server
+  {(sc/optional-key :url)       ssc/OptionalHttpUrl
+   (sc/optional-key :username)  (sc/maybe sc/Str)
+   (sc/optional-key :password)  (sc/maybe sc/Str)
+   (sc/optional-key :crypto-iv) sc/Str})
+
+(sc/defschema Organization
+  {:id sc/Str
+   :name {:fi sc/Str, :sv sc/Str}
+   :scope [{:permitType sc/Str
+            :municipality sc/Str
+            :new-application-enabled sc/Bool
+            :inforequest-enabled sc/Bool
+            (sc/optional-key :opening) (sc/maybe ssc/Timestamp)
+            (sc/optional-key :open-inforequest) sc/Bool
+            (sc/optional-key :open-inforequest-email) ssc/OptionalEmail
+            (sc/optional-key :caseManagement) {:enabled sc/Bool
+                                               :version sc/Str
+                                               (sc/optional-key :ftpUser) sc/Str}}]
+
+   (sc/optional-key :allowedAutologinIPs) sc/Any
+   (sc/optional-key :app-required-fields-filling-obligatory) sc/Bool
+   (sc/optional-key :areas) sc/Any
+   (sc/optional-key :areas-wgs84) sc/Any
+   (sc/optional-key :calendars-enabled) sc/Bool
+   (sc/optional-key :guestAuthorities) sc/Any
+   (sc/optional-key :hadOpenInforequest) sc/Bool ;; TODO legacy flag, migrate away
+   (sc/optional-key :kopiolaitos-email) (sc/maybe sc/Str) ;; TODO split emails into an array
+   (sc/optional-key :kopiolaitos-orderer-address) (sc/maybe sc/Str)
+   (sc/optional-key :kopiolaitos-orderer-email) (sc/maybe sc/Str)
+   (sc/optional-key :kopiolaitos-orderer-phone) (sc/maybe sc/Str)
+   (sc/optional-key :krysp) sc/Any
+   (sc/optional-key :links) [Link]
+   (sc/optional-key :map-layers) sc/Any
+   (sc/optional-key :notifications) {(sc/optional-key :inforequest-notification-emails) [ssc/Email]
+                                     (sc/optional-key :neighbor-order-emails)      [ssc/Email]
+                                     (sc/optional-key :submit-notification-emails) [ssc/Email]}
+   (sc/optional-key :operations-attachments) sc/Any
+   (sc/optional-key :operations-tos-functions) sc/Any
+   (sc/optional-key :permanent-archive-enabled) sc/Bool
+   (sc/optional-key :permanent-archive-in-use-since) sc/Any
+   (sc/optional-key :selected-operations) sc/Any
+   (sc/optional-key :statementGivers) sc/Any
+   (sc/optional-key :suti) {:server Server}
+   (sc/optional-key :tags) [Tag]
+   (sc/optional-key :validate-verdict-given-date) sc/Bool
+   (sc/optional-key :vendor-backend-redirect) {(sc/optional-key :vendor-backend-url-for-backend-id) ssc/OptionalHttpUrl
+                                               (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
+   }
+  )
+
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
   "Reader role has access to every application within org."
