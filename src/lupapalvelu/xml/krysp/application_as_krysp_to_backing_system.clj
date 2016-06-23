@@ -21,7 +21,7 @@
   {:pre  [permit-type]
    :post [%]}
   (if use-http-links?
-    (str (env/value :host) "/api/raw/latest-attachment-version?attachment-id=")
+    (str (env/value :host) "/api/raw/")
     (str (env/value :fileserver-address) (permit/get-sftp-directory permit-type) "/")))
 
 (defn resolve-output-directory [organization permit-type]
