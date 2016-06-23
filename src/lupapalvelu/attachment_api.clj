@@ -100,6 +100,19 @@
       (fail :error.illegal-attachment-type))))
 
 ;;
+;; Attachments
+;;
+
+(defquery attachments
+  {:description "Get all attachments in application filtered by user visibility"
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{{attachments :attachments} :application}]
+  (ok :attachments attachments))
+
+;;
 ;; Types
 ;;
 
