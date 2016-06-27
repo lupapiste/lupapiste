@@ -159,7 +159,7 @@
    (sc/optional-key :scale)              (apply sc/enum attachment-scales)
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
-   (sc/optional-key :metadata)           {sc/Any sc/Any}})
+   (sc/optional-key :metadata)           {sc/Keyword sc/Any}})
 
 
 ;;
