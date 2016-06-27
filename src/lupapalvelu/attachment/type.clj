@@ -70,7 +70,7 @@
 (def- group-tag-mapping
   {{:type-id :iv_suunnitelma :type-group :erityissuunnitelmat} :iv_suunnitelma
    {:type-id :kvv_suunnitelma :type-group :erityissuunnitelmat} :kvv_suunnitelma
-   {:type-id :rakennesuunnitelma :type-group :}})
+   {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat} :rakennesuunnitelma})
 
 (defn attachment-type
   ([{type-group :type-group type-id :type-id :as attachment-type}]
