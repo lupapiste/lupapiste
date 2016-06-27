@@ -18,9 +18,9 @@
                                    empty-tag)}})
 
 (defn- get-postiosoite [yritys]
-  (let [teksti (util/assoc-when {} :teksti (-> yritys :osoite :katu))]
+  (let [teksti (util/assoc-when-pred {} util/not-empty-or-nil? :teksti (-> yritys :osoite :katu))]
     (not-empty
-      (util/assoc-when {}
+      (util/assoc-when-pred {} util/not-empty-or-nil?
         :osoitenimi teksti
         :postinumero (-> yritys :osoite :postinumero)
         :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi)))))
@@ -28,7 +28,7 @@
 (defn- get-yritys [yritys]
   (let [postiosoite (get-simple-osoite (:osoite yritys));(get-postiosoite yritys)
         yritys-basic (not-empty
-                       (util/assoc-when {}
+                       (util/assoc-when-pred {} util/not-empty-or-nil?
                          :nimi (-> yritys :yritysnimi)
                          :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus)))]
     (if postiosoite
@@ -56,9 +56,9 @@
 
 (defn- get-vastuuhenkilo-osoitetieto [osoite]
   (let [osoite (get-simple-osoite osoite)
-        ;; osoitenimi (util/assoc-when {} :teksti (-> osoite :katu))
+        ;; osoitenimi (util/assoc-when-pred {} util/not-empty-or-nil? :teksti (-> osoite :katu))
         ;; osoite (not-empty
-        ;;          (util/assoc-when {}
+        ;;          (util/assoc-when-pred {} util/not-empty-or-nil?
         ;;            :osoitenimi osoitenimi
         ;;            :postinumero (-> osoite :postinumero)
         ;;            :postitoimipaikannimi (-> osoite :postitoimipaikannimi)))
@@ -69,14 +69,14 @@
   (let [content (not-empty
                   (if (= type "yritys")
                     ;; yritys-tyyppinen vastuuhenkilo
-                    (util/assoc-when {}
+                    (util/assoc-when-pred {} util/not-empty-or-nil?
                       :sukunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :sukunimi)
                       :etunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :etunimi)
                       :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :yritys :osoite))
                       :puhelinnumero (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :puhelin)
                       :sahkopostiosoite (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :email))
                     ;; henkilo-tyyppinen vastuuhenkilo
-                    (util/assoc-when {}
+                    (util/assoc-when-pred {} util/not-empty-or-nil?
                       :sukunimi (-> vastuuhenkilo :henkilo :henkilotiedot :sukunimi)
                       :etunimi (-> vastuuhenkilo :henkilo :henkilotiedot :etunimi)
                       :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :henkilo :osoite))
@@ -318,7 +318,7 @@
         task-name (:taskname katselmus)]
     (util/strip-nils
       (merge
-        (util/assoc-when {}
+        (util/assoc-when-pred {} util/not-empty-or-nil?
           :pitoPvm (if (number? pitoPvm) (util/to-xml-date pitoPvm) (util/to-xml-date-from-string pitoPvm))
           :katselmuksenLaji katselmuksenLaji
           :vaadittuLupaehtonaKytkin (true? vaadittuLupaehtona)
@@ -334,7 +334,7 @@
                                                             (if-not (ss/blank? v)
                                                               (assoc m k (util/to-xml-date-from-string v))
                                                               m))
-                                                          (util/assoc-when {}
+                                                          (util/assoc-when-pred {} util/not-empty-or-nil?
                                                             :kuvaus (:kuvaus huomautukset)
                                                             :toteaja (:toteaja huomautukset))
                                                           (select-keys huomautukset [:maaraAika :toteamisHetki])))}})))))
@@ -352,4 +352,3 @@
 
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
                      :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
-
