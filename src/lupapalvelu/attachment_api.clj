@@ -82,7 +82,7 @@
 
 (defn- validate-operation [{{meta :meta} :data}]
   (when-let [op (:op meta)]
-    (when (sc/check attachment/Operation op)
+    (when (and (:id op) (sc/check attachment/Operation op))
       (fail :error.illegal-attachment-operation))))
 
 (defn- validate-scale [{{meta :meta} :data}]
@@ -101,9 +101,9 @@
       (fail :error.illegal-attachment-type))))
 
 (defn- validate-operation-in-application [{{meta :meta} :data} application]
-  (when-let [op (:op meta)]
+  (when-let [op-id (get-in meta [:op :id])]
     (let [operation-ids (map :id (a/get-operations application))]
-      (when (not-any? #{(:id op)} operation-ids)
+      (when (not-any? (partial = op-id) operation-ids)
         (fail :error.illegal-attachment-operation)))))
 
 ;;
