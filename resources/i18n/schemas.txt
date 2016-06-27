@@ -2802,3 +2802,5 @@
 "rakennuspaikka.hankkeestaIlmoitettu._group_label" "sv" "Information om projektet finns på byggplatsen"
 "hankkeestaIlmoitettu.groupHelpText" "fi" "Hakijana vakuutan, että rakennuspaikalla on ilmoitettu hankkeesta kyltillä seuraavasta päivämäärästä alkaen."
 "hankkeestaIlmoitettu.groupHelpText" "sv" "Som sökande intygar jag att det på byggplatsen finns en skylt som informerar om projektet från och med"
+"operations.tree.puun-kaataminen" "fi" "Puiden kaataminen asemakaava-alueella"
+"operations.tree.puun-kaataminen" "sv" ""
