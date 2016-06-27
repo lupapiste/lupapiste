@@ -527,10 +527,10 @@
         (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
         (fail :error.invalid-task-type))
       ;; else
-      (let [updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))
+      (let [update-result (update-application command (util/deep-merge task-updates building-updates))
+            updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))
             ;; updated-application (domain/get-application-as (:id application) (:user command)) ;; returns nil?
             ]
-        (update-application command (util/deep-merge task-updates building-updates))
         (doseq [added-task added-tasks-with-updated-buildings]
           (tasks/generate-task-pdfa
            updated-application
