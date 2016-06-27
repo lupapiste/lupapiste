@@ -278,6 +278,29 @@
 
     (count (:attachments (query-application pena application-id))) => 6))
 
+(facts "Attachments query"
+  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+        {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
+    (facts "initialization"
+      (fact "verdict" verdict-resp => ok?)
+      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => true))
+
+    (facts "Authority"
+      (let [{attachments :attachments :as query-resp} (query sonja :attachments :id application-id)]
+        (count attachments) => 5
+        (fact "verdict draft included"
+          (count (filter (comp #{"verdict"} :type :target) attachments)) => 1)))
+
+    (facts "Applicant"
+      (let [{attachments :attachments :as query-resp} (query pena :attachments :id application-id)]
+        (count attachments) => 4
+        (fact "verdict draft is filtered out"
+          (count (filter (comp #{"verdict"} :type :target) attachments)) => 0)))
+
+    (fact "Unauthorized"
+      (let [query-resp (query mikko :attachments :id application-id)]
+       query-resp => (partial expected-failure? "error.application-not-accessible")))))
+
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
         application (query-application pena application-id)]
