@@ -27,21 +27,21 @@ Dropdown options for attachment actions should look correct for Mikko
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
   Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
   Confirm yes no dialog
-  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds txt attachment without comment again
   [Tags]  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko deletes attachment version
   [Tags]  attachments
@@ -57,13 +57,13 @@ Mikko deletes also the attachment template
   Click element  jquery=[data-test-id=back-to-application-from-attachment]
   Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
   Confirm yes no dialog
-  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds again txt attachment with comment
   [Tags]  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${PNG_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
   Comment count is  1
 
 "Download all attachments" should be visible in the attachment actions dropdown
@@ -129,7 +129,7 @@ Comment is present after delete
 
 Mikko adds txt attachment with comment
   [Tags]  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${PNG_TESTFILE_DESCRIPTION}  operation=Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens application to authorities
   [Tags]  attachments
@@ -176,7 +176,7 @@ Signature icon is visible
 Signature is visible
   [Tags]  attachments
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
-  Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
+  Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
   Element text should be  xpath=//section[@id="attachment"]//*/div[@data-bind="fullName: user"]  Intonen Mikko
   Element text should be  xpath=//section[@id="attachment"]//*/span[@data-bind="version: version"]  1.0
@@ -204,7 +204,7 @@ Sonja goes to conversation tab
   Open application  ${appname}  ${propertyId}
   Open side panel  conversation
   Click Element  link=Ote alueen peruskartasta
-  Wait Until  Element text should be  xpath=//section[@id="attachment"]//span[@id="test-attachment-file-name"]/a  ${TXT_TESTFILE_NAME}
+  Wait Until  Element text should be  xpath=//section[@id="attachment"]//span[@id="test-attachment-file-name"]/a  ${PNG_TESTFILE_NAME}
   Close side panel  conversation
 
 Sonja goes to attachments tab

@@ -698,7 +698,7 @@ Open attachment details
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Wait Until Page Contains  ${PNG_TESTFILE_NAME}
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
