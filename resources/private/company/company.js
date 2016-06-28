@@ -21,6 +21,7 @@
     self.email     = ko.observable().extend(required).extend({email: true});
     self.firstName = ko.observable().extend(required);
     self.lastName  = ko.observable().extend(required);
+    self.userRole  = ko.observable();
     self.admin     = ko.observable();
     self.submit    = ko.observable();
 
@@ -35,6 +36,7 @@
     self.showUserInvited    = ko.observable();
     self.showUserDetails    = ko.observable();
     self.oldUser          = ko.observable();
+    self.isDummy          = ko.pureComputed(function() { return self.userRole() === "dummy"; });
 
     self.canSearchUser    = self.email.isValid;
     self.pending          = ko.observable();
@@ -69,6 +71,7 @@
             this.oldUser( true );
             this.firstName( data.firstName );
             this.lastName( data.lastName );
+            this.userRole( data.role );
           }
         }
       }, this)

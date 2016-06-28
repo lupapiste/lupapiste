@@ -11,6 +11,7 @@
                                             admin query command http-get http-post
                                             last-email apply-remote-minimal
                                             ok? fail? http200? redirects-to
+                                            login
                                             ]]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.vetuma-itest-util :refer :all]
@@ -34,13 +35,6 @@
         {;:debug true
          :headers {"content-type" "application/json;charset=utf-8"}
          :body (json/encode user)}))))
-
-(defn- login [u p]
-  (decode-body
-    (http-post (str (server-address) "/api/login")
-      {:follow-redirects false
-       :throw-exceptions false
-       :form-params {:username u :password p}})))
 
 (facts* "Registration"
  (let [store (atom {})

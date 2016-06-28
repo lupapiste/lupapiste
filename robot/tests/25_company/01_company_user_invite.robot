@@ -17,7 +17,7 @@ Check Kaino's status
   No such test id  company-user-delete-0
 
 Invite Duff3
-  Invite existing user  dummy3@example.com  Duff3  Dummy3  
+  Invite existing dummy user  dummy3@example.com  Duff3  Dummy3
 
 Check Duff3 invitation status
   Check invitation  0  dummy3@example.com  Dummy3  Duff3  Käyttäjä  Kyllä
@@ -79,7 +79,7 @@ Delete Duff3
   Click by test id  company-user-delete-0
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Page should not contain  dummy3@example.com
-  
+
 Add new user
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
@@ -96,7 +96,7 @@ Add new user
   Click enabled by test id  company-user-send-invite
   Wait until  Element text should be  testCompanyAddUserDone  Käyttäjä kutsuttu.
   Click enabled by test id  company-new-user-invited-close-dialog
-  Check invitation  0  user2@solita.fi  Ser  Ulla  Ylläpitäjä  Ei  
+  Check invitation  0  user2@solita.fi  Ser  Ulla  Ylläpitäjä  Ei
 
 New user gets email
   Open last email
@@ -127,7 +127,7 @@ New user logs in
 Ulla sees herself as company admin
   Open company user listing
   # Ser, Solita
-  Check company user  0  user2@solita.fi  Ser  Ulla  Ylläpitäjä  Ei  
+  Check company user  0  user2@solita.fi  Ser  Ulla  Ylläpitäjä  Ei
   No such test id  company-user-delete-0
   Wait test id visible  company-add-user
   Wait test id visible  company-user-edit-1
@@ -149,7 +149,7 @@ Pena logs in and sees the non-admin view of the company
   Pena logs in
   Open company user listing
   # Panaani, Ser, Solita
-  Check company user  0  pena@example.com  Panaani  Pena  Käyttäjä  Ei  
+  Check company user  0  pena@example.com  Panaani  Pena  Käyttäjä  Ei
   No such test id  company-add-user
   No such test id  company-user-edit-1
   No such test id  company-user-delete-1
@@ -165,7 +165,7 @@ Kaino logs in and removes Ulla's admin rights
   Edit company user  1  user  Kyllä
   Click by test id  company-user-save-1
   Confirm  dynamic-yes-no-confirm-dialog
-  Check company user  1  user2@solita.fi  Ser  Ulla  Käyttäjä  Kyllä  
+  Check company user  1  user2@solita.fi  Ser  Ulla  Käyttäjä  Kyllä
   [Teardown]  Logout
 
 Mikko logs in, creates application and invites Solita
@@ -240,6 +240,27 @@ Kaino wants to invite new users, but can't because account limit is reached
 
 *** Keywords ***
 
+Invite existing dummy user
+  [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=false  ${submit}=true
+  Click enabled by test id  company-add-user
+  Wait until  Element should be visible  dialog-company-new-user
+  Test id disabled  company-search-email
+  Input text by test id  company-new-user-email  ${email}
+  Click enabled by test id  company-search-email
+  Test id disabled  company-new-user-email
+
+  Textfield value should be  jquery=[data-test-id=company-new-user-firstname]  ${EMPTY}
+  Test id enabled  company-new-user-firstname
+  Textfield value should be  jquery=[data-test-id=company-new-user-lastname]  ${EMPTY}
+  Test id enabled  company-new-user-lastname
+  Input text by test id  company-new-user-firstname  ${firstname}
+  Input text by test id  company-new-user-lastname  ${lastname}
+  Run keyword if  '${admin}' == 'true'  Click label  company-new-user-admin
+  Run keyword unless  '${submit}' == 'true'  Click label  company-new-user-submit
+  Click enabled by test id  company-user-send-invite
+  Wait Test id visible  company-add-user-done
+  Click by test id  company-new-user-invited-close-dialog
+
 Invite existing user
   [Arguments]  ${email}  ${firstname}  ${lastname}  ${admin}=false  ${submit}=true
   Click enabled by test id  company-add-user
@@ -248,16 +269,17 @@ Invite existing user
   Input text by test id  company-new-user-email  ${email}
   Click enabled by test id  company-search-email
   Test id disabled  company-new-user-email
+
   Textfield should contain  jquery=[data-test-id=company-new-user-firstname]  ${firstname}
   Test id disabled  company-new-user-firstname
   Textfield should contain  jquery=[data-test-id=company-new-user-lastname]  ${lastname}
   Test id disabled  company-new-user-lastname
+
   Run keyword if  '${admin}' == 'true'  Click label  company-new-user-admin
   Run keyword unless  '${submit}' == 'true'  Click label  company-new-user-submit
   Click enabled by test id  company-user-send-invite
   Wait Test id visible  company-add-user-done
   Click by test id  company-new-user-invited-close-dialog
-
 
 Check invitation
   [Arguments]  ${index}  ${email}  ${lastname}  ${firstname}  ${role}  ${submit}
@@ -282,4 +304,4 @@ Edit company user
   Click by test id  company-user-edit-${index}
   Select from test id  company-user-edit-role-${index}  ${role}
   Select from test id  company-user-edit-submit-${index}  ${submit}
-    
+

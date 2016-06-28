@@ -102,13 +102,13 @@
               <input class="form-input text" data-bind="textInput: model().netbill, enable: edit" type="text"
                      data-test-id="edit-company-netbill">
             </div>
-                        
+
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
               <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text" maxlength="17"
                       data-test-id="edit-company-ovt">
-            </div>          
-            
+            </div>
+
             <div class="form-entry" data-test-id="company-pop">
               <span data-bind="component: {name: 'invoice-operator-selector', params: {selected: model().pop, enabled: edit}}"></span>
             </div>
@@ -149,7 +149,7 @@
             </thead>
             <tbody>
               <!-- ko foreach: invitations -->
-              <tr>                
+              <tr>
                 <td data-bind="text: lastName,
                                attr: {'data-test-id': 'invitation-lastname-' + $index()}"></td>
                 <td data-bind="text: firstName,
@@ -170,7 +170,7 @@
               </tr>
               <!-- /ko -->
               <!-- ko foreach: users -->
-              <tr>                
+              <tr>
                 <td data-bind="text: lastName,
                                attr: {'data-test-id': 'company-user-lastname-' + $index()}"></td>
                 <td data-bind="text: firstName,
@@ -222,7 +222,7 @@
                   <div data-bind="if: opsEnabled">
                     <a data-bind="ltext: 'edit', click: edit,
                                   attr: {'data-test-id': 'company-user-edit-' + $index()}"></a>
-                    <a data-bind="click: deleteUser,   
+                    <a data-bind="click: deleteUser,
                                   ltext: 'company.user.op.delete',
                                   attr: {'data-test-id': 'company-user-delete-' + $index()}"></a>
                   </div>
@@ -259,7 +259,7 @@
           <input data-bind="textInput: email, enable: emailEnabled" class="form-input"
                  type="text" data-test-id="company-new-user-email"/>
           <div data-bind="visible: showSearchEmail" class="inner-margins dialog-content__footer">
-            <button data-bind="enable: canSearchUser, 
+            <button data-bind="enable: canSearchUser,
                                click: searchUser,
                                css: {waiting: pending}"
                     type="submit"
@@ -288,7 +288,7 @@
         </div>
 
         <div data-bind="visible: showUserAlreadyInvited">
-          <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>        
+          <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>
           <div class="dialog-content__footer">
             <button class="positive close"
                     data-test-id="company-user-already-invited-close-dialog">
@@ -302,13 +302,13 @@
 
           <label data-bind="ltext: 'company.user.firstName'" class="form-label tip"></label>
           <input data-bind="textInput: firstName,
-                            disable: done() || oldUser()"
+                            disable: done() || (!isDummy() && oldUser())"
                  class="form-input" type="text" data-test-id="company-new-user-firstname"/>
 
           <label data-bind="ltext: 'company.user.lastName'"
                  class="form-label tip"></label>
           <input data-bind="textInput: lastName,
-                            disable: done() || oldUser()"
+                            disable: done() || (!isDummy() && oldUser())"
                  class="form-input" type="text" data-test-id="company-new-user-lastname"/>
           <div class="checkbox-wrapper wrapper--break-small">
             <input data-bind="checked: admin,
@@ -338,7 +338,7 @@
           </div>
 
           <div class="inner-margins dialog-content__footer">
-            <button data-bind="enable: canSubmit, 
+            <button data-bind="enable: canSubmit,
                                click: sendInvite,
                                css: {waiting: pending}"
                     type="submit"
