@@ -333,7 +333,9 @@ var attachment = (function() {
     model.subscriptions.push(model.selectedOperationId.subscribe(function(id) {
       if (!model.operation() || id !== model.operation().id) {
         var op = _.find(model.selectableOperations(), {id: id}) || null;
-        saveLabelInformation("operation", {meta: {op: {id: op && op.id}}});
+        op = _.pick(op, "id");
+        var finalOp = _.isEmpty(op) ? null : op;
+        saveLabelInformation("operation", {meta: {op: finalOp}});
       }
     }));
 

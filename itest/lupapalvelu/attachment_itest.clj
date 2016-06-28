@@ -158,10 +158,15 @@
                      :meta {:op {:id op-id :unknown "foofaa"}}) => (partial expected-failure? :error.illegal-attachment-operation))
 
           (fact "Operation metadata can be set to null"
+            (fact "but id can't be nil"
+              (command pena :set-attachment-meta
+                       :id application-id
+                       :attachmentId (first attachment-ids)
+                       :meta {:op {:id nil}}) => (partial expected-failure? :error.illegal-attachment-operation))
             (command pena :set-attachment-meta
                      :id application-id
                      :attachmentId (first attachment-ids)
-                     :meta {:op {:id nil}}) => ok?)))
+                     :meta {:op nil}) => ok?)))
 
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero
