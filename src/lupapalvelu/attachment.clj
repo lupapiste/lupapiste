@@ -68,6 +68,8 @@
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
 
+(def attachment-groups #{:operation :parties :building-site})
+
 (defschema AttachmentId
   (ssc/min-length-string 24))
 
@@ -151,6 +153,7 @@
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
    :op                                   (sc/maybe Operation)
+   (sc/optional-key :group)              (apply sc/enum attachment-groups)
    :signatures                           [Signature]
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
@@ -159,7 +162,6 @@
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
    (sc/optional-key :metadata)           {sc/Any sc/Any}})
-
 
 ;;
 ;; Utils
@@ -178,10 +180,17 @@
 ;; Api
 ;;
 
-(defn attachment-grouping [{operation :op target :target type :type :as attachment}]
-  {:type       (att-type/tag-by-type attachment)
-   :relates-to {:operation operation
-                :target    (not-empty (select-keys target [:id :type]))}})
+(defn attachment-groups-for-application [{primary-op :primaryOperation secondary-ops :secondaryOperations}]
+  (let [operations (->> (cons primary-op secondary-ops)
+                        (map (partial merge {:group :operation})))]
+    (->> (remove #{:operation} attachment-groups)
+         (map (partial assoc {} :group))
+         (apply conj operations))))
+
+(defn attachment-grouping [{group :group operation :op :as attachment}]
+  {:ref-group  (merge {:group-type group}
+                      (when (= :operation group) operation))
+   :type-group (att-type/tag-by-type attachment)})
 
 (defn link-file-to-application [app-id fileId]
   {:pre [(string? app-id)]}

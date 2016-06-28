@@ -112,6 +112,15 @@
   [{{attachments :attachments} :application}]
   (ok :attachments (map #(assoc % :group (attachment/attachment-grouping %)) attachments)))
 
+(defquery attachment-groups
+  {:description "Get all attachment groups for application"
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{application :application}]
+  (ok :groups (attachment/attachment-groups-for-application application)))
+
 ;;
 ;; Types
 ;;
