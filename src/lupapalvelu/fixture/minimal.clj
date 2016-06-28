@@ -484,8 +484,8 @@
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
     :username  "dummy3"
-    :firstName "Duff3"
-    :lastName "Dummy3"
+    :firstName ""
+    :lastName ""
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
     :role "dummy"}
