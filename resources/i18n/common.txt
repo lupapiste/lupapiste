@@ -1559,7 +1559,7 @@
 "op-description.edit" "fi" "Lisää tunniste"
 "op-description.edit" "sv" "Lägg till identifikation"
 "open.title" "fi" "Hakemus siirtyy Näkyy viranomaiselle-tilaan, jos kysyt neuvoa viranomaiselta keskusteluketjussa. Tällöin hakemuksesi on jaettu viranomaiselle, mutta sitä ei ole vielä jätetty viranomaiselle käsiteltäväksi. Näin voitte keskustella hakemuksesta vapaasti viranomaisen kanssa ja valmistella hakemusta rauhassa."
-"open.title" "sv" "Ansökan får statusen Under beredning om du ber myndigheten om råd i diskussionstråden. Då har din ansökan delats med myndigheten men ännu inte lämnats in för handläggning. Nu kan ni fritt diskutera ansökan med myndigheten och bereda den i lugn och ro."
+"open.title" "sv" "Ansökan får statusen Syns till myndigheten om du ber myndigheten om råd i diskussionstråden. Då har din ansökan delats med myndigheten men ännu inte lämnats in för handläggning. Nu kan ni fritt diskutera ansökan med myndigheten och bereda den i lugn och ro."
 "operations.add" "fi" "Lisää toimenpide"
 "operations.add" "sv" "Lägg till åtgärd"
 "operations.selected" "fi" "Valittu toimenpide:"
