@@ -353,6 +353,7 @@
 
 
 (defn generate-task-pdfa [application {info :schema-info :as task} user lang]
+  (assert (map? application))
   (when (task-is-review? task)
     (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
 
