@@ -264,10 +264,10 @@
   (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
         types          (->> (org/get-organization-attachments-for-operation organization operation)
                             (map (partial apply att-type/attachment-type))
-                            (filter #(or (get-in % [:metadata :operation-specific]) (not (att-type/contains? existing-types %)))))
-        ops            (map #(when (get-in % [:metadata :operation-specific]) operation) types)
+                            (filter #(or (get-in % [:metadata :grouping]) (not (att-type/contains? existing-types %)))))
+        groups         (map #(when-let [group (get-in % [:metadata :grouping])] (assoc (when (= :operation group) operation) :group-type group)) types)
         metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
-    (map (partial att/make-attachment created target true false false applicationState) ops types metadatas)))
+    (map (partial att/make-attachment created target true false false applicationState) groups types metadatas)))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys

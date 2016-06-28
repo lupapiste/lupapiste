@@ -5,7 +5,7 @@
             [lupapalvelu.operations :as op]
             [sade.core :refer :all]
             [sade.env :as env]
-            [sade.util :refer [fn->>] :as util]
+            [sade.util :refer [fn-> fn->>] :as util]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
             [schema.core :refer [defschema] :as sc]))
@@ -14,7 +14,7 @@
   {:type-id     sc/Keyword
    :type-group  sc/Keyword
    :metadata   {(sc/optional-key :permitType)     sc/Keyword
-                :operation-specific               sc/Bool
+                (sc/optional-key :grouping)       sc/Keyword
                 (sc/optional-key :for-operations) #{(apply sc/enum (keys op/operations))}}})
 
 (def osapuolet attachment-types/osapuolet-v2)
@@ -51,32 +51,41 @@
   (cond-> #{}
     (contains? foreman-application-types attachment-type) (conj :tyonjohtajan-nimeaminen-v2 :tyonjohtajan-nimeaminen)))
 
-(def- operation-specific-types
-  [{:type-id :pohjapiirros       :type-group :paapiirustus}
-   {:type-id :leikkauspiirros    :type-group :paapiirustus}
-   {:type-id :julkisivupiirros   :type-group :paapiirustus}
-   {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
-   {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
-   {:type-id :energiatodistus    :type-group :muut}
-   {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
-   {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}
-   {:type-id :pohjapiirustus     :type-group :paapiirustus}
-   {:type-id :leikkauspiirustus  :type-group :paapiirustus}
-   {:type-id :julkisivupiirustus :type-group :paapiirustus}
-   {:type-id :muu_paapiirustus   :type-group :paapiirustus}
-   {:type-id :energiatodistus    :type-group :energiatodistus}
-   {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}])
+(def- default-grouping
+  {:operation     [{:type-id :pohjapiirros       :type-group :paapiirustus}
+                   {:type-id :leikkauspiirros    :type-group :paapiirustus}
+                   {:type-id :julkisivupiirros   :type-group :paapiirustus}
+                   {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
+                   {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
+                   {:type-id :energiatodistus    :type-group :muut}
+                   {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
+                   {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}
+                   {:type-id :pohjapiirustus     :type-group :paapiirustus}
+                   {:type-id :leikkauspiirustus  :type-group :paapiirustus}
+                   {:type-id :julkisivupiirustus :type-group :paapiirustus}
+                   {:type-id :muu_paapiirustus   :type-group :paapiirustus}
+                   {:type-id :iv_suunnitelma     :type-group :erityissuunnitelmat}
+                   {:type-id :kvv_suunnitelma    :type-group :erityissuunnitelmat}
+                   {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat}
+                   {:type-id :energiatodistus    :type-group :energiatodistus}
+                   {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}]
+   :building-site []
+   :parties       []})
 
 (def- group-tag-mapping
-  {{:type-id :iv_suunnitelma :type-group :erityissuunnitelmat} :iv_suunnitelma
-   {:type-id :kvv_suunnitelma :type-group :erityissuunnitelmat} :kvv_suunnitelma
-   {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat} :rakennesuunnitelma})
+  {{:type-id :iv_suunnitelma     :type-group :erityissuunnitelmat} :iv_suunnitelma
+   {:type-id :kvv_suunnitelma    :type-group :erityissuunnitelmat} :kvv_suunnitelma
+   {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat} :rakennesuunnitelma
+   {:type-id :pohjapiirustus     :type-group :paapiirustus}        :paapiirustus
+   {:type-id :leikkauspiirustus  :type-group :paapiirustus}        :paapiirustus
+   {:type-id :julkisivupiirustus :type-group :paapiirustus}        :paapiirustus
+   {:type-id :muu_paapiirustus   :type-group :paapiirustus}        :paapiirustus})
 
 (defn attachment-type
   ([{type-group :type-group type-id :type-id :as attachment-type}]
-   (->> (update attachment-type :metadata util/assoc-when-pred util/not-empty-or-nil?
-                :operation-specific (contains? operation-specific-types attachment-type)
-                :for-operations     (not-empty (for-operations attachment-type)))
+   (->> (update attachment-type :metadata util/assoc-when
+                :grouping       (->> (filter (fn-> val (contains? attachment-type)) default-grouping) (map key) first)
+                :for-operations (not-empty (for-operations attachment-type)))
         (sc/validate AttachmentType)))
   ([type-group type-id]
    (attachment-type {:type-group (keyword type-group) :type-id (keyword type-id)}))

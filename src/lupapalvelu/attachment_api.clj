@@ -392,7 +392,7 @@
     (attach-or-fail! application attachment-data)))
 
 (defcommand upload-attachment
-  {:parameters [id attachmentId attachmentType op filename tempfile size]
+  {:parameters [id attachmentId attachmentType group filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
@@ -425,7 +425,7 @@
               :content tempfile
               :attachment-id attachmentId
               :attachment-type attachmentType
-              :op op
+              :group group
               :comment-text text
               :target target
               :locked locked
@@ -571,7 +571,11 @@
                       validate-meta validate-scale validate-size validate-operation]
    :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-data! command attachmentId meta created)
+  (let [data (merge meta
+                    (when (:group meta)
+                      {:op (not-empty (select-keys (:group meta) [:id :name]))
+                       :group (get-in meta [:group :group-type])}))]
+    (attachment/update-attachment-data! command attachmentId data created))
   (ok))
 
 (defcommand set-attachment-not-needed

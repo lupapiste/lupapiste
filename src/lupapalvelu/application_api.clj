@@ -372,7 +372,8 @@
   (let [op (app/make-op operation created)
         new-docs (app/make-documents nil created op application)
         organization (org/get-organization organization)
-        new-attachments (app/make-attachments created op organization app-state tos-function :existing-attachments-types (set (map :type attachments)))]
+        existing-attachment-types (->> attachments (remove (comp #{:operation} :group)) (map :type))
+        new-attachments (app/make-attachments created op organization app-state tos-function :existing-attachments-types existing-attachment-types)]
     (update-application command {$push {:secondaryOperations  op
                                         :documents   {$each new-docs}
                                         :attachments {$each new-attachments}}
