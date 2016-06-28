@@ -279,9 +279,14 @@
     :send-email false)
   (ok))
 
-(defn invite-user! [user-email company-id role submit]
+(defn invite-user! [user-email company-id role submit firstname lastname]
   (let [company   (find-company! {:id company-id})
         user      (usr/get-user-by-email user-email)
+        user      (if (usr/dummy? user)
+                    (do                                     ; update firstname and lastname from frontend for dummy user
+                      (usr/update-user-by-email user-email {:firstName firstname :lastName lastname})
+                      (usr/get-user-by-email user-email))
+                    user)
         token-id  (token/make-token :invite-company-user nil {:user user
                                                               :company company
                                                               :role role
