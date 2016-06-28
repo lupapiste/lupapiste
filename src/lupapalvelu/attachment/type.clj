@@ -160,8 +160,7 @@
 (defn tag-by-type [{type :type :as attachment}]
   (get group-tag-mapping
        (-> (select-keys type [:type-group :type-id])
-           (util/convert-values keyword))
-       (keyword (:type-group type))))
+           (util/convert-values keyword))))
 
 ;;
 ;; Helpers for reporting purposes
