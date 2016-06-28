@@ -126,8 +126,8 @@
 
                    (fact "zip file has two files"
                      (count result) => 2)
-                   (fact "filenames end with 'test-attachment.pdf'"
-                     (every? #(.endsWith (:name %) "test-attachment.pdf") result) => true)))))))
+                   (fact "filenames end with 'test-gif-attachment.gif'"
+                     (every? #(.endsWith (:name %) "test-gif-attachment.gif") result) => true)))))))
 
         (fact "without attachment versions order fails"
           (let [for-printing (filter :forPrinting attachments-with-amount)
@@ -137,7 +137,7 @@
              :id app-id
              :lang "fi"
              :attachmentsWithAmounts (take 1 for-printing)
-             :orderInfo order-info)) => ok?)
+             :orderInfo order-info)) => fail?)
 
         (fact "unsetting organization kopiolaitos-email leads to failure in kopiolaitos order"
           (command sipoo :set-kopiolaitos-info

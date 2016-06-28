@@ -109,7 +109,9 @@
                 (.contains attachment-string "PDF") => true)
               (do
                 (fact "linkki liiteeseen contains '_test-attachment.pdf'"
-                  linkkiliitteeseen => #".+_test-attachment.pdf$")
+                  (if (.contains linkkiliitteeseen "rakennus")
+                    linkkiliitteeseen => #".+_test-attachment.pdf$"
+                    linkkiliitteeseen => #".+_test-gif-attachment.gif$"))
                 (fact "Liitetiedostossa on sisalto"
                   (not (nil? attachment-string)))
                 (fact "Tyyppi on oikea" tyyppi => expected-type)))))

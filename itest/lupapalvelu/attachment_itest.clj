@@ -167,14 +167,14 @@
         (last-email) ; Inbox zero
 
         (fact "Meta"
-          (get-in versioned-attachment [:latestVersion :version :major]) => 2
+          (get-in versioned-attachment [:latestVersion :version :major]) => 1
           (get-in versioned-attachment [:latestVersion :version :minor]) => 0)
 
         (fact "Veikko uploads a new version"
           (upload-attachment veikko application-id versioned-attachment true)
           (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-            (get-in updated-attachment [:latestVersion :version :major]) => 2
-            (get-in updated-attachment [:latestVersion :version :minor]) => 2
+            (get-in updated-attachment [:latestVersion :version :major]) => 1
+            (get-in updated-attachment [:latestVersion :version :minor]) => 1
 
            (fact "upload has Veikko's auth"
              (get-in updated-attachment [:auth 1 :id]) => veikko-id)
@@ -195,8 +195,8 @@
                        :fileId (get-in updated-attachment [:latestVersion :fileId])
                        :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
               (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-                (get-in ver-del-attachment [:latestVersion :version :major]) => 2
-                (get-in ver-del-attachment [:latestVersion :version :minor]) => 1))
+                (get-in ver-del-attachment [:latestVersion :version :major]) => 1
+                (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
 
             (fact "Applicant cannot delete attachment that is required"
               (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
@@ -210,7 +210,7 @@
         (let [signed-attachment (get-attachment-by-id pena application-id (:id versioned-attachment))]
 
           (fact "Pena has only one auth entry, although has many versions uploaded"
-            (count (filter #(= (-> % :user :id) (id-for-key pena)) (:versions signed-attachment))) => 4
+            (count (filter #(= (-> % :user :id) (id-for-key pena)) (:versions signed-attachment))) => 2
             (count (filter #(= (:id %) (id-for-key pena)) (:auth signed-attachment))) => 1)
 
           (fact "Attachment is signed"
@@ -227,14 +227,14 @@
 
           (fact "Deleting the last version clears attachment auth"
                 (let [attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-                  (count (:versions attachment )) => 4
+                  (count (:versions attachment )) => 1
                   (command veikko
                        :delete-attachment-version
                        :id application-id
                        :attachmentId (:id attachment)
                        :fileId (get-in attachment [:latestVersion :fileId])
                        :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?)
-                (count (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment)))) => 2)
+                (:auth (get-attachment-by-id veikko application-id (:id versioned-attachment))) => empty?)
 
           (fact "Authority deletes attachment"
             (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
@@ -314,7 +314,7 @@
     attachment1 =not=> attachment2
 
     (upload-attachment sonja application-id attachment1 true :filename "dev-resources/test-pdf.pdf")
-    (upload-attachment sonja application-id attachment2 true :filename "dev-resources/test-attachment.txt")
+    (upload-attachment sonja application-id attachment2 true :filename "dev-resources/test-gif-attachment.gif")
 
     (fact "Can rotate PDF"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 90) => ok?)
@@ -322,8 +322,8 @@
     (fact "Can not rotate PDF 0 degrees"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 0) => fail?)
 
-    (fact "Can rotate txt converted to pdf"
-      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => ok?)))
+    (fact "Can not rotate gif"
+      (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
 
 (facts "Rotate PDF - versions and files"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
@@ -359,6 +359,40 @@
                       first)]
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
+
+(facts "Convert attachment to PDF/A"
+       (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+             application-id (:id application)
+             attachment (first (:attachments application))
+             attachment-id (:id attachment)]
+
+       (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
+
+       (let [attachment (first (:attachments (query-application sonja application-id)))]
+           (fact "Auto conversion should be done to txt -file"
+                 (get-in attachment [:latestVersion :autoConversion]) => true)
+
+           (fact "File should be converted to PDF/A"
+                 (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+                 (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf")
+
+           (fact "Latest version should be 0.2 after conversion"
+                 (get-in attachment [:latestVersion :version :major]) => 0
+                 (get-in attachment [:latestVersion :version :minor]) => 2)
+
+           (fact "After deleting converted version, original version should exists"
+                (command sonja
+                         :delete-attachment-version
+                         :id application-id
+                         :attachmentId attachment-id
+                         :fileId (get-in attachment [:latestVersion :fileId])
+                         :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?
+                (let [original-attachment (get-attachment-by-id sonja application-id (:id attachment))]
+                     (get-in original-attachment [:latestVersion :version :major]) => 0
+                     (get-in original-attachment [:latestVersion :version :minor]) => 1
+                     (get-in original-attachment [:latestVersion :contentType]) => "text/plain"
+                     (get-in original-attachment [:latestVersion :filename]) => "test-attachment.txt")))))
+
 
 (defn- poll-job [id version limit]
   (when (pos? limit)
