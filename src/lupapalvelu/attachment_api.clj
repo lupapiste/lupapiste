@@ -82,7 +82,7 @@
 
 (defn- validate-operation [{{meta :meta} :data}]
   (when-let [op (:op meta)]
-    (when (and (:id op) (sc/check attachment/Operation op))
+    (when (sc/check attachment/Operation op)
       (fail :error.illegal-attachment-operation))))
 
 (defn- validate-scale [{{meta :meta} :data}]
