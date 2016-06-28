@@ -182,15 +182,15 @@
 
 (defn attachment-groups-for-application [{primary-op :primaryOperation secondary-ops :secondaryOperations}]
   (let [operations (->> (cons primary-op secondary-ops)
-                        (map (partial merge {:group :operation})))]
+                        (map (partial merge {:group-type :operation})))]
     (->> (remove #{:operation} attachment-groups)
-         (map (partial assoc {} :group))
+         (map (partial assoc {} :group-type))
          (apply conj operations))))
 
 (defn attachment-grouping [{group :group operation :op :as attachment}]
-  {:ref-group  (merge {:group-type group}
-                      (when (= :operation group) operation))
-   :type-group (att-type/tag-by-type attachment)})
+  {:by-ref  (merge {:group-type group}
+                   (when (= :operation group) operation))
+   :by-type (att-type/tag-by-type attachment)})
 
 (defn link-file-to-application [app-id fileId]
   {:pre [(string? app-id)]}
