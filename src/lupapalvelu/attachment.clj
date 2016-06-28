@@ -188,9 +188,10 @@
          (apply conj operations))))
 
 (defn attachment-grouping [{group :group operation :op :as attachment}]
-  {:by-ref  (merge {:group-type group}
-                   (when (= :operation group) operation))
-   :by-type (att-type/tag-by-type attachment)})
+  (let [group (or group (when operation :operation))] ;; Group not set for old attachments.
+    {:by-ref  (merge {:group-type group}
+                     (when (= :operation group) operation))
+     :by-type (att-type/tag-by-type attachment)}))
 
 (defn link-file-to-application [app-id fileId]
   {:pre [(string? app-id)]}
