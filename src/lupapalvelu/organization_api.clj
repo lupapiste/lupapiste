@@ -337,12 +337,12 @@
   (ok))
 
 (defcommand set-organization-use-attachment-links-integration
-            {:parameters [enabled]
-             :user-roles #{:authorityAdmin}
-             :input-validators  [(partial boolean-parameters [:enabled])]}
-            [{user :user}]
-            (o/update-organization (user/authority-admins-organization-id user) {$set {:use-attachment-links-integration enabled}})
-            (ok))
+  {:parameters       [enabled]
+   :user-roles       #{:authorityAdmin}
+   :input-validators [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user) {$set {:use-attachment-links-integration enabled}})
+  (ok))
 
 (defcommand set-organization-calendars-enabled
   {:parameters [enabled organizationId]
