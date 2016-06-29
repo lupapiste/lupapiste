@@ -283,7 +283,7 @@
   (let [op-info (op/operations (keyword (:name op)))
         op-schema-name (:schema op-info)
         schema-version (:schema-version application)
-        default-schema-datas (util/assoc-when-pred util/not-empty-or-nil? {}
+        default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
                                                    op-schema-name (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         make (fn [schema]
