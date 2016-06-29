@@ -110,8 +110,12 @@
                 {:pdfa? false}))))
 
 (defn- get-pdf-page-count [input-file]
-  (with-open [reader (PdfReader. ^String input-file)]
-    (.getNumberOfPages reader)))
+  (try
+    (with-open [reader (PdfReader. ^String input-file)]
+      (.getNumberOfPages reader))
+    (catch Exception e
+      (error "Error occurred when trying to read page count from PDF file" e)
+      0)))
 
 (defn- store-converted-page-count [result count]
   (let [db-key (cond
@@ -130,10 +134,10 @@
                           (io/copy pdf-file temp-file)
                           (.getCanonicalPath temp-file))
                         (.getCanonicalPath pdf-file))
-            page-count (get-pdf-page-count file-path)
             pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
             conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path opts)]
-        (store-converted-page-count conversion-result page-count)
+        (->> (get-pdf-page-count pdf-a-file-path)
+             (store-converted-page-count conversion-result))
         (if (:pdfa? conversion-result)
           (if (pos? (-> conversion-result :output-file .length))
             (info "Converted to PDF/A " pdf-a-file-path)
