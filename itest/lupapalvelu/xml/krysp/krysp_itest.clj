@@ -527,8 +527,8 @@
            (fact "XML has corresponding attachment in app" app-attachment => truthy)
 
            (fact "XML contains HTTP links for attachments"
-             attachment-urls => (contains [(str host "/api/raw/pdf-export?id=LP-091-2016-90001&lang=fi")
-                                           (str host "/api/raw/submitted-application-pdf-export?id=LP-091-2016-90001&lang=fi")
+             attachment-urls => (contains [(str host "/api/raw/pdf-export?id=" application-id "&lang=fi")
+                                           (str host "/api/raw/submitted-application-pdf-export?id=" application-id "&lang=fi")
                                            (str host "/api/raw/latest-attachment-version?attachment-id=" liite-id)]
                                           :in-any-order)))))
 
