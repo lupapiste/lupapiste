@@ -11,11 +11,11 @@
             [schema.core :refer [defschema] :as sc]))
 
 (defschema AttachmentType
-  {:type-id     sc/Keyword
-   :type-group  sc/Keyword
-   :metadata   {(sc/optional-key :permitType)     sc/Keyword
-                (sc/optional-key :grouping)       sc/Keyword
-                (sc/optional-key :for-operations) #{(apply sc/enum (keys op/operations))}}})
+  {:type-id                    sc/Keyword
+   :type-group                 sc/Keyword
+   (sc/optional-key :metadata) {(sc/optional-key :permitType)     sc/Keyword
+                                (sc/optional-key :grouping)       sc/Keyword
+                                (sc/optional-key :for-operations) #{(apply sc/enum (keys op/operations))}}})
 
 (def osapuolet attachment-types/osapuolet-v2)
 
@@ -86,6 +86,7 @@
    (->> (update attachment-type :metadata util/assoc-when
                 :grouping       (->> (filter (fn-> val (contains? attachment-type)) default-grouping) (map key) first)
                 :for-operations (not-empty (for-operations attachment-type)))
+        (util/strip-nils)
         (sc/validate AttachmentType)))
   ([type-group type-id]
    (attachment-type {:type-group (keyword type-group) :type-id (keyword type-id)}))
