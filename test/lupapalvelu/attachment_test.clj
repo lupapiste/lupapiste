@@ -42,14 +42,14 @@
                  application-state       (gen/elements states/all-states)
                  operation               (ssg/generator Operation)
                  attachment-type         (ssg/generator Type)
-                 metadata                (ssg/generator  {sc/Str sc/Str})
+                 metadata                (ssg/generator {sc/Keyword sc/Str})
                  ;; Optional parameters
                  contents                (ssg/generator (sc/maybe sc/Str))
                  read-only?              (ssg/generator (sc/maybe sc/Bool))
                  source                  (ssg/generator (sc/maybe Source))]
                 (let [validation-error (->> (make-attachment now target required? requested-by-authority? locked? application-state operation attachment-type metadata attachment-id contents read-only? source)
                                             (sc/check Attachment))]
-                  (nil? validation-error))))
+                  (is (nil? validation-error)))))
 
 (facts "Test file name encoding"
   (fact (encode-filename nil)                                 => nil)
@@ -239,7 +239,7 @@
                  file-id         (ssg/generator ssc/ObjectIdStr)
                  archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
                                                            :archivabilityError (apply sc/enum archivability-errors)
-                                                           :missing-fonts [sc/Str]}))
+                                                           :missing-fonts (sc/eq ["Arial"])}))
                  general-options (ssg/generator {:filename sc/Str
                                                 :content-type sc/Str
                                                 :size sc/Int

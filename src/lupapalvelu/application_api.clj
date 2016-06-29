@@ -708,7 +708,7 @@
       (if-let [conf (:vendor-backend-redirect org)]
         (->> (vals conf)
              (remove ss/blank?)
-             (some util/validate-url))
+             (some action/validate-url))
         (fail :error.vendor-urls-not-set)))))
 
 (defn get-vendor-backend-id [verdicts]

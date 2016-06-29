@@ -121,28 +121,52 @@
 
 
       (fact "Pena change attachment metadata"
+        (let [{:keys [primaryOperation]} (query-application pena application-id)
+              op-id (:id primaryOperation)]
 
-        (fact "Pena can change operation"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)
-        (fact "Pena can change contents"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
-        (fact "Pena can change size"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
-        (fact "Pena can change scale"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
+          (fact "Pena can change operation"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id op-id}}) => ok?)
+          (fact "Pena can change contents"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
+          (fact "Pena can change size"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
+          (fact "Pena can change scale"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
 
-        (fact "Metadata is set"
-          (let [application (query-application pena application-id)
-                attachment (get-attachment-info application (first attachment-ids))
-                op (:op attachment)
-                contents (:contents attachment)
-                size (:size attachment)
-                scale (:scale attachment)]
-            (:id op) => "foo"
-            (:name op) => "bar"
-            contents => "foobart"
-            size => "A4"
-            scale => "1:500")))
+          (fact "Metadata is set"
+            (let [application (query-application pena application-id)
+                  attachment (get-attachment-info application (first attachment-ids))
+                  op (:op attachment)
+                  contents (:contents attachment)
+                  size (:size attachment)
+                  scale (:scale attachment)]
+              (:id op) => op-id
+              contents => "foobart"
+              size => "A4"
+              scale => "1:500"))
+
+          (fact "Operation id must exist in application"
+            (command pena :set-attachment-meta
+                     :id application-id
+                     :attachmentId (first attachment-ids)
+                     :meta {:op {:id "aaabbbcccdddeeefff000111"}}) => (partial expected-failure? :error.illegal-attachment-operation))
+
+          (fact "Metadata for op is validated against schema"
+            (command pena :set-attachment-meta
+                     :id application-id
+                     :attachmentId (first attachment-ids)
+                     :meta {:op {:id op-id :unknown "foofaa"}}) => (partial expected-failure? :error.illegal-attachment-operation))
+
+          (fact "Operation metadata can be set to null"
+            (fact "but id can't be nil"
+              (command pena :set-attachment-meta
+                       :id application-id
+                       :attachmentId (first attachment-ids)
+                       :meta {:op {:id nil}}) => (partial expected-failure? :error.illegal-attachment-operation))
+            (command pena :set-attachment-meta
+                     :id application-id
+                     :attachmentId (first attachment-ids)
+                     :meta {:op nil}) => ok?)))
 
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero
@@ -318,7 +342,7 @@
     attachment1 =not=> attachment2
 
     (upload-attachment sonja application-id attachment1 true :filename "dev-resources/test-pdf.pdf")
-    (upload-attachment sonja application-id attachment2 true :filename "dev-resources/test-attachment.txt")
+    (upload-attachment sonja application-id attachment2 true :filename "dev-resources/test-gif-attachment.gif")
 
     (fact "Can rotate PDF"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 90) => ok?)
@@ -326,7 +350,7 @@
     (fact "Can not rotate PDF 0 degrees"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 0) => fail?)
 
-    (fact "Can not rotate txt"
+    (fact "Can not rotate gif"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
 
 (facts "Rotate PDF - versions and files"
@@ -363,6 +387,40 @@
                       first)]
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
+
+(facts "Convert attachment to PDF/A"
+       (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+             application-id (:id application)
+             attachment (first (:attachments application))
+             attachment-id (:id attachment)]
+
+       (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
+
+       (let [attachment (first (:attachments (query-application sonja application-id)))]
+           (fact "Auto conversion should be done to txt -file"
+                 (get-in attachment [:latestVersion :autoConversion]) => true)
+
+           (fact "File should be converted to PDF/A"
+                 (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+                 (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf")
+
+           (fact "Latest version should be 0.2 after conversion"
+                 (get-in attachment [:latestVersion :version :major]) => 0
+                 (get-in attachment [:latestVersion :version :minor]) => 2)
+
+           (fact "After deleting converted version, original version should exists"
+                (command sonja
+                         :delete-attachment-version
+                         :id application-id
+                         :attachmentId attachment-id
+                         :fileId (get-in attachment [:latestVersion :fileId])
+                         :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?
+                (let [original-attachment (get-attachment-by-id sonja application-id (:id attachment))]
+                     (get-in original-attachment [:latestVersion :version :major]) => 0
+                     (get-in original-attachment [:latestVersion :version :minor]) => 1
+                     (get-in original-attachment [:latestVersion :contentType]) => "text/plain"
+                     (get-in original-attachment [:latestVersion :filename]) => "test-attachment.txt")))))
+
 
 (defn- poll-job [id version limit]
   (when (pos? limit)

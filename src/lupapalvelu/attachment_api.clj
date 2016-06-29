@@ -7,6 +7,7 @@
             [sade.core :refer [ok fail fail! now def-]]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
+            [schema.core :as sc]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as a]
@@ -80,9 +81,9 @@
       (fail :error.illegal-meta-type :parameters k))))
 
 (defn- validate-operation [{{meta :meta} :data}]
-  (let [op (:op meta)]
-    (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
-      (fail :error.missing-parameters :parameters missing))))
+  (when-let [op (:op meta)]
+    (when (sc/check attachment/Operation op)
+      (fail :error.illegal-attachment-operation))))
 
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
@@ -98,6 +99,12 @@
   (when attachment-type
     (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
+
+(defn- validate-operation-in-application [{{meta :meta} :data} application]
+  (when-let [op-id (get-in meta [:op :id])]
+    (let [operation-ids (map :id (a/get-operations application))]
+      (when (not-any? (partial = op-id) operation-ids)
+        (fail :error.illegal-attachment-operation)))))
 
 ;;
 ;; Attachments
@@ -389,7 +396,15 @@
     "image/tiff"      (let [valid? (tiff-validation/valid-tiff? content)
                             attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
                         (attach-or-fail! application attachment-data))
-    (attach-or-fail! application attachment-data)))
+    ("application/vnd.openxmlformats-officedocument.presentationml.presentation"
+     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+     "application/vnd.oasis.opendocument.text"
+     "application/vnd.ms-powerpoint"
+     "application/rtf"
+     "application/msword"
+     "text/plain")    (let [attachment-result (attachment/attach-file! application (assoc attachment-data :skip-pdfa-conversion true))]
+                        (attach-or-fail! application (assoc attachment-data :attachment-id (:id attachment-result))))
+    (attach-or-fail! application (assoc attachment-data :skip-pdfa-conversion true))))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType group filename tempfile size]
@@ -569,7 +584,10 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
+   :pre-checks [a/validate-authority-in-drafts
+                attachment-editable-by-application-state
+                attachment-not-readOnly
+                validate-operation-in-application]}
   [{:keys [created] :as command}]
   (let [data (merge meta
                     (when (:group meta)

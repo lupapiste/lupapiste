@@ -125,7 +125,8 @@
    (sc/optional-key :stamped)            sc/Bool
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
-   (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
+   (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])
+   (sc/optional-key :autoConversion)    (sc/maybe sc/Bool)})
 
 (defschema Type
   "Attachment type"
@@ -161,7 +162,7 @@
    (sc/optional-key :scale)              (apply sc/enum attachment-scales)
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
-   (sc/optional-key :metadata)           {sc/Any sc/Any}})
+   (sc/optional-key :metadata)           {sc/Keyword sc/Any}})
 
 ;;
 ;; Utils
@@ -390,13 +391,13 @@
        (sort-by version-number)
        (last)))
 
-(defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts]}]
+(defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts autoConversion]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
                                 last
                                 :version)
                            (next-attachment-version (get-in attachment [:latestVersion :version]) user))]
-    (cond-> {:version        version-number
+    (util/assoc-when {:version        version-number
              :fileId         file-id
              :originalFileId (or original-file-id file-id)
              :created        now
@@ -406,10 +407,11 @@
              :filename       filename
              :contentType    content-type
              :size           size}
-      (not (nil? stamped))       (assoc :stamped stamped)
-      (not (nil? archivable))    (assoc :archivable archivable)
-      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
-      (not (nil? missing-fonts)) (assoc :missing-fonts missing-fonts))))
+      :stamped stamped
+      :archivable archivable
+      :archivabilityError archivabilityError
+      :missing-fonts missing-fonts
+      :autoConversion autoConversion)))
 
 (defn- ->approval [state user timestamp file-id]
   {:value (if (= :ok state) :approved :rejected)
@@ -634,6 +636,15 @@
         (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
         (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpeg" preview-content :application application-id)))))
 
+(def file-types
+  #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
+   :application/vnd.openxmlformats-officedocument.wordprocessingml.document
+   :application/vnd.oasis.opendocument.text
+   :application/vnd.ms-powerpoint
+   :application/rtf
+   :application/msword
+   :text/plain})
+
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
   [file-id attachment-fn]
@@ -648,11 +659,11 @@
         (create-preview! file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
-(defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
+(defn pre-process-attachment [{:keys [filename content skip-pdfa-conversion]}]
   (if (and (libreoffice-client/enabled?)
            (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
-           (or (=as-kw type-group :paatoksenteko) (=as-kw type-group :muut))
-           (#{:paatos :paatosote} (keyword type-id)))
+           (not skip-pdfa-conversion)
+           (contains? file-types (keyword (mime/mime-type (mime/sanitize-filename filename)))))
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
@@ -674,7 +685,8 @@
              :filename sanitized-filename
              :content-type content-type}
       (true? archivable) (assoc :archivable true)
-      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError))))
+      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
+      (and (true? archivable) (not (:skip-pdfa-conversion options))) (assoc :autoConversion true))))
 
 (defn attach-file!
   "1) Converts file to PDF/A, if required by attachment type and

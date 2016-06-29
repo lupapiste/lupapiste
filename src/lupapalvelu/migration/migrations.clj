@@ -2289,6 +2289,40 @@
                                     {:attachments true})]
          (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
 
+(defmigration unset-organization-municipalities-legacy-key
+  {:apply-when (pos? (mongo/count :organizations {:municipalities {$exists true}}))}
+  (mongo/update-by-query :organizations {:municipalities {$exists true}} {$unset {:municipalities 1}}))
+
+(defmigration attachment-operation-cleanup-v2
+  {:apply-when (or (pos? (mongo/count :applications {$or [{:attachments.op.description {$exists true}}
+                                                          {:attachments.op.optional {$exists true}}
+                                                          {:attachments.op.created {$exists true}}
+                                                          {:attachments.op.attachment-op-selector {$exists true}}]}))
+                   (pos? (mongo/count :submitted-applications {$or [{:attachments.op.description {$exists true}}
+                                                                    {:attachments.op.optional {$exists true}}
+                                                                    {:attachments.op.created {$exists true}}
+                                                                    {:attachments.op.attachment-op-selector {$exists true}}]})))}
+  (doseq [collection  [:applications :submitted-applications]
+          application (mongo/select collection
+                                    {$or [{:attachments.op.description {$exists true}}
+                                          {:attachments.op.optional {$exists true}}
+                                          {:attachments.op.created {$exists true}}
+                                          {:attachments.op.attachment-op-selector {$exists true}}]}
+                                    {:attachments true})]
+    (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
+
+(defn operation-id-cleanup-updates
+  "For attachments that have op.id set to nil, nillify whole op ({\"attachments.$.op\" nil})"
+  [{attachments :attachments}]
+  (mongo/generate-array-updates :attachments attachments #(and (:op %) (nil? (get-in % [:op :id]))) "op" nil))
+
+(defmigration attachment-op-nil-cleanup
+  {:apply-when (or (pos? (mongo/count :applications {:attachments.op.id {$type 10}}))
+                   (pos? (mongo/count :submitted-applications {:attachments.op.id {$type 10}})))}
+  (doseq [collection  [:applications :submitted-applications]
+          application (mongo/select collection {:attachments.op.id {$type 10}} [:attachments])]
+    (mongo/update-by-id collection (:id application) {$set (operation-id-cleanup-updates application)})))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections

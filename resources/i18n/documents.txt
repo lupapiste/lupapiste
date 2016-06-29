@@ -4,5 +4,5 @@
 "document.operation-identifiers" "sv" "Taggar"
 "document.operation-editor.description" "fi" "Kuvaus"
 "document.operation-editor.description" "sv" "Beskrivning"
-"document.operation-identifier.notice" "fi" "Huom! Asemapiirroksessa on tällä rakennuksella käytettävä samaa tunnusta. Esim. A."
-"document.operation-identifier.notice" "sv" "Obs! Använd samma beteckning för byggnaden som i situationsplanen."
+"document.operation-identifier.notice" "fi" "<b>Ohje:</b> Toimenpiteen kohde (rakennus, rakennelma tms) yksilöidään asemapiirroksessa tällä tunnuksella. Voit käyttää tunnuksessa numeroita ja/tai kirjaimia (esim. 1, A, 000)."
+"document.operation-identifier.notice" "sv" ""

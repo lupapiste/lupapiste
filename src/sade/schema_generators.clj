@@ -168,6 +168,14 @@
 
 (register-generator ssc/IpAddress ip-address)
 
+(def http-protocol (gen/elements ["http://" "https://"]))
+(def http-url
+  (gen/fmap
+    (fn [[proto ip path]] (s/lower-case (str proto ip "/" (ring.util.codec/url-encode path))))
+    (gen/tuple http-protocol ipv4-address gen/string-ascii)))
+
+(register-generator ssc/HttpUrl http-url)
+
 ;; Dynamic schema generator constructors
 
 (defn date-string
@@ -253,6 +261,6 @@
 (register-generator ssc/min-max-valued-integer-string min-max-valued-integer-string)
 
 (defn min-max-valued-decimal-string [min max]
-  (gen/fmap (partial format "%f") (min-max-value gen/double min max)))
+  (gen/fmap (partial format "%f") (min-max-value (gen/double* {:infinite? false :NaN? false}) min max)))
 
 (register-generator ssc/min-max-valued-decimal-string min-max-valued-decimal-string)

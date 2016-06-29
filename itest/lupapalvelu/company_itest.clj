@@ -19,12 +19,14 @@
    (fact "Call api/token"
          (http-token-call token {:ok true}) => (contains {:status 200}))))
 
-(defn token-from-email [email]
-  (let [data (last-email)]
-    (fact {:midje/description (str "Read email for " email)}
-          (index-of (:to data) email) => pos?)
-    (last (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)"
-                   (:plain (:body data))))))
+(defn token-from-email
+  ([email]
+   (token-from-email email (last-email)))
+  ([email email-data]
+   (fact {:midje/description (str "Read email for " email)}
+     (index-of (:to email-data) email) => pos?)
+   (last (re-find #"http.+/app/fi/welcome#!/.+/([A-Za-z0-9-]+)"
+                  (:plain (:body email-data))))))
 
 (defn accept-invitation [email]
   (http-token-call (token-from-email email)))
@@ -167,7 +169,7 @@
        (fact "Teppo cannot search"
              (query teppo :company-search-user :email (email-for-key pena)) => unauthorized?)
        (fact "Pena is not in the company"
-             (query kaino :company-search-user :email (email-for-key pena)) => (result :found :firstName "Pena" :lastName "Panaani"))
+             (query kaino :company-search-user :email (email-for-key pena)) => (result :found :firstName "Pena" :lastName "Panaani" :role "applicant"))
        (fact "Foobar is not a known user"
              (query kaino :company-search-user :email foobar) => (result :not-found))
        (fact "Kaino adds user foobar"
@@ -208,4 +210,58 @@
 (fact "Kaino deletes Teppo from company"
       (command kaino :company-user-delete :user-id teppo-id) => ok?)
 (fact "Teppo is no longer in the company"
-      (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen"))
+      (query kaino :company-search-user :email (email-for-key teppo)) => (result :found :firstName "Teppo" :lastName "Nieminen" :role "applicant"))
+
+(facts "Authed dummy into company"
+  (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
+        foo-email "foo@example.com"
+        foo-pw "foofaafoo"]
+    (command mikko :invite-with-role
+             :id application-id
+             :email foo-email
+             :text  ""
+             :documentName ""
+             :documentId ""
+             :path ""
+             :role "writer") => ok?
+
+    (fact "Dummy 'foo' is found, but not in the company"
+      (query kaino :company-search-user :email foo-email) => (result :found :firstName "" :lastName "" :role "dummy"))
+    (fact "Dummy gets invite to company"
+      (command kaino :company-invite-user :email foo-email :admin false :submit true :firstName "Foo" :lastName "Bar") => ok?
+      (accept-invitation foo-email))
+    (fact "Dummy is in the company"
+      (query kaino :company-search-user :email foo-email) => (result :already-in-company))
+    (fact "Foo can set pw from email token"
+      (let [email (last-email)
+            token (token-from-email foo-email email)]
+        (:subject email) => (contains "Salasanan vaihto")
+        (http-token-call token {:password foo-pw}) => (contains {:status 200})))
+
+    (let [store (atom {})
+          params {:cookie-store (->cookie-store store)}
+          login-resp (login foo-email foo-pw params)
+          anticsrf (get-anti-csrf-from-store store)
+          params (-> params
+                     (assoc :headers {"x-anti-forgery-token" anticsrf
+                                      "accepts" "application/json;charset=utf-8"})
+                     (assoc :follow-redirects false)
+                     (assoc :throw-exceptions false))]
+      login-resp => ok?
+      anticsrf => truthy
+
+      (fact "User query has correct data for ex-dummy foo"
+        (let [user-query (decoded-get
+                           (str (server-address) "/api/query/user")
+                           params)]
+          (get-in user-query [:body :user]) => (contains {:company {:id "solita" :role "user" :submit true}
+                                 :email foo-email
+                                 :firstName "Foo"
+                                 :lastName "Bar"})))
+
+      (fact "Original invite is visible for foo"
+        (let [invites (get-in (decoded-get
+                                (str (server-address) "/api/query/invites")
+                                params) [:body :invites])]
+          (count invites) => 1
+          (get-in (first invites) [:application :id]) => application-id)))))

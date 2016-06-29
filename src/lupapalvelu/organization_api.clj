@@ -94,7 +94,7 @@
 (defn validate-optional-url [param command]
   (let [url (ss/trim (get-in command [:data param]))]
     (when-not (ss/blank? url)
-      (util/validate-url url))))
+      (action/validate-url url))))
 
 ;;
 ;; Actions
@@ -112,7 +112,9 @@
                         (assoc :operationsAttachments ops-with-attachments
                                :selectedOperations selected-operations-with-permit-type
                                :allowedRoles allowed-roles)
-                        (dissoc :operations-attachments :selected-operations))
+                        (dissoc :operations-attachments :selected-operations)
+                        (update-in [:map-layers :server] select-keys [:url :username])
+                        (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
 (defquery user-organizations-for-permit-type
@@ -620,6 +622,15 @@
           {$set {:map-layers.layers selected-layers}})
         (ok))
       (fail :error.missing-parameters))))
+
+(defcommand update-suti-server-details
+  {:parameters [url username password]
+   :input-validators [(partial validate-optional-url :url)]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (o/update-organization-suti-server (user/authority-admins-organization-id user)
+                                     (ss/trim url) username password)
+  (ok))
 
 (defraw waste-ads-feed
   {:description "Simple RSS feed for construction waste information."

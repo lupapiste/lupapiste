@@ -27,7 +27,8 @@
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
-            [lupapalvelu.organization :as organization])
+            [lupapalvelu.organization :as organization]
+            [ring.util.codec :as codec])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -158,6 +159,9 @@
     (when (= status 200)
       body)))
 
+(defn decoded-get [url params]
+  (decode-response (http-get url params)))
+
 (defn- decode-post [action-type apikey command-name & args]
   (decode-response
     (http-post
@@ -174,6 +178,7 @@
          :follow-redirects false
          :cookie-store cookie-store
          :throw-exceptions false}))))
+
 
 (defn raw-command [apikey command-name & args]
   (apply decode-post :command apikey command-name args))
@@ -315,6 +320,9 @@
 
 (defn set-anti-csrf! [value]
   (fact (command pena :set-feature :feature "disable-anti-csrf" :value (not value)) => ok?))
+
+(defn get-anti-csrf-from-store [store]
+  (-> (get @store "anti-csrf-token") .getValue codec/url-decode))
 
 (defn feature? [& feature]
   (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
@@ -550,6 +558,19 @@
   (command apikey :company-invite :id app-id :company-id company-id) => ok?
   (accept-company-invitation))
 
+(defn login
+  ([u p]
+    (login u p {}))
+  ([u p params]
+  (get (decode-response
+        (http-post (str (server-address) "/api/login")
+                   (merge
+                     {:follow-redirects false
+                      :throw-exceptions false
+                      :form-params {:username u :password p}}
+                     params)))
+       :body)))
+
 ;;
 ;; Stuffin' data in
 ;;
@@ -569,7 +590,7 @@
     (facts "Signed succesfully"
       (fact "Status code" (:status resp) => 200))))
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-attachment.txt", text ""}}]
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-gif-attachment.gif", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
@@ -577,7 +598,7 @@
                                 :multipart (remove nil?
                                              [{:name "applicationId"  :content application-id}
                                               {:name "text"           :content text}
-                                              {:name "Content/type"   :content "text/plain"}
+                                              {:name "Content/type"   :content "image/gif"}
                                               {:name "attachmentType" :content (str
                                                                                  (:type-group attachment-type) "."
                                                                                  (:type-id attachment-type))}
