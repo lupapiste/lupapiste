@@ -276,17 +276,11 @@
     (if (contains? data :value)
       (let [result  (validate-field application element (:value data))]
         (->validation-result info data current-path element result))
-      (let [result (validate-element info data current-path element)
-            ;; Assumption: :_selected is always either henkilo or yritys.
-            data (let [selected (-> data :_selected :value)]
-                   (if (ss/blank? selected)
-                     data
-                     (dissoc data (if (= selected "henkilo") :yritys :henkilo))))]
-        (filter
-          seq
-          (concat (flatten [result])
-            (map (fn [[k2 v2]]
-                   (validate-fields application info k2 v2 current-path)) data)))))))
+      (filter
+        seq
+        (concat (flatten [(validate-element info data current-path element)])
+                (map (fn [[k2 v2]]
+                       (validate-fields application info k2 v2 current-path)) data))))))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
