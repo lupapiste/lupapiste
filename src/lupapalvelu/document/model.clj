@@ -182,7 +182,7 @@
       {:path     (-> (map keyword path) (concat [:postinumero]))
        :element  (assoc (find-by-name (:body element) [:postinumero]) :locKey "postinumero")
        :document (:document info)
-       :result   [:warn "bad-postal-code"]})))
+       :result   [:err "bad-postal-code"]})))
 
 (defmethod validate-element :some-checked
   [info data path element]
