@@ -42,14 +42,14 @@
                  application-state       (gen/elements states/all-states)
                  operation               (ssg/generator Operation)
                  attachment-type         (ssg/generator Type)
-                 metadata                (ssg/generator  {sc/Str sc/Str})
+                 metadata                (ssg/generator {sc/Keyword sc/Str})
                  ;; Optional parameters
                  contents                (ssg/generator (sc/maybe sc/Str))
                  read-only?              (ssg/generator (sc/maybe sc/Bool))
                  source                  (ssg/generator (sc/maybe Source))]
                 (let [validation-error (->> (make-attachment now target required? requested-by-authority? locked? application-state operation attachment-type metadata attachment-id contents read-only? source)
                                             (sc/check Attachment))]
-                  (nil? validation-error))))
+                  (is (nil? validation-error)))))
 
 (facts "Test file name encoding"
   (fact (encode-filename nil)                                 => nil)
