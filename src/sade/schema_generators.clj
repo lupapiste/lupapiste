@@ -261,6 +261,6 @@
 (register-generator ssc/min-max-valued-integer-string min-max-valued-integer-string)
 
 (defn min-max-valued-decimal-string [min max]
-  (gen/fmap (partial format "%f") (min-max-value gen/double min max)))
+  (gen/fmap (partial format "%f") (min-max-value (gen/double* {:infinite? false :NaN? false}) min max)))
 
 (register-generator ssc/min-max-valued-decimal-string min-max-valued-decimal-string)
