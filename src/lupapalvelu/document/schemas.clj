@@ -199,12 +199,14 @@
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
                                 {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
+(def postinumero {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code :i18nkey "osoite.postinumero" :transform :trim})
+
 (def simple-osoite [{:name "osoite"
                      :type :group
                      :validator :address
                      :blacklist [turvakielto]
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true :i18nkey "osoite.katu"}
-                            {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code :i18nkey "osoite.postinumero"}
+                            postinumero
                             {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size :m :required true :i18nkey "osoite.postitoimipaikannimi"}
                             country]}])
 
@@ -214,7 +216,7 @@
                              :validator :address
                              :blacklist [turvakielto]
                              :body [{:name "katu" :type :string :subtype :vrk-address :required true :i18nkey "osoite.katu"}
-                                    {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code :i18nkey "osoite.postinumero"}
+                                    postinumero
                                     {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size :m :required true :i18nkey "osoite.postitoimipaikannimi"}
                                     country]}])
 
@@ -229,7 +231,7 @@
                                  {:name "jakokirjain2" :type :string :size :s :hidden true :readonly true}
                                  {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :s :hidden true :readonly true}
                                  {:name "huoneisto" :type :string :size :s :hidden true :readonly true}
-                                 {:name "postinumero" :type :string :size :s :dummy-test :postal-code :i18nkey "osoite.postinumero"}
+                                 (dissoc postinumero :required)
                                  {:name "postitoimipaikannimi" :type :string :size :m :i18nkey "osoite.postitoimipaikannimi"}
                                  country]}])
 
