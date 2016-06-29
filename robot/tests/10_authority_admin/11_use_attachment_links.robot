@@ -33,7 +33,7 @@ Authority admin sees attachment links disabled
 
 Toggle links
   [Arguments]
-  Wait and click  //input[@id='attachments-as-links-enabled']
+  Wait and click  attachments-as-links-enabled
   Positive indicator should be visible
 
 
