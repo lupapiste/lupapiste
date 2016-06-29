@@ -8,6 +8,7 @@
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.validators :as v]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.accessibility :as attaccess]
@@ -2310,6 +2311,31 @@
                                           {:attachments.op.attachment-op-selector {$exists true}}]}
                                     {:attachments true})]
     (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
+
+
+;; migraatio, joka ajettiin vain kerran perumaan yhden batchrunin tulokset, koska 
+;; generoidut pdf:t eivät olleet valideja.
+#_(defmigration verdict-polling-pdf-failure-removal
+  {:apply-when (pos? (mongo/count :applications {:tasks.source.type "background"}))}
+  (println "PDF korjausmigraatio: background-sourcellisia hakemuksia on " 
+    (mongo/count :applications {:tasks.source.type "background"}))
+  (doseq [failed (mongo/select :applications {:tasks.source.type "background"})]
+    (doseq [task (:tasks failed)]
+      (if (= "background" (:type (:source task)))
+        (do
+          (println " - failannut taski" (:id task))
+          (doseq [att (:attachments failed)]
+            (if (= (:id task) (:id (:source att)))
+              (try
+                (println "   + poistetaan taskiin " (:id task) " linkattu liite " (:id att) " hakemukselta " (:_id failed))
+                (attachment/delete-attachment! (:id failed) (:id att))
+                (catch Exception e
+                  (println "   + Virhe poistettaessa liitettä")))))
+          (println " - poistetaan taski " (:id task) " hakemukselta " (:id failed))
+          (action/update-application 
+            (action/application->command failed)
+            {$pull {:tasks {:id (:id task)}}})
+          (println " - taski poistettu"))))))
 
 (defn operation-id-cleanup-updates
   "For attachments that have op.id set to nil, nillify whole op ({\"attachments.$.op\" nil})"
