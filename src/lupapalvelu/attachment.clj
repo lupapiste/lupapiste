@@ -599,7 +599,6 @@
 
 (defn output-attachment
   ([attachment download?]
-   (println (type attachment))
   (if attachment
     (let [filename (ss/encode-filename (:file-name attachment))
           response {:status 200
