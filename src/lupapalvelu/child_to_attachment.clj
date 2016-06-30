@@ -17,12 +17,12 @@
 (defn- build-attachment-options [user application type id lang file attachment-id]
   {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts :tasks} type)]}
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
-        child (get-child application type id)
+        {:keys [taskname] :as child} (get-child application type id)
         type-name (case type
-                    :statements (i18n/localize (name lang) "statement.lausunto")
-                    :neighbors (i18n/localize (name lang) "application.MM.neighbors")
-                    :verdicts (i18n/localize (name lang) (if (:sopimus child) "userInfo.company.contract" "application.verdict.title"))
-                    :tasks (i18n/localize (name lang) "task-katselmus.rakennus.tila._group_label"))
+                    :statements (i18n/localize lang "statement.lausunto")
+                    :neighbors (i18n/localize lang "application.MM.neighbors")
+                    :verdicts (i18n/localize lang (if (:sopimus child) "userInfo.company.contract" "application.verdict.title"))
+                    :tasks (i18n/localize lang "task-katselmus.rakennus.tila._group_label"))
         base-attachment-opts {:application        application
                               :filename           (str type-name ".pdf")
                               :size               (.length file)
@@ -38,7 +38,8 @@
                               :contents           (case type
                                                     :statements (get-in child [:person :text])
                                                     :neighbors (get-in child [:owner :name])
-                                                    :tasks (i18n/localize (name lang) (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value])))
+                                                    :tasks (str (i18n/localize lang (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value])))
+                                                                (when taskname (str " - " taskname)))
                                                     type-name)
                               :locked             true
                               :read-only          (contains? #{:neighbors :statements :verdicts} type)

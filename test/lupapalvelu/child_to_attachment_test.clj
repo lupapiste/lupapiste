@@ -68,8 +68,9 @@
                  :vetuma  {:firstName "TESTAA" :lastName "PORTAALIA"}
                  :created 1444902294666}]})
 
-(defn- dummy-task [id name]
+(defn- dummy-task [id name & [taskname]]
   {:id          id
+   :taskname    taskname
    :schema-info {:name       "task-katselmus",
                  :type       "task"
                  :order      1
@@ -116,7 +117,7 @@
                    (:read-only att-other) => false)))))
 
 (facts "Generate attachment from dummy application tasks"
-       (let [dummy-tasks [(dummy-task "2" "muu katselmus")
+       (let [dummy-tasks [(dummy-task "2" "muu katselmus" "katselmointi ftw")
                           (dummy-task "1" "muu katselmus")]
              application (dummy-application "LP-1" :tasks dummy-tasks)]
          (doseq [lang i18n/languages]
@@ -125,7 +126,7 @@
                  att1 (build-attachment-options {} application :tasks "1" lang file "one")
                  att-other (build-attachment-options {} application :tasks "2" lang file nil)]
              (fact ":contents"
-                   (:contents att) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus"))
+                   (:contents att) => (str (i18n/localize lang "task-katselmus.katselmuksenLaji.muu katselmus") " - katselmointi ftw"))
              (fact ":attachment-type"
                (:attachment-type att) => {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"})
              (fact ":archivable"
