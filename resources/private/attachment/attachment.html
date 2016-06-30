@@ -61,7 +61,7 @@
                   </h1>
                   <span data-bind="component: {
                                   name: 'help-toggle',
-                                   params: { flag: showHelp, 
+                                   params: { flag: showHelp,
                                    lhtml: isRamAttachment() ? 'ram.help' : 'attachment.view.desc' }}"></span>
               </div>
           </div>
@@ -170,11 +170,10 @@
                   <div class="col2 attachment-info-field">
                     <label data-bind="ltext: 'attachment.label.operation'"></label>
                     <select data-test-id="attachment-operation-select"
-                            data-bind="options: selectableOperations,
-                                       optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
-                                       optionsValue: 'id',
+                            data-bind="options: selectableGroups,
+                                       optionsText: getGroupOptionsText,
                                        optionsCaption: loc('attachment.label.operation.choose'),
-                                       value: selectedOperationId,
+                                       value: selectedGroup,
                                        enable: $root.authorization.ok('set-attachment-meta') && editable && opSelector"></select>
                   </div>
                   <div class="col1 attachment-info-field">

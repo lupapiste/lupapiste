@@ -60,8 +60,9 @@ var attachment = (function() {
     previewDisabled:              ko.observable(false),
     previewVisible:               ko.observable(false),
     operation:                    ko.observable(),
-    selectedOperationId:          ko.observable(),
-    selectableOperations:         ko.observableArray(),
+    group:                        ko.observable(),
+    selectedGroup:                ko.observable(),
+    selectableGroups:             ko.observableArray(),
     contents:                     ko.observable(),
     scale:                        ko.observable(),
     scales:                       ko.observableArray(LUPAPISTE.config.attachmentScales),
@@ -240,6 +241,14 @@ var attachment = (function() {
       return false;
     },
 
+    getGroupOptionsText: function(item) {
+      if (item["group-type"] === "operation") {
+        return item.description ? loc([item.name, "_group_label"]) + " - " + item.description : loc([item.name, "_group_label"]);
+      } else if (item["group-type"]) {
+        return loc([item["group-type"], "_group_label"]);
+      }
+    },
+
     isNotOk: function() { return !model.stateIs("ok");},
     doesNotRequireUserAction: function() { return !model.stateIs("requires_user_action");},
     isApprovable: function() { return authorizationModel.ok("approve-attachment") && model.initialized(); },
@@ -330,12 +339,13 @@ var attachment = (function() {
       }, 500)));
     }
 
-    model.subscriptions.push(model.selectedOperationId.subscribe(function(id) {
-      if (!model.operation() || id !== model.operation().id) {
-        var op = _.find(model.selectableOperations(), {id: id}) || null;
-        op = _.pick(op, "id");
-        var finalOp = _.isEmpty(op) ? null : op;
-        saveLabelInformation("operation", {meta: {op: finalOp}});
+    model.subscriptions.push(model.selectedGroup.subscribe(function(group) {
+      if (util.getIn(group, ["id"]) !== util.getIn(model, ["operation", "id"]) ||
+          util.getIn(group, ["group-type"]) !== util.getIn(model, ["group"])) {
+        model.group(util.getIn(group, ["group-type"]));
+        model.operation(util.getIn(group, ["id"]) ? _.omit(group, "group-type") : null);
+        group = _.pick(group, ["id", "name", "group-type"]);
+        saveLabelInformation("group", {meta: {group: !_.isEmpty(group) ? group : null}});
       }
     }));
 
@@ -457,6 +467,19 @@ var attachment = (function() {
     var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
 
+    ajax
+      .query("attachment-groups", {id: applicationId})
+      .success(function(resp) {
+        var currentGroup = _.pickBy({"group-type": attachment.group,
+                                     "id": util.getIn(attachment, ["op", "id"])},
+                                    _.isString);
+        model.selectableGroups(resp.groups);
+        if (!_.isEmpty(currentGroup)) {
+          model.selectedGroup(_.find(model.selectableGroups(), currentGroup));
+        }
+      })
+      .call();
+
     model.latestVersion(attachment.latestVersion);
     model.versions(attachment.versions);
     model.signatures(attachment.signatures || []);
@@ -464,9 +487,8 @@ var attachment = (function() {
     model.approval(attachment.approved);
     model.filename(attachment.filename);
     model.type(attachment.type);
-    model.selectableOperations(application.allOperations);
     model.operation(attachment.op);
-    model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
+    model.group(attachment.group);
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);
