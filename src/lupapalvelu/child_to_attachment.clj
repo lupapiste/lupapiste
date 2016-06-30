@@ -8,7 +8,8 @@
     [clojure.pprint :refer [pprint]]
     [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
     [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
-    [clojure.java.io :as io])
+    [clojure.java.io :as io]
+    [clojure.string :as s])
   (:import (java.io File FileOutputStream)))
 
 (defn- get-child [application type id]
@@ -24,7 +25,7 @@
                     :verdicts (i18n/localize lang (if (:sopimus child) "userInfo.company.contract" "application.verdict.title"))
                     :tasks (i18n/localize lang "task-katselmus.rakennus.tila._group_label"))
         base-attachment-opts {:application        application
-                              :filename           (str type-name ".pdf")
+                              :filename           (-> type-name (s/replace " " "_") (str ".pdf"))
                               :size               (.length file)
                               :content            file
                               :attachment-id      attachment-id
