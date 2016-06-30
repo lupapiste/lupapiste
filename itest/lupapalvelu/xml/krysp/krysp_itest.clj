@@ -104,7 +104,7 @@
              attachment-string (slurp attachment-file)
              ]
 
-            (if (re-matches #"[\w:/]+_(Lausunto|Rakennuksen_katselmus).pdf" linkkiliitteeseen)
+            (if (re-matches #"[^\s]+_(Lausunto|Rakennuksen_katselmus).pdf" linkkiliitteeseen)
               (fact {:midje/description (str (ss/suffix linkkiliitteeseen "/") " is a PDF")}
                 (.contains attachment-string "PDF") => true)
               (do
