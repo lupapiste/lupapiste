@@ -13,7 +13,7 @@
             [lupapalvelu.organization :as organization])
   (:import (java.io File)))
 
-(def build-attachment #'lupapalvelu.child-to-attachment/build-attachment)
+(def build-attachment-options #'lupapalvelu.child-to-attachment/build-attachment-options)
 
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"
@@ -86,7 +86,7 @@
              application (dummy-application "LP-1" :statements dummy-statements)]
          (doseq [lang i18n/languages]
            (let [file (File/createTempFile (str "child-test-statement-" (name lang) "-") ".pdf")
-                 att (build-attachment {} application :statements "2" lang file nil)]
+                 att (build-attachment-options {} application :statements "2" lang file nil)]
              (fact ":contents"
                    (:contents att) => "Paloviranomainen")
              (fact " :attachment-type"
@@ -102,8 +102,8 @@
              application (dummy-application "LP-1" :neighbors dummy-neighbours)]
          (doseq [lang i18n/languages]
            (let [file (File/createTempFile (str "child-test-neighbour-" (name lang) "-") ".pdf")
-                 att (build-attachment {} application :neighbors "2" lang file nil)
-                 att-other (build-attachment {} application :tasks "2" lang file nil)]
+                 att (build-attachment-options {} application :neighbors "2" lang file nil)
+                 att-other (build-attachment-options {} application :tasks "2" lang file nil)]
              (fact ":contents"
                    (:contents att) => "Matti Malli")
              (fact ":attachment-type"
@@ -121,9 +121,9 @@
              application (dummy-application "LP-1" :tasks dummy-tasks)]
          (doseq [lang i18n/languages]
            (let [file (File/createTempFile (str "child-test-task-" (name lang) "-") ".pdf")
-                 att (build-attachment {} application :tasks "2" lang file nil)
-                 att1 (build-attachment {} application :tasks "1" lang file "one")
-                 att-other (build-attachment {} application :tasks "2" lang file nil)]
+                 att (build-attachment-options {} application :tasks "2" lang file nil)
+                 att1 (build-attachment-options {} application :tasks "1" lang file "one")
+                 att-other (build-attachment-options {} application :tasks "2" lang file nil)]
              (fact ":contents"
                    (:contents att) => (i18n/localize (name lang) "task-katselmus.katselmuksenLaji.muu katselmus"))
              (fact ":attachment-type"
@@ -136,6 +136,7 @@
                    (:attachment-id att) => nil)
              (fact ":attachment-id exists"
                    (:attachment-id att1) => "one")
-
              (fact ":read-only of attachment with other type than :neighbors or :statements"
-                   (:read-only att-other) => false)))))
+                   (:read-only att-other) => false)
+             (fact "attachment targets the original task"
+                   (:target att) => {:type :task :id "2"})))))
