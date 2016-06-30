@@ -104,7 +104,7 @@
              attachment-string (slurp attachment-file)
              ]
 
-            (if (.endsWith linkkiliitteeseen "_Lausunto.pdf")
+            (if (re-matches #"[\w:/]+_(Lausunto|Rakennuksen_katselmus).pdf" linkkiliitteeseen)
               (fact {:midje/description (str (ss/suffix linkkiliitteeseen "/") " is a PDF")}
                 (.contains attachment-string "PDF") => true)
               (do
@@ -351,9 +351,9 @@
 
     (final-xml-validation
       (query-application sonja application-id)
-      0
+      1 ; The attachment generated from the review itself
       2 ; Two attachments were uploaded above
-      2
+      3
       (fn [xml]
         (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
               katselmuksenRakennus (xml/select1 xml [:katselmuksenRakennustieto :KatselmuksenRakennus])
@@ -412,11 +412,11 @@
       (let [application (query-application apikey application-id)]
         (final-xml-validation
           application
-          0
+          1 ; The attachment generated from the review itself
           ; Uploaded 2 regular attachments,the other should be katselmuspoytakirja.
           ; In KRYSP 2.2.0+ both are wrapped in liitetieto elements.
           (if (= "753-R" (:organization application)) 2 1)
-          2
+          3
           (fn [xml]
             (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
                   poytakirja (xml/xml->edn (or (xml/select1 katselmus [:katselmuspoytakirja]) (xml/select1 katselmus [:Liite])))
