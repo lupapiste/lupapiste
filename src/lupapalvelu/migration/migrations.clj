@@ -2314,7 +2314,7 @@
 
 
 ;; migraatio, joka ajettiin vain kerran perumaan yhden batchrunin tulokset, koska 
-;; generoidut pdf:t eivät olleet valideja.
+;; generoidut pdf:t eivat olleet valideja.
 #_(defmigration verdict-polling-pdf-failure-removal
   {:apply-when (pos? (mongo/count :applications {:tasks.source.type "background"}))}
   (println "PDF korjausmigraatio: background-sourcellisia hakemuksia on " 
@@ -2330,7 +2330,7 @@
                 (println "   + poistetaan taskiin " (:id task) " linkattu liite " (:id att) " hakemukselta " (:_id failed))
                 (attachment/delete-attachment! (:id failed) (:id att))
                 (catch Exception e
-                  (println "   + Virhe poistettaessa liitettä")))))
+                  (println "   + Virhe poistettaessa liitetta")))))
           (println " - poistetaan taski " (:id task) " hakemukselta " (:id failed))
           (action/update-application 
             (action/application->command failed)
