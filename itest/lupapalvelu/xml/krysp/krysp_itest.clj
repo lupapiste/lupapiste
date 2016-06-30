@@ -463,6 +463,77 @@
                (count designers) => 1
                (first designers) => "suunnittelija2"))))))
 
+(facts "Attachments are linked with HTTP links in KRYSP XML if the organization so chooses"
+       (let [application (create-and-open-application raktark-helsinki :propertyId "09141600550007" :address "Fleminginkatu 1")
+             application-id (:id application)]
+
+         (generate-documents application raktark-helsinki)
+         (generate-attachment application raktark-helsinki "helsinki")
+
+         (command raktark-helsinki :submit-application :id application-id :lang "fi") => ok?
+         (command raktark-helsinki :approve-application :id application-id :lang "fi") => ok?
+
+         (let [application (query-application raktark-helsinki application-id)
+               permit-type (keyword (permit/permit-type application))
+               app-attachments (filter :latestVersion (:attachments application))
+               organization (organization-from-minimal-by-id (:organization application))
+               sftp-user (get-in organization [:krysp permit-type :ftpUser])
+               krysp-version (get-in organization [:krysp permit-type :version])
+               permit-type-dir (permit/get-sftp-directory permit-type)
+               output-dir (str "target/" sftp-user permit-type-dir "/")
+               sftp-server (subs (env/value :fileserver-address) 7)
+               target-file-name (str "target/Downloaded-" (:id application) "-" (now) ".xml")
+               filename-starts-with (:id application)
+               xml-file (if get-files-from-sftp-server?
+                          (io/file (get-file-from-server
+                                     sftp-user
+                                     sftp-server
+                                     filename-starts-with
+                                     target-file-name
+                                     (str permit-type-dir "/")))
+                          (io/file (get-local-filename output-dir filename-starts-with)))
+               xml-as-string (slurp xml-file)
+               xml (parse (io/reader xml-file))
+               liitetieto (xml/select xml [:liitetieto])
+               liite-edn (-> liitetieto last (xml/select1 [:Liite]) xml/xml->edn :Liite (util/ensure-sequential :metatietotieto))
+               liite-id (->> liite-edn
+                             :metatietotieto
+                             (map #(or (:metatieto %) (:Metatieto %)))
+                             (some #(when (= "liiteId" (:metatietoNimi %)) (:metatietoArvo %))))
+               app-attachment (some #(when (= liite-id (:id %)) %) app-attachments)
+               attachment-urls (map
+                                 (fn [liite]
+                                   (-> (xml/select1 liite [:Liite])
+                                       xml/xml->edn
+                                       :Liite
+                                       :linkkiliitteeseen))
+                                 liitetieto)
+               host (env/value :host)]
+
+           (fact "Correctly named xml file is created" (.exists xml-file) => true)
+
+           (fact "XML file is valid"
+             (validate xml-as-string (:permitType application) krysp-version))
+
+           (fact "XML contains correct amount attachments"
+             (count liitetieto) => 3)
+
+           (fact "Correct number of attachments are marked sent"
+             (->> app-attachments
+                  (filter :latestVersion)
+                  (filter #(not= (get-in % [:target :type]) "verdict"))
+                  (filter :sent)
+                  count)
+             => 1)
+
+           (fact "XML has corresponding attachment in app" app-attachment => truthy)
+
+           (fact "XML contains HTTP links for attachments"
+             attachment-urls => (contains [(str host "/api/raw/pdf-export?id=" application-id "&lang=fi")
+                                           (str host "/api/raw/submitted-application-pdf-export?id=" application-id "&lang=fi")
+                                           (str host "/api/raw/latest-attachment-version?attachment-id=" liite-id)]
+                                          :in-any-order)))))
+
 ;;
 ;; TODO: Fix this
 ;;
