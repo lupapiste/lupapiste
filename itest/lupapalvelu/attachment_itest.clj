@@ -311,12 +311,14 @@
 
     (facts "Authority"
       (let [{attachments :attachments :as query-resp} (query sonja :attachments :id application-id)]
+        query-resp => ok?
         (count attachments) => 5
         (fact "verdict draft included"
           (count (filter (comp #{"verdict"} :type :target) attachments)) => 1)))
 
     (facts "Applicant"
       (let [{attachments :attachments :as query-resp} (query pena :attachments :id application-id)]
+        query-resp => ok?
         (count attachments) => 4
         (fact "verdict draft is filtered out"
           (count (filter (comp #{"verdict"} :type :target) attachments)) => 0)))
@@ -324,6 +326,28 @@
     (fact "Unauthorized"
       (let [query-resp (query mikko :attachments :id application-id)]
        query-resp => (partial expected-failure? "error.application-not-accessible")))))
+
+(facts "Attachment-groups query"
+  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+        {groups :groups :as query-resp} (query sonja :attachment-groups :id application-id)]
+
+    query-resp => ok?
+
+    (fact "Three groups"
+      (count groups) => 3)
+
+    (fact "Three different kind of groups"
+      (map :group-type groups) => (just ["building-site" "parties" "operation"] :in-any-order))
+
+    (fact "Operation group-type has operation specific info fields"
+      (keys (util/find-first (comp #{"operation"} :group-type) groups)) => (contains [:group-type :id :name :description] :in-any-order :gaps-ok))
+
+    (command sonja :add-operation :id application-id :operation "puun-kaataminen") => ok?
+
+    (fact "Four groups"
+      (-> (query sonja :attachment-groups :id application-id)
+          :groups
+          count) => 4)))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
