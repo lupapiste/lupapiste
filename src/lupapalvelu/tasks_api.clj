@@ -105,10 +105,6 @@
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
 
-(defn generate-task-pdfa [application {info :schema-info :as task} user lang]
-  (when (tasks/task-is-review? task)
-    (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
-
 (defcommand approve-task
   {:description "Authority can approve task, moves to ok"
    :parameters  [id taskId]
