@@ -2,7 +2,13 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.attachment.type :refer :all]
-            [lupapalvelu.attachment.metadata :refer :all]))
+            [lupapalvelu.attachment.metadata :refer :all]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.generators :as gen]
+            [clojure.test :refer [is]]
+            [schema.core :as sc]
+            [sade.schema-generators :as ssg]))
 
 (testable-privates lupapalvelu.attachment.type attachment-types-by-operation)
 
@@ -63,3 +69,19 @@
   (->> (keys type-grouping)
        (remove (partial contains? (mapcat val attachment-types-by-permit-type)))) => empty?)
 
+(sc/defschema AType
+  {(sc/optional-key :type-id)     (sc/enum :type1 :type2)
+   (sc/optional-key :type-group)  (sc/enum :group1 :group2)
+   (sc/optional-key :kw)          sc/Keyword
+   (sc/optional-key :str)         sc/Str
+   (sc/optional-key :num)         sc/Num
+   (sc/optional-key :map)         {sc/Keyword sc/Keyword}})
+
+(defspec equals?-spec
+  (prop/for-all [types (gen/vector (ssg/generator AType) 1 3)]
+                (if (and (every? :type-id types)
+                         (every? :type-group types)
+                         (some->> (not-empty types) (map :type-id) (apply =))
+                         (some->> (not-empty types) (map :type-group) (apply =)))
+                  (is (apply equals? types))
+                  (is (not (apply equals? types))))))
