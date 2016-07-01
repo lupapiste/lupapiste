@@ -606,7 +606,9 @@
   {:description "Organization server and layer details."
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok (o/organization-map-layers-data (user/authority-admins-organization-id user))))
+  (let [org-id (user/authority-admins-organization-id user)
+        {:keys [server layers]} (o/organization-map-layers-data org-id)]
+    (ok :server (select-keys server [:url :username]), :layers layers)))
 
 (defcommand update-map-server-details
   {:parameters [url username password]
