@@ -142,8 +142,7 @@ The filled-up warning field and party info plus the added attachment cause corre
   Wait Until  Element should be visible  xpath=//*[@data-test-id='application-submit-btn']
   ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 8
   Wait Until  Xpath Should Match X Times  //*[@class='requiredField-line']  ${missingRequiredCountAfter}
-  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  0
-  Element should not be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']
+  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  2
 
 Mikko could submit application after missing stuff have been added
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
