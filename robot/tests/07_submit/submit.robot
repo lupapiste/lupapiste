@@ -61,7 +61,7 @@ Mikko can not submit application because there are "missing required" items on t
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-fields']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-attachments']
-  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  6
+  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  8
   ${missingRequiredCount} =  Get Matching Xpath Count  xpath=//*[@class='requiredField-line']
   Set Suite Variable  ${missingRequiredCount}
   Logout
