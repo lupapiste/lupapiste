@@ -23,6 +23,7 @@ LUPAPISTE.ServerSettingsModel = function(params) {
   self.url = ko.observable("");
   self.username = ko.observable("");
   self.password = ko.observable("");
+  self.passwordPlaceholder = ko.observable("");
 
   self.error = params.error;
   self.errorMessageTerm = params.errorMessageTerm;
@@ -34,17 +35,23 @@ LUPAPISTE.ServerSettingsModel = function(params) {
   self.disposedComputed( function() {
     var server = params.server();
     if(server) {
-      self.url( server.url);
-      self.username( server.username);
-      self.password( server.password);
+      self.url(server.url);
+      self.username(server.username);
+      if (server.username) {
+        self.passwordPlaceholder("********");
+      }
     }
   });
 
   self.updateServerDetails = function() {
+    var username = _.trim(self.username());
     params.channel.send( {
       url: _.trim(self.url()),
-      username: _.trim(self.username()),
+      username: username,
       password: self.password()
     });
+    if (!username) {
+      self.passwordPlaceholder("");
+    }
   };
 };
