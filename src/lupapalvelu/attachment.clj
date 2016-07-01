@@ -192,7 +192,7 @@
   (let [group (or group (when operation :operation))] ;; Group not set for old attachments.
     {:by-ref  (merge {:group-type group}
                      (when (= :operation group) operation))
-     :by-type (att-type/tag-by-type attachment)}))
+     :by-type (att-type/group-by-type attachment)}))
 
 (defn link-file-to-application [app-id fileId]
   {:pre [(string? app-id)]}

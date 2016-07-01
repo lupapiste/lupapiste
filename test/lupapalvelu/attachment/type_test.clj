@@ -50,3 +50,16 @@
 
   (fact "foreman application has restricted set of attachment types"
     (count (attachment-types-by-operation "tyonjohtajan-nimeaminen-v2")) => 5))
+
+(fact "All attachment types in default-grouping are valid"
+  (->> (mapcat val default-grouping)
+       (remove (partial contains? (mapcat val attachment-types-by-permit-type)))) => empty?)
+
+(fact "All attachment types in foreman-application-types are valid"
+  (->> foreman-application-types
+       (remove (partial contains? (mapcat val attachment-types-by-permit-type)))) => empty?)
+
+(fact "All attachment types in group-tag-mapping are valid"
+  (->> (keys type-grouping)
+       (remove (partial contains? (mapcat val attachment-types-by-permit-type)))) => empty?)
+
