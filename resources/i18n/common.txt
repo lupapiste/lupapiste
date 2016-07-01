@@ -2507,6 +2507,7 @@
 "attachment.downloadOriginalVersion.info" "sv" "Dokumentet är översatt,"
 "attachment.downloadOriginalVersion.link" "fi" "lataa alkuperäinen versio."
 "attachment.downloadOriginalVersion.link" "sv" "ladda originalversionen."
+"attachment.downloadOriginalVersion.autoConversionInfo" "fi" "Tiedosto on muunnettu automaattisesti,"
 "state.application" "fi" "Hakemuksen tila:"
 "state.application" "sv" "Ansökans status:"
 "user" "fi" "Käyttäjä"

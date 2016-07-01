@@ -226,7 +226,8 @@
                                      :locked true
                                      :user user
                                      :created (or attachment-time timestamp)
-                                     :state :ok})
+                                     :state :ok
+                                     :keep-original-file? true})
            (error (str (:status resp) " - unable to download " url ": " resp)))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))

@@ -165,6 +165,18 @@
   [pdf-file & [opts]]
   (analyze-and-convert-to-pdf-a pdf-file opts))
 
+(defn file-is-valid-pdfa? [pdf-file]
+  (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")
+        file-path (if (instance? InputStream pdf-file)
+                    (do (io/copy pdf-file temp-file)
+                        (.getCanonicalPath temp-file))
+                    (.getCanonicalPath pdf-file))
+        output-file (File/createTempFile "lupapiste-pdfa-validation" ".pdf")
+        {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
+    (io/delete-file temp-file :silently)
+    (io/delete-file output-file :silently)
+    (= exit 0)))
+
 (defn pdf-a-required? [organization-id]
   (organization/some-organization-has-archive-enabled? #{organization-id}))
 
