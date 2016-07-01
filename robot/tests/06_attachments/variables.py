@@ -10,6 +10,7 @@ def createFile(path, content):
         fp.close()
 
 TXT_TESTFILE_NAME = 'robotframework-testfile-06_attachments.txt'
+PDF_TESTFILE_NAME = 'robotframework-testfile-06_attachments.pdf'
 TXT_TESTFILE_CONTENT = 'Created by Lupapiste robot/tests/06_attachments/variables.py'
 TXT_TESTFILE_DESCRIPTION = "attachment-foo"
 TXT_TESTFILE_PATH = os.path.join(os.path.expanduser('~'), TXT_TESTFILE_NAME)

@@ -276,29 +276,34 @@ body.admin, body.authority-admin {
 }
 
 /* line 95, ../../../private/common-html/sass/partials/_base.scss */
+.spacerL {
+  margin-bottom: 24px;
+}
+
+/* line 99, ../../../private/common-html/sass/partials/_base.scss */
 .right {
   float: right;
 }
 
-/* line 99, ../../../private/common-html/sass/partials/_base.scss */
+/* line 103, ../../../private/common-html/sass/partials/_base.scss */
 .left {
   float: left;
 }
 
-/* line 103, ../../../private/common-html/sass/partials/_base.scss */
+/* line 107, ../../../private/common-html/sass/partials/_base.scss */
 .sticky {
   position: -webkit-sticky;
   position: sticky;
   top: 60px;
   z-index: 1;
 }
-/* line 109, ../../../private/common-html/sass/partials/_base.scss */
+/* line 113, ../../../private/common-html/sass/partials/_base.scss */
 .sticky:after, .sticky:before {
   content: '';
   display: table;
 }
 
-/* line 115, ../../../private/common-html/sass/partials/_base.scss */
+/* line 119, ../../../private/common-html/sass/partials/_base.scss */
 .inline-col {
   position: relative;
   display: inline-block;
@@ -5336,32 +5341,42 @@ i.toggle {
   margin: 6px 6px 6px 6px;
 }
 
-/* line 540, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 538, ../../../private/common-html/sass/partials/_buttons.scss */
+.margins-m {
+  margin: 12px 12px 12px 12px;
+}
+
+/* line 542, ../../../private/common-html/sass/partials/_buttons.scss */
+.no-top {
+  margin-top: 0 !important;
+}
+
+/* line 548, ../../../private/common-html/sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 544, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 552, ../../../private/common-html/sass/partials/_buttons.scss */
 #partiesDocgen button {
   margin-bottom: 6px;
 }
 
-/* line 548, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 556, ../../../private/common-html/sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
 }
 
-/* line 554, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 562, ../../../private/common-html/sass/partials/_buttons.scss */
 button:focus {
   outline: 0;
 }
 
-/* line 559, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 567, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button {
   position: relative;
 }
-/* line 561, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 569, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
@@ -5371,30 +5386,30 @@ button:focus {
   overflow: hidden;
   z-index: 1;
 }
-/* line 569, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 577, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 572, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 580, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
 }
-/* line 575, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 583, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
-/* line 583, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 591, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 585, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 593, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
 
-/* line 590, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 598, ../../../private/common-html/sass/partials/_buttons.scss */
 .left-buttons > button {
   margin-right: 12px;
 }
@@ -8322,61 +8337,55 @@ textarea.grid-style-input {
 
 /* line 1477, ../../../private/common-html/sass/partials/_forms.scss */
 div.review-done {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-/* line 1482, ../../../private/common-html/sass/partials/_forms.scss */
-div.review-done div {
-  font-size: 16px;
-  margin-bottom: 10px;
+  margin: 24px;
 }
 
-/* line 1488, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1481, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table {
   padding-top: 6px;
 }
-/* line 1491, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1484, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .form-label {
   display: inline;
   width: initial;
   vertical-align: initial;
   font-weight: bold;
 }
-/* line 1498, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1491, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .checkbox-wrapper {
   border: none;
 }
-/* line 1501, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1494, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .dropdown {
   height: 30px;
   min-width: 140px;
   lineheight: default;
 }
-/* line 1507, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1500, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table input[type=text] {
   height: 26px;
   min-width: 32px;
 }
-/* line 1513, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1506, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .err {
   color: red !important;
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 1px !important;
 }
-/* line 1519, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1512, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .warn {
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 0px !important;
 }
-/* line 1524, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1517, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .tip {
   border-color: #f6aa59;
   border-width: 1px;
 }
 
-/* line 1530, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1523, ../../../private/common-html/sass/partials/_forms.scss */
 .foreman-info {
   padding-left: 6px;
 }
@@ -10195,15 +10204,4 @@ ul.tabs {
 .comment-bubble.attachment .header,
 .comment-bubble-authority.attachment .header {
   border-bottom-color: #f7ac2e;
-}
-
-/* line 278, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble.for-me .header,
-.comment-bubble-authority.for-me .header {
-  border-bottom-color: #46b02d;
-}
-
-/* line 3, ../../../private/common-html/sass/partials/_modal.scss */
-#modal-dialog .small {
-  width: 360px;
 }

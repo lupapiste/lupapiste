@@ -26,10 +26,10 @@
     border: none;
     padding: 0 0 0 0;
     &:active, &:hover {
-                span {
-                  text-decoration: underline;
-                }
-              }
+      span {
+        text-decoration: underline;
+      }
+    }
   }
 }
 
@@ -37,9 +37,6 @@
 .stacked.help-toggle div {
   overflow-y: visible;
 }
-
-
-
 
 .help-text {
   display: none;
@@ -85,11 +82,24 @@
 
 .page-info {
   margin: $marginM 0;
-
 }
 
 .help-adjacent-title {
   margin-top: 0 !important;
   line-height: normal;
   display: inline-block;
+}
+
+.help-box {
+  padding: {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+  background-color: $gray238;
+  border-left: 10px solid $orange-dark;
+  p {
+    padding-bottom: 0px;
+  }
 }
