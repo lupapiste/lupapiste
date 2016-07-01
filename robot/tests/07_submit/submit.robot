@@ -112,9 +112,9 @@ Mikko selects the "not needed" checkbox of some other attachment template than t
   Select Checkbox  ${checkbox-path-hakija-valtakirja}
   Wait Until  Checkbox Should Be Selected  ${checkbox-path-hakija-valtakirja}
 
-Mikko adds txt attachment to the attachment template added by Sonja
+Mikko adds pdf attachment to the attachment template added by Sonja
   Open attachment details  muut.muu
-  Add attachment version  ${TXT_TESTFILE_PATH}
+  Add attachment version  ${PDF_TESTFILE_PATH}
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
   Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
@@ -159,4 +159,3 @@ Mikko cant re-submit application
 
 Submit date should be visible
   Wait until  Element should be visible  xpath=//span[@data-test-id='application-submitted-date']
-
