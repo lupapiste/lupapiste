@@ -52,15 +52,7 @@
     (contains? foreman-application-types attachment-type) (conj :tyonjohtajan-nimeaminen-v2 :tyonjohtajan-nimeaminen)))
 
 (def- default-grouping
-  {:operation     [{:type-id :pohjapiirros       :type-group :paapiirustus}
-                   {:type-id :leikkauspiirros    :type-group :paapiirustus}
-                   {:type-id :julkisivupiirros   :type-group :paapiirustus}
-                   {:type-id :yhdistelmapiirros  :type-group :paapiirustus}
-                   {:type-id :erityissuunnitelma :type-group :rakentamisen_aikaiset}
-                   {:type-id :energiatodistus    :type-group :muut}
-                   {:type-id :korjausrakentamisen_energiaselvitys :type-group :muut}
-                   {:type-id :rakennuksen_tietomalli_BIM :type-group :muut}
-                   {:type-id :pohjapiirustus     :type-group :paapiirustus}
+  {:operation     [{:type-id :pohjapiirustus     :type-group :paapiirustus}
                    {:type-id :leikkauspiirustus  :type-group :paapiirustus}
                    {:type-id :julkisivupiirustus :type-group :paapiirustus}
                    {:type-id :muu_paapiirustus   :type-group :paapiirustus}
