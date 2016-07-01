@@ -401,6 +401,18 @@
     :city "Loppi"
     :private {:password "$2a$10$MX9RWSqjBocwxg1ikSp/POV8lXd6lKA4yDymRIg7.GsXdRigZxmjK"}}
 
+   ;; Helsinki - rakennnustarkastaja@hel.fi / helsinki
+   {:id "5770f6ffd358719a09397a45"
+    :email "rakennustarkastaja@hel.fi"
+    :enabled true
+    :role "authority"
+    :orgAuthz {:091-R #{:authority :approver :archivist :tos-editor :tos-publisher}}
+    :firstName "Hannu"
+    :lastName "Helsinki"
+    :username "rakennustarkastaja@hel.fi"
+    :private {:password "$2a$10$/bi569g4ijAitS82ES9MO.TDqGZrNlBrBPC1rE6N8v7uqTJbiHTNW"
+              :apikey "a0ac77ecd2e6c2ea6e73f860"}}
+
    ;; Hakijat
 
    ;; Hakija: Mikko's neighbour - teppo@example.com / teppo69
@@ -546,7 +558,8 @@
                                       :kopiolaitos-orderer-address nil
                                       :kopiolaitos-orderer-email nil
                                       :kopiolaitos-orderer-phone nil
-                                      :calendars-enabled false})
+                                      :calendars-enabled false
+                                      :use-attachment-links-integration false})
 
 (def organizations (map
                      (partial merge default-keys-for-organizations)
@@ -854,6 +867,25 @@
                        :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
+
+                      ;; Helsinki R
+                      {:id "091-R"
+                       :name {:fi "Helsingin rakennusvalvontavirasto"
+                              :sv "Helsingfors byggnadstillsynsverket"}
+                       :scope [{:municipality "091"
+                                :permitType "R"
+                                :new-application-enabled true}]
+                       :links [{:name {:fi "Helsinki" :sv "Helsingfors"}
+                                :url "http://www.hel.fi"}
+                               {:name {:fi "Rakennusvalvontavirasto", :sv "Byggnadstillsynsverket"}
+                                :url "http://www.hel.fi/www/rakvv/fi"}]
+                       :krysp {:R {:url local-krysp :version "2.2.0" :ftpUser "dev_helsinki"}}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
+                                                                      [:paapiirustus :pohjapiirustus]]}
+                       :permanent-archive-enabled true
+                       :permanent-archive-in-use-since 1451613600000
+                       :use-attachment-links-integration true}
 
                       ;;
                       ;; Ymparisto organisaatiot

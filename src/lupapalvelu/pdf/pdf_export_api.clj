@@ -10,6 +10,16 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.action :as action]))
 
+(defn ok [body]
+  {:status  200
+   :headers {"Content-Type" "application/pdf"}
+   :body    body})
+
+(def not-found
+  {:status 404
+   :headers {"Content-Type" "text/plain"}
+   :body "404"})
+
 (defraw pdf-export
   {:parameters [:id]
    :user-roles #{:applicant :authority :oirAuthority}
@@ -18,12 +28,19 @@
    :states     states/all-states}
   [{:keys [user application lang]}]
   (if application
-    {:status 200
-     :headers {"Content-Type" "application/pdf"}
-     :body (-> application (a/with-masked-person-ids user) (pdf-export/generate lang))}
-    {:status 404
-     :headers {"Content-Type" "text/plain"}
-     :body "404"}))
+    (ok (-> application (a/with-masked-person-ids user) (pdf-export/generate lang)))
+    not-found))
+
+(defraw submitted-application-pdf-export
+  {:parameters       [:id]
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/all-org-authz-roles
+   :states           states/all-states}
+  [{:keys [user application lang]}]
+  (if-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+    (ok (-> submitted-application (a/with-masked-person-ids user) (pdf-export/generate lang)))
+    not-found))
 
 (defraw bulletin-pdf-export
   {:parameters [bulletinId]
@@ -32,12 +49,8 @@
    :states     states/all-states}
   [{:keys [lang user]}]
   (if-let [bulletin (bulletins/get-bulletin bulletinId {})]
-    {:status 200
-     :headers {"Content-Type" "application/pdf"}
-     :body (-> (last (:versions bulletin)) (a/with-masked-person-ids user) (pdf-export/generate lang))}
-    {:status 404
-     :headers {"Content-Type" "text/plain"}
-     :body "404"}))
+    (ok (-> (last (:versions bulletin)) (a/with-masked-person-ids user) (pdf-export/generate lang)))
+    not-found))
 
 (defraw pdfa-casefile
   {:parameters       [:id]
@@ -48,9 +61,5 @@
    :states           states/all-states}
   [{:keys [user application lang]}]
   (if application
-    {:status  200
-     :headers {"Content-Type" "application/pdf"}
-           :body (libre/generate-casefile-pdfa application lang)}
-    {:status  404
-     :headers {"Content-Type" "text/plain"}
-     :body    "404"}))
+    (ok (libre/generate-casefile-pdfa application lang))
+    not-found))

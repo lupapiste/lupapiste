@@ -265,7 +265,7 @@
         (loc "task-katselmus.rakennus.tila.kayttoonottava") (if (get-in v [:kayttoonottava :value]) (loc "yes") (loc "no"))
         (loc "task-katselmus.rakennus.tila.tila._group_label") (get-in v [:tila :value]))) rakennus))
 
-(defn collect-task-fields [tasks]
+(defn collect-task-fields [tasks attachment-count]
   (map
     (fn [{:keys [duedate taskname closed created state schema-info source assignee data]}]
       (let [i18n-prefix (:i18nprefix schema-info)
@@ -293,7 +293,7 @@
           (loc "task-katselmus.katselmus.lasnaolijat") lasnaolijat
           (loc "task-katselmus.katselmus.poikkeamat") poikkeamat
           (loc "task-katselmus.katselmus.tila._group_label") tila
-          (loc "osapuoli.patevyys.Liiteet") "0"
+          (loc "osapuoli.patevyys.Liiteet") (str attachment-count)
           :rakennus (collect-rakennus rakennus))))
     tasks))
 
@@ -520,6 +520,15 @@
     (= type :tasks) render-tasks
     :else render-fields-plain))
 
+(defn- task-attachment-count [{:keys [attachments]} {task-id :id}]
+  (->> attachments
+       (filter (fn [{:keys [target source]}] (and (= (keyword (:type target)) :task)
+                                                  (= (:id target) task-id)
+                                                  ;; Do not count the existing attachment generated from this task, if any
+                                                  (or (not= (keyword (:type source)) :tasks)
+                                                      (not= (:id source) task-id)))))
+       count))
+
 (defn- generate-pdf-data-with-child [{subtype :permitSubtype :as app} child-type id lang]
   (i18n/with-lang lang
     (let [title (cond
@@ -534,7 +543,7 @@
           child-data (cond
                        (= child-type :statements) (collect-statement-fields child)
                        (= child-type :neighbors) (collect-neighbour-fields child)
-                       (= child-type :tasks) (collect-task-fields child)
+                       (= child-type :tasks) (collect-task-fields child (task-attachment-count app (first child)))
                        (= child-type :verdicts) nil
                        :else (collect-documents app))]
       ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper

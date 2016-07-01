@@ -2312,8 +2312,7 @@
                                     {:attachments true})]
     (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
 
-
-;; migraatio, joka ajettiin vain kerran perumaan yhden batchrunin tulokset, koska 
+;; migraatio, joka ajettiin vain kerran perumaan yhden batchrunin tulokset, koska
 ;; generoidut pdf:t eivat olleet valideja.
 #_(defmigration verdict-polling-pdf-failure-removal
   {:apply-when (pos? (mongo/count :applications {:tasks.source.type "background"}))}
@@ -2348,6 +2347,10 @@
   (doseq [collection  [:applications :submitted-applications]
           application (mongo/select collection {:attachments.op.id {$type 10}} [:attachments])]
     (mongo/update-by-id collection (:id application) {$set (operation-id-cleanup-updates application)})))
+
+(defmigration add-use-attachment-links-integration-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:use-attachment-links-integration {$exists false}}))}
+  (mongo/update-by-query :organizations {:use-attachment-links-integration {$exists false}} {$set {:use-attachment-links-integration false}}))
 
 ;;
 ;; ****** NOTE! ******

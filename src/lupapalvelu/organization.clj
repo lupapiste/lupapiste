@@ -105,8 +105,7 @@
    (sc/optional-key :validate-verdict-given-date) sc/Bool
    (sc/optional-key :vendor-backend-redirect) {(sc/optional-key :vendor-backend-url-for-backend-id) ssc/OptionalHttpUrl
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
-   }
-  )
+   (sc/optional-key :use-attachment-links-integration) sc/Bool})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
