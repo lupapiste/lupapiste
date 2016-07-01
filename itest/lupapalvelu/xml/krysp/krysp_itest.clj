@@ -529,11 +529,10 @@
            (fact "XML has corresponding attachment in app" app-attachment => truthy)
 
            (fact "XML contains HTTP links for attachments"
-             attachment-urls => (contains [(str host "/api/raw/pdf-export?id=" application-id "&lang=fi")
-                                           (str host "/api/raw/submitted-application-pdf-export?id=" application-id "&lang=fi")
-                                           (str host "/api/raw/latest-attachment-version?attachment-id=" liite-id)]
+             attachment-urls => (contains [(re-pattern (str "[^\\s]+/api/raw/pdf-export\\?id=" application-id "&lang=fi"))
+                                           (re-pattern (str "[^\\s]+/api/raw/submitted-application-pdf-export\\?id=" application-id "&lang=fi"))
+                                           (re-pattern (str "[^\\s]+/api/raw/latest-attachment-version\\?attachment-id=" liite-id))]
                                           :in-any-order)))))
-
 ;;
 ;; TODO: Fix this
 ;;
