@@ -50,12 +50,12 @@ Owners are visible after page refresh
 Error indicator appears with invalid data
   Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.osoite.postinumero"]  Test
   Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
-  Wait until  Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'warn')]
+  Wait until  Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
 
 Error indicator disappears when valid value is input
   Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.osoite.postinumero"]  12345
   Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
-  Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'warn')]
+  Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
 
 Huoneistot info for Uusirakennus is correct
   Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class="huoneistot-table"]//tbody//tr  1
@@ -120,11 +120,11 @@ Mikko subscribes notifications
 
 Mikko inputs bad postal code for hakija-r
   Input text with jQuery  div#application-parties-tab section[data-doc-type="hakija-r"] input[data-docgen-path="henkilo.osoite.postinumero"]  000
-  Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.warn[data-docgen-path="henkilo.osoite.postinumero"]
+  Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]
 
 Mikko changes hakija-r country and postal code becomes valid
   Select from list  jquery=div#application-parties-tab section[data-doc-type="hakija-r"] select[data-docgen-path="henkilo.osoite.maa"]  CHN
-  Wait Until  Element should not be visible  jquery=section[data-doc-type="hakija-r"] input.warn[data-docgen-path="henkilo.osoite.postinumero"]
+  Wait Until  Element should not be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]
 
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
