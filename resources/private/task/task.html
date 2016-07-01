@@ -3,13 +3,17 @@
 <body>
   <section class="page container" id="task" data-bind="with: task">
     <h1><span data-bind="attr: {'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span><span data-bind="text: displayName"></span></h1>
-    <div class="clear-fix">
+    <div class="clear-fix inner-margins">
       <a class="btn secondary"
          data-bind="click: returnToApplication"
          data-test-id="back-to-application-from-task">
           <i class="lupicon-chevron-start"></i>
          <span data-bind ="ltext: 'application.return'"></span>
       </a>
+      <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.reviewSubmitOk() && !$root.processing(), visible: $root.authorization.ok('review-can-be-marked-done')" class="positive">
+        <i class="lupicon-eye"></i>
+        <span data-bind="ltext: 'task.review-done'"></span>
+      </button>
       <!-- ko if: approvable || rejectable -->
       <button data-test-id="approve-task" data-bind="ltext: 'task.approve', click: approve, enable: approvable, visible: $root.authorization.ok('approve-task')" class="positive"></button>
       <button data-test-id="reject-task"  data-bind="ltext: 'task.reject', click: reject, enable: rejectable, visible: $root.authorization.ok('reject-task')" class="negative"></button>
@@ -18,17 +22,9 @@
       <button data-test-id="delete-task"
               data-bind="ltext:'remove', click: deleteTask, visible: $root.authorization.ok('delete-task')"
               class="secondary" style="float:right"></button>
-
     </div>
 
-    <div class="review-done"
-         data-bind="visible: $root.authorization.ok('review-can-be-marked-done')">
-      <div data-bind="ltext: 'task.review-done.help'"></div>
-      <button data-test-id="review-done" data-bind="click: reviewDone, enable: $root.reviewSubmitOk() && !$root.processing()" class="positive">
-        <i class="lupicon-eye"></i>
-        <span data-bind="ltext: 'task.review-done'"></span>
-      </button>
-    </div>
+    <div class="review-done help-box" data-bind="ltext: 'task.review-done.help', visible: $root.authorization.ok('review-can-be-marked-done')"></div>
 
     <div id="taskAttachments" >
       <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, addAttachmentDisabled: $root.addAttachmentDisabled, authorization: $root.authorization}}"></div>
