@@ -150,8 +150,8 @@
                   </div>
                   <div data-bind="if: fileId !== originalFileId">
                     <span class="attachment-label-info-item">
-                      <span data-bind="ltext: 'attachment.downloadOriginalVersion.info', visible: !ko.unwrap(autoConversion)"></span>
-                      <span data-bind="ltext: 'attachment.downloadOriginalVersion.autoConversionInfo', visible: autoConversion"></span>
+                      <span data-bind="ltext: 'attachment.downloadOriginalVersion.info', visible: !ko.unwrap($data.autoConversion)"></span>
+                      <span data-bind="ltext: 'attachment.downloadOriginalVersion.autoConversionInfo', visible: $data.autoConversion"></span>
                       <span id="original-file">
                         <a data-bind="ltext: 'attachment.downloadOriginalVersion.link', attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.originalFileId}"></a>
                       </span>
