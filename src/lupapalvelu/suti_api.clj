@@ -47,3 +47,12 @@
    :feature :suti-integration}
   [{user :user}]
   (ok :operations (-> user suti/admin-org :suti :operations)))
+
+(defcommand suti-www
+  {:description "Public Suti URL. Not to be confused with the Suti backend."
+   :parameters [www]
+   :input-validators [(partial action/non-blank-parameters [:www])]
+   :user-roles #{:authorityAdmin}
+   :feature :suti-integration}
+  [{user :user}]
+  (suti/set-www (suti/admin-org user) www))

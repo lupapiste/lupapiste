@@ -39,12 +39,36 @@ LUPAPISTE.SutiService = function() {
       .call();
   };
 
+  self.sutiEnabled = ko.computed( {
+    read: function() {
+      return suti().enabled;
+    },
+    write: function( flag ) {
+      if( _.isBoolean( flag )) {
+        ajax.command( "suti-toggle-enabled", {flag: flag})
+          .success( function( res ) {
+            util.showSavedIndicator( res );
+            suti( _.assign( suti(), {enabled: flag}));
+          })
+          .call();
+      }
+    }
+  });
 
-  // ko.computed( function() {
-  //   if( _.isBoolean( self.sutiEnabled() && self.initialized )) {
-  //     ajax.command( "suti-toggle-enabled", {flag: self.sutiEnabled()}).call();
-  //   }
-  // });
+  self.sutiWww = ko.computed( {
+    read: function() {
+      return suti().www;
+    },
+    write: function( www ) {
+      www = _.trim( www );
+      ajax.command( "suti-www", {www: www})
+        .success( function( res ) {
+          util.showSavedIndicator( res );
+          suti( _.assign( suti(), {www: www}));
+        })
+        .call();
+    }
+  });
 
   self.isSutiOperation = function ( dataOrId )  {
     return operations.indexOf( _.get( dataOrId, "id", dataOrId) ) >= 0;

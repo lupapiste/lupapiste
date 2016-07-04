@@ -1,5 +1,6 @@
 (ns lupapalvelu.suti
   (:require [monger.operators :refer :all]
+            [sade.strings :as ss]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
             [lupapalvelu.user :as usr]))
@@ -27,5 +28,8 @@
 
 (defn organization-details [{{server :server :as suti} :suti}]
   (-> suti
-      (select-keys [:enabled ::www])
+      (select-keys [:enabled :www])
       (assoc :server (select-keys server [:url :username]))))
+
+(defn set-www [organization www]
+  (org/update-organization (:id organization) {$set {:suti.www (ss/trim www)}}))

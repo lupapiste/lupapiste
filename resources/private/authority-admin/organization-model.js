@@ -51,10 +51,6 @@ LUPAPISTE.OrganizationModel = function () {
   self.suti = ko.observable();
   self.useAttachmentLinksIntegration = ko.observable(false);
 
-  self.sutiEnabled = ko.observable();
-  self.sutiOperations = ko.observableArray();
-  self.sutiWww = ko.observable();
-
   self.sectionOperations = ko.observableArray();
 
   self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
@@ -256,12 +252,6 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.permitTypes(_(organization.scope).map("permitType").uniq().value());
 
-    self.suti(organization.suti);
-
-    // Suti integration
-    self.sutiEnabled(_.get( organization, "suti.enabled", false ));
-    self.sutiWww( _.get( organization, "suti.www"));
-    self.sectionOperations( _.get( organization, "section-operations", []));
     self.initialized = true;
   };
 

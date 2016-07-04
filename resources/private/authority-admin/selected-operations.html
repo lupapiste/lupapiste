@@ -12,7 +12,7 @@
               <tr>
                 <th data-bind="ltext: permitType"></th>
                 <th data-bind="ltext: 'verdict.pykala'"></th>
-                <!-- ko if: $root.organization.sutiEnabled -->
+                <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
                 <th data-bind="ltext: 'suti.column',
                                feature: 'suti-integration'"></th>
                 <!-- /ko -->
@@ -31,7 +31,7 @@
                                       click: $root.organization.toggleSectionOperation"></label>
                   </div>
                 </td>
-                <!-- ko if: $root.organization.sutiEnabled -->
+                <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
                 <td data-bind="feature: 'suti-integration'">
                   <div class="checkbox-wrapper">
                     <input type="checkbox"
