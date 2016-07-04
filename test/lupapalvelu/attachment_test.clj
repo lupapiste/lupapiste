@@ -238,7 +238,7 @@
   (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
                  file-id         (ssg/generator ssc/ObjectIdStr)
                  archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
-                                                           :archivabilityError (apply sc/enum archivability-errors)
+                                                           :archivabilityError (apply sc/enum nil archivability-errors)
                                                            :missing-fonts (sc/eq ["Arial"])}))
                  general-options (ssg/generator {:filename sc/Str
                                                 :content-type sc/Str

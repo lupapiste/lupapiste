@@ -85,3 +85,14 @@
                          (some->> (not-empty types) (map :type-group) (apply =)))
                   (is (apply equals? types))
                   (is (not (apply equals? types))))))
+
+(defspec contains?-spec 30
+  (prop/for-all [atype      (ssg/generator AType)
+                 types-coll (gen/vector (ssg/generator AType) 0 10)]
+                (if (and (:type-id atype)
+                         (:type-group atype)
+                         (some->> (not-empty types-coll)
+                                  (map #(select-keys % [:type-id :type-group]))
+                                  (some #{(select-keys atype [:type-id :type-group])})))
+                  (is (contains? types-coll atype))
+                  (is (not (contains? types-coll atype))))))
