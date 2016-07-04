@@ -740,17 +740,17 @@
                false)]
       (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
 
-  (defjson [:get "/dev/suti/good"] []
+  (defjson [:get "/dev/suti/good/:id"] []
     {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
                    {:name "Two" :expired false :expirydate "/Date(12345)/" :downloaded nil}
                    {:name "Three" :expired false :expirydate nil :downloaded nil}]})
   (defjson [:get "/dev/suti/empty"] []
     {})
 
-  (defpage "/dev/suti/bad" []
+  (defpage "/dev/suti/bad/:id" []
     (resp/status 501 "Bad Suti request."))
 
-  (defpage "/dev/suti/auth" []
+  (defpage "/dev/suti/auth/:id" []
     ;; Username: suti, password: secret
     (let [[username password] (http/decode-basic-auth (request/ring-request))]
       (if (and (= username "suti") (= password "secret"))

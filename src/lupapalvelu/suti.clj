@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [cheshire.core :as json]
             [swiss.arrows :refer :all]
+            [taoensso.timbre :refer [debugf]]
             [sade.http :as http]
             [sade.strings :as ss]
             [lupapalvelu.organization :as org]
@@ -61,14 +62,16 @@
              (json/parse-string true)
              :productlist
              (map clean-suti-date <>))
-    (catch Exception _
+    (catch Exception e
+      (debugf "Suti fetch failed (%s): %s" url (.getMessage e))
       "suti.products-error")))
 
-(defn application-data [{:keys [suti organization]}]
-  (let [{:keys [enabled www server]} (:suti (org/get-organization organization))
+(defn application-data [{:keys [suti organization primaryOperation]}]
+  (let [{:keys [enabled www server operations]} (:suti (org/get-organization organization))
         {url :url} server
-        products (when (and suti enabled (ss/not-blank? server))
+        suti-enabled (and enabled (contains? (set operations) (:name primaryOperation)))
+        products (when (and suti suti-enabled (ss/not-blank? url))
                    (fetch-suti-products (append-to-url url suti) server))]
     {:enabled enabled
-     :www www
+     :www (ss/replace www "$$" suti)
      :products products}))

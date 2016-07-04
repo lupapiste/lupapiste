@@ -87,5 +87,18 @@ LUPAPISTE.SutiService = function() {
       .call();
   };
 
+  self.fetchApplicationData = function( applicationId ) {
+    // Clear old data just in case
+    suti( {} );
+    ajax.query( "suti-application-data", {id: applicationId })
+      .success( function( res ) {
+        suti( res.data );
+      })
+      .call();
+  };
+
+  self.products = ko.pureComputed( function() {
+    return suti().products;
+  });
 
 };

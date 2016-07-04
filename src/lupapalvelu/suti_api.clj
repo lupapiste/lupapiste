@@ -4,6 +4,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.states :as states]
             [lupapalvelu.suti :as suti]))
 
 (defcommand suti-toggle-enabled
@@ -62,6 +63,7 @@
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:authority :applicant}
+   :states states/all-application-states
    :feature :suti-integration}
   [{application :application}]
   (ok :data (suti/application-data application)))

@@ -1,5 +1,5 @@
 "suti.column" "fi" "Suti"
 "suti.enabled" "fi" "Suunnittelun lähtötietopaketti saatavilla"
 "suti.admin.title" "fi" "Suunnittelun lähtötietopaketti (Suti)"
-"suti.admin.www" "fi" "Lähtötietopaketin osoite (URL). %s korvautuu hankenumerolla."
+"suti.admin.www" "fi" "Lähtötietopaketin osoite (URL). $$ korvautuu hankenumerolla."
 "suti.products-error" "fi" "Tietojen haku ei onnistunut."
