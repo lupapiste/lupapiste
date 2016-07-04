@@ -61,7 +61,7 @@ Mikko can not submit application because there are "missing required" items on t
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-fields']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-attachments']
-  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  6
+  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  8
   ${missingRequiredCount} =  Get Matching Xpath Count  xpath=//*[@class='requiredField-line']
   Set Suite Variable  ${missingRequiredCount}
   Logout
@@ -112,9 +112,9 @@ Mikko selects the "not needed" checkbox of some other attachment template than t
   Select Checkbox  ${checkbox-path-hakija-valtakirja}
   Wait Until  Checkbox Should Be Selected  ${checkbox-path-hakija-valtakirja}
 
-Mikko adds txt attachment to the attachment template added by Sonja
+Mikko adds pdf attachment to the attachment template added by Sonja
   Open attachment details  muut.muu
-  Add attachment version  ${TXT_TESTFILE_PATH}
+  Add attachment version  ${PDF_TESTFILE_PATH}
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
   Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
@@ -142,8 +142,7 @@ The filled-up warning field and party info plus the added attachment cause corre
   Wait Until  Element should be visible  xpath=//*[@data-test-id='application-submit-btn']
   ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 8
   Wait Until  Xpath Should Match X Times  //*[@class='requiredField-line']  ${missingRequiredCountAfter}
-  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  0
-  Element should not be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']
+  Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[@class='requiredField-line']  2
 
 Mikko could submit application after missing stuff have been added
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
@@ -159,4 +158,3 @@ Mikko cant re-submit application
 
 Submit date should be visible
   Wait until  Element should be visible  xpath=//span[@data-test-id='application-submitted-date']
-

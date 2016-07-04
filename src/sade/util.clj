@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.java.io :as io]
-            [sade.core :refer :all]
+            [sade.core :refer [fail!]]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
             [clj-time.core :refer [hours days weeks months years ago from-now]]
@@ -420,11 +420,6 @@
 
 (defn select-values [m keys]
   (map #(get m %) keys))
-
-(defn validate-url [url]
-  ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
-  (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
-    (fail :error.invalid.url)))
 
 (defn this-jar
   "utility function to get the name of jar in which this function is invoked"

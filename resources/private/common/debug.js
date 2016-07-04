@@ -89,7 +89,7 @@ jQuery(function($) {
                   .append($("<input type='checkbox' id='debugHub'>").click(function() { hub.setDebug(this.checked); }))
                   .append($("<label for='debugHub'>").text("Log events"))
                   .append($("<br>"))
-                  .append($("<a href='/api/last-email'>Last Email</a> - <a href='/api/last-emails'>All</a><br>"))
+                  .append($("<a href='/api/last-email' target='_blank'>Last Email</a> - <a href='/api/last-emails' target='_blank'>All</a><br>"))
                   .append($("<a href='/internal/reload'>Reload env/i18n</a><br>"))
                   .append($("<p>")
                           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())

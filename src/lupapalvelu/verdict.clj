@@ -226,7 +226,8 @@
                                      :locked true
                                      :user user
                                      :created (or attachment-time timestamp)
-                                     :state :ok})
+                                     :state :ok
+                                     :keep-original-file? true})
            (error (str (:status resp) " - unable to download " url ": " resp)))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
@@ -527,10 +528,14 @@
         (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
         (fail :error.invalid-task-type))
       ;; else
-      (do
+      (let [update-result (update-application command (util/deep-merge task-updates building-updates))
+            updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))
+            ;; updated-application (domain/get-application-as (:id application) (:user command)) ;; returns nil?
+            ]
         (doseq [added-task added-tasks-with-updated-buildings]
-          (tasks/generate-task-pdfa application added-task (:user command) (:lang command "fi")))
-        (update-application command (util/deep-merge task-updates building-updates))
+          (tasks/generate-task-pdfa
+           updated-application
+           added-task (:user command) (:lang command "fi")))
         (ok)))))
 
 

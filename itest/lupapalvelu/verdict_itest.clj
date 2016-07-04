@@ -54,7 +54,7 @@
       (fact "Sonja sees comment and attachment"
         (let [{:keys [comments attachments]} (query-application sonja application-id)
               attachments-with-versions (filter (comp seq :latestVersion) attachments)]
-          (count comments) => 2 ; comment and new attachment auto-comment
+          (count comments) => 3 ; comment and new attachment auto-comment
           (count attachments-with-versions) => 1
 
           (fact "Attachment application state"

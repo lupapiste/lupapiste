@@ -159,7 +159,7 @@
    (sc/optional-key :scale)              (apply sc/enum attachment-scales)
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
-   (sc/optional-key :metadata)           {sc/Any sc/Any}})
+   (sc/optional-key :metadata)           {sc/Keyword sc/Any}})
 
 
 ;;
@@ -589,9 +589,17 @@
     (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
       (when (seq application) attachment-file))))
 
+(defn get-attachment-latest-version-file
+  "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil."
+  [user attachment-id]
+  (let [application (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
+        file-id (attachment-latest-file-id application attachment-id)]
+    (when (and application file-id (access/can-access-attachment-file? user file-id application))
+      (mongo/download file-id))))
+
 (defn output-attachment
-  [file-id download? attachment-fn]
-  (if-let [attachment (attachment-fn file-id)]
+  ([attachment download?]
+  (if attachment
     (let [filename (ss/encode-filename (:file-name attachment))
           response {:status 200
                     :body ((:content attachment))
@@ -604,6 +612,8 @@
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
+  ([file-id download? attachment-fn]
+   (output-attachment (attachment-fn file-id) download?)))
 
 (hystrix/defcommand create-preview!
   {:hystrix/group-key   "Attachment"
@@ -643,11 +653,14 @@
         (create-preview! file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
-(defn pre-process-attachment [{:keys [filename content skip-pdfa-conversion]}]
-  (if (and (libreoffice-client/enabled?)
-           (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
-           (not skip-pdfa-conversion)
-           (contains? file-types (keyword (mime/mime-type (mime/sanitize-filename filename)))))
+(defn libreoffice-conversion-required? [{:keys [filename]}]
+  (let [mime-type (mime/mime-type (mime/sanitize-filename filename))]
+    (and (libreoffice-client/enabled?)
+         (file-types (keyword mime-type)))))
+
+(defn pre-process-attachment [{:keys [filename content skip-pdfa-conversion] :as options}]
+  (if (and (not skip-pdfa-conversion)
+           (libreoffice-conversion-required? options))
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
@@ -673,16 +686,28 @@
       (and (true? archivable) (not (:skip-pdfa-conversion options))) (assoc :autoConversion true))))
 
 (defn attach-file!
-  "1) Converts file to PDF/A, if required by attachment type and
-   2) uploads the file to MongoDB and
-   3) creates a preview image and
-   4) creates a corresponding attachment structure to application
+  "1) Uploads the original file to MongoDB if conversion is required and :keep-original-file? is true and
+   2) converts file to PDF/A, if the file format is convertable and
+   3) uploads the file to MongoDB and
+   4) creates a preview image and
+   5) creates a corresponding attachment structure to application
    Content can be a file or input-stream.
    Returns attachment version."
   [application options]
-  (->> (upload-file! application options)
-       (merge options {:now (:created options) :stamped (get options :stamped false)})
-       (set-attachment-version! application (get-or-create-attachment! application options))))
+  (let [temp-file        (File/createTempFile "lupapiste-attach-file" ".pdf")
+        _                (io/copy (:content options) temp-file)
+        options          (assoc options :content temp-file)
+        original-file-id (when (and (:keep-original-file? options)
+                                    (or (libreoffice-conversion-required? options)
+                                        (not (pdf-conversion/file-is-valid-pdfa? temp-file))))
+                           (->> (assoc options :skip-pdfa-conversion true)
+                                (upload-file! application)
+                                :file-id))]
+    (->> (cond-> options
+                 original-file-id (assoc :original-file-id original-file-id))
+         (upload-file! application)
+         (merge options {:now (:created options) :stamped (get options :stamped false)})
+         (set-attachment-version! application (get-or-create-attachment! application options)))))
 
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]

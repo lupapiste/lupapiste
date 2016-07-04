@@ -7,6 +7,7 @@
             [sade.core :refer [ok fail fail! now def-]]
             [sade.strings :as ss]
             [sade.util :as util]
+            [schema.core :as sc]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as a]
@@ -80,9 +81,9 @@
       (fail :error.illegal-meta-type :parameters k))))
 
 (defn- validate-operation [{{meta :meta} :data}]
-  (let [op (:op meta)]
-    (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
-      (fail :error.missing-parameters :parameters missing))))
+  (when-let [op (:op meta)]
+    (when (sc/check attachment/Operation op)
+      (fail :error.illegal-attachment-operation))))
 
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
@@ -98,6 +99,12 @@
   (when attachment-type
     (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
+
+(defn- validate-operation-in-application [{{meta :meta} :data} application]
+  (when-let [op-id (get-in meta [:op :id])]
+    (let [operation-ids (map :id (a/get-operations application))]
+      (when (not-any? (partial = op-id) operation-ids)
+        (fail :error.illegal-attachment-operation)))))
 
 ;;
 ;; Types
@@ -268,7 +275,7 @@
 ;;
 
 (defraw "preview-attachment"
-        {:parameters [:attachment-id]
+          {:parameters [:attachment-id]                       ;; Note that this is actually file id
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles auth/all-authz-roles
@@ -277,7 +284,7 @@
         (attachment/output-attachment-preview! attachment-id (partial attachment/get-attachment-file-as! user)))
 
 (defraw "view-attachment"
-        {:parameters [:attachment-id]
+        {:parameters [:attachment-id]                       ;; Note that this is actually file id
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles auth/all-authz-roles
@@ -286,13 +293,23 @@
         (attachment/output-attachment attachment-id false (partial attachment/get-attachment-file-as! user)))
 
 (defraw "download-attachment"
-  {:parameters [:attachment-id]
+  {:parameters [:attachment-id]                             ;; Note that this is actually file id
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-file-as! user)))
+
+(defraw "latest-attachment-version"
+  {:parameters       [:attachment-id]
+   :optional-parameters [:download]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
+  [{{:keys [attachment-id download]} :data user :user}]
+  (attachment/output-attachment (attachment/get-attachment-latest-version-file user attachment-id) (= download "true")))
 
 (defraw "download-bulletin-attachment"
   {:parameters [attachment-id]
@@ -555,7 +572,10 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation]
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
+   :pre-checks [a/validate-authority-in-drafts
+                attachment-editable-by-application-state
+                attachment-not-readOnly
+                validate-operation-in-application]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId meta created)
   (ok))

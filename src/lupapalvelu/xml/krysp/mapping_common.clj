@@ -627,20 +627,25 @@
 (defn add-generated-pdf-attachments
   "Adds the generated application pdf information to the canonical
   attachments."
-  [application begin-of-link attachments]
-  (conj attachments
-        {:Liite
-         {:kuvaus            "Vireille tullut hakemus"
-          :linkkiliitteeseen (str begin-of-link (writer/get-submitted-filename (:id application)))
-          :muokkausHetki     (util/to-xml-datetime (:submitted application))
-          :versionumero      1
-          :tyyppi            "hakemus_vireilletullessa"}}
-        {:Liite
-         {:kuvaus            "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
-          :linkkiliitteeseen (str begin-of-link (writer/get-current-filename (:id application)))
-          :muokkausHetki     (util/to-xml-datetime (now))
-          :versionumero      1
-          :tyyppi            "hakemus_taustajarjestelmaan_siirrettaessa"}}))
+  [{:keys [id submitted]} begin-of-link attachments lang]
+  (let [use-http-links? (re-matches #"https?://.*" begin-of-link)]
+    (conj attachments
+          {:Liite
+           {:kuvaus            "Vireille tullut hakemus"
+            :linkkiliitteeseen (str begin-of-link (if use-http-links?
+                                                    (str "submitted-application-pdf-export?id=" id "&lang=" lang)
+                                                    (writer/get-submitted-filename id)))
+            :muokkausHetki     (util/to-xml-datetime submitted)
+            :versionumero      1
+            :tyyppi            "hakemus_vireilletullessa"}}
+          {:Liite
+           {:kuvaus            "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
+            :linkkiliitteeseen (str begin-of-link (if use-http-links?
+                                                    (str "pdf-export?id=" id "&lang=" lang)
+                                                    (writer/get-current-filename id)))
+            :muokkausHetki     (util/to-xml-datetime (now))
+            :versionumero      1
+            :tyyppi            "hakemus_taustajarjestelmaan_siirrettaessa"}})))
 
 
 (defn attachment-details-from-canonical

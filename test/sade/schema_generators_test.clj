@@ -7,10 +7,16 @@
             [clojure.test.check.properties :as prop]))
 
 (def email-prop
-  (prop/for-all [(gen/generate email)]
-    (every-pred validators/valid-email? #(<= (count %) 255))))
+  (prop/for-all [e email]
+    ((every-pred validators/valid-email? #(<= (count %) 255)) e)))
 
 (defspec email-generator-test 100 email-prop)
+
+(def http-url-prop
+  (prop/for-all [url http-url]
+    (validators/http-url? url)))
+
+(defspec http-url-generator-test 100 http-url-prop)
 
 (def fixed-length-generator-prop
   (prop/for-all [len gen/pos-int]

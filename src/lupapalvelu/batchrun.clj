@@ -405,10 +405,8 @@
 
 (defn check-for-reviews [& args]
   (mongo/connect!)
-  (poll-verdicts-for-reviews)
-  (mongo/disconnect!))
+  (poll-verdicts-for-reviews))
 
 (defn check-review-for-id [& args]
   (mongo/connect!)
-  (poll-verdicts-for-reviews (first args))
-  (mongo/disconnect!))
+  (poll-verdicts-for-reviews (first args)))

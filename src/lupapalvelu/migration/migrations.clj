@@ -8,6 +8,7 @@
             [sade.strings :as ss]
             [sade.property :as p]
             [sade.validators :as v]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.accessibility :as attaccess]
@@ -2288,6 +2289,68 @@
                                           {:attachments.op.attachment-op-selector {$exists true}}]}
                                     {:attachments true})]
          (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
+
+(defmigration unset-organization-municipalities-legacy-key
+  {:apply-when (pos? (mongo/count :organizations {:municipalities {$exists true}}))}
+  (mongo/update-by-query :organizations {:municipalities {$exists true}} {$unset {:municipalities 1}}))
+
+(defmigration attachment-operation-cleanup-v2
+  {:apply-when (or (pos? (mongo/count :applications {$or [{:attachments.op.description {$exists true}}
+                                                          {:attachments.op.optional {$exists true}}
+                                                          {:attachments.op.created {$exists true}}
+                                                          {:attachments.op.attachment-op-selector {$exists true}}]}))
+                   (pos? (mongo/count :submitted-applications {$or [{:attachments.op.description {$exists true}}
+                                                                    {:attachments.op.optional {$exists true}}
+                                                                    {:attachments.op.created {$exists true}}
+                                                                    {:attachments.op.attachment-op-selector {$exists true}}]})))}
+  (doseq [collection  [:applications :submitted-applications]
+          application (mongo/select collection
+                                    {$or [{:attachments.op.description {$exists true}}
+                                          {:attachments.op.optional {$exists true}}
+                                          {:attachments.op.created {$exists true}}
+                                          {:attachments.op.attachment-op-selector {$exists true}}]}
+                                    {:attachments true})]
+    (mongo/update-by-id collection (:id application) (operation-cleanup-updates-for-application application))))
+
+;; migraatio, joka ajettiin vain kerran perumaan yhden batchrunin tulokset, koska
+;; generoidut pdf:t eivat olleet valideja.
+#_(defmigration verdict-polling-pdf-failure-removal
+  {:apply-when (pos? (mongo/count :applications {:tasks.source.type "background"}))}
+  (println "PDF korjausmigraatio: background-sourcellisia hakemuksia on " 
+    (mongo/count :applications {:tasks.source.type "background"}))
+  (doseq [failed (mongo/select :applications {:tasks.source.type "background"})]
+    (doseq [task (:tasks failed)]
+      (if (= "background" (:type (:source task)))
+        (do
+          (println " - failannut taski" (:id task))
+          (doseq [att (:attachments failed)]
+            (if (= (:id task) (:id (:source att)))
+              (try
+                (println "   + poistetaan taskiin " (:id task) " linkattu liite " (:id att) " hakemukselta " (:_id failed))
+                (attachment/delete-attachment! (:id failed) (:id att))
+                (catch Exception e
+                  (println "   + Virhe poistettaessa liitetta")))))
+          (println " - poistetaan taski " (:id task) " hakemukselta " (:id failed))
+          (action/update-application 
+            (action/application->command failed)
+            {$pull {:tasks {:id (:id task)}}})
+          (println " - taski poistettu"))))))
+
+(defn operation-id-cleanup-updates
+  "For attachments that have op.id set to nil, nillify whole op ({\"attachments.$.op\" nil})"
+  [{attachments :attachments}]
+  (mongo/generate-array-updates :attachments attachments #(and (:op %) (nil? (get-in % [:op :id]))) "op" nil))
+
+(defmigration attachment-op-nil-cleanup
+  {:apply-when (or (pos? (mongo/count :applications {:attachments.op.id {$type 10}}))
+                   (pos? (mongo/count :submitted-applications {:attachments.op.id {$type 10}})))}
+  (doseq [collection  [:applications :submitted-applications]
+          application (mongo/select collection {:attachments.op.id {$type 10}} [:attachments])]
+    (mongo/update-by-id collection (:id application) {$set (operation-id-cleanup-updates application)})))
+
+(defmigration add-use-attachment-links-integration-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:use-attachment-links-integration {$exists false}}))}
+  (mongo/update-by-query :organizations {:use-attachment-links-integration {$exists false}} {$set {:use-attachment-links-integration false}}))
 
 ;;
 ;; ****** NOTE! ******

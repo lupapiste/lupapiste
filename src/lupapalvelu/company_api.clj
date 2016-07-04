@@ -97,10 +97,11 @@
    :pre-checks [validate-user-is-admin-or-company-admin]}
   [{caller :user}]
   (c/search-result caller email (fn [user]
-                                  (ok (assoc (select-keys user [:firstName :lastName]) :result :found)))))
+                                  (ok (assoc (select-keys user [:firstName :lastName :role]) :result :found)))))
 
 (defcommand company-invite-user
   {:parameters [email admin submit]
+   :optional-parameters [firstName lastName]
    :user-roles #{:applicant}
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/boolean-parameters [:admin :submit])
@@ -110,7 +111,10 @@
   (c/search-result caller email (fn [_]
                                   (c/invite-user! email
                                                   (-> caller :company :id)
-                                                  (if admin :admin :user) submit)
+                                                  (if admin :admin :user)
+                                                  submit
+                                                  firstName
+                                                  lastName)
                                   (ok :result :invited))))
 
 (defcommand company-add-user

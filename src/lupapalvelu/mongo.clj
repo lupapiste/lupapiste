@@ -397,6 +397,7 @@
   (ensure-index :applications {:location 1} {:min 10000 :max 7779999 :bits 32})
   (ensure-index :applications {:archived.application 1})
   (ensure-index :applications {:archived.completed 1})
+  (ensure-index :applications {:attachments.id 1})
   (ensure-index :activation {:email 1})
   (ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (ensure-index :vetuma {:user.stamp 1})

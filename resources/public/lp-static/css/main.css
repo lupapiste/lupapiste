@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1466676539705');
 
 /* line 10, ../../../private/common-html/sass/partials/_links.scss */
@@ -40,6 +41,10 @@
 .comment-bubble-authority.attachment .header {
   border-bottom-color: #f7ac2e;
 }
+=======
+@import url('main-blessed1.css?z=1467274341162');
+
+>>>>>>> origin/develop
 
 /* line 278, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.for-me .header,
@@ -628,7 +633,11 @@
   overflow-y: visible;
 }
 
+<<<<<<< HEAD
 /* line 44, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 41, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .help-text {
   display: none;
   position: relative;
@@ -638,29 +647,49 @@
   margin-bottom: 24px;
   border: 1px solid #f7ac2e;
 }
+<<<<<<< HEAD
 /* line 53, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 50, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .help-text p:last-child {
   margin-bottom: 0;
 }
 
+<<<<<<< HEAD
 /* line 59, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 56, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .tab-info {
   width: 80%;
 }
 
+<<<<<<< HEAD
 /* line 66, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 63, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .help-reset {
   clear: both;
   max-height: 6px;
 }
 
+<<<<<<< HEAD
 /* line 71, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 68, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .panel-info {
   width: 100%;
   text-align: justify;
 }
 
+<<<<<<< HEAD
 /* line 76, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 73, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .expanded-content {
   max-height: 0;
   overflow: hidden;
@@ -668,23 +697,52 @@
   -webkit-transition: max-height 400ms;
   /* Safari */
 }
+<<<<<<< HEAD
 /* line 81, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 78, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .expanded-content.expand {
   max-height: 1000px;
 }
 
+<<<<<<< HEAD
 /* line 86, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 83, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .page-info {
   margin: 12px 0;
 }
 
+<<<<<<< HEAD
 /* line 91, ../../../private/common-html/sass/partials/_help.scss */
+=======
+/* line 87, ../../../private/common-html/sass/partials/_help.scss */
+>>>>>>> origin/develop
 .help-adjacent-title {
   margin-top: 0 !important;
   line-height: normal;
   display: inline-block;
 }
 
+<<<<<<< HEAD
+=======
+/* line 93, ../../../private/common-html/sass/partials/_help.scss */
+.help-box {
+  padding-top: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-bottom: 12px;
+  background-color: #eeeeee;
+  border-left: 10px solid #f39129;
+}
+/* line 102, ../../../private/common-html/sass/partials/_help.scss */
+.help-box p {
+  padding-bottom: 0px;
+}
+
+>>>>>>> origin/develop
 /* line 1, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete {
   background: #fff;
@@ -3340,6 +3398,7 @@ span.icon_clear:before {
 .inforequest-conversation {
   margin-top: 42px;
 }
+<<<<<<< HEAD
 /* line 715, ../../../private/common-html/sass/views/_application.scss */
 .inforequest-conversation h2 {
   border-bottom: 1px solid #c3c3c3;
@@ -3350,16 +3409,29 @@ span.icon_clear:before {
   margin-bottom: 24px;
 }
 /* line 722, ../../../private/common-html/sass/views/_application.scss */
+=======
+
+/* line 717, ../../../private/common-html/sass/views/_application.scss */
+.attachments-actions {
+  margin-bottom: 24px;
+}
+/* line 719, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .attachments-actions h3 {
   margin-top: 12px;
   font-weight: bold;
 }
 
+<<<<<<< HEAD
 /* line 728, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 725, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
+<<<<<<< HEAD
 /* line 731, ../../../private/common-html/sass/views/_application.scss */
 .parties-list button {
   margin: 12px 0;
@@ -3369,34 +3441,65 @@ span.icon_clear:before {
   display: table-row;
 }
 /* line 736, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 728, ../../../private/common-html/sass/views/_application.scss */
+.parties-list button {
+  margin: 12px 0;
+}
+/* line 731, ../../../private/common-html/sass/views/_application.scss */
+.parties-list .party {
+  display: table-row;
+}
+/* line 733, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
+<<<<<<< HEAD
 /* line 740, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 737, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
+<<<<<<< HEAD
 /* line 744, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 741, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .parties-list .party .invite-action {
   display: table-cell;
   padding-right: 12px;
 }
 
+<<<<<<< HEAD
 /* line 752, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 749, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
+<<<<<<< HEAD
 /* line 757, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 754, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
+<<<<<<< HEAD
 /* line 762, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 759, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -3412,13 +3515,18 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
+<<<<<<< HEAD
 /* line 777, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 774, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
+<<<<<<< HEAD
 /* line 783, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
@@ -3428,10 +3536,22 @@ span.icon_clear:before {
   margin-bottom: 12px;
 }
 /* line 790, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 780, ../../../private/common-html/sass/views/_application.scss */
+#inforequest-marker-map-contents .inforequest-card h3 {
+  font-size: 20px;
+}
+/* line 782, ../../../private/common-html/sass/views/_application.scss */
+#inforequest-marker-map-contents .inforequest-card h3.operation-type {
+  margin-bottom: 12px;
+}
+/* line 787, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
+<<<<<<< HEAD
 /* line 794, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
   color: #333;
@@ -3441,36 +3561,68 @@ span.icon_clear:before {
   border-top: none;
 }
 /* line 801, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 791, ../../../private/common-html/sass/views/_application.scss */
+#inforequest-marker-map-contents .inforequest-card a {
+  color: #333;
+}
+/* line 794, ../../../private/common-html/sass/views/_application.scss */
+#inforequest-marker-map-contents .inforequest-card:first-child {
+  border-top: none;
+}
+/* line 798, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
+<<<<<<< HEAD
 /* line 805, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 802, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
+<<<<<<< HEAD
 /* line 809, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
 /* line 812, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 806, ../../../private/common-html/sass/views/_application.scss */
+#inforequest-marker-map-contents .inforequest-card div blockquote {
+  font-size: 16px;
+}
+/* line 809, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
+<<<<<<< HEAD
 /* line 821, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 818, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
+<<<<<<< HEAD
 /* line 826, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 823, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
+<<<<<<< HEAD
 /* line 830, ../../../private/common-html/sass/views/_application.scss */
 .requiredField-line {
   display: table-row;
@@ -3488,10 +3640,30 @@ span.icon_clear:before {
   padding-left: 6px;
 }
 /* line 841, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 827, ../../../private/common-html/sass/views/_application.scss */
+.requiredField-line {
+  display: table-row;
+}
+/* line 829, ../../../private/common-html/sass/views/_application.scss */
+.requiredField-line span, .requiredField-line a {
+  display: table-cell;
+}
+/* line 832, ../../../private/common-html/sass/views/_application.scss */
+.requiredField-line a {
+  padding-left: 12px;
+}
+/* line 835, ../../../private/common-html/sass/views/_application.scss */
+.requiredField-line .required-field-error-element-name {
+  padding-left: 6px;
+}
+/* line 838, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .requiredField-line .lupicon-circle-attention {
   color: #e34319;
 }
 
+<<<<<<< HEAD
 /* line 846, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
@@ -3501,28 +3673,56 @@ span.icon_clear:before {
   display: table-row;
 }
 /* line 850, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 843, ../../../private/common-html/sass/views/_application.scss */
+.invited-foremans {
+  margin-bottom: 24px;
+}
+/* line 845, ../../../private/common-html/sass/views/_application.scss */
+.invited-foremans .foreman {
+  display: table-row;
+}
+/* line 847, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
+<<<<<<< HEAD
 /* line 858, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
 /* line 861, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 855, ../../../private/common-html/sass/views/_application.scss */
+.invited-foremans .foreman-state:before {
+  content: "(";
+}
+/* line 858, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
+<<<<<<< HEAD
 /* line 867, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
 /* line 870, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 864, ../../../private/common-html/sass/views/_application.scss */
+.tasks-foreman {
+  position: relative;
+}
+/* line 867, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .tasks-foreman .form-input, .tasks-foreman .form-input--inline {
   display: inline-block;
   margin: 0 6px 0 0;
 }
+<<<<<<< HEAD
 /* line 876, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman .combobox.long.form-input--inline, .tasks-foreman select.long {
   width: 41.25em;
@@ -3544,29 +3744,68 @@ span.icon_clear:before {
   content: "[";
 }
 /* line 897, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 873, ../../../private/common-html/sass/views/_application.scss */
+.tasks-foreman .form-input.combobox.long, .tasks-foreman .combobox.long.form-input--inline, .tasks-foreman select.long {
+  width: 41.25em;
+}
+/* line 878, ../../../private/common-html/sass/views/_application.scss */
+.tasks-foreman thead tr:first-child td {
+  padding-left: 0;
+}
+/* line 883, ../../../private/common-html/sass/views/_application.scss */
+.tasks-foreman .foreman-state:before {
+  content: "(";
+}
+/* line 886, ../../../private/common-html/sass/views/_application.scss */
+.tasks-foreman .foreman-state:after {
+  content: ")";
+}
+/* line 891, ../../../private/common-html/sass/views/_application.scss */
+.tasks-foreman .add-foreman:before {
+  content: "[";
+}
+/* line 894, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
+<<<<<<< HEAD
 /* line 903, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 900, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
+<<<<<<< HEAD
 /* line 908, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 905, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
+<<<<<<< HEAD
 /* line 913, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
 /* line 915, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 910, ../../../private/common-html/sass/views/_application.scss */
+.organizationLinks .organization-links {
+  margin-bottom: 12px;
+}
+/* line 912, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 .organizationLinks .organization-links a {
   color: #f39129;
   text-decoration: none;
@@ -3586,6 +3825,7 @@ span.icon_clear:before {
   text-decoration: underline;
 }
 
+<<<<<<< HEAD
 /* line 922, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab h1 {
   float: none;
@@ -3595,21 +3835,44 @@ span.icon_clear:before {
   max-width: 875px;
 }
 /* line 927, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 919, ../../../private/common-html/sass/views/_application.scss */
+#application-archival-tab h1 {
+  float: none;
+}
+/* line 922, ../../../private/common-html/sass/views/_application.scss */
+#application-archival-tab .table-metadata {
+  max-width: 875px;
+}
+/* line 924, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #application-archival-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
+<<<<<<< HEAD
 /* line 934, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 931, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
 
+<<<<<<< HEAD
 /* line 939, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 936, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 h2 > i.is-right {
   float: right;
 }
 
+<<<<<<< HEAD
 /* line 943, ../../../private/common-html/sass/views/_application.scss */
+=======
+/* line 940, ../../../private/common-html/sass/views/_application.scss */
+>>>>>>> origin/develop
 div.review-tasks {
   margin-top: 20px;
 }
@@ -3752,16 +4015,32 @@ div.review-tasks {
 }
 
 /* line 120, ../../../private/common-html/sass/views/_create_application.scss */
+<<<<<<< HEAD
+=======
+.top-marginM {
+  margin-top: 12px;
+}
+
+/* line 123, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 .top-marginL {
   margin-top: 48px;
 }
 
+<<<<<<< HEAD
 /* line 123, ../../../private/common-html/sass/views/_create_application.scss */
+=======
+/* line 126, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 .bottom-marginM {
   margin-bottom: 12px !important;
 }
 
+<<<<<<< HEAD
 /* line 127, ../../../private/common-html/sass/views/_create_application.scss */
+=======
+/* line 130, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 #popup-id_close {
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
@@ -3770,19 +4049,31 @@ div.review-tasks {
   right: 4px !important;
 }
 
+<<<<<<< HEAD
 /* line 133, ../../../private/common-html/sass/views/_create_application.scss */
+=======
+/* line 136, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 #popup-id_contentDiv {
   padding: 0;
   width: 95% !important;
   overflow: hidden;
 }
 
+<<<<<<< HEAD
 /* line 139, ../../../private/common-html/sass/views/_create_application.scss */
+=======
+/* line 142, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 #popup-id_GroupDiv {
   padding: 8px;
 }
 
+<<<<<<< HEAD
 /* line 142, ../../../private/common-html/sass/views/_create_application.scss */
+=======
+/* line 145, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 #popup-id {
   background: white;
   color: black;
@@ -3791,7 +4082,11 @@ div.review-tasks {
   box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
   border: 1px solid #4f4f4f;
 }
+<<<<<<< HEAD
 /* line 152, ../../../private/common-html/sass/views/_create_application.scss */
+=======
+/* line 155, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 #popup-id:before {
   content: " ";
   display: block;
@@ -3804,7 +4099,11 @@ div.review-tasks {
   border-right: 51px solid #4f4f4f;
   border-bottom: 25px solid transparent;
 }
+<<<<<<< HEAD
 /* line 164, ../../../private/common-html/sass/views/_create_application.scss */
+=======
+/* line 167, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 #popup-id:after {
   content: " ";
   display: block;
@@ -3819,11 +4118,19 @@ div.review-tasks {
   z-index: 2;
 }
 
+<<<<<<< HEAD
 /* line 179, ../../../private/common-html/sass/views/_create_application.scss */
 .create-help.lupicon-circle-question {
   vertical-align: top;
 }
 /* line 180, ../../../private/common-html/sass/views/_create_application.scss */
+=======
+/* line 182, ../../../private/common-html/sass/views/_create_application.scss */
+.create-help.lupicon-circle-question {
+  vertical-align: top;
+}
+/* line 183, ../../../private/common-html/sass/views/_create_application.scss */
+>>>>>>> origin/develop
 .create-help.lupicon-circle-question:before {
   vertical-align: top;
   font-size: 44px;
@@ -4173,12 +4480,20 @@ td.comment-text {
   margin-top: 1em;
   margin-bottom: 2em;
 }
+<<<<<<< HEAD
 /* line 596, ../../../private/common-html/sass/partials/_buttons.scss */
+=======
+/* line 604, ../../../private/common-html/sass/partials/_buttons.scss */
+>>>>>>> origin/develop
 .attachment-operations .btn-base, .attachment-operations [type=submit], .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations .like-btn, .attachment-operations a.link-btn, .attachment-operations a.link-btn-julkipano, .attachment-operations .check-string, .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations div, .attachment-operations a {
   margin-right: 12px;
   margin-bottom: 12px;
 }
+<<<<<<< HEAD
 /* line 602, ../../../private/common-html/sass/partials/_buttons.scss */
+=======
+/* line 610, ../../../private/common-html/sass/partials/_buttons.scss */
+>>>>>>> origin/develop
 .attachment-operations :last-child {
   margin-right: 0;
 }
@@ -4481,12 +4796,15 @@ table.admin-settings td.value .save-indicator {
   width: 100px;
 }
 
+<<<<<<< HEAD
 /* line 102, ../../../private/common-html/sass/views/_authority_admin.scss */
 table.selected-operations-table div.checkbox-wrapper, table.selected-operations-table div.sectionbox-wrapper {
   text-align: center;
   border: none;
 }
 
+=======
+>>>>>>> origin/develop
 /* line 2, ../../../private/common-html/sass/views/_neighbor.scss */
 #neighbor-show .pending {
   width: 100%;

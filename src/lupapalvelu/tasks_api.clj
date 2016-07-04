@@ -1,23 +1,19 @@
 (ns lupapalvelu.tasks-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [sade.env :as env]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
-            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [lupapalvelu.document.model :as model]))
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
 
@@ -104,10 +100,6 @@
   (update-application command
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
-
-(defn generate-task-pdfa [application {info :schema-info :as task} user lang]
-  (when (tasks/task-is-review? task)
-    (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
 
 (defcommand approve-task
   {:description "Authority can approve task, moves to ok"

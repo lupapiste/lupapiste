@@ -110,8 +110,12 @@
                 {:pdfa? false}))))
 
 (defn- get-pdf-page-count [input-file]
-  (with-open [reader (PdfReader. ^String input-file)]
-    (.getNumberOfPages reader)))
+  (try
+    (with-open [reader (PdfReader. ^String input-file)]
+      (.getNumberOfPages reader))
+    (catch Exception e
+      (error "Error occurred when trying to read page count from PDF file" e)
+      0)))
 
 (defn- store-converted-page-count [result count]
   (let [db-key (cond
@@ -130,10 +134,10 @@
                           (io/copy pdf-file temp-file)
                           (.getCanonicalPath temp-file))
                         (.getCanonicalPath pdf-file))
-            page-count (get-pdf-page-count file-path)
             pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
             conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path opts)]
-        (store-converted-page-count conversion-result page-count)
+        (->> (get-pdf-page-count pdf-a-file-path)
+             (store-converted-page-count conversion-result))
         (if (:pdfa? conversion-result)
           (if (pos? (-> conversion-result :output-file .length))
             (info "Converted to PDF/A " pdf-a-file-path)
@@ -160,6 +164,18 @@
                               (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000)))))}
   [pdf-file & [opts]]
   (analyze-and-convert-to-pdf-a pdf-file opts))
+
+(defn file-is-valid-pdfa? [pdf-file]
+  (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")
+        file-path (if (instance? InputStream pdf-file)
+                    (do (io/copy pdf-file temp-file)
+                        (.getCanonicalPath temp-file))
+                    (.getCanonicalPath pdf-file))
+        output-file (File/createTempFile "lupapiste-pdfa-validation" ".pdf")
+        {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
+    (io/delete-file temp-file :silently)
+    (io/delete-file output-file :silently)
+    (= exit 0)))
 
 (defn pdf-a-required? [organization-id]
   (organization/some-organization-has-archive-enabled? #{organization-id}))

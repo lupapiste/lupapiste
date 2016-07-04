@@ -94,7 +94,7 @@
 (defn validate-optional-url [param command]
   (let [url (ss/trim (get-in command [:data param]))]
     (when-not (ss/blank? url)
-      (util/validate-url url))))
+      (action/validate-url url))))
 
 ;;
 ;; Actions
@@ -334,6 +334,14 @@
    :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {:validate-verdict-given-date enabled}})
+  (ok))
+
+(defcommand set-organization-use-attachment-links-integration
+  {:parameters       [enabled]
+   :user-roles       #{:authorityAdmin}
+   :input-validators [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user) {$set {:use-attachment-links-integration enabled}})
   (ok))
 
 (defcommand set-organization-calendars-enabled
@@ -598,7 +606,9 @@
   {:description "Organization server and layer details."
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok (o/organization-map-layers-data (user/authority-admins-organization-id user))))
+  (let [org-id (user/authority-admins-organization-id user)
+        {:keys [server layers]} (o/organization-map-layers-data org-id)]
+    (ok :server (select-keys server [:url :username]), :layers layers)))
 
 (defcommand update-map-server-details
   {:parameters [url username password]
