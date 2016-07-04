@@ -2,3 +2,4 @@
 "suti.enabled" "fi" "Suunnittelun lähtötietopaketti saatavilla"
 "suti.admin.title" "fi" "Suunnittelun lähtötietopaketti (Suti)"
 "suti.admin.www" "fi" "Lähtötietopaketin osoite (URL). %s korvautuu hankenumerolla."
+"suti.products-error" "fi" "Tietojen haku ei onnistunut."

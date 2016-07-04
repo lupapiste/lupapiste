@@ -1,5 +1,8 @@
 (ns lupapalvelu.suti
   (:require [monger.operators :refer :all]
+            [cheshire.core :as json]
+            [swiss.arrows :refer :all]
+            [sade.http :as http]
             [sade.strings :as ss]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
@@ -33,3 +36,39 @@
 
 (defn set-www [organization www]
   (org/update-organization (:id organization) {$set {:suti.www (ss/trim www)}}))
+
+(defn- append-to-url [url part]
+  (if (ss/ends-with url "/")
+    (str url part)
+    (str url "/" part)))
+
+(defn- clean-suti-date
+  "Suti returns expirydate as a string '/Date(1495806556450)/'"
+  [{:keys [expirydate] :as data}]
+  (assoc data :expirydate (re-find #"\d+" (or expirydate ""))))
+
+
+(defn- fetch-suti-products
+  "Returns either list of products (can be empty) or error localization key."
+  [url {:keys [username password crypto-iv]}]
+  (try
+    (some-<> url
+             (http/get (merge {}
+                              (when (ss/not-blank? crypto-iv)
+                                {:basic-auth [username (org/decode-credentials password
+                                                                               crypto-iv)]})))
+             :body
+             (json/parse-string true)
+             :productlist
+             (map clean-suti-date <>))
+    (catch Exception _
+      "suti.products-error")))
+
+(defn application-data [{:keys [suti organization]}]
+  (let [{:keys [enabled www server]} (:suti (org/get-organization organization))
+        {url :url} server
+        products (when (and suti enabled (ss/not-blank? server))
+                   (fetch-suti-products (append-to-url url suti) server))]
+    {:enabled enabled
+     :www www
+     :products products}))

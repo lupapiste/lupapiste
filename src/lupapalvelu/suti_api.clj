@@ -51,8 +51,17 @@
 (defcommand suti-www
   {:description "Public Suti URL. Not to be confused with the Suti backend."
    :parameters [www]
-   :input-validators [(partial action/non-blank-parameters [:www])]
+   :input-validators [(partial action/string-parameters [:www])]
    :user-roles #{:authorityAdmin}
    :feature :suti-integration}
   [{user :user}]
   (suti/set-www (suti/admin-org user) www))
+
+(defquery suti-application-data
+  {:description "Fetches the Suti results for the given application."
+   :parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles #{:authority :applicant}
+   :feature :suti-integration}
+  [{application :application}]
+  (ok :data (suti/application-data application)))
