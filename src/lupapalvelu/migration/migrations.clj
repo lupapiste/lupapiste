@@ -2352,6 +2352,10 @@
   {:apply-when (pos? (mongo/count :organizations {:use-attachment-links-integration {$exists false}}))}
   (mongo/update-by-query :organizations {:use-attachment-links-integration {$exists false}} {$set {:use-attachment-links-integration false}}))
 
+(defmigration remove-old-foreman-operation-from-organization-selected-operations
+  {:apply-when (pos? (mongo/count :organizations {:selected-operations "tyonjohtajan-nimeaminen"}))}
+  (mongo/update :organizations {} {$pull {:selected-operations "tyonjohtajan-nimeaminen"}} :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
