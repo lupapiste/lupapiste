@@ -32,7 +32,8 @@
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus])
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [sade.env :as env])
   (:import [java.io File]))
 
 ;; Validators and pre-checks
@@ -374,25 +375,26 @@
       (attach-or-fail! application (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
 
 (defn- upload! [application {:keys [filename content] :as attachment-data}]
-  (case (mime/mime-type filename)
-    "application/pdf" (if (pdf-conversion/pdf-a-required? (:organization application))
-                        (let [processing-result (pdf-conversion/convert-to-pdf-a content {:application application :filename filename})]
-                          (if (:already-valid-pdfa? processing-result)
-                            (attach-or-fail! application (assoc attachment-data :archivable true :archivabilityError nil))
-                            (convert-pdf-and-upload! application processing-result attachment-data)))
-                        (attach-or-fail! application attachment-data))
-    "image/tiff"      (let [valid? (tiff-validation/valid-tiff? content)
-                            attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
-                        (attach-or-fail! application attachment-data))
-    ("application/vnd.openxmlformats-officedocument.presentationml.presentation"
-     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-     "application/vnd.oasis.opendocument.text"
-     "application/vnd.ms-powerpoint"
-     "application/rtf"
-     "application/msword"
-     "text/plain")    (let [attachment-result (attachment/attach-file! application (assoc attachment-data :skip-pdfa-conversion true))]
-                        (attach-or-fail! application (assoc attachment-data :attachment-id (:id attachment-result))))
-    (attach-or-fail! application (assoc attachment-data :skip-pdfa-conversion true))))
+  (let [mt (keyword (mime/mime-type filename))]
+    (cond
+      (and (= mt :application/pdf)
+           (pdf-conversion/pdf-a-required?
+             (:organization application))) (let [processing-result (pdf-conversion/convert-to-pdf-a content {:application application :filename filename})]
+                                             (if (:already-valid-pdfa? processing-result)
+                                               (attach-or-fail! application (assoc attachment-data :archivable true :archivabilityError nil))
+                                               (convert-pdf-and-upload! application processing-result attachment-data)))
+
+      (= mt :image/tiff) (let [valid? (tiff-validation/valid-tiff? content)
+                               attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
+                           (attach-or-fail! application attachment-data))
+
+      (attachment/libreoffice-conversion-required? attachment-data) (->> (assoc attachment-data :skip-pdfa-conversion true)
+                                                                         (attachment/attach-file! application)
+                                                                         :id
+                                                                         (assoc attachment-data :attachment-id)
+                                                                         (attach-or-fail! application))
+
+      :else (attach-or-fail! application (assoc attachment-data :skip-pdfa-conversion true)))))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
