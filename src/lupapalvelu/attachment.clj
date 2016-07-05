@@ -702,8 +702,7 @@
         _                (io/copy (:content options) temp-file)
         options          (assoc options :content temp-file)
         original-file-id (when (and (:keep-original-file? options)
-                                    (or (libreoffice-conversion-required? options)
-                                        (not (pdf-conversion/file-is-valid-pdfa? temp-file))))
+                                    (libreoffice-conversion-required? options))
                            (->> (assoc options :skip-pdfa-conversion true)
                                 (upload-file! application)
                                 :file-id))]
