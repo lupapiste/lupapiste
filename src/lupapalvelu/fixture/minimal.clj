@@ -874,7 +874,8 @@
                               :sv "Helsingfors byggnadstillsynsverket"}
                        :scope [{:municipality "091"
                                 :permitType "R"
-                                :new-application-enabled true}]
+                                :new-application-enabled true
+                                :inforequest-enabled true}]
                        :links [{:name {:fi "Helsinki" :sv "Helsingfors"}
                                 :url "http://www.hel.fi"}
                                {:name {:fi "Rakennusvalvontavirasto", :sv "Byggnadstillsynsverket"}
