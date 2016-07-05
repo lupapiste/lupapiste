@@ -340,12 +340,15 @@ var attachment = (function() {
     }
 
     model.subscriptions.push(model.selectedGroup.subscribe(function(group) {
+      // Update attachment group-type + operation when new group is selected
       if (util.getIn(group, ["id"]) !== util.getIn(model, ["operation", "id"]) ||
           util.getIn(group, ["group-type"]) !== util.getIn(model, ["group"])) {
-        model.group(util.getIn(group, ["group-type"]));
-        model.operation(util.getIn(group, ["id"]) ? _.omit(group, "group-type") : null);
+
         group = _.pick(group, ["id", "name", "group-type"]);
         saveLabelInformation("group", {meta: {group: !_.isEmpty(group) ? group : null}});
+
+        model.operation(util.getIn(group, ["id"]) ? _.omit(group, "group-type") : null);
+        model.group(util.getIn(group, ["group-type"]));
       }
     }));
 
