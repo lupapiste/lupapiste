@@ -816,7 +816,8 @@
                                  :max-outgoing-link-permits 1
                                  :max-incoming-link-permits 0
                                  :allowed-link-permit-types #{permit/R permit/P}
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :hidden true}
    :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R-TJ
@@ -1039,6 +1040,7 @@
    (sc/optional-key :allowed-link-permit-types) #{sc/Str}
 
    :asianhallinta sc/Bool
+   (sc/optional-key :hidden) sc/Bool
    })
 
 ;; Validate operations
@@ -1110,6 +1112,7 @@
 
 (def operation-names-by-permit-type
   (->> operations
+       (remove (comp :hidden val))
        (group-by (comp :permit-type val))
        (map (juxt (comp keyword key) (comp keys val)))
        (into {})))
