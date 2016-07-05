@@ -94,10 +94,13 @@ LUPAPISTE.SutiService = function() {
       .success( function( res ) {
         if( _.isArray( res.data.products )) {
           res.data.products = _.map( res.data.products, function( p ) {
-            // If exists, expiry date is in local (Finnish) time.
-            return p.expirydate
-              ? _.set( p, "expirydate", moment.unix( p.expirydate))
-              : p;
+            // If exist, expirydate and downloaded are in local (Finnish) time.
+            return _.assignWith( p,
+                                 {expirydate: true, downloaded: true},
+                                 function( v ) {
+                                   return v ? moment.unix( v ) : v;
+                                 });
+
           });
         }
         suti( _.assign( res.data ) );

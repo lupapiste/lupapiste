@@ -43,11 +43,14 @@
     (str url part)
     (str url "/" part)))
 
-(defn- clean-suti-date
-  "Suti returns expirydate as a string '/Date(1495806556450)/'"
-  [{:keys [expirydate] :as data}]
-  (assoc data :expirydate (re-find #"\d+" (or expirydate ""))))
-
+(defn- clean-suti-dates
+  "Suti returns expirydate and downloaded fields as a strings '\\/Date(1495806556450)\\/'"
+  [{:keys [expirydate downloaded] :as data}]
+  (println "----------- downloaded:" downloaded)
+  (letfn [(clean [v] (re-find #"\d+" (or v "")))]
+    (assoc data
+           :expirydate (clean expirydate)
+           :downloaded (clean downloaded))))
 
 (defn- fetch-suti-products
   "Returns either list of products (can be empty) or error localization key."
@@ -61,7 +64,7 @@
              :body
              (json/parse-string true)
              :productlist
-             (map clean-suti-date <>))
+             (map clean-suti-dates <>))
     (catch Exception e
       (debugf "Suti fetch failed (%s): %s" url (.getMessage e))
       "suti.products-error")))
