@@ -324,7 +324,7 @@
                               (sanitize-parameters :form-params)
                               (sanitize-parameters :params))
           response (apply f (cons (http/secure-headers sanitized-request) args))]
-      (http/secure-headers response))))
+      (select-keys (http/secure-headers response) [:status :headers :body]))))
 
 (defn- cache [max-age-in-s f]
   (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]
