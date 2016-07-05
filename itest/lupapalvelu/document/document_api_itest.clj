@@ -183,20 +183,25 @@
       (command pena :remove-doc :id application-id :docId (:id hakija)) => fail?)
 
     (fact "hakija doc is removed if there is more than one hakija-doc"
-      (let [application (query-application pena application-id)]
-        (command pena :create-doc :id application-id :schemaName (get-in hakija [:schema-info :name])) => ok?
-        (-> (query-application pena application-id) :documents domain/get-applicant-documents count) => 2
+      (let [app-before (query-application pena application-id)
+            create-resp (command pena :create-doc :id application-id :schemaName (get-in hakija [:schema-info :name]))
+            application (query-application pena application-id)
+            modified1   (:modified application)]
+        create-resp => ok?
+        (-> application :documents domain/get-applicant-documents count) => 2
 
         (command pena :remove-doc :id application-id :docId (:id hakija)) => ok?
         (let [updated-app (query-application pena application-id)]
+          (fact "Modified changed on remove-doc"
+            (< modified1 (:modified updated-app)) => true)
           (-> (:documents updated-app) domain/get-applicant-documents count) => 1
           (facts "every other doc and operation remains untouched"
             (fact "docs"
-              (count (:documents updated-app)) => (count (:documents application)))
+              (count (:documents updated-app)) => (count (:documents app-before)))
             (fact "secondary operations"
-              (count (:secondaryOperations updated-app)) => (count (:secondaryOperations application)))
+              (count (:secondaryOperations updated-app)) => (count (:secondaryOperations app-before)))
             (fact "primary operation"
-              (:primaryOperation updated-app) => (:primaryOperation application))))))
+              (:primaryOperation updated-app) => (:primaryOperation app-before))))))
 
     (fact "primary operation cannot be removed"
       (command pena :remove-doc :id application-id :docId (:id uusi-rakennus)) => fail?)
