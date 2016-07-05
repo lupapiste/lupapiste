@@ -4,6 +4,7 @@ Documentation   Mikko changes email address
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/vetuma_helpers.robot
+Resource        ../common_keywords/email_helpers.robot
 
 *** Test Cases ***
 
@@ -89,23 +90,10 @@ Party table has been updated
 
 Mikko changes his email back to mikko@example.com
   [Tags]  integration
-  Navigate to email change
-  Wait Until  Textfield Value Should Be  newEmail  mikko@example.net
-  Input text by test id  newEmail  mikko@example.com
-  Wait Until  Element Should Be Enabled  //section[@id='mypage']//button[@data-test-id='change-email']
-  Click element  //section[@id='mypage']//button[@data-test-id='change-email']
-  Wait Until  Page should contain  Uuteen sähköpostiosoitteeseen on lähetetty viesti osoitteen vaihdosta
-  Open last email
-  Wait Until  Page Should Contain  mikko@example.net
-  Page Should Contain  /app/fi/welcome#!/email/
-  ## Click the first link
-  Click link  xpath=//a
-  Vetuma button is visible
-  Authenticate via Nordea via Vetuma  vetuma-init-email
-  Wait Until  Page should contain  Voit nyt kirjautua sisään uudella sähköpostiosoitteellasi.
-  Element should be visible by test id  login-new-email
-  Click by test id  login-new-email
-  Wait Until  Page should contain  Haluan kirjautua palveluun
+  Change email to  mikko@example.com
+  Open last email and click the email change link
+  Identify for email change via Vetuma
+  Log in with new email address  mikko@example.com  mikko123  Mikko Intonen
   Logout
 
 *** Keywords ***

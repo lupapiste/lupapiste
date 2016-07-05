@@ -25,6 +25,6 @@ Bulletin has attachments tab, and uploaded attachments are visible
   Open bulletin tab  attachments
   Bulletin attachments count is  2
   Element should be visible  //section[@id='bulletins']//table[@data-test-id='bulletin-attachments-template-table']/tbody/tr/td//a[contains(., '${PDF_TESTFILE_NAME1}')]
-  Element should be visible  //section[@id='bulletins']//table[@data-test-id='bulletin-attachments-template-table']/tbody/tr/td//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Element should be visible  //section[@id='bulletins']//table[@data-test-id='bulletin-attachments-template-table']/tbody/tr/td//a[contains(., '${PDF_TXT_TESTFILE_NAME}')]
   Vetuma signin is visible
 

@@ -1,5 +1,44 @@
-@import url('main-blessed1.css?z=1466430908199');
+@import url('main-blessed1.css?z=1467274341162');
 
+
+/* line 278, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble.for-me .header,
+.comment-bubble-authority.for-me .header {
+  border-bottom-color: #46b02d;
+}
+
+/* line 3, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .small {
+  width: 360px;
+}
+/* line 6, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .medium {
+  width: 480px;
+}
+/* line 9, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .large {
+  width: 980px;
+}
+/* line 13, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog {
+  display: none;
+  position: fixed;
+  right: 0;
+  left: 0;
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 9999;
+  padding: 12px;
+  background-color: #fff;
+  min-height: 150px;
+}
+/* line 25, ../../../private/common-html/sass/partials/_modal.scss */
+#modal-dialog .dialog .component {
+  overflow: auto;
+  margin: 12px 12px 75px 12px;
+  min-height: 50px;
+}
 /* line 29, ../../../private/common-html/sass/partials/_modal.scss */
 #modal-dialog .dialog .component .button-group {
   position: absolute;
@@ -549,7 +588,7 @@
   overflow-y: visible;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_help.scss */
+/* line 41, ../../../private/common-html/sass/partials/_help.scss */
 .help-text {
   display: none;
   position: relative;
@@ -559,29 +598,29 @@
   margin-bottom: 24px;
   border: 1px solid #f7ac2e;
 }
-/* line 53, ../../../private/common-html/sass/partials/_help.scss */
+/* line 50, ../../../private/common-html/sass/partials/_help.scss */
 .help-text p:last-child {
   margin-bottom: 0;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_help.scss */
+/* line 56, ../../../private/common-html/sass/partials/_help.scss */
 .tab-info {
   width: 80%;
 }
 
-/* line 66, ../../../private/common-html/sass/partials/_help.scss */
+/* line 63, ../../../private/common-html/sass/partials/_help.scss */
 .help-reset {
   clear: both;
   max-height: 6px;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_help.scss */
+/* line 68, ../../../private/common-html/sass/partials/_help.scss */
 .panel-info {
   width: 100%;
   text-align: justify;
 }
 
-/* line 76, ../../../private/common-html/sass/partials/_help.scss */
+/* line 73, ../../../private/common-html/sass/partials/_help.scss */
 .expanded-content {
   max-height: 0;
   overflow: hidden;
@@ -589,21 +628,35 @@
   -webkit-transition: max-height 400ms;
   /* Safari */
 }
-/* line 81, ../../../private/common-html/sass/partials/_help.scss */
+/* line 78, ../../../private/common-html/sass/partials/_help.scss */
 .expanded-content.expand {
   max-height: 1000px;
 }
 
-/* line 86, ../../../private/common-html/sass/partials/_help.scss */
+/* line 83, ../../../private/common-html/sass/partials/_help.scss */
 .page-info {
   margin: 12px 0;
 }
 
-/* line 91, ../../../private/common-html/sass/partials/_help.scss */
+/* line 87, ../../../private/common-html/sass/partials/_help.scss */
 .help-adjacent-title {
   margin-top: 0 !important;
   line-height: normal;
   display: inline-block;
+}
+
+/* line 93, ../../../private/common-html/sass/partials/_help.scss */
+.help-box {
+  padding-top: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-bottom: 12px;
+  background-color: #eeeeee;
+  border-left: 10px solid #f39129;
+}
+/* line 102, ../../../private/common-html/sass/partials/_help.scss */
+.help-box p {
+  padding-bottom: 0px;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_autocomplete.scss */
@@ -3261,63 +3314,59 @@ span.icon_clear:before {
 .inforequest-conversation {
   margin-top: 42px;
 }
-/* line 715, ../../../private/common-html/sass/views/_application.scss */
-.inforequest-conversation h2 {
-  border-bottom: 1px solid #c3c3c3;
-}
 
-/* line 720, ../../../private/common-html/sass/views/_application.scss */
+/* line 717, ../../../private/common-html/sass/views/_application.scss */
 .attachments-actions {
   margin-bottom: 24px;
 }
-/* line 722, ../../../private/common-html/sass/views/_application.scss */
+/* line 719, ../../../private/common-html/sass/views/_application.scss */
 .attachments-actions h3 {
   margin-top: 12px;
   font-weight: bold;
 }
 
-/* line 728, ../../../private/common-html/sass/views/_application.scss */
+/* line 725, ../../../private/common-html/sass/views/_application.scss */
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
-/* line 731, ../../../private/common-html/sass/views/_application.scss */
+/* line 728, ../../../private/common-html/sass/views/_application.scss */
 .parties-list button {
   margin: 12px 0;
 }
-/* line 734, ../../../private/common-html/sass/views/_application.scss */
+/* line 731, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party {
   display: table-row;
 }
-/* line 736, ../../../private/common-html/sass/views/_application.scss */
+/* line 733, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 740, ../../../private/common-html/sass/views/_application.scss */
+/* line 737, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 744, ../../../private/common-html/sass/views/_application.scss */
+/* line 741, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .invite-action {
   display: table-cell;
   padding-right: 12px;
 }
 
-/* line 752, ../../../private/common-html/sass/views/_application.scss */
+/* line 749, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
-/* line 757, ../../../private/common-html/sass/views/_application.scss */
+/* line 754, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
-/* line 762, ../../../private/common-html/sass/views/_application.scss */
+/* line 759, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -3333,161 +3382,161 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
-/* line 777, ../../../private/common-html/sass/views/_application.scss */
+/* line 774, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
-/* line 783, ../../../private/common-html/sass/views/_application.scss */
+/* line 780, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
 }
-/* line 785, ../../../private/common-html/sass/views/_application.scss */
+/* line 782, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3.operation-type {
   margin-bottom: 12px;
 }
-/* line 790, ../../../private/common-html/sass/views/_application.scss */
+/* line 787, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
-/* line 794, ../../../private/common-html/sass/views/_application.scss */
+/* line 791, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
   color: #333;
 }
-/* line 797, ../../../private/common-html/sass/views/_application.scss */
+/* line 794, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
   border-top: none;
 }
-/* line 801, ../../../private/common-html/sass/views/_application.scss */
+/* line 798, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
-/* line 805, ../../../private/common-html/sass/views/_application.scss */
+/* line 802, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
-/* line 809, ../../../private/common-html/sass/views/_application.scss */
+/* line 806, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
-/* line 812, ../../../private/common-html/sass/views/_application.scss */
+/* line 809, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
-/* line 821, ../../../private/common-html/sass/views/_application.scss */
+/* line 818, ../../../private/common-html/sass/views/_application.scss */
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
-/* line 826, ../../../private/common-html/sass/views/_application.scss */
+/* line 823, ../../../private/common-html/sass/views/_application.scss */
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
-/* line 830, ../../../private/common-html/sass/views/_application.scss */
+/* line 827, ../../../private/common-html/sass/views/_application.scss */
 .requiredField-line {
   display: table-row;
 }
-/* line 832, ../../../private/common-html/sass/views/_application.scss */
+/* line 829, ../../../private/common-html/sass/views/_application.scss */
 .requiredField-line span, .requiredField-line a {
   display: table-cell;
 }
-/* line 835, ../../../private/common-html/sass/views/_application.scss */
+/* line 832, ../../../private/common-html/sass/views/_application.scss */
 .requiredField-line a {
   padding-left: 12px;
 }
-/* line 838, ../../../private/common-html/sass/views/_application.scss */
+/* line 835, ../../../private/common-html/sass/views/_application.scss */
 .requiredField-line .required-field-error-element-name {
   padding-left: 6px;
 }
-/* line 841, ../../../private/common-html/sass/views/_application.scss */
+/* line 838, ../../../private/common-html/sass/views/_application.scss */
 .requiredField-line .lupicon-circle-attention {
   color: #e34319;
 }
 
-/* line 846, ../../../private/common-html/sass/views/_application.scss */
+/* line 843, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 848, ../../../private/common-html/sass/views/_application.scss */
+/* line 845, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 850, ../../../private/common-html/sass/views/_application.scss */
+/* line 847, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 858, ../../../private/common-html/sass/views/_application.scss */
+/* line 855, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 861, ../../../private/common-html/sass/views/_application.scss */
+/* line 858, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 867, ../../../private/common-html/sass/views/_application.scss */
+/* line 864, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
-/* line 870, ../../../private/common-html/sass/views/_application.scss */
+/* line 867, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input, .tasks-foreman .form-input--inline {
   display: inline-block;
   margin: 0 6px 0 0;
 }
-/* line 876, ../../../private/common-html/sass/views/_application.scss */
+/* line 873, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman .combobox.long.form-input--inline, .tasks-foreman select.long {
   width: 41.25em;
 }
-/* line 881, ../../../private/common-html/sass/views/_application.scss */
+/* line 878, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 886, ../../../private/common-html/sass/views/_application.scss */
+/* line 883, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 889, ../../../private/common-html/sass/views/_application.scss */
+/* line 886, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 894, ../../../private/common-html/sass/views/_application.scss */
+/* line 891, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 897, ../../../private/common-html/sass/views/_application.scss */
+/* line 894, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 903, ../../../private/common-html/sass/views/_application.scss */
+/* line 900, ../../../private/common-html/sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 908, ../../../private/common-html/sass/views/_application.scss */
+/* line 905, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 913, ../../../private/common-html/sass/views/_application.scss */
+/* line 910, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 915, ../../../private/common-html/sass/views/_application.scss */
+/* line 912, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #f39129;
   text-decoration: none;
@@ -3507,30 +3556,30 @@ span.icon_clear:before {
   text-decoration: underline;
 }
 
-/* line 922, ../../../private/common-html/sass/views/_application.scss */
+/* line 919, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab h1 {
   float: none;
 }
-/* line 925, ../../../private/common-html/sass/views/_application.scss */
+/* line 922, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata {
   max-width: 875px;
 }
-/* line 927, ../../../private/common-html/sass/views/_application.scss */
+/* line 924, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
-/* line 934, ../../../private/common-html/sass/views/_application.scss */
+/* line 931, ../../../private/common-html/sass/views/_application.scss */
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
 
-/* line 939, ../../../private/common-html/sass/views/_application.scss */
+/* line 936, ../../../private/common-html/sass/views/_application.scss */
 h2 > i.is-right {
   float: right;
 }
 
-/* line 943, ../../../private/common-html/sass/views/_application.scss */
+/* line 940, ../../../private/common-html/sass/views/_application.scss */
 div.review-tasks {
   margin-top: 20px;
 }
@@ -3673,16 +3722,21 @@ div.review-tasks {
 }
 
 /* line 120, ../../../private/common-html/sass/views/_create_application.scss */
+.top-marginM {
+  margin-top: 12px;
+}
+
+/* line 123, ../../../private/common-html/sass/views/_create_application.scss */
 .top-marginL {
   margin-top: 48px;
 }
 
-/* line 123, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 126, ../../../private/common-html/sass/views/_create_application.scss */
 .bottom-marginM {
   margin-bottom: 12px !important;
 }
 
-/* line 127, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 130, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_close {
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
@@ -3691,19 +3745,19 @@ div.review-tasks {
   right: 4px !important;
 }
 
-/* line 133, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 136, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_contentDiv {
   padding: 0;
   width: 95% !important;
   overflow: hidden;
 }
 
-/* line 139, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 142, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_GroupDiv {
   padding: 8px;
 }
 
-/* line 142, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 145, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id {
   background: white;
   color: black;
@@ -3712,7 +3766,7 @@ div.review-tasks {
   box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
   border: 1px solid #4f4f4f;
 }
-/* line 152, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 155, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id:before {
   content: " ";
   display: block;
@@ -3725,7 +3779,7 @@ div.review-tasks {
   border-right: 51px solid #4f4f4f;
   border-bottom: 25px solid transparent;
 }
-/* line 164, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 167, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id:after {
   content: " ";
   display: block;
@@ -3740,11 +3794,11 @@ div.review-tasks {
   z-index: 2;
 }
 
-/* line 179, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 182, ../../../private/common-html/sass/views/_create_application.scss */
 .create-help.lupicon-circle-question {
   vertical-align: top;
 }
-/* line 180, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 183, ../../../private/common-html/sass/views/_create_application.scss */
 .create-help.lupicon-circle-question:before {
   vertical-align: top;
   font-size: 44px;
@@ -4094,12 +4148,12 @@ td.comment-text {
   margin-top: 1em;
   margin-bottom: 2em;
 }
-/* line 596, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 604, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations .btn-base, .attachment-operations [type=submit], .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations .like-btn, .attachment-operations a.link-btn, .attachment-operations a.link-btn-julkipano, .attachment-operations .check-string, .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations div, .attachment-operations a {
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 602, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 610, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations :last-child {
   margin-right: 0;
 }
@@ -4329,69 +4383,75 @@ table.admin-settings td.value .save-indicator {
   top: 0px;
 }
 
-/* line 27, ../../../private/common-html/sass/views/_authority_admin.scss */
-.munimaps {
-  margin-top: 24px;
-}
-/* line 30, ../../../private/common-html/sass/views/_authority_admin.scss */
-.munimaps h3 {
-  margin-top: .5em;
-}
-/* line 34, ../../../private/common-html/sass/views/_authority_admin.scss */
-.munimaps .munimaps--wide input, .munimaps .munimaps--wide select {
-  width: 90%;
-}
-/* line 38, ../../../private/common-html/sass/views/_authority_admin.scss */
-.munimaps .munimaps--error {
+/* line 26, ../../../private/common-html/sass/views/_authority_admin.scss */
+.serversettings--error {
   color: #df3215;
   margin-left: 6px;
   margin-right: 6px;
   margin-bottom: 24px;
   font-size: 16px;
 }
-/* line 47, ../../../private/common-html/sass/views/_authority_admin.scss */
+
+/* line 37, ../../../private/common-html/sass/views/_authority_admin.scss */
+.munimaps {
+  margin: 24px 0;
+}
+/* line 40, ../../../private/common-html/sass/views/_authority_admin.scss */
+.munimaps h3 {
+  margin-top: .5em;
+}
+/* line 44, ../../../private/common-html/sass/views/_authority_admin.scss */
+.munimaps .munimaps--wide input, .munimaps .munimaps--wide select, .munimaps .serversettings--wide input, .munimaps .serversettings--wide select {
+  width: 90%;
+}
+/* line 48, ../../../private/common-html/sass/views/_authority_admin.scss */
 .munimaps .munimaps--check input {
   margin-left: 24px;
 }
-/* line 50, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 51, ../../../private/common-html/sass/views/_authority_admin.scss */
 .munimaps .munimaps__map {
   width: 100%;
   height: 500px;
   margin-top: 24px;
 }
 
-/* line 57, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 61, ../../../private/common-html/sass/views/_authority_admin.scss */
+.sutiapi .serversettings--wide input, .sutiapi .serversettings--wide select {
+  width: 90%;
+}
+
+/* line 67, ../../../private/common-html/sass/views/_authority_admin.scss */
 .authority-admin .mask {
   /* cover the tabs*/
   margin-top: -38px;
 }
 
-/* line 63, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 73, ../../../private/common-html/sass/views/_authority_admin.scss */
 .guest-authorities {
   margin-top: 1em;
 }
 
-/* line 68, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 78, ../../../private/common-html/sass/views/_authority_admin.scss */
 .form-input--inline {
   display: inline-block;
 }
 
-/* line 73, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 83, ../../../private/common-html/sass/views/_authority_admin.scss */
 .form-input--error {
   border-color: red;
 }
 
-/* line 77, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 87, ../../../private/common-html/sass/views/_authority_admin.scss */
 .form-error-message {
   padding: 2px 2px 2px 2px;
   color: red;
 }
 
-/* line 83, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 93, ../../../private/common-html/sass/views/_authority_admin.scss */
 .permanent-archive-date-input label {
   margin-right: 6px;
 }
-/* line 86, ../../../private/common-html/sass/views/_authority_admin.scss */
+/* line 96, ../../../private/common-html/sass/views/_authority_admin.scss */
 .permanent-archive-date-input input {
   width: 100px;
 }
@@ -4976,16 +5036,18 @@ ul.appeals-files li span.appeals-files__size {
   background-repeat: no-repeat;
   background-position: 1px -5396px;
   width: 22px;
+  margin-top: 10px;
+  margin-bottom: -4px;
   height: 30px;
   padding-top: 3px;
   color: #333;
   text-shadow: none;
 }
-/* line 54, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 58, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .buttons .btn-conversation.active, #side-panel .buttons .btn-notice.active {
   background-color: #f7ac2e;
 }
-/* line 59, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 63, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-wrapper {
   float: left;
   height: 100%;
@@ -4995,7 +5057,7 @@ ul.appeals-files li span.appeals-files__size {
   padding: 6px;
   width: 500px;
 }
-/* line 68, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 72, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -5005,17 +5067,17 @@ ul.appeals-files li span.appeals-files__size {
   user-select: none;
   cursor: default;
 }
-/* line 71, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 75, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header h1 {
   line-height: 30px;
   overflow: auto;
   clear: both;
 }
-/* line 76, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 80, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .title {
   float: left;
 }
-/* line 79, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 83, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .close-btn {
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
@@ -5027,156 +5089,156 @@ ul.appeals-files li span.appeals-files__size {
   top: 6px;
   right: 6px;
 }
-/* line 89, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 93, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .help {
   margin-left: 12px;
   float: left;
 }
-/* line 92, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 96, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .help:after {
   border-bottom-color: #757575;
 }
-/* line 96, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 100, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .header .icon.help.expanded {
   margin-bottom: 22px;
 }
-/* line 101, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 105, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content {
   overflow: auto;
   height: 100%;
 }
-/* line 105, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 109, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content .form-input.textarea, #side-panel .content .textarea.form-input--inline {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 112, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 116, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-table {
   overflow: auto;
   height: 100%;
   width: 100%;
   display: table;
 }
-/* line 118, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 122, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-table .form-input.textarea, #side-panel .content-table .textarea.form-input--inline {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 123, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 127, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-table .content-row {
   display: table-row;
 }
-/* line 127, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 131, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content-table .content-cell {
   display: table-cell;
   padding-bottom: 6px;
   position: relative;
 }
-/* line 134, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 138, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .content.expanded, #side-panel .content-table.expanded {
   top: 200px;
 }
-/* line 138, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 142, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .panel-info {
   background: #757575;
   padding: 6px;
   clear: both;
 }
-/* line 144, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 148, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel h1 {
   color: #fff;
 }
-/* line 148, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 152, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .comment {
   color: #595959;
 }
-/* line 152, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 156, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-template {
   height: 100%;
 }
-/* line 156, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 160, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel {
   height: 100%;
 }
-/* line 159, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 163, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-component {
   height: 100%;
 }
-/* line 163, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 167, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-urgency {
   width: 215px;
   position: relative;
 }
-/* line 168, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 172, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-tags {
   z-index: 1;
   position: relative;
 }
-/* line 173, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 177, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.urgent {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 178, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 182, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.hold {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 183, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 187, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel label {
   vertical-align: bottom;
 }
-/* line 187, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 191, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid {
   display: table;
   height: 100%;
 }
-/* line 190, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 194, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row {
   display: table-row;
   margin-bottom: 6px;
 }
-/* line 193, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 197, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row .col-1 {
   display: table-cell;
   margin-bottom: 20px;
 }
-/* line 196, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 200, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row .col-1 label {
   color: #fff;
 }
-/* line 201, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 205, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper {
   height: 100%;
 }
-/* line 203, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 207, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col--vertical {
   height: 100%;
   padding-bottom: 60px;
 }
-/* line 207, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 211, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 {
   height: 100%;
 }
-/* line 209, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 213, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-grid .row.textarea-wrapper .col-1 textarea {
   height: 100%;
   height: 300px\9;
   box-sizing: border-box;
 }
 
-/* line 220, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 224, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
   bottom: 0;
 }
 
-/* line 225, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 229, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel {
   height: 100%;
   padding-bottom: 46px;
 }
-/* line 227, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 231, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -5184,46 +5246,46 @@ ul.appeals-files li span.appeals-files__size {
   -o-transition: box-shadow 250ms ease;
   transition: box-shadow 250ms ease;
 }
-/* line 236, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 240, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .header h1 {
   margin-bottom: 0;
 }
-/* line 241, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 245, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel .highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
-/* line 246, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 250, ../../../private/common-html/sass/views/_side_panel.scss */
 #conversation-panel label {
   color: #fff;
 }
 
-/* line 252, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 256, ../../../private/common-html/sass/views/_side_panel.scss */
 #side-panel .message-buttons button {
   margin-bottom: 6px;
 }
 
 @media all and (max-width: 991px) {
-  /* line 259, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 263, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 400px;
   }
-  /* line 262, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 266, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .btn-title {
     display: none;
   }
 
-  /* line 267, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 271, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel {
     right: -400px;
   }
 
-  /* line 272, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 276, ../../../private/common-html/sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }
 
-  /* line 276, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 280, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons {
     display: table;
   }
@@ -5237,7 +5299,7 @@ ul.appeals-files li span.appeals-files__size {
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }
-  /* line 278, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 282, ../../../private/common-html/sass/views/_side_panel.scss */
   #side-panel .message-buttons button {
     margin-bottom: 6px;
   }

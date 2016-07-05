@@ -470,6 +470,12 @@ Element should not be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
 
+# Workaround for HTML5 inputs
+Value should be
+  [Arguments]    ${textfield}    ${expected}
+  ${actual}=    Get Value    ${textfield}
+  Should Be Equal    ${expected}    ${actual}
+
 #
 # The following do not take data-test-id as argument
 #
@@ -692,7 +698,7 @@ Open attachment details
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Wait Until Page Contains  ${PNG_TESTFILE_NAME}
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
@@ -756,7 +762,7 @@ Click tree item by text
 
 
 # Cancel application or inforequest
-  
+
 Close current inforequest
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="inforequest-cancel-btn"]
   Click enabled by test id  inforequest-cancel-btn
@@ -1312,7 +1318,7 @@ Javascript?
 Click label
   [Arguments]  ${for}
   Click element  jquery=label[for=${for}]
-  
+
 
 Checkbox wrapper selected
   [Arguments]  ${id}

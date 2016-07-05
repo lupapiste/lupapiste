@@ -2188,6 +2188,8 @@
 "schemas.ilmoittaja" "sv" "Anmälare"
 "schemas.maksaja" "fi" "Luvan maksaja"
 "schemas.maksaja" "sv" "Betalare"
+"schemas.hakijan-asiamies" "fi" "Hakijan asiamies"
+"schemas.hakijan-asiamies" "sv" ""
 "schemas.paasuunnittelija" "fi" "Pääsuunnittelija"
 "schemas.paasuunnittelija" "sv" "Huvudprojekterare"
 "schemas.suunnittelija" "fi" "Suunnittelija"

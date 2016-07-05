@@ -57,6 +57,7 @@
                           :rakennustunnus   "1234567892"
                           :ovt              "003712345678"
                           nil               (if max-len (ss/substring "string" 0 max-len) "string")
+                          :recent-year      "2010"
                           :letter           (condp = (keyword case)
                                               :lower "a"
                                               :upper "A"

@@ -287,7 +287,7 @@
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
-                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
+                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical lang))
         xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]

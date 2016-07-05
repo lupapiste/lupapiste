@@ -24,15 +24,9 @@
                  :limit :searchText :skip :sort :operations :areas :areas-wgs84]))))
 
 (defn- selected-ops-by-permit-type [selected-ops]
-  (->> operations/operations
-       (filter (fn [[opname _]]
-                 (some #(= opname (keyword %)) selected-ops)))
-       (map (fn [[op {permit-type :permit-type}]]
-              {:op op :permit-type permit-type}))
-       (group-by :permit-type)
-       (map (fn [[permit-type ops]]
-              {permit-type (map :op ops)}))
-       (apply merge)))
+  (let [selected-ops-set (set (map keyword selected-ops))]
+    (-> operations/operation-names-by-permit-type
+        (util/convert-values (partial filter selected-ops-set)))))
 
 (defquery get-application-operations
   {:user-roles #{:authority}}

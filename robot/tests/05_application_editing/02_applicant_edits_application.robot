@@ -50,12 +50,12 @@ Owners are visible after page refresh
 Error indicator appears with invalid data
   Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.osoite.postinumero"]  Test
   Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
-  Wait until  Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'warn')]
+  Wait until  Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
 
 Error indicator disappears when valid value is input
   Input text with jQuery  \#application-info-tab section[data-doc-type="uusiRakennus"] input[data-docgen-path="rakennuksenOmistajat.0.henkilo.osoite.postinumero"]  12345
   Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postitoimipaikannimi']
-  Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'warn')]
+  Wait until  Element should not be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.osoite.postinumero' and contains(@class, 'err')]
 
 Huoneistot info for Uusirakennus is correct
   Xpath Should Match X Times  //div[@id='application-info-tab']//table[@class="huoneistot-table"]//tbody//tr  1
@@ -120,11 +120,11 @@ Mikko subscribes notifications
 
 Mikko inputs bad postal code for hakija-r
   Input text with jQuery  div#application-parties-tab section[data-doc-type="hakija-r"] input[data-docgen-path="henkilo.osoite.postinumero"]  000
-  Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.warn[data-docgen-path="henkilo.osoite.postinumero"]
+  Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]
 
 Mikko changes hakija-r country and postal code becomes valid
   Select from list  jquery=div#application-parties-tab section[data-doc-type="hakija-r"] select[data-docgen-path="henkilo.osoite.maa"]  CHN
-  Wait Until  Element should not be visible  jquery=section[data-doc-type="hakija-r"] input.warn[data-docgen-path="henkilo.osoite.postinumero"]
+  Wait Until  Element should not be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]
 
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
@@ -144,6 +144,18 @@ Mikko adds party maksaja using dialog
   Open accordions  parties
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
+
+Mikko adds party hakijan-asiamies using dialog
+  Click enabled by test id  add-party
+  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
+  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
+  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
+  Click enabled by test id  add-party-button
+  Wait Until  Element Should Not Be Visible  dialog-add-party
+  Open accordions  parties
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.hakijan-asiamies']
+  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
+
 
 Mikko adds party hakija-r using button
   Set Suite Variable  ${hakijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']

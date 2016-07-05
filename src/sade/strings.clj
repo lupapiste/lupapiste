@@ -36,8 +36,10 @@
     (.isEmpty s)
     true))
 
-(defn other-than-string? [x]
-  (and (not (nil? x)) (not (string? x))))
+(defn optional-string? [x]
+  (or (nil? x) (string? x)))
+
+(def other-than-string? (complement optional-string?))
 
 (defn in-lower-case? [^String s]
   (if s

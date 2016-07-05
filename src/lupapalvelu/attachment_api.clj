@@ -32,7 +32,8 @@
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus])
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [sade.env :as env])
   (:import [java.io File]))
 
 ;; Validators and pre-checks
@@ -275,7 +276,7 @@
 ;;
 
 (defraw "preview-attachment"
-        {:parameters [:attachment-id]
+          {:parameters [:attachment-id]                       ;; Note that this is actually file id
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles auth/all-authz-roles
@@ -284,7 +285,7 @@
         (attachment/output-attachment-preview! attachment-id (partial attachment/get-attachment-file-as! user)))
 
 (defraw "view-attachment"
-        {:parameters [:attachment-id]
+        {:parameters [:attachment-id]                       ;; Note that this is actually file id
          :input-validators [(partial action/non-blank-parameters [:attachment-id])]
          :user-roles #{:applicant :authority :oirAuthority}
          :user-authz-roles auth/all-authz-roles
@@ -293,13 +294,23 @@
         (attachment/output-attachment attachment-id false (partial attachment/get-attachment-file-as! user)))
 
 (defraw "download-attachment"
-  {:parameters [:attachment-id]
+  {:parameters [:attachment-id]                             ;; Note that this is actually file id
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-file-as! user)))
+
+(defraw "latest-attachment-version"
+  {:parameters       [:attachment-id]
+   :optional-parameters [:download]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles}
+  [{{:keys [attachment-id download]} :data user :user}]
+  (attachment/output-attachment (attachment/get-attachment-latest-version-file user attachment-id) (= download "true")))
 
 (defraw "download-bulletin-attachment"
   {:parameters [attachment-id]
@@ -364,17 +375,26 @@
       (attach-or-fail! application (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
 
 (defn- upload! [application {:keys [filename content] :as attachment-data}]
-  (case (mime/mime-type filename)
-    "application/pdf" (if (pdf-conversion/pdf-a-required? (:organization application))
-                        (let [processing-result (pdf-conversion/convert-to-pdf-a content)]
-                          (if (:already-valid-pdfa? processing-result)
-                            (attach-or-fail! application (assoc attachment-data :archivable true :archivabilityError nil))
-                            (convert-pdf-and-upload! application processing-result attachment-data)))
-                        (attach-or-fail! application attachment-data))
-    "image/tiff"      (let [valid? (tiff-validation/valid-tiff? content)
-                            attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
-                        (attach-or-fail! application attachment-data))
-    (attach-or-fail! application attachment-data)))
+  (let [mt (keyword (mime/mime-type filename))]
+    (cond
+      (and (= mt :application/pdf)
+           (pdf-conversion/pdf-a-required?
+             (:organization application))) (let [processing-result (pdf-conversion/convert-to-pdf-a content {:application application :filename filename})]
+                                             (if (:already-valid-pdfa? processing-result)
+                                               (attach-or-fail! application (assoc attachment-data :archivable true :archivabilityError nil))
+                                               (convert-pdf-and-upload! application processing-result attachment-data)))
+
+      (= mt :image/tiff) (let [valid? (tiff-validation/valid-tiff? content)
+                               attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
+                           (attach-or-fail! application attachment-data))
+
+      (attachment/libreoffice-conversion-required? attachment-data) (->> (assoc attachment-data :skip-pdfa-conversion true)
+                                                                         (attachment/attach-file! application)
+                                                                         :id
+                                                                         (assoc attachment-data :attachment-id)
+                                                                         (attach-or-fail! application))
+
+      :else (attach-or-fail! application (assoc attachment-data :skip-pdfa-conversion true)))))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]

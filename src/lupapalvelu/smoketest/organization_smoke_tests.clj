@@ -1,13 +1,14 @@
 (ns lupapalvelu.smoketest.organization-smoke-tests
-  (:require [lupapalvelu.smoketest.core :refer [defmonster]]
-            [lupapalvelu.mongo :as mongo]))
+  (:require [schema.core :as sc]
+            [lupapiste.mongocheck.core :refer [mongocheck]]
+            [lupapalvelu.smoketest.core :refer [defmonster]]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as org]))
 
-(def organization-keys [:scope])
-
-(def organizations (delay (mongo/select :organizations {} organization-keys)))
+(def organization-keys [])
 
 (defmonster permit-type-only-in-single-municipality-scope
-  (let [results (->> @organizations
+  (let [results (->> (mongo/select :organizations {} [:scope])
                      (mapcat :scope)
                      (group-by :municipality)
                      (map (fn [[muni scopes]] [muni (map :permitType scopes)]))
@@ -16,3 +17,8 @@
     (if (seq results)
       {:ok false :results (str results)}
       {:ok true})))
+
+(mongocheck :organizations
+  #(when-let [res (sc/check org/Organization (mongo/with-id %))]
+     (assoc (select-keys % [:id]) :errors res))
+  organization-keys)

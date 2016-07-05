@@ -1,0 +1,42 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="server-settings-template">
+  <h3 data-bind="ltext: header"></h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'auth-admin.parameter'"></th>
+        <th data-bind="ltext: 'auth-admin.value'" class="serversettings--wide"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-bind="ltext: urlLabel"></td>
+        <td class="serversettings--wide">
+          <input type="url" data-bind="value: url, disable: readOnly" data-test-id="server-details-url">
+        </td>
+      </tr>
+      <tr>
+        <td data-bind="ltext: 'auth-admin.server.username'"></td>
+        <td class="serversettings--wide">
+          <input type="text" data-bind="value: username, disable: readOnly" data-test-id="server-details-username">
+        </td>
+      </tr>
+      <tr>
+        <td data-bind="ltext: 'auth-admin.server.password'"></td>
+        <td class="serversettings--wide">
+          <input data-bind="value: password, disable: readOnly, attr: {placeholder:passwordPlaceholder}" type="password" data-test-id="server-details-password">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p data-bind="visible: error" class="serversettings--error">
+    <span data-bind="ltext: errorMessageTerm"></span>
+  </p>
+  <button class="positive"
+    data-bind="click: updateServerDetails,
+               css: {waiting: waiting},
+               disable: readOnly"
+    data-test-id="server-details-send">
+    <i class="wait spin lupicon-refresh"></i>
+    <span data-bind="ltext: saveLabel"></span>
+  </button>
+</script>

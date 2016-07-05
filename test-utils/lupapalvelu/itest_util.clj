@@ -84,6 +84,7 @@
 (def jarvenpaa  (apikey-for "admin@jarvenpaa.fi"))
 (def olli       (apikey-for "olli"))
 (def olli-id    (id-for "olli"))
+(def raktark-helsinki (apikey-for "rakennustarkastaja@hel.fi"))
 
 (def sipoo-property-id "75300000000000")
 (def jarvenpaa-property-id "18600000000000")
@@ -590,7 +591,7 @@
     (facts "Signed succesfully"
       (fact "Status code" (:status resp) => 200))))
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-attachment.txt", text ""}}]
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-gif-attachment.gif", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
@@ -598,7 +599,7 @@
                                 :multipart (remove nil?
                                              [{:name "applicationId"  :content application-id}
                                               {:name "text"           :content text}
-                                              {:name "Content/type"   :content "text/plain"}
+                                              {:name "Content/type"   :content "image/gif"}
                                               {:name "attachmentType" :content (str
                                                                                  (:type-group attachment-type) "."
                                                                                  (:type-id attachment-type))}

@@ -15,12 +15,12 @@ Mikko creates an inforequests
   Create inforequest the fast way  ${inforequest}  360603.153  6734222.95  ${propertyId}  kerrostalo-rivitalo  Liitetesti
 
 Mikko adds an attachment
-  Add attachment  inforequest  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}
+  Add attachment  inforequest  ${PNG_TESTFILE_PATH}  ${PNG_TESTFILE_DESCRIPTION}
 
 Mikko open attachment details
   Click link  xpath=//div[@data-test-id="comments-table"]//a
   Wait Until  Element Should Be Visible  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
-  Wait Until  Page Should Contain  ${TXT_TESTFILE_NAME}
+  Wait Until  Page Should Contain  ${PNG_TESTFILE_NAME}
 
 Mikko returns to inforequest
   Click link  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]

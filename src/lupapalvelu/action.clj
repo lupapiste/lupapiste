@@ -52,6 +52,9 @@
       (when-not (v/email-and-domain-valid? email)
         (fail :error.email)))))
 
+(defn validate-url [url]
+  (when-not (v/http-url? url)
+    (fail :error.invalid.url)))
 
 ;; Notificator
 

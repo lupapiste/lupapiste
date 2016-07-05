@@ -126,8 +126,8 @@
 
                    (fact "zip file has two files"
                      (count result) => 2)
-                   (fact "filenames end with 'test-attachment.txt'"
-                     (every? #(.endsWith (:name %) "test-attachment.txt") result) => true)))))))
+                   (fact "filenames end with 'test-gif-attachment.gif'"
+                     (every? #(.endsWith (:name %) "test-gif-attachment.gif") result) => true)))))))
 
         (fact "without attachment versions order fails"
           (let [for-printing (filter :forPrinting attachments-with-amount)

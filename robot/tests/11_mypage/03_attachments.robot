@@ -26,7 +26,7 @@ Mikko copies his attachments to application
   Open tab  attachments
   Select attachment operation option from dropdown  attachmentsCopyOwn
   Confirm yes no dialog
-  Wait Until  Table Should Contain  css=table.attachments-template-table  ${TXT_TESTFILE_NAME}
+  Wait Until  Table Should Contain  css=table.attachments-template-table  ${PDF_TESTFILE_NAME}
 
 Copy own attachments button is not shown to non-architect
   [Tags]  firefox
@@ -70,7 +70,7 @@ Mikko can add his attachments in post verdict state
   Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
   Select attachment operation option from dropdown  attachmentsCopyOwn
   Confirm yes no dialog
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
 
 
 *** Keywords ***

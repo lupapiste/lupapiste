@@ -501,7 +501,7 @@ Commands, queries (incl. datatables requests), exports (/data-api) and raw actio
 
 Use _defcommand_, _defquery_, _defraw_ and _defexport_ macros to define new actions. Action definitions are in the following form:
 
-    (def<action-type>
+    (def<action-type> action-name
       { ; metadata map
       }
 
@@ -510,6 +510,10 @@ Use _defcommand_, _defquery_, _defraw_ and _defexport_ macros to define new acti
     )
 
 Actions must return a map. Commands, queries and exports return a map that contain :ok key with a boolean success value. Use sade.core/ok, fail and fail! to generate these responses.
+
+A fuction named `<action-type>-<action-name>` is generated from action body. That function can be called in REPL or integration tests. For example:
+
+    (lupapalvelu.comment-api/command-add-comment {:data {}, :application {}, :user {}})
 
 **Note:** coding convention: define actions only in _api.clj namespaces. Remember to require the api-namespace in server.clj or web.clj, so the action is registered and the route is available on server startup.
 
@@ -544,7 +548,6 @@ Example query:
   (ok (select-keys application [:id :comments])))
 ```
 Returns JSON to frontend: `{:ok true :data [{:id "123" :comments []}]}`
-
 
 ## Session
 Backend delegates session handling to Ring. Semantics:

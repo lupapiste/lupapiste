@@ -532,9 +532,17 @@
               (fn [role] (or (designer-roles-mapping-new-to-old-220 role) role))))
        %)))
 
-(def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka))
+(def hakijan-asiamies-mapping-new-to-old-220 {"Hakijan asiamies"  "ei tiedossa"})
 
-(def map-enums-213-218 map-suunnittelija-kuntaroolikoodi-pre220)
+(defn map-hakijan-asiamies-pre220 [canonical]
+  (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :osapuolitieto]
+    #(map (fn [osapuoli]
+            (update-in osapuoli [:Osapuoli :kuntaRooliKoodi]
+              (fn [role] (or (hakijan-asiamies-mapping-new-to-old-220 role) role)))) %)))
+
+(def map-enums-212 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-tyonjohtaja-patevyysvaatimusluokka map-hakijan-asiamies-pre220))
+
+(def map-enums-213-218 (comp map-suunnittelija-kuntaroolikoodi-pre220 map-hakijan-asiamies-pre220))
 
 (defn- common-map-enums [canonical krysp-version]
   (-> canonical
@@ -574,7 +582,7 @@
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
-                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
+                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical lang))
         xml (rakennuslupa-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]

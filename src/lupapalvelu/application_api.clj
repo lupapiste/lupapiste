@@ -97,7 +97,9 @@
         repeating-party-schemas (app/filter-party-docs schema-version original-schema-names true)
         current-schema-name-set (->> documents (filter app/party-document?) (map (comp name :name :schema-info)) set)
         missing-schema-names    (remove current-schema-name-set original-party-schemas)]
-    (ok :partyDocumentNames (conj (concat missing-schema-names repeating-party-schemas) (op/get-applicant-doc-schema-name application)))))
+    (ok :partyDocumentNames (-> (concat missing-schema-names repeating-party-schemas)
+                                (conj (op/get-applicant-doc-schema-name application))
+                                distinct))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
@@ -707,7 +709,7 @@
       (if-let [conf (:vendor-backend-redirect org)]
         (->> (vals conf)
              (remove ss/blank?)
-             (some util/validate-url))
+             (some action/validate-url))
         (fail :error.vendor-urls-not-set)))))
 
 (defn get-vendor-backend-id [verdicts]

@@ -104,6 +104,7 @@
                       <th data-bind="ltext: 'attachment.version'">Versio</th>
                       <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
                       <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
+                      <th data-bind="ltext: 'attachment.autoConversion'">Muunnettu</th>
                       <th data-bind="ltext: 'attachment.actions'">Toiminto</th>
                     </tr>
                   </thead>
@@ -117,6 +118,9 @@
                       <td data-bind="dateString: created"></td>
                       <td>
                         <span data-bind="fullName: user"></span>
+                      </td>
+                      <td data-bind="if: $data.autoConversion" style="text-align:center">
+                          <span class="lupicon-circle-check positive"></span>
                       </td>
                       <td>
                         <a data-bind="click: $root.attachment.deleteVersion,
@@ -145,8 +149,9 @@
                     <span class="attachment-label-header-item" data-bind="fullName: $data.user"></span>
                   </div>
                   <div data-bind="if: fileId !== originalFileId">
-                    <span class="attachment-label-info-item" >
-                      <span data-bind="ltext: 'attachment.downloadOriginalVersion.info'"></span>
+                    <span class="attachment-label-info-item">
+                      <span data-bind="ltext: 'attachment.downloadOriginalVersion.info', visible: !ko.unwrap($data.autoConversion)"></span>
+                      <span data-bind="ltext: 'attachment.downloadOriginalVersion.autoConversionInfo', visible: $data.autoConversion"></span>
                       <span id="original-file">
                         <a data-bind="ltext: 'attachment.downloadOriginalVersion.link', attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.originalFileId}"></a>
                       </span>
@@ -219,6 +224,9 @@
                         <div data-bind="foreach: $data['missing-fonts']">
                           <span data-bind="text: $data"></span><br>
                         </div>
+                      </div>
+                      <div data-bind="if: $data['autoConversion']">
+                        <span data-bind="ltext: 'attachment.converted'"></span>
                       </div>
                     </div>
                   </div>

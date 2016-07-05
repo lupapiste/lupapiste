@@ -40,3 +40,17 @@
   (fact (rakennustunnus? "182736459F") => truthy)
   (fact "SYKE sample with a fixed checksum" (rakennustunnus? "100012345N") => truthy)
   (fact "VRK sample with a fixed checksum" (rakennustunnus? "1234567892") => truthy))
+
+(facts "application-id"
+  (fact "can't be"
+    (fact "nil" (application-id? nil) => false)
+    (fact "empty" (application-id? "") => false)
+    (fact "foo" (application-id? "foo") => false)
+    (fact "ObjectId" (application-id? (org.bson.types.ObjectId.)) => false)
+    (fact "partial LP id" (application-id? "LP-123-2016-0001") => false)
+    (fact "LP id with slash" (application-id? "LP-123-2016/00001") => false)
+    (fact "LP id with backslash" (application-id? "LP-123-2016\\00001") => false))
+
+  (facts "can be"
+    (fact "ObjectId as String" (application-id? (str (org.bson.types.ObjectId.))) => true)
+    (fact "LP id" (application-id? "LP-123-2016-00001") => true)))

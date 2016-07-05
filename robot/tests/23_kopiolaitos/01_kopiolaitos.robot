@@ -16,8 +16,8 @@ Mikko creates an application
 
 Mikko adds an attachment
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//td[@class='attachment-file-info']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//td[@class='attachment-file-info']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko submits application
   Submit application
@@ -115,7 +115,7 @@ Sonja checks that email was sent
   Open last email
   Page Should Contain  Sipoon rakennusvalvonta, Sonja Sibbo
   Page Should Contain  tilaaja@example.com
-  Page Should Contain  ${TXT_TESTFILE_NAME}
+  Page Should Contain  ${PNG_TESTFILE_NAME}
   [Teardown]  Go Back
 
 Sonja opens the kopiolaitos order history dialog
@@ -131,7 +131,7 @@ The history dialog includes the order item
 
   Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//td[@data-test-id='test-order-attachment-type']  Muu liite
   Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//td[@data-test-id='test-order-attachment-contents']  Muu muu muu liite
-  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//td[@data-test-id='test-order-attachment-filename']  ${TXT_TESTFILE_NAME}
+  Element should contain  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//td[@data-test-id='test-order-attachment-filename']  ${PNG_TESTFILE_NAME}
   Textfield value should be  xpath=//div[@id='dialog-verdict-attachment-prints-order-history']//div[@class='history-item']//input[@data-test-id='test-order-amount']  2
 
 Sonja closes the order history dialog

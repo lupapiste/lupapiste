@@ -535,6 +535,14 @@ i.toggle {
   margin: $marginS $marginS $marginS $marginS;
 }
 
+.margins-m {
+  margin: $marginM $marginM $marginM $marginM;
+}
+
+.no-top {
+  margin-top: 0 !important;
+}
+
 // Margin between form buttons.
 
 .form-buttons button {

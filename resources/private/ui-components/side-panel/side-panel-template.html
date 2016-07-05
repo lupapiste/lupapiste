@@ -14,10 +14,10 @@
                                visible: authorization.ok('comments') || authorization.ok('can-target-comment-to-authority') || authorization.ok('can-mark-answered'),
                                css: {active: showConversationPanel}">
                 <i class="lupicon-conversation"></i>
-                <span data-bind="if: unseenComments,
-                                 visible: unseenComments">
-                    <span data-bind="text: unseenComments" id="applicationUnseenComments" class="unseen-comments"></span>
-                </span>
+                <div data-bind="visible: unseenComments,
+                                 text: unseenComments"
+                     id="applicationUnseenComments" class="unseen-comments">
+                </div>
                 <span class="btn-title" data-bind="lspaced: 'conversation.title'"></span>
             </button>
             <button id="open-notice-side-panel"

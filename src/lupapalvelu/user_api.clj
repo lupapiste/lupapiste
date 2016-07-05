@@ -501,12 +501,12 @@
   {:parameters [organizationId role password]
    :user-roles #{:admin}
    :input-validators [(partial action/non-blank-parameters [:organizationId])
-                      (fn [{data :data}] (when-not (#{"authority" "authorityAdmin" "archivist"} (:role data)) (fail :error.invalid-role)))]
+                      (fn [{data :data}] (when-not (#{"approver" "authorityAdmin" "archivist"} (:role data)) (fail :error.invalid-role)))]
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
   (if (usr/get-user-with-password (:username user) password)
     (let [kw-role (keyword role)
-          main-role (if (= :archivist kw-role) :authority kw-role)
+          main-role (if (= :authorityAdmin kw-role) :authorityAdmin :authority)
           role-set (set [kw-role main-role])
           imposter (assoc user :impersonating true :role main-role :orgAuthz {(keyword organizationId) role-set})]
       (ssess/merge-to-session command (ok) {:user imposter}))

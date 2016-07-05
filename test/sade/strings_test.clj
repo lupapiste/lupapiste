@@ -111,6 +111,25 @@
   (fact (decimal-number? "..0") => false)
   (fact (decimal-number? "123123132.456465465465464") => true))
 
+(fact "optional-string?"
+  (fact "nil is optional"
+    (optional-string? nil) => true)
+  (fact "strings"
+    (optional-string? "") => true
+    (optional-string? "hello") => true)
+  (fact "booleas"
+    (optional-string? true) => false
+    (optional-string? false) => false)
+  (fact "numbers"
+    (optional-string? 1) => false
+    (optional-string? 3.14) => false)
+  (fact "collections"
+    (optional-string? {}) => false
+    (optional-string? #{}) => false
+    (optional-string? []) => false)
+  (fact "Object"
+    (optional-string? (Object.)) => false))
+
 (facts "other-than-string?"
   (fact "nil is nothing"
     (other-than-string? nil) => false)

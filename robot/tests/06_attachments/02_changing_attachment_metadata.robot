@@ -36,14 +36,14 @@ Mikko edits operation B description
 Mikko adds txt attachment without comment
   [Tags]  attachments
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen - Talo A
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen - Talo A
   Application state should be  draft
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko opens attachment details
   [Tags]  attachments
   Open attachment details  muut.muu
-  Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
+  Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Title Should Be  ${appname} - Lupapiste
 
 Mikko can change related operation
@@ -84,7 +84,7 @@ Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Ta
 
 Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu
-  Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
+  Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Page should contain  Muun rakennuksen rakentaminen
   Page should contain  B0
   Textfield Value Should Be  xpath=//input[@data-test-id='attachment-contents-input']  PuuCee

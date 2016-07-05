@@ -123,7 +123,8 @@
    (sc/optional-key :stamped)            sc/Bool
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
-   (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])})
+   (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])
+   (sc/optional-key :autoConversion)    (sc/maybe sc/Bool)})
 
 (defschema Type
   "Attachment type"
@@ -158,7 +159,7 @@
    (sc/optional-key :scale)              (apply sc/enum attachment-scales)
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
-   (sc/optional-key :metadata)           {sc/Any sc/Any}})
+   (sc/optional-key :metadata)           {sc/Keyword sc/Any}})
 
 
 ;;
@@ -374,13 +375,13 @@
        (sort-by version-number)
        (last)))
 
-(defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts]}]
+(defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts autoConversion]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
                                 last
                                 :version)
                            (next-attachment-version (get-in attachment [:latestVersion :version]) user))]
-    (cond-> {:version        version-number
+    (util/assoc-when {:version        version-number
              :fileId         file-id
              :originalFileId (or original-file-id file-id)
              :created        now
@@ -390,10 +391,11 @@
              :filename       filename
              :contentType    content-type
              :size           size}
-      (not (nil? stamped))       (assoc :stamped stamped)
-      (not (nil? archivable))    (assoc :archivable archivable)
-      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
-      (not (nil? missing-fonts)) (assoc :missing-fonts missing-fonts))))
+      :stamped stamped
+      :archivable archivable
+      :archivabilityError archivabilityError
+      :missing-fonts missing-fonts
+      :autoConversion autoConversion)))
 
 (defn- ->approval [state user timestamp file-id]
   {:value (if (= :ok state) :approved :rejected)
@@ -587,20 +589,31 @@
     (when-let [application (and (:application attachment-file) (get-application-no-access-checking (:application attachment-file)))]
       (when (seq application) attachment-file))))
 
+(defn get-attachment-latest-version-file
+  "Returns the file for the latest attachment version if user has access to application and the attachment, otherwise nil."
+  [user attachment-id]
+  (let [application (get-application-as {:attachments.id attachment-id} user :include-canceled-apps? true)
+        file-id (attachment-latest-file-id application attachment-id)]
+    (when (and application file-id (access/can-access-attachment-file? user file-id application))
+      (mongo/download file-id))))
+
 (defn output-attachment
-  [file-id download? attachment-fn]
-  (if-let [attachment (attachment-fn file-id)]
+  ([attachment download?]
+  (if attachment
     (let [filename (ss/encode-filename (:file-name attachment))
           response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
-                              "Content-Length" (str (:content-length attachment))}}]
+                              "Content-Length" (str (:content-length attachment))
+                              "Content-Disposition" (format "filename=\"%s\"" filename)}}]
       (if download?
         (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" filename))
         (update response :headers merge http/no-cache-headers)))
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
+  ([file-id download? attachment-fn]
+   (output-attachment (attachment-fn file-id) download?)))
 
 (hystrix/defcommand create-preview!
   {:hystrix/group-key   "Attachment"
@@ -617,6 +630,15 @@
         (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
         (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpeg" preview-content :application application-id)))))
 
+(def file-types
+  #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
+    :application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    :application/vnd.oasis.opendocument.text
+    :application/vnd.ms-powerpoint
+    :application/rtf
+    :application/msword
+    :text/plain})
+
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
   [file-id attachment-fn]
@@ -631,11 +653,18 @@
         (create-preview! file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
-(defn pre-process-attachment [{{:keys [type-group type-id]} :attachment-type :keys [filename content]}]
-  (if (and (libreoffice-client/enabled?)
-           (not (= "application/pdf" (mime/mime-type (mime/sanitize-filename filename))))
-           (or (=as-kw type-group :paatoksenteko) (=as-kw type-group :muut))
-           (#{:paatos :paatosote} (keyword type-id)))
+(defn libreoffice-conversion-required? [{:keys [filename attachment-type]}]
+  (let [mime-type (mime/mime-type (mime/sanitize-filename filename))
+        {:keys [type-group type-id]} attachment-type]
+    (and (libreoffice-client/enabled?)
+         (or (env/feature? :convert-all-attachments)
+             (and (= :paatoksenteko (keyword type-group))
+                  (#{:paatos :paatosote} (keyword type-id))))
+         (file-types (keyword mime-type)))))
+
+(defn pre-process-attachment [{:keys [filename content skip-pdfa-conversion] :as options}]
+  (if (and (not skip-pdfa-conversion)
+           (libreoffice-conversion-required? options))
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
@@ -657,19 +686,31 @@
              :filename sanitized-filename
              :content-type content-type}
       (true? archivable) (assoc :archivable true)
-      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError))))
+      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
+      (and (true? archivable) (not (:skip-pdfa-conversion options))) (assoc :autoConversion true))))
 
 (defn attach-file!
-  "1) Converts file to PDF/A, if required by attachment type and
-   2) uploads the file to MongoDB and
-   3) creates a preview image and
-   4) creates a corresponding attachment structure to application
+  "1) Uploads the original file to MongoDB if conversion is required and :keep-original-file? is true and
+   2) converts file to PDF/A, if the file format is convertable and
+   3) uploads the file to MongoDB and
+   4) creates a preview image and
+   5) creates a corresponding attachment structure to application
    Content can be a file or input-stream.
    Returns attachment version."
   [application options]
-  (->> (upload-file! application options)
-       (merge options {:now (:created options) :stamped (get options :stamped false)})
-       (set-attachment-version! application (get-or-create-attachment! application options))))
+  (let [temp-file        (File/createTempFile "lupapiste-attach-file" ".pdf")
+        _                (io/copy (:content options) temp-file)
+        options          (assoc options :content temp-file)
+        original-file-id (when (and (:keep-original-file? options)
+                                    (libreoffice-conversion-required? options))
+                           (->> (assoc options :skip-pdfa-conversion true)
+                                (upload-file! application)
+                                :file-id))]
+    (->> (cond-> options
+                 original-file-id (assoc :original-file-id original-file-id))
+         (upload-file! application)
+         (merge options {:now (:created options) :stamped (get options :stamped false)})
+         (set-attachment-version! application (get-or-create-attachment! application options)))))
 
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
@@ -748,7 +789,7 @@
   [{application :application} {:keys [content-type content file-name]}]
   (case (name content-type)
     "application/pdf" (when (pdf-conversion/pdf-a-required? (:organization application))
-                        (let [processing-result (pdf-conversion/convert-to-pdf-a (content))] ; content is a function from mongo.clj
+                        (let [processing-result (pdf-conversion/convert-to-pdf-a (content) {:application application :filename file-name})] ; content is a function from mongo.clj
                           (if (:already-valid-pdfa? processing-result)
                             {:archivable true :archivabilityError nil :already-valid true}
                             (save-pdfa-file! application processing-result file-name content-type))))
