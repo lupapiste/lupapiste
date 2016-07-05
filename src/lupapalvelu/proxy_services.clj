@@ -311,6 +311,13 @@
     (update request k util/convert-values ss/strip-non-printables)
     request))
 
+(defn- sanitize-request [request]
+  (-> request
+    (sanitize-parameters :query-params)
+    (sanitize-parameters :form-params)
+    (sanitize-parameters :params)
+    http/secure-headers))
+
 (defn- secure
   "Takes a service function as an argument and returns a proxy function that invokes the original
   function. Proxy function returns what ever the service function returns, excluding some unsafe
@@ -319,11 +326,7 @@
   newlines are stripped."
   [f & args]
   (fn [request]
-    (let [sanitized-request (-> request
-                              (sanitize-parameters :query-params)
-                              (sanitize-parameters :form-params)
-                              (sanitize-parameters :params))
-          response (apply f (cons (http/secure-headers sanitized-request) args))]
+    (let [response (apply f (cons (sanitize-request request) args))]
       (select-keys (http/secure-headers response) [:status :headers :body]))))
 
 (defn- cache [max-age-in-s f]
