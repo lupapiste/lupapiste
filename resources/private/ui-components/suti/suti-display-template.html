@@ -1,0 +1,49 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="suti-display-template">
+  <div class="suti-display"
+       data-bind="if: showSuti,
+                  visible: showSuti,
+                  feature: 'suti-integration'">
+    <rollup params="open: open">
+      <rollup-button params="open: $parent.open,
+                             css: {secondary: true},
+                             text: $parent.suti().title">
+      </rollup-button>
+      <div class="rollup__open attachments-accordion-content">
+        <div class="form-grid">
+          <div class="row">
+            <div class="col-2">
+              <div class="col--vertical">
+                <label for="suti-display-id"
+                       data-bind="ltext: 'suti.display-id'"></label>
+                <div class="button-input">
+                  <input type="text"
+                         id="suti-display-id"
+                         data-bind="value: $parent.sutiId"><button class="primary"
+                                                 data-bind="enable: $parent.suti().www,
+                                                            click: $parent.sutiLink">
+                    <i class="lupicon-external-link"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="col-2">
+              <div class="col--vertical">
+                <label>&nbsp;</label>
+                <div class="checkbox-wrapper">
+                  <input type="checkbox"
+                         id="suti-display-added"
+                         data-bind="checked: $parent.sutiAdded">
+                  <label class="checkbox-label"
+                         for="suti-display-added"
+                         data-bind="ltext: 'suti.display-added'"></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </rollup>
+  </div>  
+</script>
+

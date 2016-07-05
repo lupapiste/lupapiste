@@ -327,3 +327,15 @@ table.suti-admin-table {
 div.suti-admin-container .serversettings--wide {
   width: 50%;
 }
+
+.suti-display {
+  margin-bottom: $marginM;
+  .rollup-button {
+    span {
+      text-transform: uppercase;
+    }
+  }
+  .form-grid, .checkbox-wrapper {
+    border: none;
+  }
+}

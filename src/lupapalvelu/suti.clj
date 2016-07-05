@@ -46,7 +46,6 @@
 (defn- clean-suti-dates
   "Suti returns expirydate and downloaded fields as a strings '\\/Date(1495806556450)\\/'"
   [{:keys [expirydate downloaded] :as data}]
-  (println "----------- downloaded:" downloaded)
   (letfn [(clean [v] (re-find #"\d+" (or v "")))]
     (assoc data
            :expirydate (clean expirydate)
@@ -70,11 +69,17 @@
       "suti.products-error")))
 
 (defn application-data [{:keys [suti organization primaryOperation]}]
-  (let [{:keys [enabled www server operations]} (:suti (org/get-organization organization))
-        {url :url} server
-        suti-enabled (and enabled (contains? (set operations) (:name primaryOperation)))
-        products (when (and suti suti-enabled (ss/not-blank? url))
-                   (fetch-suti-products (append-to-url url suti) server))]
+  (let [{:keys [enabled www
+                server operations]} (:suti (org/get-organization organization))
+        url                         (:url server)
+        suti-id                     (:id suti)
+        suti-enabled                (and enabled
+                                         (contains? (set operations)
+                                                    (:name primaryOperation)))
+        products                    (when (and suti-id suti-enabled (ss/not-blank? url))
+                                      (fetch-suti-products (append-to-url url suti-id) server))]
     {:enabled enabled
-     :www (ss/replace www "$$" suti)
-     :products products}))
+     :www (when (every? ss/not-blank? [www suti-id])
+            (ss/replace www "$$" suti-id))
+     :products products
+     :suti suti}))

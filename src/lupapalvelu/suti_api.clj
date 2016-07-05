@@ -1,5 +1,6 @@
 (ns lupapalvelu.suti-api
   (:require [sade.core :refer :all]
+            [monger.operators :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
@@ -67,3 +68,16 @@
    :feature :suti-integration}
   [{application :application}]
   (ok :data (suti/application-data application)))
+
+(defcommand suti-update-application
+  {:description "Mechanism for updating Suti properties (id and added)
+  of the application. Suti parameter does not have to be fully formed."
+   :parameters [id suti]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/map-parameters [:suti])]
+   :user-roles #{:authority :applicant}
+   :states states/all-application-states
+   :feature :suti-integration}
+  [{application :application :as command}]
+  (action/update-application command {$set {:suti (merge (:suti application)
+                                                         (select-keys suti [:id :added]))}}))

@@ -87,10 +87,10 @@ LUPAPISTE.SutiService = function() {
       .call();
   };
 
-  self.fetchApplicationData = function( applicationId ) {
+  self.fetchApplicationData = function( application ) {
     // Clear old data just in case
     suti( {} );
-    ajax.query( "suti-application-data", {id: applicationId })
+    ajax.query( "suti-application-data", {id: application.id()})
       .success( function( res ) {
         if( _.isArray( res.data.products )) {
           res.data.products = _.map( res.data.products, function( p ) {
@@ -103,13 +103,28 @@ LUPAPISTE.SutiService = function() {
 
           });
         }
-        suti( _.assign( res.data ) );
+        // Fully formed application Suti data properties:
+        // enabled: true, if this application requires suti
+        // www: public url in the Suti system
+        // products: array of Suti products
+        // title: Title to be shown on Suti rollup button (see suti-display)
+        // suti: application Suti details (id and added).
+        suti( _.merge( res.data,
+                       {title: loc( "suti.display-title",
+                                    util.prop.toHumanFormat( application.propertyId()))},
+                       _.clone( ko.unwrap( _.get )( application, "suti", {}))));
       })
       .call();
   };
 
-  self.products = ko.pureComputed( function() {
-    return suti().products;
-  });
-
+  self.updateApplication = function( application, data, refresh ) {
+    ajax.command( "suti-update-application", {id: application.id(),
+                                              suti: data })
+      .success( function() {
+        if( refresh ) {
+          self.fetchApplicationData( application );
+        }
+      })
+      .call();
+  };
 };

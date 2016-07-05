@@ -3,3 +3,6 @@
 "suti.admin.title" "fi" "Suunnittelun lähtötietopaketti (Suti)"
 "suti.admin.www" "fi" "Lähtötietopaketin osoite (URL). $$ korvautuu hankenumerolla."
 "suti.products-error" "fi" "Tietojen haku ei onnistunut."
+"suti.display-title" "fi" "Suunnittelun lähtötiedot (kiinteistö {0})"
+"suti.display-id" "fi" "Hankenumero"
+"suti.display-added" "fi" "Suunnittelun lähtötiedot lisätty Suunnitelmat ja liitteet -osioon"
