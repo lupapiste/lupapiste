@@ -328,8 +328,13 @@
   (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         app-id (:id application)
         op1    (:primaryOperation application)
-        doc-count (count (:documents application))]
-    doc-count => 10
+        doc-count (count (:documents application))
+        expected-docs ["uusiRakennus" "hankkeen-kuvaus-rakennuslupa"
+                       "paatoksen-toimitus-rakval" "rakennuspaikka"
+                       "rakennusjatesuunnitelma"
+                       "hakija-r" "maksaja" "paasuunnittelija" "suunnittelija"]]
+
+    (map (comp :name :schema-info ) (:documents application)) => (contains expected-docs :in-any-order)
 
     (override-krysp-xml sipoo "753-R" :R [{:selector [:rakval:rakennuksenTiedot :rakval:rakennustunnus :rakval:muuTunnustieto :rakval:MuuTunnus :yht:tunnus] :value (:id op1)}])
 
@@ -347,7 +352,7 @@
         (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")
 
       (fact "Rakennusjateselvitys is a new document"
-        (count new-docs) => 11
+        (count new-docs) => (inc doc-count)
         (-> (last new-docs)
             :schema-info
             :name) => "rakennusjateselvitys")))
