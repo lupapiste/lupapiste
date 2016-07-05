@@ -27,7 +27,6 @@ LUPAPISTE.SutiApiModel = function(params) {
 
   self.disposedComputed(function(){
     var server = util.getIn(params, ["organization", "suti", "server"]);
-debug(server, params.organization.suti);
     self.serverParams.server(_.assign(emptyServerConf(), _.pick(server, visibleKeys)));
   });
 

@@ -632,12 +632,12 @@
 
 (def file-types
   #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
-   :application/vnd.openxmlformats-officedocument.wordprocessingml.document
-   :application/vnd.oasis.opendocument.text
-   :application/vnd.ms-powerpoint
-   :application/rtf
-   :application/msword
-   :text/plain})
+    :application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    :application/vnd.oasis.opendocument.text
+    :application/vnd.ms-powerpoint
+    :application/rtf
+    :application/msword
+    :text/plain})
 
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
@@ -653,9 +653,13 @@
         (create-preview! file-id file-name content-type (content-fn) application-id)))
     (output-attachment preview-id false attachment-fn)))
 
-(defn libreoffice-conversion-required? [{:keys [filename]}]
-  (let [mime-type (mime/mime-type (mime/sanitize-filename filename))]
+(defn libreoffice-conversion-required? [{:keys [filename attachment-type]}]
+  (let [mime-type (mime/mime-type (mime/sanitize-filename filename))
+        {:keys [type-group type-id]} attachment-type]
     (and (libreoffice-client/enabled?)
+         (or (env/feature? :convert-all-attachments)
+             (and (= :paatoksenteko (keyword type-group))
+                  (#{:paatos :paatosote} (keyword type-id))))
          (file-types (keyword mime-type)))))
 
 (defn pre-process-attachment [{:keys [filename content skip-pdfa-conversion] :as options}]
