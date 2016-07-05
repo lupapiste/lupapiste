@@ -1397,8 +1397,10 @@
 
 (def hakijan-asiamies-accordion-paths
   "Data from paths are visible in accordion header"
-  [["henkilotiedot" "etunimi"]
-   ["henkilotiedot" "sukunimi"]])
+  [[select-one-of-key]
+   ["henkilo" "henkilotiedot" "etunimi"]
+   ["henkilo" "henkilotiedot" "sukunimi"]
+   ["yritys" "yritysnimi"]])
 
 (def foreman-accordion-paths
   "Data from paths are visible in accordion header"

@@ -925,7 +925,7 @@
                     <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") && $root.authorization.ok('tos-operations-enabled') && application.id -->
                     <div id="application-caseFile-tab" class="tab-content">
                       <div>
-                        <div data-bind="component: {name: 'case-file', params: {application: application}}"></div>
+                        <div data-bind="component: {name: 'case-file', params: {application: application, authModel: $root.authorization}}"></div>
                       </div>
                     </div>
                     <!-- /ko -->
