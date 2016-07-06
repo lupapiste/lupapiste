@@ -47,12 +47,15 @@ LUPAPISTE.SutiDisplayModel = function() {
     var prods = self.suti().products;
     var msg = false;
     var error = false;
-    if( _.isString( prods ) ) {
-      msg = prods;
-      error = true;
-    } else {
-      if( _.isEmpty( prods )) {
-        msg = "suti.display-empty";
+    if( _.trim( self.sutiId())) {
+      if( _.isString( prods ) ) {
+        msg = prods;
+        error = true;
+      }
+      else {
+        if( _.isEmpty( prods )) {
+          msg = "suti.display-empty";
+        }
       }
     }
     return msg && {text: msg, error: error};

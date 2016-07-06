@@ -88,7 +88,7 @@
         suti-enabled                (and enabled
                                          (contains? (set operations)
                                                     (:name primaryOperation)))
-        products                    (when (and suti-id suti-enabled (ss/not-blank? url))
+        products                    (when (and (ss/not-blank? suti-id) suti-enabled (ss/not-blank? url))
                                       (fetch-suti-products (append-to-url url suti-id) server))]
     {:enabled enabled
      :www (when (every? ss/not-blank? [www suti-id])

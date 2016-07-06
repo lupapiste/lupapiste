@@ -1,5 +1,6 @@
 (ns lupapalvelu.suti-api
   (:require [sade.core :refer :all]
+            [sade.strings :as ss]
             [monger.operators :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.organization :as org]
@@ -80,4 +81,9 @@
    :feature :suti-integration}
   [{application :application :as command}]
   (action/update-application command {$set {:suti (merge (:suti application)
-                                                         (select-keys suti [:id :added]))}}))
+                                                         (reduce (fn [acc [k v]]
+                                                                   (assoc acc k (if (string? v)
+                                                                                  (ss/trim v)
+                                                                                  v)))
+                                                                 {}
+                                                                 (select-keys suti [:id :added])))}}))
