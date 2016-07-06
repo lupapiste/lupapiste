@@ -61,7 +61,7 @@ Add attachment to Aloituskokous
   Scroll and click test id  add-targetted-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${TXT_TESTFILE_PATH}
+  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PDF_TESTFILE_PATH}
   Click element    test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  ${PDF_TESTFILE_NAME}
@@ -137,7 +137,7 @@ Add attachment to loppukatselmus
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
   Select from list by value  jquery=#attachmentType  muut.tutkimus
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${TXT_TESTFILE_PATH}
+  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${PDF_TESTFILE_PATH}
   Click element    test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  ${PDF_TESTFILE_NAME}
