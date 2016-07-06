@@ -294,7 +294,7 @@
         self.state(self.stateReady);
         self.errorText(data.result.text);
       }
-    }
+    };
     self.error = function(e, data) {
       self.state(self.stateError);
       error("AJAX: ERROR", data.url, data.result);
