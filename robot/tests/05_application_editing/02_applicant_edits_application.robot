@@ -199,6 +199,8 @@ Mikko still sees the submitted app in applications list
   Go to page  applications
   Request should be visible  ${newName}
 
+No errors logged in editing
+  There are no frontend errors
 
 *** Keywords ***
 
