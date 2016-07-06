@@ -109,20 +109,23 @@
                 (warn (parse-errors-from-log-lines log-lines))
                 {:pdfa? false}))))
 
-(defn- get-pdf-page-count [input-file]
+(defn- get-pdf-page-count [input-file-path]
   (try
-    (with-open [reader (PdfReader. ^String input-file)]
+    (with-open [reader (PdfReader. ^String input-file-path)]
       (.getNumberOfPages reader))
     (catch Exception e
       (error "Error occurred when trying to read page count from PDF file" e)
       0)))
 
-(defn- store-converted-page-count [result count]
+(defn- store-converted-page-count [{:keys [already-valid-pdfa? pdfa? output-file]} original-file-path]
   (let [db-key (cond
-                 (:already-valid-pdfa? result) :copied-pages
-                 (:pdfa? result) :converted-pages
-                 :else :invalid-pages)]
-    (statistics/store-pdf-conversion-page-count db-key count)))
+                 already-valid-pdfa? :copied-pages
+                 pdfa? :converted-pages
+                 :else :invalid-pages)
+        file-path (if output-file (.getCanonicalPath output-file) original-file-path)]
+    (println "PAGES: " (get-pdf-page-count file-path))
+    (->> (get-pdf-page-count file-path)
+         (statistics/store-pdf-conversion-page-count db-key))))
 
 (defn- analyze-and-convert-to-pdf-a [pdf-file {:keys [target-file-path] :as opts}]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
@@ -136,8 +139,7 @@
                         (.getCanonicalPath pdf-file))
             pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
             conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path opts)]
-        (->> (get-pdf-page-count pdf-a-file-path)
-             (store-converted-page-count conversion-result))
+        (store-converted-page-count conversion-result file-path)
         (if (:pdfa? conversion-result)
           (if (pos? (-> conversion-result :output-file .length))
             (info "Converted to PDF/A " pdf-a-file-path)
