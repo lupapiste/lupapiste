@@ -370,7 +370,7 @@
           (:sade.core/line all)
           text
           (dissoc all :text :sade.core/type :sade.core/file :sade.core/line))
-        (when execute? (log/log-event :error command))
+        (when execute? (log/log-event :error (masked command)))
         (fail text (dissoc all :sade.core/type :sade.core/file :sade.core/line))))
     (catch response? resp
       (do
@@ -379,7 +379,7 @@
     (catch Object e
       (do
         (error e "exception while processing action:" (:action command) (class e) (str e))
-        (when execute? (log/log-event :error command))
+        (when execute? (log/log-event :error (masked command)))
         (fail :error.unknown)))))
 
 (defn execute [{action :action :as command}]
