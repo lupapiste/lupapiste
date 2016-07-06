@@ -42,4 +42,19 @@ LUPAPISTE.SutiDisplayModel = function() {
   self.sutiLink = function() {
     window.open( self.suti().www, "_blank");
   };
+
+  self.note = self.disposedComputed( function() {
+    var prods = self.suti().products;
+    var msg = false;
+    var error = false;
+    if( _.isString( prods ) ) {
+      msg = prods;
+      error = true;
+    } else {
+      if( _.isEmpty( prods )) {
+        msg = "suti.display-empty";
+      }
+    }
+    return msg && {text: msg, error: error};
+  });
 };

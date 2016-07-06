@@ -1,5 +1,12 @@
-@import url('main-blessed1.css?z=1467728778946');
+@import url('main-blessed1.css?z=1467789082119');
 
+/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:after {
+  border-color: rgba(246, 246, 246, 0);
+  border-top-color: #f6f6f6;
+  border-width: 10px;
+  margin-left: -10px;
+}
 /* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:before {
   border-color: rgba(187, 187, 187, 0);

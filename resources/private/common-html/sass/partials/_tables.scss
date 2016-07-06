@@ -338,4 +338,7 @@ div.suti-admin-container .serversettings--wide {
   .form-grid, .checkbox-wrapper {
     border: none;
   }
+  .suti-display--error {
+    color: $negative;
+  }
 }

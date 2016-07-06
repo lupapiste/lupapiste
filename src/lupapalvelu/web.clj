@@ -744,7 +744,7 @@
     {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
                    {:name "Two" :expired false :expirydate "\\/Date(1467710527)\\/" :downloaded "\\/Date(1467364927)\\/"}
                    {:name "Three" :expired false :expirydate nil :downloaded nil}]})
-  (defjson [:get "/dev/suti/empty"] []
+  (defjson [:get "/dev/suti/empty/:id"] []
     {})
 
   (defpage "/dev/suti/bad/:id" []

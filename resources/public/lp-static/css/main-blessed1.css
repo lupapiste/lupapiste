@@ -9743,6 +9743,10 @@ div.suti-admin-container .serversettings--wide {
 .suti-display .form-grid, .suti-display .checkbox-wrapper {
   border: none;
 }
+/* line 341, ../../../private/common-html/sass/partials/_tables.scss */
+.suti-display .suti-display--error {
+  color: #df3215;
+}
 
 /*Tab styles*/
 /* line 42, ../../../private/common-html/sass/partials/_tabs.scss */
@@ -10237,11 +10241,4 @@ ul.tabs {
 /* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
   left: 95%;
-}
-/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority:after {
-  border-color: rgba(246, 246, 246, 0);
-  border-top-color: #f6f6f6;
-  border-width: 10px;
-  margin-left: -10px;
 }

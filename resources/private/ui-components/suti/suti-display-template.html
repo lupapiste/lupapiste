@@ -43,7 +43,16 @@
               </div>
             </div>
           </div>
-        </div>
+          <div class="row"
+               data-bind="visible: $parent.note,
+                          if: $parent.note">
+            <div class="col-4">
+              <span data-bind="ltext: $parent.note().text,
+                               css: {'suti-display--error': $parent.note().error}">
+              </span>
+            </div>
+          </div>
+        </div>        
       </div>
     </rollup>
   </div>  

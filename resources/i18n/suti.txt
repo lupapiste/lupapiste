@@ -6,3 +6,4 @@
 "suti.display-title" "fi" "Suunnittelun lähtötiedot (kiinteistö {0})"
 "suti.display-id" "fi" "Hankenumero"
 "suti.display-added" "fi" "Suunnittelun lähtötiedot lisätty Suunnitelmat ja liitteet -osioon"
+"suti.display-empty" "fi" "Ei lähtötietoja."
