@@ -75,5 +75,11 @@
   (address->osoitetieto {:street "katukatu"}) => {:osoitenimi {:teksti "katukatu"}}
   (address->osoitetieto {:street "katukatu" :zip "12312" :city "kaupunki"}) => {:osoitenimi {:teksti "katukatu"} :postinumero "12312" :postitoimipaikannimi "kaupunki"})
 
-
-
+(facts "schema-info-filter"
+  (let [doc {:schema-info {:op  {}
+                           :foo :bar}}]
+    (schema-info-filter [doc] :op)        => (contains doc)
+    (schema-info-filter [doc] :quux)      => empty?
+    (schema-info-filter [doc] :foo)       => (contains doc)
+    (schema-info-filter [doc] :foo "bar") => (contains doc)
+    (schema-info-filter [doc] :foo "not") => empty?))

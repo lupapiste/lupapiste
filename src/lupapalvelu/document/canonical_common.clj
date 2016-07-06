@@ -798,14 +798,14 @@
 
 (defn- str-get-in [m ks]
   ;; return strings for keywords
-  (let [safe-name #(if (nil? %)
-                     %
-                     (name %))]
+  (let [safe-name #(if (keyword? %)
+                     (name %)
+                     %)]
     (safe-name (get-in m ks))))
 
 (defn schema-info-filter
   ([docs prop]
-   (filter #(str-get-in % [:schema-info prop]) docs))
+   (filter #(get-in % [:schema-info prop]) docs))
   ([docs prop value]
    (let [values (if (coll? value)
                   (set value)
