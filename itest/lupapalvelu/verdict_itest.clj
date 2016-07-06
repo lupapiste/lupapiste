@@ -5,7 +5,9 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.env :as env]
+            [sade.strings :as s]))
 
 (apply-remote-minimal)
 
@@ -149,6 +151,25 @@
 
     (fact "There are two new attachments, see krysp/dev/verdict.xml"
       (-> app-with-verdict :attachments count) => (+ attachment-count 2))
+
+    (when (and (env/feature? :libreoffice) (not (s/blank? (env/value :libreoffice :host))))
+      (facts "RTF attachment gets converted to PDF with the original file stored as well"
+        (let [{:keys [latestVersion] :as attachment} (->> (:attachments app-with-verdict)
+                                                          (filter (fn [{:keys [latestVersion]}] (= (:filename latestVersion) "sample-rtf-verdict.pdf")))
+                                                          (first))]
+          (fact "attachment exists"
+            attachment => truthy)
+
+          (fact "latest version file is a PDF"
+            (let [{:keys [headers body]} (raw sonja "download-attachment" :attachment-id (:fileId latestVersion))]
+              (get headers "Content-Type") => "application/pdf"
+              (.contains body "PDF") => true)
+
+          (fact "original file exists and is a RTF"
+            (:originalFileId latestVersion) => truthy
+            (let [{:keys [headers body]} (raw sonja "download-attachment" :attachment-id (:originalFileId latestVersion))]
+              (get headers "Content-Type") => "application/rtf"
+              (.contains body "\\rtf1\\ansi") => true))))))
 
     (fact "Lupaehdot, see krysp/dev/verdict.xml"
       (-> application :tasks count) => 0
