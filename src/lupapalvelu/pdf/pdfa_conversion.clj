@@ -123,7 +123,6 @@
                  pdfa? :converted-pages
                  :else :invalid-pages)
         file-path (if output-file (.getCanonicalPath output-file) original-file-path)]
-    (println "PAGES: " (get-pdf-page-count file-path))
     (->> (get-pdf-page-count file-path)
          (statistics/store-pdf-conversion-page-count db-key))))
 
