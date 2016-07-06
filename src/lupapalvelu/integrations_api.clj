@@ -67,16 +67,14 @@
       transfer
       (assoc transfer :attachments (map :id attachments)))))
 
-(defn- do-approve [application created id lang jatkoaika-app? do-rest-fn user]
+(defn- do-approve [application created id lang do-rest-fn user]
   (let [organization (organization/get-organization (:organization application))]
     (if (organization/krysp-integration? organization (permit/permit-type application))
       (or
         (application/validate-link-permits application)
         (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
-              sent-file-ids   (if jatkoaika-app?
-                                (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
-                                (let [submitted-application (mongo/by-id :submitted-applications id)]
-                                  (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
+              sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
+                                (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
           (do-rest-fn attachments-updates)))
       ;; Integration details not defined for the organization -> let the approve command pass
@@ -123,7 +121,7 @@
                        $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
-    (do-approve application created id lang jatkoaika-app? do-update user)))
+    (do-approve application created id lang do-update user)))
 
 (defn- application-already-exported [type]
   (fn [_ application]
