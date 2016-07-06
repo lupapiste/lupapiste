@@ -9,6 +9,7 @@ LUPAPISTE.SutiDisplayModel = function() {
   self.showSuti = service.sutiEnabled;
   self.open = ko.observable( true );
   self.suti = service.sutiDetails;
+  self.waiting = ko.observable();
 
   function sutiComputed( key, refresh ) {
     return self.disposedComputed( {
@@ -18,7 +19,10 @@ LUPAPISTE.SutiDisplayModel = function() {
       write: function( value ) {
         var app = lupapisteApp.models.application;
         if( app.id() ) {
-          service.updateApplication( app, _.set( {}, key, value), refresh );
+          service.updateApplication( app,
+                                     _.set( {}, key, value),
+                                     {refresh: refresh,
+                                      waiting: self.waiting});
         }
       }
     });
@@ -31,7 +35,7 @@ LUPAPISTE.SutiDisplayModel = function() {
   self.disposedComputed( function() {
     var app = lupapisteApp.models.application;
     if( app.id() ) {
-      service.fetchApplicationData( app );
+      service.fetchApplicationData( app, {waiting: self.waiting} );
     }
   });
 

@@ -21,7 +21,9 @@
                          id="suti-display-id"
                          data-bind="value: $parent.sutiId"><button class="primary"
                                                  data-bind="enable: $parent.suti().www,
-                                                            click: $parent.sutiLink">
+                                                            click: $parent.sutiLink,
+                                                            css: {waiting: $parent.waiting}">
+                    <i class="wait spin lupicon-refresh"></i>
                     <i class="lupicon-external-link"></i>
                   </button>
                 </div>
