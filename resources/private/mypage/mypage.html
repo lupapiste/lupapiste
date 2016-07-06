@@ -351,6 +351,8 @@
         <div data-bind="visible: state() === stateSending, ltext: 'userinfo.architect.upload.state.sending'"></div>
         <div data-bind="visible: state() === stateDone, ltext: 'userinfo.architect.upload.state.ready'"></div>
         <div data-bind="visible: state() === stateError, ltext: 'userinfo.architect.upload.state.error'"></div>
+        <div data-bind="visible: errorText(), ltext: errorText()" data-test-id="userinfo-upload-error"></div>
+
 
         <form>
 

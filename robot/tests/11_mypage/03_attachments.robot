@@ -18,6 +18,16 @@ Mikko uploads CV
   Click enabled by test id  userinfo-upload-ok
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
+Mikko uploads attachment with invalid mime
+  [Tags]  firefox
+  Element should be visible by test id  test-add-architect-attachment
+  Click enabled by test id  test-add-architect-attachment
+  Select From List  attachmentType  osapuolet.cv
+  Choose File      xpath=//input[@type='file']  ${XML_TESTFILE_PATH}
+  Click enabled by test id  userinfo-upload-ok
+  Wait until  Element should be visible  xpath=//div[@id='dialog-userinfo-architect-upload']//div[@data-test-id='userinfo-upload-error']
+  Click by test id  userinfo-upload-cancel
+
 Mikko copies his attachments to application
   [Tags]  firefox
   ${secs} =  Get Time  epoch
