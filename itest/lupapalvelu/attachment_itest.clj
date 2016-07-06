@@ -294,13 +294,13 @@
         application (query-application pena application-id)
         attachment1 (-> application :attachments first)]
     (:state application) => "verdictGiven"
-    (count (:attachments application)) => 5
+    (count (:attachments application)) => 6
     (fact "Uploading versions to pre-verdict attachment is not possible"
       (upload-attachment pena application-id attachment1 false :filename "dev-resources/test-pdf.pdf"))
     (fact "Uploading new post-verdict attachment is possible"
       (upload-attachment pena application-id {:id "" :type {:type-group "selvitykset" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
 
-    (count (:attachments (query-application pena application-id))) => 6))
+    (count (:attachments (query-application pena application-id))) => 7))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")

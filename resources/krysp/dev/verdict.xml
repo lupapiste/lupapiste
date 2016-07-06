@@ -268,11 +268,21 @@ Lyökämme käsi kätehen, sormet sormien lomahan, lauloaksemme hyviä, parahia 
             <yht:pykala>2</yht:pykala>
             <yht:liite>
               <yht:kuvaus>kuvaus 2</yht:kuvaus>
-              <yht:linkkiliitteeseen></yht:linkkiliitteeseen>
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-rtf-verdict.rtf</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2013-09-02T12:00:00</yht:muokkausHetki>
+              <yht:versionumero>1</yht:versionumero>
+              <yht:tekija>
+                <yht:henkilo>
+                  <yht:nimi>
+                    <yht:sukunimi>Tarkkanen</yht:sukunimi>
+                  </yht:nimi>
+                </yht:henkilo>
+              </yht:tekija>
+              <yht:tyyppi>paatos</yht:tyyppi>
               <yht:metatietotieto>
                 <yht:metatieto>
-                  <yht:metatietoArvo></yht:metatietoArvo>
-                  <yht:metatietoNimi></yht:metatietoNimi>
+                  <yht:metatietoArvo>arvo</yht:metatietoArvo>
+                  <yht:metatietoNimi>nimi</yht:metatietoNimi>
                 </yht:metatieto>
               </yht:metatietotieto>
             </yht:liite>

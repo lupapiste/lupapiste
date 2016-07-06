@@ -137,7 +137,7 @@
       (-> application :comments count) => 0)
 
     (fact "Has a verdict comment and an attachment comment"
-      (-> app-with-verdict :comments count) => 2
+      (-> app-with-verdict :comments count) => 3
       (-> app-with-verdict :comments first :target :type) => "attachment"
       (-> app-with-verdict :comments last :target :type) => "verdict")
 
@@ -147,8 +147,8 @@
        (:subject email) => "Lupapiste: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
        email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")))
 
-    (fact "There is one more attachments, see krysp/dev/verdict.xml"
-      (-> app-with-verdict :attachments count) => (inc attachment-count))
+    (fact "There are two new attachments, see krysp/dev/verdict.xml"
+      (-> app-with-verdict :attachments count) => (+ attachment-count 2))
 
     (fact "Lupaehdot, see krysp/dev/verdict.xml"
       (-> application :tasks count) => 0
