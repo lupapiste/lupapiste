@@ -742,7 +742,7 @@
 
   (defjson [:get "/dev/suti/good/:id"] []
     {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
-                   {:name "Two" :expired false :expirydate "\\/Date(1467710527)\\/" :downloaded "\\/Date(1467364927)\\/"}
+                   {:name "Two" :expired false :expirydate "\\/Date(1467710527123)\\/" :downloaded "\\/Date(1467364927456)\\/"}
                    {:name "Three" :expired false :expirydate nil :downloaded nil}]})
   (defjson [:get "/dev/suti/empty/:id"] []
     {})
@@ -754,8 +754,8 @@
     ;; Username: suti, password: secret
     (let [[username password] (http/decode-basic-auth (request/ring-request))]
       (if (and (= username "suti") (= password "secret"))
-        (json/generate-string {:productlist [{:name "Four" :expired false :expirydate "\\/Date(1467883327)\\/" :downloaded "\\/Date(1467019327)\\/" }
-                                             {:name "Five" :expired false :expirydate "\\/Date(1468056127)\\/" :downloaded nil}
+        (json/generate-string {:productlist [{:name "Four" :expired false :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
+                                             {:name "Five" :expired false :expirydate "\\/Date(1468056127124)\\/" :downloaded nil}
                                              {:name "Six" :expired false :expirydate nil :downloaded nil}]})
         (resp/status 401 "Unauthorized"))))
   )

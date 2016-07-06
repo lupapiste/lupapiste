@@ -7,3 +7,8 @@
 "suti.display-id" "fi" "Hankenumero"
 "suti.display-added" "fi" "Suunnittelun lähtötiedot lisätty Suunnitelmat ja liitteet -osioon"
 "suti.display-empty" "fi" "Ei lähtötietoja."
+"suti.display-downloaded" "fi" "Ladattu"
+"suti.display-expired" "fi" "Vanhentunut"
+"suti.display-expired" "sv" "Fåråldrad"
+"suti.display-valid" "fi" "Voimassa"
+"suti.display-valid" "sv" "Giltig"

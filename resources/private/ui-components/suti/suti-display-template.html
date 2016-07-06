@@ -20,9 +20,9 @@
                   <input type="text"
                          id="suti-display-id"
                          data-bind="value: $parent.sutiId"><button class="primary"
-                                                 data-bind="enable: $parent.suti().www,
-                                                            click: $parent.sutiLink,
-                                                            css: {waiting: $parent.waiting}">
+                                                                   data-bind="enable: $parent.suti().www,
+                                                                              click: $parent.sutiLink,
+                                                                              css: {waiting: $parent.waiting}">
                     <i class="wait spin lupicon-refresh"></i>
                     <i class="lupicon-external-link"></i>
                   </button>
@@ -52,7 +52,33 @@
               </span>
             </div>
           </div>
-        </div>        
+          <!-- ko if: _.size( $parent.products() ) -->
+          <div class="row">
+            <div class="col-4">
+              <table class="suti-display-table">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'application.attachmentType'"></th>
+                    <th data-bind="ltext: 'application.attachmentState'"></th>
+                    <th data-bind="ltext: 'suti.display-valid'"></th>
+                    <th data-bind="ltext: 'suti.display-downloaded'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: $parent.products">
+                  <tr>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="ltext: state,
+                                   css: {'suti-display--error': expired}"></td>
+                    <td data-bind="momentDate: expirydate,
+                                   css: {'suti-display--error': expired}"></td>
+                    <td data-bind="momentDate: downloaded"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- /ko -->
+        </div>
       </div>
     </rollup>
   </div>  

@@ -7,7 +7,8 @@
             [sade.strings :as ss]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr])
+  (:import org.joda.time.DateTimeZone))
 
 (defn admin-org [admin]
   (-> admin
@@ -43,13 +44,24 @@
     (str url part)
     (str url "/" part)))
 
+(defn- clean-timestamp
+  "Suti returns expirydate and downloaded fields as a strings
+  '\\/Date(1495806556450)\\/'. Included Unix timestamp is in the local
+  time, so it is also converted to UTC. Returns Unix timestamp (ms
+  from epoc) or nil."
+  [field]
+  (try
+    (when-let [ts (some->> field
+                           (re-find #"\d+")
+                           Long/parseLong)]
+      (.convertLocalToUTC (DateTimeZone/getDefault) ts true))
+    (catch Exception _)))
+
 (defn- clean-suti-dates
-  "Suti returns expirydate and downloaded fields as a strings '\\/Date(1495806556450)\\/'"
   [{:keys [expirydate downloaded] :as data}]
-  (letfn [(clean [v] (re-find #"\d+" (or v "")))]
-    (assoc data
-           :expirydate (clean expirydate)
-           :downloaded (clean downloaded))))
+  (assoc data
+         :expirydate (clean-timestamp expirydate)
+         :downloaded (clean-timestamp downloaded)))
 
 (defn- fetch-suti-products
   "Returns either list of products (can be empty) or error localization key."

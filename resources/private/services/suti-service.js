@@ -95,11 +95,12 @@ LUPAPISTE.SutiService = function() {
       .success( function( res ) {
         if( _.isArray( res.data.products )) {
           res.data.products = _.map( res.data.products, function( p ) {
-            // If exist, expirydate and downloaded are in local (Finnish) time.
+            // If exist, expirydate and downloaded are in UTC timestamps (ms)
+            // moment.utc( timestamp ) does not seem to work so we use offset.
             return _.assignWith( p,
                                  {expirydate: true, downloaded: true},
                                  function( v ) {
-                                   return v ? moment.unix( v ) : v;
+                                   return v ? moment( v + (60000 * moment().utcOffset())) : v;
                                  });
 
           });
