@@ -154,7 +154,7 @@
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
    :op                                   (sc/maybe Operation)
-   (sc/optional-key :group)              (apply sc/enum attachment-groups)
+   (sc/optional-key :group-type)         (apply sc/enum attachment-groups)
    :signatures                           [Signature]
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
@@ -188,10 +188,10 @@
          (map (partial assoc {} :group-type))
          (apply conj operations))))
 
-(defn attachment-grouping [{group :group operation :op :as attachment}]
-  (let [group (or group (when operation :operation))] ;; Group not set for old attachments.
-    {:by-ref  (merge {:group-type group}
-                     (when (= :operation group) operation))
+(defn attachment-grouping [{group-type :group-type operation :op :as attachment}]
+  (let [group-type (or group-type (when operation :operation))] ;; Group not set for old attachments.
+    {:by-ref  (merge {:group-type group-type}
+                     (when (= :operation group-type) operation))
      :by-type (att-type/group-by-type attachment)}))
 
 (defn link-file-to-application [app-id fileId]
@@ -238,7 +238,7 @@
            :versions []
            :auth []
            :contents contents}
-          (:group-type group) (assoc :group (:group-type group))
+          (:group-type group) (assoc :group-type (:group-type group))
           (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
 

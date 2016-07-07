@@ -60,7 +60,7 @@ var attachment = (function() {
     previewDisabled:              ko.observable(false),
     previewVisible:               ko.observable(false),
     operation:                    ko.observable(),
-    group:                        ko.observable(),
+    groupType:                    ko.observable(),
     selectedGroup:                ko.observable(),
     selectableGroups:             ko.observableArray(),
     contents:                     ko.observable(),
@@ -348,7 +348,7 @@ var attachment = (function() {
         saveLabelInformation("group", {meta: {group: !_.isEmpty(group) ? group : null}});
 
         model.operation(util.getIn(group, ["id"]) ? _.omit(group, "group-type") : null);
-        model.group(util.getIn(group, ["group-type"]));
+        model.groupType(util.getIn(group, ["group-type"]));
       }
     }));
 
@@ -491,7 +491,7 @@ var attachment = (function() {
     model.filename(attachment.filename);
     model.type(attachment.type);
     model.operation(attachment.op);
-    model.group(attachment.group);
+    model.groupType(attachment["group-type"]);
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);

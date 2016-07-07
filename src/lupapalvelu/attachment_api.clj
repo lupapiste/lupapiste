@@ -604,7 +604,7 @@
   (let [data (merge meta
                     (when (:group meta)
                       {:op (not-empty (select-keys (:group meta) [:id :name]))
-                       :group (get-in meta [:group :group-type])}))]
+                       :group-type (get-in meta [:group :group-type])}))]
     (attachment/update-attachment-data! command attachmentId data created))
   (ok))
 
