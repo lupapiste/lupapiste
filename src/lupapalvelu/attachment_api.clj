@@ -81,6 +81,19 @@
     (when (not-any? #{k} attachment/attachment-meta-types)
       (fail :error.illegal-meta-type :parameters k))))
 
+(defn- validate-group-op [group]
+  (when-let [op (not-empty (select-keys group [:id :name]))]
+    (when (sc/check attachment/Operation op)
+      (fail :error.illegal-attachment-operation))))
+
+(defn- validate-group-type [group]
+  (when-let [group-type (keyword (:group-type group))]
+    (when (sc/check (apply sc/enum attachment/attachment-groups) group-type)
+      (fail :error.illegal-attachment-group-type))))
+
+(defn- validate-group [{{{group :group} :meta} :data}]
+  ((some-fn validate-group-op validate-group-type) group))
+
 (defn- validate-operation [{{meta :meta} :data}]
   (when-let [op (:op meta)]
     (when (sc/check attachment/Operation op)
@@ -432,7 +445,9 @@
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
-                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))]
+                      (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.file-upload.illegal-file-type)))
+                      (fn-> (get-in [:data :group]) validate-group-op)
+                      (fn-> (get-in [:data :group]) validate-group-type)]
    :states     (conj (states/all-states-but states/terminal-states) :answered)
    :notified   true
    :on-success [(notify :new-comment)
@@ -595,7 +610,7 @@
    :user-authz-roles auth/all-authz-writer-roles
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
-                      validate-meta validate-scale validate-size validate-operation]
+                      validate-meta validate-scale validate-size validate-operation validate-group]
    :pre-checks [a/validate-authority-in-drafts
                 attachment-editable-by-application-state
                 attachment-not-readOnly
