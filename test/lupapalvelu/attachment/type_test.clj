@@ -74,10 +74,9 @@
    (sc/optional-key :type-group)  (sc/enum :group1 :group2)
    (sc/optional-key :kw)          sc/Keyword
    (sc/optional-key :str)         sc/Str
-   (sc/optional-key :num)         sc/Num
-   (sc/optional-key :map)         {sc/Keyword sc/Keyword}})
+   (sc/optional-key :num)         sc/Num})
 
-(defspec equals?-spec
+(defspec equals?-spec 50
   (prop/for-all [types (gen/vector (ssg/generator AType) 1 3)]
                 (if (and (every? :type-id types)
                          (every? :type-group types)
