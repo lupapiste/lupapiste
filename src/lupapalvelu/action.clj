@@ -421,7 +421,7 @@
    (sc/optional-key :description) sc/Str
    ; Documents that the action will be sending (email) notifications.
    (sc/optional-key :notified)    sc/Bool
-   ; Prechecks take two parameters: the command and the application.
+   ; Prechecks one parameter: the command, which has :application associated.
    ; Command does not have :data when pre-check is called on validation phase (allowed-actions)
    ; but has :data when pre-check is called during action execution.
    (sc/optional-key :pre-checks)  [(sc/cond-pre util/Fn sc/Symbol)]

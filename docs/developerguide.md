@@ -528,7 +528,7 @@ user-authz-roles | Set of application context role keywords. Action pipeline che
 org-authz-roles | Set of application organization context keywords. User is authorized to use action only if user has valid role in application's organization.
 description | Documentation string.
 notified | Boolean. Documents that the action will be sending (email) notifications.
-pre-checks | Vector of functions. Functions are called with 2 parameters: action argument map (command) and current application (if any). Function must return nil if everything is OK, or an error map. Use sade.core/fail to generate the error.
+pre-checks | Vector of functions. Functions are called with 1 parameter: action argument map (command, includes the application if applicable). Function must return nil if everything is OK, or an error map. Use sade.core/fail to generate the error.
 input-validators | Vector of functions. Functions are called with 1 parameter, the action argument map (command). Function must return nil if everything is OK, or an error map. Use sade.core/fail to generate the error.
 states | Vector of application state keywords. Action pipeline checks that the current application is in correct state before executing the action.
 on-complete | Function or vector of functions. Functions are called with 2 parameters: action argument map (command) and the action execution return value map.
