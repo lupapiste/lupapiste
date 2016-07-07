@@ -204,6 +204,8 @@
 
 (def- common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka"])
 
+(def- optional-ymparistolupa-schemas #{"ymp-maksaja"})
+
 (def- common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
 (def- applicant-doc-schema-name-hakija     "hakija")
@@ -344,6 +346,7 @@
                                   :permit-type permit/YI
                                   :applicant-doc-schema applicant-doc-schema-name-ilmoittaja
                                   :required ["ymp-ilm-kesto"]
+                                  :optional optional-ymparistolupa-schemas
                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
@@ -382,6 +385,7 @@
                                                                       :permit-type permit/YM
                                                                       :applicant-doc-schema applicant-doc-schema-name-hakija
                                                                       :required ["kiinteisto"]
+                                                                      :optional optional-ymparistolupa-schemas
                                                                       :attachments []
                                                                       :add-operation-allowed false
                                                                       :min-outgoing-link-permits 0
