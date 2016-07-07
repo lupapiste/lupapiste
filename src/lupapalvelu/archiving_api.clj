@@ -8,7 +8,7 @@
             [lupapalvelu.organization :as organization]
             [cheshire.core :as json]))
 
-(defn check-user-is-archivist [{:keys [user]} {:keys [organization]}]
+(defn check-user-is-archivist [{user :user {:keys [organization]} :application}]
   (let [archive-orgs (user/organization-ids-by-roles user #{:archivist})
         org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))

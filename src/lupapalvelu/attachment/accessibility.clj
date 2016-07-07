@@ -52,7 +52,7 @@
                   file-id)]
     (boolean
       (when-let [attachment (util/find-first
-                              (fn [{versions :versions :as attachment}]
+                              (fn [{versions :versions}]
                                 (->> (mapcat (juxt :fileId :originalFileId) versions)
                                      (util/find-first #{file-id})))
                               attachments)]
@@ -63,9 +63,9 @@
   (let [attachments-with-auth (map populate-auth attachments)]
     (filter (partial can-access-attachment? user application) attachments-with-auth)))
 
-(defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
+(defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data app :application}]
   (when (and attachment-id (not (user/authority? user)))
-    (if-let [{auth :auth} (util/find-first #(= (:id %) attachment-id) attachments)]
+    (if-let [{auth :auth} (util/find-first #(= (:id %) attachment-id) (:attachments app))]
       (when (and auth (not (auth/has-auth? {:auth auth} (:id user))))
         (fail :error.attachment.no-auth))
       (fail :error.unknown-attachment))))

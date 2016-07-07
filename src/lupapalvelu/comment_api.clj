@@ -50,7 +50,7 @@
 ;; Validation
 ;;
 
-(defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
+(defn applicant-cant-set-to [{{:keys [to]} :data user :user}]
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 

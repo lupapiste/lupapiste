@@ -124,7 +124,7 @@
     (do-approve application created id lang do-update user)))
 
 (defn- application-already-exported [type]
-  (fn [_ application]
+  (fn [{application :application}]
     (when-not (= "aiemmalla-luvalla-hakeminen" (get-in application [:primaryOperation :name]))
       (let [export-ops #{:exported-to-backing-system :exported-to-asianhallinta}
             filtered-transfers (filter (comp export-ops keyword :type) (:transfers application))]
@@ -258,7 +258,7 @@
   (when-let [link-permit-app (application/get-link-permit-app application)]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
-(defn- has-asianhallinta-operation [_ {:keys [primaryOperation]}]
+(defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
 
@@ -343,7 +343,7 @@
    :parameters [id]
    :user-roles #{:authority}
    :states     states/all-states
-   :pre-checks [(fn [{{ip :client-ip} :web user :user} {:keys [organization]}]
+   :pre-checks [(fn [{{ip :client-ip} :web user :user {:keys [organization]} :application}]
                   (if organization
                     (when-not (autologin/allowed-ip? ip organization)
                       (fail :error.ip-not-allowed))

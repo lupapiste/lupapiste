@@ -18,8 +18,8 @@
 ;; Helpers
 
 (defn- task-state-assertion [states]
-  (fn [{{task-id :taskId} :data} {tasks :tasks}]
-    (if-let [task (util/find-by-id task-id tasks)]
+  (fn [{{task-id :taskId} :data app :application}]
+    (if-let [task (util/find-by-id task-id (:tasks app))]
       (when-not ((set states) (keyword (:state task)))
         (fail :error.command-illegal-state))
       (fail :error.task-not-found))))
@@ -31,18 +31,18 @@
       {$set {:tasks.$.state state :modified created}}
       updates)))
 
-(defn- validate-task-is-not-review [{{task-id :taskId} :data} {tasks :tasks}]
+(defn- validate-task-is-not-review [{{task-id :taskId} :data {tasks :tasks} :application}]
   (when (tasks/task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
-(defn- validate-task-is-review [{{task-id :taskId} :data} {tasks :tasks}]
+(defn- validate-task-is-review [{{task-id :taskId} :data {tasks :tasks} :application}]
   (when-not (tasks/task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
 (defn- task-is-end-review? [task]
   (re-matches #"(?i)^(osittainen )?loppukatselmus$" (or (get-in task [:data :katselmuksenLaji :value]) "")))
 
-(defn- validate-task-is-end-review [{{task-id :taskId} :data} {tasks :tasks}]
+(defn- validate-task-is-end-review [{{task-id :taskId} :data {tasks :tasks} :application}]
   (when-not (task-is-end-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 

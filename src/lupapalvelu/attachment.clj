@@ -172,7 +172,7 @@
   {:pre [(string? filename)]}
   (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf"))
 
-(defn if-not-authority-state-must-not-be [state-set {user :user} {state :state}]
+(defn if-not-authority-state-must-not-be [state-set {user :user {:keys [state]} :application}]
   (when (and (not (usr/authority? user))
              (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
@@ -312,16 +312,16 @@
 
 (defn ram-status-ok
   "Pre-checker that fails only if the attachment is unapproved RAM attachment."
-  [{{attachment-id :attachmentId} :data} {attachments :attachments}]
-  (let [{:keys [ramLink state]} (util/find-by-id attachment-id attachments)]
+  [{{attachment-id :attachmentId} :data app :application}]
+  (let [{:keys [ramLink state]} (util/find-by-id attachment-id (:attachments app))]
     (when (and (ss/not-blank? ramLink)
                (util/not=as-kw state :ok))
       (fail :error.ram-not-approved))))
 
 (defn ram-status-not-ok
   "Pre-checker that fails only if the attachment is approved RAM attachment."
-  [{{attachment-id :attachmentId} :data} {attachments :attachments}]
-  (let [{:keys [ramLink state]} (util/find-by-id attachment-id attachments)]
+  [{{attachment-id :attachmentId} :data app :application}]
+  (let [{:keys [ramLink state]} (util/find-by-id attachment-id (:attachments app))]
     (when (and (ss/not-blank? ramLink)
                (util/=as-kw state :ok))
       (fail :error.ram-approved))))
@@ -333,7 +333,7 @@
   "Pre-checker that fails if the attachment is the root for RAM
   attachments and the user is applicant (authority can delete the
   root)."
-  [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
+  [{user :user {attachment-id :attachmentId} :data {:keys [attachments]} :application}]
   (when (and (-> attachment-id (util/find-by-id attachments) :ramLink ss/blank?)
              (find-by-ram-link attachment-id attachments)
              (usr/applicant? user))

@@ -9,7 +9,7 @@
   {:parameters [id]
    :states states/post-verdict-states
    :user-roles #{:authority :applicant}
-   :pre-checks [(fn [_ application]
+   :pre-checks [(fn [{:keys [application]}]
                     (when (foreman/foreman-app? application)
                       (fail :error.foreman.no-tasks)))]}
   [_])

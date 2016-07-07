@@ -14,7 +14,6 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]
             [lupapalvelu.logging :as log]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.domain :as domain]))
@@ -232,7 +231,7 @@
   (when (and (= :command (:type (meta-data command))) (get-in command [:user :impersonating]))
     unauthorized))
 
-(defn disallow-impersonation [command _]
+(defn disallow-impersonation [command]
   (when (get-in command [:user :impersonating]) unauthorized))
 
 (defn missing-parameters [command]
@@ -250,10 +249,10 @@
     (when-not (.contains valid-states (keyword state))
       (fail :error.command-illegal-state :state state))))
 
-(defn pre-checks-fail [command application]
+(defn pre-checks-fail [command]
   {:post [(or (nil? %) (contains? % :ok))]}
   (when-let [pre-checks (:pre-checks (meta-data command))]
-    (reduce #(or %1 (%2 command application)) nil pre-checks)))
+    (reduce #(or %1 (%2 command)) nil pre-checks)))
 
 (defn masked [command]
   (letfn [(strip-field [command field]
@@ -321,7 +320,7 @@
 
      unauthorized)))
 
-(defn- not-authorized-to-application [command application]
+(defn- not-authorized-to-application [{:keys [application] :as command}]
   (when (-> command :data :id)
     (if-not application
       (fail :error.application-not-accessible)
@@ -351,13 +350,13 @@
   (try+
     (or
       (some #(% command) validators)
-      (let [application (get-application command)]
+      (let [application (get-application command)
+            command (assoc command :application application)]
         (or
-          (not-authorized-to-application command application)
-          (pre-checks-fail command application)
+          (not-authorized-to-application command)
+          (pre-checks-fail command)
           (when execute?
-            (let [command  (assoc command :application application) ;; cache the app
-                  status   (executed command)
+            (let [status   (executed command)
                   post-fns (get-post-fns status (get-meta (:action command)))]
               (invoke-post-fns! post-fns command status)
               status))

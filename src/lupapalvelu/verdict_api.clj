@@ -24,7 +24,7 @@
 ;; KRYSP verdicts
 ;;
 
-(defn application-has-verdict-given-state [_ application]
+(defn application-has-verdict-given-state [{:keys [application]}]
   (when-not (and application (some (partial sm/valid-state? application) states/verdict-given-states))
     (fail :error.command-illegal-state)))
 
@@ -91,7 +91,7 @@
    :states     give-verdict-states
    :user-roles #{:authority}
    :pre-checks [application-has-verdict-given-state
-                (fn [{{:keys [verdictId]} :data} application]
+                (fn [{{:keys [verdictId]} :data application :application}]
                   (when verdictId
                     (when-not (:draft (find-verdict application verdictId))
                       (fail :error.verdict.not-draft))))]}

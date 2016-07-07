@@ -215,7 +215,7 @@
 (defn company-user-edit-allowed
   "Pre-check enforcing that the caller has sufficient credentials to
   edit company member."
-  [{caller :user :as cmd} app]
+  [{caller :user :as cmd}]
   (when-let [target-user (some-> cmd :data :user-id usr/get-user-by-id)]
     (when-not (or (= (:role caller) "admin")
                   (and (= (get-in caller [:company :role])
@@ -349,7 +349,7 @@
 (defn company-not-already-invited
   "Pre-checker for company-invite command. Fails if the company is
   already authorized to the application."
-  [{{:keys [company-id]} :data} {:keys [auth]}]
+  [{{:keys [company-id]} :data {:keys [auth]} :application}]
   ;; We identify companies by their y (Y-tunnus), since the id
   ;; is not available in the auth for not yet accepted invites.
   ;; See company-invite function below.
@@ -400,6 +400,6 @@
 (defn cannot-submit
   "Pre-check that succeeds only if a company user does not have submit
   rights"
-  [{{company :company} :user} application]
+  [{{company :company} :user}]
   (when-not (and company  (not (:submit company)))
     (fail :error.authorized)))

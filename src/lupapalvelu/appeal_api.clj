@@ -16,35 +16,35 @@
 
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
-  [{{verdictId :verdictId} :data} {:keys [verdicts]}]
+  [{{verdictId :verdictId} :data {:keys [verdicts]} :application}]
   (when verdictId
     (when-not (util/find-first #(= verdictId (:id %)) verdicts)
       (fail :error.verdict-not-found))))
 
 (defn- appeal-exists
   "Pre-check to validate that at least one appeal exists before appeal verdict can be created"
-  [{{:keys [verdictId]} :data} {:keys [appeals]}]
+  [{{:keys [verdictId]} :data {:keys [appeals]} :application}]
   (when verdictId
     (when (zero? (count (filter #(= verdictId (:target-verdict %)) appeals)))
      (fail :error.appeals-not-found))))
 
 (defn- appeal-id-exists
   "Pre-check to validate that given ID exists in application"
-  [{{appeal-id :appealId} :data} {:keys [appeals]}]
+  [{{appeal-id :appealId} :data {:keys [appeals]} :application}]
   (when appeal-id ; optional parameter, could be nil in command
     (when-not (util/find-by-id appeal-id appeals)
       (fail :error.unknown-appeal))))
 
 (defn- appeal-verdict-id-exists
   "Pre-check to validate that id from parameters exist in :appealVerdicts"
-  [{{appeal-id :appealId} :data} {:keys [appealVerdicts]}]
+  [{{appeal-id :appealId} :data {:keys [appealVerdicts]} :application}]
   (when appeal-id
     (when-not (util/find-by-id appeal-id appealVerdicts)
       (fail :error.unknown-appeal-verdict))))
 
 (defn- deny-type-change
   "Pre-check: when appeal is updated, type of appeal can't be changed"
-  [{{appeal-id :appealId type :type} :data} {:keys [appeals]}]
+  [{{appeal-id :appealId type :type} :data {:keys [appeals]} :application}]
   (when appeal-id
     (when-some [appeal (util/find-by-id appeal-id appeals)]
       (when-not (= type (:type appeal))
@@ -72,7 +72,7 @@
 
 (defn- appeal-editable?
   "Pre-check to check that appeal can be edited."
-  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
+  [{{appeal-id :appealId} :data {:keys [appeals appealVerdicts] :as application} :application}]
   (when (and appeal-id appealVerdicts)
     (if-let [appeal (util/find-by-id appeal-id appeals)]
       (when-not (appeal-item-editable? application appeal)
@@ -81,7 +81,7 @@
 
 (defn- appeal-verdict-editable?
   "Pre-check to check that appeal-verdict can be edited."
-  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
+  [{{appeal-id :appealId} :data {:keys [appealVerdicts] :as application} :application}]
   (when appeal-id
     (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
       (when-not (appeal-item-editable? application (assoc appeal-verdict :type :appealVerdict))

@@ -74,7 +74,7 @@
 (defn no-duplicate-guests
   "Pre check for avoiding duplicate guests or unnecessary access.
   Note: only application-defined access is checked."
-  [{{email :email} :data} application]
+  [{{email :email} :data application :application}]
   (when email
    (let [guest (usr/get-user-by-email email)]
      (when (auth/user-authz? auth/all-authz-roles application guest)
@@ -83,10 +83,10 @@
 (defn known-guest-authority
   "Pre check to make sure that guest authority is defined for the
   organization."
-  [{{:keys [email role]} :data} {:keys [organization]}]
+  [{{:keys [email role]} :data app :application}]
   (when (and (= role "guestAuthority")
              (not-any? #(= email (:email %))
-                       (organization-guest-authorities organization)))
+                       (organization-guest-authorities (:organization app))))
     (fail :error.not-guest-authority)))
 
 (defn valid-guest-role [{{role :role} :data}]
@@ -164,7 +164,7 @@
 (defn auth-modification-check
   "User can manipulate every guest but only organization authority can
   modify guestAuthorities."
-  [{{:keys [username]} :data user :user} application]
+  [{{:keys [username]} :data user :user application :application}]
   (when username
     (let [role (username-auth-role application username)]
       (when-not (or (= role :guest)
@@ -195,9 +195,7 @@
 
 (defn delete-guest-application
   "Namesake command implementation."
-  [{{:keys [username]} :data
-    application :application
-    :as command}]
+  [{{:keys [username]} :data :as command}]
   (action/update-application command
                              {$pull {:auth {:username username
                                             :role #"guest(Authority)?"}}})

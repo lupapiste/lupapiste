@@ -605,7 +605,7 @@
 
 (defquery add-user-attachment-allowed
   {:description "Dummy command for UI logic: returns falsey if current user is not allowed to add \"user attachments\"."
-   :pre-checks [(fn [command _]
+   :pre-checks [(fn [command]
                   (when-not (add-user-attachment-allowed? (:user command))
                     unauthorized))]
    :user-roles #{:anonymous}})
@@ -668,7 +668,7 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :states     (states/all-application-states-but states/terminal-states)
-   :pre-checks [(fn [command _]
+   :pre-checks [(fn [command]
                   (when-not (-> command :user :architect)
                     unauthorized))]}
   [{application :application user :user}]
@@ -709,30 +709,29 @@
 (defquery enable-foreman-search
   {:user-roles #{:authority}
    :org-authz-roles (disj auth/all-org-authz-roles :tos-editor :tos-publisher)
-   :pre-checks [(fn [command application]
-                  (let [org-ids (usr/organization-ids (:user command))]
+   :pre-checks [(fn [{:keys [user application]}]
+                  (let [org-ids (usr/organization-ids user)]
                     (if-not application
                       (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
                         unauthorized)
-                      unauthorized))
-                  )]}
+                      unauthorized)))]}
   [_])
 
 (defquery permanent-archive-enabled
   {:user-roles #{:applicant :authority}
-   :pre-checks [(fn [command {:keys [organization]}]
+   :pre-checks [(fn [{user :user {:keys [organization]} :application}]
                   (let [org-set (if organization
                                   #{organization}
-                                  (usr/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher :archivist}))]
+                                  (usr/organization-ids-by-roles user #{:authority :tos-editor :tos-publisher :archivist}))]
                     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
   [_])
 
 (defn calendars-enabled-api-pre-check
-  [rolez command {:keys [organization]}]
+  [rolez {user :user {:keys [organization]} :application}]
   (let [org-set (if organization
                   #{organization}
-                  (usr/organization-ids-by-roles (:user command) rolez))]
+                  (usr/organization-ids-by-roles user rolez))]
     (when (or (empty? org-set) (not (organization/some-organization-has-calendars-enabled? org-set)))
       unauthorized)))
 

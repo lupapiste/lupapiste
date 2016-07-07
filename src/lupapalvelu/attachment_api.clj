@@ -38,34 +38,34 @@
 
 ;; Validators and pre-checks
 
-(defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
+(defn- attachment-is-not-locked [{{:keys [attachmentId]} :data application :application}]
   (when (-> (attachment/get-attachment-info application attachmentId) :locked true?)
     (fail :error.attachment-is-locked)))
 
-(defn- attachment-id-is-present-in-application-or-not-set [{{:keys [attachmentId]} :data} {:keys [attachments]}]
+(defn- attachment-id-is-present-in-application-or-not-set [{{:keys [attachmentId]} :data {:keys [attachments]} :application}]
   (when-not (or (ss/blank? attachmentId) (some #(= (:id %) attachmentId) attachments))
     (fail :error.attachment.id)))
 
-(defn attachment-not-readOnly [{{attachmentId :attachmentId} :data} application]
+(defn attachment-not-readOnly [{{attachmentId :attachmentId} :data application :application}]
   (when (-> (attachment/get-attachment-info application attachmentId) :readOnly true?)
     (fail :error.unauthorized
           :desc "Read-only attachments cannot be modified.")))
 
-(defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user} application]
+(defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user application :application}]
   (when (and (-> (attachment/get-attachment-info application attachmentId) :required true?)
              (not (usr/authority? user)))
     (fail :error.unauthorized
           :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority.")))
 
-(defn- has-versions [{{attachmentId :attachmentId} :data user :user} application]
+(defn- has-versions [{{attachmentId :attachmentId} :data application :application}]
   (when (and (ss/not-blank? attachmentId)
              (empty? (:versions (attachment/get-attachment-info application attachmentId))))
     (fail :error.attachment.no-versions)))
 
 (defn- attachment-editable-by-application-state
-  ([command application]
-   (attachment-editable-by-application-state false command application))
-  ([authority-sent? {{attachmentId :attachmentId} :data user :user :as command} {current-state :state :as application}]
+  ([command]
+   (attachment-editable-by-application-state false command))
+  ([authority-sent? {{attachmentId :attachmentId} :data user :user {current-state :state :as application} :application}]
    (when-not (ss/blank? attachmentId)
      (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
        (when-not (if (= (keyword current-state) :sent)
@@ -96,12 +96,12 @@
     (when (and size (not (contains? (set attachment/attachment-sizes) (keyword size))))
       (fail :error.illegal-attachment-size :parameters size))))
 
-(defn- validate-attachment-type [{{attachment-type :attachmentType} :data} application]
+(defn- validate-attachment-type [{{attachment-type :attachmentType} :data application :application}]
   (when attachment-type
     (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
 
-(defn- validate-operation-in-application [{{meta :meta} :data} application]
+(defn- validate-operation-in-application [{{meta :meta} :data application :application}]
   (when-let [op-id (get-in meta [:op :id])]
     (let [operation-ids (map :id (a/get-operations application))]
       (when (not-any? (partial = op-id) operation-ids)
@@ -216,35 +216,35 @@
 ;;
 
 (defcommand create-attachments
-  {:description "Authority can set a placeholder for an attachment"
-   :parameters  [id attachmentTypes]
-
-   :pre-checks [(fn [{{attachment-types :attachmentTypes} :data} application]
-                  (when (and attachment-types (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
-                    (fail :error.unknown-attachment-type)))
-                a/validate-authority-in-drafts]
+  {:description      "Authority can set a placeholder for an attachment"
+   :parameters       [id attachmentTypes]
+   :pre-checks       [(fn [{{attachment-types :attachmentTypes} :data application :application}]
+                        (when (and attachment-types
+                                   (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
+                          (fail :error.unknown-attachment-type)))
+                      a/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
-   :user-roles #{:authority :oirAuthority}
-   :states      (states/all-states-but (conj states/terminal-states :answered :sent))}
+   :user-roles       #{:authority :oirAuthority}
+   :states           (states/all-states-but (conj states/terminal-states :answered :sent))}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (attachment/create-attachments! application attachmentTypes created false true true)]
     (ok :applicationId id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
 (defcommand create-ram-attachment
-  {:description "Create RAM attachment based on existing attachment"
-   :parameters  [id attachmentId]
-   :pre-checks [(fn [{{attachment-id :attachmentId} :data} {attachments :attachments}]
-                  (when-not (util/find-by-id attachment-id attachments)
-                    (fail :error.attachment.id)))
-                (fn [{{attachment-id :attachmentId} :data} {attachments :attachments}]
-                  (when (some (comp #{attachment-id} :ramLink) attachments)
-                    (fail :error.ram-link-already-exists)))
-                attachment/ram-status-ok]
+  {:description      "Create RAM attachment based on existing attachment"
+   :parameters       [id attachmentId]
+   :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
+                        (when-not (util/find-by-id attachment-id attachments)
+                          (fail :error.attachment.id)))
+                      (fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
+                        (when (some (comp #{attachment-id} :ramLink) attachments)
+                          (fail :error.ram-link-already-exists)))
+                      attachment/ram-status-ok]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
-   :user-roles #{:applicant :authority :oirAuthority}
+   :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/default-authz-writer-roles
-   :states states/post-verdict-states}
+   :states           states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (attachment/create-ram-attachment! application attachment-id created)]
     (do (att-notifications/notify-new-ram-attachment! application attachment-id created)
@@ -441,7 +441,7 @@
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
   (when (= (:type target) "statement")
-    (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
+    (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)))]
       (fail! (:text validation-error))))
 
   (upload! application
@@ -554,7 +554,7 @@
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
    :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [domain/validate-owner-or-write-access
-                (fn [_ application]
+                (fn [{application :application}]
                   (when-not (pos? (count (:attachments application)))
                     (fail :application.attachmentsEmpty)))
                 a/validate-authority-in-drafts]
@@ -647,9 +647,9 @@
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value)))]
    :pre-checks       [a/validate-authority-in-drafts
-                      (fn [{user :user {attachment-id :attachmentId} :data} {attachments :attachments}]
+                      (fn [{{attachment-id :attachmentId} :data app :application}]
                         (when attachment-id
-                          (when-let [{versions :versions} (util/find-first #(= (:id %) attachment-id) attachments)]
+                          (when-let [{versions :versions} (util/find-first #(= (:id %) attachment-id) (:attachments app))]
                             (when (empty? versions)
                               (fail :error.attachment.no-versions)))))
                       access/has-attachment-auth
@@ -664,7 +664,7 @@
   {:parameters       [id attachmentId]
    :user-roles       #{:authority}
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]
-   :pre-checks       [(fn [{{attachment-id :attachmentId} :data} {attachments :attachments}]
+   :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (let [attachment (util/find-first #(= (:id %) attachment-id) attachments)
                               {:keys [archivable contentType]} (last (:versions attachment))]
                           (when (or archivable (not= "application/pdf" contentType))

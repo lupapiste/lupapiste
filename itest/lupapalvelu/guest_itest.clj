@@ -36,11 +36,11 @@
                                                                      :description "Dude"}])
            (fact "Organization known guest authorities"
                  (guest/known-guest-authority {:data {:email veikko
-                                                      :role "guestAuthority"}}
-                                              {:organization "753-R"})=> nil
+                                                      :role "guestAuthority"}
+                                               :application {:organization "753-R"}})=> nil
                  (guest/known-guest-authority {:data {:email "not.known@foo.bar"
-                                                      :role "guestAuthority"}}
-                                              {:organization "753-R"})=> itest/fail?)
+                                                      :role "guestAuthority"}
+                                               :application {:organization "753-R"}})=> itest/fail?)
 
            (fact "Update Veikko"
                  (guest/update-guest-authority-organization admin veikko "Veikko" "The Man" "Boss")
@@ -139,11 +139,10 @@
                                                                     :unsubscribe false})) => itest/ok?
                  (-> "veikko" cmd guest/application-guests last :unsubscribed) => false?)
            (fact "Auth modification check"
-                 (let [{app :application} (cmd "pena")]
-                   (guest/auth-modification-check (cmd "pena" {:username mikko}) app) => nil?
-                   (guest/auth-modification-check (cmd "pena" {:username "veikko"}) app) => itest/fail?
-                   (guest/auth-modification-check (auth-cmd "sonja" {:username mikko}) app) => nil?
-                   (guest/auth-modification-check (auth-cmd "sonja" {:username "veikko"}) app) => nil?))
+             (guest/auth-modification-check (cmd "pena" {:username mikko})) => nil?
+             (guest/auth-modification-check (cmd "pena" {:username "veikko"})) => itest/fail?
+             (guest/auth-modification-check (auth-cmd "sonja" {:username mikko})) => nil?
+             (guest/auth-modification-check (auth-cmd "sonja" {:username "veikko"})) => nil?)
            (fact "Pena deletes Mikko"
                  (guest/delete-guest-application (cmd "pena" {:username mikko})) => itest/ok?)
            (fact "Sonja deletes Veikko"
